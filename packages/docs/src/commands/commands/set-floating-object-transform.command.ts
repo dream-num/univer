@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, ISize, ObjectPositionH, ObjectPositionV } from '@univerjs/core';
+import type { ICommand, IObjectPositionH, IObjectPositionV, ISize } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -78,8 +78,8 @@ export const SetDrawingSizeCommand: ICommand = {
 export interface ISetDrawingPositionCommandParams {
     documentId: string;
     objectId: string;
-    positionH: ObjectPositionH;
-    positionV: ObjectPositionV;
+    positionH: IObjectPositionH;
+    positionV: IObjectPositionV;
 }
 
 export const SetDrawingPositionCommand: ICommand = {

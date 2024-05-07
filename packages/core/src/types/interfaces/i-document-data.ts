@@ -26,10 +26,8 @@ import type { IColorStyle, IStyleBase } from './i-style-data';
 export interface IDocumentData extends IReferenceSource, IExtraModelData {
     /** unit ID */
     id: string;
-
     /** Revision of this document. Would be used in collaborated editing. Starts with zero. */
     rev?: number;
-
     locale?: LocaleType;
     title?: string;
     body?: IDocumentBody;
@@ -118,11 +116,16 @@ export interface IDocumentBody {
     textRuns?: ITextRun[]; // textRun style，interaction
 
     paragraphs?: IParagraph[]; // paragraph
+
     sectionBreaks?: ISectionBreak[]; // SectionBreak https://support.microsoft.com/en-us/office/insert-a-section-break-eef20fd8-e38c-4ba6-a027-e503bdf8375c
+
     customBlocks?: ICustomBlock[]; // customBlock user-defined block through plug-in
+
     tables?: ITable[]; // Table
+
     // tableOfContents?: { [index: number]: ITableOfContent }; // tableOfContents
     // links?: { [index: number]: IHyperlink }; // links
+
     customRanges?: ICustomRange[]; // plugin register，implement special logic for streams， hyperlink, field，structured document tags， bookmark，comment
 }
 
@@ -282,6 +285,7 @@ export enum CustomRangeType {
 export interface ICustomBlock {
     startIndex: number;
     blockType?: BlockType;
+    // A unique ID associated with a custom block.
     blockId: string;
 }
 
@@ -501,7 +505,9 @@ export interface IDrawing {
     objectId: string;
 
     title: string;
+
     description: string;
+
     // embeddedObjectBorder?: IDocsBorder;
 
     objectTransform: IObjectTransform;
@@ -546,8 +552,8 @@ export enum PositionedObjectLayoutType {
  */
 export interface IObjectTransform {
     size: ISize;
-    positionH: ObjectPositionH;
-    positionV: ObjectPositionV;
+    positionH: IObjectPositionH;
+    positionV: IObjectPositionV;
     angle: number;
     // Union field properties can be only one of the following:
     // shapeProperties?: IShapeProperties;
@@ -790,7 +796,7 @@ export interface INumberUnit {
     u: NumberUnitType; // unit
 }
 
-export interface ObjectPositionH {
+export interface IObjectPositionH {
     relativeFrom: ObjectRelativeFromH;
     // Union field properties can be only one of the following:
     align?: AlignTypeH;
@@ -798,7 +804,7 @@ export interface ObjectPositionH {
     percent?: number;
 }
 
-export interface ObjectPositionV {
+export interface IObjectPositionV {
     relativeFrom: ObjectRelativeFromV;
     // Union field properties can be only one of the following:
     align?: AlignTypeV;
@@ -808,26 +814,26 @@ export interface ObjectPositionV {
 
 // 20.4.3.4 ST_RelFromH (Horizontal Relative Positioning)
 export enum ObjectRelativeFromH {
-    CHARACTER,
-    COLUMN,
-    INSIDE_MARGIN,
-    LEFT_MARGIN,
-    MARGIN,
-    OUTSIDE_MARGIN,
     PAGE,
+    COLUMN,
+    CHARACTER,
+    MARGIN,
+    INSIDE_MARGIN,
+    OUTSIDE_MARGIN,
+    LEFT_MARGIN,
     RIGHT_MARGIN,
 }
 
 // 20.4.3.4 ST_RelFromH (Horizontal Relative Positioning)
 export enum ObjectRelativeFromV {
-    BOTTOM_MARGIN,
-    INSIDE_MARGIN,
-    LINE,
-    MARGIN,
-    OUTSIDE_MARGIN,
     PAGE,
     PARAGRAPH,
+    LINE,
+    MARGIN,
     TOP_MARGIN,
+    BOTTOM_MARGIN,
+    INSIDE_MARGIN,
+    OUTSIDE_MARGIN,
 }
 export enum NumberUnitType {
     POINT,

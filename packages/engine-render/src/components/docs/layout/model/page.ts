@@ -16,7 +16,6 @@
 
 import type { Nullable } from '@univerjs/core';
 import { PageOrientType } from '@univerjs/core';
-
 import type {
     IDocumentSkeletonFooter,
     IDocumentSkeletonHeader,
@@ -25,9 +24,9 @@ import type {
 } from '../../../../basics/i-document-skeleton-cached';
 import { BreakType } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
-
-import { dealWithSections } from '../block/section';
+import { dealWithSection } from '../block/section';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
+import type { ILayoutContext } from '../tools';
 import { updateBlockIndex } from '../tools';
 import { createSkeletonSection } from './section';
 
@@ -35,6 +34,7 @@ import { createSkeletonSection } from './section';
 // 判断奇数和偶数页码
 
 export function createSkeletonPage(
+    ctx: ILayoutContext,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
     pageNumber = 1,
@@ -100,6 +100,7 @@ export function createSkeletonPage(
             header = skeHeaders.get(headerId)?.get(pageWidth);
         } else if (headerTreeMap && headerTreeMap.has(headerId)) {
             header = _createSkeletonHeader(
+                ctx,
                 headerTreeMap.get(headerId)!,
                 sectionBreakConfig,
                 skeletonResourceReference
@@ -114,6 +115,7 @@ export function createSkeletonPage(
             footer = skeFooters.get(footerId)?.get(pageWidth);
         } else if (footerTreeMap && footerTreeMap.has(footerId)) {
             footer = _createSkeletonHeader(
+                ctx,
                 footerTreeMap.get(footerId)!,
                 sectionBreakConfig,
                 skeletonResourceReference
@@ -151,7 +153,7 @@ export function createSkeletonPage(
 }
 
 // 检测是否溢出了一页
-function checkPageOverflow(page: IDocumentSkeletonPage) {}
+function checkPageOverflow(page: IDocumentSkeletonPage) { }
 
 function _getNullPage() {
     return {
@@ -180,6 +182,7 @@ function _getNullPage() {
 }
 
 function _createSkeletonHeader(
+    ctx: ILayoutContext,
     headerOrFooter: DocumentViewModel,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
@@ -212,13 +215,13 @@ function _createSkeletonHeader(
         drawings,
     };
 
-    const areaPage = createSkeletonPage(headerConfig, skeletonResourceReference);
-    const page = dealWithSections(
+    const areaPage = createSkeletonPage(ctx, headerConfig, skeletonResourceReference);
+    const page = dealWithSection(
+        ctx,
         headerOrFooter,
         headerOrFooter.children[0],
         areaPage,
-        headerConfig,
-        skeletonResourceReference
+        headerConfig
     ).pages[0];
 
     updateBlockIndex([page]);

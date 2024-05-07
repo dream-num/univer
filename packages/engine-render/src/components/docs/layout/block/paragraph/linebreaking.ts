@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import type { IBullet, ICustomBlock, IDrawing, IDrawings, Nullable } from '@univerjs/core';
+import type { IBullet, IDrawing, IDrawings, Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
 import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
-import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
+import type { ILayoutContext } from '../../tools';
 import { getLastNotFullColumnInfo } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { IShapedText } from './shaping';
 import { layoutParagraph } from './layout-ruler';
-import { dealWidthInlineDrawing } from './inline-drawing';
 import { dealWithBullet } from './bullet';
 
 function _getListLevelAncestors(
@@ -93,6 +92,7 @@ function _changeDrawingToSkeletonFormat(
 
 function _getDrawingSkeletonFormat(drawingOrigin: IDrawing) {
     const objectId = drawingOrigin.objectId;
+
     return {
         objectId,
         aLeft: 0,
@@ -110,37 +110,41 @@ function _getNextPageNumber(lastPage: IDocumentSkeletonPage) {
 }
 
 export function lineBreaking(
+    ctx: ILayoutContext,
     shapedTextList: IShapedText[],
     curPage: IDocumentSkeletonPage,
-    bodyModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
-    sectionBreakConfig: ISectionBreakConfig,
-    skeletonResourceReference: ISkeletonResourceReference
+    sectionBreakConfig: ISectionBreakConfig
 ): IDocumentSkeletonPage[] {
+    const { viewModel, skeletonResourceReference } = ctx;
     const {
         lists,
         drawings = {},
         localeService,
     } = sectionBreakConfig;
 
-    const { endIndex, startIndex, blocks = [] } = paragraphNode;
+    const { endIndex, blocks = [] } = paragraphNode;
 
-    const paragraph = bodyModel.getParagraph(endIndex) || { startIndex: 0 };
+    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
 
     const { paragraphStyle = {}, bullet } = paragraph;
 
     const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeletonResourceReference;
 
     const paragraphAffectSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
+    const paragraphInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
 
     const paragraphConfig: IParagraphConfig = {
         paragraphIndex: endIndex,
         paragraphStyle,
         paragraphAffectSkeDrawings,
+        paragraphInlineSkeDrawings,
         skeHeaders,
         skeFooters,
         drawingAnchor,
     };
+
+    ctx.paragraphConfigCache.set(endIndex, paragraphConfig);
 
     const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // 取得列表所有 level 的缓存
     const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService); // 生成 bullet
@@ -149,35 +153,34 @@ export function lineBreaking(
 
     paragraphConfig.bulletSkeleton = bulletSkeleton;
 
-    const customBlockCache = new Map<number, Nullable<ICustomBlock>>();
-
     for (let i = 0, len = blocks.length; i < len; i++) {
         const charIndex = blocks[i];
-        const customBlock = bodyModel.getCustomBlock(charIndex);
+        const customBlock = viewModel.getCustomBlock(charIndex);
+
         if (customBlock == null) {
             continue;
         }
 
-        customBlockCache.set(charIndex, customBlock);
-        const blockId = customBlock.blockId;
+        const { blockId } = customBlock;
         const drawingOrigin = drawings[blockId];
         if (drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE) {
             paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
+        } else {
+            paragraphInlineSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
         }
     }
 
     let allPages = [curPage];
     let paragraphStart = true;
-    let charIndex = startIndex;
 
     for (const { text, glyphs } of shapedTextList) {
-        charIndex += text.length;
         const pushPending = () => {
             if (glyphs.length === 0) {
                 return;
             }
 
             allPages = layoutParagraph(
+                ctx,
                 glyphs,
                 allPages,
                 sectionBreakConfig,
@@ -188,30 +191,11 @@ export function lineBreaking(
             paragraphStart = false;
         };
 
-        if (text.endsWith(DataStreamTreeTokenType.CUSTOM_BLOCK)) {
-            let customBlock = customBlockCache.get(charIndex);
-            if (customBlock == null) {
-                customBlock = bodyModel.getCustomBlock(charIndex);
-            }
-            if (customBlock != null) {
-                const blockId = customBlock.blockId;
-                const drawingOrigin = drawings[blockId];
-                if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
-                    allPages = dealWidthInlineDrawing(
-                        drawingOrigin,
-                        sectionBreakConfig,
-                        allPages,
-                        paragraphConfig,
-                        localeService
-                    );
-                }
-            }
-            pushPending();
-            continue;
-        } else if (text.endsWith(DataStreamTreeTokenType.PAGE_BREAK)) {
+        if (text.endsWith(DataStreamTreeTokenType.PAGE_BREAK)) {
             pushPending();
             allPages.push(
                 createSkeletonPage(
+                    ctx,
                     sectionBreakConfig,
                     skeletonResourceReference,
                     _getNextPageNumber(allPages[allPages.length - 1]),
@@ -219,6 +203,7 @@ export function lineBreaking(
                 )
             );
             paragraphAffectSkeDrawings.clear();
+            paragraphInlineSkeDrawings.clear();
             continue;
         } else if (text.endsWith(DataStreamTreeTokenType.COLUMN_BREAK)) {
             pushPending();
@@ -231,6 +216,7 @@ export function lineBreaking(
             } else {
                 allPages.push(
                     createSkeletonPage(
+                        ctx,
                         sectionBreakConfig,
                         skeletonResourceReference,
                         _getNextPageNumber(lastPage),

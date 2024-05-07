@@ -16,6 +16,7 @@
 
 import type { ICommandInfo, IFloatingObjectManagerParam } from '@univerjs/core';
 import {
+    BooleanNumber,
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
     Disposable,
     ICommandService,
@@ -23,6 +24,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    PositionedObjectLayoutType,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation, SetDocZoomRatioOperation } from '@univerjs/docs';
@@ -31,8 +33,8 @@ import { IRenderManagerService, Liquid } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
-@OnLifecycle(LifecycleStages.Steady, FloatingObjectController)
-export class FloatingObjectController extends Disposable {
+@OnLifecycle(LifecycleStages.Steady, DocFloatingObjectController)
+export class DocFloatingObjectController extends Disposable {
     private _liquid = new Liquid();
 
     private _pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
@@ -124,6 +126,7 @@ export class FloatingObjectController extends Disposable {
 
             const docsComponent = mainComponent as Documents;
 
+            // TODO: Why NEED change skeleton here?
             docsComponent.changeSkeleton(documentSkeleton);
 
             this._refreshFloatingObject(unitId, documentSkeleton, currentRender);
@@ -185,7 +188,7 @@ export class FloatingObjectController extends Disposable {
 
         const { pages } = skeletonData;
 
-        const Objects: IFloatingObjectManagerParam[] = [];
+        const floatObjects: IFloatingObjectManagerParam[] = [];
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
@@ -204,18 +207,19 @@ export class FloatingObjectController extends Disposable {
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
             const { skeDrawings, marginLeft, marginTop } = page;
-
             // cumPageLeft + = pageWidth + documents.pageMarginLeft;
 
             this._liquid.translatePagePadding(page);
 
             skeDrawings.forEach((drawing) => {
-                const { aLeft, aTop, height, width, objectId } = drawing;
+                const { aLeft, aTop, height, width, objectId, drawingOrigin } = drawing;
+                const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;
 
-                Objects.push({
+                floatObjects.push({
                     unitId,
                     subUnitId: DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
                     floatingObjectId: objectId,
+                    behindText,
                     floatingObject: {
                         left: aLeft + docsLeft + this._liquid.x,
                         top: aTop + docsTop + this._liquid.y,
@@ -230,9 +234,11 @@ export class FloatingObjectController extends Disposable {
                 });
             });
 
+            this._liquid.restorePagePadding(page);
+
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        this._floatingObjectManagerService.BatchAddOrUpdate(Objects);
+        this._floatingObjectManagerService.batchAddOrUpdate(floatObjects);
     }
 }

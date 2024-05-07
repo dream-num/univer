@@ -45,6 +45,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
     type: CommandType.MUTATION,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         const {
             unitId,

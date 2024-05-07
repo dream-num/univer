@@ -185,6 +185,7 @@ export interface IDocumentSkeletonGlyph {
     parent?: IDocumentSkeletonDivide;
     url?: string; // image url
     featureId?: string; // support interaction for feature ,eg. hyperLine person
+    objectId?: string; // drawing.objectId
 }
 
 export interface IDocumentSkeletonBullet extends IIndentStart {

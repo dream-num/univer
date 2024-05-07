@@ -190,7 +190,7 @@ export class ZoomController extends Disposable {
     }
 
     private _calculatePagePosition(currentRender: IDocObjectParam, zoomRatio: number) {
-        const { document: docsComponent, scene } = currentRender;
+        const { document: docsComponent, scene, docBackground } = currentRender;
 
         const parent = scene?.getParent();
 
@@ -236,6 +236,7 @@ export class ZoomController extends Disposable {
         scene.resize(sceneWidth, sceneHeight + 200);
 
         docsComponent.translate(docsLeft, docsTop);
+        docBackground.translate(docsLeft, docsTop);
 
         const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         if (scrollToX !== Number.POSITIVE_INFINITY && viewport != null) {

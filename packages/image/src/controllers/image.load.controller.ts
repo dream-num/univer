@@ -30,6 +30,9 @@ import { IRenderManagerService, Picture } from '@univerjs/engine-render';
 import { IImageManagerService } from '../services/image-manager.service';
 import { IImageRenderService } from '../services/image-render.service';
 
+const IMAGE_DEFAULT_LAYER_INDEX = 11;
+const IMAGE_BEHIND_TEXT_LAYER_INDEX = 1;
+
 @OnLifecycle(LifecycleStages.Rendered, ImageLoadController)
 export class ImageLoadController extends Disposable {
     constructor(
@@ -67,13 +70,14 @@ export class ImageLoadController extends Disposable {
         );
     }
 
+
     private _floatingObjectListener() {
         this.disposeWithMe(
             toDisposable(
                 this._floatingObjectManagerService.andOrUpdate$.subscribe((params) => {
                     const sceneList: Scene[] = [];
                     params.forEach((param) => {
-                        const { unitId, subUnitId, floatingObjectId, floatingObject } = param;
+                        const { unitId, subUnitId, floatingObjectId, floatingObject, behindText } = param;
 
                         const renderObject = this._renderManagerService.getRenderById(unitId);
 
@@ -132,7 +136,7 @@ export class ImageLoadController extends Disposable {
                             scene.openTransformer();
                         }
 
-                        scene.addObject(image);
+                        scene.addObject(image, behindText ? IMAGE_BEHIND_TEXT_LAYER_INDEX : IMAGE_DEFAULT_LAYER_INDEX);
 
                         if (!sceneList.includes(scene)) {
                             sceneList.push(scene);

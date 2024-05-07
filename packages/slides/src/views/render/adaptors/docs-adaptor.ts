@@ -61,6 +61,7 @@ export class DocsAdaptor extends ObjectAdaptor {
         return this;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     override convert(pageElement: IPageElement, mainScene: Scene) {
         const {
             id,

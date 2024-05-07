@@ -15,8 +15,7 @@
  */
 
 import type { INumberUnit } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, SpacingRule } from '@univerjs/core';
-
+import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule } from '@univerjs/core';
 import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDrawing,
@@ -28,14 +27,17 @@ import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-c
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import {
     calculateLineTopByDrawings,
+    collisionDetection,
     createAndUpdateBlockAnchor,
     createSkeletonLine,
     setDivideFullState,
 } from '../../model/line';
-
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
+import type {
+    ILayoutContext,
+} from '../../tools';
 import {
     getCharSpaceApply,
     getCharSpaceConfig,
@@ -49,9 +51,11 @@ import {
     getPositionHorizon,
     getPositionVertical,
     isColumnFull,
+    lineIterator,
 } from '../../tools';
 
 export function layoutParagraph(
+    ctx: ILayoutContext,
     glyphGroup: IDocumentSkeletonGlyph[],
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
@@ -70,12 +74,12 @@ export function layoutParagraph(
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
 
             const bulletGlyph = createSkeletonBulletGlyph(glyphGroup[0], bulletSkeleton, charSpaceApply);
-            _lineOperator([bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+            _lineOperator(ctx, [bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, paragraphStart);
         } else {
-            _lineOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+            _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
         }
     } else {
-        _divideOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+        _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
     }
 
     return [...pages];
@@ -131,6 +135,7 @@ function isGlyphGroupBeyondContentBox(glyphGroup: IDocumentSkeletonGlyph[], left
 }
 
 function _divideOperator(
+    ctx: ILayoutContext,
     glyphGroup: IDocumentSkeletonGlyph[],
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
@@ -191,7 +196,8 @@ function _divideOperator(
                 addGlyphToDivide(divide, sliceGlyphGroup, preOffsetLeft);
 
                 if (glyphGroup.length) {
-                    _lineOperator(
+                    _divideOperator(
+                        ctx,
                         glyphGroup,
                         pages,
                         sectionBreakConfig,
@@ -201,7 +207,8 @@ function _divideOperator(
                     );
                 }
             } else {
-                _lineOperator(
+                _divideOperator(
+                    ctx,
                     glyphGroup,
                     pages,
                     sectionBreakConfig,
@@ -252,6 +259,7 @@ function _divideOperator(
                     const { paragraphStart: lineIsStart } = column?.lines.pop()!; // Delete the previous line and recalculate according to the maximum content height
 
                     _lineOperator(
+                        ctx,
                         newSpanGroup,
                         pages,
                         sectionBreakConfig,
@@ -261,7 +269,9 @@ function _divideOperator(
                     );
 
                     for (let i = startIndex; i < spanGroupCached.length; i++) {
+                        // TODO: @jocs Here you may see non-breakpoints appearing at the end of the line.
                         _divideOperator(
+                            ctx,
                             [spanGroupCached[i]],
                             pages,
                             sectionBreakConfig,
@@ -270,7 +280,7 @@ function _divideOperator(
                         );
                     }
 
-                    _divideOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+                    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
 
                     return;
                 }
@@ -279,11 +289,12 @@ function _divideOperator(
             addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
         }
     } else {
-        _lineOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
     }
 }
 
 function _lineOperator(
+    ctx: ILayoutContext,
     glyphGroup: IDocumentSkeletonGlyph[],
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
@@ -295,7 +306,7 @@ function _lineOperator(
     let columnInfo = getLastNotFullColumnInfo(lastPage);
     if (!columnInfo || !columnInfo.column) {
         // 如果列不存在，则做一个兜底策略，新增一页。
-        _pageOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig);
+        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig);
         lastPage = getLastPage(pages);
         columnInfo = getLastNotFullColumnInfo(lastPage);
     }
@@ -320,6 +331,7 @@ function _lineOperator(
     const {
         paragraphStyle = {},
         paragraphAffectSkeDrawings,
+        paragraphInlineSkeDrawings,
         skeHeaders,
         skeFooters,
         drawingAnchor,
@@ -390,13 +402,29 @@ function _lineOperator(
     const headersDrawings = skeHeaders?.get(headerId)?.get(pageWidth)?.skeDrawings;
     const footersDrawings = skeFooters?.get(footerId)?.get(pageWidth)?.skeDrawings;
 
-    __updateDrawingPosition(
-        lineTop,
-        lineHeight,
-        column,
-        drawingAnchor?.get(paragraphIndex)?.top,
-        paragraphAffectSkeDrawings
-    ); // 初始化paragraphAffectSkeDrawings的位置，drawing的布局参照Paragraph开始位置，如果段落中有换页的情况，换页之后的drawing参照位置是0， 0
+    // Handle float object relative to line.
+    if (line) {
+        const drawingsInLine = _getCustomBlockIdsInLine(line);
+        if (drawingsInLine.length > 0) {
+            const affectDrawings = ctx.paragraphConfigCache.get(line.paragraphIndex)?.paragraphAffectSkeDrawings;
+            const relativeLineDrawings = ([...(affectDrawings?.values() ?? [])])
+                .filter((drawing) => drawing.drawingOrigin.objectTransform.positionV.relativeFrom === ObjectRelativeFromV.LINE);
+
+            __updateAndPositionDrawings(ctx, line.top, line.lineHeight, column, relativeLineDrawings, line.paragraphIndex);
+        }
+
+        const affectInlineDrawings = ctx.paragraphConfigCache.get(line.paragraphIndex)?.paragraphInlineSkeDrawings;
+        // Update inline drawings after the line is layout.
+        if (affectInlineDrawings && affectInlineDrawings.size > 0) {
+            __updatePreLineDrawingPosition(line, affectInlineDrawings);
+        }
+    }
+
+    if (paragraphAffectSkeDrawings != null && paragraphAffectSkeDrawings.size > 0) {
+        const targetDrawings = [...paragraphAffectSkeDrawings.values()]
+            .filter((drawing) => drawing.drawingOrigin.objectTransform.positionV.relativeFrom !== ObjectRelativeFromV.LINE);
+        __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, drawingAnchor?.get(paragraphIndex)?.top);
+    }
 
     const newLineTop = calculateLineTopByDrawings(
         lineHeight,
@@ -410,7 +438,7 @@ function _lineOperator(
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
         // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
-        _columnOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
         return;
     }
 
@@ -452,10 +480,179 @@ function _lineOperator(
     column.lines.push(newLine);
     newLine.parent = column;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, drawingAnchor);
-    _divideOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+}
+
+function __updateAndPositionDrawings(
+    ctx: ILayoutContext,
+    lineTop: number,
+    lineHeight: number,
+    column: IDocumentSkeletonColumn,
+    targetDrawings: IDocumentSkeletonDrawing[],
+    paragraphIndex: number,
+    drawingAnchorTop?: number
+) {
+    if (targetDrawings.length === 0) {
+        return;
+    }
+
+    const drawings = __getDrawingPosition(
+        lineTop,
+        lineHeight,
+        column,
+        drawingAnchorTop,
+        targetDrawings
+    );
+
+    if (drawings == null || drawings.size === 0) {
+        return;
+    }
+
+    _reLayoutCheck(ctx, drawings, column, paragraphIndex);
+
+    __updateDrawingPosition(
+        column,
+        drawings
+    );
+}
+
+function _getCustomBlockIdsInLine(line: IDocumentSkeletonLine) {
+    const customBlockIds: string[] = [];
+
+    for (const divide of line.divides) {
+        for (const glyph of divide.glyphGroup) {
+            if (glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+                customBlockIds.push(glyph.objectId!);
+            }
+        }
+    }
+
+    return customBlockIds;
+}
+
+function _reLayoutCheck(
+    ctx: ILayoutContext,
+    drawings: Map<string, IDocumentSkeletonDrawing>,
+    column: IDocumentSkeletonColumn,
+    paragraphIndex: number
+) {
+    const page = column.parent?.parent;
+    const needUpdatedDrawings = new Map([...drawings]);
+
+    if (drawings.size === 0 || page == null) {
+        return drawings;
+    }
+
+    let needBreakLineIterator = false;
+
+    // Handle situations where an image anchor paragraph is squeezed to the next page.
+    for (const drawing of drawings.values()) {
+        const drawingCache = ctx.drawingsCache.get(drawing.objectId);
+        if (drawingCache == null) {
+            continue;
+        }
+        // TODO: 如何判断 drawing 是否在同一页？？？
+        const cachePageStartParagraphIndex = drawingCache.page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
+        const startIndex = page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
+        if (drawingCache.page && cachePageStartParagraphIndex && startIndex && cachePageStartParagraphIndex !== startIndex) {
+            drawingCache.page.skeDrawings.delete(drawing.objectId);
+
+            lineIterator([drawingCache.page], (line) => {
+                const { lineHeight, top } = line;
+                const width = line.parent?.width ?? 0;
+
+                if (needBreakLineIterator) {
+                    return;
+                }
+
+                const collision = collisionDetection(drawingCache.drawing, lineHeight, top, width);
+                if (collision) {
+                    // No need to loop next line.
+                    needBreakLineIterator = true;
+                    ctx.isDirty = true;
+                    ctx.layoutStartPointer.paragraphIndex = Math.min(line.paragraphIndex, ctx.layoutStartPointer.paragraphIndex ?? Number.POSITIVE_INFINITY);
+                    ctx.paragraphsOpenNewPage.add(paragraphIndex);
+                }
+            });
+        }
+    }
+
+    needBreakLineIterator = false;
+
+    lineIterator([page], (line) => {
+        const { lineHeight, top } = line;
+        const width = column.width;
+
+        if (needBreakLineIterator) {
+            return;
+        }
+
+        for (const drawing of drawings.values()) {
+            let targetDrawing = drawing;
+
+            if (ctx.drawingsCache.has(drawing.objectId)) {
+                const needRePosition = checkRelativeDrawingNeedRePosition(ctx, drawing);
+
+                if (needRePosition) {
+                    targetDrawing = ctx.drawingsCache.get(drawing.objectId)?.drawing ?? drawing;
+                } else {
+                    continue;
+                }
+            }
+
+            const collision = collisionDetection(targetDrawing, lineHeight, top, width);
+            // console.log(line.top + line.lineHeight, line.divides[0].glyphGroup[0].content);
+            if (collision) {
+                // No need to loop next line.
+                needBreakLineIterator = true;
+
+                ctx.isDirty = true;
+                ctx.layoutStartPointer.paragraphIndex = Math.min(line.paragraphIndex, ctx.layoutStartPointer.paragraphIndex ?? Number.POSITIVE_INFINITY);
+
+                let drawingCache = ctx.drawingsCache.get(drawing.objectId);
+                if (drawingCache == null) {
+                    drawingCache = {
+                        count: 0,
+                        drawing,
+                        page,
+                    };
+
+                    ctx.drawingsCache.set(drawing.objectId, drawingCache);
+                }
+
+                drawingCache.count++;
+                drawingCache.drawing = drawing;
+                drawingCache.page = page;
+            }
+        }
+    });
+
+    return needUpdatedDrawings;
+}
+
+// Detect the relative positioning of the image, whether the position needs to be repositioned.
+function checkRelativeDrawingNeedRePosition(ctx: ILayoutContext, drawing: IDocumentSkeletonDrawing) {
+    const { relativeFrom } = drawing.drawingOrigin.objectTransform.positionV;
+    const drawingCache = ctx.drawingsCache.get(drawing.objectId);
+
+    if (drawingCache == null) {
+        return false;
+    }
+
+    if (relativeFrom === ObjectRelativeFromV.PARAGRAPH || relativeFrom === ObjectRelativeFromV.LINE) {
+        const { count, drawing: prevDrawing } = drawingCache;
+        // Floating elements can be positioned no more than 5 times,
+        // and when the error is within 5 pixels, there is no need to re-layout
+        if (count < 5 && Math.abs(drawing.aTop - prevDrawing.aTop) > 5) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function _columnOperator(
+    ctx: ILayoutContext,
     glyphGroup: IDocumentSkeletonGlyph[],
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
@@ -467,13 +664,14 @@ function _columnOperator(
     const columnIsFull = isColumnFull(lastPage);
 
     if (columnIsFull === true) {
-        _pageOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
     } else {
-        _lineOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
     }
 }
 
 function _pageOperator(
+    ctx: ILayoutContext,
     glyphGroup: IDocumentSkeletonGlyph[],
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
@@ -484,8 +682,8 @@ function _pageOperator(
     const curSkeletonPage: IDocumentSkeletonPage = getLastPage(pages);
     const { skeHeaders, skeFooters } = paragraphConfig;
 
-    pages.push(createSkeletonPage(sectionBreakConfig, { skeHeaders, skeFooters }, curSkeletonPage?.pageNumber));
-    _columnOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+    pages.push(createSkeletonPage(ctx, sectionBreakConfig, { skeHeaders, skeFooters }, curSkeletonPage?.pageNumber));
+    _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
 }
 
 /**
@@ -621,57 +819,128 @@ function __getLineHeight(
     };
 }
 
-// 更新paragraphAffectSkeDrawings的绝对位置，相对于段落的第一行布局
-function __updateDrawingPosition(
+function __updatePreLineDrawingPosition(
+    line: IDocumentSkeletonLine,
+    paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>
+) {
+    const page = line?.parent?.parent?.parent;
+
+    if (page == null) {
+        return;
+    }
+
+    const drawings: Map<string, IDocumentSkeletonDrawing> = new Map();
+    const { top } = line;
+
+    for (const divide of line.divides) {
+        for (const glyph of divide.glyphGroup) {
+            if (glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0) {
+                const { objectId } = glyph;
+
+                if (objectId == null) {
+                    continue;
+                }
+
+                const drawing = paragraphInlineSkeDrawings?.get(objectId);
+
+                const drawingOrigin = drawing?.drawingOrigin;
+
+                if (drawingOrigin == null || drawing == null) {
+                    continue;
+                }
+
+                const { objectTransform } = drawingOrigin;
+
+                const { size, angle } = objectTransform;
+                const { width = 0, height = 0 } = size;
+
+                drawing.aLeft = glyph.left || 0;
+                drawing.aTop = top || 0;
+                drawing.width = width;
+                drawing.height = height;
+                drawing.angle = angle;
+
+                drawings.set(drawing.objectId, drawing);
+            }
+        }
+    }
+
+    page.skeDrawings = new Map([...page.skeDrawings, ...drawings]);
+}
+
+function __getDrawingPosition(
     lineTop: number,
     lineHeight: number,
     column: IDocumentSkeletonColumn,
     blockAnchorTop?: number,
-    paragraphAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>
+    needPositionDrawings: IDocumentSkeletonDrawing[] = []
 ) {
-    if (!paragraphAffectSkeDrawings) {
-        return;
-    }
-
     const page = column.parent?.parent;
-
-    if (!page) {
+    if (
+        page == null ||
+        needPositionDrawings.length === 0
+    ) {
         return;
     }
 
     const drawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const isPageBreak = __checkPageBreak(column);
 
-    // console.log('__updateDrawingPosition', lineTop, lineHeight, column, blockAnchorTop, paragraphAffectSkeDrawings);
-
-    paragraphAffectSkeDrawings.forEach((drawing) => {
-        if (!drawing) {
-            return;
-        }
-
+    for (const drawing of needPositionDrawings) {
         const { initialState, drawingOrigin } = drawing;
 
-        if (initialState || !drawingOrigin) {
-            return;
+        if (!drawingOrigin) {
+            continue;
         }
 
         const { objectTransform } = drawingOrigin;
-
         const { positionH, positionV, size, angle } = objectTransform;
         const { width = 0, height = 0 } = size;
 
-        drawing.aLeft = getPositionHorizon(positionH, column, page, width, isPageBreak) || 0;
-        drawing.aTop =
-            getPositionVertical(positionV, page, lineTop, lineHeight, height, blockAnchorTop, isPageBreak) || 0;
+        drawing.aLeft = getPositionHorizon(positionH, column, page, width, isPageBreak) ?? 0;
+        drawing.aTop = getPositionVertical(
+            positionV, page, lineTop, lineHeight, height, blockAnchorTop, isPageBreak
+        ) ?? 0;
         drawing.width = width;
         drawing.height = height;
         drawing.angle = angle;
         drawing.initialState = true;
 
         drawings.set(drawing.objectId, drawing);
-    });
+    }
 
-    page.skeDrawings = new Map([...page.skeDrawings, ...drawings]);
+    // if (drawings.size) {
+    //     console.log(`lineTop: ${lineTop}, blockAnchorTop: ${blockAnchorTop}`, drawings);
+    // }
+
+    return drawings;
+}
+
+
+// 更新 paragraphAffectSkeDrawings 的绝对位置，相对于段落的第一行布局
+function __updateDrawingPosition(
+    column: IDocumentSkeletonColumn,
+    drawings?: Map<string, IDocumentSkeletonDrawing>
+) {
+    const page = column.parent?.parent;
+    if (drawings != null && drawings.size !== 0 && page != null) {
+        for (const drawing of drawings.values()) {
+            const originDrawing = page.skeDrawings.get(drawing.objectId);
+
+            if (originDrawing) {
+                // If it's a layout that splits the text up and down,
+                // choose an image that is closer to the bottom for the layout
+                if (originDrawing.drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM) {
+                    const lowerDrawing = originDrawing.aTop > drawing.aTop ? originDrawing : drawing;
+                    page.skeDrawings.set(drawing.objectId, lowerDrawing);
+                } else {
+                    page.skeDrawings.set(drawing.objectId, drawing);
+                }
+            } else {
+                page.skeDrawings.set(drawing.objectId, drawing);
+            }
+        }
+    }
 }
 
 // 检查是否跨页的场景，如果向上搜索不到paragraphStart === true 的行，则代表一个段落跨页了

@@ -20,14 +20,14 @@ import {
     LifecycleStages,
     OnLifecycle,
     RxDisposable } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, IRender } from '@univerjs/engine-render';
+import type { DocBackground, Documents, DocumentSkeleton, IRender } from '@univerjs/engine-render';
 import { IRenderManagerService, PageLayoutType } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
 import { IEditorService } from '@univerjs/ui';
 import type { IDocSkeletonManagerParam, IRichTextEditingMutationParams } from '@univerjs/docs';
-import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DOCS_VIEW_KEY, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 
 @OnLifecycle(LifecycleStages.Rendered, DocRenderController)
 export class DocRenderController extends RxDisposable {
@@ -66,19 +66,25 @@ export class DocRenderController extends RxDisposable {
             currentRender = this._renderManagerService.getRenderById(unitId)!;
         }
 
-        const { mainComponent } = currentRender;
+        const { mainComponent, components } = currentRender;
 
         const docsComponent = mainComponent as Documents;
 
+        const docBackground = components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground;
+
         docsComponent.changeSkeleton(documentSkeleton);
+
+        docBackground.changeSkeleton(documentSkeleton);
 
         this._recalculateSizeBySkeleton(currentRender, documentSkeleton);
     }
 
     private _recalculateSizeBySkeleton(currentRender: IRender, skeleton: DocumentSkeleton) {
-        const { mainComponent, scene, unitId } = currentRender;
+        const { mainComponent, scene, unitId, components } = currentRender;
 
         const docsComponent = mainComponent as Documents;
+
+        const docBackground = components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground;
 
         const pages = skeleton.getSkeletonData()?.pages;
 
@@ -114,6 +120,7 @@ export class DocRenderController extends RxDisposable {
         }
 
         docsComponent.resize(width, height);
+        docBackground.resize(width, height);
 
         if (!this._editorService.isEditor(unitId)) {
             scene.resize(width, height);

@@ -17,9 +17,9 @@
 import type {
     BooleanNumber,
     IMutation,
+    IObjectPositionH,
+    IObjectPositionV,
     ISize,
-    ObjectPositionH,
-    ObjectPositionV,
     PositionedObjectLayoutType,
     WrapTextType,
 } from '@univerjs/core';
@@ -33,8 +33,8 @@ export interface ISeachDrawingMutation {
 
 export interface IDrawingTransformMutation extends ISeachDrawingMutation {
     size?: ISize;
-    positionH?: ObjectPositionH;
-    positionV?: ObjectPositionV;
+    positionH?: IObjectPositionH;
+    positionV?: IObjectPositionV;
     angle?: number;
 }
 

@@ -15,36 +15,47 @@
  */
 
 import type {
+    DocumentDataModel,
     INumberUnit,
+    IObjectPositionH,
+    IObjectPositionV,
     IParagraphStyle,
+    ISectionBreak,
     ITextStyle,
     Nullable,
-    ObjectPositionH,
-    ObjectPositionV,
 } from '@univerjs/core';
 import {
     AlignTypeH,
     AlignTypeV,
     BooleanNumber,
+    ColumnSeparatorType,
     GridType,
+    HorizontalAlign,
     NumberUnitType,
     ObjectMatrix,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
+    PageOrientType,
+    SectionType,
     SpacingRule,
+    VerticalAlign,
+    WrapStrategy,
 } from '@univerjs/core';
 
 import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
 import type {
+    IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
+    IDocumentSkeletonDrawing,
     IDocumentSkeletonFontStyle,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
+    ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
 import { GlyphType } from '../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
+import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
 import { getFontStyleString, isFunction } from '../../../basics/tools';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
@@ -315,7 +326,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                 let preLineStartIndex = columStartIndex;
                 let columnHeight = 0;
                 let maxColumnWidth = Number.NEGATIVE_INFINITY;
-                let preLine: Nullable<IDocumentSkeletonLine> = null;
+                // const preLine: Nullable<IDocumentSkeletonLine> = null;
 
                 for (const line of lines) {
                     const { divides, lineHeight } = line;
@@ -381,8 +392,10 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                     line.width = actualWidth;
                     line.asc = maxLineAsc;
                     maxColumnWidth = Math.max(maxColumnWidth, actualWidth);
-                    line.top = (preLine?.top || 0) + (preLine?.lineHeight || 0);
-                    preLine = line;
+                    // Please do not use pre line's top and height to calculate the current's top,
+                    // because of float objects will between lines.
+                    // line.top = (preLine?.top || 0) + (preLine?.lineHeight || 0);
+                    // preLine = line;
                     preLineStartIndex = line.ed;
                 }
                 column.st = columStartIndex + 1;
@@ -486,7 +499,7 @@ export function columnIterator(
 
 
 export function getPositionHorizon(
-    positionH: ObjectPositionH,
+    positionH: IObjectPositionH,
     column: IDocumentSkeletonColumn,
     page: IDocumentSkeletonPage,
     objectWidth: number,
@@ -581,7 +594,7 @@ export function getPositionHorizon(
 
 
 export function getPositionVertical(
-    positionV: ObjectPositionV,
+    positionV: IObjectPositionV,
     page: IDocumentSkeletonPage,
     lineTop: number,
     lineHeight: number,
@@ -602,8 +615,7 @@ export function getPositionVertical(
                 absoluteTop = lineTop + lineHeight / 2 - objectHeight / 2;
             }
             return absoluteTop;
-        }
-        if (relativeFrom === ObjectRelativeFromV.TOP_MARGIN) {
+        } else if (relativeFrom === ObjectRelativeFromV.TOP_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.MARGIN) {
             // TODO
@@ -623,14 +635,16 @@ export function getPositionVertical(
             }
             return absoluteTop;
         }
-    } else if (posOffset) {
+    } else if (posOffset != null) {
         let absoluteTop = 0;
+        const { marginTop } = page;
+
         if (relativeFrom === ObjectRelativeFromV.LINE) {
-            absoluteTop = lineTop || 0 + posOffset;
+            absoluteTop = (lineTop || 0) + posOffset;
         } else if (relativeFrom === ObjectRelativeFromV.TOP_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.MARGIN) {
-            // TODO
+            absoluteTop = posOffset;
         } else if (relativeFrom === ObjectRelativeFromV.BOTTOM_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.INSIDE_MARGIN) {
@@ -638,12 +652,12 @@ export function getPositionVertical(
         } else if (relativeFrom === ObjectRelativeFromV.OUTSIDE_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.PAGE) {
-            absoluteTop = posOffset;
+            absoluteTop = posOffset - marginTop;
         } else if (relativeFrom === ObjectRelativeFromV.PARAGRAPH) {
             absoluteTop = (isPageBreak ? 0 : blockAnchorTop == null ? lineTop : blockAnchorTop) + posOffset;
         }
         return absoluteTop;
-    } else if (percent) {
+    } else if (percent != null) {
         const { pageHeight, marginBottom, marginTop } = page;
         if (relativeFrom === ObjectRelativeFromV.TOP_MARGIN) {
             // TODO
@@ -741,4 +755,174 @@ export function getFontCreateConfig(
     fontCreateConfigCache.setValue(st, ed, result);
 
     return result;
+}
+
+// Generate an empty doc skeleton with the initial states.
+export function getNullSkeleton(): IDocumentSkeletonCached {
+    return {
+        pages: [],
+        left: 0,
+        top: 0,
+        st: 0,
+        skeHeaders: new Map(),
+        skeFooters: new Map(),
+        skeListLevel: new Map(), // TODO: 移到 context 中管理？
+        drawingAnchor: new Map(), // TODO: 移到 context 中管理
+    };
+}
+
+export function setPageParent(pages: IDocumentSkeletonPage[], parent: IDocumentSkeletonCached) {
+    for (const page of pages) {
+        page.parent = parent;
+    }
+}
+
+// The context state of the layout process, which is used to store some cache and intermediate states in the typesetting process,
+// as well as identifying information such as the pointer of the layout.
+export interface ILayoutContext {
+    // The view model of current layout document.
+    viewModel: DocumentViewModel;
+    // The data model of current layout document.
+    dataModel: DocumentDataModel;
+    // The document style: pageSize, renderConfig, etc.
+    // documentStyle: IDocumentStyle;
+    // Configuration for document layout.
+    docsConfig: IDocsConfig;
+    // The initial layout skeleton, it will be the empty skeleton if it's the first layout.
+    skeleton: IDocumentSkeletonCached;
+    // The position coordinates of the layout,
+    // which are used to indicate which section and paragraph are currently layout,
+    // and used to support the starting point of the reflow when re-layout.
+    layoutStartPointer: {
+        paragraphIndex: Nullable<number>; // Layout from the beginning if the paragraphIndex is null.
+    };
+    // It is used to identify whether it is a re-layout,
+    // and if it is a re-layout, the skeleton needs to be backtracked to the layoutStartPointer states.
+    isDirty: boolean;
+    // Used to store the resource of document and resource cache.
+    skeletonResourceReference: ISkeletonResourceReference;
+    // Positioned float objects cache.
+    drawingsCache: Map<string, {
+        count: number;
+        page: IDocumentSkeletonPage;
+        drawing: IDocumentSkeletonDrawing;
+    }>;
+    paragraphConfigCache: Map<number, IParagraphConfig>;
+    sectionBreakConfigCache: Map<number, ISectionBreakConfig>;
+    paragraphsOpenNewPage: Set<number>;
+}
+
+const DEFAULT_SECTION_BREAK: ISectionBreak = {
+    columnProperties: [],
+    columnSeparatorType: ColumnSeparatorType.NONE,
+    sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
+    startIndex: 0,
+};
+
+export const DEFAULT_PAGE_SIZE = { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY };
+
+export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number) {
+    const { viewModel, dataModel, docsConfig } = ctx;
+    const sectionNode = viewModel.children[nodeIndex];
+    const sectionBreak = viewModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
+    const { documentStyle } = dataModel;
+    const {
+        pageNumberStart: global_pageNumberStart = 1, // pageNumberStart
+        pageSize: global_pageSize = DEFAULT_PAGE_SIZE,
+        pageOrient: global_pageOrient = PageOrientType.PORTRAIT,
+        defaultHeaderId: global_defaultHeaderId,
+        defaultFooterId: global_defaultFooterId,
+        evenPageHeaderId: global_evenPageHeaderId,
+        evenPageFooterId: global_evenPageFooterId,
+        firstPageHeaderId: global_firstPageHeaderId,
+        firstPageFooterId: global_firstPageFooterId,
+        useFirstPageHeaderFooter: global_useFirstPageHeaderFooter,
+        useEvenPageHeaderFooter: global_useEvenPageHeaderFooter,
+
+        marginTop: global_marginTop = 0,
+        marginBottom: global_marginBottom = 0,
+        marginRight: global_marginRight = 0,
+        marginLeft: global_marginLeft = 0,
+        marginHeader: global_marginHeader = 0,
+        marginFooter: global_marginFooter = 0,
+
+        renderConfig: global_renderConfig = {
+            horizontalAlign: HorizontalAlign.LEFT,
+            verticalAlign: VerticalAlign.TOP,
+            centerAngle: 0,
+            vertexAngle: 0,
+            wrapStrategy: WrapStrategy.UNSPECIFIED,
+        },
+    } = documentStyle;
+    const {
+        pageNumberStart = global_pageNumberStart,
+        pageSize = global_pageSize,
+        pageOrient = global_pageOrient,
+        marginTop = global_marginTop,
+        marginBottom = global_marginBottom,
+        marginRight = global_marginRight,
+        marginLeft = global_marginLeft,
+        marginHeader = global_marginHeader,
+        marginFooter = global_marginFooter,
+
+        defaultHeaderId = global_defaultHeaderId,
+        defaultFooterId = global_defaultFooterId,
+        evenPageHeaderId = global_evenPageHeaderId,
+        evenPageFooterId = global_evenPageFooterId,
+        firstPageHeaderId = global_firstPageHeaderId,
+        firstPageFooterId = global_firstPageFooterId,
+        useFirstPageHeaderFooter = global_useFirstPageHeaderFooter,
+        useEvenPageHeaderFooter = global_useEvenPageHeaderFooter,
+
+        columnProperties = [],
+        columnSeparatorType = ColumnSeparatorType.NONE,
+        contentDirection,
+        sectionType,
+        textDirection,
+        renderConfig = global_renderConfig,
+    } = sectionBreak;
+
+    const sectionNodeNext = viewModel.children[nodeIndex + 1];
+    const sectionTypeNext = viewModel.getSectionBreak(sectionNodeNext?.endIndex)?.sectionType;
+
+    const headerIds = { defaultHeaderId, evenPageHeaderId, firstPageHeaderId };
+    const footerIds = { defaultFooterId, evenPageFooterId, firstPageFooterId };
+
+    if (pageSize.width === null) {
+        pageSize.width = Number.POSITIVE_INFINITY;
+    }
+
+    if (pageSize.height === null) {
+        pageSize.height = Number.POSITIVE_INFINITY;
+    }
+
+    const sectionBreakConfig: ISectionBreakConfig = {
+        pageNumberStart,
+        pageSize,
+        pageOrient,
+        marginTop,
+        marginBottom,
+        marginRight,
+        marginLeft,
+        marginHeader,
+        marginFooter,
+
+        headerIds,
+        footerIds,
+
+        useFirstPageHeaderFooter,
+        useEvenPageHeaderFooter,
+
+        columnProperties,
+        columnSeparatorType,
+        contentDirection,
+        sectionType,
+        sectionTypeNext,
+        textDirection,
+        renderConfig,
+
+        ...docsConfig,
+    };
+
+    return sectionBreakConfig;
 }

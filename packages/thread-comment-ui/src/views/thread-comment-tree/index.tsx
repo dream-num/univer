@@ -111,7 +111,20 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                 )
                 : (
                     <div className={styles.threadCommentItemContent}>
-                        {item.text}
+                        {item.text.map((item, i) => {
+                            switch (item.type) {
+                                case 'user':
+                                    return (
+                                        <a className={styles.threadCommentItemAt} key={i}>
+                                            @
+                                            {item.content.label}
+                                            {' '}
+                                        </a>
+                                    );
+                                default:
+                                    return item.content;
+                            }
+                        })}
                     </div>
                 )}
         </div>
@@ -132,7 +145,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             // mock empty comment
             [{
                 id: 'mock',
-                text: '',
+                text: [],
                 personId: personId ?? '',
                 ref: refStr ?? '',
                 dT: '',

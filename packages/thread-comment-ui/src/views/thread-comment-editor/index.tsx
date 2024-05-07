@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IThreadComment } from '@univerjs/thread-comment';
+import type { IThreadComment, TextNode } from '@univerjs/thread-comment';
 import { Button, Mentions } from '@univerjs/design';
 import React, { useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -24,16 +24,73 @@ import styles from './index.module.less';
 
 export interface IThreadCommentEditorProps {
     id?: string;
-    comment?: Pick<IThreadComment, 'attachments' | 'text'>;
+    comment?: Pick<IThreadComment, 'attachments' | 'text' | 'mentions'>;
     onSave?: (comment: Pick<IThreadComment, 'attachments' | 'text'>) => void;
     onCancel?: () => void;
     autoFocus?: boolean;
 }
 
+const parseMentions = (text: string): TextNode[] => {
+    const regex = /@\[(.*?)\]\((\d+)\)|(\d+)/g;
+    let match;
+    let lastIndex = 0;
+    const result: TextNode[] = [];
+
+    while ((match = regex.exec(text)) !== null) {
+        if (match.index > lastIndex) {
+        // Add the text between two user mentions or before the first user mention
+            result.push({
+                type: 'text',
+                content: text.substring(lastIndex, match.index),
+            });
+        }
+
+        if (match[1] && match[2]) {
+        // User mention found
+            result.push({
+
+                type: 'user',
+                content: {
+                    id: match[2],
+                    label: match[1],
+                },
+            });
+        } else if (match[3]) {
+        // Text (numbers) found
+            result.push({
+                type: 'text',
+                content: match[3],
+            });
+        }
+        lastIndex = regex.lastIndex;
+    }
+
+    // Add any remaining text after the last mention (if any)
+    if (lastIndex < text.length) {
+        result.push({
+            type: 'text',
+            content: text.substring(lastIndex),
+        });
+    }
+
+    return result;
+};
+const transformTextNode2Text = (nodes: TextNode[]) => {
+    return nodes.map((item) => {
+        switch (item.type) {
+            case 'user':
+                return `@[${item.content.label}](${item.content.id})`;
+            default:
+                return item.content;
+        }
+    }).join('');
+};
+
+
 export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
     const { comment, onSave, id, onCancel, autoFocus } = props;
     const localeService = useDependency(LocaleService);
-    const [localComment, setLocalComment] = useState({ text: '', ...comment });
+    const [localComment, setLocalComment] = useState({ text: [], ...comment });
     const [editing, setEditing] = useState(false);
 
     return (
@@ -42,9 +99,9 @@ export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
                 autoFocus={autoFocus}
                 style={{ width: '100%' }}
                 placeholder={localeService.t('threadCommentUI.editor.placeholder')}
-                value={localComment?.text}
+                value={transformTextNode2Text(localComment?.text ?? [])}
                 onChange={(e) => {
-                    setLocalComment?.({ ...comment, text: e.target.value });
+                    setLocalComment?.({ ...comment, text: parseMentions(e.target.value) });
                 }}
                 onFocus={() => {
                     setEditing(true);
@@ -56,6 +113,7 @@ export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
                         id: '11',
                         display: 'zhangwei',
                     }]}
+                    displayTransform={(id, label) => `@${label} `}
                 />
             </Mentions>
             {editing
@@ -66,7 +124,7 @@ export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
                             onClick={() => {
                                 onCancel?.();
                                 setEditing(false);
-                                setLocalComment({ text: '' });
+                                setLocalComment({ text: [] });
                             }}
                         >
                             {localeService.t('threadCommentUI.editor.cancel')}
@@ -77,7 +135,7 @@ export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
                             onClick={() => {
                                 onSave?.(localComment);
                                 setEditing(false);
-                                setLocalComment({ text: '' });
+                                setLocalComment({ text: [] });
                             }}
                         >
                             {localeService.t(id ? 'threadCommentUI.editor.save' : 'threadCommentUI.editor.reply')}

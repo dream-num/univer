@@ -15,7 +15,7 @@
  */
 
 import { CommandType, type ICommand } from '@univerjs/core';
-import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
+import type { IThreadComment, TextNode } from '../../types/interfaces/i-thread-comment';
 import { ThreadCommentModel } from '../../models/thread-comment.model';
 
 export interface IAddCommentMutationParams {
@@ -40,7 +40,7 @@ export const AddCommentMutation: ICommand<IAddCommentMutationParams> = {
 
 export interface IUpdateCommentPayload {
     commentId: string;
-    text: string;
+    text: TextNode[];
     attachments?: string[];
     dT?: string;
     updated?: boolean;

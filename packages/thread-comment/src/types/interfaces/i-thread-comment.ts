@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
+export type TextNode = {
+    type: 'text';
+    content: string;
+} | {
+    type: 'user';
+    content: {
+        id: string;
+        label: string;
+    };
+};
+
 export interface IThreadComment {
     id: string;
     ref: string;
     dT: string;
     personId: string;
     parentId?: string;
-    text: string;
+    text: TextNode[];
     attachments?: string[];
     resolved?: boolean;
     updated?: boolean;

@@ -35,7 +35,7 @@ export type {
     IUpdateCommentMutationParams,
     IUpdateCommentPayload,
 } from './commands/mutations/comment.mutation';
-export type { IThreadComment } from './types/interfaces/i-thread-comment';
+export type { IThreadComment, TextNode } from './types/interfaces/i-thread-comment';
 export {
     AddCommentCommand,
     DeleteCommentCommand,

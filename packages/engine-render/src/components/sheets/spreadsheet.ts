@@ -111,6 +111,9 @@ export class Spreadsheet extends SheetComponent {
         return this._forceDisableGridlines;
     }
 
+    /**
+     * TODO: DR-Univer, fix as unknown as
+     */
     override dispose() {
         super.dispose();
         this._documents.dispose();

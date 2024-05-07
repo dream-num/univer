@@ -341,6 +341,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         return new SpreadsheetSkeleton(worksheet, config, cellData, styles, localeService, contextService);
     }
 
+    /**
+     * TODO: DR-Univer, fix as unknown as
+     */
     override dispose(): void {
         super.dispose();
 

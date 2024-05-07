@@ -86,6 +86,9 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
         /* abstract */
     }
 
+    /**
+     * TODO: DR-Univer, fix as unknown as
+     */
     override dispose() {
         super.dispose();
         this._skeleton?.dispose();

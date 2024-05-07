@@ -86,6 +86,9 @@ export class InputManager extends Disposable {
         this._scene = scene;
     }
 
+    /**
+     * TODO: DR-Univer, fix as unknown as
+     */
     override dispose(): void {
         super.dispose();
         this.detachControl();

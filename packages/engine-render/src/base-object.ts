@@ -353,20 +353,7 @@ export abstract class BaseObject extends Disposable {
                 return;
             }
 
-<<<<<<< HEAD
             this._layer.makeDirtyWithDebounce(state);
-=======
-            if (typeof this._layer.debounceParentTimeout === 'function') {
-                this._layer.debounceParentTimeout();
-            }
-            // To prevent multiple refreshes caused by setting values for multiple object instances at once.
-            this._layer.debounceParentTimeout = requestImmediateMacroTask(() => {
-                if (this._layer) {
-                    this._layer.makeDirty(state);
-                    this._layer.debounceParentTimeout = null;
-                }
-            });
->>>>>>> ecdf333aa (refactor(sheets-ui): move sheet canvas view and sheet renderer)
         }
 
         return this;

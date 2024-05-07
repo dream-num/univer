@@ -333,6 +333,11 @@ export interface IDocumentLayout {
     characterSpacingControl?: characterSpacingControlType; // characterSpacingControl 17.18.7 ST_CharacterSpacing (Character-Level Whitespace Compression Settings)，default compressPunctuation
     paragraphLineGapDefault?: number; // paragraphLineGapDefault default line spacing
     spaceWidthEastAsian?: BooleanNumber; // add space between east asian and English
+
+    autoHyphenation?: BooleanNumber; // 17.15.1.10 autoHyphenation (Automatically Hyphenate Document Contents When Displayed)
+    consecutiveHyphenLimit?: number; // 17.15.1.22 consecutiveHyphenLimit (Maximum Number of Consecutively Hyphenated Lines)
+    doNotHyphenateCaps?: BooleanNumber; // 17.15.1.37 doNotHyphenateCaps (Do Not Hyphenate Words in ALL CAPITAL LETTERS)
+    hyphenationZone?: number; // 17.15.1.53 hyphenationZone (Hyphenation Zone)
 }
 
 export enum GridType {
@@ -613,6 +618,7 @@ export interface IParagraphStyle extends IIndentStart {
     wordWrap?: BooleanNumber; // 17.3.1.45 wordWrap (Allow Line Breaking At Character Level)
     widowControl?: BooleanNumber; // 17.3.1.44 widowControl (Allow First/Last Line to Display on a Separate Page)
     shading?: IShading; // shading
+    suppressHyphenation?: BooleanNumber; // 17.3.1.34 suppressAutoHyphens (Suppress Hyphenation for Paragraph)
 }
 
 /**

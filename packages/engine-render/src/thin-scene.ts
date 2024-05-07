@@ -23,7 +23,7 @@ import { RENDER_CLASS_TYPE } from './basics/const';
 import type { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ITransformChangeState } from './basics/interfaces';
 import { Transform } from './basics/transform';
-import type { IViewportBound, Vector2 } from './basics/vector2';
+import type { Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 
 export abstract class ThinScene extends Disposable {
@@ -181,8 +181,6 @@ export abstract class ThinScene extends Disposable {
     abstract triggerPointerOver(evt: IPointerEvent | IMouseEvent): void;
 
     abstract triggerPointerEnter(evt: IPointerEvent | IMouseEvent): void;
-
-    abstract renderObjects(ctx: UniverRenderingContext, bounds?: IViewportBound): void;
 
     abstract render(parentCtx?: UniverRenderingContext): void;
 

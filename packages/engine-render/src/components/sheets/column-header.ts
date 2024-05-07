@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import type { IViewportBound, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import { SheetColumnHeaderExtensionRegistry } from '../extension';
@@ -22,6 +23,18 @@ import { SpreadsheetHeader } from './sheet-component';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
 
 export class SpreadsheetColumnHeader extends SpreadsheetHeader {
+    override getDocuments() {
+        throw new Error('Method not implemented.');
+    }
+
+    override getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number): Nullable<{ startY: number; startX: number; endX: number; endY: number }> {
+        throw new Error('Method not implemented.');
+    }
+
+    override getSelectionBounding(startRow: number, startColumn: number, endRow: number, endColumn: number): Nullable<{ startRow: number; startColumn: number; endRow: number; endColumn: number }> {
+        throw new Error('Method not implemented.');
+    }
+
     private _columnHeaderLayoutExtension!: ColumnHeaderLayout;
 
     constructor(oKey: string, spreadsheetSkeleton?: SpreadsheetSkeleton) {

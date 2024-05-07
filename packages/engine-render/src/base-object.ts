@@ -130,7 +130,7 @@ export abstract class BaseObject {
 
     private _forceRender = false;
 
-    private _layer: Layer; // TODO: @DR-Univer. Belong to layer
+    private _layer: Nullable<Layer>; // TODO: @DR-Univer. Belong to layer
 
     constructor(key?: string) {
         if (key) {
@@ -254,7 +254,7 @@ export abstract class BaseObject {
         return this._cursor;
     }
 
-    get layer() {
+    get layer(): Nullable<Layer> {
         return this._layer;
     }
 
@@ -690,8 +690,8 @@ export abstract class BaseObject {
 
         this.onDisposeObserver.clear();
 
-        this.parent = null;
-        this.layer = null;
+        this._parent = null;
+        this._layer = null;
         this.transform = null as unknown as Transform;
     }
 

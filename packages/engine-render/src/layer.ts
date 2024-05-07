@@ -183,13 +183,13 @@ export class Layer extends Disposable {
     }
 
     makeDirtyWithDebounce(state: boolean = true) {
-        if (this.debounceParentTimeout) {
-            this.debounceParentTimeout();
+        if (this._debounceParentTimeout) {
+            this._debounceParentTimeout();
         }
         // To prevent multiple refreshes caused by setting values for multiple object instances at once.
-        this.debounceParentTimeout = requestImmediateMacroTask(() => {
+        this._debounceParentTimeout = requestImmediateMacroTask(() => {
             this.makeDirty(state);
-            this.debounceParentTimeout = null;
+            this._debounceParentTimeout = null;
         });
     }
 
@@ -222,14 +222,6 @@ export class Layer extends Disposable {
 
         this.makeDirty(false);
         return this;
-    }
-
-    set debounceParentTimeout(func: Nullable<() => void>) {
-        this._debounceParentTimeout = func;
-    }
-
-    get debounceParentTimeout(): Nullable<() => void> {
-        return this._debounceParentTimeout;
     }
 
     private _layerBehavior(o: BaseObject) {

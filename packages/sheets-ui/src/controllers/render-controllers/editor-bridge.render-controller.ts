@@ -17,7 +17,7 @@
 import type { ICommandInfo, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
 import { FOCUSING_DOC, FOCUSING_SHEET, ICommandService, IContextService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
-import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { DeviceInputEventType, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
@@ -42,7 +42,6 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IEditorService private readonly _editorService: IEditorService,

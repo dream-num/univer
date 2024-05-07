@@ -1,5 +1,6 @@
 exports.baseRules = {
     curly: ['error', 'multi-line'],
+    'no-empty-function': ['error'],
     'eol-last': ['error', 'always'],
     'import/no-cycle': 'error',
     'import/no-self-import': 'error',

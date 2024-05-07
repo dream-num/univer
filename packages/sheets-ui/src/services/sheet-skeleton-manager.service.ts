@@ -68,8 +68,7 @@ export class SheetSkeletonManagerService implements IDisposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
-        // @ts-ignore
-        window.__debugSheetSkeletonManagerService = this;
+        // empty
     }
 
     dispose(): void {

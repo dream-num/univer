@@ -86,6 +86,27 @@ export class InputManager extends Disposable {
         this._scene = scene;
     }
 
+    override dispose(): void {
+        super.dispose();
+        this.detachControl();
+        this._scene = null as unknown as ThinScene;
+        this._currentMouseEnterPicked?.dispose();
+        this._currentMouseEnterPicked = null;
+        this._currentObject?.dispose();
+        this._currentObject = null;
+        this._startingPosition = null as unknown as Vector2;
+        clearTimeout(this._delayedTimeout);
+        clearTimeout(this._delayedTripeTimeout);
+        this._onPointerMove = null as unknown as (evt: IMouseEvent) => void;
+        this._onPointerDown = null as unknown as (evt: IPointerEvent) => void;
+        this._onPointerUp = null as unknown as (evt: IPointerEvent) => void;
+        this._onPointerEnter = null as unknown as (evt: IPointerEvent) => void;
+        this._onPointerLeave = null as unknown as (evt: IPointerEvent) => void;
+        this._onMouseWheel = null as unknown as (evt: IWheelEvent) => void;
+        this._onKeyDown = null as unknown as (evt: IKeyboardEvent) => void;
+        this._onKeyUp = null as unknown as (evt: IKeyboardEvent) => void;
+    }
+
     // Handle events such as triggering mouseleave and mouseenter.
     mouseLeaveEnterHandler(evt: IMouseEvent) {
         const o = this._currentObject;
@@ -100,6 +121,7 @@ export class InputManager extends Disposable {
         }
     }
 
+    // eslint-disable-next-line max-lines-per-function
     attachControl(
         hasDown: boolean = true,
         hasUp: boolean = true,
@@ -238,6 +260,7 @@ export class InputManager extends Disposable {
             }
         };
 
+        // eslint-disable-next-line complexity
         this._onInputObserver = engine.onInputChangedObservable.add((eventData: IEvent) => {
             const evt: IEvent = eventData;
             // Keyboard Events

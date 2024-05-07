@@ -88,11 +88,12 @@ export abstract class ThinEngine<T extends IDisposable> extends Disposable {
     override dispose() {
         super.dispose();
 
-        const scenes = this.getScenes();
+        const scenes = { ...this.getScenes() };
         const sceneKeys = Object.keys(scenes);
         sceneKeys.forEach((key) => {
             (scenes[key] as any).dispose();
         });
+        this._scenes = {};
     }
 
     remainScene(key: string) {

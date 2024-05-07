@@ -259,12 +259,13 @@ export class Layer extends Disposable {
 
     override dispose() {
         super.dispose();
-
-        this.getObjects().forEach((o) => {
+        const objects = [...this.getObjects()];
+        objects.forEach((o) => {
             o.dispose();
         });
         this.clear();
 
         this._cacheCanvas?.dispose();
+        this._cacheCanvas = null;
     }
 }

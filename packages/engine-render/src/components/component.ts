@@ -59,4 +59,14 @@ export class RenderComponent<T, U, V> extends BaseObject {
     draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         /* abstract */
     }
+
+    override dispose(): void {
+        super.dispose();
+
+        for (const extension of this._extensions.values()) {
+            extension.dispose();
+        }
+
+        this._extensions.clear();
+    }
 }

@@ -42,6 +42,11 @@ export class Skeleton extends Disposable {
         this._dirty = state;
     }
 
+    override dispose() {
+        super.dispose();
+        this._fontLocale = null as unknown as IFontLocale;
+    }
+
     private _localeInitial() {
         // TODO: should be load from config file
         // this._fontLocale = {

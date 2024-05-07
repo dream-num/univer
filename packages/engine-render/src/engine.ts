@@ -42,9 +42,7 @@ export class Engine extends ThinEngine<Scene> {
 
     private _container: Nullable<HTMLElement>;
 
-    private _canvas: Canvas;
-
-    private _canvasEle!: HTMLCanvasElement;
+    private _canvas: Nullable<Canvas>;
 
     private _renderingQueueLaunched = false;
 
@@ -102,7 +100,7 @@ export class Engine extends ThinEngine<Scene> {
             height: elemHeight,
             pixelRatio,
         });
-        this._canvasEle = this._canvas.getCanvasEle();
+
         this._handleKeyboardAction();
         this._handlePointerAction();
         if (mode !== CanvasRenderMode.Printing) {
@@ -111,11 +109,11 @@ export class Engine extends ThinEngine<Scene> {
     }
 
     override get width() {
-        return this._canvas.getWidth();
+        return this.getCanvas().getWidth();
     }
 
     override get height() {
-        return this._canvas.getHeight();
+        return this.getCanvas().getHeight();
     }
 
     get requestNewFrameHandler() {
@@ -139,11 +137,11 @@ export class Engine extends ThinEngine<Scene> {
     }
 
     override getCanvas() {
-        return this._canvas;
+        return this._canvas!;
     }
 
     override getCanvasElement() {
-        return this._canvas.getCanvasEle();
+        return this.getCanvas().getCanvasEle()!;
     }
 
     /**
@@ -152,19 +150,19 @@ export class Engine extends ThinEngine<Scene> {
      */
     override setRemainCapture() {
         try {
-            this._canvasEle.setPointerCapture(this._remainCapture);
+            this.getCanvasElement().setPointerCapture(this._remainCapture);
         } catch {
             console.warn('no capture');
         }
     }
 
     getPixelRatio() {
-        return this._canvas.getPixelRatio();
+        return this.getCanvas().getPixelRatio();
     }
 
     setContainer(elem: HTMLElement, resize = true) {
         this._container = elem;
-        this._container.appendChild(this._canvasEle);
+        this._container.appendChild(this.getCanvasElement());
 
         if (resize) {
             this.resize();
@@ -211,7 +209,7 @@ export class Engine extends ThinEngine<Scene> {
     resizeBySize(width: number, height: number) {
         const preWidth = this.width;
         const preHeight = this.height;
-        this._canvas.setSize(width, height);
+        this.getCanvas().setSize(width, height);
         this.onTransformChangeObservable.notifyObservers({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize,
             value: {
@@ -228,16 +226,18 @@ export class Engine extends ThinEngine<Scene> {
     override dispose() {
         super.dispose();
         const eventPrefix = getPointerPrefix();
-        this._canvasEle.removeEventListener(`${eventPrefix}leave`, this._pointerLeaveEvent);
-        this._canvasEle.removeEventListener(`${eventPrefix}enter`, this._pointerEnterEvent);
-        this._canvasEle.removeEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
-        this._canvasEle.removeEventListener(`${eventPrefix}down`, this._pointerDownEvent);
-        this._canvasEle.removeEventListener(`${eventPrefix}up`, this._pointerUpEvent);
-        this._canvasEle.removeEventListener('blur', this._pointerBlurEvent);
-        this._canvasEle.removeEventListener(this._getWheelEventName(), this._pointerWheelEvent);
+        const canvasEle = this.getCanvasElement();
+        canvasEle.removeEventListener(`${eventPrefix}leave`, this._pointerLeaveEvent);
+        canvasEle.removeEventListener(`${eventPrefix}enter`, this._pointerEnterEvent);
+        canvasEle.removeEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
+        canvasEle.removeEventListener(`${eventPrefix}down`, this._pointerDownEvent);
+        canvasEle.removeEventListener(`${eventPrefix}up`, this._pointerUpEvent);
+        canvasEle.removeEventListener('blur', this._pointerBlurEvent);
+        canvasEle.removeEventListener(this._getWheelEventName(), this._pointerWheelEvent);
 
         this._activeRenderLoops = [];
-        this._canvas.dispose();
+        this.getCanvas().dispose();
+        this._canvas = null;
         this.onBeginFrameObservable.clear();
         this.onEndFrameObservable.clear();
         this.onTransformChangeObservable.clear();
@@ -346,8 +346,8 @@ export class Engine extends ThinEngine<Scene> {
             return null;
         }
 
-        if (this._canvasEle?.ownerDocument?.defaultView) {
-            return this._canvasEle.ownerDocument.defaultView;
+        if (this.getCanvasElement().ownerDocument?.defaultView) {
+            return this.getCanvasElement().ownerDocument.defaultView;
         }
 
         return window;
@@ -402,10 +402,12 @@ export class Engine extends ThinEngine<Scene> {
             this.onInputChangedObservable.notifyObservers(deviceEvent);
         };
 
-        this._canvasEle.addEventListener('keydown', keyboardDownEvent);
-        this._canvasEle.addEventListener('keyup', keyboardUpEvent);
+        const canvasEle = this.getCanvasElement();
+        canvasEle.addEventListener('keydown', keyboardDownEvent);
+        canvasEle.addEventListener('keyup', keyboardUpEvent);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _handlePointerAction() {
         const eventPrefix = getPointerPrefix();
 
@@ -485,13 +487,13 @@ export class Engine extends ThinEngine<Scene> {
                 }
                 if (!document.pointerLockElement) {
                     this._remainCapture = this._mouseId;
-                    this._canvasEle.setPointerCapture(this._mouseId);
+                    this.getCanvasElement().setPointerCapture(this._mouseId);
                 }
             } else {
                 // Touch; Since touches are dynamically assigned, only set capture if we have an id
                 if (evt.pointerId && !document.pointerLockElement) {
                     this._remainCapture = evt.pointerId;
-                    this._canvasEle.setPointerCapture(evt.pointerId);
+                    this.getCanvasElement().setPointerCapture(evt.pointerId);
                 }
             }
 
@@ -560,16 +562,17 @@ export class Engine extends ThinEngine<Scene> {
             deviceEvent.previousState = previousButton;
             deviceEvent.currentState = this.pointer[evt.button + 2];
 
+            const canvasEle = this.getCanvasElement();
             if (
                 deviceType === DeviceType.Mouse &&
                 this._mouseId >= 0 &&
-                this._canvasEle.hasPointerCapture(this._mouseId)
+                canvasEle.hasPointerCapture(this._mouseId)
             ) {
                 this._remainCapture = this._mouseId;
-                this._canvasEle.releasePointerCapture(this._mouseId);
-            } else if (deviceEvent.pointerId && this._canvasEle.hasPointerCapture(deviceEvent.pointerId)) {
+                canvasEle.releasePointerCapture(this._mouseId);
+            } else if (deviceEvent.pointerId && canvasEle.hasPointerCapture(deviceEvent.pointerId)) {
                 this._remainCapture = deviceEvent.pointerId;
-                this._canvasEle.releasePointerCapture(deviceEvent.pointerId);
+                canvasEle.releasePointerCapture(deviceEvent.pointerId);
             }
 
             this.onInputChangedObservable.notifyObservers(deviceEvent);
@@ -603,8 +606,8 @@ export class Engine extends ThinEngine<Scene> {
         };
 
         this._pointerBlurEvent = (evt: any) => {
-            if (this._mouseId >= 0 && this._canvasEle.hasPointerCapture(this._mouseId)) {
-                this._canvasEle.releasePointerCapture(this._mouseId);
+            if (this._mouseId >= 0 && this.getCanvasElement().hasPointerCapture(this._mouseId)) {
+                this.getCanvasElement().releasePointerCapture(this._mouseId);
                 this._remainCapture = this._mouseId;
                 this._mouseId = -1;
             }
@@ -646,13 +649,14 @@ export class Engine extends ThinEngine<Scene> {
             }
         };
 
-        this._canvasEle.addEventListener(`${eventPrefix}enter`, this._pointerEnterEvent);
-        this._canvasEle.addEventListener(`${eventPrefix}leave`, this._pointerLeaveEvent);
-        this._canvasEle.addEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
-        this._canvasEle.addEventListener(`${eventPrefix}down`, this._pointerDownEvent);
-        this._canvasEle.addEventListener(`${eventPrefix}up`, this._pointerUpEvent);
-        this._canvasEle.addEventListener('blur', this._pointerBlurEvent);
-        this._canvasEle.addEventListener(
+        const canvasEle = this.getCanvasElement();
+        canvasEle.addEventListener(`${eventPrefix}enter`, this._pointerEnterEvent);
+        canvasEle.addEventListener(`${eventPrefix}leave`, this._pointerLeaveEvent);
+        canvasEle.addEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
+        canvasEle.addEventListener(`${eventPrefix}down`, this._pointerDownEvent);
+        canvasEle.addEventListener(`${eventPrefix}up`, this._pointerUpEvent);
+        canvasEle.addEventListener('blur', this._pointerBlurEvent);
+        canvasEle.addEventListener(
             this._getWheelEventName(),
             this._pointerWheelEvent,
             this._getPassive() ? { passive: false } : false
@@ -686,8 +690,9 @@ export class Engine extends ThinEngine<Scene> {
                 },
             };
 
-            this._canvasEle.addEventListener('test', noop, options);
-            this._canvasEle.removeEventListener('test', noop, options);
+            const canvasEle = this.getCanvasElement();
+            canvasEle.addEventListener('test', noop, options);
+            canvasEle.removeEventListener('test', noop, options);
         } catch (e) {
             /* */
         }

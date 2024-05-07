@@ -705,6 +705,10 @@ export abstract class BaseObject {
         this._makeDirtyMix();
 
         this.onDisposeObserver.clear();
+
+        this.parent = null;
+        this.layer = null;
+        this.transform = null as unknown as Transform;
     }
 
     toJson() {

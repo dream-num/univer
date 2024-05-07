@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
-import { Observable, requestImmediateMacroTask } from '@univerjs/core';
+import { Observable } from '@univerjs/core';
 
 import type { EVENT_TYPE } from './basics/const';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
@@ -351,13 +351,7 @@ export abstract class BaseObject {
                 return;
             }
 
-            if (this._layer.debounceParentTimeout) {
-                this._layer.debounceParentTimeout();
-            }
-            // To prevent multiple refreshes caused by setting values for multiple object instances at once.
-            this._layer.debounceParentTimeout = requestImmediateMacroTask(() => {
-                this._layer?.makeDirty(state);
-            });
+            this._layer.makeDirtyWithDebounce(state);
         }
 
         return this;

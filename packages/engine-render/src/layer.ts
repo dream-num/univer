@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, sortRules, toDisposable } from '@univerjs/core';
+import { Disposable, requestImmediateMacroTask, sortRules, toDisposable } from '@univerjs/core';
 
 import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
@@ -182,6 +182,17 @@ export class Layer extends Disposable {
         return this;
     }
 
+    makeDirtyWithDebounce(state: boolean = true) {
+        if (this.debounceParentTimeout) {
+            this.debounceParentTimeout();
+        }
+        // To prevent multiple refreshes caused by setting values for multiple object instances at once.
+        this.debounceParentTimeout = requestImmediateMacroTask(() => {
+            this.makeDirty(state);
+            this.debounceParentTimeout = null;
+        });
+    }
+
     isDirty(): boolean {
         return this._dirty;
     }
@@ -213,7 +224,7 @@ export class Layer extends Disposable {
         return this;
     }
 
-    set debounceParentTimeout(func: () => void) {
+    set debounceParentTimeout(func: Nullable<() => void>) {
         this._debounceParentTimeout = func;
     }
 

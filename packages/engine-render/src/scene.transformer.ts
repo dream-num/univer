@@ -23,12 +23,15 @@ import type { IMouseEvent, IPointerEvent } from './basics/i-events';
 import { getCurrentScrollXY } from './basics/scroll-xy';
 import { Group } from './group';
 import { ScrollTimer } from './scroll-timer';
+import type { IRectProps } from './shape/rect';
 import { Rect } from './shape/rect';
 
 import { radToDeg } from './basics/tools';
 import type { Scene } from './scene';
+import type { IPoint } from './basics/vector2';
 import { Vector2 } from './basics/vector2';
 import type { ITransformerConfig } from './basics/transformer-config';
+import { type IRegularPolygonProps, RegularPolygon } from './shape/regular-polygon';
 
 enum TransformerManagerType {
     RESIZE_LT = '__SpreadsheetTransformerResizeLT__',
@@ -264,6 +267,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     attachTo(applyObject: BaseObject) {
         if (this.hoverEnabled) {
             this.hoverEnterFunc && applyObject.onPointerEnterObserver.add(this.hoverEnterFunc);
@@ -301,11 +305,18 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 this._copperSelectedObject = applyObject;
             }
 
+            if (!isCropper) {
+                this.onChangeStartObservable.notifyObservers({
+                    objects: this._selectedObjectMap,
+                    type: MoveObserverType.MOVE_START,
+                });
+            } else {
+                this.onChangeStartObservable.notifyObservers({
+                    objects: new Map([[applyObject.oKey, applyObject]]) as Map<string, BaseObject>,
+                    type: MoveObserverType.MOVE_START,
+                });
+            }
 
-            this.onChangeStartObservable.notifyObservers({
-                objects: this._selectedObjectMap,
-                type: MoveObserverType.MOVE_START,
-            });
 
             const moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
@@ -319,18 +330,23 @@ export class Transformer extends Disposable implements ITransformerConfig {
             });
 
             const upObserver = scene.onPointerUpObserver.add(() => {
-                // scene.onPointerMoveObserver.remove(this._moveObserver);
-                // scene.onPointerUpObserver.remove(this._upObserver);
                 moveObserver?.dispose();
                 upObserver?.dispose();
                 scene.enableEvent();
                 !isCropper && this.refreshControls();
                 scrollTimer.dispose();
 
-                this.onChangeEndObservable.notifyObservers({
-                    objects: this._selectedObjectMap,
-                    type: MoveObserverType.MOVE_END,
-                });
+                if (!isCropper) {
+                    this.onChangeEndObservable.notifyObservers({
+                        objects: this._selectedObjectMap,
+                        type: MoveObserverType.MOVE_END,
+                    });
+                } else {
+                    this.onChangeEndObservable.notifyObservers({
+                        objects: new Map([[applyObject.oKey, applyObject]]) as Map<string, BaseObject>,
+                        type: MoveObserverType.MOVE_END,
+                    });
+                }
             });
 
             state.stopPropagation();
@@ -604,7 +620,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         };
     }
 
-    private _attachEventToAnchor(anchor: Rect, type = TransformerManagerType.RESIZE_LT, applyObject: BaseObject) {
+    private _attachEventToAnchor(anchor: BaseObject, type = TransformerManagerType.RESIZE_LT, applyObject: BaseObject) {
         const { keepRatio, isCropper } = this._getConfig(applyObject);
         this.disposeWithMe(
             toDisposable(
@@ -612,32 +628,25 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
                     this._startOffsetX = evtOffsetX;
                     this._startOffsetY = evtOffsetY;
-
                     const scene = this._getTopScene();
 
                     if (scene == null) {
                         return;
                     }
-
                     scene.disableEvent();
-
                     const scrollTimer = ScrollTimer.create(scene);
                     scrollTimer.startScroll(evtOffsetX, evtOffsetY);
-
                     const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
-
                     this._viewportScrollX = scrollX;
                     this._viewportScrollY = scrollY;
 
                     const cursor = this._getRotateAnchorCursor(type);
                     if (!isCropper) {
                         this._clearControls();
-
                         this.onChangeStartObservable.notifyObservers({
                             objects: this._selectedObjectMap,
                             type: MoveObserverType.MOVE_START,
                         });
-
                         this._selectedObjectMap.forEach((moveObject) => {
                             const { width, height, left, top } = moveObject.getState();
                             this._startStateMap.set(moveObject.oKey, { width, height, left, top });
@@ -648,11 +657,9 @@ export class Transformer extends Disposable implements ITransformerConfig {
                             objects: new Map([[applyObject.oKey, applyObject]]) as Map<string, BaseObject>,
                             type: MoveObserverType.MOVE_START,
                         });
-
                         const { width, height, left, top } = applyObject.getState();
                         this._startStateMap.set(applyObject.oKey, { width, height, left, top });
                     }
-
 
                     this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                         const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
@@ -671,12 +678,18 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         scrollTimer.dispose();
                         this.refreshControls();
                         this._startStateMap.clear();
-                        this.onChangeEndObservable.notifyObservers({
-                            objects: this._selectedObjectMap,
-                            type: MoveObserverType.MOVE_END,
-                        });
+                        if (!isCropper) {
+                            this.onChangeEndObservable.notifyObservers({
+                                objects: this._selectedObjectMap,
+                                type: MoveObserverType.MOVE_END,
+                            });
+                        } else {
+                            this.onChangeEndObservable.notifyObservers({
+                                objects: new Map([[applyObject.oKey, applyObject]]) as Map<string, BaseObject>,
+                                type: MoveObserverType.MOVE_END,
+                            });
+                        }
                     });
-
                     state.stopPropagation();
                 })
             )
@@ -821,6 +834,63 @@ export class Transformer extends Disposable implements ITransformerConfig {
         return cursor;
     }
 
+    private _getCopperAnchorPosition(type: TransformerManagerType, height: number, width: number, applyObject: BaseObject) {
+        const { borderStrokeWidth, borderSpacing, anchorSize } = this._getConfig(applyObject);
+
+        let left = 0;
+        let top = 0;
+
+        const longEdge = anchorSize;
+        const shortEdge = anchorSize / 4;
+
+        switch (type) {
+            case TransformerManagerType.RESIZE_LT:
+                left += -borderSpacing - borderStrokeWidth;
+                top += -borderSpacing - borderStrokeWidth;
+                break;
+            case TransformerManagerType.RESIZE_CT:
+                left += width / 2;
+                top += -borderSpacing - borderStrokeWidth;
+
+                break;
+            case TransformerManagerType.RESIZE_RT:
+                left += width + borderSpacing - borderStrokeWidth - longEdge;
+                top += -borderSpacing - borderStrokeWidth;
+
+                break;
+            case TransformerManagerType.RESIZE_LM:
+                left += borderSpacing - borderStrokeWidth;
+                top += height / 2;
+
+                break;
+            case TransformerManagerType.RESIZE_RM:
+                left += width + borderSpacing - borderStrokeWidth - shortEdge;
+                top += height / 2;
+
+                break;
+            case TransformerManagerType.RESIZE_LB:
+                left += -this.borderSpacing - borderStrokeWidth;
+                top += height + borderSpacing - borderStrokeWidth - longEdge;
+
+                break;
+            case TransformerManagerType.RESIZE_CB:
+                left += width / 2;
+                top += height + borderSpacing - borderStrokeWidth - shortEdge;
+
+                break;
+            case TransformerManagerType.RESIZE_RB:
+                left += width + borderSpacing - borderStrokeWidth - longEdge;
+                top += height + borderSpacing - borderStrokeWidth - longEdge;
+
+                break;
+        }
+
+        return {
+            left,
+            top,
+        };
+    }
+
     private _getRotateAnchorPosition(type: TransformerManagerType, height: number, width: number, applyObject: BaseObject) {
         const { rotateAnchorOffset, rotateSize, borderStrokeWidth, borderSpacing, anchorSize } = this._getConfig(applyObject);
 
@@ -910,6 +980,122 @@ export class Transformer extends Disposable implements ITransformerConfig {
         // anchor.cursor = cursor;
 
         return anchor;
+    }
+
+    private _createCopperResizeAnchor(type: TransformerManagerType, applyObject: BaseObject, zIndex: number) {
+        const { height, width, scaleX, scaleY } = applyObject.getState();
+
+        const { anchorFill, anchorStroke, anchorStrokeWidth, anchorSize } = this._getConfig(applyObject);
+
+        const { left, top } = this._getCopperAnchorPosition(type, height, width, applyObject);
+
+        const cursor = this._getRotateAnchorCursor(type);
+
+        let anchor: BaseObject;
+        const oKey = `${type}_${zIndex}`;
+        const config: IRectProps | IRegularPolygonProps = {
+            zIndex: zIndex - 1,
+            fill: anchorFill,
+            stroke: anchorStroke,
+            strokeWidth: anchorStrokeWidth,
+            width: anchorSize,
+            height: anchorSize,
+            left,
+            top,
+        };
+        const longEdge = anchorSize;
+        const shortEdge = anchorSize / 4;
+        if (cursor === CURSOR_TYPE.EAST_RESIZE) {
+            config.width = shortEdge;
+            config.height = longEdge;
+            anchor = new Rect(oKey, config);
+        } else if (cursor === CURSOR_TYPE.WEST_RESIZE) {
+            config.width = shortEdge;
+            config.height = longEdge;
+            anchor = new Rect(oKey, config);
+        } else if (cursor === CURSOR_TYPE.NORTH_RESIZE) {
+            config.width = longEdge;
+            config.height = shortEdge;
+            anchor = new Rect(oKey, config);
+        } else if (cursor === CURSOR_TYPE.SOUTH_RESIZE) {
+            config.width = longEdge;
+            config.height = shortEdge;
+            anchor = new Rect(oKey, config);
+        } else if (cursor === CURSOR_TYPE.NORTH_EAST_RESIZE) {
+            (config as IRegularPolygonProps).pointsGroup = this._getNorthEastPoints(longEdge, shortEdge);
+            anchor = new RegularPolygon(oKey, config as IRegularPolygonProps);
+        } else if (cursor === CURSOR_TYPE.NORTH_WEST_RESIZE) {
+            (config as IRegularPolygonProps).pointsGroup = this._getNorthWestPoints(longEdge, shortEdge);
+            anchor = new RegularPolygon(oKey, config as IRegularPolygonProps);
+        } else if (cursor === CURSOR_TYPE.SOUTH_EAST_RESIZE) {
+            (config as IRegularPolygonProps).pointsGroup = this._getSouthEastPoints(longEdge, shortEdge);
+            anchor = new RegularPolygon(oKey, config as IRegularPolygonProps);
+        } else if (cursor === CURSOR_TYPE.SOUTH_WEST_RESIZE) {
+            (config as IRegularPolygonProps).pointsGroup = this._getSouthWestPoints(longEdge, shortEdge);
+            anchor = new RegularPolygon(oKey, config as IRegularPolygonProps);
+        }
+
+
+        this._attachHover(anchor!, cursor, CURSOR_TYPE.DEFAULT);
+
+        return anchor!;
+    }
+
+    private _getNorthEastPoints(longEdge: number, shortEdge: number): IPoint[][] {
+        const minusL_S = longEdge - shortEdge;
+        return [
+            [
+                { x: 0, y: 0 },
+                { x: longEdge, y: 0 },
+                { x: longEdge, y: longEdge },
+                { x: minusL_S, y: longEdge },
+                { x: minusL_S, y: shortEdge },
+                { x: 0, y: shortEdge },
+            ],
+        ];
+    }
+
+    private _getNorthWestPoints(longEdge: number, shortEdge: number): IPoint[][] {
+        return [
+            [
+                { x: 0, y: 0 },
+                { x: longEdge, y: 0 },
+                { x: longEdge, y: shortEdge },
+                { x: shortEdge, y: shortEdge },
+                { x: shortEdge, y: longEdge },
+                { x: 0, y: longEdge },
+            ],
+        ];
+    }
+
+    private _getSouthEastPoints(longEdge: number, shortEdge: number): IPoint[][] {
+        const minusL_S = longEdge - shortEdge;
+        return [
+            [
+                { x: minusL_S, y: 0 },
+                { x: longEdge, y: 0 },
+                { x: longEdge, y: longEdge },
+                { x: 0, y: longEdge },
+                { x: 0, y: minusL_S },
+                { x: minusL_S, y: minusL_S },
+                { x: minusL_S, y: 0 },
+            ],
+        ];
+    }
+
+    private _getSouthWestPoints(longEdge: number, shortEdge: number): IPoint[][] {
+        const minusL_S = longEdge - shortEdge;
+        return [
+            [
+                { x: 0, y: 0 },
+                { x: shortEdge, y: 0 },
+                { x: shortEdge, y: minusL_S },
+                { x: longEdge, y: minusL_S },
+                { x: longEdge, y: longEdge },
+                { x: 0, y: longEdge },
+                { x: 0, y: 0 },
+            ],
+        ];
     }
 
     private _checkTransformerType(oKey: string) {
@@ -1012,15 +1198,10 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _createControl(applyObject: BaseObject, isSkipOnCropper = true) {
         const { left, top, height, width, angle, scaleX, scaleY, ancestorLeft, ancestorTop, skewX, skewY, flipX, flipY } = applyObject;
-        const { isCropper, resizeEnabled,
-                rotateAnchorOffset, rotateSize, rotateCornerRadius,
-                borderEnabled, borderStroke, borderStrokeWidth, borderSpacing, enabledAnchors,
-        } = this._getConfig(applyObject);
-
+        const { isCropper, resizeEnabled, rotateAnchorOffset, rotateSize, rotateCornerRadius, borderEnabled, borderStroke, borderStrokeWidth, borderSpacing, enabledAnchors } = this._getConfig(applyObject);
         if (isSkipOnCropper && isCropper) {
             return;
         }
-
         const oKey = applyObject.oKey;
         const zIndex = this._selectedObjectMap.size + applyObject.zIndex + 1;
         const layerIndex = applyObject.getLayerIndex() || DEFAULT_TRANSFORMER_LAYER_INDEX;
@@ -1033,7 +1214,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
             });
             groupElements.push(outline);
         }
-
         if (resizeEnabled && !isCropper) {
             const { left: lineLeft, top: lineTop } = this._getRotateAnchorPosition(
                 TransformerManagerType.ROTATE_LINE, height, width, applyObject
@@ -1054,7 +1234,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
             this._attachHover(rotate, cursor, CURSOR_TYPE.DEFAULT);
             groupElements.push(rotateLine, rotate);
         }
-
         if (resizeEnabled) {
             for (let i = 0, len = enabledAnchors.length; i < len; i++) {
                 const isEnable = enabledAnchors[i];
@@ -1062,7 +1241,13 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     continue;
                 }
                 const type = TransformerManagerTypeArray[i];
-                const anchor = this._createResizeAnchor(type, applyObject, zIndex);
+                let anchor: BaseObject;
+                if (!isCropper) {
+                    anchor = this._createResizeAnchor(type, applyObject, zIndex);
+                } else {
+                    anchor = this._createCopperResizeAnchor(type, applyObject, zIndex);
+                }
+
                 this._attachEventToAnchor(anchor, type, applyObject);
                 groupElements.push(anchor);
             }

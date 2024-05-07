@@ -22,8 +22,8 @@ import type { IImageData } from '@univerjs/image';
 
 export interface IImageCropperObjectProps extends IShapeProps {
     applyObject: BaseObject;
-
     imageData?: IImageData;
+    dragPadding?: number;
 }
 
 enum ImageCropperObjectType {
@@ -36,6 +36,8 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
 
     private _imageData: Nullable<IImageData>;
 
+    private _dragPadding = 8;
+
     private _cacheCanvas: Nullable<Canvas>;
 
     constructor(key?: string, props?: T) {
@@ -45,6 +47,9 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
         props.transformerConfig = {
             keepRatio: false,
             isCropper: true,
+            anchorFill: 'rgb(0, 0, 0)',
+            anchorStroke: 'rgb(255, 255, 255)',
+            anchorSize: 24,
         };
 
         super(key, props);
@@ -55,6 +60,10 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
 
         if (props?.imageData) {
             this._imageData = props.imageData;
+        }
+
+        if (props?.dragPadding) {
+            this._dragPadding = props.dragPadding;
         }
 
         this._applyProps();
@@ -100,11 +109,12 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
     }
 
     private _inSurround(oCoord: Vector2) {
+        const padding = this._dragPadding;
         if (
-            oCoord.x >= 15 - this.strokeWidth / 2 &&
-            oCoord.x <= this.width + this.strokeWidth / 2 - 15 &&
-            oCoord.y >= 15 - this.strokeWidth / 2 &&
-            oCoord.y <= this.height + this.strokeWidth / 2 - 15
+            oCoord.x >= padding - this.strokeWidth / 2 &&
+            oCoord.x <= this.width + this.strokeWidth / 2 - padding &&
+            oCoord.y >= padding - this.strokeWidth / 2 &&
+            oCoord.y <= this.height + this.strokeWidth / 2 - padding
         ) {
             return true;
         }

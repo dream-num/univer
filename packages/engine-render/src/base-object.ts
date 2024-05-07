@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
-import { Observable, requestImmediateMacroTask } from '@univerjs/core';
+import { Observable } from '@univerjs/core';
 
 import type { EVENT_TYPE } from './basics/const';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
@@ -26,6 +26,7 @@ import { generateRandomKey, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
 import type { IViewportBound, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
+import type { Layer } from './layer';
 
 export const BASE_OBJECT_ARRAY = [
     'top',
@@ -129,7 +130,7 @@ export abstract class BaseObject {
 
     private _forceRender = false;
 
-    private _layer: any; // TODO: @DR-Univer. Belong to layer
+    private _layer: Nullable<Layer>; // TODO: @DR-Univer. Belong to layer
 
     constructor(key?: string) {
         if (key) {
@@ -253,7 +254,7 @@ export abstract class BaseObject {
         return this._cursor;
     }
 
-    get layer() {
+    get layer(): Nullable<Layer> {
         return this._layer;
     }
 
@@ -285,7 +286,7 @@ export abstract class BaseObject {
         this.setCursor(val);
     }
 
-    set layer(layer: any) {
+    set layer(layer: Layer) {
         this._layer = layer;
     }
 
@@ -345,29 +346,12 @@ export abstract class BaseObject {
         this._dirty = state;
 
         if (state) {
-            // const scene = this.getScene();
-            // if (scene == null) {
-            //     this._dirty = false;
-
-            //     return;
-            // }
             if (this._layer == null) {
                 this._dirty = false;
                 return;
             }
-            // clearTimeout(scene.debounceParentTimeout);
-            // // To prevent multiple refreshes caused by setting values for multiple object instances at once.
-            // scene.debounceParentTimeout = setTimeout(() => {
-            //     this._parent?.makeDirty(state);
-            // }, 0);
 
-            if (typeof this._layer.debounceParentTimeout === 'function') {
-                this._layer.debounceParentTimeout();
-            }
-            // To prevent multiple refreshes caused by setting values for multiple object instances at once.
-            this._layer.debounceParentTimeout = requestImmediateMacroTask(() => {
-                this._layer?.makeDirty(state);
-            });
+            this._layer.makeDirtyWithDebounce(state);
         }
 
         return this;
@@ -706,8 +690,8 @@ export abstract class BaseObject {
 
         this.onDisposeObserver.clear();
 
-        this.parent = null;
-        this.layer = null;
+        this._parent = null;
+        this._layer = null;
         this.transform = null as unknown as Transform;
     }
 

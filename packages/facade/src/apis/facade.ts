@@ -31,7 +31,7 @@ import {
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
 import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
-import type { IDisposable } from '@wendellhu/redi';
+import type { Dependency, IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Quantity } from '@wendellhu/redi';
 
 import type { RenderComponentType, SheetComponent, SheetExtension } from '@univerjs/engine-render';
@@ -43,16 +43,34 @@ import { FWorkbook } from './sheets/f-workbook';
 
 export class FUniver {
     /**
-     * Create a FUniver instance, if the injector is not provided, it will create a new Univer instance.
+     * Get dependencies for FUniver, you can override newAPI to add more dependencies.
+     * @param injector
+     * @param derivedDependencies
+     * @returns
      */
-    static newAPI(wrapped: Univer | Injector): FUniver {
-        const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
+    protected static getDependencies(injector: Injector, derivedDependencies?: []): Dependency[] {
+        const dependencies: Dependency[] = derivedDependencies || [];
         // Is unified registration required?
         const socketService = injector.get(ISocketService, Quantity.OPTIONAL);
         if (!socketService) {
-            injector.add([ISocketService, { useClass: WebSocketService }]);
+            dependencies.push([ISocketService, { useClass: WebSocketService }]);
         }
+        return dependencies;
+    }
 
+    /**
+     * Create a FUniver instance, if the injector is not provided, it will create a new Univer instance.
+     * @param wrapped The Univer instance or injector.
+     * @returns FUniver instance.
+     *
+     * @zh 创建一个 FUniver 实例，如果未提供注入器，将创建一个新的 Univer 实例。
+     * @param_zh wrapped Univer 实例或注入器。
+     * @returns_zh FUniver 实例。
+     */
+    static newAPI(wrapped: Univer | Injector): FUniver {
+        const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
+        const dependencies = FUniver.getDependencies(injector);
+        dependencies.forEach((dependency) => injector.add(dependency));
         return injector.createInstance(FUniver);
     }
 
@@ -65,7 +83,7 @@ export class FUniver {
     private _debouncedFormulaCalculation: () => void;
 
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(Injector) protected readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @ISocketService private readonly _ws: ISocketService,

@@ -75,6 +75,14 @@ export class DocumentSkeleton extends Skeleton {
         return new DocumentSkeleton(docViewModel, localeService);
     }
 
+    override dispose(): void {
+        super.dispose();
+        this._skeletonData = null;
+        this._renderedBlockIdMap.clear();
+        this._findLiquid = null as unknown as Liquid;
+        this._docViewModel.dispose();
+    }
+
     getViewModel() {
         return this._docViewModel;
     }

@@ -103,6 +103,16 @@ export class Documents extends DocComponent {
         return new Documents(oKey, documentSkeleton, config);
     }
 
+    override dispose() {
+        super.dispose();
+
+        this._skeletonObserver?.dispose();
+        this._skeletonObserver = null;
+        this.onPageRenderObservable.clear();
+        this._drawLiquid = null as unknown as Liquid;
+        this._findLiquid = null as unknown as Liquid;
+    }
+
     setConfig(config?: IDocumentsConfig) {
         if (config?.pageMarginLeft != null) {
             this.pageMarginLeft = config?.pageMarginLeft;

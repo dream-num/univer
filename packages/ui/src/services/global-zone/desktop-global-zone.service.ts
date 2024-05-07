@@ -31,7 +31,9 @@ export class DesktopGlobalZoneService implements IGlobalZoneService {
     constructor(
         @Inject(ComponentManager)
         private readonly _componentManager: ComponentManager
-    ) {}
+    ) {
+        // empty
+    }
 
     get componentKey() {
         return this._componentKey;

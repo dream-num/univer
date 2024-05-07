@@ -41,8 +41,6 @@ export class UniverImagePlugin extends Plugin {
         this._mockAddImage();
     }
 
-    override onReady(): void {}
-
     private _mockAddImage(): void {
         /**
          * TODO: @DR-Univer Before the loading process is completed, mock some data for testing.

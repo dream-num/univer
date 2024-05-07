@@ -58,7 +58,9 @@ export const Test: StoryObj<ISheetNumfmtPanelProps> = {
             <RediContext.Provider value={{ injector: inject }}>
                 <SheetNumfmtPanel
                     value={{ defaultPattern: '', defaultValue: 123123, row: 2, col: 3 }}
-                    onChange={(_pattern) => {}}
+                    onChange={(_pattern) => {
+                        // empty
+                    }}
                 />
             </RediContext.Provider>
         );

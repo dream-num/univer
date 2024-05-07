@@ -41,7 +41,9 @@ export class DataStreamTreeNode {
     constructor(
         public nodeType: DataStreamTreeNodeType,
         public content?: string
-    ) {}
+    ) {
+        // empty
+    }
 
     static create(nodeType: DataStreamTreeNodeType, content?: string) {
         return new DataStreamTreeNode(nodeType, content);

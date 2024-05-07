@@ -152,9 +152,6 @@ export function createSkeletonPage(
     return page;
 }
 
-// 检测是否溢出了一页
-function checkPageOverflow(page: IDocumentSkeletonPage) { }
-
 function _getNullPage() {
     return {
         sections: [],

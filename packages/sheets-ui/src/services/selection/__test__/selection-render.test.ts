@@ -137,8 +137,10 @@ const mockEvent: IMouseEvent = {
     },
 };
 
-class Engine extends ThinEngine<Scene> {
-    clearCanvas() {}
+class MockEngine extends ThinEngine<Scene> {
+    clearCanvas() {
+        // empty
+    }
 
     getCanvas() {
         return 1 as any;
@@ -148,7 +150,9 @@ class Engine extends ThinEngine<Scene> {
         return 1 as any;
     }
 
-    setCanvasCursor(val: CURSOR_TYPE) {}
+    setCanvasCursor(val: CURSOR_TYPE) {
+        // empty
+    }
 
     getPixelRatio() {
         return 1;
@@ -202,7 +206,7 @@ describe('Test indirect', () => {
             contextService
         );
 
-        const scene = new Scene('', new Engine());
+        const scene = new Scene('', new MockEngine());
 
         selectionRenderService.changeRuntime(skeleton, scene);
 

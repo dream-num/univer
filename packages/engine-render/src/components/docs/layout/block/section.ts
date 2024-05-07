@@ -166,6 +166,3 @@ function _pushPage(allCurrentSkeletonPages: IDocumentSkeletonPage[], blockSkelet
 
     allCurrentSkeletonPages.push(...blockSkeletonPages);
 }
-
-// 当本节有多个列，且下一节为连续节类型的时候，需要按照列数分割，重新计算lines
-export function dealWidthBlocksByMultiColumnAndContinuous() {}

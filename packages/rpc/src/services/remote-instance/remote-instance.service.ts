@@ -34,7 +34,9 @@ export interface IRemoteSyncService {
     syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean>;
 }
 export class RemoteSyncPrimaryService implements IRemoteSyncService {
-    constructor(@ICommandService private readonly _commandService: ICommandService) { }
+    constructor(@ICommandService private readonly _commandService: ICommandService) {
+        // empty
+    }
 
     async syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean> {
         return this._commandService.syncExecuteCommand(params.mutationInfo.id, params.mutationInfo.params, {
@@ -68,7 +70,9 @@ export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService protected readonly _commandService: ICommandService,
         @ILogService protected readonly _logService: ILogService
-    ) { }
+    ) {
+        // empty
+    }
 
     whenReady(): Promise<true> {
         return Promise.resolve(true);

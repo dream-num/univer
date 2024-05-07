@@ -27,7 +27,6 @@ import type { SheetComponent } from '../components/sheets/sheet-component';
 import type { Slide } from '../components/slides/slide';
 import { Engine } from '../engine';
 import { Scene } from '../scene';
-import { SceneViewer } from '../scene-viewer';
 import { type IRender, type IRenderControllerCtor, RenderUnit } from './render-unit';
 
 export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;

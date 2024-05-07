@@ -66,7 +66,9 @@ export class FRange {
         private readonly _range: IRange,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
-    ) { }
+    ) {
+        // super
+    }
 
     getRow(): number {
         return this._range.startRow;

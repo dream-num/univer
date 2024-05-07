@@ -72,7 +72,9 @@ export class LineBreaker {
     private _LB30a: number = 0;
     private _rule: Rule = new Rule();
 
-    constructor(public string: string) {}
+    constructor(public string: string) {
+        // empty
+    }
 
     use(extension: ILineBreakExtension) {
         extension(this);

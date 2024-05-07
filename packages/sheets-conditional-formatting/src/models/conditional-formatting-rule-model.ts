@@ -32,11 +32,11 @@ export class ConditionalFormattingRuleModel {
     private _ruleChange$ = new Subject<{ rule: IConditionFormattingRule; unitId: string; subUnitId: string; type: RuleOperatorType }>();
     $ruleChange = this._ruleChange$.asObservable();
 
-    constructor(@Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
+    constructor(
+        @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
         @Inject(Injector) private _injector: Injector
-
     ) {
-
+        // empty
     }
 
     private _ensureList(unitId: string, subUnitId: string) {

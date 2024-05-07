@@ -26,7 +26,10 @@ interface IUserHabitController {
 }
 
 export class UserHabitController implements IUserHabitController {
-    constructor(@Inject(ILocalStorageService) private _localStorageService: ILocalStorageService) {}
+    constructor(@Inject(ILocalStorageService) private _localStorageService: ILocalStorageService) {
+        // super
+    }
+
     private _getKey(habit: string) {
         return `userHabitController_${habit}`;
     }

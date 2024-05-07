@@ -28,7 +28,9 @@ export class DocContainerUIController {
         private readonly _config: IUniverDocsUIConfig,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) private readonly _injector: Injector
-    ) {}
+    ) {
+        // empty
+    }
 
     getUIConfig() {
         const config = {

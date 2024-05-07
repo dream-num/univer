@@ -194,10 +194,11 @@ export class SheetCanvasPopManagerService extends Disposable {
             sheetId: subUnitId,
         });
         const currentRender = this._renderManagerService.getRenderById(unitId);
-
         if (!currentRender || !skeleton) {
             return {
-                dispose: () => { },
+                dispose: () => {
+                    // empty
+                },
             };
         }
 

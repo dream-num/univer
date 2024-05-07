@@ -48,7 +48,7 @@ export class Engine extends ThinEngine<Scene> {
 
     private _activeRenderLoops = new Array<() => void>();
 
-    private _renderFunction = () => { };
+    private _renderFunction = () => { /* empty */ };
 
     private _requestNewFrameHandler: number = -1;
 
@@ -680,7 +680,7 @@ export class Engine extends ThinEngine<Scene> {
         // IE11 only supports captureEvent:boolean, not options:object, and it defaults to false.
         // Feature detection technique copied from: https://github.com/github/eventlistener-polyfill (MIT license)
         let passiveSupported = false;
-        const noop = () => { };
+        const noop = () => { /* empty */ };
 
         try {
             const options: object = {

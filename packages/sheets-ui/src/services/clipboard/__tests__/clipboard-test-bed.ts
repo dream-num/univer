@@ -486,11 +486,17 @@ export class testMarkSelectionService {
         return null;
     }
 
-    removeShape(id: string): void {}
+    removeShape(id: string): void {
+        // empty
+    }
 
-    removeAllShapes(): void {}
+    removeAllShapes(): void {
+        // empty
+    }
 
-    refreshShapes(): void {}
+    refreshShapes(): void {
+        // empty
+    }
 
     getShapeMap(): Map<string, any> {
         return new Map();
@@ -500,7 +506,7 @@ export class testMarkSelectionService {
 export class testNotificationService {
     show(): IDisposable {
         return {
-            dispose: () => {},
+            dispose: () => { /* empty */ },
         };
     }
 }

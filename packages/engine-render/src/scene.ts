@@ -479,15 +479,6 @@ export class Scene extends ThinScene {
         }
     }
 
-    changeObjectOrder() {}
-
-    // override renderObjects(ctx: UniverRenderingContext, bounds?: IViewportBound) {
-    //     this.getAllObjectsByOrder().forEach((o) => {
-    //         o.render(ctx, bounds);
-    //     });
-    //     return this;
-    // }
-
     override render(parentCtx?: UniverRenderingContext) {
         if (!this.isDirty()) {
             return;

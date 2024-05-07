@@ -233,9 +233,6 @@ export function setLineMarginBottom(line: IDocumentSkeletonLine, marginBottom: n
     line.marginBottom = marginBottom;
 }
 
-// 获得文字内容后的行信息计算
-export function updateDivideInLine(line: IDocumentSkeletonLine) {}
-
 export function collisionDetection(
     drawing: IDocumentSkeletonDrawing,
     lineHeight: number,

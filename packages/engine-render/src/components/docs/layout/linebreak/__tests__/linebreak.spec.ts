@@ -68,7 +68,7 @@ describe('unicode line break tests', () => {
             });
 
         if (skip.includes(rowNumber)) {
-            it.skip(cols, () => {});
+            it.skip(cols, () => { /* empty */ });
             return;
         }
 

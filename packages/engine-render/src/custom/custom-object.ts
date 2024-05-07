@@ -21,7 +21,7 @@ import type { UniverRenderingContext } from '../context';
 export class CustomObject extends BaseObject {
     constructor(
         key?: string,
-        private _render = (mainCtx: UniverRenderingContext) => {},
+        private _render = (mainCtx: UniverRenderingContext) => { /* empty */ },
         private _isHitCustom?: (coord: Vector2) => boolean
     ) {
         super(key);

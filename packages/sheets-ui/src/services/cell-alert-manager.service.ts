@@ -51,7 +51,9 @@ export class CellAlertManagerService {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopManagerService: SheetCanvasPopManagerService
-    ) {}
+    ) {
+        // empty
+    }
 
     showAlert(alert: ICellAlert) {
         let lastPopup = this._currentAlert.get(alert.key);
@@ -62,7 +64,9 @@ export class CellAlertManagerService {
             lastPopup = {
                 alert,
                 dispose: {
-                    dispose() {},
+                    dispose() {
+                        // empty
+                    },
                 },
             };
             this._currentAlert.set(alert.key, lastPopup);

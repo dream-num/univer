@@ -23,7 +23,9 @@ export class ActionIterator {
     private _index = 0;
     private _offset = 0;
 
-    constructor(private _actions: TextXAction[]) {}
+    constructor(private _actions: TextXAction[]) {
+        // empty
+    }
 
     hasNext() {
         return this.peekLength() < Number.POSITIVE_INFINITY;

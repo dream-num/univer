@@ -92,9 +92,6 @@ export class UniverSheetsUIPlugin extends Plugin {
     override onStarting(injector: Injector): void {
         (
             [
-                // views
-                [SheetCanvasView],
-
                 // services
                 [ShortcutExperienceService],
                 [IEditorBridgeService, { useClass: EditorBridgeService }],
@@ -144,6 +141,7 @@ export class UniverSheetsUIPlugin extends Plugin {
 
     private _registerRenderControllers(): void {
         ([
+            SheetCanvasView,
             HeaderFreezeRenderController,
             HeaderUnhideRenderController,
             HeaderResizeRenderController,

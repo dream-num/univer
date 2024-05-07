@@ -98,10 +98,6 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         return this.snapshot.container;
     }
 
-    getParentRenderUnitId() {
-        return this.snapshot.parentRenderUnitId;
-    }
-
     getSnapshot() {
         return this.snapshot;
     }

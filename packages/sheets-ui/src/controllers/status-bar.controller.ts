@@ -114,12 +114,21 @@ export class StatusBarController extends Disposable {
         );
     }
 
+    private _clearResult(): void {
+        this._statusBarService.setState(null);
+    }
+
     private _calculateSelection(selections: IRange[], primary: Nullable<ISelectionCell>) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) {
+            return this._clearResult();
+        }
+
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
         const sheetData: ISheetData = {};
         const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
+
         this._univerInstanceService
             .getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!
             .getSheets()
@@ -133,6 +142,7 @@ export class StatusBarController extends Disposable {
                     columnData: sheetConfig.columnData,
                 };
             });
+
         if (selections?.length) {
             const refs = selections.map((s) => new RangeReferenceObject(s, sheetId, unitId));
             refs.forEach((ref) => {
@@ -180,11 +190,7 @@ export class StatusBarController extends Disposable {
             };
             this._statusBarService.setState(newState as IStatusBarServiceStatus);
         } else {
-            this._statusBarService.setState(null);
+            this._clearResult();
         }
-    }
-
-    private _isSingleCell(range: IRange) {
-        return range.startRow === range.endRow && range.startColumn === range.endColumn;
     }
 }

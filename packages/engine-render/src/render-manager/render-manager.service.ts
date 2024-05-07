@@ -27,7 +27,6 @@ import type { SheetComponent } from '../components/sheets/sheet-component';
 import type { Slide } from '../components/slides/slide';
 import { Engine } from '../engine';
 import { Scene } from '../scene';
-import { SceneViewer } from '../scene-viewer';
 import { type IRender, type IRenderControllerCtor, RenderUnit } from './render-unit';
 
 export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;
@@ -35,7 +34,6 @@ export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseOb
 export interface IRenderManagerService extends IDisposable {
     currentRender$: Observable<Nullable<string>>;
     createRender$: Observable<Nullable<string>>;
-    createRenderWithParent(unitId: string, parentUnitId: string): IRender;
     createRender(unitId: string): IRender;
     removeRender(unitId: string): void;
     setCurrent(unitId: string): void;
@@ -60,7 +58,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
 
     private _currentUnitId: string = '';
 
-    private _renderMap: Map<string, RenderUnit> = new Map();
+    private _renderMap: Map<string, IRender> = new Map();
 
     private readonly _currentRender$ = new BehaviorSubject<Nullable<string>>(this._currentUnitId);
     readonly currentRender$ = this._currentRender$.asObservable();
@@ -119,23 +117,6 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return Array.from(this._renderControllers.get(type) ?? []);
     }
 
-    createRenderWithParent(unitId: string, parentUnitId: string): IRender {
-        const parent = this.getRenderById(parentUnitId);
-        if (parent == null) {
-            throw new Error('parent render is null');
-        }
-
-        const { scene, engine } = parent;
-        const current = this._createRender(unitId, engine, false);
-        const currentScene = current.scene;
-        const sv = new SceneViewer(unitId);
-
-        sv.addSubScene(currentScene);
-        scene.addObject(sv);
-
-        return current;
-    }
-
     createRenderWithEngine(unitId: string, engine: Engine): IRender {
         return this._createRender(unitId, engine, false);
     }
@@ -145,9 +126,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     }
 
     createRender(unitId: string): IRender {
-        const engine = new Engine();
-
-        return this._createRender(unitId, engine);
+        return this._createRender(unitId, new Engine());
     }
 
     private _createRender(unitId: string, engine: Engine, isMainScene: boolean = true): IRender {
@@ -193,6 +172,10 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                 mainComponent: null,
                 components: new Map(),
                 isMainScene,
+                // @ts-ignore
+                with(_dependency) {
+                    return null;
+                },
             };
         }
 
@@ -200,7 +183,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return renderUnit;
     }
 
-    private _addRenderUnit(unitId: string, item: RenderUnit) {
+    private _addRenderUnit(unitId: string, item: IRender) {
         this._renderMap.set(unitId, item);
     }
 
@@ -231,7 +214,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return [...this.getRenderAll().values()][0];
     }
 
-    getRenderById(unitId: string): Nullable<RenderUnit> {
+    getRenderById(unitId: string): Nullable<IRender> {
         return this._renderMap.get(unitId);
     }
 
@@ -239,15 +222,20 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return this._renderMap;
     }
 
-    private _disposeItem(item: Nullable<RenderUnit>, shouldDestroyEngine: boolean = true) {
+    private _disposeItem(item: Nullable<IRender>, shouldDestroyEngine: boolean = true) {
         if (item == null) {
             return;
         }
 
         const { engine, scene, components } = item;
+
+        // `mainComponent` is one of the `components` so it does not to be disposed again
         components?.forEach((component) => component.dispose());
         scene.dispose();
-        item.dispose();
+
+        if (isDisposable(item)) {
+            item.dispose();
+        }
 
         if (shouldDestroyEngine) {
             engine.dispose();
@@ -256,3 +244,8 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
 }
 
 export const IRenderManagerService = createIdentifier<RenderManagerService>('engine-render.render-manager.service');
+
+export function isDisposable(thing: unknown): thing is IDisposable {
+  // eslint-disable-next-line ts/no-explicit-any
+    return !!thing && typeof (thing as any).dispose === 'function';
+}

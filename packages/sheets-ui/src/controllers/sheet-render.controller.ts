@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Workbook } from '@univerjs/core';
-import {
-    CommandType,
+import type { ICommandInfo,
+    Workbook } from '@univerjs/core';
+import { CommandType,
     ICommandService,
     IContextService,
     IUniverInstanceService,
@@ -81,7 +81,7 @@ export class SheetRenderController extends RxDisposable {
 
     private _init() {
         this._initialRenderRefresh();
-        this._initSheetDisposeListener();
+        this._initWorkbookListener();
         this._initCommandListener();
         this._initContextListener();
     }
@@ -117,14 +117,30 @@ export class SheetRenderController extends RxDisposable {
         );
     }
 
-    private _initSheetDisposeListener(): void {
+    private _initWorkbookListener(): void {
+        this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((workbook) => {
+                const unitId = workbook.getUnitId();
+
+                this._renderManagerService.createRender(unitId);
+                this._renderManagerService.setCurrent(unitId);
+            });
+
         this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(takeUntil(this.dispose$))
             .subscribe((workbook) => {
                 const unitId = workbook.getUnitId();
 
                 this._sheetSkeletonManagerService.removeSkeleton({ unitId });
+                this._renderManagerService.removeRender(unitId);
             });
+
+        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => {
+            const unitId = workbook.getUnitId();
+            this._renderManagerService.createRender(unitId);
+            this._renderManagerService.setCurrent(unitId);
+        });
     }
 
     private _initCommandListener(): void {

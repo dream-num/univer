@@ -76,7 +76,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderCon
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
-    private _scrollTimer!: ScrollTimer;
+    private _scrollTimer: Nullable<ScrollTimer>;
 
     private _changeFromColumn = -1;
 
@@ -104,10 +104,9 @@ export class HeaderMoveRenderController extends Disposable implements IRenderCon
         });
 
         scene.onPointerMoveObserver.remove(this._moveObserver);
-
         scene.onPointerUpObserver.remove(this._upObserver);
 
-        this._scrollTimer.dispose();
+        this._scrollTimer?.dispose();
     }
 
     constructor(

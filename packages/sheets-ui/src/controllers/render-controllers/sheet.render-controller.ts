@@ -14,17 +14,3 @@
  * limitations under the License.
  */
 
-export interface IExtraModelData {
-    /**
-     * should start renderLoop Immediately
-     * default is true
-     */
-    shouldStartRenderingImmediately?: boolean;
-
-    // Union field properties can be only one of the following:
-    /**
-     * HTML selector
-     * default is null
-     */
-    container?: string;
-}

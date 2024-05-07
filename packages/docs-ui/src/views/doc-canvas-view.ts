@@ -84,25 +84,12 @@ export class DocCanvasView extends RxDisposable {
         }
     }
 
-    // eslint-disable-next-line max-lines-per-function
+
     private _addNewRender() {
         const documentModel = this._currentDocumentModel;
 
         const unitId = documentModel.getUnitId();
-
-        const container = documentModel.getContainer();
-
-        const parentRenderUnitId = documentModel.getParentRenderUnitId();
-
-        if (container != null && parentRenderUnitId != null) {
-            throw new Error('container or parentRenderUnitId can only exist one');
-        }
-
-        if (container == null && parentRenderUnitId != null) {
-            this._renderManagerService.createRenderWithParent(unitId, parentRenderUnitId);
-        } else {
-            this._renderManagerService.createRender(unitId);
-        }
+        this._renderManagerService.createRender(unitId);
 
         const currentRender = this._renderManagerService.getRenderById(unitId);
 

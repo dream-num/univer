@@ -168,6 +168,7 @@ export class Engine extends ThinEngine<Scene> {
             this.resize();
 
             this._resizeObserver?.unobserve(this._container as HTMLElement);
+            this._resizeObserver = null;
 
             let timer: number | undefined;
             this._resizeObserver = new ResizeObserver(() => {
@@ -180,11 +181,10 @@ export class Engine extends ThinEngine<Scene> {
             });
             this._resizeObserver.observe(this._container);
 
-            this.disposeWithMe(
-                toDisposable(() => {
-                    this._resizeObserver?.unobserve(this._container as HTMLElement);
-                })
-            );
+            this.disposeWithMe(() => {
+                this._resizeObserver?.unobserve(this._container as HTMLElement);
+                if (timer !== undefined) window.cancelIdleCallback(timer);
+            });
         }
     }
 

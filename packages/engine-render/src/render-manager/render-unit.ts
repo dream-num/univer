@@ -56,6 +56,7 @@ export class RenderUnit extends Disposable implements IRender {
     private readonly _injector: Injector;
 
     private _renderContext: IRenderContext<UnitModel>;
+
     set isMainScene(is: boolean) { this._renderContext.isMainScene = is; }
     get isMainScene(): boolean { return this._renderContext.isMainScene; }
     set engine(engine: Engine) { this._renderContext.engine = engine; }

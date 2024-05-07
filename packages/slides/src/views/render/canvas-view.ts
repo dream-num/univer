@@ -144,19 +144,7 @@ export class CanvasView extends RxDisposable {
             return;
         }
 
-        const container = slideDataModel.getContainer();
-
-        const parentRenderUnitId = slideDataModel.getParentRenderUnitId();
-
-        if (container != null && parentRenderUnitId != null) {
-            throw new Error('container or parentRenderUnitId can only exist one');
-        }
-
-        if (container == null && parentRenderUnitId != null) {
-            this._renderManagerService.createRenderWithParent(unitId, parentRenderUnitId);
-        } else {
-            this._renderManagerService.createRender(unitId);
-        }
+        this._renderManagerService.createRender(unitId);
 
         const currentRender = this._renderManagerService.getRenderById(unitId);
 

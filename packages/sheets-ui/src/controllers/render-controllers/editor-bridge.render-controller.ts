@@ -15,7 +15,8 @@
  */
 
 import type { ICommandInfo, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
-import { FOCUSING_DOC, FOCUSING_SHEET, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { FOCUSING_DOC, FOCUSING_SHEET, ICommandService, IContextService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
 import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
@@ -27,17 +28,16 @@ import {
 import { Inject, Injector, Quantity } from '@wendellhu/redi';
 import { merge, takeUntil } from 'rxjs';
 import { IEditorService, ILayoutService, IRangeSelectorService } from '@univerjs/ui';
+import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
+import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
+import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import { getSheetObject } from '../utils/component-tools';
 
-import { SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
-import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
-import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
-import { IEditorBridgeService } from '../services/editor-bridge.service';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { getSheetObject } from './utils/component-tools';
-
-@OnLifecycle(LifecycleStages.Rendered, EditorBridgeController)
-export class EditorBridgeController extends RxDisposable {
+export class EditorBridgeRenderController extends RxDisposable implements IRenderController {
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -56,8 +56,6 @@ export class EditorBridgeController extends RxDisposable {
 
         this._commandExecutedListener();
     }
-
-    override dispose(): void {}
 
     private _initialize() {
         this._initSelectionChangeListener();
@@ -105,10 +103,6 @@ export class EditorBridgeController extends RxDisposable {
         }
 
         const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return;
-        }
-
         const { unitId, sheetId } = currentSkeleton;
         const { scene, engine } = sheetObject;
         this._commandService.executeCommand(SetActivateCellEditOperation.id, {
@@ -122,12 +116,7 @@ export class EditorBridgeController extends RxDisposable {
 
     private _initialEventListener() {
         const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return;
-        }
-
-        const { spreadsheet, spreadsheetColumnHeader, spreadsheetLeftTopPlaceholder, spreadsheetRowHeader } =
-            sheetObject;
+        const { spreadsheet, spreadsheetColumnHeader, spreadsheetLeftTopPlaceholder, spreadsheetRowHeader } = sheetObject;
 
         spreadsheet.onDblclickObserver.add((evt) => {
             // No need to enter edit status when user click the right button.
@@ -161,24 +150,16 @@ export class EditorBridgeController extends RxDisposable {
                 }
 
                 const editorId = documentDataModel.getUnitId();
-
                 if (!this._editorService.isEditor(editorId)) {
                     return;
                 }
 
                 if (this._editorService.isSheetEditor(editorId)) {
                     this._contextService.setContextValue(FOCUSING_DOC, false);
-                    // this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, true);
                     this._contextService.setContextValue(FOCUSING_SHEET, true);
                 } else {
-                    // this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
-                    // this._contextService.setContextValue(EDITOR_ACTIVATED, false);
-                    // this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
-                    // this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
-
                     this._contextService.setContextValue(FOCUSING_SHEET, false);
                     this._contextService.setContextValue(FOCUSING_DOC, true);
-
                     this._hideEditor();
                 }
             })
@@ -193,6 +174,7 @@ export class EditorBridgeController extends RxDisposable {
         if (this._editorBridgeService.isForceKeepVisible()) {
             return;
         }
+
         this._hideEditor();
     }
 
@@ -267,7 +249,7 @@ export class EditorBridgeController extends RxDisposable {
     }
 
     private _getCurrentUnitIdAndSheetId() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
         return {
             unitId: workbook.getUnitId(),
@@ -277,7 +259,7 @@ export class EditorBridgeController extends RxDisposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._univerInstanceService, this._renderManagerService);
+        return getSheetObject(this._context.unit, this._context)!;
     }
 
     private _commandExecutedListener() {

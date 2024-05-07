@@ -29,7 +29,6 @@ import { EditingController } from './controllers/editor/editing.controller';
 import { EndEditController } from './controllers/editor/end-edit.controller';
 import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
 import { StartEditController } from './controllers/editor/start-edit.controller';
-import { EditorBridgeController } from './controllers/editor-bridge.controller';
 import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
 import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 import { HeaderMenuRenderController } from './controllers/render-controllers/header-menu.render-controller';
@@ -70,6 +69,7 @@ import { ForceStringAlertRenderController } from './controllers/force-string-ale
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
+import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN_NAME';
@@ -120,7 +120,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 // TODO@wzhudev: lots of controllers here should be refactored to RenderController
                 [ActiveWorksheetController],
                 [AutoHeightController],
-                [EditorBridgeController],
                 [EndEditController],
                 [FormulaEditorController],
                 [HeaderFreezeRenderController],
@@ -159,6 +158,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             ForceStringRenderController,
             CellCustomRenderController,
             SheetContextMenuRenderController,
+            EditorBridgeRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
         });

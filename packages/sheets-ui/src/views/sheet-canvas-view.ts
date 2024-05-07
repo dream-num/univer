@@ -113,8 +113,6 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
         );
 
         scene.enableLayerCache(SHEET_COMPONENT_MAIN_LAYER_INDEX, SHEET_COMPONENT_HEADER_LAYER_INDEX);
-
-        this._sheetSkeletonManagerService.setCurrent({ sheetId, unitId });
     }
 
     private _addViewport(worksheet: Worksheet) {
@@ -256,10 +254,6 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
                                 evt.preventDefault();
                             }
                         }
-                    }
-                    if (evt.inputIndex === PointerInput.MouseWheelZ) {
-                        // TODO
-                        // ...
                     }
 
                     this._context.scene.makeDirty(true);

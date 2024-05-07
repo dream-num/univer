@@ -22,11 +22,11 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Year extends BaseFunction {
-    override calculate(serialNumber: BaseValueObject) {
-        if (serialNumber == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
+    override minParams = 1;
 
+    override maxParams = 1;
+
+    override calculate(serialNumber: BaseValueObject) {
         if (serialNumber.isArray()) {
             return serialNumber.map((serialNumberObject) => this._handleSingleObject(serialNumberObject));
         }

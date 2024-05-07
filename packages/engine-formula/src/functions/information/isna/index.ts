@@ -16,16 +16,16 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Isna extends BaseFunction {
-    override calculate(value: BaseValueObject) {
-        if (value == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
+    override minParams = 1;
 
+    override maxParams = 1;
+
+    override calculate(value: BaseValueObject) {
         if (value.getValue() === ErrorType.NA) {
             return BooleanValueObject.create(true);
         } else if (value.isArray()) {

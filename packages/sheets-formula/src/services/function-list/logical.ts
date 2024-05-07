@@ -210,7 +210,7 @@ export const FUNCTION_LIST_LOGICAL: IFunctionInfo[] = [
                 name: 'formula.functionList.LAMBDA.functionParameter.parameter.name',
                 detail: 'formula.functionList.LAMBDA.functionParameter.parameter.detail',
                 example: '[x, y, …,]',
-                require: 1,
+                require: 0,
                 repeat: 1,
             },
             {

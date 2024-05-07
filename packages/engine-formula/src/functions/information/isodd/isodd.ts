@@ -21,11 +21,11 @@ import { BooleanValueObject } from '../../../engine/value-object/primitive-objec
 import { BaseFunction } from '../../base-function';
 
 export class Isodd extends BaseFunction {
-    override calculate(value: BaseValueObject) {
-        if (value == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
+    override minParams = 1;
 
+    override maxParams = 1;
+
+    override calculate(value: BaseValueObject) {
         if (value.isArray() || value.isBoolean()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }

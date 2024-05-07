@@ -88,10 +88,10 @@ export class ScrollBar extends BaseScrollBar {
 
     override dispose() {
         super.dispose();
-        this._mainScene?.onPointerMoveObserver.remove(this._horizonPointerMoveObserver);
-        this._mainScene?.onPointerMoveObserver.remove(this._verticalPointerMoveObserver);
-        this._mainScene?.onPointerUpObserver.remove(this._horizonPointerUpObserver);
-        this._mainScene?.onPointerUpObserver.remove(this._verticalPointerUpObserver);
+        this._horizonPointerMoveObserver?.dispose();
+        this._horizonPointerUpObserver?.dispose();
+        this._verticalPointerMoveObserver?.dispose();
+        this._verticalPointerUpObserver?.dispose();
         this._mainScene = null;
         this._view.removeScrollBar();
     }

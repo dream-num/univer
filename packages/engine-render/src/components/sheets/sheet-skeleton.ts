@@ -342,6 +342,30 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
+     * TODO: DR-Univer, fix as unknown as
+     */
+    override dispose(): void {
+        super.dispose();
+
+        this._rowHeightAccumulation = [];
+        this._columnWidthAccumulation = [];
+        this._rowTotalHeight = 0;
+        this._columnTotalWidth = 0;
+        this._rowHeaderWidth = 0;
+        this._columnHeaderHeight = 0;
+        this._rowColumnSegment = null as any;
+        this._dataMergeCache = [];
+        this._stylesCache = null as any;
+        this._renderedCellCache = null as unknown as ObjectMatrix<boolean>;
+        this._overflowCache = null as unknown as ObjectMatrix<IRange>;
+
+        this._worksheet = null as unknown as Worksheet;
+        this._worksheetData = null as unknown as IWorksheetData;
+        this._cellData = null as unknown as ObjectMatrix<Nullable<ICellData>>;
+        this._styles = null as unknown as Styles;
+    }
+
+    /**
      * @deprecated should never expose a property that is provided by another module!
      */
     getCellData() {

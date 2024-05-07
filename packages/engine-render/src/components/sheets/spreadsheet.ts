@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, ISelectionCellWithCoord, Nullable } from '@univerjs/core';
-import { BooleanNumber, ObjectMatrix, sortRules } from '@univerjs/core';
+import type { IRange, ISelectionCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
+import { BooleanNumber, sortRules } from '@univerjs/core';
 
 import type { BaseObject } from '../../base-object';
 
@@ -54,12 +54,6 @@ export class Spreadsheet extends SheetComponent {
     private _refreshIncrementalState = false;
 
     private _forceDirty = false;
-
-    private _overflowCacheRuntime: { [row: number]: boolean } = {};
-
-    private _overflowCacheRuntimeRange = new ObjectMatrix<IRange>();
-
-    private _overflowCacheRuntimeTimeout: number | NodeJS.Timeout = -1;
 
     private _forceDisableGridlines = false;
 
@@ -115,6 +109,20 @@ export class Spreadsheet extends SheetComponent {
 
     get forceDisableGridlines() {
         return this._forceDisableGridlines;
+    }
+
+    /**
+     * TODO: DR-Univer, fix as unknown as
+     */
+    override dispose() {
+        super.dispose();
+        this._documents.dispose();
+        this._documents = null as unknown as Documents;
+        this._cacheCanvas?.dispose();
+        this._cacheCanvas = null as unknown as Canvas;
+        this._backgroundExtension = null as unknown as Background;
+        this._borderExtension = null as unknown as Border;
+        this._fontExtension = null as unknown as Font;
     }
 
     override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {

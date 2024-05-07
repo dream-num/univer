@@ -150,10 +150,16 @@ export class Group extends BaseObject {
     // 判断被选中的唯一对象
     pick(coord: Vector2) {}
 
+    private _clear() {
+        this._objects = [];
+    }
+
     override dispose() {
-        this.getObjects().forEach((o) => {
+        const objects = [...this.getObjects()];
+        objects.forEach((o) => {
             o.dispose();
         });
+        this._clear();
         super.dispose();
     }
 

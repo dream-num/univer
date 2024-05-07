@@ -35,11 +35,31 @@ export const ToggleSheetCommentPanelOperation: ICommand = {
             sidebarService.open({
                 header: { title: 'threadCommentUI.panel.title' },
                 children: { label: THREAD_COMMENT_PANEL },
-                width: 312,
+                width: 320,
             });
             panelService.setPanelVisible(true);
         }
 
+        return true;
+    },
+};
+
+export interface ISetActiveCommentOperationParams {
+    unitId: string;
+    subUnitId: string;
+    commentId: string;
+}
+
+export const SetActiveCommentOperation: ICommand<ISetActiveCommentOperationParams> = {
+    id: 'thread-comment-ui.operation.set-active-comment',
+    type: CommandType.OPERATION,
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+
+        const panelService = accessor.get(ThreadCommentPanelService);
+        panelService.setActiveComment(params);
         return true;
     },
 };

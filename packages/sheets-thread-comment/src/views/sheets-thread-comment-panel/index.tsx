@@ -18,7 +18,8 @@ import type { Workbook } from '@univerjs/core';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ThreadCommentPanel } from '@univerjs/thread-comment-ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { map } from 'rxjs';
 
 export const SheetsThreadCommentPanel = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -26,14 +27,13 @@ export const SheetsThreadCommentPanel = () => {
     if (!workbook) {
         return null;
     }
-    const worksheet = workbook.getActiveSheet();
     const unitId = workbook.getUnitId();
-    const subUnitId = worksheet.getSheetId();
+    const subUnitId$ = useMemo(() => workbook.activeSheet$.pipe(map((i) => i?.getSheetId())), [workbook.activeSheet$]);
 
     return (
         <ThreadCommentPanel
             unitId={unitId}
-            subUnitId={subUnitId}
+            subUnitId$={subUnitId$}
             type={UniverInstanceType.UNIVER_SHEET}
         />
     );

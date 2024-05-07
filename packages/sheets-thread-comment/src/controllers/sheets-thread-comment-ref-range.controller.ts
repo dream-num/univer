@@ -15,7 +15,7 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { Disposable, DisposableCollection, toDisposable } from '@univerjs/core';
+import { Disposable, DisposableCollection, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
@@ -30,6 +30,7 @@ import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { ISheetThreadComment } from '../types/interfaces/i-sheet-thread-comment';
 import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
 
+@OnLifecycle(LifecycleStages.Starting, SheetsThreadCommentRefRangeController)
 export class SheetsThreadCommentRefRangeController extends Disposable {
     private _disposableMap = new Map<string, IDisposable>();
 
@@ -37,6 +38,7 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel
+
     ) {
         super();
         this._initRefRange();
@@ -58,6 +60,7 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
 
         const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
             const resultRange = handleDefaultRangeChangeWithEffectRefCommands(oldRange, commandInfo);
+
             if (resultRange && resultRange.startColumn === oldRange.startColumn && resultRange.startRow === oldRange.startRow) {
                 return {
                     undos: [],
@@ -87,7 +90,6 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
                     }],
                 };
             }
-
             return {
                 redos: [{
                     id: UpdateCommentRefMutation.id,

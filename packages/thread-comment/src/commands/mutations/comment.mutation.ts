@@ -79,7 +79,7 @@ export interface IUpdateCommentRefMutationParams {
 }
 
 export const UpdateCommentRefMutation: ICommand<IUpdateCommentRefMutationParams> = {
-    id: 'thread-comment.mutation.update-comment',
+    id: 'thread-comment.mutation.update-comment-ref',
     type: CommandType.MUTATION,
     handler(accessor, params) {
         if (!params) {

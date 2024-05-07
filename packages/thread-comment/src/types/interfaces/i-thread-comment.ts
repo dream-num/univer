@@ -24,4 +24,7 @@ export interface IThreadComment {
     attachments?: string[];
     resolved?: boolean;
     updated?: boolean;
+    unitId: string;
+    subUnitId: string;
+    mentions?: string[];
 }

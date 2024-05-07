@@ -25,5 +25,9 @@ export default {
             cancel: 'Cancel',
             save: 'Save',
         },
+        item: {
+            edit: 'Edit',
+            delete: 'Delete This Comment',
+        },
     },
 };

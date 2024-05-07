@@ -15,7 +15,6 @@
  */
 
 export default {
-
     threadCommentUI: {
         panel: {
             title: '评论管理',
@@ -25,6 +24,10 @@ export default {
             reply: '回复',
             cancel: '取消',
             save: '保存',
+        },
+        item: {
+            edit: '编辑',
+            delete: '删除',
         },
     },
 };

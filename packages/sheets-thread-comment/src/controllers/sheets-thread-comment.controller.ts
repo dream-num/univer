@@ -18,7 +18,7 @@ import { Disposable, ICommandService, LifecycleStages, LocaleService, OnLifecycl
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { CommentSingle } from '@univerjs/icons';
-import { THREAD_COMMENT_PANEL, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
+import { SetActiveCommentOperation, THREAD_COMMENT_PANEL, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { SelectionMoveType, SetSelectionsOperation } from '@univerjs/sheets';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
@@ -63,13 +63,14 @@ export class SheetsThreadCommentController extends Disposable {
                     if (!this._sheetsThreadCommentModel.showCommentMarker(unitId, subUnitId, row, col)) {
                         return;
                     }
-
-                    this._sheetsThreadCommentPopupService.showPopup({
-                        unitId,
-                        subUnitId,
-                        row,
-                        col,
-                    });
+                    const commentId = this._sheetsThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
+                    if (commentId) {
+                        this._commandService.executeCommand(SetActiveCommentOperation.id, {
+                            unitId,
+                            subUnitId,
+                            commentId,
+                        });
+                    }
                 }
             }
         });
@@ -107,7 +108,7 @@ export class SheetsThreadCommentController extends Disposable {
             if (commentInfo) {
                 const { unitId, subUnitId, commentId } = commentInfo;
                 const comment = this._sheetsThreadCommentModel.getComment(unitId, subUnitId, commentId);
-                if (!comment) {
+                if (!comment || comment.resolved) {
                     return;
                 }
 

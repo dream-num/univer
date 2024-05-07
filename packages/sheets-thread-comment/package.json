@@ -72,6 +72,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
+        "@univerjs/engine-render": "workspace:^",
         "@univerjs/icons": "^0.1.29",
         "@univerjs/sheets": "workspace:^",
         "@univerjs/sheets-ui": "workspace:^"

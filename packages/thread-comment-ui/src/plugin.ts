@@ -20,7 +20,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { PLUGIN_NAME } from './types/const';
 import { ThreadCommentPanelService } from './services/thread-comment-panel.service';
-import { ToggleSheetCommentPanelOperation } from './commands/operations/comment.operations';
+import { SetActiveCommentOperation, ToggleSheetCommentPanelOperation } from './commands/operations/comment.operations';
 import { ThreadCommentUIController } from './controllers/thread-comment-ui.controller';
 
 export class ThreadCommentUIPlugin extends ThreadCommentPlugin {
@@ -48,7 +48,7 @@ export class ThreadCommentUIPlugin extends ThreadCommentPlugin {
             injector.add(dep);
         });
 
-        [ToggleSheetCommentPanelOperation].forEach((command) => {
+        [ToggleSheetCommentPanelOperation, SetActiveCommentOperation].forEach((command) => {
             this._commandService.registerCommand(command);
         });
     }

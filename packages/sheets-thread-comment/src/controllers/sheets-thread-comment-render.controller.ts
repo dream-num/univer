@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import type { Spreadsheet } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsThreadCommentRenderController)
 export class SheetsThreadCommentRenderController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel
+        @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
         this._initViewModelIntercept();
+        this._initSkeletonChange();
     }
 
     private _initViewModelIntercept() {
@@ -54,5 +62,28 @@ export class SheetsThreadCommentRenderController extends Disposable {
                 }
             )
         );
+    }
+
+    private _initSkeletonChange() {
+        const markSkeletonDirty = () => {
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            if (!workbook) return;
+
+            const unitId = workbook.getUnitId();
+            const subUnitId = workbook.getActiveSheet().getSheetId();
+            const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({ unitId, sheetId: subUnitId });
+            const currentRender = this._renderManagerService.getRenderById(unitId);
+
+            skeleton?.makeDirty(true);
+            skeleton?.calculate();
+
+            if (currentRender) {
+                (currentRender.mainComponent as Spreadsheet).makeForceDirty();
+            }
+        };
+
+        this.disposeWithMe(this._sheetsThreadCommentModel.commentUpdate$.subscribe(() => {
+            markSkeletonDirty();
+        }));
     }
 }

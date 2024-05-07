@@ -29,7 +29,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { BaseObject, IImageProps, Scene } from '@univerjs/engine-render';
-import { DRAWING_OBJECT_LAYER_INDEX, Image, IRenderManagerService } from '@univerjs/engine-render';
+import { CURSOR_TYPE, DRAWING_OBJECT_LAYER_INDEX, Image, IRenderManagerService } from '@univerjs/engine-render';
 import { getImageShapeKeyByDrawingSearch, type IImageData } from '@univerjs/image';
 
 
@@ -122,6 +122,8 @@ export class ImageUpdateController extends Disposable {
 
                     scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(image);
 
+                    this._addHoverForImage(image);
+
                     if (!sceneList.includes(scene)) {
                         sceneList.push(scene);
                     }
@@ -138,6 +140,23 @@ export class ImageUpdateController extends Disposable {
         );
     }
 
+    private _addHoverForImage(o: Image) {
+        this.disposeWithMe(
+            toDisposable(
+                o.onPointerEnterObserver.add(() => {
+                    o.cursor = CURSOR_TYPE.GRAB;
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                o.onPointerLeaveObserver.add(() => {
+                    o.cursor = CURSOR_TYPE.DEFAULT;
+                })
+            )
+        );
+    }
 
     private _drawingRemoveListener() {
         this.disposeWithMe(

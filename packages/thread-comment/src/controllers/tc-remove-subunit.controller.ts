@@ -47,8 +47,8 @@ export class ThreadCommentRemoveSubUnitController extends Disposable {
                         const subUnitId = params.subUnitId || workbook.getActiveSheet().getSheetId();
                         const { commentMap } = this._threadCommentModel.ensureMap(unitId, subUnitId);
 
-                        const ids = Array.from(commentMap.keys());
-                        const comments = Array.from(commentMap.values());
+                        const ids = Array.from(Object.keys(commentMap));
+                        const comments = Array.from(Object.values(commentMap));
                         const redos = ids.map((id) => ({
                             id: DeleteCommentMutation.id,
                             params: {

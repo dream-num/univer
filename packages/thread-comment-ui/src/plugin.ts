@@ -15,28 +15,32 @@
  */
 
 import { ThreadCommentPlugin } from '@univerjs/thread-comment';
-import { ICommandService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { PLUGIN_NAME } from './types/const';
 import { ThreadCommentPanelService } from './services/thread-comment-panel.service';
 import { SetActiveCommentOperation, ToggleSheetCommentPanelOperation } from './commands/operations/comment.operations';
 import { ThreadCommentUIController } from './controllers/thread-comment-ui.controller';
+import type { IThreadCommentUIConfig } from './types/interfaces/i-thread-comment-mention';
 
 export class ThreadCommentUIPlugin extends ThreadCommentPlugin {
     static override pluginName = PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_UNKNOWN;
 
     constructor(
-        _config: unknown,
+        _config: IThreadCommentUIConfig,
         @Inject(Injector) protected override _injector: Injector,
-        @ICommandService protected override _commandService: ICommandService
+        @ICommandService protected override _commandService: ICommandService,
+        @IConfigService protected _configService: IConfigService
     ) {
         super(
             _config,
             _injector,
             _commandService
         );
+
+        this._configService.setConfig(PLUGIN_NAME, _config);
     }
 
     override onStarting(injector: Injector): void {

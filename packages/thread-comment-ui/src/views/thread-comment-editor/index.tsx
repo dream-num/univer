@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { IThreadComment, TextNode } from '@univerjs/thread-comment';
+import type { IThreadComment, IThreadCommentMention, TextNode } from '@univerjs/thread-comment';
 import { Button, Mentions } from '@univerjs/design';
 import React, { useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { LocaleService } from '@univerjs/core';
+import { IConfigService, LocaleService } from '@univerjs/core';
+import { PLUGIN_NAME } from '../../types/const';
+import type { IThreadCommentUIConfig } from '../../types/interfaces/i-thread-comment-mention';
 import styles from './index.module.less';
 
 
@@ -31,14 +33,14 @@ export interface IThreadCommentEditorProps {
 }
 
 const parseMentions = (text: string): TextNode[] => {
-    const regex = /@\[(.*?)\]\((\d+)\)|(\d+)/g;
+    const regex = /@\[(.*?)\]\((.*?)\)|(\w+)/g;
     let match;
     let lastIndex = 0;
     const result: TextNode[] = [];
 
     while ((match = regex.exec(text)) !== null) {
         if (match.index > lastIndex) {
-        // Add the text between two user mentions or before the first user mention
+            // Add the text between two user mentions or before the first user mention
             result.push({
                 type: 'text',
                 content: text.substring(lastIndex, match.index),
@@ -46,17 +48,18 @@ const parseMentions = (text: string): TextNode[] => {
         }
 
         if (match[1] && match[2]) {
-        // User mention found
+            // User mention found
+            const [type, id] = match[2].split('-');
             result.push({
-
-                type: 'user',
+                type: 'mention',
                 content: {
-                    id: match[2],
                     label: match[1],
+                    type,
+                    id,
                 },
             });
         } else if (match[3]) {
-        // Text (numbers) found
+            // Text (numbers) found
             result.push({
                 type: 'text',
                 content: match[3],
@@ -78,8 +81,8 @@ const parseMentions = (text: string): TextNode[] => {
 const transformTextNode2Text = (nodes: TextNode[]) => {
     return nodes.map((item) => {
         switch (item.type) {
-            case 'user':
-                return `@[${item.content.label}](${item.content.id})`;
+            case 'mention':
+                return `@[${item.content.label}](${item.content.type}-${item.content.id})`;
             default:
                 return item.content;
         }
@@ -87,11 +90,18 @@ const transformTextNode2Text = (nodes: TextNode[]) => {
 };
 
 
+const transformMention = (mention: IThreadCommentMention) => ({
+    display: mention.label,
+    id: `${mention.type}-${mention.id}`,
+});
+
 export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
     const { comment, onSave, id, onCancel, autoFocus } = props;
+    const configService = useDependency(IConfigService);
     const localeService = useDependency(LocaleService);
     const [localComment, setLocalComment] = useState({ text: [], ...comment });
     const [editing, setEditing] = useState(false);
+    const mentions = configService.getConfig<IThreadCommentUIConfig>(PLUGIN_NAME)?.mentions ?? [];
 
     return (
         <div className={styles.threadCommentEditor} onClick={(e) => e.preventDefault()}>
@@ -107,14 +117,17 @@ export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
                     setEditing(true);
                 }}
             >
-                <Mentions.Mention
-                    trigger="@"
-                    data={[{
-                        id: '11',
-                        display: 'zhangwei',
-                    }]}
-                    displayTransform={(id, label) => `@${label} `}
-                />
+                {mentions.map((mention) => (
+                    <Mentions.Mention
+                        key={mention.trigger}
+                        trigger={mention.trigger}
+                        data={mention.getMentions ?
+                            (query) => mention.getMentions!(query)
+                                .then((res) => res.map(transformMention))
+                            : (mention.mentions ?? []).map(transformMention)}
+                        displayTransform={(id, label) => `@${label} `}
+                    />
+                ))}
             </Mentions>
             {editing
                 ? (

@@ -16,7 +16,8 @@
 
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ICommandService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, UniverInstanceType } from '@univerjs/core';
+import type { IThreadCommentUIConfig } from '@univerjs/thread-comment-ui';
 import { ThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
 import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
@@ -27,16 +28,29 @@ import { SheetsThreadCommentRenderController } from './controllers/sheets-thread
 
 export const SHEETS_THREAD_COMMENT = 'SHEETS_THREAD_COMMENT';
 
+const defaultConfig: IThreadCommentUIConfig = {
+    mentions: [{
+        trigger: '@',
+        mentions: [{
+            id: 'mock',
+            label: 'MockUser',
+            type: 'user',
+        }],
+    }],
+};
+
+
 export class UniverSheetsThreadCommentPlugin extends ThreadCommentUIPlugin {
     static override pluginName = SHEETS_THREAD_COMMENT;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        _config: unknown,
+        _config: IThreadCommentUIConfig = defaultConfig,
         @Inject(Injector) protected override _injector: Injector,
-        @Inject(ICommandService) protected override _commandService: ICommandService
+        @Inject(ICommandService) protected override _commandService: ICommandService,
+        @Inject(IConfigService) protected override _configService: IConfigService
     ) {
-        super(_config, _injector, _commandService);
+        super(_config, _injector, _commandService, _configService);
     }
 
     override onStarting(injector: Injector): void {
@@ -46,7 +60,6 @@ export class UniverSheetsThreadCommentPlugin extends ThreadCommentUIPlugin {
             [SheetsThreadCommentController],
             [SheetsThreadCommentRefRangeController],
             [SheetsThreadCommentRenderController],
-
             [SheetsThreadCommentPopupService],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);

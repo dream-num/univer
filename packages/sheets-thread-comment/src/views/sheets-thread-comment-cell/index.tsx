@@ -41,7 +41,6 @@ export const SheetsThreadCommentCell = () => {
             subUnitId={subUnitId}
             type={UniverInstanceType.UNIVER_SHEET}
             refStr={ref}
-            personId=""
         />
     );
 };

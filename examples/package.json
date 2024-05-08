@@ -21,7 +21,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/facade": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/icons": "^0.1.44",
+        "@univerjs/icons": "^0.1.45",
         "@univerjs/image": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",

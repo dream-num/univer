@@ -18,8 +18,8 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import React, { useState } from 'react';
-import { DeleteSingle, MoreSingle } from '@univerjs/icons';
-import { ICommandService, LocaleService, Tools, type UniverInstanceType } from '@univerjs/core';
+import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle } from '@univerjs/icons';
+import { ICommandService, LocaleService, Tools, type UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import dayjs from 'dayjs';
 import { Dropdown, Menu, MenuItem } from '@univerjs/design';
@@ -32,7 +32,6 @@ export interface IThreadCommentTreeProps {
     subUnitId: string;
     type: UniverInstanceType;
     refStr?: string;
-    personId?: string;
     showEdit?: boolean;
     onClick?: () => void;
     showHighlight?: boolean;
@@ -52,6 +51,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const { item, unitId, subUnitId, editing, onEditingChange } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const userManagerService = useDependency(UserManagerService);
+    const user = userManagerService.getUser(item.personId);
     const handleDeleteItem = () => {
         commandService.executeCommand(
             DeleteCommentCommand.id,
@@ -65,24 +66,28 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
 
     return (
         <div className={styles.threadCommentItem}>
-            <img className={styles.threadCommentItemHead} />
+            <img className={styles.threadCommentItemHead} src={user?.avatar} />
             <div className={styles.threadCommentItemTitle}>
                 <div>
-                    {item.personId || ' '}
+                    {user?.name || ' '}
                 </div>
-                <Dropdown
-                    overlay={(
-                        <Menu>
-                            <MenuItem onClick={() => onEditingChange?.(true)}>{localeService.t('threadCommentUI.item.edit')}</MenuItem>
-                            <MenuItem onClick={handleDeleteItem}>{localeService.t('threadCommentUI.item.delete')}</MenuItem>
-                        </Menu>
-                    )}
-                >
+                <div>
                     <div className={styles.threadCommentIcon}>
-                        <MoreSingle />
+                        <ReplyToCommentSingle />
                     </div>
-                </Dropdown>
-
+                    <Dropdown
+                        overlay={(
+                            <Menu>
+                                <MenuItem onClick={() => onEditingChange?.(true)}>{localeService.t('threadCommentUI.item.edit')}</MenuItem>
+                                <MenuItem onClick={handleDeleteItem}>{localeService.t('threadCommentUI.item.delete')}</MenuItem>
+                            </Menu>
+                        )}
+                    >
+                        <div className={styles.threadCommentIcon}>
+                            <MoreHorizontalSingle />
+                        </div>
+                    </Dropdown>
+                </div>
             </div>
             <div className={styles.threadCommentItemTime}>{item.dT}</div>
             {editing
@@ -113,7 +118,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                     <div className={styles.threadCommentItemContent}>
                         {item.text.map((item, i) => {
                             switch (item.type) {
-                                case 'user':
+                                case 'mention':
                                     return (
                                         <a className={styles.threadCommentItemAt} key={i}>
                                             @
@@ -132,13 +137,15 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
 };
 
 export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
-    const { id, unitId, subUnitId, refStr, personId, showEdit = true, onClick, showHighlight } = props;
+    const { id, unitId, subUnitId, refStr, showEdit = true, onClick, showHighlight } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [editingId, setEditingId] = useState('');
     useObservable(threadCommentModel.commentMap$);
     const comments = id ? threadCommentModel.getCommentWithChildren(unitId, subUnitId, id) : null;
     const commandService = useDependency(ICommandService);
+    const userManagerService = useDependency(UserManagerService);
     const resolved = comments?.root.resolved;
+    const currentUser = useObservable(userManagerService.currentUser$);
     const renderComments = [
         ...comments ?
             [comments.root] :
@@ -146,7 +153,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             [{
                 id: 'mock',
                 text: [],
-                personId: personId ?? '',
+                personId: currentUser?.userID ?? '',
                 ref: refStr ?? '',
                 dT: '',
                 unitId,
@@ -186,8 +193,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 {comments
                     ? (
                         <div className={styles.threadCommentIconContainer}>
-                            <div className={styles.threadCommentIcon}>
-                                <DeleteSingle onClick={handleResolve} />
+                            <div className={styles.threadCommentIcon} style={{ color: resolved ? 'rgb(var(--green-500))' : '' }}>
+                                <ResolvedSingle onClick={handleResolve} />
                             </div>
                             <div className={styles.threadCommentIcon}>
                                 <DeleteSingle onClick={handleDeleteRoot} />
@@ -230,7 +237,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                             dT: dayjs().format('YYYY/MM/DD HH:mm'),
                                             id: Tools.generateRandomId(),
                                             ref: refStr,
-                                            personId,
+                                            personId: currentUser?.userID,
                                             parentId: comments?.root.id,
                                             unitId,
                                             subUnitId,

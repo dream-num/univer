@@ -14,33 +14,3 @@
  * limitations under the License.
  */
 
-export interface IThreadCommentMention {
-    type: string;
-    label: string;
-    id: string;
-    extra?: any;
-}
-
-export type TextNode = {
-    type: 'text';
-    content: string;
-} | {
-    type: 'mention';
-    content: IThreadCommentMention;
-};
-
-export interface IThreadComment {
-    id: string;
-    ref: string;
-    dT: string;
-    updateT?: string;
-    personId: string;
-    parentId?: string;
-    text: TextNode[];
-    attachments?: string[];
-    resolved?: boolean;
-    updated?: boolean;
-    unitId: string;
-    subUnitId: string;
-    mentions?: string[];
-}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -101,7 +101,23 @@ if (!IS_E2E) {
     univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 }
 
-univer.registerPlugin(UniverSheetsThreadCommentPlugin);
+const mockUser = {
+    userID: 'mockId',
+    name: 'MockUser',
+    avatar: '',
+};
+
+univer.registerPlugin(UniverSheetsThreadCommentPlugin, {
+    mentions: [{
+        trigger: '@',
+        mentions: [{
+            id: mockUser.userID,
+            label: mockUser.name,
+            type: 'user',
+            extra: mockUser,
+        }],
+    }],
+});
 // Uncomment the following lines to test if the document is disposed correctly without memory leaks.
 // setTimeout(() => {
 //     univer.__getInjector().get(IUniverInstanceService).disposeUnit(DEFAULT_WORKBOOK_DATA_DEMO.id);
@@ -114,6 +130,10 @@ univer.registerPlugin(UniverSheetsThreadCommentPlugin);
 // debugger plugin
 univer.registerPlugin(DebuggerPlugin);
 
+
+const injector = univer.__getInjector();
+const userManagerService = injector.get(UserManagerService);
+userManagerService.setCurrentUser(mockUser);
 
 declare global {
     interface Window {

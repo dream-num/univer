@@ -138,6 +138,10 @@ const mockEvent: IMouseEvent = {
 };
 
 class MockEngine extends ThinEngine<Scene> {
+    setRemainCapture(): void {
+        // empty
+    }
+
     clearCanvas() {
         // empty
     }

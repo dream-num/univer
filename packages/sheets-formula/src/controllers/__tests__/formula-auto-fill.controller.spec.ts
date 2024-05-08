@@ -32,7 +32,8 @@ import {
     SetSelectionsOperation,
 } from '@univerjs/sheets';
 import {
-    AutoFillController,
+    AutoFillCommand,
+    AutoFillRenderController,
     AutoFillService,
     IAutoFillService,
     ISelectionRenderService,
@@ -53,7 +54,7 @@ describe('Test auto fill with formula', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let autoFillController: AutoFillController;
+    let autoFilterRenderController: AutoFillRenderController;
     let themeService: ThemeService;
     let getValues: (
         startRow: number,
@@ -65,7 +66,7 @@ describe('Test auto fill with formula', () => {
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
             [ISelectionRenderService, { useClass: SelectionRenderService }],
-            [AutoFillController],
+            [AutoFillRenderController],
             [IAutoFillService, { useClass: AutoFillService }],
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
@@ -76,7 +77,8 @@ describe('Test auto fill with formula', () => {
         commandService = get(ICommandService);
         themeService = get(ThemeService);
         themeService.setTheme(theme);
-        autoFillController = get(AutoFillController);
+
+        autoFilterRenderController = get(AutoFillRenderController);
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(AddWorksheetMergeMutation);
@@ -115,7 +117,7 @@ describe('Test auto fill with formula', () => {
                 },
             ]);
 
-            (autoFillController as any)._triggerAutoFill(
+            (autoFilterRenderController as any)._handleFill(
                 {
                     startColumn: 1,
                     endColumn: 1,
@@ -166,7 +168,7 @@ describe('Test auto fill with formula', () => {
             expect(B2?.si).toEqual(B3?.si);
 
             // drop to right
-            (autoFillController as any)._triggerAutoFill(
+            (autoFilterRenderController as any)._handleFill(
                 {
                     startColumn: 1,
                     endColumn: 1,

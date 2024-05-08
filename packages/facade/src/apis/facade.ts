@@ -332,7 +332,6 @@ export class FUniver {
      */
     private _getSheetRenderComponent(unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> {
         const render = this._renderManagerService.getRenderById(unitId);
-
         if (!render) {
             throw new Error('Render not found');
         }
@@ -340,7 +339,6 @@ export class FUniver {
         const { components } = render;
 
         const renderComponent = components.get(viewKey);
-
         if (!renderComponent) {
             throw new Error('Render component not found');
         }

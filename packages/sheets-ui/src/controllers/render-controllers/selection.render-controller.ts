@@ -233,7 +233,7 @@ export class SelectionRenderController extends Disposable implements IRenderCont
 
     private _refreshSelection(params: readonly ISelectionWithStyle[]) {
         const selections = params.map((selectionWithStyle) => {
-            const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
+            const selectionData = this._selectionRenderService.convertSelectionToCoord(selectionWithStyle);
             selectionData.style = getNormalSelectionStyle(this._themeService);
             return selectionData;
         });
@@ -299,7 +299,7 @@ export class SelectionRenderController extends Disposable implements IRenderCont
 
                 const selectionWithStyle = this._getAllRange(skeleton);
 
-                const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
+                const selectionData = this._selectionRenderService.convertSelectionToCoord(selectionWithStyle);
                 this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
 
                 this._selectionRenderService.refreshSelectionMoveStart();
@@ -327,7 +327,7 @@ export class SelectionRenderController extends Disposable implements IRenderCont
                             continue;
                         }
                         const selectionData =
-                            this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
+                            this._selectionRenderService.convertSelectionToCoord(selectionWithStyle);
                         this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
                     }
 

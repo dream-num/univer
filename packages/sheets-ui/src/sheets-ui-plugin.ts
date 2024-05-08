@@ -104,12 +104,7 @@ export class UniverSheetsUIPlugin extends Plugin {
 
                 [ScrollManagerService],
                 [SheetSkeletonManagerService],
-                [
-                    ISelectionRenderService,
-                    {
-                        useClass: SelectionRenderService,
-                    },
-                ],
+                [ISelectionRenderService, { useClass: SelectionRenderService }],
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
                 [HoverManagerService],
@@ -117,7 +112,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [CellAlertManagerService],
 
                 // controllers
-                // TODO@wzhudev: lots of controllers here should be refactored to RenderController
                 [ActiveWorksheetController],
                 [AutoHeightController],
                 [EndEditController],

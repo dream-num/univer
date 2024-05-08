@@ -59,7 +59,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
                     return;
                 }
                 const rangeType = currentSelection.range.rangeType;
-                const range = this._selectionRenderService.convertSelectionRangeToData(currentSelection).rangeWithCoord;
+                const range = this._selectionRenderService.convertSelectionToCoord(currentSelection).rangeWithCoord;
                 const isPointerInRange = () => {
                     if (!range) {
                         return false;

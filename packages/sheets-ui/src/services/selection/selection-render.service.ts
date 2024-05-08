@@ -77,7 +77,7 @@ export interface ISelectionRenderService {
     getActiveRange(): Nullable<IRange>;
     getActiveSelection(): Nullable<SelectionShape>;
     getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[];
-    convertSelectionRangeToData(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
+    convertSelectionToCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
     convertRangeDataToSelection(range: IRange): Nullable<IRangeWithCoord>;
     convertCellRangeToInfo(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
     eventTrigger(
@@ -905,7 +905,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._shortcutService.setDisable(true);
     }
 
-    convertSelectionRangeToData(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle {
+    convertSelectionToCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle {
         const { range, primary, style } = selectionWithStyle;
         let rangeWithCoord = this.convertRangeDataToSelection(range);
         if (rangeWithCoord == null) {

@@ -216,7 +216,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderCo
         };
 
         const { scene } = this._renderManagerService.getRenderById(unitId) || {};
-        const { rangeWithCoord, primaryWithCoord } = this._selectionRenderService.convertSelectionRangeToData({
+        const { rangeWithCoord, primaryWithCoord } = this._selectionRenderService.convertSelectionToCoord({
             range: arrayRange,
             primary: null,
             style,

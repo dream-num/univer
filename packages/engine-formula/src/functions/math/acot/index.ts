@@ -21,11 +21,11 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Acot extends BaseFunction {
-    override calculate(variant: BaseValueObject) {
-        if (variant == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
+    override minParams = 1;
 
+    override maxParams = 1;
+
+    override calculate(variant: BaseValueObject) {
         if (variant.isString()) {
             variant = variant.convertToNumberObjectValue();
         }

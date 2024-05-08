@@ -22,11 +22,11 @@ import type { ArrayValueObject } from '../../../engine/value-object/array-value-
 import { CubeValueObject } from '../../../engine/value-object/cube-value-object';
 
 export class Cube extends BaseFunction {
-    override calculate(...variants: BaseValueObject[]) {
-        if (variants.length === 0) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
+    override minParams = 1;
 
+    override maxParams = 255;
+
+    override calculate(...variants: BaseValueObject[]) {
         const values: ArrayValueObject[] = [];
 
         for (let i = 0; i < variants.length; i++) {

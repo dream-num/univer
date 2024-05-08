@@ -25,16 +25,16 @@ import { BaseFunction } from '../../base-function';
 import { isSingleValueObject } from '../../../engine/utils/value-object';
 
 export class Vlookup extends BaseFunction {
+    override minParams = 3;
+
+    override maxParams = 4;
+
     override calculate(
         lookupValue: BaseValueObject,
         tableArray: BaseValueObject,
         colIndexNum: BaseValueObject,
         rangeLookup?: BaseValueObject
     ) {
-        if (lookupValue == null || tableArray == null || colIndexNum == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
         if (lookupValue.isError()) {
             return lookupValue;
         }

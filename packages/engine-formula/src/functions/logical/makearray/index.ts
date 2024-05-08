@@ -23,11 +23,11 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Makearray extends BaseFunction {
-    override calculate(...variants: BaseValueObject[]) {
-        if (variants.length !== 3) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
+    override minParams = 3;
 
+    override maxParams = 3;
+
+    override calculate(...variants: BaseValueObject[]) {
         const row = this.getIndexNumValue(variants[0]);
 
         if (typeof row !== 'number') {

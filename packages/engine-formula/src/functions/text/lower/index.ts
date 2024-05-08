@@ -20,11 +20,11 @@ import { StringValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Lower extends BaseFunction {
-    override calculate(text: BaseValueObject) {
-        if (text == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
+    override minParams = 1;
 
+    override maxParams = 1;
+
+    override calculate(text: BaseValueObject) {
         if (text.isError()) {
             return text;
         }

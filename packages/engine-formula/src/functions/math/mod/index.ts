@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Mod extends BaseFunction {
-    override calculate(number: BaseValueObject, divisor: BaseValueObject) {
-        if (number == null || divisor == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
+    override minParams = 2;
 
+    override maxParams = 2;
+
+    override calculate(number: BaseValueObject, divisor: BaseValueObject) {
         if (number.isString()) {
             number = number.convertToNumberObjectValue();
         }

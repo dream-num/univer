@@ -29,15 +29,15 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { BaseFunction } from '../../base-function';
 
 export class Indirect extends BaseFunction {
+    override minParams = 1;
+
+    override maxParams = 2;
+
     override isAddress() {
         return true;
     }
 
     override calculate(refText: BaseValueObject, a1?: BaseValueObject) {
-        if (refText == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
         if (refText.isError()) {
             return refText;
         }

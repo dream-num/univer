@@ -29,13 +29,13 @@ import { BaseFunction } from '../../base-function';
  *
  */
 export class Index extends BaseFunction {
+    override minParams = 2;
+
+    override maxParams = 4;
+
     override needsReferenceObject = true;
 
     override calculate(reference: FunctionVariantType, rowNum: FunctionVariantType, columnNum?: FunctionVariantType, areaNum?: FunctionVariantType) {
-        if (reference == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
         if (reference.isError()) {
             return reference;
         }

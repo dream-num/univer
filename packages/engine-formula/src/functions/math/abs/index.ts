@@ -20,11 +20,11 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { BaseFunction } from '../../base-function';
 
 export class Abs extends BaseFunction {
-    override calculate(variant: BaseValueObject) {
-        if (variant == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
+    override minParams = 1;
 
+    override maxParams = 1;
+
+    override calculate(variant: BaseValueObject) {
         if (variant.isString()) {
             variant = variant.convertToNumberObjectValue();
         }

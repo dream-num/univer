@@ -21,11 +21,11 @@ import { BooleanValueObject } from '../../../engine/value-object/primitive-objec
 import { BaseFunction } from '../../base-function';
 
 export class Or extends BaseFunction {
-    override calculate(...logicalValues: BaseValueObject[]) {
-        if (logicalValues.length === 0) {
-            return new ErrorValueObject(ErrorType.NA);
-        }
+    override minParams = 1;
 
+    override maxParams = 255;
+
+    override calculate(...logicalValues: BaseValueObject[]) {
         let result = false;
         let noBoolean = true;
         let errorValue = null;

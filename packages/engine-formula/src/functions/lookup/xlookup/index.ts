@@ -25,6 +25,10 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Xlookup extends BaseFunction {
+    override minParams = 3;
+
+    override maxParams = 6;
+
     override calculate(
         lookupValue: BaseValueObject,
         lookupArray: ArrayValueObject,
@@ -33,10 +37,6 @@ export class Xlookup extends BaseFunction {
         matchMode?: BaseValueObject,
         searchMode?: BaseValueObject
     ) {
-        if (lookupValue == null || lookupArray == null || returnArray == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
         if (lookupValue.isError()) {
             return lookupValue;
         }

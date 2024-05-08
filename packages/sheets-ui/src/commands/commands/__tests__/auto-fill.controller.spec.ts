@@ -45,6 +45,7 @@ import { EditorBridgeService, IEditorBridgeService } from '../../../services/edi
 import { ISelectionRenderService, SelectionRenderService } from '../../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { RefillCommand } from '../refill.command';
+import { SheetRenderController } from '../../../controllers/sheet-render.controller';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
@@ -258,7 +259,6 @@ describe('Test auto fill rules in controller', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let autoFillController: AutoFillRenderController;
     let themeService: ThemeService;
     let getValues: (
         startRow: number,
@@ -283,7 +283,7 @@ describe('Test auto fill rules in controller', () => {
             [IEditorService, { useClass: EditorService }],
             [IRenderManagerService, { useClass: RenderManagerService }],
             [SheetSkeletonManagerService],
-            [AutoFillRenderController],
+            [SheetRenderController],
         ]);
         univer = testBed.univer;
         get = testBed.get;
@@ -291,7 +291,9 @@ describe('Test auto fill rules in controller', () => {
         commandService = get(ICommandService);
         themeService = get(ThemeService);
         themeService.setTheme(theme);
-        autoFillController = get(AutoFillRenderController);
+        const renderManagerService = get(IRenderManagerService);
+        renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, AutoFillRenderController);
+
         selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
@@ -334,6 +336,8 @@ describe('Test auto fill rules in controller', () => {
         describe('auto fill the numbers', async () => {
             it('correct situation', async () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const renderManagerService = get(IRenderManagerService);
+                const autoFillController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
                 if (!workbook) throw new Error('This is an error');
                 // test number
                 (autoFillController as any)._triggerAutoFill(
@@ -375,6 +379,8 @@ describe('Test auto fill rules in controller', () => {
         describe('auto fill the extend numbers', async () => {
             it('correct situation', async () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const renderManagerService = get(IRenderManagerService);
+                const autoFillController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
                 if (!workbook) throw new Error('This is an error');
                 // test extend number
                 (autoFillController as any)._triggerAutoFill(
@@ -399,6 +405,8 @@ describe('Test auto fill rules in controller', () => {
         describe('auto fill the chinese numbers', async () => {
             it('correct situation', async () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const renderManagerService = get(IRenderManagerService);
+                const autoFillController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
                 if (!workbook) throw new Error('This is an error');
                 // test chinese number
                 (autoFillController as any)._triggerAutoFill(
@@ -423,6 +431,8 @@ describe('Test auto fill rules in controller', () => {
         describe('auto fill the chinese week', async () => {
             it('correct situation', async () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const renderManagerService = get(IRenderManagerService);
+                const autoFillController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
                 if (!workbook) throw new Error('This is an error');
 
                 // test chinese week
@@ -448,6 +458,8 @@ describe('Test auto fill rules in controller', () => {
         describe('auto fill the loop series', async () => {
             it('correct situation', async () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const renderManagerService = get(IRenderManagerService);
+                const autoFillController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
                 if (!workbook) throw new Error('This is an error');
                 // test loop series
                 (autoFillController as any)._triggerAutoFill(
@@ -472,6 +484,8 @@ describe('Test auto fill rules in controller', () => {
         describe('auto fill the other string', async () => {
             it('correct situation', async () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const renderManagerService = get(IRenderManagerService);
+                const autoFillController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
                 if (!workbook) throw new Error('This is an error');
                 // test other string
                 (autoFillController as any)._triggerAutoFill(
@@ -497,6 +511,8 @@ describe('Test auto fill rules in controller', () => {
             it('correct situation', async () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
+                const renderManagerService = get(IRenderManagerService);
+                const autoFillController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
                 // test mixed mode
                 (autoFillController as any)._triggerAutoFill(
                     {
@@ -558,6 +574,9 @@ describe('Test auto fill rules in controller', () => {
                     },
                 }]);
 
+                const renderManagerService = get(IRenderManagerService);
+                const autoFillController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
+
                 (autoFillController as any)._triggerAutoFill(
                     {
                         startRow: 0,
@@ -609,6 +628,9 @@ describe('Test auto fill rules in controller', () => {
                     },
                 }]);
 
+
+                const renderManagerService = get(IRenderManagerService);
+                const autoFillController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
                 (autoFillController as any)._triggerAutoFill(
                     {
                         startRow: 0,
@@ -638,6 +660,9 @@ describe('Test auto fill rules in controller', () => {
         it('correct situation', async () => {
             const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             if (!workbook) throw new Error('This is an error');
+
+            const renderManagerService = get(IRenderManagerService);
+            const autoFillController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
             // test other string
             (autoFillController as any)._handleDbClickFill({
                 startRow: 10,
@@ -666,6 +691,9 @@ describe('Test auto fill rules in controller', () => {
         it('correct situation', async () => {
             const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             if (!workbook) throw new Error('This is an error');
+            const renderManagerService = get(IRenderManagerService);
+            const autoFillController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
+
             // test other string
             (autoFillController as any)._triggerAutoFill(
                 {
@@ -698,6 +726,8 @@ describe('Test auto fill rules in controller', () => {
         it('correct situation', async () => {
             const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             if (!workbook) throw new Error('This is an error');
+            const renderManagerService = get(IRenderManagerService);
+            const autoFillController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
             // equal ratio
             (autoFillController as any)._triggerAutoFill(
                 {
@@ -746,6 +776,8 @@ describe('Test auto fill rules in controller', () => {
         it('correct situation', async () => {
             const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             if (!workbook) throw new Error('This is an error');
+            const renderManagerService = get(IRenderManagerService);
+            const autoFillController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
             // equal ratio
             (autoFillController as any)._triggerAutoFill(
                 {
@@ -813,6 +845,9 @@ describe('Test auto fill rules in controller', () => {
         it('correct situation', async () => {
             const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             if (!workbook) throw new Error('This is an error');
+            const renderManagerService = get(IRenderManagerService);
+            const autoFillController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
+
             // test right
             (autoFillController as any)._triggerAutoFill(
                 {
@@ -830,6 +865,8 @@ describe('Test auto fill rules in controller', () => {
             );
             expect(workbook.getSheetBySheetId('sheet1')?.getCell(16, 3)?.v).toBe(3);
             expect(workbook.getSheetBySheetId('sheet1')?.getCell(16, 4)?.v).toBe(4);
+
+
             // test left
             (autoFillController as any)._triggerAutoFill(
                 {

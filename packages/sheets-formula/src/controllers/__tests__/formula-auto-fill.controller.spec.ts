@@ -22,6 +22,7 @@ import {
     RedoCommand,
     ThemeService,
     UndoCommand,
+    UniverInstanceType,
 } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
@@ -38,11 +39,14 @@ import {
     IAutoFillService,
     ISelectionRenderService,
     SelectionRenderService,
+    SheetRenderController,
+    SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/ui';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { FormulaAutoFillController } from '../formula-auto-fill.controller';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -66,7 +70,9 @@ describe('Test auto fill with formula', () => {
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
             [ISelectionRenderService, { useClass: SelectionRenderService }],
-            [AutoFillRenderController],
+            [IRenderManagerService, { useClass: RenderManagerService }],
+            [SheetSkeletonManagerService],
+            [SheetRenderController],
             [IAutoFillService, { useClass: AutoFillService }],
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
@@ -78,7 +84,10 @@ describe('Test auto fill with formula', () => {
         themeService = get(ThemeService);
         themeService.setTheme(theme);
 
-        autoFilterRenderController = get(AutoFillRenderController);
+        const renderManagerService = get(IRenderManagerService);
+        renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, AutoFillRenderController);
+
+        autoFilterRenderController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(AddWorksheetMergeMutation);

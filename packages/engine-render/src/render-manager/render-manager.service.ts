@@ -243,7 +243,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     }
 }
 
-export const IRenderManagerService = createIdentifier<RenderManagerService>('engine-render.render-manager.service');
+export const IRenderManagerService = createIdentifier<IRenderManagerService>('engine-render.render-manager.service');
 
 export function isDisposable(thing: unknown): thing is IDisposable {
   // eslint-disable-next-line ts/no-explicit-any

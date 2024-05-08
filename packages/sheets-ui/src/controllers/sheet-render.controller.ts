@@ -45,9 +45,6 @@ interface ISetWorksheetMutationParams {
     subUnitId: string;
 }
 
-/**
- * @todo `RenderUnit`
- */
 @OnLifecycle(LifecycleStages.Ready, SheetRenderController)
 export class SheetRenderController extends RxDisposable {
     private _skeletonChangeMutations = new Set<string>();

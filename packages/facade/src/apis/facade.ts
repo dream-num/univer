@@ -40,6 +40,7 @@ import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FDocument } from './docs/f-document';
 import { FWorkbook } from './sheets/f-workbook';
+import { FSheetHooks } from './sheets/f-sheet-hooks';
 
 export class FUniver {
     /**
@@ -310,6 +311,14 @@ export class FUniver {
         }
 
         return ws;
+    }
+
+    /**
+     * Get sheet hooks
+     * @returns
+     */
+    getSheetHooks() {
+        return this._injector.createInstance(FSheetHooks);
     }
 
     /**

@@ -102,6 +102,7 @@ export interface ITestBed {
     get: Injector['get'];
     sheet: UnitModel<Workbook>;
     univerAPI: FUniver;
+    injector: Injector;
 }
 
 export function createTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
@@ -172,5 +173,6 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
         get: injector.get.bind(injector),
         sheet,
         univerAPI,
+        injector,
     };
 }

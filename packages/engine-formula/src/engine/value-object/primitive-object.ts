@@ -391,14 +391,15 @@ export const NumberValueObjectCache = new FormulaAstLRU<NumberValueObject>(NUMBE
 export class NumberValueObject extends BaseValueObject {
     private _value: number = 0;
 
-    static create(value: number, pattern: string = '') {
-        const key = `${value}-${pattern}`;
+    static create(value: number) {
+        const key = `${value}`;
         const cached = NumberValueObjectCache.get(key);
         if (cached) {
+            // The NumberValueObject may be cached with a number format, but the next time the cache is retrieved, the number format is not required.
+            cached.setPattern('');
             return cached;
         }
         const instance = new NumberValueObject(value);
-        instance.setPattern(pattern);
         NumberValueObjectCache.set(key, instance);
         return instance;
     }

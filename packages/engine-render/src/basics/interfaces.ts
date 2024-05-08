@@ -117,6 +117,7 @@ export interface ISectionBreakConfig extends IDocStyleBase, ISectionBreakBase, I
 export interface IParagraphConfig {
     paragraphIndex: number;
     paragraphAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
+    paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     // headerAndFooterAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>;
     bulletSkeleton?: IDocumentSkeletonBullet;
     // pageContentWidth: number;

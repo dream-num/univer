@@ -154,6 +154,13 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const treeList: FormulaDependencyTree[] = [];
 
+        // Recalculation can only be triggered after clearing the cache. For example, if a calculation error is reported for a non-existent formula and a custom formula is registered later, all formulas need to be calculated forcibly.
+        const forceCalculate = this._currentConfigService.isForceCalculate();
+        if (forceCalculate) {
+            this._dependencyManagerService.reset();
+            FormulaASTCache.clear();
+        }
+
 
         this._registerFormulas(formulaDataKeys, formulaData, unitData, treeList);
 

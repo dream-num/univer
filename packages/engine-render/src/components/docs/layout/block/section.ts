@@ -14,27 +14,45 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { DataStreamTreeNodeType } from '@univerjs/core';
-
-import type { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonPage } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
+import type { ILayoutContext } from '../tools';
+import { createSkeletonPage } from '../model/page';
 import { dealWithBlockError } from './block-error';
 import { dealWidthParagraph } from './paragraph/layout';
 
-export function dealWithSections(
-    bodyModel: DocumentViewModel,
+export function dealWithSection(
+    ctx: ILayoutContext,
+    viewModel: DocumentViewModel,
     sectionNode: DataStreamTreeNode,
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
-    skeletonResourceReference: ISkeletonResourceReference,
-    _preRenderedBlockIdMap?: Map<string, boolean>
+    layoutAnchor: Nullable<number>
 ) {
     const allCurrentSkeletonPages: IDocumentSkeletonPage[] = [];
     const renderedBlockIdMap = new Map<string, boolean>();
 
-    for (const node of sectionNode.children) {
+    let paragraphStartIndex = 0;
+
+    if (layoutAnchor != null) {
+        const { startIndex, endIndex } = sectionNode;
+        if (layoutAnchor >= startIndex && layoutAnchor <= endIndex) {
+            for (let pi = 0; pi < sectionNode.children.length; pi++) {
+                const paragraph = sectionNode.children[pi];
+                if (paragraph.endIndex === layoutAnchor) {
+                    paragraphStartIndex = pi;
+                    break;
+                }
+            }
+        }
+    }
+
+    for (let i = paragraphStartIndex; i < sectionNode.children.length; i++) {
+        const paragraphNode = sectionNode.children[i];
         // const { paragraph, table, tableOfContents, blockType, customBlock, blockId } = block;
         // if (preRenderedBlockIdMap?.get(blockId)) {
         //     continue;
@@ -44,16 +62,25 @@ export function dealWithSections(
         if (allCurrentSkeletonPages.length > 0) {
             currentPageCache = allCurrentSkeletonPages[allCurrentSkeletonPages.length - 1];
         }
-        if (node.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
+
+        if (paragraphNode.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
             // Paragraph 段落
+            if (ctx.paragraphsOpenNewPage.has(paragraphNode.endIndex)) {
+                currentPageCache = createSkeletonPage(
+                    ctx,
+                    sectionBreakConfig,
+                    ctx.skeletonResourceReference,
+                    currentPageCache.pageNumber + 1
+                );
+            }
             skeletonPages = dealWidthParagraph(
-                bodyModel,
-                node,
+                ctx,
+                viewModel,
+                paragraphNode,
                 currentPageCache,
-                sectionBreakConfig,
-                skeletonResourceReference
+                sectionBreakConfig
             );
-        } else if (node.nodeType === DataStreamTreeNodeType.TABLE) {
+        } else if (paragraphNode.nodeType === DataStreamTreeNodeType.TABLE) {
             // Table 表格
         }
 
@@ -64,12 +91,68 @@ export function dealWithSections(
         _pushPage(allCurrentSkeletonPages, skeletonPages);
 
         // renderedBlockIdMap.set(blockId, true);
+        if (ctx.isDirty) {
+            break;
+        }
+    }
+
+    if (ctx.isDirty && ctx.layoutStartPointer.paragraphIndex != null) {
+        // Rollback the skeleton to the layout start point.
+        _rollbackPages(ctx.layoutStartPointer.paragraphIndex, allCurrentSkeletonPages);
     }
 
     return {
         pages: allCurrentSkeletonPages,
         renderedBlockIdMap,
     };
+}
+
+// Roll back pages to the state it was in before the dirty paragraph.
+function _rollbackPages(paragraphIndex: number, allCurrentSkeletonPages: IDocumentSkeletonPage[]) {
+    let findFirstDirtyLine = false;
+    for (let pageIndex = 0; pageIndex < allCurrentSkeletonPages.length; pageIndex++) {
+        const page = allCurrentSkeletonPages[pageIndex];
+
+        for (let sectionIndex = 0; sectionIndex < page.sections.length; sectionIndex++) {
+            const section = page.sections[sectionIndex];
+
+            for (let columnIndex = 0; columnIndex < section.columns.length; columnIndex++) {
+                const column = section.columns[columnIndex];
+
+                for (let lineIndex = 0; lineIndex < column.lines.length; lineIndex++) {
+                    const line = column.lines[lineIndex];
+
+                    if (line.paragraphIndex === paragraphIndex) {
+                        findFirstDirtyLine = true;
+                        column.lines.splice(lineIndex);
+                        break;
+                    }
+                }
+
+                if (findFirstDirtyLine) {
+                    const columnSplitIndex = column.lines.length ? columnIndex + 1 : columnIndex;
+                    const preColumnIndex = columnSplitIndex - 1;
+                    if (preColumnIndex >= 0) {
+                        section.columns[preColumnIndex].isFull = false;
+                    }
+                    section.columns.splice(columnSplitIndex);
+                    break;
+                }
+            }
+
+            if (findFirstDirtyLine) {
+                const sectionSplitIndex = section.columns.length ? sectionIndex + 1 : sectionIndex;
+                page.sections.splice(sectionSplitIndex);
+                break;
+            }
+        }
+
+        if (findFirstDirtyLine) {
+            const pageSplitIndex = page.sections.length ? pageIndex + 1 : pageIndex;
+            allCurrentSkeletonPages.splice(pageSplitIndex);
+            break;
+        }
+    }
 }
 
 function _pushPage(allCurrentSkeletonPages: IDocumentSkeletonPage[], blockSkeletonPages: IDocumentSkeletonPage[]) {

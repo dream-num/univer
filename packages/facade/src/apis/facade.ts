@@ -19,6 +19,7 @@ import type { CommandListener, DocumentDataModel, IDocumentData, IExecutionOptio
     Workbook } from '@univerjs/core';
 import {
     BorderStyleTypes,
+    debounce,
     ICommandService,
     IUniverInstanceService,
     toDisposable,
@@ -28,42 +29,69 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import type { IRegisterFunctionParams, IUnregisterFunctionParams } from '@univerjs/sheets-formula';
+import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
 import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
-import type { IDisposable } from '@wendellhu/redi';
+import type { Dependency, IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Quantity } from '@wendellhu/redi';
 
 import type { RenderComponentType, SheetComponent, SheetExtension } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
+import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FDocument } from './docs/f-document';
 import { FWorkbook } from './sheets/f-workbook';
+import { FSheetHooks } from './sheets/f-sheet-hooks';
 
 export class FUniver {
     /**
-     * Create a FUniver instance, if the injector is not provided, it will create a new Univer instance.
+     * Get dependencies for FUniver, you can override newAPI to add more dependencies.
+     * @param injector
+     * @param derivedDependencies
+     * @returns
      */
-    static newAPI(wrapped: Univer | Injector): FUniver {
-        const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
+    protected static getDependencies(injector: Injector, derivedDependencies?: []): Dependency[] {
+        const dependencies: Dependency[] = derivedDependencies || [];
         // Is unified registration required?
         const socketService = injector.get(ISocketService, Quantity.OPTIONAL);
         if (!socketService) {
-            injector.add([ISocketService, { useClass: WebSocketService }]);
+            dependencies.push([ISocketService, { useClass: WebSocketService }]);
         }
+        return dependencies;
+    }
 
+    /**
+     * Create a FUniver instance, if the injector is not provided, it will create a new Univer instance.
+     * @param wrapped The Univer instance or injector.
+     * @returns FUniver instance.
+     *
+     * @zh 创建一个 FUniver 实例，如果未提供注入器，将创建一个新的 Univer 实例。
+     * @param_zh wrapped Univer 实例或注入器。
+     * @returns_zh FUniver 实例。
+     */
+    static newAPI(wrapped: Univer | Injector): FUniver {
+        const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
+        const dependencies = FUniver.getDependencies(injector);
+        dependencies.forEach((dependency) => injector.add(dependency));
         return injector.createInstance(FUniver);
     }
 
     static BorderStyle = BorderStyleTypes;
     static WrapStrategy = WrapStrategy;
 
+    /**
+     * registerFunction may be executed multiple times, triggering multiple formula forced refreshes
+     */
+    private _debouncedFormulaCalculation: () => void;
+
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(Injector) protected readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @ISocketService private readonly _ws: ISocketService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
-    ) {}
+    ) {
+        this._initialize();
+    }
 
     /**
      * Create a new spreadsheet and get the API handler of that spreadsheet.
@@ -143,7 +171,7 @@ export class FUniver {
      * Register a function to the spreadsheet.
      * @param config
      */
-    registerFunction(config: IRegisterFunctionParams) {
+    registerFunction(config: IRegisterFunctionParams): IDisposable {
         let registerFunctionService = this._injector.get(IRegisterFunctionService);
 
         if (!registerFunctionService) {
@@ -151,24 +179,14 @@ export class FUniver {
             registerFunctionService = this._injector.get(IRegisterFunctionService);
         }
 
-        registerFunctionService.registerFunctions(config);
-    }
+        const functionsDisposable = registerFunctionService.registerFunctions(config);
 
-    /**
-     * Unregister a function from the spreadsheet.
-     *
-     * TODO@Dushusir: remove unregister,use IDisposable
-     * @param config
-     */
-    unregisterFunction(config: IUnregisterFunctionParams) {
-        let registerFunctionService = this._injector.get(IRegisterFunctionService);
+        // When the initialization workbook data already contains custom formulas, and then register the formula, you need to trigger a forced calculation to refresh the calculation results
+        this._debouncedFormulaCalculation();
 
-        if (!registerFunctionService) {
-            this._injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
-            registerFunctionService = this._injector.get(IRegisterFunctionService);
-        }
-
-        registerFunctionService.unregisterFunctions(config);
+        return toDisposable(() => {
+            functionsDisposable.dispose();
+        });
     }
 
     /**
@@ -296,6 +314,14 @@ export class FUniver {
     }
 
     /**
+     * Get sheet hooks
+     * @returns
+     */
+    getSheetHooks() {
+        return this._injector.createInstance(FSheetHooks);
+    }
+
+    /**
      * Get sheet render component from render by unitId and view key.
      * @param unitId
      * @returns
@@ -316,6 +342,21 @@ export class FUniver {
         }
 
         return renderComponent;
+    }
+
+    private _initialize(): void {
+        this._debouncedFormulaCalculation = debounce(() => {
+            this._commandService.executeCommand(
+                SetFormulaCalculationStartMutation.id,
+                {
+                    commands: [],
+                    forceCalculation: true,
+                },
+                {
+                    onlyLocal: true,
+                }
+            );
+        }, 10);
     }
 
     // @endregion

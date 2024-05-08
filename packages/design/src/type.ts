@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
-export class Selection {}
+export interface IDisposable {
+    dispose(): void;
+}

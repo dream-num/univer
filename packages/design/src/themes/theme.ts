@@ -38,18 +38,42 @@ function convertHexToRgb(input: string): string {
 }
 
 class Theme {
+    private static _instance: Theme | null = null;
     private _styleSheet: HTMLStyleElement | null = null;
-
     private _themeRootName = styles.theme;
 
-    constructor() {
+    private constructor() {
         if (!canUseDom()) return;
 
         const $style = document.createElement('style');
         $style.id = this._themeRootName;
-        document.head.appendChild($style);
 
-        this._styleSheet = $style;
+        // Determine the mount point for the stylesheet
+        let mountPoint: HTMLElement | ShadowRoot | null = null;
+        const currentRoot = document.getRootNode();
+
+        if (currentRoot === document) {
+            // Normal DOM environment
+            mountPoint = document.head;
+        } else if (currentRoot instanceof ShadowRoot) {
+            // Shadow DOM environment
+            mountPoint = currentRoot;
+        } else {
+            // Inside an iframe or other environment
+            mountPoint = (currentRoot as Document).head;
+        }
+
+        if (mountPoint) {
+            mountPoint.appendChild($style);
+            this._styleSheet = $style;
+        }
+    }
+
+    static getInstance(): Theme {
+        if (!Theme._instance) {
+            Theme._instance = new Theme();
+        }
+        return Theme._instance;
     }
 
     setTheme(root: HTMLElement, theme: Record<string, string>) {
@@ -69,4 +93,4 @@ class Theme {
     }
 }
 
-export const themeInstance = new Theme();
+export const themeInstance = Theme.getInstance();

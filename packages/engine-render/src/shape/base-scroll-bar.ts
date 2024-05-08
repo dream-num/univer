@@ -177,6 +177,12 @@ export class BaseScrollBar extends Disposable {
         this.verticalBarRect?.dispose();
         this.verticalThumbRect?.dispose();
         this.placeholderBarRect?.dispose();
+
+        this.horizonBarRect = null;
+        this.horizonThumbRect = null;
+        this.verticalBarRect = null;
+        this.verticalThumbRect = null;
+        this.placeholderBarRect = null;
     }
 
     hasHorizonThumb() {

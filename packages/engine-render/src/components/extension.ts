@@ -61,6 +61,11 @@ export class ComponentExtension<T, U, V> {
     protected _getScale(parentScale: IScale) {
         return getScale(parentScale);
     }
+
+    dispose() {
+        this.extensionOffset = {};
+        this.parent = null;
+    }
 }
 
 export const SpreadsheetExtensionRegistry = Registry.create();

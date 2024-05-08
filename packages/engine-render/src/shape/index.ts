@@ -23,6 +23,5 @@ export * from './rect';
 export * from './regular-polygon';
 export * from './rich-text';
 export * from './scroll-bar';
-export * from './selection';
 export * from './shape';
 export * from './checkbox';

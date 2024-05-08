@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-import type { ISectionBreak, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
-import {
-    ColumnSeparatorType,
-    GridType,
-    HorizontalAlign,
-    PageOrientType,
-    PRESET_LIST_TYPE,
-    SectionType,
-    VerticalAlign,
-    WrapStrategy,
-} from '@univerjs/core';
-
+import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
+import { GridType, PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonGlyph,
@@ -33,22 +23,16 @@ import type {
     ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
 import { GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
-import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch, ISectionBreakConfig } from '../../../basics/interfaces';
+import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch } from '../../../basics/interfaces';
 import type { IViewportBound, Vector2 } from '../../../basics/vector2';
 import { Skeleton } from '../../skeleton';
 import { Liquid } from '../liquid';
 import type { DocumentViewModel } from '../view-model/document-view-model';
-import { getLastPage, updateBlockIndex } from './tools';
+import type { ILayoutContext } from './tools';
+import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, setPageParent, updateBlockIndex } from './tools';
 import { createSkeletonSection } from './model/section';
-import { dealWithSections } from './block/section';
+import { dealWithSection } from './block/section';
 import { createSkeletonPage } from './model/page';
-
-const DEFAULT_SECTION_BREAK: ISectionBreak = {
-    columnProperties: [],
-    columnSeparatorType: ColumnSeparatorType.NONE,
-    sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
-    startIndex: 0,
-};
 
 export enum DocumentSkeletonState {
     PENDING = 'pending',
@@ -57,12 +41,28 @@ export enum DocumentSkeletonState {
     INVALID = 'invalid',
 }
 
+function resetContext(ctx: ILayoutContext) {
+    ctx.isDirty = false;
+    ctx.skeleton.drawingAnchor?.clear();
+}
+
+function removeDupPages(ctx: ILayoutContext) {
+    const hash = new Set();
+
+    ctx.skeleton.pages = ctx.skeleton.pages.filter((page) => {
+        const hasPage = hash.has(page);
+        hash.add(page);
+
+        return !hasPage;
+    });
+}
+
 export class DocumentSkeleton extends Skeleton {
     private _skeletonData: Nullable<IDocumentSkeletonCached>;
 
-    private _renderedBlockIdMap = new Map<string, boolean>();
-
     private _findLiquid: Liquid = new Liquid();
+
+    private _iteratorCount = 0;
 
     constructor(
         private _docViewModel: DocumentViewModel,
@@ -75,6 +75,13 @@ export class DocumentSkeleton extends Skeleton {
         return new DocumentSkeleton(docViewModel, localeService);
     }
 
+    override dispose(): void {
+        super.dispose();
+        this._skeletonData = null;
+        this._findLiquid = null as unknown as Liquid;
+        this._docViewModel.dispose();
+    }
+
     getViewModel() {
         return this._docViewModel;
     }
@@ -85,9 +92,12 @@ export class DocumentSkeleton extends Skeleton {
             return;
         }
 
+        const ctx = this._prepareLayoutContext();
+
         // const start = +new Date();
-        this._skeletonData = this._createSkeleton(bounds);
+        this._skeletonData = this._createSkeleton(ctx, bounds);
         // console.log('skeleton calculate cost', +new Date() - start);
+        // console.log(this._skeletonData);
     }
 
     getSkeletonData() {
@@ -446,6 +456,67 @@ export class DocumentSkeleton extends Skeleton {
         this._findLiquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
     }
 
+    private _prepareLayoutContext(): ILayoutContext {
+        const viewModel = this.getViewModel();
+        const dataModel = viewModel.getDataModel();
+        const { headerTreeMap, footerTreeMap } = viewModel;
+        const { documentStyle, drawings, lists: customLists = {} } = dataModel;
+        const lists = {
+            ...PRESET_LIST_TYPE,
+            ...customLists,
+        };
+        const {
+            charSpace = 0, // charSpace
+            linePitch = 15.6, // linePitch pt
+            gridType = GridType.LINES, // gridType
+            paragraphLineGapDefault = 0,
+            defaultTabStop = 10.5,
+            textStyle = {},
+        } = documentStyle;
+
+        const docsConfig: IDocsConfig = {
+            headerTreeMap,
+            footerTreeMap,
+            lists,
+            drawings,
+
+            charSpace,
+            linePitch,
+            gridType,
+            localeService: this._localService,
+            paragraphLineGapDefault,
+            defaultTabStop,
+            documentTextStyle: textStyle,
+        };
+
+        const skeleton = getNullSkeleton();
+
+        const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeleton;
+
+        const skeletonResourceReference: ISkeletonResourceReference = {
+            skeHeaders,
+            skeFooters,
+            skeListLevel,
+            drawingAnchor,
+        };
+
+        return {
+            viewModel,
+            dataModel,
+            skeleton,
+            skeletonResourceReference,
+            docsConfig,
+            layoutStartPointer: {
+                paragraphIndex: null,
+            },
+            isDirty: false,
+            drawingsCache: new Map(),
+            paragraphConfigCache: new Map(),
+            sectionBreakConfigCache: new Map(),
+            paragraphsOpenNewPage: new Set(),
+        };
+    }
+
     /**
      * \v COLUMN_BREAK
      * \f PAGE_BREAK
@@ -474,167 +545,50 @@ export class DocumentSkeleton extends Skeleton {
      * @returns view model: skeleton
      */
 
-    private _createSkeleton(_bounds?: IViewportBound) {
-        // 每一个布局
-        const DEFAULT_PAGE_SIZE = { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY };
-        const viewModel = this.getViewModel();
-        const { headerTreeMap, footerTreeMap } = viewModel;
-        const { documentStyle, drawings, lists: customLists = {} } = viewModel.getDataModel();
-        const lists = {
-            ...PRESET_LIST_TYPE,
-            ...customLists,
-        };
-        const {
-            pageNumberStart: global_pageNumberStart = 1, // pageNumberStart
-            pageSize: global_pageSize = DEFAULT_PAGE_SIZE,
-            pageOrient: global_pageOrient = PageOrientType.PORTRAIT,
-            defaultHeaderId: global_defaultHeaderId,
-            defaultFooterId: global_defaultFooterId,
-            evenPageHeaderId: global_evenPageHeaderId,
-            evenPageFooterId: global_evenPageFooterId,
-            firstPageHeaderId: global_firstPageHeaderId,
-            firstPageFooterId: global_firstPageFooterId,
-            useFirstPageHeaderFooter: global_useFirstPageHeaderFooter,
-            useEvenPageHeaderFooter: global_useEvenPageHeaderFooter,
+    private _createSkeleton(ctx: ILayoutContext, _bounds?: IViewportBound): IDocumentSkeletonCached {
+        // console.log('createSkeleton: iterate ', this._iteratorCount, 'times');
+        const { viewModel, skeleton, skeletonResourceReference } = ctx;
 
-            marginTop: global_marginTop = 0,
-            marginBottom: global_marginBottom = 0,
-            marginRight: global_marginRight = 0,
-            marginLeft: global_marginLeft = 0,
-            marginHeader: global_marginHeader = 0,
-            marginFooter: global_marginFooter = 0,
+        const allSkeletonPages = skeleton.pages;
 
-            charSpace = 0, // charSpace
-            linePitch = 15.6, // linePitch pt
-            gridType = GridType.LINES, // gridType
-            paragraphLineGapDefault = 0,
-            defaultTabStop = 10.5,
-            textStyle = {},
-            renderConfig: global_renderConfig = {
-                horizontalAlign: HorizontalAlign.LEFT,
-                verticalAlign: VerticalAlign.TOP,
-                centerAngle: 0,
-                vertexAngle: 0,
-                wrapStrategy: WrapStrategy.UNSPECIFIED,
-            },
-        } = documentStyle;
+        viewModel.resetCache();
 
-        const docsConfig: IDocsConfig = {
-            headerTreeMap,
-            footerTreeMap,
-            lists,
-            drawings,
+        let startSectionIndex = 0;
 
-            charSpace,
-            linePitch,
-            gridType,
-            localeService: this._localService,
-            paragraphLineGapDefault,
-            defaultTabStop,
-            documentTextStyle: textStyle,
-        };
+        const layoutAnchor = ctx.layoutStartPointer.paragraphIndex;
 
-        const skeleton = this._getNullSke();
+        // Reset layoutStartPointer.
+        ctx.layoutStartPointer.paragraphIndex = null;
 
-        const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeleton;
-
-        const skeletonResourceReference: ISkeletonResourceReference = {
-            skeHeaders,
-            skeFooters,
-            skeListLevel,
-            drawingAnchor,
-        };
-
-        const allSkeletonPages: IDocumentSkeletonPage[] = [];
-
-        skeleton.pages = allSkeletonPages;
-
-        const bodyModel = this.getViewModel();
-
-        bodyModel.resetCache();
-
-        for (let i = 0, len = bodyModel.children.length; i < len; i++) {
-            const sectionNode = bodyModel.children[i];
-            const sectionBreak = bodyModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
-            const {
-                pageNumberStart = global_pageNumberStart,
-                pageSize = global_pageSize,
-                pageOrient = global_pageOrient,
-                marginTop = global_marginTop,
-                marginBottom = global_marginBottom,
-                marginRight = global_marginRight,
-                marginLeft = global_marginLeft,
-                marginHeader = global_marginHeader,
-                marginFooter = global_marginFooter,
-
-                defaultHeaderId = global_defaultHeaderId,
-                defaultFooterId = global_defaultFooterId,
-                evenPageHeaderId = global_evenPageHeaderId,
-                evenPageFooterId = global_evenPageFooterId,
-                firstPageHeaderId = global_firstPageHeaderId,
-                firstPageFooterId = global_firstPageFooterId,
-                useFirstPageHeaderFooter = global_useFirstPageHeaderFooter,
-                useEvenPageHeaderFooter = global_useEvenPageHeaderFooter,
-
-                columnProperties = [],
-                columnSeparatorType = ColumnSeparatorType.NONE,
-                contentDirection,
-                sectionType,
-                textDirection,
-                renderConfig = global_renderConfig,
-            } = sectionBreak;
-
-            const sectionNodeNext = bodyModel.children[i + 1];
-            const sectionTypeNext = bodyModel.getSectionBreak(sectionNodeNext?.endIndex)?.sectionType;
-
-            const headerIds = { defaultHeaderId, evenPageHeaderId, firstPageHeaderId };
-            const footerIds = { defaultFooterId, evenPageFooterId, firstPageFooterId };
-
-            if (pageSize.width === null) {
-                pageSize.width = Number.POSITIVE_INFINITY;
+        if (layoutAnchor != null) {
+            for (let sectionIndex = 0; sectionIndex < viewModel.children.length; sectionIndex++) {
+                const sectionNode = viewModel.children[sectionIndex];
+                const { endIndex, startIndex } = sectionNode;
+                if (layoutAnchor >= startIndex && layoutAnchor <= endIndex) {
+                    startSectionIndex = sectionIndex;
+                    break;
+                }
             }
+        }
 
-            if (pageSize.height === null) {
-                pageSize.height = Number.POSITIVE_INFINITY;
-            }
+        // Loop the sections with the start section index.
+        for (let i = startSectionIndex, len = viewModel.children.length; i < len; i++) {
+            const sectionNode = viewModel.children[i];
+            const sectionBreakConfig = prepareSectionBreakConfig(ctx, i);
+            const { sectionType, columnProperties, columnSeparatorType, sectionTypeNext } = sectionBreakConfig;
 
-            const sectionBreakConfig: ISectionBreakConfig = {
-                pageNumberStart,
-                pageSize,
-                pageOrient,
-                marginTop,
-                marginBottom,
-                marginRight,
-                marginLeft,
-                marginHeader,
-                marginFooter,
-
-                headerIds,
-                footerIds,
-
-                useFirstPageHeaderFooter,
-                useEvenPageHeaderFooter,
-
-                columnProperties,
-                columnSeparatorType,
-                contentDirection,
-                sectionType,
-                sectionTypeNext,
-                textDirection,
-                renderConfig,
-
-                ...docsConfig,
-            };
-
-            let curSkeletonPage: IDocumentSkeletonPage = getLastPage(allSkeletonPages);
+            let curSkeletonPage = getLastPage(allSkeletonPages);
             let isContinuous = false;
+
+            ctx.sectionBreakConfigCache.set(sectionNode.endIndex, sectionBreakConfig);
 
             if (sectionType === SectionType.CONTINUOUS) {
                 updateBlockIndex(allSkeletonPages);
-                this._addNewSectionByContinuous(curSkeletonPage, columnProperties, columnSeparatorType);
+                this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
                 isContinuous = true;
-            } else {
+            } else if (layoutAnchor == null || curSkeletonPage == null) {
                 curSkeletonPage = createSkeletonPage(
+                    ctx,
                     sectionBreakConfig,
                     skeletonResourceReference,
                     curSkeletonPage?.pageNumber
@@ -642,44 +596,47 @@ export class DocumentSkeleton extends Skeleton {
             }
 
             // 计算页内布局，block 结构
-            const blockInfo = dealWithSections(
-                bodyModel,
+            const { pages } = dealWithSection(
+                ctx,
+                viewModel,
                 sectionNode,
                 curSkeletonPage,
                 sectionBreakConfig,
-                skeletonResourceReference,
-                this._renderedBlockIdMap
+                layoutAnchor
             );
 
             // todo: 当本节有多个列，且下一节为连续节类型的时候，需要按照列数分割，重新计算 lines
-            if (sectionTypeNext === SectionType.CONTINUOUS && columnProperties.length > 0) {
+            if (sectionTypeNext === SectionType.CONTINUOUS && columnProperties!.length > 0) {
                 // TODO
             }
-
-            const { pages } = blockInfo;
-
-            // renderedBlockIdMap.forEach((value, blockId) => {
-            //     this._renderedBlockIdMap.set(blockId, value);
-            // });
 
             if (isContinuous) {
                 pages.splice(0, 1);
             }
 
             allSkeletonPages.push(...pages);
+
+            // The page needs to be reflowed due to floating objects.
+            if (ctx.isDirty) {
+                break;
+            }
         }
 
-        // 计算页和节的位置信息
-        updateBlockIndex(allSkeletonPages);
+        // TODO: 10 is too small?
+        if (ctx.isDirty && this._iteratorCount < 10) {
+            this._iteratorCount++;
 
-        this._setPageParent(allSkeletonPages, skeleton);
+            resetContext(ctx);
+            return this._createSkeleton(ctx, _bounds);
+        } else {
+            // 计算页和节的位置信息
+            this._iteratorCount = 0;
+            removeDupPages(ctx);
+            updateBlockIndex(skeleton.pages);
 
-        return skeleton;
-    }
-
-    private _setPageParent(pages: IDocumentSkeletonPage[], parent: IDocumentSkeletonCached) {
-        for (const page of pages) {
-            page.parent = parent;
+            setPageParent(skeleton.pages, skeleton);
+            // console.log(skeleton);
+            return skeleton;
         }
     }
 
@@ -712,19 +669,6 @@ export class DocumentSkeleton extends Skeleton {
         );
         newSection.parent = curSkeletonPage;
         sections.push(newSection);
-    }
-
-    private _getNullSke(): IDocumentSkeletonCached {
-        return {
-            pages: [],
-            left: 0,
-            top: 0,
-            st: 0,
-            skeHeaders: new Map(),
-            skeFooters: new Map(),
-            skeListLevel: new Map(),
-            drawingAnchor: new Map(),
-        };
     }
 
     private _findNodeIterator(charIndex: number) {

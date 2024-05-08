@@ -64,7 +64,7 @@ export function createSkeletonLine(
     columnWidth: number,
     lineIndex: number = 0,
     isParagraphStart: boolean = false,
-    affectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
+    pageSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map(),
     headersDrawings?: Map<string, IDocumentSkeletonDrawing>,
     footersDrawings?: Map<string, IDocumentSkeletonDrawing>
 ): IDocumentSkeletonLine {
@@ -91,6 +91,8 @@ export function createSkeletonLine(
     lineSke.paddingBottom = paddingBottom;
     lineSke.marginTop = marginTop; // marginTop is initialized when it is created, and marginBottom is not calculated when it is created, it will be determined according to the situation of the next paragraph
     lineSke.spaceBelowApply = spaceBelowApply;
+
+    const affectSkeDrawings = new Map(Array.from(pageSkeDrawings).filter(([_, drawing]) => drawing.drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE));
 
     lineSke.divides = _calculateDividesByDrawings(
         lineHeight,
@@ -163,6 +165,7 @@ function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHe
         if (newAtop + newHeight < lineTop || newAtop > lineHeight + lineTop) {
             return;
         }
+
         return newAtop + height;
     }
     // 旋转的情况，要考虑行首位与drawing旋转后得到的最大区域
@@ -232,6 +235,17 @@ export function setLineMarginBottom(line: IDocumentSkeletonLine, marginBottom: n
 
 // 获得文字内容后的行信息计算
 export function updateDivideInLine(line: IDocumentSkeletonLine) {}
+
+export function collisionDetection(
+    drawing: IDocumentSkeletonDrawing,
+    lineHeight: number,
+    lineTop: number,
+    columnWidth: number
+) {
+    const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
+    // TODO: handle angle is not 0.
+    return !!__getSplitWidthNoAngle(aTop, height, aLeft, width, lineTop, lineHeight, columnWidth, drawingOrigin);
+}
 
 function _calculateSplit(
     drawing: IDocumentSkeletonDrawing,
@@ -309,6 +323,7 @@ function __getBoundingBox(angle: number, left: number, width: number, top: numbe
     const rt = new Vector2(left + width, top);
     const rb = new Vector2(left + width, top + height);
     const boundingBox = transform.makeBoundingBoxFromPoints([lt, lb, rt, rb]); // 返回旋转后的点集合以及矩形选区
+
     return boundingBox;
 }
 
@@ -490,6 +505,7 @@ export function createAndUpdateBlockAnchor(
     if (!drawingAnchor) {
         return;
     }
+
     if (drawingAnchor.has(paragraphIndex)) {
         const anchor = drawingAnchor.get(paragraphIndex);
         anchor?.elements.push(line);

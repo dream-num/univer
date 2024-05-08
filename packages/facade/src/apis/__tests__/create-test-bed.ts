@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Workbook } from '@univerjs/core';
+import type { IWorkbookData, UnitModel, Workbook } from '@univerjs/core';
 import {
     ILogService,
     IUniverInstanceService,
@@ -26,7 +26,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { FunctionService, IFunctionService } from '@univerjs/engine-formula';
+import { FormulaDataModel, FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import { SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
 import {
@@ -56,7 +56,30 @@ function getTestWorkbookDataDemo(): IWorkbookData {
             sheet1: {
                 id: 'sheet1',
                 name: 'sheet1',
-                cellData: {},
+                cellData: {
+                    0: {
+                        3: {
+                            f: '=SUM(A1)',
+                            si: '3e4r5t',
+                        },
+                    },
+                    1: {
+                        3: {
+                            f: '=SUM(A2)',
+                            si: 'OSPtzm',
+                        },
+                    },
+                    2: {
+                        3: {
+                            si: 'OSPtzm',
+                        },
+                    },
+                    3: {
+                        3: {
+                            si: 'OSPtzm',
+                        },
+                    },
+                },
                 rowCount: 100,
                 columnCount: 100,
             },
@@ -77,8 +100,9 @@ function getTestWorkbookDataDemo(): IWorkbookData {
 export interface ITestBed {
     univer: Univer;
     get: Injector['get'];
-    sheet: Workbook;
+    sheet: UnitModel<Workbook>;
     univerAPI: FUniver;
+    injector: Injector;
 }
 
 export function createTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
@@ -117,6 +141,8 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
             injector.add([IShortcutService, { useClass: DesktopShortcutService }]);
             injector.add([IPlatformService, { useClass: DesktopPlatformService }]);
             injector.add([SheetSkeletonManagerService]);
+            injector.add([FormulaDataModel]);
+            injector.add([LexerTreeBuilder]);
             SheetsConditionalFormattingPlugin.dependencyList.forEach((d) => {
                 injector.add(d);
             });
@@ -132,7 +158,7 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
     });
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookData || getTestWorkbookDataDemo());
+    const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData || getTestWorkbookDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');
@@ -147,5 +173,6 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
         get: injector.get.bind(injector),
         sheet,
         univerAPI,
+        injector,
     };
 }

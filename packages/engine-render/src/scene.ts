@@ -661,19 +661,26 @@ export class Scene extends ThinScene {
     }
 
     override dispose() {
-        this.getLayers().forEach((layer) => {
+        let layers = [...this.getLayers()];
+        layers.forEach((layer) => {
             layer.dispose();
         });
+        layers = [];
 
-        this.getViewports().forEach((viewport) => {
+        let viewports = [...this.getViewports()];
+        viewports.forEach((viewport) => {
             viewport.dispose();
         });
+        viewports = [];
 
         this.clearLayer();
         this.clearViewports();
         this.detachControl();
         this.onTransformChangeObservable?.clear();
+        this._inputManager?.dispose();
+        this._inputManager = null;
         this._transformer?.dispose();
+        this._transformer = null;
         this.onPointerDownObserver.clear();
         this.onPointerMoveObserver.clear();
         this.onPointerUpObserver.clear();
@@ -684,6 +691,7 @@ export class Scene extends ThinScene {
         this.onMouseWheelObserver.clear();
         this.onKeyDownObservable.clear();
         this.onKeyUpObservable.clear();
+        this._addObject$.complete();
         super.dispose();
     }
 

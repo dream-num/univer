@@ -85,6 +85,14 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
     protected _draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         /* abstract */
     }
+
+    /**
+     * TODO: DR-Univer, fix as unknown as
+     */
+    override dispose() {
+        super.dispose();
+        this._skeleton = null as unknown as SpreadsheetSkeleton;
+    }
 }
 
 export class SpreadsheetHeader extends SheetComponent {

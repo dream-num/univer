@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, sortRules, toDisposable } from '@univerjs/core';
+import { Disposable, requestImmediateMacroTask, sortRules, toDisposable } from '@univerjs/core';
 
 import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
@@ -29,6 +29,8 @@ export class Layer extends Disposable {
     private _cacheCanvas: Nullable<Canvas>;
 
     protected _dirty: boolean = true;
+
+    private _debounceDirtyFunc: Nullable<() => void>;
 
     constructor(
         private _scene: ThinScene,
@@ -180,6 +182,17 @@ export class Layer extends Disposable {
         return this;
     }
 
+    makeDirtyWithDebounce(state: boolean = true) {
+        if (this._debounceDirtyFunc) {
+            this._debounceDirtyFunc();
+        }
+        // To prevent multiple refreshes caused by setting values for multiple object instances at once.
+        this._debounceDirtyFunc = requestImmediateMacroTask(() => {
+            this.makeDirty(state);
+            this._debounceDirtyFunc = null;
+        });
+    }
+
     isDirty(): boolean {
         return this._dirty;
     }
@@ -259,12 +272,15 @@ export class Layer extends Disposable {
 
     override dispose() {
         super.dispose();
-
-        this.getObjects().forEach((o) => {
+        const objects = [...this.getObjects()];
+        objects.forEach((o) => {
             o.dispose();
         });
         this.clear();
 
+        this._debounceDirtyFunc = null;
+
         this._cacheCanvas?.dispose();
+        this._cacheCanvas = null;
     }
 }

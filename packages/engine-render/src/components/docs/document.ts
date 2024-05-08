@@ -22,7 +22,7 @@ import { CellValueType, HorizontalAlign, Observable, VerticalAlign, WrapStrategy
 
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
-import { LineType, PageLayoutType } from '../../basics/i-document-skeleton-cached';
+import { LineType } from '../../basics/i-document-skeleton-cached';
 import { degToRad } from '../../basics/tools';
 import type { Transform } from '../../basics/transform';
 import type { IViewportBound } from '../../basics/vector2';
@@ -33,19 +33,10 @@ import type { IExtensionConfig } from '../extension';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import { Liquid } from './liquid';
+import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
-
-interface IPageMarginLayout {
-    pageMarginLeft: number;
-    pageMarginTop: number;
-    pageLayoutType?: PageLayoutType;
-}
-
-export interface IDocumentsConfig extends IPageMarginLayout {
-    hasEditor?: boolean;
-}
 
 export interface IPageRenderConfig {
     page: IDocumentSkeletonPage;
@@ -80,9 +71,7 @@ export class Documents extends DocComponent {
     // private _textAngleRotateOffset: number = 0;
 
     constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
-        super(oKey, documentSkeleton);
-
-        this.setConfig(config);
+        super(oKey, documentSkeleton, config);
 
         this._drawLiquid = new Liquid();
 
@@ -95,32 +84,18 @@ export class Documents extends DocComponent {
         this.makeDirty(true);
     }
 
-    // get hasEditor() {
-    //     return this._hasEditor;
-    // }
-
     static create(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         return new Documents(oKey, documentSkeleton, config);
     }
 
-    setConfig(config?: IDocumentsConfig) {
-        if (config?.pageMarginLeft != null) {
-            this.pageMarginLeft = config?.pageMarginLeft;
-        } else {
-            this.pageMarginLeft = 17;
-        }
+    override dispose() {
+        super.dispose();
 
-        if (config?.pageMarginTop != null) {
-            this.pageMarginTop = config?.pageMarginTop;
-        } else {
-            this.pageMarginTop = 14;
-        }
-
-        if (config?.pageLayoutType != null) {
-            this.pageLayoutType = config?.pageLayoutType;
-        } else {
-            this.pageLayoutType = PageLayoutType.VERTICAL;
-        }
+        this._skeletonObserver?.dispose();
+        this._skeletonObserver = null;
+        this.onPageRenderObservable.clear();
+        this._drawLiquid = null as unknown as Liquid;
+        this._findLiquid = null as unknown as Liquid;
     }
 
     getOffsetConfig(): IDocumentOffsetConfig {
@@ -192,18 +167,6 @@ export class Documents extends DocComponent {
 
 
     override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
-        const documentSkeleton = this.getSkeleton();
-
-        if (!documentSkeleton) {
-            return;
-        }
-
-        // if (this.isCalculateSkeleton) {
-        //     documentSkeleton.calculate(bounds);
-        // }
-
-        this._drawLiquid.reset();
-
         const skeletonData = this.getSkeleton()?.getSkeletonData();
 
         if (skeletonData == null) {
@@ -275,7 +238,7 @@ export class Documents extends DocComponent {
 
             const finalAngle = vertexAngle - centerAngle;
 
-            if (this._isSkipByDiffBounds(page, pageTop, pageLeft, bounds)) {
+            if (this.isSkipByDiffBounds(page, pageTop, pageLeft, bounds)) {
                 const { x, y } = this._drawLiquid.translatePage(
                     page,
                     this.pageLayoutType,
@@ -590,34 +553,6 @@ export class Documents extends DocComponent {
         DocumentsSpanAndLineExtensionRegistry.getData().forEach((extension) => {
             this.register(extension);
         });
-    }
-
-    private _isSkipByDiffBounds(page: IDocumentSkeletonPage, pageTop: number, pageLeft: number, bounds?: IViewportBound) {
-        if (bounds === null || bounds === undefined) {
-            return false;
-        }
-
-        const { pageWidth, pageHeight, marginBottom, marginTop, marginLeft, marginRight } = page;
-
-        const pageRight = pageLeft + pageWidth + marginLeft + marginRight;
-
-        const pageBottom = pageTop + pageHeight + marginBottom + marginTop;
-
-        const { left, top, right, bottom } = bounds.viewBound;
-
-        if (pageRight < left || pageBottom < top) {
-            return true;
-        }
-
-        if (pageLeft > right && pageWidth !== Number.POSITIVE_INFINITY) {
-            return true;
-        }
-
-        if (pageTop > bottom && pageHeight !== Number.POSITIVE_INFINITY) {
-            return true;
-        }
-
-        return false;
     }
 
     // private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {

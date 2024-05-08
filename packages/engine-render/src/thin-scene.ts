@@ -189,6 +189,18 @@ export abstract class ThinScene extends Disposable {
     getParent(): any {}
 
     override dispose() {
+        this.onTransformChangeObservable.clear();
+        this.onFileLoadedObservable.clear();
+        this.onPointerDownObserver.clear();
+        this.onPointerMoveObserver.clear();
+        this.onPointerUpObserver.clear();
+        this.onPointerEnterObserver.clear();
+        this.onPointerLeaveObserver.clear();
+        this.onDblclickObserver.clear();
+        this.onTripleClickObserver.clear();
+        this.onMouseWheelObserver.clear();
+        this.onKeyDownObservable.clear();
+        this.onKeyUpObservable.clear();
         super.dispose();
     }
 

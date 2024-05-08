@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type { ILayoutContext } from '../../tools';
 import { clearFontCreateConfigCache } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
@@ -24,24 +25,24 @@ import { lineBreaking } from './linebreaking';
 import { lineAdjustment } from './line-adjustment';
 
 export function dealWidthParagraph(
-    bodyModel: DocumentViewModel,
+    ctx: ILayoutContext,
+    viewModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     curPage: IDocumentSkeletonPage,
-    sectionBreakConfig: ISectionBreakConfig,
-    skeletonResourceReference: ISkeletonResourceReference
+    sectionBreakConfig: ISectionBreakConfig
 ): IDocumentSkeletonPage[] {
     clearFontCreateConfigCache();
 
     // Step 1: Text Shaping.
     const { endIndex, content = '' } = paragraphNode;
 
-    const paragraph = bodyModel.getParagraph(endIndex) || { startIndex: 0 };
+    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
 
     const { paragraphStyle = {} } = paragraph;
 
     const shapedTextList = shaping(
         content,
-        bodyModel,
+        viewModel,
         paragraphNode,
         sectionBreakConfig,
         paragraphStyle
@@ -49,12 +50,11 @@ export function dealWidthParagraph(
 
     // Step 2: Line Breaking.
     const allPages = lineBreaking(
+        ctx,
         shapedTextList,
         curPage,
-        bodyModel,
         paragraphNode,
-        sectionBreakConfig,
-        skeletonResourceReference
+        sectionBreakConfig
     );
 
     // Step 3: Line Adjustment.

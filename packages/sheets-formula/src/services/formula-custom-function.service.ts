@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, toDisposable } from '@univerjs/core';
 import type { PrimitiveValueType } from '@univerjs/engine-formula';
 import { RegisterFunctionMutation, UnregisterFunctionMutation } from '@univerjs/engine-formula';
+import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 
 export type IRegisterFunction = (
     ...arg: Array<PrimitiveValueType | PrimitiveValueType[][]>
 ) => PrimitiveValueType | PrimitiveValueType[][];
 
+// [[Function, FunctionName, Description]]
 export type IRegisterFunctionList = [[IRegisterFunction, string, string?]];
 
 export interface IFormulaCustomFunctionService {
@@ -30,9 +32,7 @@ export interface IFormulaCustomFunctionService {
      * register descriptions
      * @param functionList
      */
-    registerFunctions(functionList: IRegisterFunctionList): void;
-
-    unregisterFunctions(functionList: string[]): void;
+    registerFunctions(functionList: IRegisterFunctionList): IDisposable;
 }
 
 export const IFormulaCustomFunctionService = createIdentifier<IFormulaCustomFunctionService>(
@@ -44,8 +44,12 @@ export class FormulaCustomFunctionService extends Disposable implements IFormula
         super();
     }
 
-    registerFunctions(functionList: IRegisterFunctionList) {
-        const functions = functionList.map((func) => [func[0].toString(), func[1]]);
+    registerFunctions(functionList: IRegisterFunctionList): IDisposable {
+        const functionNameList: string[] = []; // used to unregister functions
+        const functions = functionList.map((func) => {
+            functionNameList.push(func[1]);
+            return [func[0].toString(), func[1]];
+        });
 
         // Synchronous to worker
         this._commandService.executeCommand(
@@ -57,18 +61,17 @@ export class FormulaCustomFunctionService extends Disposable implements IFormula
                 local: true,
             }
         );
-    }
 
-    unregisterFunctions(functionList: string[]) {
-        // Synchronous to worker
-        this._commandService.executeCommand(
-            UnregisterFunctionMutation.id,
-            {
-                functions: functionList,
-            },
-            {
-                local: true,
-            }
-        );
+        return toDisposable(() => {
+            this._commandService.executeCommand(
+                UnregisterFunctionMutation.id,
+                {
+                    functions: functionNameList,
+                },
+                {
+                    local: true,
+                }
+            );
+        });
     }
 }

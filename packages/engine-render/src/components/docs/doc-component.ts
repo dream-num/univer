@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from '../../basics/const';
-import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine } from '../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
 import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
 import type { INodeInfo } from '../../basics/interfaces';
 import type { IBoundRectNoAngle, IViewportBound } from '../../basics/vector2';
@@ -25,6 +25,16 @@ import type { UniverRenderingContext } from '../../context';
 import { RenderComponent } from '../component';
 import type { DOCS_EXTENSION_TYPE } from './doc-extension';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
+
+export interface IPageMarginLayout {
+    pageMarginLeft: number;
+    pageMarginTop: number;
+    pageLayoutType?: PageLayoutType;
+}
+
+export interface IDocumentsConfig extends IPageMarginLayout {
+    hasEditor?: boolean;
+}
 
 export class DocComponent extends RenderComponent<
     IDocumentSkeletonGlyph | IDocumentSkeletonLine,
@@ -39,9 +49,12 @@ export class DocComponent extends RenderComponent<
 
     constructor(
         oKey: string,
-        private _skeleton?: DocumentSkeleton
+        private _skeleton?: DocumentSkeleton,
+        config?: IDocumentsConfig
     ) {
         super(oKey);
+
+        this._setConfig(config);
     }
 
     getSkeleton() {
@@ -50,6 +63,26 @@ export class DocComponent extends RenderComponent<
 
     setSkeleton(skeleton: DocumentSkeleton) {
         this._skeleton = skeleton;
+    }
+
+    private _setConfig(config?: IDocumentsConfig) {
+        if (config?.pageMarginLeft != null) {
+            this.pageMarginLeft = config?.pageMarginLeft;
+        } else {
+            this.pageMarginLeft = 17;
+        }
+
+        if (config?.pageMarginTop != null) {
+            this.pageMarginTop = config?.pageMarginTop;
+        } else {
+            this.pageMarginTop = 14;
+        }
+
+        if (config?.pageLayoutType != null) {
+            this.pageLayoutType = config?.pageLayoutType;
+        } else {
+            this.pageLayoutType = PageLayoutType.VERTICAL;
+        }
     }
 
     override render(mainCtx: UniverRenderingContext, bounds?: IViewportBound) {
@@ -86,6 +119,34 @@ export class DocComponent extends RenderComponent<
             scaleX,
             scaleY,
         };
+    }
+
+    isSkipByDiffBounds(page: IDocumentSkeletonPage, pageTop: number, pageLeft: number, bounds?: IViewportBound) {
+        if (bounds === null || bounds === undefined) {
+            return false;
+        }
+
+        const { pageWidth, pageHeight, marginBottom, marginTop, marginLeft, marginRight } = page;
+
+        const pageRight = pageLeft + pageWidth + marginLeft + marginRight;
+
+        const pageBottom = pageTop + pageHeight + marginBottom + marginTop;
+
+        const { left, top, right, bottom } = bounds.viewBound;
+
+        if (pageRight < left || pageBottom < top) {
+            return true;
+        }
+
+        if (pageLeft > right && pageWidth !== Number.POSITIVE_INFINITY) {
+            return true;
+        }
+
+        if (pageTop > bottom && pageHeight !== Number.POSITIVE_INFINITY) {
+            return true;
+        }
+
+        return false;
     }
 
     scrollBySelection() {}

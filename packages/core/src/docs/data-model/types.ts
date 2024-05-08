@@ -24,7 +24,7 @@ export enum DataStreamTreeNodeType {
     TABLE,
     TABLE_ROW,
     TABLE_CELL,
-    // CUSTOM_BLOCK, // \b  图片 mention等不参与文档流的场景
+    CUSTOM_BLOCK, // \b  图片 mention 等不参与文档流的场景
     // TABLE_START, // \x1A  表格开始
     // TABLE_ROW_START, // \x1B  表格开始
     // TABLE_CELL_START, // \x1C  表格开始

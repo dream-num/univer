@@ -15,10 +15,12 @@
  */
 
 import { type IUniverInstanceService, type Nullable, UniverInstanceType } from '@univerjs/core';
-import type { Documents, Engine, IRenderManagerService, Scene } from '@univerjs/engine-render';
+import type { DocBackground, Documents, Engine, IRenderManagerService, Scene } from '@univerjs/engine-render';
+import { DOCS_VIEW_KEY } from './docs-view-key';
 
 export interface IDocObjectParam {
     document: Documents;
+    docBackground: DocBackground;
     scene: Scene;
     engine: Engine;
 }
@@ -38,11 +40,13 @@ export function getDocObject(
         return;
     }
 
-    const { mainComponent, scene, engine } = currentRender;
+    const { mainComponent, scene, engine, components } = currentRender;
     const document = mainComponent as Documents;
+    const docBackground = components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground;
 
     return {
         document,
+        docBackground,
         scene,
         engine,
     };
@@ -57,11 +61,13 @@ export function getDocObjectById(
         return;
     }
 
-    const { mainComponent, scene, engine } = currentRender;
+    const { mainComponent, scene, engine, components } = currentRender;
     const document = mainComponent as Documents;
+    const docBackground = components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground;
 
     return {
         document,
+        docBackground,
         scene,
         engine,
     };

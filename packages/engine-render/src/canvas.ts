@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { getDevicePixelRatio } from './basics/draw';
 import { createCanvasElement } from './basics/tools';
 import { UniverPrintingContext, UniverRenderingContext } from './context';
@@ -56,9 +57,9 @@ export class Canvas {
 
     private _pixelRatio = 1;
 
-    private _canvasEle: HTMLCanvasElement;
+    private _canvasEle: Nullable<HTMLCanvasElement>;
 
-    private _context: UniverRenderingContext;
+    private _context: Nullable<UniverRenderingContext>;
 
     private _width = 0;
 
@@ -101,7 +102,7 @@ export class Canvas {
     }
 
     getCanvasEle() {
-        return this._canvasEle;
+        return this._canvasEle!;
     }
 
     /**
@@ -110,7 +111,7 @@ export class Canvas {
      * @returns {CanvasContext} context
      */
     getContext() {
-        return this._context;
+        return this._context!;
     }
 
     getPixelRatio() {
@@ -131,19 +132,19 @@ export class Canvas {
         this._pixelRatio = pixelRatioParam || getDevicePixelRatio();
 
         if (width) {
-            this._canvasEle.width = width * this._pixelRatio;
+            this.getCanvasEle().width = width * this._pixelRatio;
 
-            this._width = this._canvasEle.width / this._pixelRatio;
+            this._width = this.getCanvasEle().width / this._pixelRatio;
 
-            this._canvasEle.style.width = `${this._width}px`;
+            this.getCanvasEle().style.width = `${this._width}px`;
         }
 
         if (height) {
-            this._canvasEle.height = height * this._pixelRatio;
+            this.getCanvasEle().height = height * this._pixelRatio;
 
-            this._height = this._canvasEle.height / this._pixelRatio;
+            this._height = this.getCanvasEle().height / this._pixelRatio;
 
-            this._canvasEle.style.height = `${this._height}px`;
+            this.getCanvasEle().style.height = `${this._height}px`;
         }
 
         this.getContext().setTransform(this._pixelRatio, 0, 0, this._pixelRatio, 0, 0);
@@ -161,7 +162,9 @@ export class Canvas {
 
     dispose() {
         this.clear();
-        this._canvasEle.remove();
+        this._canvasEle?.remove();
+        this._canvasEle = null;
+        this._context = null;
     }
 
     clear() {
@@ -180,10 +183,10 @@ export class Canvas {
         try {
             // If this call fails (due to browser bug, like in Firefox 3.6),
             // then revert to previous no-parameter image/png behavior
-            return this._canvasEle.toDataURL(mimeType, quality);
+            return this.getCanvasEle().toDataURL(mimeType, quality);
         } catch (e) {
             try {
-                return this._canvasEle.toDataURL();
+                return this.getCanvasEle().toDataURL();
             } catch (err: unknown) {
                 const { message } = err as Error;
                 console.error(

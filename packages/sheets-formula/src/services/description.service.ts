@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, toDisposable } from '@univerjs/core';
 import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import {
     functionArray,
@@ -87,7 +87,7 @@ export interface IDescriptionService {
      * register descriptions
      * @param functionList
      */
-    registerDescriptions(functionList: IFunctionInfo[]): void;
+    registerDescriptions(functionList: IFunctionInfo[]): IDisposable;
 
     /**
      * unregister descriptions
@@ -186,9 +186,14 @@ export class DescriptionService implements IDescriptionService, IDisposable {
         return searchList;
     }
 
-    registerDescriptions(description: IFunctionInfo[]) {
+    registerDescriptions(description: IFunctionInfo[]): IDisposable {
         this._descriptions = this._descriptions.concat(description);
         this._registerDescriptions();
+
+        return toDisposable(() => {
+            const functionNames = description.map((item) => item.functionName);
+            this.unregisterDescriptions(functionNames);
+        });
     }
 
     unregisterDescriptions(functionNames: string[]) {

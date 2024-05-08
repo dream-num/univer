@@ -23,6 +23,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RenderComponentType, SheetComponent } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
+import { RegisterFunctionMutation, SetFormulaCalculationStartMutation, UnregisterFunctionMutation } from '@univerjs/engine-formula';
+import { IDescriptionService } from '@univerjs/sheets-formula';
 import type { FUniver } from '../facade';
 import { createTestBed } from './create-test-bed';
 import { COLUMN_UNIQUE_KEY, ColumnHeaderCustomExtension, MAIN_UNIQUE_KEY, MainCustomExtension, ROW_UNIQUE_KEY, RowHeaderCustomExtension } from './utils/sheet-extension-util';
@@ -54,7 +56,10 @@ describe('Test FUniver', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(SetRangeValuesCommand);
         commandService.registerCommand(SetRangeValuesMutation);
+        commandService.registerCommand(RegisterFunctionMutation);
+        commandService.registerCommand(UnregisterFunctionMutation);
         commandService.registerCommand(SetStyleCommand);
+        commandService.registerCommand(SetFormulaCalculationStartMutation);
 
         getValueByPosition = (
             startRow: number,
@@ -162,6 +167,34 @@ describe('Test FUniver', () => {
         expect(() => univerAPI.createSocket('URL')).toThrowError();
     });
 
+    it('Function registerFunction', () => {
+        const funcionName = 'CUSTOMSUM';
+        const functionsDisposable = univerAPI.registerFunction({
+            calculate: [
+                [function (...variants) {
+                    let sum = 0;
+
+                    for (const variant of variants) {
+                        sum += Number(variant) || 0;
+                    }
+
+                    return sum;
+                }, funcionName, 'Custom sum function'],
+            ],
+        });
+
+        const descriptionService = get(IDescriptionService);
+
+        const functionInfo = descriptionService.getFunctionInfo(funcionName);
+
+        expect(functionInfo?.functionName).toBe(funcionName);
+
+        functionsDisposable.dispose();
+
+        const functionInfoAfterDispose = descriptionService.getFunctionInfo(funcionName);
+
+        expect(functionInfoAfterDispose).toBeUndefined();
+    });
 
     it('Function registerSheetRowHeaderExtension and unregisterSheetRowHeaderExtension', () => {
         const rowHeader = univerAPI.registerSheetRowHeaderExtension('test', new RowHeaderCustomExtension());

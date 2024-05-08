@@ -64,6 +64,22 @@ export default {
             required: 'Required.',
             optional: 'Optional.',
         },
+        error: {
+            title: 'Error',
+            divByZero: 'Divide by zero error',
+            name: 'Invalid name error',
+            value: 'Error in value',
+            num: 'Number error',
+            na: 'Value not available error',
+            cycle: 'Circular reference error',
+            ref: 'Invalid cell reference error',
+            spill: "Spill range isn't blank",
+            calc: 'Calculation error',
+            error: 'Error',
+            connect: 'Getting data',
+            null: 'Null Error',
+        },
+
         functionType: {
             financial: 'Financial',
             date: 'Date & Time',

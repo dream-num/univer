@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType, Univer } from '@univerjs/core';
+import { Univer, UniverInstanceType } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSlidesPlugin } from '@univerjs/slides';
@@ -26,7 +26,6 @@ import { DEFAULT_SLIDE_DATA } from '../data';
 
 // univer
 const univer = new Univer({
-    locale: LocaleType.ZH_CN,
     theme: greenTheme,
 });
 
@@ -41,13 +40,4 @@ univer.registerPlugin(UniverUIPlugin, {
 univer.registerPlugin(UniverSlidesPlugin);
 univer.registerPlugin(UniverSlidesUIPlugin);
 
-univer.createUniverSlide(DEFAULT_SLIDE_DATA);
-
-// use for console test
-declare global {
-    interface Window {
-        univer?: Univer;
-    }
-}
-
-window.univer = univer;
+univer.createUnit(UniverInstanceType.UNIVER_SLIDE, DEFAULT_SLIDE_DATA);

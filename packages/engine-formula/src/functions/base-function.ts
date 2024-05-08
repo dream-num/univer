@@ -53,6 +53,16 @@ export class BaseFunction extends Disposable {
      */
     needsReferenceObject: boolean = false;
 
+    /**
+     * Minimum number of parameters
+     */
+    minParams: number = -1;
+
+    /**
+     * Maximum number of parameters
+     */
+    maxParams: number = -1;
+
     constructor(private _name: IFunctionNames) {
         super();
     }

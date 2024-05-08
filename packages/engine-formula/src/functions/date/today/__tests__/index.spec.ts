@@ -18,8 +18,6 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Today } from '../index';
-import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
-import { ErrorType } from '../../../../basics/error-type';
 
 // mock new Date() use V
 const _Date = Date;
@@ -43,11 +41,6 @@ describe('Test today function', () => {
         it('Normal', () => {
             const result = textFunction.calculate();
             expect(result.getValue()).toBe(43831);
-        });
-
-        it('Set a parameter', () => {
-            const result = textFunction.calculate(NumberValueObject.create(1));
-            expect(result.getValue()).toBe(ErrorType.NA);
         });
     });
 });

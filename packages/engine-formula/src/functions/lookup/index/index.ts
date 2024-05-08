@@ -27,15 +27,17 @@ import { BaseFunction } from '../../base-function';
  *
  * =INDEX(A2:A5,2,1):A1 same as =A1:A3
  *
+ * We refer to Google Sheets and set both rowNum and columnNum to optional
+ *
  */
 export class Index extends BaseFunction {
-    override minParams = 2;
+    override minParams = 1;
 
     override maxParams = 4;
 
     override needsReferenceObject = true;
 
-    override calculate(reference: FunctionVariantType, rowNum: FunctionVariantType, columnNum?: FunctionVariantType, areaNum?: FunctionVariantType) {
+    override calculate(reference: FunctionVariantType, rowNum?: FunctionVariantType, columnNum?: FunctionVariantType, areaNum?: FunctionVariantType) {
         if (reference.isError()) {
             return reference;
         }

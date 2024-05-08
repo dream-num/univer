@@ -99,7 +99,7 @@ export const UpdateCommentCommand: ICommand<IUpdateCommentCommandParams> = {
                     commentId: payload.commentId,
                     text: currentComment.text,
                     attachments: currentComment.attachments,
-                    dT: currentComment.dT,
+                    updateT: currentComment.updateT,
                     updated: currentComment.updated,
                 },
             },

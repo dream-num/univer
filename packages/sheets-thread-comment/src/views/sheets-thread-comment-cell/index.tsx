@@ -33,6 +33,9 @@ export const SheetsThreadCommentCell = () => {
     const { row, col, unitId, subUnitId } = activePopup;
     const rootId = sheetThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
     const ref = `${Tools.chatAtABC(col)}${row + 1}`;
+    const onClose = () => {
+        sheetsThreadCommentPopupService.hidePopup();
+    };
 
     return (
         <ThreadCommentTree
@@ -41,6 +44,7 @@ export const SheetsThreadCommentCell = () => {
             subUnitId={subUnitId}
             type={UniverInstanceType.UNIVER_SHEET}
             refStr={ref}
+            onClose={onClose}
         />
     );
 };

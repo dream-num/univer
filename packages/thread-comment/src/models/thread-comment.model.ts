@@ -155,6 +155,7 @@ export class ThreadCommentModel {
         oldComment.updated = true;
         oldComment.text = payload.text;
         oldComment.attachments = payload.attachments;
+        oldComment.updateT = payload.updateT;
 
         this._commentUpdate$.next({
             unitId,

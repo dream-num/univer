@@ -15,8 +15,8 @@
  */
 
 import type { IThreadComment, IThreadCommentMention, TextNode } from '@univerjs/thread-comment';
-import { Button, Mentions } from '@univerjs/design';
-import React, { useState } from 'react';
+import { Button, Mention, Mentions } from '@univerjs/design';
+import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { IConfigService, LocaleService } from '@univerjs/core';
 import { PLUGIN_NAME } from '../../types/const';
@@ -95,17 +95,34 @@ const transformMention = (mention: IThreadCommentMention) => ({
     id: `${mention.type}-${mention.id}`,
 });
 
-export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
+export interface IThreadCommentEditorInstance {
+    reply: (text: TextNode[]) => void;
+}
+
+export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThreadCommentEditorProps>((props, ref) => {
     const { comment, onSave, id, onCancel, autoFocus } = props;
     const configService = useDependency(IConfigService);
     const localeService = useDependency(LocaleService);
     const [localComment, setLocalComment] = useState({ text: [], ...comment });
     const [editing, setEditing] = useState(false);
     const mentions = configService.getConfig<IThreadCommentUIConfig>(PLUGIN_NAME)?.mentions ?? [];
+    const inputRef = useRef(null);
+
+    useImperativeHandle(ref, () => ({
+        reply(text) {
+            setLocalComment({
+                ...comment,
+                text,
+                attachments: [],
+            });
+            (inputRef.current as any)?.inputElement.focus();
+        },
+    }));
 
     return (
         <div className={styles.threadCommentEditor} onClick={(e) => e.preventDefault()}>
             <Mentions
+                ref={inputRef}
                 autoFocus={autoFocus}
                 style={{ width: '100%' }}
                 placeholder={localeService.t('threadCommentUI.editor.placeholder')}
@@ -118,12 +135,12 @@ export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
                 }}
             >
                 {mentions.map((mention) => (
-                    <Mentions.Mention
+                    <Mention
                         key={mention.trigger}
                         trigger={mention.trigger}
                         data={mention.getMentions ?
                             (query) => mention.getMentions!(query)
-                                .then((res) => res.map(transformMention))
+                                .then((res) => res.map(transformMention)) as any
                             : (mention.mentions ?? []).map(transformMention)}
                         displayTransform={(id, label) => `@${label} `}
                     />
@@ -158,4 +175,4 @@ export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
                 : null}
         </div>
     );
-};
+});

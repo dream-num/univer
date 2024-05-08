@@ -42,8 +42,8 @@ export interface IUpdateCommentPayload {
     commentId: string;
     text: TextNode[];
     attachments?: string[];
-    dT?: string;
     updated?: boolean;
+    updateT?: string;
 }
 
 export interface IUpdateCommentMutationParams {

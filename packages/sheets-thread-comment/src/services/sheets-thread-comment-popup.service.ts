@@ -23,10 +23,14 @@ import { type IDisposable, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import { SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 
+export interface IThreadCommentPopup extends ISheetLocationBase {
+    commentId: string;
+}
+
 export class SheetsThreadCommentPopupService extends Disposable {
     private _lastPopup: Nullable<IDisposable> = null;
-    private _activePopup: Nullable<ISheetLocationBase>;
-    private _activePopup$ = new BehaviorSubject<Nullable<ISheetLocationBase>>(null);
+    private _activePopup: Nullable<IThreadCommentPopup>;
+    private _activePopup$ = new BehaviorSubject<Nullable<IThreadCommentPopup>>(null);
 
     activePopup$ = this._activePopup$.asObservable();
 
@@ -41,7 +45,7 @@ export class SheetsThreadCommentPopupService extends Disposable {
         super();
     }
 
-    showPopup(location: ISheetLocationBase, onHide?: () => void) {
+    showPopup(location: IThreadCommentPopup, onHide?: () => void) {
         const { row, col } = location;
         this._lastPopup && this._lastPopup.dispose();
         if (this._zenZoneService.visible) {

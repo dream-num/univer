@@ -118,6 +118,7 @@ export class SheetsThreadCommentController extends Disposable {
                     subUnitId,
                     row: location.row,
                     col: location.column,
+                    commentId: comment.id,
                 });
             }
         }));

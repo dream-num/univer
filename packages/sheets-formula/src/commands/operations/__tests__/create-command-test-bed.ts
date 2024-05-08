@@ -17,14 +17,15 @@
 import type { IWorkbookData } from '@univerjs/core';
 import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { EditorService, IEditorService } from '@univerjs/ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { EditorBridgeService, IEditorBridgeService, ISelectionRenderService, SelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FormulaPromptService, IFormulaPromptService } from '../../../services/prompt.service';
 
-const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
+const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -43,7 +44,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     name: '',
     sheetOrder: [],
     styles: {},
-};
+});
 
 export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
@@ -67,18 +68,22 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
         }
 
         override onStarting(injector: Injector): void {
+            injector.add([ISelectionRenderService, { useClass: SelectionRenderService }]);
             injector.add([SelectionManagerService]);
             injector.add([LexerTreeBuilder]);
             injector.add([IFormulaPromptService, { useClass: FormulaPromptService }]);
+            injector.add([IEditorBridgeService, { useClass: EditorBridgeService }]);
             injector.add([IEditorService, { useClass: EditorService }]);
+            injector.add([SheetSkeletonManagerService]);
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([SheetInterceptorService]);
 
             dependencies?.forEach((d) => injector.add(d));
         }
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookData || TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, workbookData || TEST_WORKBOOK_DATA_DEMO());
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

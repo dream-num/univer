@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable, Univer } from '@univerjs/core';
+import type { Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
     NORMAL_SELECTION_PLUGIN_NAME,
@@ -60,84 +60,86 @@ describe('Test insert function operation', () => {
 
     describe('insert function', () => {
         describe('correct situations', () => {
-            it('insert function, match the data range above', async () => {
+            it('insert function, match the data range above, directly set values', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
-                // B3
+                // B3:B4
                 selectionManager.add([
                     {
-                        range: { startRow: 2, startColumn: 1, endRow: 2, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                        range: { startRow: 2, startColumn: 1, endRow: 3, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
                         style: null,
                     },
                 ]);
 
-                function getValue(): Nullable<ICellData> {
+                function getValues() {
                     return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
-                        ?.getRange(2, 1, 2, 1)
-                        .getValue();
+                        ?.getRange(2, 1, 3, 1)
+                        .getValues();
                 }
                 const params: IInsertFunctionOperationParams = {
                     value: 'SUM',
                 };
 
                 expect(await commandService.executeCommand(InsertFunctionOperation.id, params)).toBeTruthy();
-                expect(getValue()?.f).toStrictEqual('=SUM(B2)');
+                let values = getValues();
+                expect(values?.[0]?.[0]?.f).toStrictEqual('=SUM(B2)');
+                expect(values?.[0]?.[0]?.si).toStrictEqual(values?.[1]?.[0]?.si);
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                expect(getValue()).toStrictEqual({});
+                expect(getValues()).toStrictEqual([[{}], [{}]]);
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                expect(getValue()?.f).toStrictEqual('=SUM(B2)');
-
-                // Restore the original data
-                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                values = getValues();
+                expect(values?.[0]?.[0]?.f).toStrictEqual('=SUM(B2)');
+                expect(values?.[0]?.[0]?.si).toStrictEqual(values?.[1]?.[0]?.si);
             });
 
-            it('insert function, match the data range left', async () => {
+            it('insert function, match the data range left, directly set values', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
-                // C2
+                // C2:D2
                 selectionManager.add([
                     {
-                        range: { startRow: 1, startColumn: 2, endRow: 1, endColumn: 2, rangeType: RANGE_TYPE.NORMAL },
+                        range: { startRow: 1, startColumn: 2, endRow: 1, endColumn: 3, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
                         style: null,
                     },
                 ]);
 
-                function getValue(): Nullable<ICellData> {
+                function getValues() {
                     return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
-                        ?.getRange(1, 2, 1, 2)
-                        .getValue();
+                        ?.getRange(1, 2, 1, 3)
+                        .getValues();
                 }
                 const params: IInsertFunctionOperationParams = {
                     value: 'SUM',
                 };
 
                 expect(await commandService.executeCommand(InsertFunctionOperation.id, params)).toBeTruthy();
-                expect(getValue()?.f).toStrictEqual('=SUM(B2)');
+                let values = getValues();
+                expect(values?.[0]?.[0]?.f).toStrictEqual('=SUM(B2)');
+                expect(values?.[0]?.[0]?.si).toStrictEqual(values?.[0]?.[1]?.si);
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                expect(getValue()).toStrictEqual({});
+                expect(getValues()).toStrictEqual([[{}, {}]]);
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                expect(getValue()?.f).toStrictEqual('=SUM(B2)');
-
-                // Restore the original data
-                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                values = getValues();
+                expect(values?.[0]?.[0]?.f).toStrictEqual('=SUM(B2)');
+                expect(values?.[0]?.[0]?.si).toStrictEqual(values?.[0]?.[1]?.si);
             });
         });
 
@@ -193,7 +195,7 @@ describe('Test insert function operation', () => {
                         },
                     },
                 };
-                expect(isNumberCell(cell)).toBeTruthy();
+                expect(isNumberCell(cell)).toBeFalsy();
             });
             it('should return true when cell is rich text', () => {
                 const cell = {

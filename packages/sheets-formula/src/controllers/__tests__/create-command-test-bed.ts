@@ -17,7 +17,10 @@
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import { EditorBridgeService, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { EditorService, IEditorService } from '@univerjs/ui';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -83,6 +86,10 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+            injector.add([SheetSkeletonManagerService]);
+            injector.add([IEditorBridgeService, { useClass: EditorBridgeService }]);
+            injector.add([IEditorService, { useClass: EditorService }]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

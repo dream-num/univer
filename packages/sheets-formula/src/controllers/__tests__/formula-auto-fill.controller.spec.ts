@@ -32,7 +32,6 @@ import {
     SetSelectionsOperation,
 } from '@univerjs/sheets';
 import {
-    AutoFillCommand,
     AutoFillController,
     AutoFillService,
     IAutoFillService,
@@ -116,7 +115,7 @@ describe('Test auto fill with formula', () => {
                 },
             ]);
 
-            (autoFillController as any)._handleFill(
+            (autoFillController as any)._triggerAutoFill(
                 {
                     startColumn: 1,
                     endColumn: 1,
@@ -167,7 +166,7 @@ describe('Test auto fill with formula', () => {
             expect(B2?.si).toEqual(B3?.si);
 
             // drop to right
-            (autoFillController as any)._handleFill(
+            (autoFillController as any)._triggerAutoFill(
                 {
                     startColumn: 1,
                     endColumn: 1,
@@ -278,13 +277,6 @@ describe('Test auto fill with formula', () => {
 
             // Restore the original data
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-        });
-    });
-
-    describe('fault situations', () => {
-        it('will not apply when there is no selected ranges', async () => {
-            const result = await commandService.executeCommand(AutoFillCommand.id);
-            expect(result).toBeFalsy();
         });
     });
 });

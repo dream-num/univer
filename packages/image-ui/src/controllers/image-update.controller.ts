@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingParam, ITransformState, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IDrawingParam, IDrawingSearch, ITransformState, Nullable } from '@univerjs/core';
 import {
     checkIfMove,
     Disposable,
@@ -31,7 +31,12 @@ import {
 import type { BaseObject, IImageProps, Scene } from '@univerjs/engine-render';
 import { CURSOR_TYPE, DRAWING_OBJECT_LAYER_INDEX, Image, IRenderManagerService } from '@univerjs/engine-render';
 import { getImageShapeKeyByDrawingSearch, type IImageData } from '@univerjs/image';
+import { IDialogService } from '@univerjs/ui';
+import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
+import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
 
+
+const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
 @OnLifecycle(LifecycleStages.Rendered, ImageUpdateController)
 export class ImageUpdateController extends Disposable {
@@ -40,7 +45,8 @@ export class ImageUpdateController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService
+        @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService,
+        @IDialogService private readonly _dialogService: IDialogService
     ) {
         super();
 
@@ -62,15 +68,76 @@ export class ImageUpdateController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const updateCommandList: string[] = [];
-
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (updateCommandList.includes(command.id)) {
-                    return true;
+                if (command.id === ImageResetSizeOperation.id) {
+                    const params = command.params as IDrawingSearch[];
+                    if (params == null) {
+                        return;
+                    }
+                    this._resetImageSize(params);
                 }
             })
         );
+    }
+
+    private _resetImageSize(params: IDrawingSearch[]) {
+        const updateParams: IImageData[] = [];
+        const sceneList: Scene[] = [];
+
+        params.forEach((param) => {
+            const { unitId, subUnitId, drawingId } = param;
+
+            const renderObject = this._renderManagerService.getRenderById(unitId);
+
+            const scene = renderObject?.scene;
+
+            if (scene == null) {
+                return true;
+            }
+
+
+            const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId, drawingType: DrawingTypeEnum.DRAWING_IMAGE });
+
+            const imageShape = scene.getObject(imageShapeKey);
+
+            if (imageShape == null) {
+                return true;
+            }
+
+
+            const imageData = this._drawingManagerService.getDrawingByParam<IImageData>(param);
+
+            if (imageData == null) {
+                return true;
+            }
+
+            (imageShape as Image).resetSize();
+
+            const { width, height } = (imageShape as Image).getNativeSize();
+
+            if (sceneList.includes(scene) === false) {
+                sceneList.push(scene);
+            }
+
+            updateParams.push({
+                ...imageData,
+                transform: {
+                    ...imageData.transform,
+                    height,
+                    width,
+                    angle: 0,
+                },
+                srcRect: null,
+            });
+        });
+
+        this._drawingManagerService.extraUpdateNotification(updateParams);
+
+        sceneList.forEach((scene) => {
+            const transformer = scene.getTransformerByCreate();
+            transformer.refreshControls();
+        });
     }
 
     private _sceneListenerOnImageMap: WeakSet<Scene> = new WeakSet();
@@ -117,12 +184,13 @@ export class ImageUpdateController extends Disposable {
 
                     const image = new Image(imageShapeKey, imageConfig);
 
-
                     this._addImageSourceCache(param, image.getNative());
 
                     scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(image);
 
                     this._addHoverForImage(image);
+
+                    this._addDialogForImage(image);
 
                     if (!sceneList.includes(scene)) {
                         sceneList.push(scene);
@@ -157,6 +225,65 @@ export class ImageUpdateController extends Disposable {
             )
         );
     }
+
+    private _addDialogForImage(o: Image) {
+        this.disposeWithMe(
+            toDisposable(
+                o.onDblclickObserver.add(() => {
+                    const dialogId = `${o.oKey}-viewer-dialog`;
+
+                    const nativeSize = o.getNativeSize();
+                    const screenWidth = window.innerWidth - IMAGE_VIEWER_DROPDOWN_PADDING;
+                    const screenHeight = window.innerHeight - IMAGE_VIEWER_DROPDOWN_PADDING;
+
+                    const adjustSize = this._adjustImageSize(nativeSize.width, nativeSize.height, screenWidth, screenHeight);
+
+                    const dialog = this._dialogService.open({
+                        width: adjustSize.width,
+                        id: dialogId,
+                        children: {
+                            label: {
+                                name: COMPONENT_IMAGE_VIEWER,
+                                props: {
+                                    src: o.getNative()?.src,
+                                    width: adjustSize.width,
+                                    height: adjustSize.height,
+                                },
+                            },
+                        },
+                        destroyOnClose: true,
+                        draggable: false,
+                        onClose: () => {
+                            this._dialogService.close(dialogId);
+                            dialog.dispose();
+                        },
+                    });
+                })
+            )
+        );
+    }
+
+    private _adjustImageSize(nativeWidth: number, nativeHeight: number, screenWidth: number, screenHeight: number) {
+        // Use native size if the image is smaller than the screen
+        if (nativeWidth <= screenWidth && nativeHeight <= screenHeight) {
+            return {
+                width: nativeWidth,
+                height: nativeHeight,
+            };
+        }
+
+        // Calculate scale ratios
+        const widthRatio = screenWidth / nativeWidth;
+        const heightRatio = screenHeight / nativeHeight;
+        const scale = Math.min(widthRatio, heightRatio); // Choose the smaller ratio to ensure the image fits within the screen
+
+        // Return new dimensions
+        return {
+            width: Math.floor(nativeWidth * scale),
+            height: Math.floor(nativeHeight * scale),
+        };
+    }
+
 
     private _drawingRemoveListener() {
         this.disposeWithMe(

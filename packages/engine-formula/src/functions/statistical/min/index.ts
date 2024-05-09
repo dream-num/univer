@@ -24,8 +24,7 @@ export class Min extends BaseFunction {
     override maxParams = 255;
 
     override calculate(...variants: BaseValueObject[]) {
-        // Don't use Number.POSITIVE_INFINITY, the minimum value of a string and a blank cell should be 0
-        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(Number.POSITIVE_INFINITY);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
@@ -46,6 +45,10 @@ export class Min extends BaseFunction {
             }
 
             accumulatorAll = this._validator(accumulatorAll, variant as BaseValueObject);
+        }
+
+        if (accumulatorAll.getValue() === Number.POSITIVE_INFINITY) {
+            return NumberValueObject.create(0);
         }
 
         return accumulatorAll;

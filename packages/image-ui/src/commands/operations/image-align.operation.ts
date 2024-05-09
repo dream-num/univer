@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, ImageSourceType, ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
+import type { IDrawingSearch, IOperation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 
-
-export interface IImageDataValue {
-
+export enum AlignType {
+    left,
+    center,
+    right,
+    top,
+    middle,
+    bottom,
+    horizon,
+    vertical,
 }
 
-export interface IImageData extends IDrawingParam {
-    imageSourceType: ImageSourceType;
-    source: string;
-
-    /**
-     * 20.1.8.55 srcRect (Source Rectangle)
-     */
-    srcRect?: Nullable<ISrcRect>;
-
-    /**
-     * 20.1.9.18 prstGeom (Preset geometry)
-     */
-    prstGeom?: Nullable<PresetGeometryType>;
+export interface ISetImageAlignOperationParams {
+    drawings: IDrawingSearch[];
+    alignType: AlignType;
 }
 
+export const SetImageAlignOperation: IOperation<ISetImageAlignOperationParams> = {
+    id: 'sheet.operation.set-image-align',
+    type: CommandType.OPERATION,
+    handler: (accessor, params) => {
+        return true;
+    },
+};

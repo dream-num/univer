@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, Nullable } from '@univerjs/core';
-import { ICommandService } from '@univerjs/core';
+
+import { IDrawingManagerService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import { ImageCommonPanel } from '@univerjs/image-ui';
-import { ISheetDrawingService } from '@univerjs/sheets';
 
 
 export const SheetImagePanel = () => {
-    const commandService = useDependency(ICommandService);
-    const sheetDrawingService = useDependency(ISheetDrawingService);
-    const drawing = sheetDrawingService.getFocusDrawings()[0];
+    const drawingManagerService = useDependency(IDrawingManagerService);
+    const drawing = drawingManagerService.getFocusDrawings()[0];
 
     if (drawing == null) {
         return;

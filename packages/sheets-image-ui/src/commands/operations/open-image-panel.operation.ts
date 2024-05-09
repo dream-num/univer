@@ -15,7 +15,7 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { CommandType, IDrawingManagerService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { getSheetCommandTarget, ISheetDrawingService } from '@univerjs/sheets';
@@ -33,7 +33,7 @@ export const SidebarSheetImageOperation: ICommand = {
         const sidebarService = accessor.get(ISidebarService);
         const localeService = accessor.get(LocaleService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const sheetDrawingService = accessor.get(ISheetDrawingService);
+        const drawingManagerService = accessor.get(IDrawingManagerService);
 
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
@@ -44,7 +44,7 @@ export const SidebarSheetImageOperation: ICommand = {
                     header: { title: localeService.t('sheetImage.panel.title') },
                     children: { label: COMPONENT_SHEET_IMAGE_PANEL },
                     onClose: () => {
-                        sheetDrawingService.focusDrawing(null);
+                        drawingManagerService.focusDrawing(null);
                     },
                     width: 360,
                 });

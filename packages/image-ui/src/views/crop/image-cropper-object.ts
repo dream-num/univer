@@ -15,8 +15,8 @@
  */
 
 import type { IKeyValue, ITransformState, Nullable } from '@univerjs/core';
-import type { BaseObject, Engine, IShapeProps, IViewportBound, Scene, Transform, UniverRenderingContext, Vector2 } from '@univerjs/engine-render';
-import { Canvas, Rect, Shape } from '@univerjs/engine-render';
+import type { BaseObject, Engine, IShapeProps, IViewportBound, Scene, UniverRenderingContext, Vector2 } from '@univerjs/engine-render';
+import { Canvas, degToRad, Rect, Shape, Transform } from '@univerjs/engine-render';
 import type { IImageData } from '@univerjs/image';
 
 
@@ -87,6 +87,10 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
         this._applyProps();
     }
 
+    get srcRect() {
+        return this._imageData?.srcRect;
+    }
+
     override dispose() {
         super.dispose();
         this._cacheCanvas?.dispose();
@@ -152,26 +156,30 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
 
         this._initialCacheCanvas();
 
-        this._cacheCanvas?.clear();
-        const cacheCtx = this._cacheCanvas?.getContext();
-        if (cacheCtx == null) {
-            return;
+        if (this._dirty) {
+            this._cacheCanvas?.clear();
+            const cacheCtx = this._cacheCanvas?.getContext();
+            if (cacheCtx == null) {
+                return;
+            }
+
+            cacheCtx.save();
+
+            Rect.drawWith(cacheCtx, {
+                left: 0,
+                top: 0,
+                width: engineWidth,
+                height: engineHeight,
+                fill: 'rgba(0, 0, 0, 0.5)',
+            });
+
+            cacheCtx.setTransform(ctx.getTransform());
+            this._clipForApplyObject(cacheCtx);
+            this._applyCache(ctx);
+            cacheCtx.restore();
+        } else {
+            this._applyCache(ctx);
         }
-
-        cacheCtx.save();
-
-        Rect.drawWith(cacheCtx, {
-            left: 0,
-            top: 0,
-            width: engineWidth,
-            height: engineHeight,
-            fill: 'rgba(0, 0, 0, 0.5)',
-        });
-
-        cacheCtx.setTransform(ctx.getTransform());
-        this._clipForApplyObject(cacheCtx);
-        this._applyCache(ctx);
-        cacheCtx.restore();
     }
 
     private _clipForApplyObject(cacheCtx: UniverRenderingContext) {
@@ -204,7 +212,7 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
         let cropRight = 0;
         let cropBottom = 0;
 
-        const { left: applyLeft, top: applyTop, width: applyWidth, height: applyHeight, angle } = this._applyObject;
+        const { left: applyLeft, top: applyTop, width: applyWidth, height: applyHeight, angle, strokeWidth: applyStrokeWidth } = this._applyObject;
 
         if (imageData != null && imageData.srcRect != null) {
             const { left = 0, top = 0, right = 0, bottom = 0 } = imageData.srcRect;

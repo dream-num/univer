@@ -17,6 +17,10 @@
 import type { Nullable } from '../common/type-util';
 import type { ITransformState } from '../services/drawing/drawing-interfaces';
 
+export const MOVE_BUFFER_VALUE = 2;
+
+export const ROTATE_BUFFER_VALUE = 1;
+
 export function checkIfMove(transform: Nullable<ITransformState>, previousTransform: Nullable<ITransformState>): boolean {
     if (previousTransform == null || transform == null) {
         return true;
@@ -31,5 +35,5 @@ export function checkIfMove(transform: Nullable<ITransformState>, previousTransf
     const allWidthPrev = widthPrev;
     const allHeightPrev = heightPrev;
 
-    return Math.abs(left - leftPrev) > 0.5 || Math.abs(top - topPrev) > 0.5 || Math.abs(allWidth - allWidthPrev) > 0.5 || Math.abs(allHeight - allHeightPrev) > 0.5 || Math.abs(angle - anglePrev) > 0.1;
+    return Math.abs(left - leftPrev) > MOVE_BUFFER_VALUE || Math.abs(top - topPrev) > MOVE_BUFFER_VALUE || Math.abs(allWidth - allWidthPrev) > MOVE_BUFFER_VALUE || Math.abs(allHeight - allHeightPrev) > MOVE_BUFFER_VALUE || Math.abs(angle - anglePrev) > ROTATE_BUFFER_VALUE;
 }

@@ -478,6 +478,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const position = this._getNodePosition(startNode);
 
+        //    console.log(startNode, position);
+
         if (position == null) {
             this._removeAllTextRanges();
 

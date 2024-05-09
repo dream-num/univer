@@ -53,7 +53,9 @@ import {
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
     SetWorksheetActiveOperation,
+    SetWorksheetColWidthMutation,
     SetWorksheetRowIsAutoHeightCommand,
+    SetWorksheetRowIsAutoHeightMutation,
 } from '@univerjs/sheets';
 
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
@@ -1178,7 +1180,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetRowIsAutoHeightMutation.id) {
                     return update();
                 }
             });
@@ -1222,7 +1224,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetColWidthMutation.id) {
                     return update();
                 }
             });

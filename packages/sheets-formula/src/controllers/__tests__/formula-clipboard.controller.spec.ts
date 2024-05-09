@@ -108,6 +108,7 @@ describe('Test paste with formula', () => {
                             cellValue: {
                                 12: {
                                     2: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -116,6 +117,7 @@ describe('Test paste with formula', () => {
                                         t: null,
                                     },
                                     3: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -333,6 +335,7 @@ describe('Test paste with formula', () => {
                             cellValue: {
                                 5: {
                                     5: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -341,6 +344,7 @@ describe('Test paste with formula', () => {
                                         t: null,
                                     },
                                     6: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -349,6 +353,7 @@ describe('Test paste with formula', () => {
                                         t: null,
                                     },
                                     7: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -357,6 +362,7 @@ describe('Test paste with formula', () => {
                                         t: null,
                                     },
                                     8: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -367,6 +373,7 @@ describe('Test paste with formula', () => {
                                 },
                                 6: {
                                     5: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -375,6 +382,7 @@ describe('Test paste with formula', () => {
                                         t: null,
                                     },
                                     6: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -383,6 +391,7 @@ describe('Test paste with formula', () => {
                                         t: null,
                                     },
                                     7: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -391,6 +400,7 @@ describe('Test paste with formula', () => {
                                         t: null,
                                     },
                                     8: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -401,6 +411,7 @@ describe('Test paste with formula', () => {
                                 },
                                 7: {
                                     5: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -409,6 +420,7 @@ describe('Test paste with formula', () => {
                                         t: null,
                                     },
                                     6: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -417,6 +429,7 @@ describe('Test paste with formula', () => {
                                         t: null,
                                     },
                                     7: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -425,6 +438,7 @@ describe('Test paste with formula', () => {
                                         t: null,
                                     },
                                     8: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -435,6 +449,7 @@ describe('Test paste with formula', () => {
                                 },
                                 8: {
                                     5: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -443,6 +458,7 @@ describe('Test paste with formula', () => {
                                         t: null,
                                     },
                                     6: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -451,6 +467,7 @@ describe('Test paste with formula', () => {
                                         t: null,
                                     },
                                     7: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,
@@ -459,6 +476,7 @@ describe('Test paste with formula', () => {
                                         t: null,
                                     },
                                     8: {
+                                        custom: null,
                                         s: null,
                                         f: null,
                                         si: null,

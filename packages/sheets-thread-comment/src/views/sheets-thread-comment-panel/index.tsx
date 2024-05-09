@@ -15,11 +15,12 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ThreadCommentPanel } from '@univerjs/thread-comment-ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useMemo } from 'react';
 import { map } from 'rxjs';
+import { ShowAddSheetCommentModalOperation } from '../../commands/operations/comment.operation';
 
 export const SheetsThreadCommentPanel = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -28,13 +29,19 @@ export const SheetsThreadCommentPanel = () => {
         return null;
     }
     const unitId = workbook.getUnitId();
+    const commandService = useDependency(ICommandService);
     const subUnitId$ = useMemo(() => workbook.activeSheet$.pipe(map((i) => i?.getSheetId())), [workbook.activeSheet$]);
+
+    const handleAdd = () => {
+        commandService.executeCommand(ShowAddSheetCommentModalOperation.id);
+    };
 
     return (
         <ThreadCommentPanel
             unitId={unitId}
             subUnitId$={subUnitId$}
             type={UniverInstanceType.UNIVER_SHEET}
+            onAdd={handleAdd}
         />
     );
 };

@@ -73,7 +73,10 @@ export class SheetsThreadCommentPopupService extends Disposable {
                 },
                 offset: [0, 3],
                 direction: 'vertical',
-                excludeOutside: Array.from(document.querySelectorAll('.univer-thread-comment')),
+                excludeOutside: [
+                    ...Array.from(document.querySelectorAll('.univer-thread-comment')),
+                    document.getElementById('thread-comment-add'),
+                ].filter(Boolean) as Element[],
             }
         );
 

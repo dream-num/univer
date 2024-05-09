@@ -33,7 +33,6 @@ export const ShowAddSheetCommentModalOperation: ICommand = {
         const activeCell = selectionManagerService.getFirst()?.primary;
         const current = selectionManagerService.getCurrent();
         const model = accessor.get(SheetsThreadCommentModel);
-
         if (!current || !activeCell) {
             return false;
         }

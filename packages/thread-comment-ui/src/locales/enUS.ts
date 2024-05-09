@@ -20,7 +20,8 @@ export default {
             title: 'Comment Management',
             empty: 'No comments yet',
             filterEmpty: 'No match result',
-            reset: 'Reset filter',
+            reset: 'Reset Filter',
+            addComment: 'Add Comment',
         },
         editor: {
             placeholder: 'Reply or add others with @',

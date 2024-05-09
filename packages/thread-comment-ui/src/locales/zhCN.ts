@@ -21,6 +21,7 @@ export default {
             empty: '暂无评论',
             filterEmpty: '没有匹配的结果',
             reset: '重置',
+            addComment: '新建评论',
         },
         editor: {
             placeholder: 'Reply or add others with @',

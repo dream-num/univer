@@ -35,7 +35,7 @@ export interface ICanvasPopup {
     onClickOutside?: (e: MouseEvent) => void;
     direction?: 'vertical' | 'horizontal';
     offset?: [number, number];
-    excludeOutside?: HTMLElement[];
+    excludeOutside?: Element[];
     /** Close the popup even if the outside element clicked is its target. */
     closeOnSelfTarget?: boolean;
     extraProps?: Record<string, any>;

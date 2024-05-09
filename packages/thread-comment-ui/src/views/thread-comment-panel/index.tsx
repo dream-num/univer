@@ -20,6 +20,7 @@ import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { ICommandService, LocaleService, type UniverInstanceType } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import { Button, Select } from '@univerjs/design';
+import { IncreaseSingle } from '@univerjs/icons';
 import dayjs from 'dayjs';
 import type { Observable } from 'rxjs';
 import { ThreadCommentTree } from '../thread-comment-tree';
@@ -31,10 +32,11 @@ export interface IThreadCommentPanelProps {
     unitId: string;
     subUnitId$: Observable<string | undefined>;
     type: UniverInstanceType;
+    onAdd: () => void;
 }
 
 export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
-    const { unitId, subUnitId$, type } = props;
+    const { unitId, subUnitId$, type, onAdd } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
     const localeService = useDependency(LocaleService);
@@ -85,6 +87,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
             );
         }
     }, [unitId, threadCommentModel, update]);
+
 
     return (
         <div className={styles.threadCommentPanel}>
@@ -146,8 +149,29 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                 ? null
                 : (
                     <div className={styles.threadCommentPanelEmpty}>
-                        {isFiltering ? localeService.t('threadCommentUI.panel.filterEmpty') : localeService.t('threadCommentUI.panel.empty')}
-                        {isFiltering ? <Button onClick={onReset} type="link">{localeService.t('threadCommentUI.panel.reset')}</Button> : null}
+                        {isFiltering ?
+                            localeService.t('threadCommentUI.panel.filterEmpty')
+                            : localeService.t('threadCommentUI.panel.empty')}
+                        {isFiltering
+                            ? (
+                                <Button
+                                    onClick={onReset}
+                                    type="link"
+                                >
+                                    {localeService.t('threadCommentUI.panel.reset')}
+                                </Button>
+                            )
+                            : (
+                                <Button
+                                    id="thread-comment-add"
+                                    className={styles.threadCommentPanelAdd}
+                                    type="primary"
+                                    onClick={onAdd}
+                                >
+                                    <IncreaseSingle />
+                                    {localeService.t('threadCommentUI.panel.addComment')}
+                                </Button>
+                            )}
                     </div>
                 )}
         </div>

@@ -35,7 +35,6 @@ export interface ISheetDrawingPosition extends IOtherTransform {
 
 export interface ISheetDrawingParam {
     sheetTransform: ISheetDrawingPosition;
-    originSize: ISize;
 }
 
 
@@ -67,9 +66,6 @@ export interface ISheetDrawingService {
     removeDrawing(param: IDrawingSearch): Nullable<ISheetDrawingServiceParam>;
     batchRemoveDrawing(params: IDrawingSearch[]): ISheetDrawingServiceParam[];
 
-    focusDrawing(param: Nullable<IDrawingSearch>): void;
-    getFocusDrawings(): ISheetDrawingServiceParam[];
-
     updateDrawing(param: ISheetDrawingServiceUpdateParam): void;
     batchUpdateDrawing(params: ISheetDrawingServiceUpdateParam[]): void;
 
@@ -85,8 +81,6 @@ export interface ISheetDrawingService {
 export class SheetDrawingService extends Disposable implements ISheetDrawingService {
     private _drawingMap: { [drawingType: DrawingType]: ISheetDrawingMap } = {};
 
-    private _focusDrawings: ISheetDrawingServiceParam[] = [];
-
     private _add$ = new Subject<ISheetDrawingServiceParam[]>();
     add$: Observable<ISheetDrawingServiceParam[]> = this._add$.asObservable();
 
@@ -95,10 +89,6 @@ export class SheetDrawingService extends Disposable implements ISheetDrawingServ
 
     private _update$ = new Subject<ISheetDrawingServiceUpdateParam[]>();
     update$: Observable<ISheetDrawingServiceUpdateParam[]> = this._update$.asObservable();
-
-    private _focus$ = new Subject<ISheetDrawingServiceParam[]>();
-    focus$: Observable<ISheetDrawingServiceParam[]> = this._focus$.asObservable();
-
 
     getDrawingMap(unitId: string, subUnitId: string, drawingType: DrawingType): Nullable<IISheetDrawingMapItem> {
         return this._drawingMap[drawingType]?.[unitId]?.[subUnitId];
@@ -148,27 +138,6 @@ export class SheetDrawingService extends Disposable implements ISheetDrawingServ
             this._updateDrawing(param);
         });
         this._update$.next(params);
-    }
-
-    focusDrawing(param: Nullable<IDrawingSearch>): void {
-        if (param == null) {
-            this._focusDrawings = [];
-            this._focus$.next([]);
-            return;
-        }
-        const { unitId, subUnitId, drawingId, drawingType } = param;
-        const item = this._drawingMap[drawingType]?.[unitId]?.[subUnitId]?.[drawingId];
-        if (item == null) {
-            this._focusDrawings = [];
-            this._focus$.next([]);
-            return;
-        }
-        this._focusDrawings.push(item);
-        this._focus$.next([item]);
-    }
-
-    getFocusDrawings() {
-        return this._focusDrawings;
     }
 
     private _updateDrawing(param: ISheetDrawingServiceUpdateParam): void {

@@ -15,7 +15,7 @@
  */
 
 import type { IAbsoluteTransform, IKeyValue, Nullable, Observer } from '@univerjs/core';
-import { Disposable, Observable, toDisposable } from '@univerjs/core';
+import { Disposable, MOVE_BUFFER_VALUE, Observable, toDisposable } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
@@ -26,12 +26,13 @@ import { ScrollTimer } from './scroll-timer';
 import type { IRectProps } from './shape/rect';
 import { Rect } from './shape/rect';
 
-import { radToDeg } from './basics/tools';
+import { degToRad, radToDeg } from './basics/tools';
 import type { Scene } from './scene';
 import type { IPoint } from './basics/vector2';
 import { Vector2 } from './basics/vector2';
 import type { ITransformerConfig } from './basics/transformer-config';
 import { type IRegularPolygonProps, RegularPolygon } from './shape/regular-polygon';
+import { offsetRotationAxis } from './basics/offset-rotation-axis';
 
 enum TransformerManagerType {
     RESIZE_LT = '__SpreadsheetTransformerResizeLT__',
@@ -163,6 +164,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _observerObjectMap = new Map<string, Nullable<Observer<IPointerEvent | IMouseEvent>>>();
     private _copperControl: Nullable<Group>;
     private _copperSelectedObject: Nullable<BaseObject>;
+
+    private _moveBufferSkip = false;
 
     constructor(
         private _scene: Scene,
@@ -317,6 +320,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 });
             }
 
+            this._moveBufferSkip = false;
 
             const moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
@@ -410,6 +414,102 @@ export class Transformer extends Disposable implements ITransformerConfig {
         });
     }
 
+    private _checkMoveBoundary(moveObject: BaseObject, moveLeft: number, moveTop: number, ancestorLeft: number, ancestorTop: number, topSceneWidth: number, topSceneHeight: number) {
+        const { left, top, width, height } = moveObject;
+
+        if (moveLeft + left + ancestorLeft < 0) {
+            moveLeft = -ancestorLeft;
+        }
+
+        if (moveTop + top + ancestorTop < 0) {
+            moveTop = -ancestorTop;
+        }
+
+        if (moveLeft + left + width + ancestorLeft > topSceneWidth) {
+            moveLeft = topSceneWidth - width - left - ancestorLeft;
+        }
+
+        if (moveTop + top + height + ancestorTop > topSceneHeight) {
+            moveTop = topSceneHeight - height - top - ancestorTop;
+        }
+
+        return {
+            moveLeft,
+            moveTop,
+        };
+    }
+
+    private _moving(moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer, isCropper = false) {
+        const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
+        const x = moveOffsetX - this._viewportScrollX + scrollX;
+        const y = moveOffsetY - this._viewportScrollY + scrollY;
+
+        const { ancestorScaleX, ancestorScaleY, ancestorLeft, ancestorTop } = this._scene;
+
+        let moveLeft = this._smoothAccuracy((x - this._startOffsetX) / ancestorScaleX, isCropper);
+        let moveTop = this._smoothAccuracy((y - this._startOffsetY) / ancestorScaleY, isCropper);
+
+        if (this._moveBufferBlocker(moveOffsetX, moveOffsetY)) {
+            return;
+        }
+
+        const topScene = this._getTopScene();
+        if (!topScene) {
+            return;
+        }
+
+        const { width: topSceneWidth, height: topSceneHeight } = topScene;
+
+        if (!isCropper) {
+            const selectedObjects = Array.from(this._selectedObjectMap.values());
+            // move boundary check
+            for (let i = 0; i < selectedObjects.length; i++) {
+                const moveObject = selectedObjects[i];
+                const boundary = this._checkMoveBoundary(moveObject, moveLeft, moveTop, ancestorLeft, ancestorTop, topSceneWidth, topSceneHeight);
+
+                moveLeft = boundary.moveLeft;
+                moveTop = boundary.moveTop;
+            }
+
+            this._selectedObjectMap.forEach((moveObject) => {
+                moveObject.translate(moveLeft + moveObject.left, moveTop + moveObject.top);
+            });
+            this.onChangingObservable.notifyObservers({
+                objects: this._selectedObjectMap,
+                moveX: moveLeft,
+                moveY: moveTop,
+                type: MoveObserverType.MOVING,
+            });
+        } else if (this._copperSelectedObject) {
+            const cropper = this._copperSelectedObject;
+            // move boundary check
+            const boundary = this._checkMoveBoundary(cropper, moveLeft, moveTop, ancestorLeft, ancestorTop, topSceneWidth, topSceneHeight);
+
+            moveLeft = boundary.moveLeft;
+            moveTop = boundary.moveTop;
+
+            cropper.translate(moveLeft + cropper.left, moveTop + cropper.top);
+            this.onChangingObservable.notifyObservers({
+                objects: new Map([[cropper.oKey, cropper]]) as Map<string, BaseObject>,
+                moveX: moveLeft,
+                moveY: moveTop,
+                type: MoveObserverType.MOVING,
+            });
+        }
+
+
+        this._startOffsetX = x;
+        this._startOffsetY = y;
+    }
+
+    private _moveBufferBlocker(x: number, y: number) {
+        if (!this._moveBufferSkip && Math.abs(x - this._startOffsetX) < MOVE_BUFFER_VALUE && Math.abs(y - this._startOffsetY) < MOVE_BUFFER_VALUE) {
+            return true;
+        }
+        this._moveBufferSkip = true;
+        return false;
+    }
+
 
     private _anchorMoving(
         type: TransformerManagerType,
@@ -424,22 +524,18 @@ export class Transformer extends Disposable implements ITransformerConfig {
         const x = moveOffsetX - this._viewportScrollX + scrollX;
         const y = moveOffsetY - this._viewportScrollY + scrollY;
 
-        const { ancestorScaleX, ancestorScaleY } = this._scene;
-
-        const moveLeft = (x - this._startOffsetX) / ancestorScaleX;
-        const moveTop = (y - this._startOffsetY) / ancestorScaleY;
+        if (this._moveBufferBlocker(moveOffsetX, moveOffsetY)) {
+            return;
+        }
 
         const moveFunc = (moveObject: BaseObject) => {
-            const { left, top, width, height } = moveObject;
+            const { left, top, width, height, angle } = moveObject;
             const originState = this._startStateMap.get(moveObject.oKey) || {};
             let state: ITransformState = {};
 
-            if (keepRatio
-                && type !== TransformerManagerType.RESIZE_CT
-                && type !== TransformerManagerType.RESIZE_CB
-                && type !== TransformerManagerType.RESIZE_LM
-                && type !== TransformerManagerType.RESIZE_RM
-            ) {
+            const { moveLeft, moveTop } = this._getMovePoint(x, y, moveObject);
+
+            if (keepRatio && type !== TransformerManagerType.RESIZE_CT && type !== TransformerManagerType.RESIZE_CB && type !== TransformerManagerType.RESIZE_LM && type !== TransformerManagerType.RESIZE_RM) {
                 switch (type) {
                     case TransformerManagerType.RESIZE_LT:
                         state = this._resizeLeftTop(moveObject, moveLeft, moveTop, originState);
@@ -456,13 +552,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 }
             } else {
                 state = this._updateCloseKeepRatioState(type, left, top, width, height, moveLeft, moveTop);
-
-
-                this._startOffsetX = x;
-                this._startOffsetY = y;
             }
-            moveObject.transformByState(state);
+
+            moveObject.transformByState(this._applyRotationForResult(state, { left, top, width, height }, angle, isCropper));
         };
+
 
         if (!isCropper) {
             this._selectedObjectMap.forEach((moveObject) => {
@@ -470,8 +564,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
             });
             this.onChangingObservable.notifyObservers({
                 objects: this._selectedObjectMap,
-                moveX: moveLeft,
-                moveY: moveTop,
                 type: MoveObserverType.MOVING,
             });
         } else {
@@ -479,15 +571,73 @@ export class Transformer extends Disposable implements ITransformerConfig {
             moveFunc(applyObject);
             this.onChangingObservable.notifyObservers({
                 objects: new Map([[applyObject.oKey, applyObject]]) as Map<string, BaseObject>,
-                moveX: moveLeft,
-                moveY: moveTop,
                 type: MoveObserverType.MOVING,
             });
         }
+
+        if (!(keepRatio && type !== TransformerManagerType.RESIZE_CT && type !== TransformerManagerType.RESIZE_CB && type !== TransformerManagerType.RESIZE_LM && type !== TransformerManagerType.RESIZE_RM)) {
+            this._startOffsetX = x;
+            this._startOffsetY = y;
+        }
+    }
+
+    private _getMovePoint(x: number, y: number, moveObject: BaseObject) {
+        const { ancestorScaleX, ancestorScaleY } = this._scene;
+        const { left, top, width, height, angle } = moveObject;
+
+        const cx = left + width / 2;
+        const cy = top + height / 2;
+        const centerPoint = new Vector2(cx, cy);
+
+        const xyPoint = new Vector2(x, y);
+        xyPoint.rotateByPoint(degToRad(-angle), centerPoint);
+
+        const startPoint = new Vector2(this._startOffsetX, this._startOffsetY);
+        startPoint.rotateByPoint(degToRad(-angle), centerPoint);
+
+        const moveLeft = (xyPoint.x - startPoint.x) / ancestorScaleX;
+        const moveTop = (xyPoint.y - startPoint.y) / ancestorScaleY;
+
+        return {
+            moveLeft,
+            moveTop,
+        };
+    }
+
+    /**
+     *
+     */
+    private _applyRotationForResult(newsState: ITransformState, oldState: ITransformState, angle: number, isCropper = false) {
+        if (angle === 0) {
+            return newsState;
+        }
+
+        const { left = 0, top = 0, width = 0, height = 0 } = newsState;
+        const { left: oldLeft = 0, top: oldTop = 0, width: oldWidth = 0, height: oldHeight = 0 } = oldState;
+
+        const oldCx = oldWidth / 2;
+        const oldCy = oldHeight / 2;
+
+        const newCx = width / 2 + left - oldLeft;
+        const newCy = height / 2 + top - oldTop;
+
+        const finalPoint = offsetRotationAxis(new Vector2(oldCx, oldCy), angle, new Vector2(left, top), new Vector2(newCx, newCy));
+
+        return {
+            width: this._smoothAccuracy(width, isCropper),
+            height: this._smoothAccuracy(height, isCropper),
+            left: this._smoothAccuracy(finalPoint.x, isCropper),
+            top: this._smoothAccuracy(finalPoint.y, isCropper),
+        };
     }
 
     private _updateCloseKeepRatioState(type: TransformerManagerType, left: number, top: number, width: number, height: number, moveLeft: number, moveTop: number) {
-        const state: ITransformState = {};
+        const state: ITransformState = {
+            left,
+            top,
+            width,
+            height,
+        };
 
         switch (type) {
             case TransformerManagerType.RESIZE_LT:
@@ -537,8 +687,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
         const { moveLeft: moveLeftFix, moveTop: moveTopFix } = this._fixMoveLtRb(moveLeft, moveTop, originWidth, originHeight, aspectRatio);
 
         return {
-            left: originLeft + moveLeftFix,
-            top: originTop + moveTopFix,
+            left: originLeft + moveLeftFix + left + width - originWidth - originLeft,
+            top: originTop + moveTopFix + top + height - originHeight - originTop,
             width: originWidth - moveLeftFix,
             height: originHeight - moveTopFix,
         };
@@ -552,6 +702,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
         const { moveLeft: moveLeftFix, moveTop: moveTopFix } = this._fixMoveLtRb(moveLeft, moveTop, originWidth, originHeight, aspectRatio);
 
         return {
+            left,
+            top,
             width: originWidth + moveLeftFix,
             height: originHeight + moveTopFix,
         };
@@ -565,7 +717,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
         const { moveLeft: moveLeftFix, moveTop: moveTopFix } = this._fixMoveLbRt(moveLeft, moveTop, originWidth, originHeight, aspectRatio);
 
         return {
-            left: originLeft + moveLeftFix,
+            left: originLeft + moveLeftFix + left + width - originWidth - originLeft,
+            top,
             width: originWidth - moveLeftFix,
             height: originHeight + moveTopFix,
         };
@@ -579,7 +732,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
         const { moveLeft: moveLeftFix, moveTop: moveTopFix } = this._fixMoveLbRt(moveLeft, moveTop, originWidth, originHeight, aspectRatio);
 
         return {
-            top: originTop + moveTopFix,
+            left,
+            top: originTop + moveTopFix + top + height - originHeight - originTop,
             width: originWidth + moveLeftFix,
             height: originHeight - moveTopFix,
         };
@@ -621,24 +775,25 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _attachEventToAnchor(anchor: BaseObject, type = TransformerManagerType.RESIZE_LT, applyObject: BaseObject) {
-        const { keepRatio, isCropper } = this._getConfig(applyObject);
         this.disposeWithMe(
             toDisposable(
                 anchor.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
                     this._startOffsetX = evtOffsetX;
                     this._startOffsetY = evtOffsetY;
-                    const scene = this._getTopScene();
-
-                    if (scene == null) {
+                    const topScene = this._getTopScene();
+                    const { keepRatio, isCropper } = this._getConfig(applyObject);
+                    if (topScene == null) {
                         return;
                     }
-                    scene.disableEvent();
-                    const scrollTimer = ScrollTimer.create(scene);
+                    topScene.disableEvent();
+                    const scrollTimer = ScrollTimer.create(topScene);
                     scrollTimer.startScroll(evtOffsetX, evtOffsetY);
                     const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
                     this._viewportScrollX = scrollX;
                     this._viewportScrollY = scrollY;
+                    const { ancestorLeft, ancestorTop } = this._scene;
+                    const { width: topSceneWidth, height: topSceneHeight } = topScene;
 
                     const cursor = this._getRotateAnchorCursor(type);
                     if (!isCropper) {
@@ -661,39 +816,67 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         this._startStateMap.set(applyObject.oKey, { width, height, left, top });
                     }
 
-                    this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                    this._moveBufferSkip = false;
+                    this._moveObserver = topScene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                         const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
                         this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer, keepRatio, isCropper, applyObject);
                         scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
                             this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer, keepRatio, isCropper, applyObject);
                         });
-                        scene.setCursor(cursor);
+                        topScene.setCursor(cursor);
                     });
 
-                    this._upObserver = scene.onPointerUpObserver.add(() => {
-                        scene.onPointerMoveObserver.remove(this._moveObserver);
-                        scene.onPointerUpObserver.remove(this._upObserver);
-                        scene.enableEvent();
-                        scene.resetCursor();
+                    this._upObserver = topScene.onPointerUpObserver.add(() => {
+                        topScene.onPointerMoveObserver.remove(this._moveObserver);
+                        topScene.onPointerUpObserver.remove(this._upObserver);
+                        topScene.enableEvent();
+                        topScene.resetCursor();
                         scrollTimer.dispose();
-                        this.refreshControls();
                         this._startStateMap.clear();
                         if (!isCropper) {
+                            this._recoverySizeBoundary(Array.from(this._selectedObjectMap.values()), ancestorLeft, ancestorTop, topSceneWidth, topSceneHeight);
                             this.onChangeEndObservable.notifyObservers({
                                 objects: this._selectedObjectMap,
                                 type: MoveObserverType.MOVE_END,
                             });
                         } else {
+                            this._recoverySizeBoundary([applyObject], ancestorLeft, ancestorTop, topSceneWidth, topSceneHeight);
                             this.onChangeEndObservable.notifyObservers({
                                 objects: new Map([[applyObject.oKey, applyObject]]) as Map<string, BaseObject>,
                                 type: MoveObserverType.MOVE_END,
                             });
                         }
+                        this.refreshControls();
                     });
                     state.stopPropagation();
                 })
             )
         );
+    }
+
+    private _recoverySizeBoundary(selectedObjects: BaseObject[], ancestorLeft: number, ancestorTop: number, topSceneWidth: number, topSceneHeight: number) {
+        for (let i = 0; i < selectedObjects.length; i++) {
+            const moveObject = selectedObjects[i];
+            const { left, top, width, height } = moveObject;
+
+            const newTransform: ITransformState = {};
+
+            if (left + ancestorLeft < 0) {
+                newTransform.left = -ancestorLeft;
+                newTransform.width = width + left;
+            } else if (left + width + ancestorLeft > topSceneWidth) {
+                newTransform.width = topSceneWidth - left - ancestorLeft;
+            }
+
+            if (top + ancestorTop < 0) {
+                newTransform.top = -ancestorTop;
+                newTransform.height = height + top;
+            } else if (top + height + ancestorTop > topSceneHeight) {
+                newTransform.height = topSceneHeight - top - ancestorTop;
+            }
+
+            moveObject.transformByState(newTransform);
+        }
     }
 
     private _attachEventToRotate(rotateControl: Rect, applyObject: BaseObject) {
@@ -731,6 +914,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         type: MoveObserverType.MOVE_START,
                     });
 
+
+                    this._moveBufferSkip = false;
                     const moveObserver = topScene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                         const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
                         this._rotateMoving(moveOffsetX, moveOffsetY, centerX, centerY, agentOrigin);
@@ -759,6 +944,10 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _rotateMoving(moveOffsetX: number, moveOffsetY: number, centerX: number, centerY: number, agentOrigin: number) {
         const { ancestorScaleX, ancestorScaleY } = this._scene;
 
+        if (this._moveBufferBlocker(moveOffsetX, moveOffsetY)) {
+            return;
+        }
+
         const angle1 = Math.atan2(
             (moveOffsetY - centerY) / ancestorScaleY + this._viewportScrollY,
             (moveOffsetX - centerX) / ancestorScaleX + this._viewportScrollX
@@ -776,6 +965,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
             angle = 360 + angle;
         }
         angle %= 360;
+
+        angle = this._smoothAccuracy(angle);
 
         this._selectedObjectMap.forEach((moveObject) => {
             moveObject.transformByState({ angle });
@@ -849,7 +1040,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 top += -borderSpacing - borderStrokeWidth;
                 break;
             case TransformerManagerType.RESIZE_CT:
-                left += width / 2;
+                left += width / 2 - longEdge / 2;
                 top += -borderSpacing - borderStrokeWidth;
 
                 break;
@@ -860,12 +1051,12 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 break;
             case TransformerManagerType.RESIZE_LM:
                 left += borderSpacing - borderStrokeWidth;
-                top += height / 2;
+                top += height / 2 - longEdge / 2;
 
                 break;
             case TransformerManagerType.RESIZE_RM:
                 left += width + borderSpacing - borderStrokeWidth - shortEdge;
-                top += height / 2;
+                top += height / 2 - longEdge / 2;
 
                 break;
             case TransformerManagerType.RESIZE_LB:
@@ -874,7 +1065,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
                 break;
             case TransformerManagerType.RESIZE_CB:
-                left += width / 2;
+                left += width / 2 - longEdge / 2;
                 top += height + borderSpacing - borderStrokeWidth - shortEdge;
 
                 break;
@@ -1279,42 +1470,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
         return currentScene.getEngine()?.activeScene as Nullable<Scene>;
     }
 
-    private _moving(moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer, isCropper = false) {
-        const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
-        const x = moveOffsetX - this._viewportScrollX + scrollX;
-        const y = moveOffsetY - this._viewportScrollY + scrollY;
-
-        const { ancestorScaleX, ancestorScaleY } = this._scene;
-
-        const moveLeft = (x - this._startOffsetX) / ancestorScaleX;
-        const moveTop = (y - this._startOffsetY) / ancestorScaleY;
-
-        if (!isCropper) {
-            this._selectedObjectMap.forEach((moveObject) => {
-                moveObject.translate(moveLeft + moveObject.left, moveTop + moveObject.top);
-            });
-            this.onChangingObservable.notifyObservers({
-                objects: this._selectedObjectMap,
-                moveX: moveLeft,
-                moveY: moveTop,
-                type: MoveObserverType.MOVING,
-            });
-        } else if (this._copperSelectedObject) {
-            const cropper = this._copperSelectedObject;
-            cropper.translate(moveLeft + cropper.left, moveTop + cropper.top);
-            this.onChangingObservable.notifyObservers({
-                objects: new Map([[cropper.oKey, cropper]]) as Map<string, BaseObject>,
-                moveX: moveLeft,
-                moveY: moveTop,
-                type: MoveObserverType.MOVING,
-            });
-        }
-
-
-        this._startOffsetX = x;
-        this._startOffsetY = y;
-    }
-
     private _updateActiveObjectList(applyObject: BaseObject, evt: IPointerEvent | IMouseEvent) {
         const { isCropper } = this._getConfig(applyObject);
         if (this._selectedObjectMap.has(applyObject.oKey)) {
@@ -1338,5 +1493,12 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._cancelFocusObserver = scene.onPointerDownObserver.add(() => {
             this.clearSelectedObjects();
         });
+    }
+
+    private _smoothAccuracy(num: number, isCropper = false, accuracy: number = 10) {
+        if (isCropper) {
+            return Math.round(num * 1000) / 1000;
+        }
+        return Math.round(num * accuracy) / accuracy;
     }
 }

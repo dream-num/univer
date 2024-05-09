@@ -434,8 +434,8 @@ export class SheetFindModel extends FindModel {
 
     private _disposeHighlights(): void {
         this._highlightShapes.forEach((shape) => {
-            shape.dispose();
             shape.getScene().makeDirty();
+            shape.dispose();
         });
 
         this._highlightShapes = [];

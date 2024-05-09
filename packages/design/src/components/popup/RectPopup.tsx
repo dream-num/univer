@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useEvent } from 'rc-util';
 import styles from './index.module.less';
 
@@ -87,6 +87,7 @@ function RectPopup(props: IRectPopupProps) {
         left: -9999,
     });
 
+    const style = useMemo(() => ({ ...position, overflow: 'inherit' }), [position]);
     useEffect(() => {
         const { clientWidth, clientHeight } = nodeRef.current!;
         const { innerWidth, innerHeight } = window;
@@ -144,7 +145,7 @@ function RectPopup(props: IRectPopupProps) {
         <section
             ref={nodeRef}
             className={styles.popup}
-            style={position}
+            style={style}
             onClick={(e) => {
                 e.stopPropagation();
             }}

@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, ImageSourceType, ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
+import { degToRad } from './tools';
+import type { Vector2 } from './vector2';
 
+export function offsetRotationAxis(referenceCoords: Vector2, angleDegree: number, vertexCoords: Vector2, centerCoords: Vector2): Vector2 {
+    const angleRad = degToRad(angleDegree);
 
-export interface IImageDataValue {
+    const newVertexCoords = vertexCoords.clone().rotateByPoint(angleRad, referenceCoords);
 
+    const newCenterCoords = centerCoords.clone().rotateByPoint(angleRad, referenceCoords);
+
+    const finalPoint = newVertexCoords.clone();
+    finalPoint.rotateByPoint(degToRad(-angleDegree), newCenterCoords);
+
+    return finalPoint;
 }
-
-export interface IImageData extends IDrawingParam {
-    imageSourceType: ImageSourceType;
-    source: string;
-
-    /**
-     * 20.1.8.55 srcRect (Source Rectangle)
-     */
-    srcRect?: Nullable<ISrcRect>;
-
-    /**
-     * 20.1.9.18 prstGeom (Preset geometry)
-     */
-    prstGeom?: Nullable<PresetGeometryType>;
-}
-

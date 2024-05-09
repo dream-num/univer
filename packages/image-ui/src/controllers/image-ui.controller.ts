@@ -23,6 +23,13 @@ import { ImagePopupMenu } from '../views/image-popup-menu/ImagePopupMenu';
 import zhCN from '../locale/zh-CN';
 import enUS from '../locale/en-US';
 import { CloseImageCropOperation, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
+import { ImageViewer } from '../views/image-viewer/ImageViewer';
+import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
+import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
+import { SetImageArrangeOperation } from '../commands/operations/image-arrange.operation';
+import { SetImageGroupOperation } from '../commands/operations/image-group.operation';
+import { SetImageAlignOperation } from '../commands/operations/image-align.operation';
+
 
 @OnLifecycle(LifecycleStages.Rendered, ImageUIController)
 export class ImageUIController extends Disposable {
@@ -46,6 +53,7 @@ export class ImageUIController extends Disposable {
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(COMPONENT_IMAGE_POPUP_MENU, ImagePopupMenu));
+        this.disposeWithMe(componentManager.register(COMPONENT_IMAGE_VIEWER, ImageViewer));
     }
 
     private _initMenus(): void {
@@ -63,6 +71,10 @@ export class ImageUIController extends Disposable {
         [
             OpenImageCropOperation,
             CloseImageCropOperation,
+            ImageResetSizeOperation,
+            SetImageArrangeOperation,
+            SetImageGroupOperation,
+            SetImageAlignOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

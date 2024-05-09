@@ -22,12 +22,18 @@ import {
 import type { IRenderContext } from '@univerjs/engine-render';
 import type { ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import {
+    InsertColMutation,
+    InsertRowMutation,
+    RemoveColMutation,
+    RemoveRowMutation,
     SetColHiddenMutation,
     SetColVisibleMutation,
     SetRowHiddenMutation,
     SetRowVisibleMutation,
     SetSpecificColsVisibleCommand,
     SetSpecificRowsVisibleCommand,
+    SetWorksheetColWidthMutation,
+    SetWorksheetRowIsAutoHeightMutation,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
@@ -40,6 +46,12 @@ import { getCoordByCell, getSheetObject } from './utils/component-tools';
 const HEADER_UNHIDE_CONTROLLER_SHAPE = '__SpreadsheetHeaderUnhideSHAPEControllerShape__';
 
 const RENDER_COMMANDS: string[] = [
+    InsertColMutation.id,
+    InsertRowMutation.id,
+    RemoveColMutation.id,
+    RemoveRowMutation.id,
+    SetWorksheetColWidthMutation.id,
+    SetWorksheetRowIsAutoHeightMutation.id,
     SetRowHiddenMutation.id,
     SetRowVisibleMutation.id,
     SetColHiddenMutation.id,

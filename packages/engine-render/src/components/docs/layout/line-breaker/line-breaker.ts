@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable ts/naming-convention */
+
 import type { Nullable } from '@univerjs/core';
 
 import { Break } from './break';
@@ -88,7 +90,7 @@ export class LineBreaker {
         return this;
     }
 
-    nextBreak() {
+    nextBreakPoint() {
         // get the first char if we're at the beginning of the string
         if (this._curClass == null) {
             const firstClass = this._nextCharClass();

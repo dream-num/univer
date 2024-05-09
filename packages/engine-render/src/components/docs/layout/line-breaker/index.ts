@@ -14,12 +14,4 @@
  * limitations under the License.
  */
 
-import type { LineBreaker } from '../linebreaker';
-
-const TAB_CODE_POINT = 9;
-
-export function tabLineBreakExtension(breaker: LineBreaker) {
-    breaker.addRule('break_before_tab', (codePoint) => {
-        return codePoint === TAB_CODE_POINT;
-    });
-}
+export { LineBreaker } from './line-breaker';

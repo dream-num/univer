@@ -17,8 +17,8 @@
 import type { IParagraphStyle, Nullable } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
-import { LineBreaker } from '../../linebreak';
-import { tabLineBreakExtension } from '../../linebreak/extensions/tab-linebreak-extension';
+import { LineBreaker } from '../../line-breaker';
+import { tabLineBreakExtension } from '../../line-breaker/extensions/tab-linebreak-extension';
 import { createSkeletonCustomBlockGlyph, createSkeletonLetterGlyph, createSkeletonTabGlyph, glyphShrinkLeft, glyphShrinkRight } from '../../model/glyph';
 import { getCharSpaceApply, getFontCreateConfig } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
@@ -128,7 +128,7 @@ export function shaping(
     tabLineBreakExtension(breaker);
 
     // eslint-disable-next-line no-cond-assign
-    while ((bk = breaker.nextBreak())) {
+    while ((bk = breaker.nextBreakPoint())) {
         // get the string between the last break and this one
         const word = content.slice(last, bk.position);
         const shapedGlyphs: IDocumentSkeletonGlyph[] = [];

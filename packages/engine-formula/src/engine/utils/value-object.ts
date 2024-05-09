@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
-import { CellValueType, isRealNum } from '@univerjs/core';
+import { CellValueType } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
@@ -106,10 +106,11 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
             };
         }
         // String "00"
-        if (vo.isString() && isRealNum(v)) {
+        // =IF(1,"0") evaluates to "0", which should be a normal string (regardless of whether it is a number or not). Forced strings only appear when preceded by single quotes
+        if (vo.isString()) {
             return {
                 v,
-                t: CellValueType.FORCE_STRING,
+                t: CellValueType.STRING,
                 ...cellWithStyle,
             };
         }

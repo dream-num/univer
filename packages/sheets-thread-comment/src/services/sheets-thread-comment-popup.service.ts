@@ -24,7 +24,7 @@ import { BehaviorSubject } from 'rxjs';
 import { SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 
 export interface IThreadCommentPopup extends ISheetLocationBase {
-    commentId: string;
+    commentId?: string;
 }
 
 export class SheetsThreadCommentPopupService extends Disposable {

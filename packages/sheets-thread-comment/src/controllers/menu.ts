@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { getMenuHiddenObservable, MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
+import { getMenuHiddenObservable, KeyCode, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { ToggleSheetCommentPanelOperation } from '@univerjs/thread-comment-ui';
 import { UniverInstanceType } from '@univerjs/core';
+import { whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { ShowAddSheetCommentModalOperation } from '../commands/operations/comment.operation';
 import { COMMENT_SINGLE_ICON } from '../types/const';
 
@@ -29,7 +31,7 @@ export const threadCommentMenu = (accessor: IAccessor) => {
         icon: COMMENT_SINGLE_ICON,
         title: 'sheetThreadComment.menu.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
+    } as IMenuItem;
 };
 
 export const threadPanelMenu = (accessor: IAccessor) => {
@@ -41,4 +43,10 @@ export const threadPanelMenu = (accessor: IAccessor) => {
         positions: MenuPosition.TOOLBAR_START,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
+};
+
+export const AddCommentShortcut: IShortcutItem = {
+    id: ShowAddSheetCommentModalOperation.id,
+    binding: KeyCode.M | MetaKeys.CTRL_COMMAND | MetaKeys.ALT,
+    preconditions: whenSheetEditorFocused,
 };

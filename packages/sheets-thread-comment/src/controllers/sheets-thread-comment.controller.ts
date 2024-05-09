@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
+import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { CommentSingle } from '@univerjs/icons';
 import { SetActiveCommentOperation, THREAD_COMMENT_PANEL, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
@@ -29,7 +29,7 @@ import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
 import { enUS, zhCN } from '../locales';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
 import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
-import { threadCommentMenu, threadPanelMenu } from './menu';
+import { AddCommentShortcut, threadCommentMenu, threadPanelMenu } from './menu';
 
 @OnLifecycle(LifecycleStages.Starting, SheetsThreadCommentController)
 export class SheetsThreadCommentController extends Disposable {
@@ -38,17 +38,23 @@ export class SheetsThreadCommentController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(ICommandService) private readonly _commandService: ICommandService,
+        @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetsThreadCommentPopupService) private readonly _sheetsThreadCommentPopupService: SheetsThreadCommentPopupService,
         @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel,
-        @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService
+        @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService,
+        @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
         super();
         this._initMenu();
+        this._initShortcut();
         this._initComponent();
         this._initLocale();
         this._initCommandListener();
         this._initPanelListener();
+    }
+
+    private _initShortcut() {
+        this._shortcutService.registerShortcut(AddCommentShortcut);
     }
 
     private _initCommandListener() {
@@ -76,7 +82,6 @@ export class SheetsThreadCommentController extends Disposable {
             }
         });
     }
-
 
     private _initMenu() {
         [

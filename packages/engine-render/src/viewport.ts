@@ -647,7 +647,6 @@ export class Viewport {
      * @param objects
      * @param isMaxLayer
      * @param isLast
-     * @returns
      */
     render(parentCtx?: UniverRenderingContext, objects: BaseObject[] = [], isMaxLayer = false, isLast = false) {
         if (
@@ -673,23 +672,13 @@ export class Viewport {
         if (this._renderClipState) {
             mainCtx.beginPath();
             // DEPT: left is set by upper views but width and height is not
-            // 这里用 (this.width || 0) * scale 反而出错了  选区不对
-            // 此刻 this.left 已经乘了 scale
+            // this.left has handle scale already, no need to `this.width * scale`
             mainCtx.rect(this.left, this.top, (this.width || 0), (this.height || 0));
             mainCtx.clip();
         }
 
         mainCtx.transform(tm[0], tm[1], tm[2], tm[3], tm[4], tm[5]);
         const viewPortInfo = this._calcViewportInfo();
-
-
-        // scrolling ---> make Dirty
-        if (viewPortInfo.diffX !== 0 || viewPortInfo.diffY !== 0 || viewPortInfo.diffBounds.length !== 0) {
-            this.markDirty();
-            viewPortInfo.isDirty = true;
-        }
-        viewPortInfo.cacheCanvas = this._cacheCanvas!;
-
 
         objects.forEach((o) => {
             o.render(mainCtx, viewPortInfo);
@@ -722,48 +711,54 @@ export class Viewport {
         this._scrollRendered();
     }
 
+
+    private _makeDefaultViewport() {
+        return {
+            viewBound: {
+                left: -1,
+                top: -1,
+                right: -1,
+                bottom: -1,
+            },
+            diffBounds: [],
+            diffX: -1,
+            diffY: -1,
+            viewPortPosition: {
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+            },
+            viewPortKey: this.viewportKey,
+            // isDirty: this.isDirty,
+            isForceDirty: this.isForceDirty,
+            allowCache: false,
+            cacheBound: {
+                left: -1,
+                top: -1,
+                right: -1,
+                bottom: -1,
+            },
+            diffCacheBounds: [],
+            cacheViewPortPosition: {
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+            },
+            shouldCacheUpdate: 0,
+            sceneTrans: Transform.create([1, 0, 0, 1, 0, 0]),
+            leftOrigin: 0,
+            topOrigin: 0,
+            bufferEdgeX: this.bufferEdgeX,
+            bufferEdgeY: this.bufferEdgeY,
+        } satisfies IViewportInfo;
+    }
+
+    // eslint-disable-next-line max-lines-per-function
     private _calcViewportInfo(): IViewportInfo {
         if (this.isActive === false) {
-            return {
-                viewBound: {
-                    left: -1,
-                    top: -1,
-                    right: -1,
-                    bottom: -1,
-                },
-                diffBounds: [],
-                diffX: -1,
-                diffY: -1,
-                viewPortPosition: {
-                    top: 0,
-                    left: 0,
-                    bottom: 0,
-                    right: 0,
-                },
-                viewPortKey: this.viewportKey,
-                isDirty: this.isDirty,
-                isForceDirty: this.isForceDirty,
-                allowCache: false,
-                cacheBound: {
-                    left: -1,
-                    top: -1,
-                    right: -1,
-                    bottom: -1,
-                },
-                diffCacheBounds: [],
-                cacheViewPortPosition: {
-                    top: 0,
-                    left: 0,
-                    bottom: 0,
-                    right: 0,
-                },
-                shouldCacheUpdate: 0,
-                sceneTrans: Transform.create([1, 0, 0, 1, 0, 0]),
-                leftOrigin: 0,
-                topOrigin: 0,
-                bufferEdgeX: this.bufferEdgeX,
-                bufferEdgeY: this.bufferEdgeY,
-            } satisfies IViewportInfo;
+            return this._makeDefaultViewport();
         }
 
         const sceneTrans = this._scene.transform.clone();
@@ -804,10 +799,6 @@ export class Viewport {
 
         const viewBound = {
             // 这里若对 top left 做 Math.floor 对 right bottom Math.ceil 操作, 放大后, 贴图会模糊
-            // top: parseFloat(topLeft.y.toFixed(3)),
-            // left: parseFloat(topLeft.x.toFixed(3)),
-            // right: parseFloat(bottomRight.x.toFixed(3)),
-            // bottom: parseFloat(bottomRight.y.toFixed(3)),
             top: topLeft.y,
             left: topLeft.x,
             right: bottomRight.x,
@@ -833,7 +824,6 @@ export class Viewport {
         const cacheViewPortPosition = this.expandBounds(viewPortPosition);
 
         const shouldCacheUpdate = this._shouldCacheUpdate(viewBound, this._preCacheBound, diffX, diffY);
-        // console.log('shouldCacheUpdate', this.viewPortKey, shouldCacheUpdate);
         if (shouldCacheUpdate) {
             diffCacheBounds = this._calcDiffCacheBound(this._preCacheBound, cacheBound);
         }
@@ -845,7 +835,7 @@ export class Viewport {
             diffY,
             viewPortPosition,
             viewPortKey: this.viewportKey,
-            isDirty: this.isDirty,
+            isDirty: this.isDirty ? 0b10 : 0b00,
             isForceDirty: this.isForceDirty,
             allowCache: this._allowCache,
             cacheBound: this.cacheBound,
@@ -881,6 +871,8 @@ export class Viewport {
         return svCoord;
     }
 
+
+    // eslint-disable-next-line complexity
     onMouseWheel(evt: IWheelEvent, state: EventState) {
         if (!this._scrollBar || this.isActive === false) {
             return;
@@ -888,11 +880,9 @@ export class Viewport {
         let isLimitedStore;
         if (evt.inputIndex === PointerInput.MouseWheelX) {
             const deltaFactor = Math.abs(evt.deltaX);
-            // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
             const allWidth = this._scene.width;
             const viewWidth = this.width || 1;
             const scrollNum = (viewWidth / allWidth) * deltaFactor;
-
             if (evt.deltaX > 0) {
                 isLimitedStore = this.scrollBy({
                     x: scrollNum,
@@ -967,7 +957,6 @@ export class Viewport {
         }
         if (evt.inputIndex === PointerInput.MouseWheelZ) {
             // TODO
-            // ...
         }
 
         this._scene.makeDirty(true);
@@ -1084,15 +1073,13 @@ export class Viewport {
 
     private _resizeCacheCanvasAndScrollBar() {
         const actualScrollX = this.actualScrollX;
-
         const actualScrollY = this.actualScrollY;
-        const { width, height, parentHeight } = this._getViewPortSize();
+        const { width, height } = this._getViewPortSize();
 
         const scaleX = this.scene.scaleX;
         const scaleY = this.scene.scaleY;
         const canvasW = width !== 0 ? width + this.bufferEdgeX * 2 * scaleX : 0;
         const canvasH = height !== 0 ? height + this.bufferEdgeY * 2 * scaleY : 0;
-
         this._cacheCanvas?.setSize(canvasW, canvasH);
 
         const contentWidth = (this._scene.width - this._paddingEndX) * this._scene.scaleX;
@@ -1135,6 +1122,8 @@ export class Viewport {
         } else {
             height = (this._heightOrigin || 0) * scaleY;
         }
+        width = Math.max(0, width);
+        height = Math.max(0, height);
 
         this._width = width;
         this._height = height;

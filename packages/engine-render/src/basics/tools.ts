@@ -808,7 +808,7 @@ export function inRowViewRanges(ranges: IRange[], rowIndex: number) {
 }
 
 /**
- * 如果 range 有相交, 那么扩展到第一个 range 中.
+ * 如果 range 有相交, 那么扩展到第一组 range 中.
  * @param ranges
  */
 export function mergeRangeIfIntersects(mainRanges: IRange[], ranges: IRange[]) {

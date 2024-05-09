@@ -1379,8 +1379,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         const row_ed = searchArray(rowHeightAccumulation, Math.round(viewBound.bottom) - this.columnHeaderHeightAndMarginTop);
 
         if (row_st === -1 && row_ed === 0) {
-            dataset_row_st = -1;
-            dataset_row_ed = -1;
+            dataset_row_st = 0;
+            dataset_row_ed = 0;
         } else {
             if (row_st === -1) {
                 dataset_row_st = 0;
@@ -1401,8 +1401,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         const col_ed = searchArray(columnWidthAccumulation, Math.round(viewBound.right) - this.rowHeaderWidthAndMarginLeft);
 
         if (col_st === -1 && col_ed === 0) {
-            dataset_col_st = -1;
-            dataset_col_ed = -1;
+            dataset_col_st = 0;
+            dataset_col_ed = 0;
         } else {
             if (col_st === -1) {
                 dataset_col_st = 0;

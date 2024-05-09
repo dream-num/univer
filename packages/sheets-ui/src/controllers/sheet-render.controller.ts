@@ -213,10 +213,8 @@ export class SheetRenderController extends RxDisposable {
         scene.makeDirty();
         if (!command.params) return;
         const cmdParams = command.params as Record<string, any>;
-        const viewports = scene.getSpreadSheetViewports();
-        // 还有个概念和这个很像， SetRangeValuesCommand
+        const viewports = scene.getViewports().filter((v) => ['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(v.viewportKey));
         if (command.id === SetRangeValuesMutation.id && cmdParams.cellValue) {
-            // TODO command.params 数据结构有很多种
             const dirtyRange: IRange = this._cellValueToRange(cmdParams.cellValue);
             const dirtyBounds = this._rangeToBounds([dirtyRange]);
             this.markViewportDirty(viewports, dirtyBounds);

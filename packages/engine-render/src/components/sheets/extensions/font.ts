@@ -139,7 +139,7 @@ export class Font extends SheetExtension {
                     /**
                      * Incremental content rendering for texture mapping
                      * startRow endRow 和 diffRanges 在 row 上不相交, 那么返回不渲染
-                     * (因为可以走贴图)
+                     * PS 如果这个单元格并不在 merge 区域内, mergeInfo start 和 end 就是单元格本身
                      */
                     if (!this.isRowInDiffRanges(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
                         return true;
@@ -346,7 +346,7 @@ export class Font extends SheetExtension {
 
         ctx.rectByPrecision(startX, startY, endX - startX, endY - startY);
         ctx.clip();
-        ctx.clearRectForTexture(startX, startY, endX - startX, endY - startY);
+        // ctx.clearRectForTexture(startX, startY, endX - startX, endY - startY);
     }
 }
 

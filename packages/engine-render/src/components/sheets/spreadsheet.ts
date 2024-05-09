@@ -112,6 +112,14 @@ export class Spreadsheet extends SheetComponent {
         this._fontExtension = null as unknown as Font;
     }
 
+    /**
+     * 根据 viewport 绘制
+     * viewRange 根据 cacheBound 计算得到
+     * diffRange 根据 diffCacheBounds 得到
+     * @param ctx
+     * @param viewportInfo
+     * @returns
+     */
     override draw(ctx: UniverRenderingContext, viewportInfo: IViewportInfo) {
         // const { parent = { scaleX: 1, scaleY: 1 } } = this;
         // const mergeData = this.getMergeData();
@@ -123,7 +131,7 @@ export class Spreadsheet extends SheetComponent {
 
         const parentScale = this.getParentScale();
 
-        const diffRanges = this._refreshIncrementalState && viewportInfo?.diffBounds
+        const diffRanges = this._refreshIncrementalState && viewportInfo?.diffCacheBounds
             ? viewportInfo?.diffBounds?.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
             : undefined;
         const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo?.cacheBound)];
@@ -218,10 +226,8 @@ export class Spreadsheet extends SheetComponent {
     }
 
     /**
-     * canvas resize 并不会调用此函数
-     * resize 调用的是 forceDirty
+     * canvas resize calling not this function
      * @param state
-     * @returns
      */
     override makeDirty(state: boolean = true) {
         super.makeDirty(state);
@@ -242,28 +248,23 @@ export class Spreadsheet extends SheetComponent {
         const bufferEdgeSizeX = bufferEdgeX * scaleX / window.devicePixelRatio;
         const bufferEdgeSizeY = bufferEdgeY * scaleY / window.devicePixelRatio;
 
-
         const cacheCtx = cacheCanvas.getContext();
         cacheCtx.save();
 
         const { left, top, right, bottom } = viewPortPosition;
-
         const dw = right - left + rowHeaderWidth;
         const dh = bottom - top + columnHeaderHeight;
 
-
-        // 没有滚动
-        if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || isForceDirty) {
+        if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || isForceDirty || isDirty) {
             if (isDirty || isForceDirty) {
                 this.refreshCacheCanvas(viewportBoundsInfo, { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY });
             }
             this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
-        } else {
-            if (isDirty) {
-                this.paintNewAreaOfCacheCanvas(viewportBoundsInfo, {
-                    cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeight, rowHeaderWidth,
-                });
-            }
+        } else if (diffBounds.length !== 0 || diffX !== 0 || diffY === 0) {
+            // scrolling && no dirty
+            this.paintNewAreaOfCacheCanvas(viewportBoundsInfo, {
+                cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeight, rowHeaderWidth,
+            });
             this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
         }
         cacheCtx.restore();

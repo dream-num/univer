@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, IOperation } from '@univerjs/core';
-import { CommandType, IDrawingManagerService } from '@univerjs/core';
+import type { IDrawingSearch, IOperation, ISrcRect } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 
 
 export const OpenImageCropOperation: IOperation<IDrawingSearch> = {
@@ -34,3 +34,14 @@ export const CloseImageCropOperation: IOperation<IDrawingSearch> = {
     },
 };
 
+export interface IOpenImageCropOperationBySrcRectParams extends IDrawingSearch {
+    srcRect: ISrcRect;
+}
+
+export const OpenImageCropOperationBySrcRect: IOperation<IOpenImageCropOperationBySrcRectParams> = {
+    id: 'sheet.operation.open-image-crop-by-srcRect',
+    type: CommandType.OPERATION,
+    handler: (accessor, params) => {
+        return true;
+    },
+};

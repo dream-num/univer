@@ -14,25 +14,5 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, ImageSourceType, ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
-
-
-export interface IImageDataValue {
-
-}
-
-export interface IImageData extends IDrawingParam {
-    imageSourceType: ImageSourceType;
-    source: string;
-
-    /**
-     * 20.1.8.55 srcRect (Source Rectangle)
-     */
-    srcRect?: Nullable<ISrcRect>;
-
-    /**
-     * 20.1.9.18 prstGeom (Preset geometry)
-     */
-    prstGeom?: Nullable<PresetGeometryType>;
-}
+export const COMPONENT_IMAGE_VIEWER = 'COMPONENT_IMAGE_VIEWER';
 

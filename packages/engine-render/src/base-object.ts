@@ -135,6 +135,10 @@ export abstract class BaseObject extends Disposable {
 
     get transform() {
         const transform = this._transform.clone();
+        return this.transformForAngle(transform);
+    }
+
+    transformForAngle(transform: Transform) {
         /**
          * If the object is center rotated, the coordinate needs to be rotated back to the original position.
          */
@@ -146,6 +150,7 @@ export abstract class BaseObject extends Disposable {
             transform.rotate(this.angle);
             transform.translate(-cx, -cy);
         }
+
         return transform;
     }
 

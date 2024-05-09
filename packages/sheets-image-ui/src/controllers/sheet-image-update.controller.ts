@@ -30,8 +30,8 @@ import { SetSheetImageCommand } from '../commands/commands/set-sheet-image.comma
 import { RemoveSheetImageCommand } from '../commands/commands/remove-sheet-image.command';
 
 
-const SHEET_IMAGE_WIDTH_LIMIT = 1000;
-const SHEET_IMAGE_HEIGHT_LIMIT = 1000;
+const SHEET_IMAGE_WIDTH_LIMIT = 500;
+const SHEET_IMAGE_HEIGHT_LIMIT = 500;
 
 @OnLifecycle(LifecycleStages.Rendered, SheetImageUpdateController)
 export class SheetImageUpdateController extends Disposable {
@@ -114,7 +114,7 @@ export class SheetImageUpdateController extends Disposable {
         if (width > SHEET_IMAGE_WIDTH_LIMIT || height > SHEET_IMAGE_HEIGHT_LIMIT) {
             const scaleWidth = SHEET_IMAGE_WIDTH_LIMIT / width;
             const scaleHeight = SHEET_IMAGE_HEIGHT_LIMIT / height;
-            scale = Math.min(scaleWidth, scaleHeight);
+            scale = Math.max(scaleWidth, scaleHeight);
         }
 
 
@@ -135,10 +135,6 @@ export class SheetImageUpdateController extends Disposable {
         };
 
         const sheetDrawingParam: ISheetDrawingServiceParam = {
-            originSize: {
-                width,
-                height,
-            },
             sheetTransform,
             drawingId: imageId,
             unitId,
@@ -257,9 +253,9 @@ export class SheetImageUpdateController extends Disposable {
 
         const to = {
             column: endSelectionCell.actualColumn,
-            columnOffset: startX + imageWidth - endSelectionCell.startX,
+            columnOffset: startX + imageWidth * scale - endSelectionCell.startX,
             row: endSelectionCell.actualRow,
-            rowOffset: startY + imageHeight - endSelectionCell.startY,
+            rowOffset: startY + imageHeight * scale - endSelectionCell.startY,
         };
 
         return {

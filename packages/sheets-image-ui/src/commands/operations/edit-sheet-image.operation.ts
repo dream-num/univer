@@ -18,9 +18,9 @@ import type { IDrawingSearch, IOperation } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
+    IDrawingManagerService,
 
 } from '@univerjs/core';
-import { ISheetDrawingService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import { SidebarSheetImageOperation } from './open-image-panel.operation';
 
@@ -29,13 +29,13 @@ export const EditSheetImageOperation: IOperation<IDrawingSearch> = {
     id: 'sheet.operation.edit-sheet-image',
     type: CommandType.OPERATION,
     handler: (accessor: IAccessor, params?: IDrawingSearch) => {
-        const sheetDrawingService = accessor.get(ISheetDrawingService);
+        const drawingManagerService = accessor.get(IDrawingManagerService);
         const commandService = accessor.get(ICommandService);
 
         if (params == null) {
             return false;
         }
-        sheetDrawingService.focusDrawing(params);
+        drawingManagerService.focusDrawing(params);
         commandService.executeCommand(SidebarSheetImageOperation.id, { value: 'open' });
         return true;
     },

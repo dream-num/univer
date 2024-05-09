@@ -18,11 +18,12 @@ import type { Nullable, Workbook } from '@univerjs/core';
 import { DrawingTypeEnum, ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import type { BaseObject } from '@univerjs/engine-render';
+import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { COMPONENT_IMAGE_POPUP_MENU, OpenImageCropOperation } from '@univerjs/image-ui';
+import { COMPONENT_IMAGE_POPUP_MENU, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/image-ui';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { takeUntil } from 'rxjs';
+import { ImageCropperObject } from '@univerjs/image-ui/views/crop/image-cropper-object.js';
 import { SidebarSheetImageOperation } from '../commands/operations/open-image-panel.operation';
 import { RemoveSheetImageCommand } from '../commands/commands/remove-sheet-image.command';
 import { EditSheetImageOperation } from '../commands/operations/edit-sheet-image.operation';
@@ -70,6 +71,18 @@ export class ImagePopupMenuController extends RxDisposable {
         }
     }
 
+    private _hasCropObject(scene: Scene) {
+        const objects = scene.getAllObjects();
+
+        for (const object of objects) {
+            if (object instanceof ImageCropperObject) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private _popupMenuListener(unitId: string) {
         const scene = this._renderManagerService.getRenderById(unitId)?.scene;
         if (!scene) {
@@ -85,6 +98,10 @@ export class ImagePopupMenuController extends RxDisposable {
         this.disposeWithMe(
             toDisposable(
                 transformer.onCreateControlObservable.add(() => {
+                    if (this._hasCropObject(scene)) {
+                        return;
+                    }
+
                     const selectedObjects = transformer.getSelectedObjectMap();
                     if (selectedObjects.size > 1) {
                         disposePopups.forEach((dispose) => dispose.dispose());
@@ -121,9 +138,9 @@ export class ImagePopupMenuController extends RxDisposable {
                 transformer.onClearControlObservable.add((changeSelf) => {
                     disposePopups.forEach((dispose) => dispose.dispose());
 
-                    if (changeSelf === true) {
-                        this._commandService.executeCommand(SidebarSheetImageOperation.id, { value: 'close' });
-                    }
+                    // if (changeSelf === true) {
+                    //     this._commandService.executeCommand(SidebarSheetImageOperation.id, { value: 'close' });
+                    // }
                 })
             )
         );
@@ -156,7 +173,7 @@ export class ImagePopupMenuController extends RxDisposable {
             {
                 label: 'image-popup.reset',
                 index: 3,
-                commandId: 'image.reset',
+                commandId: ImageResetSizeOperation.id,
                 commandParams: [{ unitId, subUnitId, drawingId, drawingType }],
                 disable: false,
             },

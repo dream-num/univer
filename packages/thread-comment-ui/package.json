@@ -62,6 +62,9 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/icons": "^0.1.45",
+        "@univerjs/protocol": "^0.1.19",
+        "@univerjs/sheets": "workspace:^",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": ">=0.12.13",
         "clsx": ">=2.0.0",
@@ -69,9 +72,6 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.45",
-        "@univerjs/protocol": "^0.1.19",
-        "@univerjs/sheets": "workspace:^",
         "@univerjs/thread-comment": "workspace:^",
         "dayjs": "^1.11.10"
     },

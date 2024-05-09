@@ -62,9 +62,11 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/engine-render": "workspace:^",
+        "@univerjs/icons": "^0.1.29",
         "@univerjs/shared": "workspace:*",
-        "@univerjs/thread-comment": "workspace:*",
-        "@univerjs/thread-comment-ui": "workspace:*",
+        "@univerjs/sheets": "workspace:^",
+        "@univerjs/sheets-ui": "workspace:^",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": ">=0.12.13",
         "clsx": ">=2.0.0",
@@ -72,10 +74,8 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/engine-render": "workspace:^",
-        "@univerjs/icons": "^0.1.29",
-        "@univerjs/sheets": "workspace:^",
-        "@univerjs/sheets-ui": "workspace:^"
+        "@univerjs/thread-comment": "workspace:*",
+        "@univerjs/thread-comment-ui": "workspace:*"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

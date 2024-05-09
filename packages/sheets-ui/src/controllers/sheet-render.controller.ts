@@ -57,7 +57,6 @@ export class SheetRenderController extends RxDisposable {
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
-
         Promise.resolve().then(() => this._init());
     }
 

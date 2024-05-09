@@ -22,7 +22,6 @@ import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
-import { AutoFillRenderController } from './controllers/render-controllers/auto-fill.render-controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
 import { EditingController } from './controllers/editor/editing.controller';
@@ -70,6 +69,7 @@ import { SheetsZoomRenderController } from './controllers/render-controllers/zoo
 import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
+import { AutoFillController } from './controllers/auto-fill.controller';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN_NAME';
@@ -123,6 +123,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [StartEditController],
                 [StatusBarController],
                 [EditingController],
+                [AutoFillController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }
@@ -142,7 +143,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             SheetsScrollRenderController,
             SelectionRenderController,
             FormatPainterRenderController,
-            AutoFillRenderController,
+            // AutoFillRenderController,
             HeaderMenuRenderController,
             HeaderMoveRenderController,
             CellAlertRenderController,

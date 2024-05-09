@@ -22,7 +22,6 @@ import {
     RedoCommand,
     ThemeService,
     UndoCommand,
-    UniverInstanceType,
 } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
@@ -34,19 +33,16 @@ import {
 } from '@univerjs/sheets';
 import {
     AutoFillCommand,
-    AutoFillRenderController,
+    AutoFillController,
     AutoFillService,
     IAutoFillService,
     ISelectionRenderService,
     SelectionRenderService,
-    SheetRenderController,
-    SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/ui';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { FormulaAutoFillController } from '../formula-auto-fill.controller';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -58,7 +54,7 @@ describe('Test auto fill with formula', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let autoFilterRenderController: AutoFillRenderController;
+    let autoFillController: AutoFillController;
     let themeService: ThemeService;
     let getValues: (
         startRow: number,
@@ -70,9 +66,7 @@ describe('Test auto fill with formula', () => {
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
             [ISelectionRenderService, { useClass: SelectionRenderService }],
-            [IRenderManagerService, { useClass: RenderManagerService }],
-            [SheetSkeletonManagerService],
-            [SheetRenderController],
+            [AutoFillController],
             [IAutoFillService, { useClass: AutoFillService }],
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
@@ -83,15 +77,12 @@ describe('Test auto fill with formula', () => {
         commandService = get(ICommandService);
         themeService = get(ThemeService);
         themeService.setTheme(theme);
-
-        const renderManagerService = get(IRenderManagerService);
-        renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, AutoFillRenderController);
-
-        autoFilterRenderController = renderManagerService!.getRenderById('workbook-01')?.with(AutoFillRenderController)!;
+        autoFillController = get(AutoFillController);
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
+        commandService.registerCommand(AutoFillCommand);
 
         getValues = (
             startRow: number,
@@ -126,7 +117,7 @@ describe('Test auto fill with formula', () => {
                 },
             ]);
 
-            (autoFilterRenderController as any)._handleFill(
+            (autoFillController as any)._triggerAutoFill(
                 {
                     startColumn: 1,
                     endColumn: 1,
@@ -177,7 +168,7 @@ describe('Test auto fill with formula', () => {
             expect(B2?.si).toEqual(B3?.si);
 
             // drop to right
-            (autoFilterRenderController as any)._handleFill(
+            (autoFillController as any)._triggerAutoFill(
                 {
                     startColumn: 1,
                     endColumn: 1,

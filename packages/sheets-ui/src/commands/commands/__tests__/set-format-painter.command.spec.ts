@@ -52,6 +52,7 @@ import { IMarkSelectionService } from '../../../services/mark-selection/mark-sel
 import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
 import { SheetRenderController } from '../../../controllers/sheet-render.controller';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
+import { SheetCanvasView } from '../../../views/sheet-canvas-view';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
@@ -232,6 +233,7 @@ describe('Test format painter rules in controller', () => {
         themeService.setTheme(theme);
 
         const renderManagerService = get(IRenderManagerService);
+        renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, SheetCanvasView);
         renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, FormatPainterRenderController);
 
         commandService.registerCommand(SetFormatPainterOperation);

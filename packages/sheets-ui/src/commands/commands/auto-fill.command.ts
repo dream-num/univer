@@ -21,15 +21,20 @@ import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutati
 import type { IAccessor } from '@wendellhu/redi';
 
 import { generateNullCellValue } from '../../services/auto-fill/tools';
+import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 
-export interface IAutoFillCommandParams { }
+export interface IAutoFillCommandParams {
+    unitId: string;
+    subUnitId: string;
+}
 
 export const AutoFillCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.auto-fill',
 
     handler: async (accessor: IAccessor, params: IAutoFillCommandParams) => {
-        return true;
+        const autoFillService = accessor.get(IAutoFillService);
+        return autoFillService.fillData(params.unitId, params.subUnitId); ;
     },
 };
 

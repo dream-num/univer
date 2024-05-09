@@ -22,6 +22,10 @@ import {
 import type { IRenderContext } from '@univerjs/engine-render';
 import type { ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import {
+    InsertColMutation,
+    InsertRowMutation,
+    RemoveColMutation,
+    RemoveRowMutation,
     SetColHiddenMutation,
     SetColVisibleMutation,
     SetRowHiddenMutation,
@@ -44,6 +48,10 @@ const RENDER_COMMANDS: string[] = [
     SetRowVisibleMutation.id,
     SetColHiddenMutation.id,
     SetColVisibleMutation.id,
+    InsertColMutation.id,
+    InsertRowMutation.id,
+    RemoveColMutation.id,
+    RemoveRowMutation.id,
 ];
 
 /**

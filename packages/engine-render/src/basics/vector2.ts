@@ -876,7 +876,10 @@ export interface IViewportInfo {
      */
     viewPortPosition: IBoundRectNoAngle;
     viewPortKey: string;
-    isDirty?: boolean;
+    /**
+     * 后续会通过 number 来表示究竟是什么原因导致的标脏 这里采用二进制数值方便运算
+     */
+    isDirty?: number;
     isForceDirty?: boolean;
 
     allowCache?: boolean;

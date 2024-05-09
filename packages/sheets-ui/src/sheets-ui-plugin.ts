@@ -70,6 +70,7 @@ import { SheetsScrollRenderController } from './controllers/render-controllers/s
 import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
+import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN_NAME';
@@ -124,6 +125,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [StatusBarController],
                 [EditingController],
                 [AutoFillController],
+                [FormatPainterController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }

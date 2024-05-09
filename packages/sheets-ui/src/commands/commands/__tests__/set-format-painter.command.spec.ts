@@ -25,7 +25,7 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     AddWorksheetMergeMutation,
@@ -40,7 +40,7 @@ import type { Injector } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { FormatPainterRenderController } from '../../../controllers/render-controllers/format-painter.render-controller';
+import { FormatPainterController } from '../../../controllers/format-painter/format-painter.controller';
 import { FormatPainterService, IFormatPainterService } from '../../../services/format-painter/format-painter.service';
 import { SetFormatPainterOperation } from '../../operations/set-format-painter.operation';
 import {
@@ -50,9 +50,6 @@ import {
 } from '../set-format-painter.command';
 import { IMarkSelectionService } from '../../../services/mark-selection/mark-selection.service';
 import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
-import { SheetRenderController } from '../../../controllers/sheet-render.controller';
-import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
-import { SheetCanvasView } from '../../../views/sheet-canvas-view';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
@@ -187,17 +184,11 @@ class MarkSelectionService extends Disposable implements IMarkSelectionService {
         return null;
     }
 
-    refreshShapes() {
-        // empty
-    }
+    refreshShapes() { /* TODO document why this method 'refreshShapes' is empty */ }
 
-    removeShape(id: string): void {
-        // empty
-    }
+    removeShape(id: string): void { /* TODO document why this method 'removeShape' is empty */ }
 
-    removeAllShapes(): void {
-        // empty
-    }
+    removeAllShapes(): void { /* TODO document why this method 'removeAllShapes' is empty */ }
 
     getShapeMap(): Map<string, any> {
         return new Map();
@@ -209,12 +200,18 @@ class SelectionRenderService {
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
 }
 
+class RenderManagerService {
+    getRenderById(id: string) {
+        return null;
+    }
+}
 
 describe('Test format painter rules in controller', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
     let themeService: ThemeService;
+    let formatPainterController: FormatPainterController;
 
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
@@ -222,8 +219,7 @@ describe('Test format painter rules in controller', () => {
             [IFormatPainterService, { useClass: FormatPainterService }],
             [ISelectionRenderService, { useClass: SelectionRenderService }],
             [IRenderManagerService, { useClass: RenderManagerService }],
-            [SheetSkeletonManagerService],
-            [SheetRenderController],
+            [FormatPainterController],
         ]);
         univer = testBed.univer;
         get = testBed.get;
@@ -232,10 +228,7 @@ describe('Test format painter rules in controller', () => {
         themeService = get(ThemeService);
         themeService.setTheme(theme);
 
-        const renderManagerService = get(IRenderManagerService);
-        renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, SheetCanvasView);
-        renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, FormatPainterRenderController);
-
+        formatPainterController = get(FormatPainterController);
         commandService.registerCommand(SetFormatPainterOperation);
         commandService.registerCommand(SetInfiniteFormatPainterCommand);
         commandService.registerCommand(SetOnceFormatPainterCommand);
@@ -258,10 +251,6 @@ describe('Test format painter rules in controller', () => {
         describe('format painter the numbers', async () => {
             it('correct situation', async () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                const renderManagerService = get(IRenderManagerService);
-                const formatPainterController = renderManagerService!
-                    .getRenderById('workbook-01')?.with(FormatPainterRenderController)!;
-
                 if (!workbook) throw new Error('This is an error');
                 await commandService.executeCommand(SetSelectionsOperation.id, {
                     unitId: 'workbook-01',

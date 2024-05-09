@@ -66,6 +66,7 @@ export interface IDrawingManagerService {
     readonly add$: Observable<IDrawingParam[]>;
     readonly update$: Observable<IDrawingParam[]>;
     readonly extraUpdate$: Observable<IDrawingParam[]>;
+    readonly focus$: Observable<IDrawingParam[]>;
 
     dispose(): void;
 
@@ -83,6 +84,9 @@ export interface IDrawingManagerService {
     getDrawingByParam<T extends IDrawingParam>(param: Nullable<IDrawingSearch>): Nullable<T>;
 
     getDrawingOKey<T extends IDrawingParam>(oKey: string): Nullable<T>;
+
+    focusDrawing(param: Nullable<IDrawingSearch>): void;
+    getFocusDrawings(): IDrawingParam[];
 }
 
 /**
@@ -90,6 +94,8 @@ export interface IDrawingManagerService {
  */
 export class DrawingManagerService implements IDisposable, IDrawingManagerService {
     private _drawingManagerInfo: { [drawingType: DrawingType]: IDrawingMap } = {};
+
+    private _focusDrawings: IDrawingParam[] = [];
 
     private readonly _remove$ = new Subject<IDrawingParam[]>();
     readonly remove$ = this._remove$.asObservable();
@@ -102,6 +108,10 @@ export class DrawingManagerService implements IDisposable, IDrawingManagerServic
 
     private readonly _extraUpdate$ = new Subject<IDrawingParam[]>();
     readonly extraUpdate$ = this._extraUpdate$.asObservable();
+
+    private _focus$ = new Subject<IDrawingParam[]>();
+    focus$: Observable<IDrawingParam[]> = this._focus$.asObservable();
+
 
     dispose(): void {
         this._remove$.complete();
@@ -153,14 +163,6 @@ export class DrawingManagerService implements IDisposable, IDrawingManagerServic
         this._extraUpdate$.next(updateParams);
     }
 
-    // setCurrent(searchParam: Nullable<IImageManagerBaseParam>) {
-    //     this._current = searchParam;
-    // }
-
-    // getCurrent(): Nullable<IImageManagerParam> {
-    //     return this._getCurrentBySearch(this._current);
-    // }
-
     getDrawingByParam<T extends IDrawingParam>(param: Nullable<IDrawingSearch>): Nullable<T> {
         return this._getCurrentBySearch<T>(param);
     }
@@ -168,6 +170,27 @@ export class DrawingManagerService implements IDisposable, IDrawingManagerServic
     getDrawingOKey<T extends IDrawingParam>(oKey: string): Nullable<T> {
         const [unitId, subUnitId, drawingId, drawingType] = oKey.split('#-#');
         return this._getCurrentBySearch<T>({ unitId, subUnitId, drawingId, drawingType: Number.parseInt(drawingType) });
+    }
+
+    focusDrawing(param: Nullable<IDrawingSearch>): void {
+        if (param == null) {
+            this._focusDrawings = [];
+            this._focus$.next([]);
+            return;
+        }
+        const { unitId, subUnitId, drawingId, drawingType } = param;
+        const item = this._drawingManagerInfo[drawingType]?.[unitId]?.[subUnitId]?.[drawingId];
+        if (item == null) {
+            this._focusDrawings = [];
+            this._focus$.next([]);
+            return;
+        }
+        this._focusDrawings.push(item);
+        this._focus$.next([item]);
+    }
+
+    getFocusDrawings() {
+        return this._focusDrawings;
     }
 
     private _getCurrentBySearch<T extends IDrawingParam>(searchParam: Nullable<IDrawingSearch>): Nullable<T> {

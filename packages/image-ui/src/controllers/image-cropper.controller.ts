@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingSearch, ISrcRect, ITransformState, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IDrawingParam, IDrawingSearch, ISrcRect, ITransformState, Nullable } from '@univerjs/core';
 import { checkIfMove, Disposable, ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { IImageData } from '@univerjs/image';
 import { getImageShapeKeyByDrawingSearch } from '@univerjs/image';
 import type { BaseObject, Image, Scene } from '@univerjs/engine-render';
-import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
+import { CURSOR_TYPE, degToRad, IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { CloseImageCropOperation, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ImageCropperObject } from '../views/crop/image-cropper-object';
 
@@ -96,13 +96,19 @@ export class ImageCropperController extends Disposable {
                 // imageShape.hide();
                 // scene.getTransformer()?.clearControls();
 
+                const transformer = scene.getTransformer();
+
+                transformer?.clearControls();
+
                 const imageCropperObject = new ImageCropperObject(`${imageShapeKey}-crop`, { imageData, applyObject: imageShape });
 
                 scene.addObject(imageCropperObject, imageShape.getLayerIndex() + 1).attachTransformerTo(imageCropperObject);
-                scene.getTransformer()?.createControlForCopper(imageCropperObject);
+                transformer?.createControlForCopper(imageCropperObject);
                 this._addHoverForImageCopper(imageCropperObject);
 
-                imageShape.closeRenderByCrop();
+                imageShape.openRenderByCropper();
+
+                transformer?.refreshControls();
 
                 imageCropperObject.makeDirty(true);
             })
@@ -147,13 +153,31 @@ export class ImageCropperController extends Disposable {
                 }
                 const imageShape = imageCropperObject.applyObject as Image;
 
-                imageCropperObject?.dispose();
+
                 const transformer = scene.getTransformerByCreate();
                 transformer.detachFrom(imageCropperObject);
                 transformer.clearCopperControl();
 
-                imageShape.openRenderByCrop();
+                const srcRect = this._getSrcRectByTransformState(imageShape, imageCropperObject);
+
+                const drawingParam = this._drawingManagerService.getDrawingOKey<IDrawingParam>(imageShape.oKey);
+                if (drawingParam != null) {
+                    const { left, top, height, width } = imageCropperObject;
+                    this._drawingManagerService.extraUpdateNotification([{
+                        ...drawingParam,
+                        transform: {
+                            ...drawingParam.transform,
+                            left, top, height, width,
+                        },
+                        srcRect: srcRect.srcRectAngle,
+                    }]);
+                }
+                imageShape.setSrcRect({ ...srcRect.srcRectAngle });
+                imageShape.closeRenderByCropper();
+
                 imageShape.makeDirty(true);
+
+                imageCropperObject?.dispose();
             })
         );
     }
@@ -219,20 +243,10 @@ export class ImageCropperController extends Disposable {
 
                     const srcRect = this._getSrcRectByTransformState(applyObject, cropObject);
 
-                    const searchParam = this._drawingManagerService.getDrawingOKey(applyObject.oKey);
-                    if (searchParam == null) {
-                        return;
-                    }
-
                     cropObject.imageData = {
                         ...cropObject.imageData,
-                        srcRect,
+                        srcRect: srcRect.srcRect,
                     } as IImageData;
-
-                    this._drawingManagerService.extraUpdateNotification([{
-                        ...searchParam,
-                        srcRect,
-                    }]);
 
                     transformer.createControlForCopper(cropObject);
                 })
@@ -273,16 +287,56 @@ export class ImageCropperController extends Disposable {
         );
     }
 
-    private _getSrcRectByTransformState(applyObject: BaseObject, imageCropperObject: ImageCropperObject): ISrcRect {
-        const { left, top, height, width, angle } = imageCropperObject;
+    private _getSrcRectByTransformState(applyObject: BaseObject, imageCropperObject: ImageCropperObject) {
+        const { left, top, height, width, strokeWidth, angle: copperAngle } = imageCropperObject;
 
-        const { left: applyLeft, top: applyTop, width: applyWidth, height: applyHeight } = applyObject;
+        const { left: applyLeft, top: applyTop, width: applyWidth, height: applyHeight, angle: applyAngle, strokeWidth: applyStrokeWidth } = applyObject;
+
+
+        const newLeft = left - applyLeft;
+        const newTop = top - applyTop;
+
+        const srcRect = {
+            left: newLeft,
+            top: newTop,
+            right: applyWidth - newLeft - width,
+            bottom: applyHeight - newTop - height,
+        };
+
+        const srcRectAngle = { ...srcRect };
+
+        // const offsetPoint = new Vector2(0, 0);
+        if (applyAngle !== 0) {
+            /**
+             * Calculate the offset of the center rotation to correctly position the object entering the cropping.
+             */
+            const cx = left + width / 2;
+            const cy = top + height / 2;
+            const centerPoint = new Vector2(cx, cy);
+
+            const newCx = applyWidth / 2 + applyLeft;
+            const newCy = applyHeight / 2 + applyTop;
+            const newCenterPoint = new Vector2(newCx, newCy);
+
+            const vertexPoint = new Vector2(applyLeft, applyTop);
+            vertexPoint.rotateByPoint(degToRad(applyAngle), newCenterPoint);
+
+            const applyFinalPoint = vertexPoint.clone();
+            applyFinalPoint.rotateByPoint(degToRad(-applyAngle), centerPoint);
+
+
+            const newAngleLeft = left - applyFinalPoint.x;
+            const newAngleTop = top - applyFinalPoint.y;
+
+            srcRectAngle.left = newAngleLeft;
+            srcRectAngle.top = newAngleTop;
+            srcRectAngle.right = applyWidth - newAngleLeft - width;
+            srcRectAngle.bottom = applyHeight - newAngleTop - height;
+        }
 
         return {
-            left: left - applyLeft,
-            top: top - applyTop,
-            bottom: applyTop + applyHeight - top - height,
-            right: applyLeft + applyWidth - left - width,
+            srcRect,
+            srcRectAngle,
         };
     }
 }

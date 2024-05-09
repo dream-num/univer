@@ -96,6 +96,12 @@ export const ImageCommonPanel = (props: IImageCommonPanel) => {
     const [rotation, setRotation] = useState(originRotation);
     const [lockRatio, setLockRatio] = useState(transformer.keepRatio);
 
+    const [arrangeShow, setArrangeShow] = useState(true);
+    const [transformShow, setTransformShow] = useState(true);
+    const [alignShow, setAlignShow] = useState(false);
+    const [cropShow, setCropShow] = useState(true);
+    const [groupShow, setGroupShow] = useState(false);
+
     function getUpdateParams(objects: Map<string, BaseObject>): Nullable<IDrawingParam>[] {
         const params: Nullable<IDrawingParam>[] = [];
         objects.forEach((object) => {
@@ -220,6 +226,43 @@ export const ImageCommonPanel = (props: IImageCommonPanel) => {
     }
 
     useEffect(() => {
+        const onClearControlObserver = transformer.onClearControlObservable.add((changeSelf) => {
+            if (changeSelf === true) {
+                setArrangeShow(false);
+                setTransformShow(false);
+                setAlignShow(false);
+                setCropShow(false);
+                setGroupShow(false);
+            }
+        });
+
+
+        const onChangeStartObserver = transformer.onChangeStartObservable.add((state) => {
+            const { objects } = state;
+            const params = getUpdateParams(objects);
+
+            if (params.length === 0) {
+                setArrangeShow(false);
+                setTransformShow(false);
+                setAlignShow(false);
+                setCropShow(false);
+                setGroupShow(false);
+            } else if (params.length === 1) {
+                setArrangeShow(true);
+                setTransformShow(true);
+                setAlignShow(false);
+                setCropShow(true);
+                setGroupShow(false);
+            } else {
+                setArrangeShow(true);
+                setTransformShow(false);
+                setAlignShow(true);
+                setCropShow(false);
+                setGroupShow(true);
+            }
+        });
+
+
         const onChangingObserver = transformer.onChangingObservable.add((state) => {
             const { objects } = state;
             const params = getUpdateParams(objects);
@@ -272,6 +315,8 @@ export const ImageCommonPanel = (props: IImageCommonPanel) => {
 
         return () => {
             onChangingObserver?.dispose();
+            onChangeStartObserver?.dispose();
+            onClearControlObserver?.dispose();
         };
     }, []);
 
@@ -368,9 +413,13 @@ export const ImageCommonPanel = (props: IImageCommonPanel) => {
         transformer.keepRatio = val as boolean;
     };
 
+    const gridDisplay = (isShow: boolean) => {
+        return isShow ? 'block' : 'none';
+    };
+
     return (
         <div className={styles.imageCommonPanel}>
-            <div className={styles.imageCommonPanelGrid}>
+            <div className={styles.imageCommonPanelGrid} style={{ display: gridDisplay(arrangeShow) }}>
                 <div className={styles.imageCommonPanelRow}>
                     <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelTitle)}>
                         <div>{localeService.t('image-panel.arrange.title')}</div>
@@ -405,7 +454,7 @@ export const ImageCommonPanel = (props: IImageCommonPanel) => {
                     </div>
                 </div>
             </div>
-            <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)}>
+            <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)} style={{ display: gridDisplay(transformShow) }}>
                 <div className={styles.imageCommonPanelRow}>
                     <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelTitle)}>
                         <div>{localeService.t('image-panel.transform.title')}</div>
@@ -500,7 +549,7 @@ export const ImageCommonPanel = (props: IImageCommonPanel) => {
                     </div>
                 </div>
             </div>
-            <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)}>
+            <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)} style={{ display: gridDisplay(alignShow) }}>
                 <div className={styles.imageCommonPanelRow}>
                     <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelTitle)}>
                         <div>{localeService.t('image-panel.align.title')}</div>
@@ -512,7 +561,7 @@ export const ImageCommonPanel = (props: IImageCommonPanel) => {
                     </div>
                 </div>
             </div>
-            <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)}>
+            <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)} style={{ display: gridDisplay(cropShow) }}>
                 <div className={styles.imageCommonPanelRow}>
                     <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelTitle)}>
                         <div>{localeService.t('image-panel.crop.title')}</div>
@@ -530,7 +579,7 @@ export const ImageCommonPanel = (props: IImageCommonPanel) => {
                     </div>
                 </div>
             </div>
-            <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)}>
+            <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)} style={{ display: gridDisplay(groupShow) }}>
                 <div className={styles.imageCommonPanelRow}>
                     <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelTitle)}>
                         <div>{localeService.t('image-panel.group.title')}</div>

@@ -24,7 +24,8 @@ export class Min extends BaseFunction {
     override maxParams = 255;
 
     override calculate(...variants: BaseValueObject[]) {
-        let accumulatorAll: BaseValueObject = NumberValueObject.create(Number.POSITIVE_INFINITY);
+        // Don't use Number.POSITIVE_INFINITY, the minimum value of a string and a blank cell should be 0
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 

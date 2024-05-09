@@ -32,6 +32,18 @@ describe('Test mod function', () => {
             const result = textFunction.calculate(number, power);
             expect(result.getValue()).toBe(1);
         });
+        it('Number is single cell, power is single cell, the number does not exceed the regulations', () => {
+            const number = NumberValueObject.create(1125899999999);
+            const power = NumberValueObject.create(1);
+            const result = textFunction.calculate(number, power);
+            expect(result.getValue()).toBe(0);
+        });
+        it('Number is single cell, power is single cell, the number exceeds the regulations', () => {
+            const number = NumberValueObject.create(1125900000000);
+            const power = NumberValueObject.create(1);
+            const result = textFunction.calculate(number, power);
+            expect(result.getValue()).toBe(ErrorType.NUM);
+        });
         it('Number is single string number, power is single string number', () => {
             const number = new StringValueObject('5');
             const power = new StringValueObject('2');

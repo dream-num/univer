@@ -16,4 +16,4 @@
 
 export { Mentions } from './Mentions';
 export type { IMentionsProps } from './Mentions';
-export { Mention } from 'react-mentions';
+export { Mention, type MentionProps } from 'react-mentions';

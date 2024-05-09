@@ -15,12 +15,14 @@
  */
 
 import type { IThreadCommentMention } from '@univerjs/thread-comment';
-
+import type { MentionProps } from '@univerjs/design';
+import { IMentionsProps } from '@univerjs/design';
 
 export interface IThreadCommentMentionConfig {
     getMentions?: (search: string) => Promise<IThreadCommentMention[]>;
     mentions?: IThreadCommentMention[];
     trigger: string;
+    renderSuggestion?: MentionProps['renderSuggestion'];
 }
 
 export interface IThreadCommentUIConfig {

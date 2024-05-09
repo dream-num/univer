@@ -15,6 +15,7 @@
  */
 
 import type { IThreadComment, IThreadCommentMention, TextNode } from '@univerjs/thread-comment';
+import type { MentionProps } from '@univerjs/design';
 import { Button, Mention, Mentions } from '@univerjs/design';
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -93,11 +94,24 @@ const transformTextNode2Text = (nodes: TextNode[]) => {
 const transformMention = (mention: IThreadCommentMention) => ({
     display: mention.label,
     id: `${mention.type}-${mention.id}`,
+    raw: mention,
 });
 
 export interface IThreadCommentEditorInstance {
     reply: (text: TextNode[]) => void;
 }
+
+const defaultRenderSuggestion: MentionProps['renderSuggestion'] = (mention, search, highlightedDisplay, index, focused) => {
+    const icon = (mention as any).raw?.icon;
+    return (
+        <div className={styles.threadCommentEditorSuggestion}>
+            {icon ? <img className={styles.threadCommentEditorSuggestionIcon} src={icon} /> : null}
+            <div>
+                {mention.display ?? mention.id}
+            </div>
+        </div>
+    );
+};
 
 export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThreadCommentEditorProps>((props, ref) => {
     const { comment, onSave, id, onCancel, autoFocus } = props;
@@ -143,6 +157,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                                 .then((res) => res.map(transformMention)) as any
                             : (mention.mentions ?? []).map(transformMention)}
                         displayTransform={(id, label) => `@${label} `}
+                        renderSuggestion={mention.renderSuggestion ?? defaultRenderSuggestion}
                     />
                 ))}
             </Mentions>

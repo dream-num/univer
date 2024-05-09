@@ -18,6 +18,9 @@ export default {
     threadCommentUI: {
         panel: {
             title: '评论管理',
+            empty: '暂无评论',
+            filterEmpty: '没有匹配的结果',
+            reset: '重置',
         },
         editor: {
             placeholder: 'Reply or add others with @',

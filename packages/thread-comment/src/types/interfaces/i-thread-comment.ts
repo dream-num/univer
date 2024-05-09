@@ -18,6 +18,7 @@ export interface IThreadCommentMention {
     type: string;
     label: string;
     id: string;
+    icon?: string;
     extra?: any;
 }
 

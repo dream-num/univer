@@ -43,6 +43,15 @@ export class SheetsThreadCommentPopupService extends Disposable {
         @IZenZoneService private readonly _zenZoneService: IZenZoneService
     ) {
         super();
+        this._initZenVisible();
+    }
+
+    private _initZenVisible() {
+        this.disposeWithMe(this._zenZoneService.visible$.subscribe((visible) => {
+            if (visible) {
+                this.hidePopup();
+            }
+        }));
     }
 
     showPopup(location: IThreadCommentPopup, onHide?: () => void) {

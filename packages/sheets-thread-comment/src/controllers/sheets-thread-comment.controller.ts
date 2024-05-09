@@ -22,6 +22,7 @@ import { SetActiveCommentOperation, THREAD_COMMENT_PANEL, ThreadCommentPanelServ
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { SelectionMoveType, SetSelectionsOperation } from '@univerjs/sheets';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
+import { ScrollToCellCommand } from '@univerjs/sheets-ui';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
@@ -113,6 +114,14 @@ export class SheetsThreadCommentController extends Disposable {
                 }
 
                 const location = singleReferenceToGrid(comment.ref);
+                this._commandService.executeCommand(ScrollToCellCommand.id, {
+                    range: {
+                        startColumn: location.column,
+                        endColumn: location.column,
+                        startRow: location.row,
+                        endRow: location.column,
+                    },
+                });
                 this._sheetsThreadCommentPopupService.showPopup({
                     unitId,
                     subUnitId,

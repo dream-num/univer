@@ -17,9 +17,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
-import { ICommandService, type UniverInstanceType } from '@univerjs/core';
+import { ICommandService, LocaleService, type UniverInstanceType } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
-import { Select } from '@univerjs/design';
+import { Button, Select } from '@univerjs/design';
 import dayjs from 'dayjs';
 import type { Observable } from 'rxjs';
 import { ThreadCommentTree } from '../thread-comment-tree';
@@ -37,6 +37,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const { unitId, subUnitId$, type } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
+    const localeService = useDependency(LocaleService);
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [unitComments, setUnitComments] = useState(() => threadCommentModel.getUnit(unitId));
     const panelService = useDependency(ThreadCommentPanelService);
@@ -69,6 +70,13 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
 
         return comments;
     }, [comments, status]);
+
+    const isFiltering = status !== 'all' || unit !== 'all';
+
+    const onReset = () => {
+        setStatus('all');
+        setUnit('all');
+    };
 
     useEffect(() => {
         if (unitId) {
@@ -134,6 +142,14 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     }}
                 />
             ))}
+            {statuedComments.length
+                ? null
+                : (
+                    <div className={styles.threadCommentPanelEmpty}>
+                        {isFiltering ? localeService.t('threadCommentUI.panel.filterEmpty') : localeService.t('threadCommentUI.panel.empty')}
+                        {isFiltering ? <Button onClick={onReset} type="link">{localeService.t('threadCommentUI.panel.reset')}</Button> : null}
+                    </div>
+                )}
         </div>
     );
 };

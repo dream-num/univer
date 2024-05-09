@@ -18,6 +18,9 @@ export default {
     threadCommentUI: {
         panel: {
             title: 'Comment Management',
+            empty: 'No comments yet',
+            filterEmpty: 'No match result',
+            reset: 'Reset filter',
         },
         editor: {
             placeholder: 'Reply or add others with @',

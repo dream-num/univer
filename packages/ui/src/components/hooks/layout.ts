@@ -16,12 +16,12 @@
 
 import { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
 /**
  * These hooks are used for browser layout
  * Prefer to client-side
  */
 
-const noWindow = typeof window === 'undefined';
 
 /**
  * To detect whether the element is displayed over the viewport
@@ -79,7 +79,7 @@ function detectElementOverViewport(element: HTMLElement) {
 /** Allow the element to scroll when its height over the viewport height */
 export function useScrollOnOverViewport(element: HTMLElement | undefined | null, disabled: boolean = false) {
     useEffect(() => {
-        if (!element || noWindow || disabled) {
+        if (canUseDom() || !element || disabled) {
             return;
         }
 

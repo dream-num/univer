@@ -28,7 +28,7 @@ import { CommandType,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { IViewportInfos, Rect, SpreadsheetColumnHeader, SpreadsheetRowHeader, Viewport } from '@univerjs/engine-render';
+import type { IViewportInfos, Rect, Scene, SpreadsheetColumnHeader, SpreadsheetRowHeader, Viewport } from '@univerjs/engine-render';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet } from '@univerjs/engine-render';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
@@ -203,17 +203,23 @@ export class SheetRenderController extends RxDisposable {
             });
     }
 
+    private _spreadsheetViewports(scene: Scene) {
+        return scene.getViewports().filter((v) => ['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(v.viewportKey));
+    }
+
     private _markSpreadsheetDirty(unitId: string, command: ICommandInfo) {
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) return;
         const { mainComponent: spreadsheet, scene } = currentRender;
+        // 现在 spreadsheet.markDirty 会调用 vport.markDirty
+        // 因为其他 controller 中存在 mainComponent?.makeDirty() 的调用, 不止是 sheet-render.controller 在标脏
         if (spreadsheet) {
             spreadsheet.makeDirty(); // refresh spreadsheet
         }
         scene.makeDirty();
         if (!command.params) return;
         const cmdParams = command.params as Record<string, any>;
-        const viewports = scene.getViewports().filter((v) => ['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(v.viewportKey));
+        const viewports = this._spreadsheetViewports(scene);
         if (command.id === SetRangeValuesMutation.id && cmdParams.cellValue) {
             const dirtyRange: IRange = this._cellValueToRange(cmdParams.cellValue);
             const dirtyBounds = this._rangeToBounds([dirtyRange]);

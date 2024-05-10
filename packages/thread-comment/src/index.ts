@@ -21,6 +21,7 @@ export {
 export {
     ThreadCommentResourceController,
 } from './controllers/tc-resource.controller';
+export { ThreadCommentRemoveSubUnitController } from './controllers/tc-remove-subunit.controller'
 export { TC_PLUGIN_NAME } from './types/const';
 export {
     AddCommentMutation,

@@ -18,7 +18,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ICommandService, IConfigService, UniverInstanceType } from '@univerjs/core';
 import type { IThreadCommentUIConfig } from '@univerjs/thread-comment-ui';
-import { ThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
 import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
 import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
@@ -40,7 +40,7 @@ const defaultConfig: IThreadCommentUIConfig = {
 };
 
 
-export class UniverSheetsThreadCommentPlugin extends ThreadCommentUIPlugin {
+export class UniverSheetsThreadCommentPlugin extends UniverThreadCommentUIPlugin {
     static override pluginName = SHEETS_THREAD_COMMENT;
     static override type = UniverInstanceType.UNIVER_SHEET;
 

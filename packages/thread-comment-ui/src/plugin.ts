@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ThreadCommentPlugin } from '@univerjs/thread-comment';
+import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { ICommandService, IConfigService, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -24,7 +24,7 @@ import { SetActiveCommentOperation, ToggleSheetCommentPanelOperation } from './c
 import { ThreadCommentUIController } from './controllers/thread-comment-ui.controller';
 import type { IThreadCommentUIConfig } from './types/interfaces/i-thread-comment-mention';
 
-export class ThreadCommentUIPlugin extends ThreadCommentPlugin {
+export class UniverThreadCommentUIPlugin extends UniverThreadCommentPlugin {
     static override pluginName = PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_UNKNOWN;
 

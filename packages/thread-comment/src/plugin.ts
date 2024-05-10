@@ -23,7 +23,7 @@ import { AddCommentMutation, DeleteCommentMutation, ResolveCommentMutation, Upda
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from './commands/commands/comment.command';
 import { ThreadCommentRemoveSubUnitController } from './controllers/tc-remove-subunit.controller';
 
-export class ThreadCommentPlugin extends Plugin {
+export class UniverThreadCommentPlugin extends Plugin {
     static override pluginName = TC_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_UNKNOWN;
 

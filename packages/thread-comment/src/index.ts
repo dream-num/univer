@@ -52,4 +52,4 @@ export type {
     IUpdateCommentRefCommandParams,
     IUpdateCommentRefPayload,
 } from './commands/commands/comment.command';
-export { ThreadCommentPlugin } from './plugin';
+export { UniverThreadCommentPlugin } from './plugin';

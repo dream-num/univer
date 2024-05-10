@@ -32,7 +32,7 @@ import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
 
-const EXTENSION_Z_INDEX = 30;
+const EXTENSION_Z_INDEX = 45;
 export interface ISheetFontRenderExtension {
     fontRenderExtension?: {
         leftOffset?: number;

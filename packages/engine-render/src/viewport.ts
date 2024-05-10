@@ -245,6 +245,7 @@ export class Viewport {
             this._resizeHandler();
         });
         this._resizeHandler();
+        // this._testDisplayCache();
     }
 
     initCacheCanvas(props?: IViewProps) {
@@ -267,12 +268,13 @@ export class Viewport {
         const showCache = (cacheCanvas: UniverCanvas) => {
             cacheCanvas.getCanvasEle().style.zIndex = '100';
             cacheCanvas.getCanvasEle().style.position = 'fixed';
-            cacheCanvas.getCanvasEle().style.background = 'red';
+            cacheCanvas.getCanvasEle().style.background = '#fff';
             cacheCanvas.getCanvasEle().style.pointerEvents = 'none'; // 禁用事件响应
             cacheCanvas.getCanvasEle().style.border = '1px solid black'; // 设置边框样式
             cacheCanvas.getCanvasEle().style.transformOrigin = '100% 100%';
             cacheCanvas.getCanvasEle().style.transform = 'scale(0.5)';
-            // cacheCanvas.getCanvasEle().style.opacity = '0.9';
+            cacheCanvas.getCanvasEle().style.translate = '20% 20%';
+            cacheCanvas.getCanvasEle().style.opacity = '0.9';
             document.body.appendChild(cacheCanvas.getCanvasEle());
         };
         if (['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(this.viewportKey)) {
@@ -417,7 +419,6 @@ export class Viewport {
      * this.width this.height 也有可能是 undefined
      * 因此应通过 _getViewPortSize 获取宽高
      * @param position
-     * @returns
      */
     resize(position: IViewPosition) {
         const positionKeys = Object.keys(position);
@@ -673,6 +674,7 @@ export class Viewport {
             mainCtx.beginPath();
             // DEPT: left is set by upper views but width and height is not
             // this.left has handle scale already, no need to `this.width * scale`
+            // const { scaleX, scaleY } = this._getBoundScale(m[0], m[3]);
             mainCtx.rect(this.left, this.top, (this.width || 0), (this.height || 0));
             mainCtx.clip();
         }

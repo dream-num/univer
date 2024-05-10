@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, ColumnSeparatorType, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, SectionType, WrapTextType } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
@@ -703,39 +703,39 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         sectionBreaks: [
             {
                 startIndex: 3066,
-                // columnProperties: [
-                //     {
-                //         width: ptToPixel(240),
-                //         paddingEnd: ptToPixel(15),
-                //     },
-                // ],
-                // columnSeparatorType: ColumnSeparatorType.NONE,
-                // sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
+                columnProperties: [
+                    {
+                        width: ptToPixel(240),
+                        paddingEnd: ptToPixel(15),
+                    },
+                ],
+                columnSeparatorType: ColumnSeparatorType.NONE,
+                sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
                 // textDirection: textDirectionDocument,
                 // contentDirection: textDirection!,
             },
         ],
         customBlocks: [
-            {
-                startIndex: 189,
-                blockId: 'shapeTest1',
-            },
-            {
-                startIndex: 367,
-                blockId: 'shapeTest2',
-            },
-            {
-                startIndex: 489,
-                blockId: 'shapeTest3',
-            },
-            {
-                startIndex: 668,
-                blockId: 'shapeTest4',
-            },
-            {
-                startIndex: 962,
-                blockId: 'shapeTest5',
-            },
+            // {
+            //     startIndex: 189,
+            //     blockId: 'shapeTest1',
+            // },
+            // {
+            //     startIndex: 367,
+            //     blockId: 'shapeTest2',
+            // },
+            // {
+            //     startIndex: 489,
+            //     blockId: 'shapeTest3',
+            // },
+            // {
+            //     startIndex: 668,
+            //     blockId: 'shapeTest4',
+            // },
+            // {
+            //     startIndex: 962,
+            //     blockId: 'shapeTest5',
+            // },
         ],
     },
     documentStyle: {

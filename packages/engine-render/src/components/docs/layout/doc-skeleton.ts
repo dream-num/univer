@@ -287,7 +287,7 @@ export class DocumentSkeleton extends Skeleton {
 
             this._findLiquid.translatePagePadding(page);
 
-            const sections = page.sections;
+            const { sections } = page;
 
             for (const section of sections) {
                 const { columns, height } = section;
@@ -303,6 +303,7 @@ export class DocumentSkeleton extends Skeleton {
                 for (const column of columns) {
                     const { lines, width: columnWidth } = column;
 
+                    this._findLiquid.translateSave();
                     this._findLiquid.translateColumn(column);
 
                     // const { x: startX } = this._findLiquid;
@@ -410,6 +411,7 @@ export class DocumentSkeleton extends Skeleton {
                             this._findLiquid.translateRestore();
                         }
                     }
+                    this._findLiquid.translateRestore();
                 }
             }
             this._findLiquid.restorePagePadding(page);

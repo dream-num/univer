@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// @ts-ignore
 import numfmt from 'numfmt';
 
 /**

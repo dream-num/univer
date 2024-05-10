@@ -34,16 +34,8 @@ export class DesktopSidebarService implements ISidebarService {
         this.sidebarOptions$.next(this._sidebarOptions);
 
         return toDisposable(() => {
-            this.sidebarOptions$.complete();
+            this.close();
         });
-    }
-
-    set(params: ISidebarMethodOptions): void {
-        this._sidebarOptions = {
-            ...params,
-        };
-
-        this.sidebarOptions$.next(this._sidebarOptions);
     }
 
     close() {

@@ -26,8 +26,5 @@ export interface ISidebarService {
     readonly sidebarOptions$: Subject<ISidebarMethodOptions>;
 
     open(params: ISidebarMethodOptions): IDisposable;
-
-    set(params: ISidebarMethodOptions): void;
-
     close(): void;
 }

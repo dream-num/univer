@@ -25,6 +25,8 @@ export class ScriptPanelService extends Disposable {
     }
 
     override dispose(): void {
+        super.dispose();
+
         this._open$.next(false);
         this._open$.complete();
     }

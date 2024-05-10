@@ -30,7 +30,7 @@ import {
     collisionDetection,
     createAndUpdateBlockAnchor,
     createSkeletonLine,
-    setDivideFullState,
+    updateDivideInfo,
 } from '../../model/line';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
@@ -53,6 +53,7 @@ import {
     isColumnFull,
     lineIterator,
 } from '../../tools';
+import { BreakPointType } from '../../line-breaker/break';
 
 export function layoutParagraph(
     ctx: ILayoutContext,
@@ -60,7 +61,8 @@ export function layoutParagraph(
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
-    paragraphStart: boolean = false
+    paragraphStart: boolean = false,
+    breakPointType = BreakPointType.Normal
 ) {
     if (paragraphStart) {
         // elementIndex === 0 表示段落开始的第一个字符，需要新起一行，与之前的段落区分开
@@ -74,12 +76,12 @@ export function layoutParagraph(
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
 
             const bulletGlyph = createSkeletonBulletGlyph(glyphGroup[0], bulletSkeleton, charSpaceApply);
-            _lineOperator(ctx, [bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+            _lineOperator(ctx, [bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType);
         } else {
-            _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+            _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType);
         }
     } else {
-        _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+        _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType);
     }
 
     return [...pages];
@@ -141,6 +143,7 @@ function _divideOperator(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
     paragraphStart = false,
+    breakPointType = BreakPointType.Normal,
     defaultSpanLineHeight?: number
 ) {
     const lastPage = getLastPage(pages);
@@ -156,7 +159,9 @@ function _divideOperator(
 
         if (preOffsetLeft + width > divide.width) {
             // width 超过 divide 宽度
-            setDivideFullState(divide, true);
+            updateDivideInfo(divide, {
+                isFull: true,
+            });
             // 处理 word 或者数字串超过 divide width 的情况，主要分两种情况
             // 1. 以段落符号结尾时候，即使超过 divide 宽度，也需要将换行符追加到 divide 结尾。
             // 2. 空行中，英文单词或者连续数字超过 divide 宽度的情况，将把英文单词、数字串拆分，一部分追加到上一行，剩下的放在新的一行中，
@@ -203,6 +208,7 @@ function _divideOperator(
                         sectionBreakConfig,
                         paragraphConfig,
                         paragraphStart,
+                        breakPointType,
                         defaultSpanLineHeight
                     );
                 }
@@ -214,6 +220,7 @@ function _divideOperator(
                     sectionBreakConfig,
                     paragraphConfig,
                     paragraphStart,
+                    breakPointType,
                     defaultSpanLineHeight
                 );
             }
@@ -265,6 +272,7 @@ function _divideOperator(
                         sectionBreakConfig,
                         paragraphConfig,
                         lineIsStart,
+                        breakPointType,
                         boundingBoxAscent + boundingBoxDescent
                     );
 
@@ -280,16 +288,17 @@ function _divideOperator(
                         );
                     }
 
-                    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+                    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType);
 
                     return;
                 }
             }
 
             addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+            updateDivideInfo(divide, { breakType: breakPointType });
         }
     } else {
-        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
     }
 }
 
@@ -300,13 +309,14 @@ function _lineOperator(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
     paragraphStart: boolean = false,
+    breakPointType: BreakPointType = BreakPointType.Normal,
     defaultSpanLineHeight?: number
 ) {
     let lastPage = getLastPage(pages);
     let columnInfo = getLastNotFullColumnInfo(lastPage);
     if (!columnInfo || !columnInfo.column) {
         // 如果列不存在，则做一个兜底策略，新增一页。
-        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig);
+        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, undefined, breakPointType);
         lastPage = getLastPage(pages);
         columnInfo = getLastNotFullColumnInfo(lastPage);
     }
@@ -438,7 +448,7 @@ function _lineOperator(
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
         // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
-        _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
         return;
     }
 
@@ -480,7 +490,7 @@ function _lineOperator(
     column.lines.push(newLine);
     newLine.parent = column;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, drawingAnchor);
-    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
 }
 
 function __updateAndPositionDrawings(
@@ -658,15 +668,16 @@ function _columnOperator(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
     paragraphStart: boolean = false,
+    breakPointType = BreakPointType.Normal,
     defaultSpanLineHeight?: number
 ) {
     const lastPage = getLastPage(pages);
     const columnIsFull = isColumnFull(lastPage);
 
     if (columnIsFull === true) {
-        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
     } else {
-        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
     }
 }
 
@@ -677,13 +688,14 @@ function _pageOperator(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
     paragraphStart: boolean = false,
+    breakPointType = BreakPointType.Normal,
     defaultSpanLineHeight?: number
 ) {
     const curSkeletonPage: IDocumentSkeletonPage = getLastPage(pages);
     const { skeHeaders, skeFooters } = paragraphConfig;
 
     pages.push(createSkeletonPage(ctx, sectionBreakConfig, { skeHeaders, skeFooters }, curSkeletonPage?.pageNumber));
-    _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+    _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
 }
 
 /**

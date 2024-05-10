@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-import type { IParagraph } from '@univerjs/core';
+import type { IParagraphStyle } from '@univerjs/core';
 import { HorizontalAlign } from '@univerjs/core';
 import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
-import { getGlyphGroupWidth, lineIterator } from '../../tools';
-import { glyphShrinkLeft, glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';
+import { getFontCreateConfig, getGlyphGroupWidth, lineIterator } from '../../tools';
+import { createHyphenDashGlyph, glyphShrinkLeft, glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';
 import { hasCJK, hasCJKText, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../../basics/tools';
+import { BreakPointType } from '../../line-breaker/break';
+import type { DocumentViewModel } from '../../../view-model/document-view-model';
+import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
+import type { ISectionBreakConfig } from '../../../../../basics';
+import { isLetter } from '../../line-breaker/enhancers/hyphen-enhancer';
 
 // How much a character should hang into the end margin.
 // For more discussion, see:
@@ -232,7 +237,39 @@ function shrinkStartAndEndCJKPunctuation(line: IDocumentSkeletonLine) {
     }
 }
 
-export function lineAdjustment(pages: IDocumentSkeletonPage[], paragraph: IParagraph) {
+// Add dash to the end of divide when divide is break by Hyphen.
+function addHyphenDash(
+    line: IDocumentSkeletonLine,
+    viewModel: DocumentViewModel,
+    paragraphNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphStyle: IParagraphStyle
+) {
+    for (const divide of line.divides) {
+        const { st, glyphGroup, breakType } = divide;
+        const lastGlyph = glyphGroup[glyphGroup.length - 1];
+
+        if (isLetter(lastGlyph.content) && breakType === BreakPointType.Hyphen) {
+            const index = st + glyphGroup.reduce((total, g) => total + g.count, 0);
+            const config = getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+
+            const hyphenDashGlyph = createHyphenDashGlyph(config);
+            hyphenDashGlyph.parent = lastGlyph.parent;
+            hyphenDashGlyph.left = lastGlyph.left + lastGlyph.width;
+            divide.glyphGroup.push(hyphenDashGlyph);
+        }
+    }
+}
+
+export function lineAdjustment(
+    pages: IDocumentSkeletonPage[],
+    viewModel: DocumentViewModel,
+    paragraphNode: DataStreamTreeNode,
+    sectionBreakConfig: ISectionBreakConfig
+) {
+    const { endIndex } = paragraphNode;
+    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
+
     lineIterator(pages, (line) => {
         // Only need to adjust the current paragraph.
         if (line.paragraphIndex !== paragraph.startIndex) {
@@ -244,6 +281,8 @@ export function lineAdjustment(pages: IDocumentSkeletonPage[], paragraph: IParag
         shrinkStartAndEndCJKPunctuation(line);
         // restore the original glyph width.
         restoreLastCJKGlyphWidth(line);
+        // Add dash to the end of divide when divide is break by Hyphen.
+        addHyphenDash(line, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
         // Handle horizontal align: left\center\right\justified.
         horizontalAlignHandler(line, horizontalAlign);
     });

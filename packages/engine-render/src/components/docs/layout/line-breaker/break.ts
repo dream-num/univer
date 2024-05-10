@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
+export enum BreakPointType {
+    // Just a normal opportunity (e.g. after a space).
+    Normal = 'Normal',
+    // A mandatory breakpoint (after '\n' or at the end of the text).
+    Mandatory = 'Mandatory',
+    // An opportunity for hyphenating.
+    Hyphen = 'Hyphen',
+}
+
 export class Break {
     constructor(
         public position: number,
-        public required = false
-    ) {
-        // empty
-    }
+        public type = BreakPointType.Normal
+    ) {}
 }

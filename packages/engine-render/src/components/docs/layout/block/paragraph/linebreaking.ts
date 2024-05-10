@@ -173,7 +173,7 @@ export function lineBreaking(
     let allPages = [curPage];
     let paragraphStart = true;
 
-    for (const { text, glyphs } of shapedTextList) {
+    for (const { text, glyphs, breakPointType } of shapedTextList) {
         const pushPending = () => {
             if (glyphs.length === 0) {
                 return;
@@ -185,7 +185,8 @@ export function lineBreaking(
                 allPages,
                 sectionBreakConfig,
                 paragraphConfig,
-                paragraphStart
+                paragraphStart,
+                breakPointType
             );
 
             paragraphStart = false;

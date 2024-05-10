@@ -34,18 +34,13 @@ export function dealWidthParagraph(
     clearFontCreateConfigCache();
 
     // Step 1: Text Shaping.
-    const { endIndex, content = '' } = paragraphNode;
-
-    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
-
-    const { paragraphStyle = {} } = paragraph;
-
+    const { content = '' } = paragraphNode;
     const shapedTextList = shaping(
+        ctx,
         content,
         viewModel,
         paragraphNode,
-        sectionBreakConfig,
-        paragraphStyle
+        sectionBreakConfig
     );
 
     // Step 2: Line Breaking.
@@ -59,7 +54,12 @@ export function dealWidthParagraph(
 
     // Step 3: Line Adjustment.
     // Handle line adjustment(stretch and shrink) and punctuation adjustment.
-    lineAdjustment(allPages, paragraph);
+    lineAdjustment(
+        allPages,
+        viewModel,
+        paragraphNode,
+        sectionBreakConfig
+    );
 
     return allPages;
 }

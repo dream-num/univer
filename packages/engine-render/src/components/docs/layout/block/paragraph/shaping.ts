@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { IParagraphStyle, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 import { LineBreaker } from '../../line-breaker';
 import { tabLineBreakExtension } from '../../line-breaker/extensions/tab-linebreak-extension';
 import { createSkeletonCustomBlockGlyph, createSkeletonLetterGlyph, createSkeletonTabGlyph, glyphShrinkLeft, glyphShrinkRight } from '../../model/glyph';
+import type { ILayoutContext } from '../../tools';
 import { getCharSpaceApply, getFontCreateConfig } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
@@ -29,6 +30,9 @@ import type { IOpenTypeGlyphInfo } from '../../shaping-engine/text-shaping';
 import { textShape } from '../../shaping-engine/text-shaping';
 import { fontLibrary } from '../../shaping-engine/font-library';
 import { prepareParagraphBody } from '../../shaping-engine/utils';
+import { LineBreakerHyphenEnhancer } from '../../line-breaker/enhancers/hyphen-enhancer';
+import { Lang } from '../../hyphenation/lang';
+import { BreakPointType } from '../../line-breaker/break';
 import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
 
 // Now we apply consecutive punctuation adjustment, specified in Chinese Layout
@@ -89,15 +93,16 @@ function addCJKLatinSpacing(shapedTextList: IShapedText[]) {
 export interface IShapedText {
     text: string;
     glyphs: IDocumentSkeletonGlyph[];
+    breakPointType: BreakPointType;
 }
 
 
 export function shaping(
+    ctx: ILayoutContext,
     content: string,
-    bodyModel: DocumentViewModel,
+    viewModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
-    paragraphStyle: IParagraphStyle,
     useOpenType = false // Temporarily disable using opentype for shaping.
 ): IShapedText[] {
     const {
@@ -106,15 +111,16 @@ export function shaping(
         defaultTabStop = 10.5,
         drawings = {},
     } = sectionBreakConfig;
-    const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
     const shapedTextList: IShapedText[] = [];
     const breaker = new LineBreaker(content);
     const { endIndex } = paragraphNode;
+    const { paragraphStyle = {} } = viewModel.getParagraph(endIndex) || { startIndex: 0 };
+    const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
     let last = 0;
     let bk;
     let lastGlyphIndex = 0;
 
-    const paragraphBody = prepareParagraphBody(bodyModel.getBody()!, endIndex);
+    const paragraphBody = prepareParagraphBody(viewModel.getBody()!, endIndex);
 
     // const now = +new Date();
     let glyphInfos: IOpenTypeGlyphInfo[] = [];
@@ -127,8 +133,10 @@ export function shaping(
     // Add custom extension for linebreak.
     tabLineBreakExtension(breaker);
 
+    const enhancedBreaker = new LineBreakerHyphenEnhancer(breaker, ctx.hyphen, Lang.EnUs);
+
     // eslint-disable-next-line no-cond-assign
-    while ((bk = breaker.nextBreakPoint())) {
+    while ((bk = enhancedBreaker.nextBreakPoint())) {
         // get the string between the last break and this one
         const word = content.slice(last, bk.position);
         const shapedGlyphs: IDocumentSkeletonGlyph[] = [];
@@ -151,7 +159,7 @@ export function shaping(
 
             for (const glyphInfo of glyphInfosInWord) {
                 const { start, char } = glyphInfo;
-                const config = getFontCreateConfig(start, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+                const config = getFontCreateConfig(start, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
 
                 if (char === DataStreamTreeTokenType.TAB) {
                     const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
@@ -176,9 +184,9 @@ export function shaping(
                 }
 
                 if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
-                    const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-                    let newSpan: Nullable<IDocumentSkeletonGlyph> = null;
-                    const customBlock = bodyModel.getCustomBlock(paragraphNode.startIndex + i);
+                    const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+                    let newGlyph: Nullable<IDocumentSkeletonGlyph> = null;
+                    const customBlock = viewModel.getCustomBlock(paragraphNode.startIndex + i);
 
                     if (customBlock != null) {
                         const { blockId } = customBlock;
@@ -186,38 +194,38 @@ export function shaping(
                         if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
                             const { width, height } = drawingOrigin.objectTransform.size;
                             const { objectId } = drawingOrigin;
-                            newSpan = createSkeletonCustomBlockGlyph(config, width, height, objectId);
+                            newGlyph = createSkeletonCustomBlockGlyph(config, width, height, objectId);
                         } else {
-                            newSpan = createSkeletonCustomBlockGlyph(config, 0, 0, drawingOrigin.objectId);
+                            newGlyph = createSkeletonCustomBlockGlyph(config, 0, 0, drawingOrigin.objectId);
                         }
                     }
 
-                    if (newSpan == null) {
-                        newSpan = createSkeletonLetterGlyph(char, config);
+                    if (newGlyph == null) {
+                        newGlyph = createSkeletonLetterGlyph(char, config);
                     }
 
-                    shapedGlyphs.push(newSpan);
+                    shapedGlyphs.push(newGlyph);
                     i += char.length;
                     src = src.substring(char.length);
                 } else if (/\s/.test(char) || hasCJK(char)) {
-                    const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-                    let newSpan: Nullable<IDocumentSkeletonGlyph> = null;
+                    const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+                    let newGlyph: Nullable<IDocumentSkeletonGlyph> = null;
 
                     if (char === DataStreamTreeTokenType.TAB) {
                         const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-                        newSpan = createSkeletonTabGlyph(config, charSpaceApply);
+                        newGlyph = createSkeletonTabGlyph(config, charSpaceApply);
                     } else {
-                        newSpan = createSkeletonLetterGlyph(char, config);
+                        newGlyph = createSkeletonLetterGlyph(char, config);
                     }
 
-                    shapedGlyphs.push(newSpan);
+                    shapedGlyphs.push(newGlyph);
                     i += char.length;
                     src = src.substring(char.length);
                 } else if (startWithEmoji(src)) {
                     const { step, glyphGroup } = emojiHandler(
                         i,
                         src,
-                        bodyModel,
+                        viewModel,
                         paragraphNode,
                         sectionBreakConfig,
                         paragraphStyle
@@ -230,7 +238,7 @@ export function shaping(
                     const { step, glyphGroup } = ArabicHandler(
                         i,
                         src,
-                        bodyModel,
+                        viewModel,
                         paragraphNode,
                         sectionBreakConfig,
                         paragraphStyle
@@ -243,7 +251,7 @@ export function shaping(
                     const { step, glyphGroup } = TibetanHandler(
                         i,
                         src,
-                        bodyModel,
+                        viewModel,
                         paragraphNode,
                         sectionBreakConfig,
                         paragraphStyle
@@ -257,7 +265,7 @@ export function shaping(
                     const { step, glyphGroup } = otherHandler(
                         i,
                         src,
-                        bodyModel,
+                        viewModel,
                         paragraphNode,
                         sectionBreakConfig,
                         paragraphStyle
@@ -287,12 +295,15 @@ export function shaping(
             }
         }
 
+        const lastShapedGlyphs = shapedGlyphsList[shapedGlyphsList.length - 1];
+
         for (const shapedGlyphs of shapedGlyphsList) {
             const word = shapedGlyphs.map((g) => g.content).join();
 
             shapedTextList.push({
                 text: word,
                 glyphs: shapedGlyphs,
+                breakPointType: shapedGlyphs === lastShapedGlyphs ? bk.type : BreakPointType.Normal,
             });
         }
 

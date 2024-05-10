@@ -95,7 +95,7 @@ univer.registerPlugin(UniverSheetsFilterPlugin);
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // image
-univer.registerPlugin(UniverImagePlugin);
+univer.registerPlugin(UniverDrawingPlugin);
 univer.registerPlugin(UniverImageUIPlugin);
 univer.registerPlugin(UniverSheetsImageUIPlugin);
 

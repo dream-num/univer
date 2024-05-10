@@ -77,7 +77,7 @@ enum MoveObserverType {
     MOVE_END,
 }
 
-interface IChangeObserverConfig {
+export interface IChangeObserverConfig {
     objects: Map<string, BaseObject>;
     moveX?: number;
     moveY?: number;

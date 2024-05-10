@@ -26,7 +26,6 @@ import { CloseImageCropOperation, OpenImageCropOperation } from '../commands/ope
 import { ImageViewer } from '../views/image-viewer/ImageViewer';
 import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
-import { SetImageArrangeOperation } from '../commands/operations/image-arrange.operation';
 import { SetImageGroupOperation } from '../commands/operations/image-group.operation';
 import { SetImageAlignOperation } from '../commands/operations/image-align.operation';
 
@@ -72,7 +71,6 @@ export class ImageUIController extends Disposable {
             OpenImageCropOperation,
             CloseImageCropOperation,
             ImageResetSizeOperation,
-            SetImageArrangeOperation,
             SetImageGroupOperation,
             SetImageAlignOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));

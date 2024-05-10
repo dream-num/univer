@@ -18,6 +18,7 @@ import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import { type Observable, Subject } from 'rxjs';
 import type { Nullable } from '../../common/type-util';
+import { sortRules, sortRulesByDesc } from '../../shared';
 import type { ITransformState } from './drawing-interfaces';
 
 export const DEFAULT_DOCUMENT_SUB_COMPONENT_ID = '__default_document_sub_component_id20231101__';
@@ -34,14 +35,19 @@ export enum DrawingTypeEnum {
 
 export type DrawingType = DrawingTypeEnum | number;
 
-export interface IDrawingSearch {
-    drawingType: DrawingType;
+
+export interface IDrawingSearchAllType {
     unitId: string;
     subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
     drawingId: string;
 }
 
+export interface IDrawingSearch extends IDrawingSearchAllType {
+
+}
+
 export interface IDrawingParam extends IDrawingSearch {
+    drawingType: DrawingType;
     transform?: Nullable<ITransformState>;
     zIndex?: number;
     groupId?: string;
@@ -61,12 +67,28 @@ export interface IDrawingMapItem {
 }
 
 
+export interface IDrawingOrderMap {
+    [unitId: string]: IDrawingSubunitOrderMap;
+}
+
+export interface IDrawingSubunitOrderMap {
+    [subUnitId: string]: string[];
+}
+
+export interface IDrawingOrderMapParam {
+    unitId: string;
+    subUnitId: string;
+    drawingIds: string[];
+}
+
+
 export interface IDrawingManagerService {
     readonly remove$: Observable<IDrawingParam[]>;
     readonly add$: Observable<IDrawingParam[]>;
     readonly update$: Observable<IDrawingParam[]>;
     readonly extraUpdate$: Observable<IDrawingParam[]>;
     readonly focus$: Observable<IDrawingParam[]>;
+    readonly order$: Observable<IDrawingOrderMapParam>;
 
     dispose(): void;
 
@@ -87,13 +109,22 @@ export interface IDrawingManagerService {
 
     focusDrawing(param: Nullable<IDrawingSearch>): void;
     getFocusDrawings(): IDrawingParam[];
+
+    forwardDrawings(unitId: string, subUnitId: string, drawingIds: string[]): void;
+    backwardDrawing(unitId: string, subUnitId: string, drawingIds: string[]): void;
+    frontDrawing(unitId: string, subUnitId: string, drawingIds: string[]): void;
+    backDrawing(unitId: string, subUnitId: string, drawingIds: string[]): void;
+    replaceDrawingOrder(unitId: string, subUnitId: string, drawingIds: string[]): void;
+    getDrawingOrder(unitId: string, subUnitId: string): string[];
 }
 
 /**
  *
  */
 export class DrawingManagerService implements IDisposable, IDrawingManagerService {
-    private _drawingManagerInfo: { [drawingType: DrawingType]: IDrawingMap } = {};
+    private _drawingManagerInfo: IDrawingMap = {};
+
+    private _drawingOrderMap: IDrawingOrderMap = {};
 
     private _focusDrawings: IDrawingParam[] = [];
 
@@ -112,6 +143,8 @@ export class DrawingManagerService implements IDisposable, IDrawingManagerServic
     private _focus$ = new Subject<IDrawingParam[]>();
     focus$: Observable<IDrawingParam[]> = this._focus$.asObservable();
 
+    private _order$ = new Subject<IDrawingOrderMapParam>();
+    order$: Observable<IDrawingOrderMapParam> = this._order$.asObservable();
 
     dispose(): void {
         this._remove$.complete();
@@ -168,8 +201,8 @@ export class DrawingManagerService implements IDisposable, IDrawingManagerServic
     }
 
     getDrawingOKey<T extends IDrawingParam>(oKey: string): Nullable<T> {
-        const [unitId, subUnitId, drawingId, drawingType] = oKey.split('#-#');
-        return this._getCurrentBySearch<T>({ unitId, subUnitId, drawingId, drawingType: Number.parseInt(drawingType) });
+        const [unitId, subUnitId, drawingId] = oKey.split('#-#');
+        return this._getCurrentBySearch<T>({ unitId, subUnitId, drawingId });
     }
 
     focusDrawing(param: Nullable<IDrawingSearch>): void {
@@ -178,8 +211,8 @@ export class DrawingManagerService implements IDisposable, IDrawingManagerServic
             this._focus$.next([]);
             return;
         }
-        const { unitId, subUnitId, drawingId, drawingType } = param;
-        const item = this._drawingManagerInfo[drawingType]?.[unitId]?.[subUnitId]?.[drawingId];
+        const { unitId, subUnitId, drawingId } = param;
+        const item = this._drawingManagerInfo[unitId]?.[subUnitId]?.[drawingId];
         if (item == null) {
             this._focusDrawings = [];
             this._focus$.next([]);
@@ -193,30 +226,154 @@ export class DrawingManagerService implements IDisposable, IDrawingManagerServic
         return this._focusDrawings;
     }
 
+    getDrawingOrder(unitId: string, subUnitId: string) {
+        return this._drawingOrderMap[unitId]?.[subUnitId] || [];
+    }
+
+    forwardDrawings(unitId: string, subUnitId: string, drawingIds: string[]) {
+        drawingIds.forEach((drawingId) => {
+            const index = this._hasDrawingOrder({ unitId, subUnitId, drawingId });
+            if (index === -1) {
+                return;
+            }
+            this._moveDrawingOrder(unitId, subUnitId, drawingId, index + 1);
+        });
+    }
+
+    replaceDrawingOrder(unitId: string, subUnitId: string, drawingIds: string[]) {
+        this._establishDrawingOrderMap(unitId, subUnitId);
+        this._drawingOrderMap[unitId][subUnitId] = drawingIds;
+
+        this._order$.next({ unitId, subUnitId, drawingIds });
+    }
+
+    backwardDrawing(unitId: string, subUnitId: string, drawingIds: string[]) {
+        drawingIds.forEach((drawingId) => {
+            const index = this._hasDrawingOrder({ unitId, subUnitId, drawingId });
+            if (index === -1) {
+                return;
+            }
+            this._moveDrawingOrder(unitId, subUnitId, drawingId, index - 1);
+        });
+    }
+
+    frontDrawing(unitId: string, subUnitId: string, drawingIds: string[]) {
+        const orderDrawingIds = this._getOrderFromSearchParams(unitId, subUnitId, drawingIds);
+        orderDrawingIds.forEach((orderDrawingId) => {
+            const { drawingId } = orderDrawingId;
+            const index = this._getDrawingCount(unitId, subUnitId);
+            this._moveDrawingOrder(unitId, subUnitId, drawingId, index + 1);
+        });
+    }
+
+    backDrawing(unitId: string, subUnitId: string, drawingIds: string[]) {
+        const orderSearchParams = this._getOrderFromSearchParams(unitId, subUnitId, drawingIds, true);
+        orderSearchParams.forEach((orderSearchParam) => {
+            const { drawingId } = orderSearchParam;
+            this._moveDrawingOrder(unitId, subUnitId, drawingId, 0);
+        });
+    }
+
+    private _getDrawingCount(unitId: string, subUnitId: string) {
+        return this.getDrawingOrder(unitId, subUnitId).length || 0;
+    }
+
+    private _getOrderFromSearchParams(unitId: string, subUnitId: string, drawingIds: string[], isDesc = false) {
+        return drawingIds.map((drawingId) => {
+            const zIndex = this._hasDrawingOrder({ unitId, subUnitId, drawingId });
+            return { drawingId, zIndex };
+        }).sort(isDesc === false ? sortRules : sortRulesByDesc);
+    }
+
+    private _establishDrawingOrderMap(unitId: string, subUnitId: string) {
+        if (!this._drawingOrderMap[unitId]) {
+            this._drawingOrderMap[unitId] = {};
+        }
+
+        if (!this._drawingOrderMap[unitId][subUnitId]) {
+            this._drawingOrderMap[unitId][subUnitId] = [];
+        }
+    }
+
+    private _insertDrawingOrder(searchParam: Nullable<IDrawingSearchAllType>) {
+        if (searchParam == null) {
+            return;
+        }
+
+        const { unitId, subUnitId, drawingId } = searchParam;
+
+        this._establishDrawingOrderMap(unitId, subUnitId);
+
+        if (this._drawingOrderMap[unitId][subUnitId].includes(drawingId)) {
+            return;
+        }
+
+        this._drawingOrderMap[unitId][subUnitId].push(drawingId);
+    }
+
+    private _removeDrawingOrder(searchParam: Nullable<IDrawingSearchAllType>) {
+        if (searchParam == null) {
+            return;
+        }
+
+        const { unitId, subUnitId, drawingId } = searchParam;
+
+        this._establishDrawingOrderMap(unitId, subUnitId);
+
+        const index = this._drawingOrderMap[unitId][subUnitId].indexOf(drawingId);
+        if (index === -1) {
+            return;
+        }
+
+        this._drawingOrderMap[unitId][subUnitId].splice(index, 1);
+    }
+
+    private _hasDrawingOrder(searchParam: Nullable<IDrawingSearchAllType>) {
+        if (searchParam == null) {
+            return -1;
+        }
+
+        const { unitId, subUnitId, drawingId } = searchParam;
+
+        this._establishDrawingOrderMap(unitId, subUnitId);
+
+        return this._drawingOrderMap[unitId][subUnitId].indexOf(drawingId);
+    }
+
+    private _moveDrawingOrder(unitId: string, subUnitId: string, drawingId: string, toIndex: number) {
+        this._establishDrawingOrderMap(unitId, subUnitId);
+        const index = this._drawingOrderMap[unitId][subUnitId].indexOf(drawingId);
+        if (index === -1) {
+            return;
+        }
+
+        this._drawingOrderMap[unitId][subUnitId].splice(index, 1);
+        this._drawingOrderMap[unitId][subUnitId].splice(toIndex, 0, drawingId);
+    }
+
     private _getCurrentBySearch<T extends IDrawingParam>(searchParam: Nullable<IDrawingSearch>): Nullable<T> {
         if (searchParam == null) {
             return;
         }
-        const { unitId, subUnitId, drawingId, drawingType } = searchParam;
-        return this._drawingManagerInfo[drawingType]?.[unitId]?.[subUnitId]?.[drawingId] as T;
+        const { unitId, subUnitId, drawingId } = searchParam;
+        return this._drawingManagerInfo[unitId]?.[subUnitId]?.[drawingId] as T;
     }
 
     private _addByParam<T extends IDrawingParam>(insertParam: T): T[] {
-        const { unitId, subUnitId, drawingId, drawingType } = insertParam;
+        const { unitId, subUnitId, drawingId } = insertParam;
 
-        if (!this._drawingManagerInfo[drawingType]) {
-            this._drawingManagerInfo[drawingType] = {};
+
+        if (!this._drawingManagerInfo[unitId]) {
+            this._drawingManagerInfo[unitId] = {};
         }
 
-        if (!this._drawingManagerInfo[drawingType][unitId]) {
-            this._drawingManagerInfo[drawingType][unitId] = {};
+        if (!this._drawingManagerInfo[unitId][subUnitId]) {
+            this._drawingManagerInfo[unitId][subUnitId] = {};
         }
 
-        if (!this._drawingManagerInfo[drawingType][unitId][subUnitId]) {
-            this._drawingManagerInfo[drawingType][unitId][subUnitId] = {};
-        }
+        this._drawingManagerInfo[unitId][subUnitId][drawingId] = insertParam;
 
-        this._drawingManagerInfo[drawingType][unitId][subUnitId][drawingId] = insertParam;
+        this._insertDrawingOrder({ unitId, subUnitId, drawingId });
 
         return [insertParam];
     }
@@ -225,9 +382,9 @@ export class DrawingManagerService implements IDisposable, IDrawingManagerServic
         if (searchParam == null) {
             return [];
         }
-        const { unitId, subUnitId, drawingId, drawingType } = searchParam;
+        const { unitId, subUnitId, drawingId } = searchParam;
 
-        const subComponentObjects = this._drawingManagerInfo[drawingType]?.[unitId]?.[subUnitId];
+        const subComponentObjects = this._drawingManagerInfo[unitId]?.[subUnitId];
 
         if (subComponentObjects == null) {
             return [];
@@ -241,13 +398,15 @@ export class DrawingManagerService implements IDisposable, IDrawingManagerServic
 
         delete subComponentObjects[drawingId];
 
+        this._removeDrawingOrder({ unitId, subUnitId, drawingId });
+
         return [object];
     }
 
     private _updateByParam<T extends IDrawingParam>(updateParam: T): T[] {
-        const { unitId, subUnitId, drawingId, drawingType } = updateParam;
+        const { unitId, subUnitId, drawingId } = updateParam;
 
-        const subComponentObjects = this._drawingManagerInfo[drawingType]?.[unitId]?.[subUnitId];
+        const subComponentObjects = this._drawingManagerInfo[unitId]?.[subUnitId];
 
         if (subComponentObjects == null) {
             return [];

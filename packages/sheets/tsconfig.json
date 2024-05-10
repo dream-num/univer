@@ -5,5 +5,5 @@
         "outDir": "lib/types"
     },
     "references": [{ "path": "./tsconfig.node.json" }],
-    "include": ["src", "../engine-formula/src/engine/utils/__tests__/numfmt-kit.spec.ts"]
+    "include": ["src"]
 }

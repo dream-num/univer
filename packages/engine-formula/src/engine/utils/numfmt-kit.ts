@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, Nullable, Styles } from '@univerjs/core';
+// @ts-ignore
 import numfmt from 'numfmt';
 import { operatorToken } from '../../basics/token';
 

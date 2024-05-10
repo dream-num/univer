@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import type { MenuItemGroupProps, MenuItemProps, MenuProps, SubMenuProps } from 'rc-menu';
+import type { MenuItemGroupProps, MenuItemProps, MenuProps, MenuRef, SubMenuProps } from 'rc-menu';
 import RcMenu, { MenuItem as RcMenuItem, MenuItemGroup as RcMenuItemGroup, SubMenu as RcSubMenu } from 'rc-menu';
 import React, { useContext } from 'react';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
-export function Menu(props: MenuProps) {
+export const Menu = React.forwardRef<MenuRef, MenuProps>((props, ref) => {
     const { mountContainer } = useContext(ConfigContext);
-
-    return mountContainer && React.cloneElement(<RcMenu prefixCls={styles.menu} getPopupContainer={() => mountContainer} />, {
+    return mountContainer && React.cloneElement(<RcMenu ref={ref} prefixCls={styles.menu} getPopupContainer={() => mountContainer} />, {
         ...props,
     });
-}
+});
 
 export function MenuItem(props: MenuItemProps) {
     return React.cloneElement(<RcMenuItem />, { ...props });

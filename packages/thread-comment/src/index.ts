@@ -27,6 +27,7 @@ export {
     DeleteCommentMutation,
     ResolveCommentMutation,
     UpdateCommentMutation,
+    UpdateCommentRefMutation,
 } from './commands/mutations/comment.mutation';
 export type {
     IAddCommentMutationParams,

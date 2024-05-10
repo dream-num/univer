@@ -25,7 +25,7 @@ import {
 import type { ISheetDrawingServiceParam } from '@univerjs/sheets';
 import { InsertDrawingMutation, ISheetDrawingService, RemoveDrawingMutation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-import { InsertImageMutation, RemoveImageMutation } from '@univerjs/image';
+import { InsertImageMutation, RemoveImageMutation } from '@univerjs/drawing';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams } from './interfaces';
 
@@ -54,30 +54,20 @@ export const RemoveSheetImageCommand: ICommand = {
         const unitIds: string[] = [];
 
         drawings.forEach((param) => {
-            const { unitId, subUnitId, drawingId, drawingType } = param;
+            const { unitId, subUnitId, drawingId } = param;
 
             unitIds.push(unitId);
 
-            const oldSheetDrawing = sheetDrawingService.getDrawingItem({ unitId, subUnitId, drawingId, drawingType });
+            const oldSheetDrawing = sheetDrawingService.getDrawingItem({ unitId, subUnitId, drawingId });
             if (oldSheetDrawing) {
                 sheetDrawingParams.push(oldSheetDrawing);
             }
 
-            const oldImageDrawing = drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId, drawingType });
+            const oldImageDrawing = drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
             if (oldImageDrawing) {
                 imageDrawingParams.push(oldImageDrawing);
             }
         });
-
-        // const sheetDrawingParams = drawings.map((param) => param.sheetDrawingParam);
-        // const imageDrawingParams = drawings.map((param) => param.drawingParam);
-        // const unitIds: string[] = drawings.map((param) => param.sheetDrawingParam.unitId);
-
-        // prepare do mutations
-        // const removeImageMutationParams = drawings.map((param) => {
-        //     const { unitId, subUnitId, drawingId, drawingType } = param.drawingParam;
-        //     return { unitId, subUnitId, drawingId, drawingType };
-        // });
 
 
         // execute do mutations and add undo mutations to undo stack if completed

@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { DrawingTypeEnum, ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
@@ -147,34 +147,33 @@ export class ImagePopupMenuController extends RxDisposable {
     }
 
     private _getImageMenuItems(unitId: string, subUnitId: string, drawingId: string) {
-        const drawingType = DrawingTypeEnum.DRAWING_IMAGE;
         return [
             {
                 label: 'image-popup.edit',
                 index: 0,
                 commandId: EditSheetImageOperation.id,
-                commandParams: { unitId, subUnitId, drawingId, drawingType },
+                commandParams: { unitId, subUnitId, drawingId },
                 disable: false,
             },
             {
                 label: 'image-popup.delete',
                 index: 1,
                 commandId: RemoveSheetImageCommand.id,
-                commandParams: { unitId, drawings: [{ unitId, subUnitId, drawingId, drawingType }] },
+                commandParams: { unitId, drawings: [{ unitId, subUnitId, drawingId }] },
                 disable: false,
             },
             {
                 label: 'image-popup.crop',
                 index: 2,
                 commandId: OpenImageCropOperation.id,
-                commandParams: { unitId, subUnitId, drawingId, drawingType },
+                commandParams: { unitId, subUnitId, drawingId },
                 disable: false,
             },
             {
                 label: 'image-popup.reset',
                 index: 3,
                 commandId: ImageResetSizeOperation.id,
-                commandParams: [{ unitId, subUnitId, drawingId, drawingType }],
+                commandParams: [{ unitId, subUnitId, drawingId }],
                 disable: false,
             },
         ];

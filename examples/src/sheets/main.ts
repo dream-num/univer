@@ -36,7 +36,7 @@ import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validati
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 
 import { FUniver } from '@univerjs/facade';
-import { UniverImagePlugin } from '@univerjs/image';
+import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverImageUIPlugin } from '@univerjs/image-ui';
 import { UniverSheetsImageUIPlugin } from '@univerjs/sheets-image-ui';
 import { DebuggerPlugin } from '../plugins/debugger';
@@ -99,7 +99,7 @@ univer.registerPlugin(UniverSheetsFilterPlugin);
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // image
-univer.registerPlugin(UniverImagePlugin);
+univer.registerPlugin(UniverDrawingPlugin);
 univer.registerPlugin(UniverImageUIPlugin);
 univer.registerPlugin(UniverSheetsImageUIPlugin);
 

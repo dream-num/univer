@@ -23,6 +23,8 @@ import {
 import { InsertImageMutation } from '../commands/mutations/insert-image.mutations';
 import { RemoveImageMutation } from '../commands/mutations/remove-image.mutations';
 import { SetImageMutation } from '../commands/mutations/set-image.mutations';
+import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
+import { SetDrawingArrangeMutation } from '../commands/mutations/set-drawing-arrange.mutation';
 
 @OnLifecycle(LifecycleStages.Rendered, ImageController)
 export class ImageController extends Disposable {
@@ -47,6 +49,8 @@ export class ImageController extends Disposable {
             InsertImageMutation,
             RemoveImageMutation,
             SetImageMutation,
+            SetDrawingArrangeMutation,
+            SetDrawingArrangeCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

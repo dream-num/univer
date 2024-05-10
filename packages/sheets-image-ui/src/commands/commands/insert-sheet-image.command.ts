@@ -21,7 +21,7 @@ import {
     IUndoRedoService,
 } from '@univerjs/core';
 
-import { InsertImageMutation, RemoveImageMutation } from '@univerjs/image';
+import { InsertImageMutation, RemoveImageMutation } from '@univerjs/drawing';
 
 import { InsertDrawingMutation, RemoveDrawingMutation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
@@ -51,8 +51,8 @@ export const InsertSheetImageCommand: ICommand = {
 
         // prepare do mutations
         const removeImageMutationParams = drawings.map((param) => {
-            const { unitId, subUnitId, drawingId, drawingType } = param.drawingParam;
-            return { unitId, subUnitId, drawingId, drawingType };
+            const { unitId, subUnitId, drawingId } = param.drawingParam;
+            return { unitId, subUnitId, drawingId };
         });
 
         // execute do mutations and add undo mutations to undo stack if completed

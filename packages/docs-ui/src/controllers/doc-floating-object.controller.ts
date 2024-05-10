@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingManagerParam } from '@univerjs/core';
+import type { ICommandInfo } from '@univerjs/core';
 import {
     BooleanNumber,
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
@@ -61,51 +61,51 @@ export class DocFloatingObjectController extends Disposable {
     }
 
     private _updateOnPluginChange() {
-        this._drawingManagerService.pluginUpdate$.subscribe((params) => {
-            const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
+        // this._drawingManagerService.pluginUpdate$.subscribe((params) => {
+        //     const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
 
-            if (docsSkeletonObject == null) {
-                return;
-            }
+        //     if (docsSkeletonObject == null) {
+        //         return;
+        //     }
 
-            const { unitId, skeleton } = docsSkeletonObject;
+        //     const { unitId, skeleton } = docsSkeletonObject;
 
-            const currentRender = this._renderManagerService.getRenderById(unitId);
+        //     const currentRender = this._renderManagerService.getRenderById(unitId);
 
-            if (currentRender == null) {
-                return;
-            }
+        //     if (currentRender == null) {
+        //         return;
+        //     }
 
-            const { mainComponent, components, scene } = currentRender;
+        //     const { mainComponent, components, scene } = currentRender;
 
-            const docsComponent = mainComponent as Documents;
+        //     const docsComponent = mainComponent as Documents;
 
-            const { left: docsLeft, top: docsTop } = docsComponent;
+        //     const { left: docsLeft, top: docsTop } = docsComponent;
 
-            params.forEach((param) => {
-                const { unitId, subUnitId, drawingId, drawing } = param;
+        //     params.forEach((param) => {
+        //         const { unitId, subUnitId, drawingId, drawing } = param;
 
-                const { left = 0, top = 0, width = 0, height = 0, angle, flipX, flipY, skewX, skewY } = drawing;
+        //         const { left = 0, top = 0, width = 0, height = 0, angle, flipX, flipY, skewX, skewY } = drawing;
 
-                const cache = this._pageMarginCache.get(drawingId);
+        //         const cache = this._pageMarginCache.get(drawingId);
 
-                const marginLeft = cache?.marginLeft || 0;
-                const marginTop = cache?.marginTop || 0;
+        //         const marginLeft = cache?.marginLeft || 0;
+        //         const marginTop = cache?.marginTop || 0;
 
-                skeleton
-                    ?.getViewModel()
-                    .getDataModel()
-                    .updateDrawing(drawingId, {
-                        left: left - docsLeft - marginLeft,
-                        top: top - docsTop - marginTop,
-                        height,
-                        width,
-                    });
-            });
+        //         skeleton
+        //             ?.getViewModel()
+        //             .getDataModel()
+        //             .updateDrawing(drawingId, {
+        //                 left: left - docsLeft - marginLeft,
+        //                 top: top - docsTop - marginTop,
+        //                 height,
+        //                 width,
+        //             });
+        //     });
 
-            skeleton?.calculate();
-            mainComponent?.makeDirty();
-        });
+        //     skeleton?.calculate();
+        //     mainComponent?.makeDirty();
+        // });
     }
 
     private _initialRenderRefresh() {
@@ -188,7 +188,7 @@ export class DocFloatingObjectController extends Disposable {
 
         const { pages } = skeletonData;
 
-        const floatObjects: IFloatingObjectManagerParam[] = [];
+        const floatObjects: any[] = []; // IFloatingObjectManagerParam
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
@@ -239,6 +239,6 @@ export class DocFloatingObjectController extends Disposable {
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        this._floatingObjectManagerService.batchAddOrUpdate(floatObjects);
+        // this._floatingObjectManagerService.batchAddOrUpdate(floatObjects);
     }
 }

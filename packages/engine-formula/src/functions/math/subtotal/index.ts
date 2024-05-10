@@ -53,19 +53,15 @@ enum FunctionNumIgnoreHidden {
 }
 
 export class Subtotal extends BaseFunction {
+    override minParams = 2;
+
+    override maxParams = 255;
+
     override needsReferenceObject = true;
 
     override calculate(functionNum: FunctionVariantType, ...refs: FunctionVariantType[]) {
-        if (functionNum == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
         if (functionNum.isError()) {
             return functionNum;
-        }
-
-        if (refs.length === 0) {
-            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (functionNum.isReferenceObject()) {

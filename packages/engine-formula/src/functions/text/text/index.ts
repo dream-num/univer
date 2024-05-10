@@ -23,11 +23,11 @@ import { NumberValueObject, StringValueObject } from '../../../engine/value-obje
 import { BaseFunction } from '../../base-function';
 
 export class Text extends BaseFunction {
-    override calculate(text: BaseValueObject, formatText: BaseValueObject) {
-        if (text == null || formatText == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
+    override minParams = 2;
 
+    override maxParams = 2;
+
+    override calculate(text: BaseValueObject, formatText: BaseValueObject) {
         if (text.isError()) {
             return text;
         }

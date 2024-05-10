@@ -26,16 +26,16 @@ import { BaseFunction } from '../../base-function';
 import { compareToken } from '../../../basics/token';
 
 export class Xmatch extends BaseFunction {
+    override minParams = 2;
+
+    override maxParams = 4;
+
     override calculate(
         lookupValue: BaseValueObject,
         lookupArray: ArrayValueObject,
         matchMode?: BaseValueObject,
         searchMode?: BaseValueObject
     ) {
-        if (lookupValue == null || lookupArray == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
         if (lookupValue.isError()) {
             return lookupValue;
         }

@@ -23,15 +23,15 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Match extends BaseFunction {
+    override minParams = 2;
+
+    override maxParams = 3;
+
     override calculate(
         lookupValue: BaseValueObject,
         lookupArray: ArrayValueObject,
         matchType?: BaseValueObject
     ) {
-        if (lookupValue == null || lookupArray == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
         if (lookupValue.isError()) {
             return lookupValue;
         }

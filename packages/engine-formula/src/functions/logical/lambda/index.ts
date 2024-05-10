@@ -23,6 +23,10 @@ import { BaseFunction } from '../../base-function';
  * Please refer to the lambdaNode; here, it serves the purpose of a placeholder for the formula.
  */
 export class Lambda extends BaseFunction {
+    override minParams = 1;
+
+    override maxParams = 255;
+
     override calculate(...variants: BaseValueObject[]) {
         return ErrorValueObject.create(ErrorType.VALUE);
     }

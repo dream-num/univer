@@ -15,27 +15,26 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { FUNCTION_NAMES_INFORMATION } from '../function-names';
 
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
-import { ErrorType } from '../../../basics/error-type';
-import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import { Isodd } from './isodd';
+import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
+import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
+import { Iseven } from '../iseven';
 
-
-describe('Test isodd function', () => {
-    const testFunction = new Isodd(FUNCTION_NAMES_INFORMATION.ISODD);
+describe('Test iseven function', () => {
+    const testFunction = new Iseven(FUNCTION_NAMES_INFORMATION.ISEVEN);
 
     it('should work with different kind of number values', () => {
-        expect(testFunction.calculate(NumberValueObject.create(-1)).getValue()).toBeTruthy();
-        expect(testFunction.calculate(NumberValueObject.create(2.5)).getValue()).toBeFalsy();
-        expect(testFunction.calculate(NumberValueObject.create(5)).getValue()).toBeTruthy();
-        expect(testFunction.calculate(NumberValueObject.create(0)).getValue()).toBeFalsy();
+        expect(testFunction.calculate(NumberValueObject.create(-1)).getValue()).toBeFalsy();
+        expect(testFunction.calculate(NumberValueObject.create(2.5)).getValue()).toBeTruthy();
+        expect(testFunction.calculate(NumberValueObject.create(5)).getValue()).toBeFalsy();
+        expect(testFunction.calculate(NumberValueObject.create(0)).getValue()).toBeTruthy();
     });
 
     it('should convert value first if is it not a number value', () => {
-        expect(testFunction.calculate(StringValueObject.create('123')).getValue()).toBeTruthy();
-        expect(testFunction.calculate(StringValueObject.create('122')).getValue()).toBeFalsy();
+        expect(testFunction.calculate(StringValueObject.create('123')).getValue()).toBeFalsy();
+        expect(testFunction.calculate(StringValueObject.create('122')).getValue()).toBeTruthy();
     });
 
     it('should throw error when value is not convertable to number', () => {

@@ -18,6 +18,10 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { BaseFunction } from '../../base-function';
 
 export class Minus extends BaseFunction {
+    override minParams = 2;
+
+    override maxParams = 2;
+
     override calculate(variant1: BaseValueObject, variant2: BaseValueObject) {
         if (variant1.isError()) {
             return variant1;

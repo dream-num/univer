@@ -22,13 +22,13 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Columns extends BaseFunction {
-    override calculate(
-        reference?: BaseValueObject
-    ) {
-        if (reference == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
+    override minParams = 1;
 
+    override maxParams = 1;
+
+    override calculate(
+        reference: BaseValueObject
+    ) {
         if (reference.isError()) {
             return reference;
         }

@@ -147,7 +147,7 @@ export class SheetsFilterService extends Disposable {
                 fromCallback(this._commandService.onCommandExecuted)
                     .pipe(filter(([command]) => command.type === CommandType.MUTATION && FILTER_MUTATIONS.has(command.id))),
 
-                // source2: activte sheet changes
+                // source2: activate sheet changes
                 this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
                     .pipe(switchMap((workbook) => workbook?.activeSheet$ ?? of(null)))
             ).subscribe(() => this._updateActiveFilterModel()));

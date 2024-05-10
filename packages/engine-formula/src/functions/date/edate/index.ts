@@ -27,11 +27,11 @@ import { BaseFunction } from '../../base-function';
  * TODO@Dushusir: support plaine text date: =EDATE("2020-1-1",1), =EDATE("2020/1/1",1) and other formats
  */
 export class Edate extends BaseFunction {
-    override calculate(startDate: BaseValueObject, months: BaseValueObject) {
-        if (startDate == null || months == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
+    override minParams = 2;
 
+    override maxParams = 2;
+
+    override calculate(startDate: BaseValueObject, months: BaseValueObject) {
         if (startDate.isError()) {
             return startDate;
         }

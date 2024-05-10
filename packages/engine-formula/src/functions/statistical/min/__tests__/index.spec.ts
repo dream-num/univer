@@ -120,5 +120,31 @@ describe('Test min function', () => {
             const result = textFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(-3);
         });
+        it('Var1 is array, var2 is array', () => {
+            const var1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [null],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const var2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['a'],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = textFunction.calculate(var1, var2);
+            expect(result.getValue()).toBe(0);
+        });
     });
 });

@@ -19,6 +19,10 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { BaseFunction } from '../../base-function';
 
 export class Compare extends BaseFunction {
+    override minParams = 2;
+
+    override maxParams = 2;
+
     private _compareType: compareToken = compareToken.EQUALS;
 
     setCompareType(token: compareToken) {

@@ -1,5 +1,37 @@
 
 
+## [0.1.10](https://github.com/dream-num/univer/compare/v0.1.9...v0.1.10) (2024-05-10)
+
+
+### Bug Fixes
+
+* **conditional-formatting:** custom formula rendering error ([#2117](https://github.com/dream-num/univer/issues/2117)) ([d04a0f8](https://github.com/dream-num/univer/commit/d04a0f8fd496415b07bd761eaee85f716c23fbf0))
+* **conditional-formatting:** update icon set id ([#2109](https://github.com/dream-num/univer/issues/2109)) ([81a59fd](https://github.com/dream-num/univer/commit/81a59fdc1c52c054f7c014cda1ea39d27be66016))
+* **conditional-formatting:** update icon set id ([#2115](https://github.com/dream-num/univer/issues/2115)) ([21b7a14](https://github.com/dream-num/univer/commit/21b7a145d745d64874c6791821c8e5b02007e769))
+* **conditional-formatting:** viewmodel interception is not required at initialization time ([#2107](https://github.com/dream-num/univer/issues/2107)) ([305d235](https://github.com/dream-num/univer/commit/305d235091a0cfe77be02196bbcc44d39c1e37cf))
+* correct skeleton dispose timing ([#2196](https://github.com/dream-num/univer/issues/2196)) ([87e96df](https://github.com/dream-num/univer/commit/87e96df3204953aaf89d5cd9328c9026629992bb))
+* **docs:** text selection in multiple columns ([#2199](https://github.com/dream-num/univer/issues/2199)) ([5f9816e](https://github.com/dream-num/univer/commit/5f9816e060942ba642df41ee9bd63d6c883e65da))
+* fix ci playwright ([#2168](https://github.com/dream-num/univer/issues/2168)) ([714b244](https://github.com/dream-num/univer/commit/714b2448352712943e448cdb0c3c3e324c7bfe63))
+* fix slide rendering ([#2127](https://github.com/dream-num/univer/issues/2127)) ([300d5d6](https://github.com/dream-num/univer/commit/300d5d6959b43255bfc8a3e2e4ab7574b1c42ce4))
+* message service do not return disposable ([#2155](https://github.com/dream-num/univer/issues/2155)) ([d831996](https://github.com/dream-num/univer/commit/d83199680949108dca3309736ce6bf4b1106c796))
+* **render-engine:** fx column dose not display content ([#2161](https://github.com/dream-num/univer/issues/2161)) ([73e8c02](https://github.com/dream-num/univer/commit/73e8c0277bea79da6c7770684b02b40e919373e3))
+* **render:** memory leak ([#2166](https://github.com/dream-num/univer/issues/2166)) ([9b078e2](https://github.com/dream-num/univer/commit/9b078e2cfb4f7c714c1715fe1e067b490c93b187))
+* **render:** memory leak and capture ([#2171](https://github.com/dream-num/univer/issues/2171)) ([af27e38](https://github.com/dream-num/univer/commit/af27e38c59b5ac929684ed04013038cbd8047c8e))
+* **sheet:** find-replace replaceAll only effect on the active sheet ([#2202](https://github.com/dream-num/univer/issues/2202)) ([0ed9f56](https://github.com/dream-num/univer/commit/0ed9f560ac7f42560a3c21943313b097f127d005))
+* **sheets-data-validation:** data validation daily bugifx ([#2126](https://github.com/dream-num/univer/issues/2126)) ([3b45f89](https://github.com/dream-num/univer/commit/3b45f89548f000e5bf4939021c1f9bfa04fb9dca)), closes [#2121](https://github.com/dream-num/univer/issues/2121) [#2120](https://github.com/dream-num/univer/issues/2120) [#2114](https://github.com/dream-num/univer/issues/2114) [#2112](https://github.com/dream-num/univer/issues/2112)
+* **sheet:** unhide hidden icon render incorrect when headers resize ([#2208](https://github.com/dream-num/univer/issues/2208)) ([a68bfb9](https://github.com/dream-num/univer/commit/a68bfb9bd14485d8e287eda6476490cc2463b452))
+* **slides-ui:** fix excessive re-render issue to prevent infinite loop errors ([#2159](https://github.com/dream-num/univer/issues/2159)) ([9edf924](https://github.com/dream-num/univer/commit/9edf924dfb33cc21d8dd43285927deee58e693d0))
+
+
+### Features
+
+* **docs:** image layout in doc ([#1958](https://github.com/dream-num/univer/issues/1958)) ([00d0b79](https://github.com/dream-num/univer/commit/00d0b7917d75433629fad629d635adc427b6b4a5))
+* **facade:** add sheet hooks, onCellPointerMove hook ([#2193](https://github.com/dream-num/univer/issues/2193)) ([476ffd3](https://github.com/dream-num/univer/commit/476ffd33c4425890e55e8dffdcb7a2563ed85f18))
+* **facade:** refactor f-univer newAPI and add getDependencies ([#2176](https://github.com/dream-num/univer/issues/2176)) ([94a86d3](https://github.com/dream-num/univer/commit/94a86d3097980dede0cca584af48c0df9855794e))
+* **formula:** report formula error message, check params number by minParams and maxParams ([#1876](https://github.com/dream-num/univer/issues/1876)) ([88f517b](https://github.com/dream-num/univer/commit/88f517be0411806982e4a54062e8d6c72326827e))
+* ui plugin support override dependencies ([#2125](https://github.com/dream-num/univer/issues/2125)) ([561f7aa](https://github.com/dream-num/univer/commit/561f7aae1bce9a337b55c9512515ddbf5e3eed73))
+* **user:** add user model ([#2137](https://github.com/dream-num/univer/issues/2137)) ([49c1a70](https://github.com/dream-num/univer/commit/49c1a70bb1013e5a04f9b9b3c0786858fee755b6))
+
 ## [0.1.9](https://github.com/dream-num/univer/compare/v0.1.8...v0.1.9) (2024-04-29)
 
 

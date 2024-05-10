@@ -17,17 +17,16 @@
 import type { ICommandInfo, IRange, ITransformState, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, DrawingTypeEnum, ICommandService, IDrawingManagerService, IImageRemoteService, ImageSourceType, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import type { IImageData } from '@univerjs/image';
-import { getImageSize } from '@univerjs/image';
+import type { IImageData } from '@univerjs/drawing';
+import { getImageSize } from '@univerjs/drawing';
 import type { ISheetDrawingPosition, ISheetDrawingServiceParam } from '@univerjs/sheets';
 import { ISheetDrawingService, SelectionManagerService } from '@univerjs/sheets';
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSheetImageCommand } from '../commands/commands/insert-sheet-image.command';
-import type { IDrawingCommandParams, IInsertDrawingCommandParams, IPartialDrawingCommandParam, ISetDrawingCommandParam, ISetDrawingCommandParams } from '../commands/commands/interfaces';
+import type { IInsertDrawingCommandParams, IPartialDrawingCommandParam, ISetDrawingCommandParam, ISetDrawingCommandParams } from '../commands/commands/interfaces';
 import { SetSheetImageCommand } from '../commands/commands/set-sheet-image.command';
-import { RemoveSheetImageCommand } from '../commands/commands/remove-sheet-image.command';
 
 
 const SHEET_IMAGE_WIDTH_LIMIT = 500;
@@ -278,9 +277,9 @@ export class SheetImageUpdateController extends Disposable {
                     return;
                 }
 
-                const sheetDrawing = this._sheetDrawingService.getDrawingItem({ unitId, subUnitId, drawingId, drawingType });
+                const sheetDrawing = this._sheetDrawingService.getDrawingItem({ unitId, subUnitId, drawingId });
 
-                const imageDrawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId, drawingType });
+                const imageDrawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
 
                 if (sheetDrawing == null || imageDrawing == null) {
                     return;

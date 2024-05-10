@@ -21,7 +21,7 @@ import { Autofill, MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useState } from 'react';
-import { RemoveImageMutation } from '@univerjs/image';
+import { RemoveImageMutation } from '@univerjs/drawing';
 import styles from './index.module.less';
 
 

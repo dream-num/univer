@@ -18,8 +18,8 @@ import type { ICommandInfo, IDrawingParam, IDrawingSearch, ISrcRect, ITransformS
 import { checkIfMove, Disposable, ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
-import type { IImageData } from '@univerjs/image';
-import { getImageShapeKeyByDrawingSearch } from '@univerjs/image';
+import type { IImageData } from '@univerjs/drawing';
+import { getImageShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import type { BaseObject, Image, Scene } from '@univerjs/engine-render';
 import { CURSOR_TYPE, degToRad, IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { CloseImageCropOperation, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
@@ -62,7 +62,7 @@ export class ImageCropperController extends Disposable {
                     return;
                 }
 
-                const { unitId, subUnitId, drawingId, drawingType } = params;
+                const { unitId, subUnitId, drawingId } = params;
 
                 const renderObject = this._renderManagerService.getRenderById(unitId);
 
@@ -78,13 +78,13 @@ export class ImageCropperController extends Disposable {
                 }
 
 
-                const imageData = this._drawingManagerService.getDrawingByParam<IImageData>({ unitId, subUnitId, drawingId, drawingType });
+                const imageData = this._drawingManagerService.getDrawingByParam<IImageData>({ unitId, subUnitId, drawingId });
 
                 if (imageData == null) {
                     return;
                 }
 
-                const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId, drawingType });
+                const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
                 const imageShape = scene.getObject(imageShapeKey) as Image;
 

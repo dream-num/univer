@@ -17,7 +17,7 @@
 import type { IKeyValue, ITransformState, Nullable } from '@univerjs/core';
 import type { BaseObject, Engine, IShapeProps, IViewportBound, Scene, UniverRenderingContext, Vector2 } from '@univerjs/engine-render';
 import { Canvas, degToRad, Rect, Shape, Transform } from '@univerjs/engine-render';
-import type { IImageData } from '@univerjs/image';
+import type { IImageData } from '@univerjs/drawing';
 
 
 export interface IImageCropperObjectProps extends IShapeProps {

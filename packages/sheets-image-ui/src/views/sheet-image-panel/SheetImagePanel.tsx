@@ -15,28 +15,36 @@
  */
 
 
+import type { IDrawingParam } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ImageCommonPanel } from '@univerjs/image-ui';
-
+import styles from '@univerjs/image-ui/views/panel/index.module.less';
 
 export const SheetImagePanel = () => {
     const drawingManagerService = useDependency(IDrawingManagerService);
-    const drawing = drawingManagerService.getFocusDrawings()[0];
+    const focusDrawings = drawingManagerService.getFocusDrawings();
 
-    if (drawing == null) {
+    if (focusDrawings == null || focusDrawings.length === 0) {
         return;
     }
 
-    const { unitId, subUnitId, drawingId, drawingType } = drawing;
-    const props = {
-        unitId, subUnitId, drawingId, drawingType,
-    };
+    const [drawings, setDrawings] = useState<IDrawingParam[]>(focusDrawings);
+
+    useEffect(() => {
+        const focusDispose = drawingManagerService.focus$.subscribe((drawings) => {
+            setDrawings(drawings);
+        });
+
+        return () => {
+            focusDispose.unsubscribe(); ;
+        };
+    }, []);
 
     return (
-        <div className="container">
-            <ImageCommonPanel {...props} />
+        <div className={styles.imageCommonPanel}>
+            <ImageCommonPanel drawings={drawings} />
         </div>
     );
 };

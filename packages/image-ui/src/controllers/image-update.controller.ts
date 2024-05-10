@@ -30,7 +30,8 @@ import {
 } from '@univerjs/core';
 import type { BaseObject, IImageProps, Scene } from '@univerjs/engine-render';
 import { CURSOR_TYPE, DRAWING_OBJECT_LAYER_INDEX, Image, IRenderManagerService } from '@univerjs/engine-render';
-import { getImageShapeKeyByDrawingSearch, type IImageData } from '@univerjs/image';
+import type { IImageData, ISetImageArrangeMutationParams } from '@univerjs/drawing';
+import { getImageShapeKeyByDrawingSearch, SetDrawingArrangeMutation } from '@univerjs/drawing';
 import { IDialogService } from '@univerjs/ui';
 import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
@@ -76,6 +77,12 @@ export class ImageUpdateController extends Disposable {
                         return;
                     }
                     this._resetImageSize(params);
+                } else if (command.id === SetDrawingArrangeMutation.id) {
+                    const params = command.params as ISetImageArrangeMutationParams;
+                    if (params == null) {
+                        return;
+                    }
+                    this._drawingArrange(params);
                 }
             })
         );
@@ -96,15 +103,13 @@ export class ImageUpdateController extends Disposable {
                 return true;
             }
 
-
-            const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId, drawingType: DrawingTypeEnum.DRAWING_IMAGE });
+            const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
             const imageShape = scene.getObject(imageShapeKey);
 
             if (imageShape == null) {
                 return true;
             }
-
 
             const imageData = this._drawingManagerService.getDrawingByParam<IImageData>(param);
 
@@ -140,6 +145,30 @@ export class ImageUpdateController extends Disposable {
         });
     }
 
+    private _drawingArrange(params: ISetImageArrangeMutationParams) {
+        const { unitId, subUnitId, drawingIds } = params;
+
+        const renderObject = this._renderManagerService.getRenderById(unitId);
+
+        const scene = renderObject?.scene;
+
+        if (scene == null) {
+            return;
+        }
+
+        const transformer = scene.getTransformerByCreate();
+
+        drawingIds.forEach((drawingId, index) => {
+            const oKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+            const object = scene.getObject(oKey) as Image;
+            if (object == null) {
+                return;
+            }
+            object.setProps({ zIndex: index });
+            object.makeDirty();
+        });
+    }
+
     private _sceneListenerOnImageMap: WeakSet<Scene> = new WeakSet();
 
     private _drawingAddListener() {
@@ -163,7 +192,7 @@ export class ImageUpdateController extends Disposable {
 
                     const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
 
-                    const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId, drawingType: DrawingTypeEnum.DRAWING_IMAGE });
+                    const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
                     const imageShape = scene.getObject(imageShapeKey);
 
@@ -299,7 +328,7 @@ export class ImageUpdateController extends Disposable {
                         return true;
                     }
 
-                    const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId, drawingType: DrawingTypeEnum.DRAWING_IMAGE });
+                    const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
                     const imageShape = scene.getObject(imageShapeKey);
 
@@ -333,7 +362,7 @@ export class ImageUpdateController extends Disposable {
 
                     const { left = 0, top = 0, width = 0, height = 0, angle = 0, flipX = false, flipY = false, skewX = 0, skewY = 0 } = transform;
 
-                    const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId, drawingType: DrawingTypeEnum.DRAWING_IMAGE });
+                    const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
                     const imageShape = scene.getObject(imageShapeKey);
 
@@ -357,7 +386,6 @@ export class ImageUpdateController extends Disposable {
         }) as IDrawingParam[];
     }
 
-
     private _addListenerOnImage(scene: Scene) {
         const transformer = scene.getTransformerByCreate();
 
@@ -368,10 +396,20 @@ export class ImageUpdateController extends Disposable {
                 transformer.onChangeStartObservable.add((state) => {
                     const { objects } = state;
                     const objectArray = Array.from(objects.values());
+                    const drawings: IDrawingSearch[] = [];
                     startTransforms = objectArray.filter((object) => object instanceof Image).map((object) => {
-                        const { left, top, height, width, angle } = object;
+                        const { left, top, height, width, angle, oKey } = object;
+                        const drawing = this._drawingManagerService.getDrawingOKey(oKey);
+                        if (drawing != null) {
+                            const { unitId, subUnitId, drawingId } = drawing;
+                            drawings.push({ unitId, subUnitId, drawingId });
+                        }
                         return { left, top, height, width, angle };
                     });
+
+                    if (drawings.length > 0) {
+                        this._drawingManagerService.focusDrawing(drawings[drawings.length - 1]);
+                    }
                 })
             )
         );

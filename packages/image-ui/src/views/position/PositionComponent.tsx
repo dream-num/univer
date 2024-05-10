@@ -19,7 +19,7 @@ import { ICommandService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useRef } from 'react';
 import type { ICustomComponentProps } from '@univerjs/ui';
-import { ALLOW_IMAGE_LIST } from '@univerjs/image';
+import { ALLOW_IMAGE_LIST } from '@univerjs/drawing';
 
 
 export interface IResizeComponentProps {

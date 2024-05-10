@@ -187,7 +187,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                     {!disabled
                         ? (
                             <Dropdown
-                                overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}
+                                overlay={<Menu overViewport="scroll" menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}
                                 onVisibleChange={handleDropdownVisibleChange}
                             >
                                 <div
@@ -217,7 +217,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
             : !disabled
                 ? (
                     <Dropdown
-                        overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}
+                        overlay={<Menu overViewport="scroll" menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}
                         onVisibleChange={handleDropdownVisibleChange}
                     >
                         <div

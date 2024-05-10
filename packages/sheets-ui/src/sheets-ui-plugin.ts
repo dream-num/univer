@@ -138,6 +138,11 @@ export class UniverSheetsUIPlugin extends Plugin {
     private _registerRenderControllers(): void {
         ([
             SheetCanvasView,
+            // https://github.com/dream-num/univer-pro/issues/669
+            // HeaderMoveRenderController must be initialized before SelectionRenderController.
+            // Before HMRC expected selections remain unchanged when user clicks on the header. If we don't initialize HMRC before SRC,
+            // the selections will be changed by SRC first. Maybe we should merge row/col header related render controllers to one class.
+            HeaderMoveRenderController,
             SelectionRenderController,
             HeaderFreezeRenderController,
             HeaderUnhideRenderController,
@@ -145,9 +150,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             SheetsZoomRenderController,
             SheetsScrollRenderController,
             FormatPainterRenderController,
-            // AutoFillRenderController,
             HeaderMenuRenderController,
-            HeaderMoveRenderController,
             CellAlertRenderController,
             ForceStringAlertRenderController,
             MarkSelectionRenderController,

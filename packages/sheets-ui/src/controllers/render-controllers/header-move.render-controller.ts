@@ -243,7 +243,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderCon
                         Vector2.FromArray([moveOffsetX, moveOffsetY])
                     );
 
-                    scene.setCursor(CURSOR_TYPE.GRABBING);
+                    // scene.setCursor(CURSOR_TYPE.GRABBING);
 
                     this._rowColumnMoving(
                         newMoveOffsetX,
@@ -446,7 +446,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderCon
     }
 
     private _checkInHeaderRange(rowOrColumn: number, type: HEADER_MOVE_TYPE = HEADER_MOVE_TYPE.ROW) {
-        const rangeDatas = this._selectionManagerService.getSelections();
+        const selections = this._selectionManagerService.getSelections();
 
         const pluginName = this._selectionManagerService.getCurrent()?.pluginName;
 
@@ -454,7 +454,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderCon
             return false;
         }
 
-        const matchSelectionData = rangeDatas?.find((data) => {
+        const matchSelectionData = selections?.find((data) => {
             const range = data.range;
             const { startRow, endRow, startColumn, endColumn, rangeType } = range;
             if (type === HEADER_MOVE_TYPE.COLUMN) {

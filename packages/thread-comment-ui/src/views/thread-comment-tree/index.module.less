@@ -8,6 +8,15 @@
     position: relative;
 }
 
+.thread-comment-content {
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-color: rgba(var(--scrollbar-color), 0.7) transparent;
+    scrollbar-gutter: auto;
+    scrollbar-width: thin;
+}
+
 .thread-comment-highlight {
     background-color: rgb(var(--gold-400));
     position: absolute;

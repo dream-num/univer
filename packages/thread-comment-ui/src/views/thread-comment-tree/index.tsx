@@ -231,38 +231,40 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                     )
                     : null}
             </div>
-            {renderComments.map(
-                (item) => (
-                    <ThreadCommentItem
-                        unitId={unitId}
-                        subUnitId={subUnitId}
-                        item={item}
-                        key={item.id}
-                        editing={editingId === item.id}
-                        onEditingChange={(editing) => {
-                            if (editing) {
-                                setEditingId(item.id);
-                            } else {
-                                setEditingId('');
-                            }
-                        }}
-                        onReply={(user) => {
-                            if (!user) {
-                                return;
-                            }
-                            editorRef.current?.reply([{
-                                type: 'mention',
-                                content: {
-                                    type: 'user',
-                                    id: user.userID,
-                                    label: user.name,
-                                    extra: user,
-                                },
-                            }]);
-                        }}
-                    />
-                )
-            )}
+            <div className={styles.threadCommentContent}>
+                {renderComments.map(
+                    (item) => (
+                        <ThreadCommentItem
+                            unitId={unitId}
+                            subUnitId={subUnitId}
+                            item={item}
+                            key={item.id}
+                            editing={editingId === item.id}
+                            onEditingChange={(editing) => {
+                                if (editing) {
+                                    setEditingId(item.id);
+                                } else {
+                                    setEditingId('');
+                                }
+                            }}
+                            onReply={(user) => {
+                                if (!user) {
+                                    return;
+                                }
+                                editorRef.current?.reply([{
+                                    type: 'mention',
+                                    content: {
+                                        type: 'user',
+                                        id: user.userID,
+                                        label: user.name,
+                                        extra: user,
+                                    },
+                                }]);
+                            }}
+                        />
+                    )
+                )}
+            </div>
             {showEdit && !editingId && !resolved
                 ? (
                     <div>

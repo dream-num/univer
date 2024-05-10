@@ -57,7 +57,7 @@ import {
 import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
-import { filter } from 'rxjs';
+import { delay, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
@@ -156,25 +156,23 @@ export class StartEditController extends Disposable {
 
     private _initialEditFocusListener() {
         this.disposeWithMe(
-            this._editorBridgeService.currentEditCellState$.subscribe((editCellState) => {
+            // Delay for sometime until the `editorObject` is ready.
+            // FIXME: this solution is hacking. There shouldn't be so many modules to
+            // deal with sheet editors hence create so many time-sequence problems.
+            this._editorBridgeService.currentEditCellState$.pipe(delay(16)).subscribe((editCellState) => {
                 if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
                     return;
                 }
 
                 const { position, documentLayoutObject, scaleX, editorUnitId } = editCellState;
-
                 const editorObject = this._getEditorObject();
-
                 if (editorObject == null) {
                     return;
                 }
 
                 const { startX, endX } = position;
-
                 const { textRotation, wrapStrategy, documentModel } = documentLayoutObject;
-
                 const { vertexAngle: angle } = convertTextRotation(textRotation);
-
                 documentModel!.updateDocumentId(editorUnitId);
 
                 if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
@@ -459,113 +457,112 @@ export class StartEditController extends Disposable {
     // You can double-click on the cell or input content by keyboard to put the cell into the edit state.
     // eslint-disable-next-line max-lines-per-function
     private _initialStartEdit() {
-        this.disposeWithMe(
-            // eslint-disable-next-line max-lines-per-function
-            this._editorBridgeService.visible$.subscribe((param) => {
-                const { visible, eventType, keycode } = param;
+        // eslint-disable-next-line max-lines-per-function
+        this.disposeWithMe(this._editorBridgeService.visible$.subscribe((param) => {
+            const { visible, eventType, keycode } = param;
 
-                if (visible === this._editorVisiblePrevious) {
-                    return;
-                }
+            if (visible === this._editorVisiblePrevious) {
+                return;
+            }
 
-                this._editorVisiblePrevious = visible;
+            this._editorVisiblePrevious = visible;
 
-                if (visible === false) {
-                    this._setOpenForCurrent(null, null);
-                    return;
-                }
+            if (visible === false) {
+                this._setOpenForCurrent(null, null);
+                return;
+            }
 
-                const editCellState = this._editorBridgeService.getEditCellState();
+            const editCellState = this._editorBridgeService.getEditCellState();
 
-                if (editCellState == null) {
-                    return;
-                }
+            if (editCellState == null) {
+                return;
+            }
 
-                const {
-                    position,
-                    documentLayoutObject,
-                    canvasOffset,
-                    scaleX,
-                    scaleY,
-                    editorUnitId,
-                    unitId,
-                    sheetId,
-                    isInArrayFormulaRange = false,
-                } = editCellState;
+            const {
+                position,
+                documentLayoutObject,
+                canvasOffset,
+                scaleX,
+                scaleY,
+                editorUnitId,
+                unitId,
+                sheetId,
+                isInArrayFormulaRange = false,
+            } = editCellState;
 
-                const editorObject = this._getEditorObject();
+            const editorObject = this._getEditorObject();
 
-                if (editorObject == null) {
-                    return;
-                }
+            if (editorObject == null) {
+                return;
+            }
 
-                this._setOpenForCurrent(unitId, sheetId);
+            this._setOpenForCurrent(unitId, sheetId);
 
-                const { document, scene } = editorObject;
+            const { document, scene } = editorObject;
 
-                this._contextService.setContextValue(EDITOR_ACTIVATED, true);
+            this._contextService.setContextValue(EDITOR_ACTIVATED, true);
 
-                const { documentModel: documentDataModel } = documentLayoutObject;
+            const { documentModel: documentDataModel } = documentLayoutObject;
 
-                const docParam = this._docSkeletonManagerService.getSkeletonByUnitId(editorUnitId);
+            const docParam = this._docSkeletonManagerService.getSkeletonByUnitId(editorUnitId);
 
-                if (docParam == null || documentDataModel == null) {
-                    return;
-                }
+            if (docParam == null || documentDataModel == null) {
+                return;
+            }
 
-                const { skeleton } = docParam;
+            const { skeleton } = docParam;
 
-                this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+            this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
 
                 // move selection
-                if (
-                    eventType === DeviceInputEventType.Keyboard ||
+            if (
+                eventType === DeviceInputEventType.Keyboard ||
                 (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
-                ) {
-                    const snapshot = Tools.deepClone(documentDataModel.snapshot) as IDocumentData;
-                    const documentViewModel = this._docViewModelManagerService.getViewModel(editorUnitId);
+            ) {
+                const snapshot = Tools.deepClone(documentDataModel.snapshot) as IDocumentData;
+                const documentViewModel = this._docViewModelManagerService.getViewModel(editorUnitId);
 
-                    if (documentViewModel == null) {
-                        return;
-                    }
-
-                    this._resetBodyStyle(snapshot.body!, !!isInArrayFormulaRange);
-
-                    documentDataModel.reset(snapshot);
-                    documentViewModel.reset(documentDataModel);
-
-                    document.makeDirty();
-
-                    // @JOCS, Why calculate here?
-                    if (keycode === KeyCode.BACKSPACE || eventType === DeviceInputEventType.Dblclick) {
-                        skeleton.calculate();
-                        this._editorBridgeService.changeEditorDirty(true);
-                    }
-
-                    this._textSelectionManagerService.replaceTextRanges([
-                        {
-                            startOffset: 0,
-                            endOffset: 0,
-                        },
-                    ]);
-                } else if (eventType === DeviceInputEventType.Dblclick) {
-                    // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
-                    const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
-
-                    scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.scrollTo({
-                        y: Number.POSITIVE_INFINITY,
-                    });
-
-                    this._textSelectionManagerService.replaceTextRanges([
-                        {
-                            startOffset: cursor,
-                            endOffset: cursor,
-                        },
-                    ]);
+                if (documentViewModel == null) {
+                    return;
                 }
 
-                this._renderManagerService.getRenderById(unitId)?.scene.resetCursor();
-            })
+                this._resetBodyStyle(snapshot.body!, !!isInArrayFormulaRange);
+
+                documentDataModel.reset(snapshot);
+                documentViewModel.reset(documentDataModel);
+
+                document.makeDirty();
+
+                    // @JOCS, Why calculate here?
+                if (keycode === KeyCode.BACKSPACE || eventType === DeviceInputEventType.Dblclick) {
+                    skeleton.calculate();
+                    this._editorBridgeService.changeEditorDirty(true);
+                }
+
+                this._textSelectionManagerService.replaceTextRanges([
+                    {
+                        startOffset: 0,
+                        endOffset: 0,
+                    },
+                ]);
+            } else if (eventType === DeviceInputEventType.Dblclick) {
+                    // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
+                const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
+
+                scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.scrollTo({
+                    y: Number.POSITIVE_INFINITY,
+                });
+
+                this._textSelectionManagerService.replaceTextRanges([
+                    {
+                        startOffset: cursor,
+                        endOffset: cursor,
+                    },
+                ]);
+            }
+
+            this._renderManagerService.getRenderById(unitId)?.scene.resetCursor();
+        })
         );
     }
 
@@ -683,7 +680,7 @@ export class StartEditController extends Disposable {
 
     private _setOpenForCurrent(unitId: Nullable<string>, sheetId: Nullable<string>) {
         const sheetEditors = this._editorService.getAllEditor();
-        for (const [id, sheetEditor] of sheetEditors) {
+        for (const [_, sheetEditor] of sheetEditors) {
             if (!sheetEditor.isSheetEditor()) {
                 continue;
             }

@@ -138,12 +138,12 @@ export class UniverSheetsUIPlugin extends Plugin {
     private _registerRenderControllers(): void {
         ([
             SheetCanvasView,
+            SelectionRenderController,
             HeaderFreezeRenderController,
             HeaderUnhideRenderController,
             HeaderResizeRenderController,
             SheetsZoomRenderController,
             SheetsScrollRenderController,
-            SelectionRenderController,
             FormatPainterRenderController,
             // AutoFillRenderController,
             HeaderMenuRenderController,

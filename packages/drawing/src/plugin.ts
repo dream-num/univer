@@ -21,9 +21,9 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { ImageController } from './controllers/image.controller';
 import { ImageRemoteService } from './services/image-remote.service';
 
-const PLUGIN_NAME = 'IMAGE_PLUGIN';
+const PLUGIN_NAME = 'DRAWING_PLUGIN';
 
-export class UniverImagePlugin extends Plugin {
+export class UniverDrawingPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(

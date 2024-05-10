@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-import { CommandType, type IDrawingSearch, type IOperation } from '@univerjs/core';
+import type { IMutation } from '@univerjs/core';
+import { CommandType, IDrawingManagerService } from '@univerjs/core';
 
-export enum ArrangeType {
-    forward,
-    backward,
-    front,
-    back,
+
+export interface ISetImageArrangeMutationParams {
+    unitId: string;
+    subUnitId: string;
+    drawingIds: string[];
 }
 
-export interface ISetImageArrangeOperationParams {
-    drawings: IDrawingSearch[];
-    arrangeType: ArrangeType;
-}
-
-export const SetImageArrangeOperation: IOperation<ISetImageArrangeOperationParams> = {
-    id: 'sheet.operation.set-image-arrange',
-    type: CommandType.OPERATION,
+export const SetDrawingArrangeMutation: IMutation<ISetImageArrangeMutationParams> = {
+    id: 'sheet.mutation.set-image-arrange',
+    type: CommandType.MUTATION,
     handler: (accessor, params) => {
+        const drawingManagerService = accessor.get(IDrawingManagerService);
+
+        const { unitId, subUnitId, drawingIds } = params;
+
+        drawingManagerService.replaceDrawingOrder(unitId, subUnitId, drawingIds);
+
         return true;
     },
 };

@@ -33,8 +33,7 @@ export const AddCommentMutation: ICommand<IAddCommentMutationParams> = {
         }
         const threadCommentModel = accessor.get(ThreadCommentModel);
         const { unitId, subUnitId, comment } = params;
-        threadCommentModel.addComment(unitId, subUnitId, comment);
-        return true;
+        return threadCommentModel.addComment(unitId, subUnitId, comment);
     },
 };
 
@@ -62,8 +61,7 @@ export const UpdateCommentMutation: ICommand<IUpdateCommentMutationParams> = {
         }
         const threadCommentModel = accessor.get(ThreadCommentModel);
         const { unitId, subUnitId, payload } = params;
-        threadCommentModel.updateComment(unitId, subUnitId, payload);
-        return true;
+        return threadCommentModel.updateComment(unitId, subUnitId, payload);
     },
 };
 
@@ -87,8 +85,7 @@ export const UpdateCommentRefMutation: ICommand<IUpdateCommentRefMutationParams>
         }
         const threadCommentModel = accessor.get(ThreadCommentModel);
         const { unitId, subUnitId, payload } = params;
-        threadCommentModel.updateCommentRef(unitId, subUnitId, payload);
-        return true;
+        return threadCommentModel.updateCommentRef(unitId, subUnitId, payload);
     },
 };
 
@@ -109,8 +106,7 @@ export const ResolveCommentMutation: ICommand<IResolveCommentMutationParams> = {
         }
         const threadCommentModel = accessor.get(ThreadCommentModel);
         const { unitId, subUnitId, resolved, commentId } = params;
-        threadCommentModel.resolveComment(unitId, subUnitId, commentId, resolved);
-        return true;
+        return threadCommentModel.resolveComment(unitId, subUnitId, commentId, resolved);
     },
 };
 
@@ -130,7 +126,6 @@ export const DeleteCommentMutation: ICommand<IDeleteCommentMutationParams> = {
         }
         const threadCommentModel = accessor.get(ThreadCommentModel);
         const { unitId, subUnitId, commentId } = params;
-        threadCommentModel.deleteComment(unitId, subUnitId, commentId);
-        return true;
+        return threadCommentModel.deleteComment(unitId, subUnitId, commentId);
     },
 };

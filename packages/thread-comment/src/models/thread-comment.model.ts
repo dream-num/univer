@@ -125,6 +125,10 @@ export class ThreadCommentModel {
 
         const parentId = comment.parentId;
         if (parentId) {
+            const parent = commentMap[parentId];
+            if (!parent) {
+                return false;
+            }
             let children = commentChildrenMap.get(parentId);
             if (!children) {
                 children = [];
@@ -144,6 +148,7 @@ export class ThreadCommentModel {
         });
         this._refreshCommentsMap$();
         this._refreshCommentsTreeMap$();
+        return true;
     }
 
     updateComment(unitId: string, subUnitId: string, payload: IUpdateCommentPayload) {
@@ -231,27 +236,26 @@ export class ThreadCommentModel {
         const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
         const current = commentMap[commentId];
         if (!current) {
-            return;
+            return false;
         }
 
         if (current.parentId) {
             const children = commentChildrenMap.get(current.parentId);
-            if (!children) {
-                return;
+            if (children) {
+                const index = children.indexOf(commentId);
+                children.splice(index, 1);
             }
-            const index = children.indexOf(commentId);
-            children.splice(index, 1);
             delete commentMap[commentId];
         } else {
             const children = commentChildrenMap.get(commentId);
-            if (!children) {
-                return;
-            }
+
             delete commentMap[commentId];
             commentChildrenMap.delete(commentId);
-            children.forEach((childId) => {
-                delete commentMap[childId];
-            });
+            if (children) {
+                children.forEach((childId) => {
+                    delete commentMap[childId];
+                });
+            }
         }
 
         this._commentUpdate$.next({
@@ -265,6 +269,7 @@ export class ThreadCommentModel {
         });
         this._refreshCommentsMap$();
         this._refreshCommentsTreeMap$();
+        return true;
     }
 
     getUnit(unitId: string) {

@@ -444,7 +444,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
         },
         autoHyphenation: BooleanNumber.TRUE,
         doNotHyphenateCaps: BooleanNumber.FALSE,
-        consecutiveHyphenLimit: 1,
+        consecutiveHyphenLimit: 2,
         // gridType: GridType.LINES_AND_CHARS,
         // linePitch: 24,
         // charSpace: 12,

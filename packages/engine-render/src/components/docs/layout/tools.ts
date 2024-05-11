@@ -853,8 +853,8 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         marginFooter: global_marginFooter = 0,
 
         autoHyphenation = BooleanNumber.FALSE,
-
         doNotHyphenateCaps = BooleanNumber.FALSE,
+        consecutiveHyphenLimit = Number.POSITIVE_INFINITY,
 
         renderConfig: global_renderConfig = {
             horizontalAlign: HorizontalAlign.LEFT,
@@ -933,6 +933,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
 
         autoHyphenation,
         doNotHyphenateCaps,
+        consecutiveHyphenLimit,
 
         ...docsConfig,
     };

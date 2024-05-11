@@ -18,6 +18,7 @@ import type { INumberUnit } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule } from '@univerjs/core';
 import type {
     IDocumentSkeletonColumn,
+    IDocumentSkeletonDivide,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
@@ -136,6 +137,51 @@ function isGlyphGroupBeyondContentBox(glyphGroup: IDocumentSkeletonGlyph[], left
     return isBeyondContentBox;
 }
 
+// Gets the number of consecutive lines ending with a hyphen.
+function _getConsecutiveHyphenLineCount(divide: IDocumentSkeletonDivide) {
+    const column = divide.parent?.parent;
+
+    if (column == null) {
+        return 0;
+    }
+
+    let count = 0;
+
+    for (let i = column.lines.length - 1; i >= 0; i--) {
+        const line = column.lines[i];
+        const lastDivide = line.divides[line.divides.length - 1];
+        if (lastDivide.breakType === BreakPointType.Hyphen) {
+            count++;
+        } else {
+            break;
+        }
+    }
+
+    return count;
+}
+
+function _popHyphenSlice(divide: IDocumentSkeletonDivide) {
+    const glyphGroup: IDocumentSkeletonGlyph[] = [];
+
+    let lastGlyph = divide.glyphGroup.pop();
+
+    while (lastGlyph && lastGlyph.content !== ' ') {
+        glyphGroup.unshift(lastGlyph);
+
+        lastGlyph = divide.glyphGroup.pop();
+    }
+
+    // If the hyphenated word slice is the first word slice of the divide,
+    // ignore this rule and recovery divide.
+    if (divide.glyphGroup.length === 0) {
+        divide.glyphGroup.push(...glyphGroup);
+
+        glyphGroup.length = 0;
+    }
+
+    return glyphGroup;
+}
+
 function _divideOperator(
     ctx: ILayoutContext,
     glyphGroup: IDocumentSkeletonGlyph[],
@@ -162,6 +208,9 @@ function _divideOperator(
             updateDivideInfo(divide, {
                 isFull: true,
             });
+            const hyphenLineCount = _getConsecutiveHyphenLineCount(divideInfo.divide);
+            const { consecutiveHyphenLimit = Number.POSITIVE_INFINITY } = sectionBreakConfig;
+
             // 处理 word 或者数字串超过 divide width 的情况，主要分两种情况
             // 1. 以段落符号结尾时候，即使超过 divide 宽度，也需要将换行符追加到 divide 结尾。
             // 2. 空行中，英文单词或者连续数字超过 divide 宽度的情况，将把英文单词、数字串拆分，一部分追加到上一行，剩下的放在新的一行中，
@@ -212,6 +261,27 @@ function _divideOperator(
                         defaultSpanLineHeight
                     );
                 }
+            } else if (hyphenLineCount > consecutiveHyphenLimit) {
+                const hyphenSliceGlyphGroup = _popHyphenSlice(divide);
+
+                if (hyphenSliceGlyphGroup.length > 0) {
+                    updateDivideInfo(divide, {
+                        breakType: BreakPointType.Normal,
+                    });
+
+                    _divideOperator(ctx, hyphenSliceGlyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, BreakPointType.Hyphen);
+                }
+
+                _divideOperator(
+                    ctx,
+                    glyphGroup,
+                    pages,
+                    sectionBreakConfig,
+                    paragraphConfig,
+                    paragraphStart,
+                    breakPointType,
+                    defaultSpanLineHeight
+                );
             } else {
                 _divideOperator(
                     ctx,
@@ -341,7 +411,6 @@ function _lineOperator(
     const {
         paragraphStyle = {},
         paragraphAffectSkeDrawings,
-        paragraphInlineSkeDrawings,
         skeHeaders,
         skeFooters,
         drawingAnchor,
@@ -899,7 +968,7 @@ function __getDrawingPosition(
     const isPageBreak = __checkPageBreak(column);
 
     for (const drawing of needPositionDrawings) {
-        const { initialState, drawingOrigin } = drawing;
+        const { drawingOrigin } = drawing;
 
         if (!drawingOrigin) {
             continue;

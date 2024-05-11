@@ -852,6 +852,8 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         marginHeader: global_marginHeader = 0,
         marginFooter: global_marginFooter = 0,
 
+        autoHyphenation = BooleanNumber.FALSE,
+
         renderConfig: global_renderConfig = {
             horizontalAlign: HorizontalAlign.LEFT,
             verticalAlign: VerticalAlign.TOP,
@@ -926,6 +928,8 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         sectionTypeNext,
         textDirection,
         renderConfig,
+
+        autoHyphenation,
 
         ...docsConfig,
     };

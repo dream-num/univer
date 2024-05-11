@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IParagraphStyle, Nullable } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 import { LineBreaker } from '../../line-breaker';
@@ -90,6 +90,13 @@ function addCJKLatinSpacing(shapedTextList: IShapedText[]) {
     }
 }
 
+function hyphenConfig(paragraphStyle: IParagraphStyle, sectionBreakConfig: ISectionBreakConfig) {
+    const { suppressHyphenation = BooleanNumber.FALSE } = paragraphStyle;
+    const { autoHyphenation = BooleanNumber.FALSE } = sectionBreakConfig;
+
+    return suppressHyphenation === BooleanNumber.FALSE && autoHyphenation === BooleanNumber.TRUE;
+}
+
 export interface IShapedText {
     text: string;
     glyphs: IDocumentSkeletonGlyph[];
@@ -137,7 +144,9 @@ export function shaping(
 
     const lang = languageDetector.detect(content);
 
-    if (lang !== Lang.UNKNOWN) {
+    const needHyphen = hyphenConfig(paragraphStyle, sectionBreakConfig);
+
+    if (lang !== Lang.UNKNOWN && needHyphen) {
         // Use hyphen enhancer when the lang pattern is loaded.
         if (hyphen.hasPattern(lang)) {
             breaker = new LineBreakerHyphenEnhancer(breaker, hyphen, lang) as unknown as LineBreaker;

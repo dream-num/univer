@@ -253,6 +253,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 paragraphStyle: {
                     spaceAbove: 30,
                     lineSpacing: 1.5,
+                    suppressHyphenation: BooleanNumber.FALSE,
                 },
             },
             {
@@ -441,6 +442,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             vertexAngle: 0,
             centerAngle: 0,
         },
+        autoHyphenation: BooleanNumber.TRUE,
         // gridType: GridType.LINES_AND_CHARS,
         // linePitch: 24,
         // charSpace: 12,

@@ -249,7 +249,7 @@ function addHyphenDash(
         const { st, glyphGroup, breakType } = divide;
         const lastGlyph = glyphGroup[glyphGroup.length - 1];
 
-        if (isLetter(lastGlyph.content) && breakType === BreakPointType.Hyphen) {
+        if (lastGlyph && isLetter(lastGlyph.content) && breakType === BreakPointType.Hyphen) {
             const index = st + glyphGroup.reduce((total, g) => total + g.count, 0);
             const config = getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
 

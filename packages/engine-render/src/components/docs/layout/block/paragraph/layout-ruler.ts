@@ -197,11 +197,12 @@ function _divideOperator(
 
     if (divideInfo) {
         const width = __getGlyphGroupWidth(glyphGroup);
-        const { divide } = divideInfo;
+        const { divide, isLast } = divideInfo;
         const lastGlyph = divide?.glyphGroup?.[divide.glyphGroup.length - 1];
         const lastWidth = lastGlyph?.width || 0;
         const lastLeft = lastGlyph?.left || 0;
         const preOffsetLeft = lastWidth + lastLeft;
+        const { hyphenationZone } = sectionBreakConfig;
 
         if (preOffsetLeft + width > divide.width) {
             // width 超过 divide 宽度
@@ -294,6 +295,28 @@ function _divideOperator(
                     defaultSpanLineHeight
                 );
             }
+        } else if ( // Determine if first word slice appears inside the hyphenation zone.
+            isLast &&
+            hyphenationZone &&
+            hyphenationZone > 0 &&
+            preOffsetLeft >= divide.width - hyphenationZone &&
+            breakPointType === BreakPointType.Hyphen &&
+            divide.breakType === BreakPointType.Normal
+        ) {
+            updateDivideInfo(divide, {
+                isFull: true,
+            });
+
+            _divideOperator(
+                ctx,
+                glyphGroup,
+                pages,
+                sectionBreakConfig,
+                paragraphConfig,
+                paragraphStart,
+                breakPointType,
+                defaultSpanLineHeight
+            );
         } else {
             // w 不超过 divide 宽度，加入到 divide 中去
             const currentLine = divide.parent;

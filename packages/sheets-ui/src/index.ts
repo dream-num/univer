@@ -47,6 +47,7 @@ export {
     getSheetObject,
     getTransformCoord,
 } from './controllers/utils/component-tools';
+export { useActiveWorkbook, useActiveWorksheet } from './components/hook';
 export { whenSheetEditorFocused } from './controllers/shortcuts/utils';
 export type { IEditorBridgeServiceParam } from './services/editor-bridge.service';
 export { enUS, zhCN } from './locale';

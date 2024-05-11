@@ -17,33 +17,94 @@
 import type { IDrawingParam } from '@univerjs/core';
 import { ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { CreateCopySingle } from '@univerjs/icons';
 import { Button } from '@univerjs/design';
 import clsx from 'clsx';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { GroupType, SetImageGroupOperation } from '../../commands/operations/image-group.operation';
+import { getUpdateParams } from '../../utils/get-update-params';
 import styles from './index.module.less';
 
 
 export interface IImageGroupProps {
     drawings: IDrawingParam[];
-    groupShow: boolean;
+    hasGroup: boolean;
 }
 
 export const ImageGroup = (props: IImageGroupProps) => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
-    const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
+    const drawingManagerService = useDependency(IDrawingManagerService);
 
-    const { drawings, groupShow } = props;
+    const { hasGroup, drawings } = props;
+
+    const [groupShow, setGroupShow] = useState(false);
+
+    const [groupBtnShow, setGroupBtnShow] = useState(true);
+    const [ungroupBtnShow, setUngroupBtnShow] = useState(true);
 
     const gridDisplay = (isShow: boolean) => {
         return isShow ? 'block' : 'none';
     };
 
+    const onGroupBtnClick = (groupType: GroupType) => {
+        commandService.executeCommand(SetImageGroupOperation.id, {
+            groupType,
+        });
+    };
+
+    useEffect(() => {
+        const drawingParam = drawings[0];
+
+        if (drawingParam == null) {
+            return;
+        }
+
+        const { unitId } = drawingParam;
+
+        const renderObject = renderManagerService.getRenderById(unitId);
+        const scene = renderObject?.scene;
+        if (scene == null) {
+            return;
+        }
+        const transformer = scene.getTransformerByCreate();
+
+
+        const onClearControlObserver = transformer.onClearControlObservable.add((changeSelf) => {
+            if (changeSelf === true) {
+                setGroupShow(false);
+            }
+        });
+
+
+        const onChangeStartObserver = transformer.onChangeStartObservable.add((state) => {
+            const { objects } = state;
+            const params = getUpdateParams(objects, drawingManagerService);
+
+            if (params.length === 0) {
+                setGroupShow(false);
+            } else if (params.length === 1) {
+                setGroupShow(true);
+                setGroupBtnShow(false);
+                setUngroupBtnShow(true);
+            } else {
+                setGroupShow(true);
+                setGroupBtnShow(true);
+                setUngroupBtnShow(true);
+            }
+        });
+
+        return () => {
+            onChangeStartObserver?.dispose();
+            onClearControlObserver?.dispose();
+        };
+    }, []);
+
+
     return (
-        <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)} style={{ display: gridDisplay(groupShow) }}>
+        <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)} style={{ display: gridDisplay(hasGroup === true ? groupShow : false) }}>
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelTitle)}>
                     <div>{localeService.t('image-panel.group.title')}</div>
@@ -51,19 +112,19 @@ export const ImageGroup = (props: IImageGroupProps) => {
             </div>
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan3)}>
-                    <Button size="small">
+                    <Button size="small" onClick={() => { onGroupBtnClick(GroupType.group); }} style={{ display: gridDisplay(groupBtnShow) }}>
                         <div className={clsx(styles.imageCommonPanelInline)}><CreateCopySingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.group')}</div>
                     </Button>
                 </div>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan3)}>
-                    <Button size="small">
+                    <Button size="small" onClick={() => { onGroupBtnClick(GroupType.regroup); }} style={{ display: gridDisplay(groupBtnShow) }}>
                         <div className={clsx(styles.imageCommonPanelInline)}><CreateCopySingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.reGroup')}</div>
                     </Button>
                 </div>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan3)}>
-                    <Button size="small">
+                    <Button size="small" onClick={() => { onGroupBtnClick(GroupType.ungroup); }} style={{ display: gridDisplay(ungroupBtnShow) }}>
                         <div className={clsx(styles.imageCommonPanelInline)}><CreateCopySingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.unGroup')}</div>
                     </Button>

@@ -20,11 +20,13 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import type { BaseObject } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { getUpdateParams } from '../../utils/get-update-params';
 import { ImageArrange } from './ImageArrange';
 import { ImageTransform } from './ImageTransform';
 import { ImageAlign } from './ImageAlign';
 import { ImageCropper } from './ImageCropper';
 import { ImageGroup } from './ImageGroup';
+
 
 export interface IImageCommonPanelProps {
     drawings: IDrawingParam[];
@@ -61,39 +63,7 @@ export const ImageCommonPanel = (props: IImageCommonPanelProps) => {
     const [transformShow, setTransformShow] = useState(true);
     const [alignShow, setAlignShow] = useState(false);
     const [cropperShow, setCropperShow] = useState(true);
-    const [groupShow, setGroupShow] = useState(false);
-
-    function getUpdateParams(objects: Map<string, BaseObject>): Nullable<IDrawingParam>[] {
-        const params: Nullable<IDrawingParam>[] = [];
-        objects.forEach((object) => {
-            const { oKey, left, top, height, width, angle } = object;
-
-            const searchParam = drawingManagerService.getDrawingOKey(oKey);
-
-            if (searchParam == null) {
-                params.push(null);
-                return true;
-            }
-
-            const { unitId, subUnitId, drawingId } = searchParam;
-
-            params.push({
-                unitId,
-                subUnitId,
-                drawingId,
-                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-                transform: {
-                    left,
-                    top,
-                    height,
-                    width,
-                    angle,
-                },
-            });
-        });
-
-        return params;
-    }
+    // const [groupShow, setGroupShow] = useState(false);
 
     useEffect(() => {
         const onClearControlObserver = transformer.onClearControlObservable.add((changeSelf) => {
@@ -102,33 +72,29 @@ export const ImageCommonPanel = (props: IImageCommonPanelProps) => {
                 setTransformShow(false);
                 setAlignShow(false);
                 setCropperShow(false);
-                setGroupShow(false);
             }
         });
 
 
         const onChangeStartObserver = transformer.onChangeStartObservable.add((state) => {
             const { objects } = state;
-            const params = getUpdateParams(objects);
+            const params = getUpdateParams(objects, drawingManagerService);
 
             if (params.length === 0) {
                 setArrangeShow(false);
                 setTransformShow(false);
                 setAlignShow(false);
                 setCropperShow(false);
-                setGroupShow(false);
             } else if (params.length === 1) {
                 setArrangeShow(true);
                 setTransformShow(true);
                 setAlignShow(false);
                 setCropperShow(true);
-                setGroupShow(false);
             } else {
                 setArrangeShow(true);
                 setTransformShow(false);
                 setAlignShow(true);
                 setCropperShow(false);
-                setGroupShow(true);
             }
         });
 
@@ -145,7 +111,7 @@ export const ImageCommonPanel = (props: IImageCommonPanelProps) => {
             <ImageTransform transformShow={hasTransform === true ? transformShow : false} drawings={drawings} />
             <ImageAlign alignShow={hasAlign === true ? alignShow : false} drawings={drawings} />
             <ImageCropper cropperShow={hasCropper === true ? cropperShow : false} drawings={drawings} />
-            <ImageGroup groupShow={hasGroup === true ? groupShow : false} drawings={drawings} />
+            <ImageGroup hasGroup={hasGroup} drawings={drawings} />
         </>
     );
 };

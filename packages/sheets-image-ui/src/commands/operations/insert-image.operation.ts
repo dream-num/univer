@@ -18,7 +18,7 @@ import type { IOperation, Nullable } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
 export interface IInsertImageOperationParams {
-    file: Nullable<File>;
+    files: Nullable<File[]>;
 };
 
 

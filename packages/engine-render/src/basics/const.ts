@@ -154,6 +154,9 @@ export enum RENDER_CLASS_TYPE {
     VIEWPORT = 'Viewport',
     LAYER = 'Layer',
     GROUP = 'Group',
+    IMAGE = 'Image',
+    SHAPE = 'Shape',
+    TEXT = 'Text',
 }
 
 export const MAXIMUM_ROW_HEIGHT = 2000;

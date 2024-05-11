@@ -27,7 +27,7 @@ import { InsertDrawingMutation, ISheetDrawingService, RemoveDrawingMutation } fr
 import type { IAccessor } from '@wendellhu/redi';
 import { InsertImageMutation, RemoveImageMutation } from '@univerjs/drawing';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
-import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams } from './interfaces';
+import type { IDeleteDrawingCommandParams } from './interfaces';
 
 
 /**

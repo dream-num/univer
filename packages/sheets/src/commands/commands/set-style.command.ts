@@ -44,7 +44,7 @@ import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
-import { createRangeIterator } from './utils/selection-utils';
+import { createRangeIteratorWithSkipFilteredRows } from './utils/selection-utils';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -88,7 +88,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
 
         const cellValue = new ObjectMatrix<ICellData>();
 
-        const iterator = createRangeIterator(worksheet);
+        const iterator = createRangeIteratorWithSkipFilteredRows(worksheet);
 
         if (Tools.isArray(style.value)) {
             for (let i = 0; i < ranges.length; i++) {

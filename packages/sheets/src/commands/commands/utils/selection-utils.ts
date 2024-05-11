@@ -216,7 +216,7 @@ export function isSingleCellSelection(selection: Nullable<ISelectionWithStyle & 
  * @param sheet bind a sheet
  * @returns iterator
  */
-export function createRangeIterator(sheet: Worksheet) {
+export function createRangeIteratorWithSkipFilteredRows(sheet: Worksheet) {
     function forOperableEach(ranges: IRange, operator: (row: number, col: number, range: IRange) => void) {
         function iterate(range: IRange) {
             for (let r = range.startRow; r <= range.endRow; r++) {

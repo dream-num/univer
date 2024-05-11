@@ -270,7 +270,7 @@ export class Spreadsheet extends SheetComponent {
         // support for browser native zoom
         const sourceLeft = bufferEdgeSizeX * Math.min(1, window.devicePixelRatio);
         const sourceTop = bufferEdgeSizeY * Math.min(1, window.devicePixelRatio);
-        this._applyCacheFreeze(mainCtx, cacheCanvas, sourceLeft, sourceTop, dw, dh, left, top, dw, dh);
+        this._applyCache(mainCtx, cacheCanvas, sourceLeft, sourceTop, dw, dh, left, top, dw, dh);
         cacheCtx.restore();
     }
 
@@ -436,7 +436,7 @@ export class Spreadsheet extends SheetComponent {
      * @param dh
      * @returns
      */
-    protected _applyCacheFreeze(
+    protected _applyCache(
         ctx: UniverRenderingContext,
         cacheCanvas: Canvas,
         sx: number = 0,
@@ -459,6 +459,7 @@ export class Spreadsheet extends SheetComponent {
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.imageSmoothingEnabled = false;
         ctx.drawImage(
             cacheCanvas.getCanvasEle(),
             sx * pixelRatio,

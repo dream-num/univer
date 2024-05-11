@@ -73,12 +73,12 @@ Highlights:
 | <h3>🎨 Univer Slides</h3>                    |                   |
 | [Slides](https://www.univer.ai/examples/slides/)<br>A canvas presentation containing graphic text, floating pictures, tables and other elements                                  | [![](./docs/img/examples-slides.gif)](https://www.univer.ai/examples/slides/)                           |
 | <h3>🧩 Univer Innovation</h3>                    |                   |
-| [Zen Mode](https://univer.ai/guides/tutorials/zen-editor/#live-demo)<br>The cell of Sheet is a Doc?                                 | [![](./docs/img/zen-mode.gif)](https://univer.ai/guides/tutorials/zen-editor/#live-demo)                           |
+| [Zen Mode](https://univer.ai/guides/sheet/tutorials/zen-editor/#live-demo)<br>The cell of Sheet is a Doc?                                 | [![](./docs/img/zen-mode.gif)](https://univer.ai/guides/sheet/tutorials/zen-editor/#live-demo)                           |
 | [Univer (SaaS version)](https://univer.ai/)<br>With Univer, we enable users to create 3 forms of page as they wish. By merging sheet, doc and slide's capabilities together, Univer empowers individuals and teams to create, organize and streamline workflows effortlessly.                                   | [![](./docs/img/univer-workspace-drag-chart.gif)](https://youtu.be/kpV0MvQuFZA)                           |
 
 ## Usage
 
-We recommend to import Univer as a npm package. Please checkout the [Quick Start](https://univer.ai/guides/quick-start/) section on the documentation website. We also have an [online playground](https://univer.ai/playground/) which can help you preview Univer without setting up the development environment.
+We recommend to import Univer as a npm package. Please checkout the [Quick Start](https://univer.ai/guides/sheet/getting-started/quickstart) section on the documentation website. We also have an [online playground](https://univer.ai/playground/) which can help you preview Univer without setting up the development environment.
 
 Univer bases on a plugin architecture. You can install the following packages to enhance the functionality of Univer.
 
@@ -144,7 +144,7 @@ Thanks to our sponsors, just part of them are listed here because of the space l
 
 ## Links
 
-- [Documentation](https://univer.ai/guides/introduction/)
+- [Documentation](https://univer.ai/guides/sheet/introduction)
 - [Online Playground](https://univer.ai/playground/)
 - [Official Website](https://univer.ai)
 

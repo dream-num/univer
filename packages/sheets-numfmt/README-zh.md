@@ -45,5 +45,5 @@ const univer = new Univer({
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 ```
 :::note
-如果你需要导出快照支持导出数字格式,需要额外新增[一部分代码](/guides/extend/model/#本地化快照方案)
+如果你需要导出快照支持导出数字格式,需要额外新增[一部分代码](https://univer.ai/guides/sheet/customization/model)
 :::

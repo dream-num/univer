@@ -29,5 +29,5 @@ pnpm add @univerjs/sheets-formula
 
 If the officially provided formula does not meet your needs, you can expand the formula yourself. Depending on different needs, we provide multiple ways to support registering one or more custom formulas.
 
-- [Register formula using Facade API](https://univer.ai/guides/facade/general/#register-formula)
-- [Custom Formula](https://univer.ai/guides/customization/formula/)
+- [Register formula using Facade API](https://univer.ai/guides/sheet/facade/general/#register-formula)
+- [Custom Formula](https://univer.ai/guides/sheet/customization/formula/)

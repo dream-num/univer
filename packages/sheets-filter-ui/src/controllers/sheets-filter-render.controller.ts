@@ -42,7 +42,7 @@ interface ISheetsFilterRenderParams {
     skeleton: SpreadsheetSkeleton;
 }
 
-@OnLifecycle(LifecycleStages.Ready, SheetsFilterRenderController)
+@OnLifecycle(LifecycleStages.Rendered, SheetsFilterRenderController)
 export class SheetsFilterRenderController extends RxDisposable {
     private _filterRangeShape: SelectionShape | null = null;
     private _buttonRenderDisposable: IDisposable | null = null;

@@ -18,6 +18,7 @@ import type { IDocumentData, IWorkbookData } from '@univerjs/core';
 import { BooleanNumber, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
 
 import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
+import { SHEET_FILTER_SNAPSHOT_ID } from '@univerjs/sheets-filter';
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
 const richTextDemo: IDocumentData = {
@@ -23545,6 +23546,14 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             name: DATA_VALIDATION_PLUGIN_NAME,
             data: JSON.stringify({
                 'sheet-0011': dataValidation,
+            }),
+        },
+        {
+            name: SHEET_FILTER_SNAPSHOT_ID,
+            data: JSON.stringify({
+                'sheet-0011': {
+                    ref: { startRow: 21, startColumn: 5, endRow: 23, endColumn: 6 },
+                },
             }),
         },
         {

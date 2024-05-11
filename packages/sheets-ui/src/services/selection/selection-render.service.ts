@@ -931,7 +931,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         if (scene == null || skeleton == null) {
             return;
         }
-        const { scaleX, scaleY } = scene.getAncestorScale();
+        // const { scaleX, scaleY } = scene.getAncestorScale();
         const startCell = skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
         const endCell = skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
 

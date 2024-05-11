@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 
-import { AdditionAndSubtractionSingle } from '@univerjs/icons';
 import { SelectionManagerService } from '@univerjs/sheets';
-import { UploadFileMenu } from '../views/upload-component/UploadFile';
-import { COMPONENT_UPLOAD_FILE_MENU } from '../views/upload-component/component-name';
-import { ImageMenuFactory, ImageUploadIcon, UploadCellImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
-import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetImageDataController)
 export class SheetImageDataController extends Disposable {

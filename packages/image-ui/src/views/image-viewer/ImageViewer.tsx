@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, Nullable } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
-import { Dropdown } from '@univerjs/design';
-import { Autofill, MoreDownSingle } from '@univerjs/icons';
-import { useDependency } from '@wendellhu/redi/react-bindings';
-import clsx from 'clsx';
-import React, { useCallback, useEffect, useState } from 'react';
-import { RemoveImageMutation } from '@univerjs/drawing';
-import styles from './index.module.less';
-
+import type { Nullable } from '@univerjs/core';
+import React from 'react';
 
 export interface IImageViewerProps {
     src: Nullable<string>;

@@ -24,7 +24,6 @@ import { COMPONENT_IMAGE_POPUP_MENU, ImageResetSizeOperation, OpenImageCropOpera
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { takeUntil } from 'rxjs';
 import { ImageCropperObject } from '@univerjs/image-ui/views/crop/image-cropper-object.js';
-import { SidebarSheetImageOperation } from '../commands/operations/open-image-panel.operation';
 import { RemoveSheetImageCommand } from '../commands/commands/remove-sheet-image.command';
 import { EditSheetImageOperation } from '../commands/operations/edit-sheet-image.operation';
 

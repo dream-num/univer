@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { IAbsoluteTransform, ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
+import type { ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
 
 import type { UniverRenderingContext } from '../context';
-import { Transform } from '../basics/transform';
 import type { IObjectFullState, ITransformChangeState, IViewportBound } from '../basics';
-import { degToRad, radToDeg, Vector2 } from '../basics';
+import { RENDER_CLASS_TYPE, Vector2 } from '../basics';
 import { offsetRotationAxis } from '../basics/offset-rotation-axis';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
@@ -87,6 +86,10 @@ export class Image extends Shape<IImageProps> {
         return this._props.prstGeom;
     }
 
+    override get classType(): RENDER_CLASS_TYPE {
+        return RENDER_CLASS_TYPE.IMAGE;
+    }
+
     resetSize() {
         if (this._native == null) {
             return;
@@ -151,11 +154,7 @@ export class Image extends Shape<IImageProps> {
     //     return transform;
     // }
 
-    private _transformBySrcRect() {
-        if (this.srcRect == null) {
-            return;
-        }
-        const { left = 0, top = 0, right = 0, bottom = 0 } = this.srcRect;
+    calculateTransformWithSrcRect() {
         const {
             left: imageLeft,
             top: imageTop,
@@ -163,11 +162,50 @@ export class Image extends Shape<IImageProps> {
             height: imageHeight,
         } = this;
 
-        let newLeft = imageLeft - left;
-        let newTop = imageTop - top;
+        if (this.srcRect == null) {
+            return {
+                left: imageLeft,
+                top: imageTop,
+                width: imageWidth,
+                height: imageHeight,
+                angle: this.angle,
+            };
+        }
+        const { left = 0, top = 0, right = 0, bottom = 0 } = this.srcRect;
+
+
+        const newLeft = imageLeft - left;
+        const newTop = imageTop - top;
 
         const width = imageWidth + right + left;
         const height = imageHeight + bottom + top;
+
+        return {
+            left: newLeft,
+            top: newTop,
+            width,
+            height,
+            angle: this.angle,
+        };
+    }
+
+    private _transformBySrcRect() {
+        if (this.srcRect == null) {
+            return;
+        }
+        const { left = 0, top = 0, right = 0, bottom = 0 } = this.srcRect;
+        const {
+            width: imageWidth,
+            height: imageHeight,
+        } = this;
+
+        // let newLeft = imageLeft - left;
+        // let newTop = imageTop - top;
+
+        // const width = imageWidth + right + left;
+        // const height = imageHeight + bottom + top;
+
+        let { left: newLeft, top: newTop, width, height } = this.calculateTransformWithSrcRect();
 
         if (this.angle !== 0) {
             /**

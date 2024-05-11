@@ -19,10 +19,11 @@ import { checkIfMove, Disposable, ICommandService, IDrawingManagerService, IUniv
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { IImageData } from '@univerjs/drawing';
-import { getImageShapeKeyByDrawingSearch } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import type { BaseObject, Image, Scene } from '@univerjs/engine-render';
-import { CURSOR_TYPE, degToRad, IRenderManagerService, Vector2 } from '@univerjs/engine-render';
-import { CloseImageCropOperation, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
+import { CURSOR_TYPE, degToRad, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
+import type { IOpenImageCropOperationBySrcRectParams } from '../commands/operations/image-crop.operation';
+import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ImageCropperObject } from '../views/crop/image-cropper-object';
 
 @OnLifecycle(LifecycleStages.Rendered, ImageCropperController)
@@ -47,6 +48,149 @@ export class ImageCropperController extends Disposable {
     private _init(): void {
         this._initOpenCrop();
         this._initCloseCrop();
+        this._initAutoCrop();
+    }
+
+    private _initAutoCrop() {
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== AutoImageCropOperation.id) {
+                    return;
+                }
+
+                const params = command.params as IOpenImageCropOperationBySrcRectParams;
+
+                if (params == null) {
+                    return;
+                }
+
+                const { cropType } = params;
+
+                const drawingParams = this._drawingManagerService.getFocusDrawings();
+
+                if (drawingParams.length !== 1) {
+                    return;
+                }
+
+                const drawingParam = drawingParams[0];
+
+                const { unitId, subUnitId, drawingId } = drawingParam;
+
+                const renderObject = this._renderManagerService.getRenderById(unitId);
+
+                const scene = renderObject?.scene;
+
+                if (scene == null) {
+                    return true;
+                }
+
+                const imageCropperObject = this._searchCropObject(scene);
+                if (imageCropperObject != null) {
+                    this._commandService.syncExecuteCommand(CloseImageCropOperation.id);
+                    return;
+                }
+
+                const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+
+                const imageShape = scene.getObject(imageShapeKey) as Image;
+
+                if (imageShape == null) {
+                    return;
+                }
+
+                this._updateCropperObject(cropType, imageShape);
+
+                this._commandService.executeCommand(OpenImageCropOperation.id, { unitId, subUnitId, drawingId });
+            })
+        );
+    }
+
+    private _calculateSrcRectByRatio(left: number, top: number, width: number, height: number, numerator: number, denominator: number) {
+        const srcRatio = width / height;
+        const ratio = numerator / denominator;
+
+        let newWidth = width;
+        let newHeight = height;
+
+        if (srcRatio > ratio) {
+            newWidth = height * ratio;
+        } else {
+            newHeight = width / ratio;
+        }
+
+        const newLeft = (width - newWidth) / 2;
+        const newTop = (height - newHeight) / 2;
+
+        return {
+            left: precisionTo(newLeft, 1),
+            top: precisionTo(newTop, 1),
+            right: precisionTo(width - (newLeft + newWidth), 1),
+            bottom: precisionTo(height - (newTop + newHeight), 1),
+        };
+    }
+
+
+    private _updateCropperObject(cropType: CropType, imageShape: Image) {
+        const { left, top, width, height } = imageShape.calculateTransformWithSrcRect();
+
+        let newSrcRect: Nullable<ISrcRect>;
+        switch (cropType) {
+            case CropType.R1_1:
+                // 1:1
+                newSrcRect = this._calculateSrcRectByRatio(left, top, width, height, 1, 1);
+                break;
+            case CropType.R16_9:
+                // 16:9
+                newSrcRect = this._calculateSrcRectByRatio(left, top, width, height, 16, 9);
+                break;
+            case CropType.R9_16:
+                // 9:16
+                newSrcRect = this._calculateSrcRectByRatio(left, top, width, height, 9, 16);
+                break;
+            case CropType.R5_4:
+                // 5:4
+                newSrcRect = this._calculateSrcRectByRatio(left, top, width, height, 5, 4);
+                break;
+            case CropType.R4_5:
+                // 4:5
+                newSrcRect = this._calculateSrcRectByRatio(left, top, width, height, 4, 5);
+                break;
+            case CropType.R4_3:
+                // 4:3
+                newSrcRect = this._calculateSrcRectByRatio(left, top, width, height, 4, 3);
+                break;
+            case CropType.R3_4:
+                // 3:4
+                newSrcRect = this._calculateSrcRectByRatio(left, top, width, height, 3, 4);
+                break;
+            case CropType.R3_2:
+                // 3:2
+                newSrcRect = this._calculateSrcRectByRatio(left, top, width, height, 3, 2);
+                break;
+            case CropType.R2_3:
+                // 2:3
+                newSrcRect = this._calculateSrcRectByRatio(left, top, width, height, 2, 3);
+                break;
+            case CropType.FREE:
+            default:
+                break;
+        }
+
+        if (newSrcRect == null) {
+            return;
+        }
+
+        imageShape.setSrcRect(newSrcRect);
+
+        const { left: newLeft = 0, top: newTop = 0, bottom: newBottom = 0, right: newRight = 0 } = newSrcRect;
+
+        imageShape.transformByState({
+            left: left + newLeft,
+            top: top + newTop,
+            width: width - newRight - newLeft,
+            height: height - newBottom - newTop,
+
+        });
     }
 
     private _initOpenCrop() {
@@ -84,7 +228,7 @@ export class ImageCropperController extends Disposable {
                     return;
                 }
 
-                const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+                const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
                 const imageShape = scene.getObject(imageShapeKey) as Image;
 
@@ -100,7 +244,12 @@ export class ImageCropperController extends Disposable {
 
                 transformer?.clearControls();
 
-                const imageCropperObject = new ImageCropperObject(`${imageShapeKey}-crop`, { imageData, applyObject: imageShape });
+
+                const imageCropperObject = new ImageCropperObject(`${imageShapeKey}-crop`, {
+                    srcRect: imageShape.srcRect,
+                    prstGeom: imageShape.prstGeom,
+                    applyTransform: imageShape.calculateTransformWithSrcRect(),
+                });
 
                 scene.addObject(imageCropperObject, imageShape.getLayerIndex() + 1).attachTransformerTo(imageCropperObject);
                 transformer?.createControlForCopper(imageCropperObject);
@@ -151,8 +300,10 @@ export class ImageCropperController extends Disposable {
                 if (imageCropperObject == null) {
                     return;
                 }
-                const imageShape = imageCropperObject.applyObject as Image;
-
+                const imageShape = this._getApplyObjectByCropObject(imageCropperObject);
+                if (imageShape == null) {
+                    return;
+                }
 
                 const transformer = scene.getTransformerByCreate();
                 transformer.detachFrom(imageCropperObject);
@@ -163,7 +314,7 @@ export class ImageCropperController extends Disposable {
                 const drawingParam = this._drawingManagerService.getDrawingOKey<IDrawingParam>(imageShape.oKey);
                 if (drawingParam != null) {
                     const { left, top, height, width } = imageCropperObject;
-                    this._drawingManagerService.extraUpdateNotification([{
+                    this._drawingManagerService.externalUpdateNotification([{
                         ...drawingParam,
                         transform: {
                             ...drawingParam.transform,
@@ -182,8 +333,11 @@ export class ImageCropperController extends Disposable {
         );
     }
 
-    private _getApplyObjectByCropObject(cropObject: ImageCropperObject): Nullable<BaseObject> {
-        const applyObject = cropObject.applyObject;
+    private _getApplyObjectByCropObject(cropObject: ImageCropperObject): Nullable<Image> {
+        const cropOKey = cropObject.oKey;
+        const applyOKey = cropOKey.slice(0, cropOKey.length - 5);
+
+        const applyObject = cropObject.getScene().getObject(applyOKey) as Image;
         if (applyObject == null) {
             return null;
         }
@@ -243,10 +397,12 @@ export class ImageCropperController extends Disposable {
 
                     const srcRect = this._getSrcRectByTransformState(applyObject, cropObject);
 
-                    cropObject.imageData = {
-                        ...cropObject.imageData,
-                        srcRect: srcRect.srcRect,
-                    } as IImageData;
+                    cropObject.refreshSrcRect(srcRect.srcRect, applyObject.getState());
+
+                    // cropObject.imageData = {
+                    //     ...cropObject.imageData,
+                    //     srcRect: srcRect.srcRect,
+                    // } as IImageData;
 
                     transformer.createControlForCopper(cropObject);
                 })

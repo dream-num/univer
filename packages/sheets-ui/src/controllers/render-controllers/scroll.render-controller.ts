@@ -20,32 +20,30 @@ import {
     Disposable,
     ICommandService,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     toDisposable,
-    UniverInstanceType,
 } from '@univerjs/core';
+import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { ScrollCommand } from '../commands/commands/set-scroll.command';
-import { VIEWPORT_KEY } from '../common/keys';
-import { ScrollManagerService } from '../services/scroll-manager.service';
-import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import type { IExpandSelectionCommandParams } from '../commands/commands/set-selection.command';
-import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../commands/commands/set-selection.command';
-import { getSheetObject } from './utils/component-tools';
+import { ScrollCommand } from '../../commands/commands/set-scroll.command';
+import { VIEWPORT_KEY } from '../../common/keys';
+import { ScrollManagerService } from '../../services/scroll-manager.service';
+import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
+import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
+import { getSheetObject } from '../utils/component-tools';
 
 const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAndTabCommand.id];
 
 /**
  * This controller handles scroll logic in sheet interaction.
  */
-@OnLifecycle(LifecycleStages.Rendered, ScrollController)
-export class ScrollController extends Disposable {
+export class SheetsScrollRenderController extends Disposable implements IRenderController {
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -306,7 +304,7 @@ export class ScrollController extends Disposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._univerInstanceService, this._renderManagerService);
+        return getSheetObject(this._context.unit, this._context);
     }
 
     private _scrollToSelectionByDirection(range: IRange) {
@@ -381,31 +379,18 @@ export class ScrollController extends Disposable {
     private _scrollToCell(row: number, column: number): boolean {
         const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
 
-        if (rowHeightAccumulation == null || columnWidthAccumulation == null) {
-            return false;
-        }
+        if (rowHeightAccumulation == null || columnWidthAccumulation == null) return false;
 
         const scene = this._getSheetObject()?.scene;
-        if (scene == null) {
-            return false;
-        }
+        if (scene == null) return false;
 
         const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-        if (viewport == null) {
-            return false;
-        }
-
-        const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return false;
-        }
+        if (viewport == null) return false;
 
         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        if (skeleton == null) {
-            return false;
-        }
+        if (skeleton == null) return false;
 
-        const worksheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
+        const worksheet = this._context.unit.getActiveSheet();
         const {
             startColumn: freezeStartColumn,
             startRow: freezeStartRow,
@@ -414,9 +399,8 @@ export class ScrollController extends Disposable {
         } = worksheet.getFreeze();
 
         const bounds = this._getViewportBounding();
-        if (bounds == null) {
-            return false;
-        }
+        if (bounds == null) return false;
+
         const {
             startRow: viewportStartRow,
             startColumn: viewportStartColumn,
@@ -464,9 +448,7 @@ export class ScrollController extends Disposable {
             }
         }
 
-        if (startSheetViewRow === undefined && startSheetViewColumn === undefined) {
-            return false;
-        }
+        if (startSheetViewRow === undefined && startSheetViewColumn === undefined) return false;
 
         const { offsetX, offsetY } = this._scrollManagerService.getCurrentScroll() || {};
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {

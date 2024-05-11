@@ -18,5 +18,7 @@ export class Break {
     constructor(
         public position: number,
         public required = false
-    ) {}
+    ) {
+        // empty
+    }
 }

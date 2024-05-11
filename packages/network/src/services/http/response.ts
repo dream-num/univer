@@ -75,5 +75,7 @@ export class ResponseHeader {
         readonly headers: HTTPHeaders,
         readonly status: number,
         readonly statusText: string
-    ) {}
+    ) {
+        // empty
+    }
 }

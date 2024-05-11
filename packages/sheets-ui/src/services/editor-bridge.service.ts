@@ -133,39 +133,25 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     ) {
         super();
 
-        this.disposeWithMe(
-            toDisposable(() => {
-                this._currentEditCellState$.complete();
-                this._currentEditCell = null;
-            })
-        );
+        this.disposeWithMe(toDisposable(() => {
+            this._currentEditCellState$.complete();
+            this._currentEditCell = null;
+        }));
 
-        this.disposeWithMe(
-            toDisposable(
-                this.interceptor.intercept(this.interceptor.getInterceptPoints().AFTER_CELL_EDIT, {
-                    priority: -1,
-                    handler: (_value) => _value,
-                })
-            )
-        );
+        this.disposeWithMe(this.interceptor.intercept(this.interceptor.getInterceptPoints().AFTER_CELL_EDIT, {
+            priority: -1,
+            handler: (_value) => _value,
+        }));
 
-        this.disposeWithMe(
-            toDisposable(
-                this.interceptor.intercept(this.interceptor.getInterceptPoints().BEFORE_CELL_EDIT, {
-                    priority: -1,
-                    handler: (_value) => _value,
-                })
-            )
-        );
+        this.disposeWithMe(this.interceptor.intercept(this.interceptor.getInterceptPoints().BEFORE_CELL_EDIT, {
+            priority: -1,
+            handler: (_value) => _value,
+        }));
 
-        this.disposeWithMe(
-            toDisposable(
-                this.interceptor.intercept(this.interceptor.getInterceptPoints().AFTER_CELL_EDIT_ASYNC, {
-                    priority: -1,
-                    handler: (_value) => _value,
-                })
-            )
-        );
+        this.disposeWithMe(this.interceptor.intercept(this.interceptor.getInterceptPoints().AFTER_CELL_EDIT_ASYNC, {
+            priority: -1,
+            handler: (_value) => _value,
+        }));
     }
 
     refreshEditCellState() {
@@ -220,8 +206,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         let { startX, startY, endX, endY } = actualRangeWithCoord;
 
         const { scaleX, scaleY } = scene.getAncestorScale();
-
-        const { scaleX: precisionScaleX, scaleY: precisionScaleY } = scene.getPrecisionScale();
 
         const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
         startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);

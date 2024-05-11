@@ -218,32 +218,29 @@ export class FormulaEditorController extends RxDisposable {
     // Listen to changes in the size of the formula editor container to set the size of the editor.
     private _syncEditorSize() {
         this._formulaEditorManagerService.position$.pipe(takeUntil(this.dispose$)).subscribe((position) => {
-            if (position == null) {
-                return;
-            }
+            if (!position) return this._clearScheduledCallback();
+
             const editorObject = getEditorObject(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, this._renderManagerService);
             const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(
                 DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
             );
 
-            if (editorObject == null || formulaEditorDataModel == null) {
-                return;
-            }
+            if (editorObject == null || formulaEditorDataModel == null) return this._clearScheduledCallback();
 
             const { width, height } = position;
+            if (width === 0 || height === 0) return this._clearScheduledCallback();
 
             const { engine } = editorObject;
-
-            // Update page size when container resized.
             formulaEditorDataModel.updateDocumentDataPageSize(width);
-
             this._autoScroll();
-
-            // resize canvas
-            requestIdleCallback(() => {
-                engine.resizeBySize(width, height);
-            });
+            this._scheduledCallback = requestIdleCallback(() => engine.resizeBySize(width, height));
         });
+    }
+
+    private _scheduledCallback: number = -1;
+    private _clearScheduledCallback(): void {
+        if (this._scheduledCallback !== -1) cancelIdleCallback(this._scheduledCallback);
+        this._scheduledCallback = -1;
     }
 
     // Sync cell content to formula editor bar when sheet selection changed.

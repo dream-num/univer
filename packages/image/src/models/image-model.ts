@@ -24,7 +24,9 @@ export interface IImageData {
 export class ImageModel {
     private _imageShapeKey: Nullable<string>;
 
-    constructor(private _imageData: IImageData) {}
+    constructor(private _imageData: IImageData) {
+        // empty
+    }
 
     getImageData() {
         return this._imageData;

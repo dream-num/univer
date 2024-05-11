@@ -22,7 +22,7 @@ import {
     ICommandService,
     toDisposable,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import { CURSOR_TYPE, DeviceInputEventType, Rect, Vector2 } from '@univerjs/engine-render';
 import type {
     IDeltaColumnWidthCommandParams,
@@ -32,16 +32,16 @@ import type {
 import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../common/keys';
-import { IEditorBridgeService } from '../services/editor-bridge.service';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
+import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY, VIEWPORT_KEY } from '../../common/keys';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
     HEADER_MENU_SHAPE_THUMB_SIZE,
     HEADER_MENU_SHAPE_WIDTH_HEIGHT,
     HEADER_RESIZE_SHAPE_TYPE,
     HeaderMenuResizeShape,
-} from '../views/header-resize-shape';
-import { getCoordByOffset, getSheetObject, getTransformCoord } from './utils/component-tools';
+} from '../../views/header-resize-shape';
+import { getCoordByOffset, getTransformCoord } from '../utils/component-tools';
 
 const HEADER_RESIZE_CONTROLLER_SHAPE_ROW = '__SpreadsheetHeaderResizeControllerShapeRow__';
 
@@ -60,7 +60,7 @@ enum HEADER_RESIZE_TYPE {
 }
 
 
-export class HeaderResizeController extends Disposable implements IRenderController {
+export class HeaderResizeRenderController extends Disposable implements IRenderController {
     private _currentRow: number = 0;
 
     private _currentColumn: number = 0;
@@ -99,13 +99,8 @@ export class HeaderResizeController extends Disposable implements IRenderControl
         this._columnResizeRect?.dispose();
         this._columnResizeRect = null;
 
-        const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return;
-        }
-
-        const { spreadsheetRowHeader, spreadsheetColumnHeader } = sheetObject;
-
+        const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+        const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
         this._observers.forEach((observer) => {
             spreadsheetRowHeader.onPointerMoveObserver.remove(observer);
             spreadsheetRowHeader.onPointerLeaveObserver.remove(observer);
@@ -117,12 +112,7 @@ export class HeaderResizeController extends Disposable implements IRenderControl
     }
 
     private _init() {
-        const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return;
-        }
-
-        const { scene } = sheetObject;
+        const scene = this._context.scene;
 
         this._rowResizeRect = new HeaderMenuResizeShape(HEADER_RESIZE_CONTROLLER_SHAPE_ROW, {
             visible: false,
@@ -148,12 +138,9 @@ export class HeaderResizeController extends Disposable implements IRenderControl
     }
 
     private _initialHover(initialType: HEADER_RESIZE_TYPE = HEADER_RESIZE_TYPE.ROW) {
-        const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return;
-        }
-
-        const { spreadsheetRowHeader, spreadsheetColumnHeader, scene } = sheetObject;
+        const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+        const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
+        const scene = this._context.scene;
 
         const eventBindingObject =
             initialType === HEADER_RESIZE_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
@@ -263,8 +250,7 @@ export class HeaderResizeController extends Disposable implements IRenderControl
     }
 
     private _initialHoverResize(initialType: HEADER_RESIZE_TYPE = HEADER_RESIZE_TYPE.ROW) {
-        const sheetObject = this._getSheetObject()!;
-        const { scene } = sheetObject;
+        const scene = this._context.scene;
 
         const eventBindingObject =
             initialType === HEADER_RESIZE_TYPE.ROW ? this._rowResizeRect : this._columnResizeRect;
@@ -310,8 +296,8 @@ export class HeaderResizeController extends Disposable implements IRenderControl
                     const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                     if (skeleton == null) return;
 
-                    const sheetObject = this._getSheetObject();
-                    const { scene } = sheetObject;
+                    const scene = this._context.scene;
+
                     const engine = scene.getEngine();
                     const canvasMaxHeight = engine?.height || 0;
                     const canvasMaxWidth = engine?.width || 0;
@@ -455,17 +441,13 @@ export class HeaderResizeController extends Disposable implements IRenderControl
                     });
 
                     this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
-                        const sheetObject = this._getSheetObject();
+                        const scene = this._context.scene;
 
-                        if (sheetObject == null) {
-                            return;
-                        }
 
                         this._clearObserverEvent();
                         this._resizeHelperShape?.dispose();
                         this._resizeHelperShape = null;
 
-                        const { scene } = sheetObject;
                         scene.enableEvent();
 
                         if (isStartMove) {
@@ -498,8 +480,8 @@ export class HeaderResizeController extends Disposable implements IRenderControl
             toDisposable(
                 eventBindingObject.onDblclickObserver.add(() => {
                     if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                        const sheetObject = this._getSheetObject();
-                        const { scene } = sheetObject;
+                        const scene = this._context.scene;
+
                         scene.resetCursor();
 
                         this._commandService.executeCommand<ISetWorksheetRowIsAutoHeightCommandParams>(
@@ -517,15 +499,11 @@ export class HeaderResizeController extends Disposable implements IRenderControl
     }
 
     private _clearObserverEvent() {
-        const sheetObject = this._getSheetObject();
-        const { scene } = sheetObject;
+        const scene = this._context.scene;
+
         scene.onPointerMoveObserver.remove(this._moveObserver);
         scene.onPointerUpObserver.remove(this._upObserver);
         this._moveObserver = null;
         this._upObserver = null;
-    }
-
-    private _getSheetObject() {
-        return getSheetObject(this._context.unit, this._context)!;
     }
 }

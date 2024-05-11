@@ -22,7 +22,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import type { FUniver } from '../../facade';
-import { createTestBed } from '../../__tests__/create-test-bed';
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 
 describe('Test FRange', () => {
     let get: Injector['get'];
@@ -42,7 +42,7 @@ describe('Test FRange', () => {
     ) => Nullable<IStyleData>;
 
     beforeEach(() => {
-        const testBed = createTestBed();
+        const testBed = createFacadeTestBed();
         get = testBed.get;
         univerAPI = testBed.univerAPI;
 

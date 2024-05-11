@@ -26,7 +26,9 @@ interface Line {
 }
 
 export class Path2 {
-    constructor(private _lines: Vector2[] = INITIAL_Path2) {}
+    constructor(private _lines: Vector2[] = INITIAL_Path2) {
+        // empty
+    }
 
     intersection(lines: Vector2[]): Nullable<Vector2[]> {
         if (this._lines.length < 1 || lines.length < 1) {

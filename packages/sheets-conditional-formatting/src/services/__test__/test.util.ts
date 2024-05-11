@@ -80,7 +80,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
             this._injector.add([ConditionalFormattingFormulaService]);
             this._injector.add([ConditionalFormattingRuleModel]);
             this._injector.add([ConditionalFormattingViewModel]);
-            this._injector.add([IActiveDirtyManagerService, { useFactory: () => ({ register: () => { } } as any) }]);
+            this._injector.add([IActiveDirtyManagerService, { useFactory: () => ({ register: () => { /* empty */ } } as any) }]);
             this._injector.get(ConditionalFormattingService);
         }
     }

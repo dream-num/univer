@@ -26,7 +26,7 @@ import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { RegisterFunctionMutation, SetFormulaCalculationStartMutation, UnregisterFunctionMutation } from '@univerjs/engine-formula';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import type { FUniver } from '../facade';
-import { createTestBed } from './create-test-bed';
+import { createFacadeTestBed } from './create-test-bed';
 import { COLUMN_UNIQUE_KEY, ColumnHeaderCustomExtension, MAIN_UNIQUE_KEY, MainCustomExtension, ROW_UNIQUE_KEY, RowHeaderCustomExtension } from './utils/sheet-extension-util';
 
 describe('Test FUniver', () => {
@@ -49,7 +49,7 @@ describe('Test FUniver', () => {
     let getSheetRenderComponent: (unitId: string, viewKey: SHEET_VIEW_KEY) => Nullable<RenderComponentType>;
 
     beforeEach(() => {
-        const testBed = createTestBed();
+        const testBed = createFacadeTestBed();
         get = testBed.get;
         univerAPI = testBed.univerAPI;
 
@@ -88,7 +88,6 @@ describe('Test FUniver', () => {
 
         getSheetRenderComponent = (unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> => {
             const render = get(IRenderManagerService).getRenderById(unitId);
-
             if (!render) {
                 throw new Error('Render not found');
             }

@@ -16,7 +16,7 @@
 
 import { LocaleType } from '@univerjs/core';
 import { defaultTheme, greenTheme } from '@univerjs/design';
-import type { IMenuSelectorItem } from '@univerjs/ui';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -29,6 +29,7 @@ import { SaveSnapshotOptions } from '../commands/operations/save-snapshot.operat
 import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
+import { CreateEmptySheetCommand, DisposeCurrentUnitCommand } from '../commands/commands/unit.command';
 
 export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
@@ -170,6 +171,7 @@ export function SidebarMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     };
 }
 
+
 export function SetEditableMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: SetEditable.id,
@@ -210,5 +212,39 @@ export function SaveSnapshotSetEditableMenuItemFactory(accessor: IAccessor): IMe
                 value: 'record',
             },
         ],
+    };
+}
+
+const UNIT_ITEM_MENU_ID = 'debugger.unit-menu-item';
+
+export function UnitMenuItemFactory(): IMenuSelectorItem {
+    return {
+        id: UNIT_ITEM_MENU_ID,
+        title: 'Unit',
+        tooltip: 'Unit Commands',
+        type: MenuItemType.SUBITEMS,
+        positions: [MenuPosition.TOOLBAR_OTHERS],
+    };
+}
+
+export function DisposeCurrentUnitMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: DisposeCurrentUnitCommand.id,
+        title: 'Dispose Current Unit',
+        tooltip: 'Dispose Current Unit',
+        icon: 'DS',
+        type: MenuItemType.BUTTON,
+        positions: [UNIT_ITEM_MENU_ID],
+    };
+}
+
+export function CreateEmptySheetMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: CreateEmptySheetCommand.id,
+        title: 'Create Another Sheet',
+        tooltip: 'Create Another Sheet',
+        icon: 'CR',
+        type: MenuItemType.BUTTON,
+        positions: [UNIT_ITEM_MENU_ID],
     };
 }

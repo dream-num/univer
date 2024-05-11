@@ -240,6 +240,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             this._logService.error('[SheetClipboardService]', 'hook already exists', hook.id);
             return { dispose: () => { /* empty */ } };
         }
+
         // hook added should be ordered at meaning while
         const insertIndex = this._clipboardHooks.findIndex((existingHook) => {
             const existingHookPriority = existingHook.priority || 0;

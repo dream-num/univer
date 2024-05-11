@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommandInfo, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICellData, ICommandInfo, IExecutionOptions, IMutationCommonParams, IMutationInfo, IRange, Nullable, UnitModel, Workbook } from '@univerjs/core';
 import {
     Direction,
     Disposable,
     DisposableCollection,
     ICommandService,
-    IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
     ObjectMatrix,
     OnLifecycle,
-    RANGE_TYPE,
     Rectangle,
     toDisposable,
     Tools,
@@ -34,6 +32,7 @@ import {
 import { DeviceInputEventType, getCellInfoInMergeData } from '@univerjs/engine-render';
 import type {
     IAddWorksheetMergeMutationParams,
+    IRemoveSheetMutationParams,
     IRemoveWorksheetMergeMutationParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
@@ -42,13 +41,24 @@ import {
     AddWorksheetMergeMutation,
     ClearSelectionContentCommand,
     getAddMergeMutationRangeByType,
+    InsertColMutation,
+    InsertRowMutation,
+    MoveColsMutation,
+    MoveRangeMutation,
+    MoveRowsMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
+    RemoveColMutation,
     RemoveMergeUndoMutationFactory,
+    RemoveRowMutation,
+    RemoveSheetMutation,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SetSelectionsOperation,
+    SetWorksheetActiveOperation,
+    SetWorksheetColWidthMutation,
+    SetWorksheetRowHeightMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -68,12 +78,15 @@ import type {
 import { APPLY_TYPE, AutoFillHookType, DATA_TYPE } from '../services/auto-fill/type';
 import { IEditorBridgeService } from '../services/editor-bridge.service';
 import { ISelectionRenderService } from '../services/selection/selection-render.service';
+import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
+import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import type { IDiscreteRange } from './utils/range-tools';
 import { discreteRangeToRange, generateNullCellValue, rangeToDiscreteRange } from './utils/range-tools';
 
 @OnLifecycle(LifecycleStages.Steady, AutoFillController)
 export class AutoFillController extends Disposable {
     private _beforeApplyData: Array<Array<Nullable<ICellData>>> = [];
+    private _currentLocation: Nullable<IAutoFillLocation> = null;
 
     private _copyData: ICopyDataPiece[] = [];
     private _defaultHook: ISheetAutoFillHook;
@@ -81,7 +94,6 @@ export class AutoFillController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @IAutoFillService private readonly _autoFillService: IAutoFillService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
@@ -107,14 +119,56 @@ export class AutoFillController extends Disposable {
         this._initDefaultHook();
         this._onSelectionControlFillChanged();
         this._onApplyTypeChanged();
-        [AutoFillCommand, AutoClearContentCommand].forEach((command) => {
-            this.disposeWithMe(this._commandService.registerCommand(command));
-        });
+        this._initQuitListener();
     }
 
     private _initDefaultHook() {
-        this._autoFillService.addHook(this._defaultHook);
+        this.disposeWithMe(this._autoFillService.addHook(this._defaultHook));
     }
+
+    private _initQuitListener() {
+        const quitCommands = [
+            SetCellEditVisibleOperation.id,
+            AutoClearContentCommand.id,
+            SetZoomRatioOperation.id,
+            SetWorksheetActiveOperation.id,
+            SetRangeValuesMutation.id,
+            MoveRangeMutation.id,
+            RemoveRowMutation.id,
+            RemoveColMutation.id,
+            InsertRowMutation.id,
+            InsertColMutation.id,
+            MoveRowsMutation.id,
+            MoveColsMutation.id,
+            SetWorksheetColWidthMutation.id,
+            SetWorksheetRowHeightMutation.id,
+        ];
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
+            const fromCollab = options?.fromCollab;
+            if (quitCommands.includes(command.id) && !fromCollab && (command.params as IMutationCommonParams).trigger !== AutoFillCommand.id) {
+                this._quit();
+            }
+            if (command.id === RemoveSheetMutation.id) {
+                if ((command.params as IRemoveSheetMutationParams).unitId === this._currentLocation?.unitId &&
+                    (command.params as IRemoveSheetMutationParams).subUnitId === this._currentLocation?.subUnitId) {
+                    this._quit();
+                }
+            }
+        }));
+        this.disposeWithMe(this._univerInstanceService.unitDisposed$.subscribe((unit: UnitModel) => {
+            if (unit.getUnitId() === this._currentLocation?.unitId) {
+                this._quit();
+            }
+        }));
+    }
+
+    private _quit() {
+        this._currentLocation = null;
+        this._beforeApplyData = [];
+        this._copyData = [];
+        this._autoFillService.setShowMenu(false);
+    }
+
 
     private _onSelectionControlFillChanged() {
         const disposableCollection = new DisposableCollection();
@@ -367,62 +421,10 @@ export class AutoFillController extends Disposable {
     }
 
     private _handleFillData() {
-        const {
-            source,
-            target,
-            unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId(),
-            subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId(),
-        } = this._autoFillService.autoFillLocation || {};
-        const direction = this._autoFillService.direction;
-        if (!source || !target) {
+        if (!this._currentLocation) {
             return;
         }
-
-        const selection = Rectangle.union(discreteRangeToRange(source), discreteRangeToRange(target));
-        const applyType = this._autoFillService.applyType;
-        const activeHooks = this._autoFillService.getActiveHooks();
-
-        this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-            selections: [
-                {
-                    primary: { ...(this._selectionManagerService.getLast()?.primary ?? selection) },
-                    range: {
-                        ...selection,
-                        rangeType: RANGE_TYPE.NORMAL,
-                    },
-                },
-            ],
-            unitId,
-            subUnitId,
-        });
-
-        const undos: IMutationInfo[] = [];
-        const redos: IMutationInfo[] = [];
-        activeHooks.forEach((hook) => {
-            const { undos: hookUndos, redos: hookRedos } =
-                hook.onFillData?.({ source, target, unitId, subUnitId }, direction, applyType) || {};
-            if (hookUndos) {
-                undos.push(...hookUndos);
-            }
-            if (hookRedos) {
-                redos.push(...hookRedos);
-            }
-        });
-
-        const result = redos.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
-        if (result) {
-            // add to undo redo services
-            this._undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: undos,
-                redoMutations: redos,
-            });
-        }
-        // this._commandService.executeCommand(AutoFillCommand.id);
-        activeHooks.forEach((hook) => {
-            hook.onAfterFillData?.({ source, target, unitId, subUnitId }, direction, applyType);
-        });
-        this._autoFillService.setShowMenu(true);
+        this._commandService.executeCommand(AutoFillCommand.id, { unitId: this._currentLocation?.unitId, subUnitId: this._currentLocation?.subUnitId });
     }
 
     // calc apply data according to copy data and direction
@@ -697,6 +699,7 @@ export class AutoFillController extends Disposable {
         });
         this._beforeApplyData = applyData;
         this._copyData = this._getCopyData(source, direction);
+        this._currentLocation = location;
         if (this._hasSeries(this._copyData)) {
             this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, false);
         } else {

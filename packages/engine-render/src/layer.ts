@@ -186,6 +186,7 @@ export class Layer extends Disposable {
         if (this._debounceDirtyFunc) {
             this._debounceDirtyFunc();
         }
+
         // To prevent multiple refreshes caused by setting values for multiple object instances at once.
         this._debounceDirtyFunc = requestImmediateMacroTask(() => {
             this.makeDirty(state);

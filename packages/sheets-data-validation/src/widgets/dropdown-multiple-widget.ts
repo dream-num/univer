@@ -33,7 +33,9 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService
-    ) {}
+    ) {
+        // empty
+    }
 
     private _ensureMap(subUnitId: string) {
         let map = this._dropdownInfoMap.get(subUnitId);

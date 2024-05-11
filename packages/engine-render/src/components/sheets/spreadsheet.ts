@@ -116,7 +116,7 @@ export class Spreadsheet extends SheetComponent {
      */
     override dispose() {
         super.dispose();
-        this._documents.dispose();
+        this._documents?.dispose();
         this._documents = null as unknown as Documents;
         this._cacheCanvas?.dispose();
         this._cacheCanvas = null as unknown as Canvas;

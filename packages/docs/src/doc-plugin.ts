@@ -63,32 +63,22 @@ export interface IUniverDocsConfig {
     hasScroll?: boolean;
 }
 
-const DEFAULT_DOCUMENT_PLUGIN_DATA = {
-    hasScroll: true,
-};
-
 const PLUGIN_NAME = 'docs';
 
 export class UniverDocsPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_DOC;
 
-    private _config: IUniverDocsConfig;
-
     constructor(
-        config: Partial<IUniverDocsConfig> = {},
+        _config: Partial<IUniverDocsConfig> = {},
         @Inject(Injector) override _injector: Injector
     ) {
         super();
-
-        this._config = Object.assign(DEFAULT_DOCUMENT_PLUGIN_DATA, config);
 
         this._initializeDependencies(_injector);
 
         this._initializeCommands();
     }
-
-    initialize(): void {}
 
     private _initializeCommands(): void {
         (
@@ -134,10 +124,6 @@ export class UniverDocsPlugin extends Plugin {
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
         });
-    }
-
-    override onReady(): void {
-        this.initialize();
     }
 
     private _initializeDependencies(docInjector: Injector) {

@@ -184,11 +184,11 @@ class MarkSelectionService extends Disposable implements IMarkSelectionService {
         return null;
     }
 
-    refreshShapes() {}
+    refreshShapes() { /* TODO document why this method 'refreshShapes' is empty */ }
 
-    removeShape(id: string): void {}
+    removeShape(id: string): void { /* TODO document why this method 'removeShape' is empty */ }
 
-    removeAllShapes(): void {}
+    removeAllShapes(): void { /* TODO document why this method 'removeAllShapes' is empty */ }
 
     getShapeMap(): Map<string, any> {
         return new Map();

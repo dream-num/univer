@@ -254,12 +254,10 @@ describe('Test filter model and related utils', () => {
         });
 
         // TODO@wzhudev: not implemented yet
-
-        describe('Test serialization and deserialization', () => {
-            it('should serialize return a correct object', () => { });
-
-            it('should deserialize return a correct instance', () => { });
-        });
+        // describe('Test serialization and deserialization', () => {
+        //     it('should serialize return a correct object', () => { });
+        //     it('should deserialize return a correct instance', () => { });
+        // });
     });
 });
 

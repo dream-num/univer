@@ -31,13 +31,22 @@ export function checkFormulaDataNull(formulaData: IFormulaData, unitId: string, 
     return false;
 }
 
-export function removeFormulaData(formulaData: IFormulaData | IArrayFormulaRangeType | IArrayFormulaUnitCellType, unitId: string, sheetId: string) {
-    if (formulaData && formulaData[unitId] && formulaData[unitId]?.[sheetId]) {
-        delete formulaData[unitId]![sheetId];
-        return {
-            [unitId]: {
-                [sheetId]: null,
-            },
-        };
+export function removeFormulaData(formulaData: IFormulaData | IArrayFormulaRangeType | IArrayFormulaUnitCellType, unitId: string, sheetId?: string) {
+    if (sheetId) {
+        if (formulaData && formulaData[unitId] && formulaData[unitId]?.[sheetId]) {
+            delete formulaData[unitId]![sheetId];
+            return {
+                [unitId]: {
+                    [sheetId]: null,
+                },
+            };
+        }
+    } else {
+        if (formulaData && formulaData[unitId]) {
+            delete formulaData[unitId];
+            return {
+                [unitId]: null,
+            };
+        }
     }
 }

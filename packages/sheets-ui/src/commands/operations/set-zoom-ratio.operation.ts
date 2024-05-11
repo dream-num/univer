@@ -16,7 +16,9 @@
 
 import type { IOperation } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IAccessor } from '@wendellhu/redi';
+import { SheetsZoomRenderController } from '../../controllers/render-controllers/zoom.render-controller';
 
 export interface ISetZoomRatioOperationParams {
     zoomRatio: number;
@@ -41,15 +43,10 @@ export const SetZoomRatioOperation: IOperation<ISetZoomRatioOperationParams> = {
     id: 'sheet.operation.set-zoom-ratio',
     type: CommandType.OPERATION,
     handler: (accessor, params: ISetZoomRatioOperationParams) => {
-        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
+        const renderManagerService = accessor.get(IRenderManagerService);
+        const renderUnit = renderManagerService.getRenderById(params.unitId);
 
-        const worksheet = workbook?.getSheetBySheetId(params.subUnitId);
-        if (worksheet == null) {
-            return false;
-        }
-
-        worksheet.getConfig().zoomRatio = params.zoomRatio;
-
-        return true;
+        if (!renderUnit) return false;
+        return renderUnit.with(SheetsZoomRenderController).updateZoom(params.subUnitId, params.zoomRatio);
     },
 };

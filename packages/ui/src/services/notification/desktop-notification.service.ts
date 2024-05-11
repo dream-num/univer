@@ -25,6 +25,6 @@ export class DesktopNotificationService implements INotificationService {
     show(params: INotificationMethodOptions): IDisposable {
         notification.show(params);
 
-        return toDisposable(() => {});
+        return toDisposable(() => { /* empty */ });
     }
 }

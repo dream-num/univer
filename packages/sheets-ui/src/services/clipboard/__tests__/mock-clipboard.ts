@@ -49,7 +49,10 @@ interface IMockClipboardProps {
 }
 
 export class MockClipboard {
-    constructor(private props: IMockClipboardProps) {}
+    constructor(private props: IMockClipboardProps) {
+        // empty
+    }
+
     read(): Promise<IClipboardItem[]> {
         // Here you can return the simulated IClipboardItem array
         const clipboardItems: IClipboardItem[] = [new MockClipboardItem(this.props)];

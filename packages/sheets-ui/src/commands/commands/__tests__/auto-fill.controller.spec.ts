@@ -45,6 +45,7 @@ import { EditorBridgeService, IEditorBridgeService } from '../../../services/edi
 import { ISelectionRenderService, SelectionRenderService } from '../../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { RefillCommand } from '../refill.command';
+import { AutoClearContentCommand, AutoFillCommand } from '../auto-fill.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
@@ -303,6 +304,8 @@ describe('Test auto fill rules in controller', () => {
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RefillCommand);
+        commandService.registerCommand(AutoClearContentCommand);
+        commandService.registerCommand(AutoFillCommand);
 
         getValues = (
             startRow: number,

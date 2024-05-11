@@ -16,7 +16,6 @@
 
 import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocCanvasView } from '@univerjs/docs-ui';
-import { SheetCanvasView } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { interval, takeUntil, throttle } from 'rxjs';
 
@@ -94,14 +93,16 @@ export class PerformanceMonitorController extends RxDisposable {
                 .subscribe((fps) => {
                     container.innerText = `FPS: ${fps}`;
                 });
-        } else if (this._documentType === UniverInstanceType.UNIVER_SHEET) {
-            this._injector
-                .get(SheetCanvasView)
-                .fps$.pipe(takeUntil(this.dispose$))
-                .pipe(throttle(() => interval(THROTTLE_TIME)))
-                .subscribe((fps) => {
-                    container.innerText = `FPS: ${fps}`;
-                });
         }
+        // TODO@wzhudev: restore fps monitor
+        // else if (this._documentType === UniverInstanceType.UNIVER_SHEET) {
+        //     this._injector
+        //         .get(SheetCanvasView)
+        //         .fps$.pipe(takeUntil(this.dispose$))
+        //         .pipe(throttle(() => interval(THROTTLE_TIME)))
+        //         .subscribe((fps) => {
+        //             container.innerText = `FPS: ${fps}`;
+        //         });
+        // }
     }
 }

@@ -147,9 +147,6 @@ export class Group extends BaseObject {
         return true;
     }
 
-    // 判断被选中的唯一对象
-    pick(coord: Vector2) {}
-
     private _clear() {
         this._objects = [];
     }

@@ -16,13 +16,15 @@
 
 import type { Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { HoverManagerService } from '../services/hover-manager.service';
 
-@OnLifecycle(LifecycleStages.Rendered, HoverController)
-export class HoverController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, HoverRenderController)
+export class HoverRenderController extends Disposable implements IRenderController {
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @IRenderManagerService private _renderManagerService: IRenderManagerService,
         @Inject(HoverManagerService) private _hoverManagerService: HoverManagerService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
@@ -30,10 +32,6 @@ export class HoverController extends Disposable {
         super();
 
         this._initPointerEvent();
-    }
-
-    private _initScrollEvent() {
-        // this.
     }
 
     private _initPointerEvent() {

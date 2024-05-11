@@ -262,6 +262,7 @@ export class FormulaDataModel extends Disposable {
      * @returns
      */
     initFormulaData() {
+        // TODO@Dushusir: load doc/slide formula data
         // Load formula data from workbook config data.
         const allSheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (allSheets.length === 0) {
@@ -556,7 +557,7 @@ export function initSheetFormulaData(
     unitId: string,
     sheetId: string,
     cellMatrix: ObjectMatrix<Nullable<ICellData>>
-) {
+): IFormulaData {
     const formulaIdMap = new Map<string, { f: string; r: number; c: number }>(); // Connect the formula and ID
     const sheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem>();
     cellMatrix.forValue((r, c, cell) => {

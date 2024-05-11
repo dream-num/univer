@@ -78,8 +78,6 @@ export class CalculateFormulaService extends Disposable {
         super();
     }
 
-    override dispose(): void {}
-
     /**
      * Stop the execution of the formula.
      */

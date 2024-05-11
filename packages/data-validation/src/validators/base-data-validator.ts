@@ -73,7 +73,9 @@ export abstract class BaseDataValidator<DataType = CellValue> {
     constructor(
         @Inject(LocaleService) readonly localeService: LocaleService,
         @Inject(Injector) readonly injector: Injector
-    ) { }
+    ) {
+        // empty
+    }
 
     get operatorNames() {
         return this.operators.map((operator) => this.localeService.t(operatorNameMap[operator]));

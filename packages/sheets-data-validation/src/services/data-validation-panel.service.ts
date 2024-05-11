@@ -15,16 +15,18 @@
  */
 
 import type { IDataValidationRule, Nullable } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
-import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
+import { Disposable, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { ISidebarService } from '@univerjs/ui';
+import type { IDisposable } from '@wendellhu/redi';
+import { BehaviorSubject, distinctUntilChanged, filter } from 'rxjs';
 
 export class DataValidationPanelService extends Disposable {
     private _open$ = new BehaviorSubject<boolean>(false);
+    readonly open$ = this._open$.pipe(distinctUntilChanged());
+
     private _activeRule: Nullable<{ unitId: string; subUnitId: string; rule: IDataValidationRule }> = undefined;
     private _activeRule$ = new BehaviorSubject<Nullable<{ unitId: string; subUnitId: string; rule: IDataValidationRule }>>(undefined);
-
-    open$ = this._open$.pipe(distinctUntilChanged());
-    activeRule$ = this._activeRule$.asObservable();
+    readonly activeRule$ = this._activeRule$.asObservable();
 
     get activeRule() {
         return this._activeRule;
@@ -34,9 +36,29 @@ export class DataValidationPanelService extends Disposable {
         return this._open$.getValue();
     }
 
+    private _closeDisposable: Nullable<IDisposable> = null;
+
+    constructor(
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @ISidebarService private readonly _sidebarService: ISidebarService
+    ) {
+        super();
+
+        this.disposeWithMe(
+            this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET)
+                .pipe(filter((sheet) => !sheet)).subscribe(() => {
+                    this.close();
+                })
+        );
+    }
+
     override dispose(): void {
+        super.dispose();
+
         this._open$.next(false);
         this._open$.complete();
+
+        this._closeDisposable?.dispose();
     }
 
     open(): void {
@@ -45,6 +67,14 @@ export class DataValidationPanelService extends Disposable {
 
     close(): void {
         this._open$.next(false);
+        this._closeDisposable?.dispose();
+    }
+
+    setCloseDisposable(disposable: IDisposable): void {
+        this._closeDisposable = toDisposable(() => {
+            disposable.dispose();
+            this._closeDisposable = null;
+        });
     }
 
     setActiveRule(rule: Nullable<{ unitId: string; subUnitId: string; rule: IDataValidationRule }>): void {

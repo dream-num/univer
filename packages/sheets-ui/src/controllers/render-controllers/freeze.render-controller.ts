@@ -63,12 +63,12 @@ import {
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { ScrollCommand } from '../commands/commands/set-scroll.command';
-import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
-import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../common/keys';
-import { ScrollManagerService } from '../services/scroll-manager.service';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { getCoordByOffset, getSheetObject } from './utils/component-tools';
+import { ScrollCommand } from '../../commands/commands/set-scroll.command';
+import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
+import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../../common/keys';
+import { ScrollManagerService } from '../../services/scroll-manager.service';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import { getCoordByOffset, getSheetObject } from '../utils/component-tools';
 
 enum FREEZE_DIRECTION_TYPE {
     ROW,

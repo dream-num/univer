@@ -44,13 +44,13 @@ import { FormulaDependencyTree, FormulaDependencyTreeCache } from './dependency-
 
 const FORMULA_CACHE_LRU_COUNT = 100000;
 
-export const FormulaASTCache = new FormulaAstLRU<AstRootNode>(FORMULA_CACHE_LRU_COUNT);
-
 @OnLifecycle(LifecycleStages.Rendered, FormulaDependencyGenerator)
 export class FormulaDependencyGenerator extends Disposable {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
 
     private _dirtyUnitSheetNameMap: IDirtyUnitSheetNameMap = {};
+
+    private _formulaASTCache = new FormulaAstLRU<AstRootNode>(FORMULA_CACHE_LRU_COUNT);
 
     constructor(
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
@@ -68,7 +68,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
     override dispose(): void {
         this._updateRangeFlattenCache.clear();
-        FormulaASTCache.clear();
+        this._formulaASTCache.clear();
         this._dirtyUnitSheetNameMap = {};
     }
 
@@ -158,7 +158,7 @@ export class FormulaDependencyGenerator extends Disposable {
         const forceCalculate = this._currentConfigService.isForceCalculate();
         if (forceCalculate) {
             this._dependencyManagerService.reset();
-            FormulaASTCache.clear();
+            this._formulaASTCache.clear();
         }
 
 
@@ -266,7 +266,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
                     const { f: formulaString } = formulaDataItem;
 
-                    const node = this._generateAstNode(formulaString);
+                    const node = this._generateAstNode(unitId, formulaString);
 
                     const FDtree = new FormulaDependencyTree();
 
@@ -312,7 +312,7 @@ export class FormulaDependencyGenerator extends Disposable {
                         return true;
                     }
 
-                    const node = this._generateAstNode(formulaString, x, y);
+                    const node = this._generateAstNode(unitId, formulaString, x, y);
 
                     const FDtree = new FormulaDependencyTree();
 
@@ -358,8 +358,8 @@ export class FormulaDependencyGenerator extends Disposable {
         this._dirtyUnitSheetNameMap = this._currentConfigService.getDirtyNameMap();
     }
 
-    private _generateAstNode(formulaString: string, refOffsetX: number = 0, refOffsetY: number = 0) {
-        let astNode: Nullable<AstRootNode> = FormulaASTCache.get(`${formulaString}##${refOffsetX}${refOffsetY}`);
+    private _generateAstNode(unitId: string, formulaString: string, refOffsetX: number = 0, refOffsetY: number = 0) {
+        let astNode: Nullable<AstRootNode> = this._formulaASTCache.get(`${unitId}${formulaString}##${refOffsetX}${refOffsetY}`);
 
         if (astNode && !this._isDirtyDefinedForNode(astNode)) {
             return astNode;
@@ -379,7 +379,7 @@ export class FormulaDependencyGenerator extends Disposable {
             throw new Error('astNode is null');
         }
 
-        FormulaASTCache.set(`${formulaString}##${refOffsetX}${refOffsetY}`, astNode);
+        this._formulaASTCache.set(`${unitId}${formulaString}##${refOffsetX}${refOffsetY}`, astNode);
 
         return astNode;
     }

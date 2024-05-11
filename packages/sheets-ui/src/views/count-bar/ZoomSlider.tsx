@@ -21,7 +21,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { Slider } from '@univerjs/design';
-import { SetWorksheetActivateCommand } from '@univerjs/sheets';
+import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -44,7 +44,7 @@ export function ZoomSlider() {
 
     useEffect(() => {
         const disposable = commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetZoomRatioOperation.id || commandInfo.id === SetWorksheetActivateCommand.id) {
+            if (commandInfo.id === SetZoomRatioOperation.id || commandInfo.id === SetWorksheetActiveOperation.id) {
                 const currentZoom = getCurrentZoom();
                 setZoom(currentZoom);
             }

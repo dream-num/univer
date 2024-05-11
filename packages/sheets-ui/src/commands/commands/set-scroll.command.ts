@@ -15,12 +15,13 @@
  */
 
 import type { ICommand, IRange } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 
 import { getSheetCommandTarget } from '@univerjs/sheets';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { ScrollManagerService } from '../../services/scroll-manager.service';
 import { SetScrollOperation } from '../operations/scroll.operation';
-import { ScrollController } from '../../controllers/scroll.controller';
+import { SheetsScrollRenderController } from '../../controllers/render-controllers/scroll.render-controller';
 
 export interface ISetScrollRelativeCommandParams {
     offsetX?: number;
@@ -127,7 +128,11 @@ export const ScrollToCellCommand: ICommand<IScrollToCellCommandParams> = {
     id: 'sheet.command.scroll-to-cell',
     type: CommandType.COMMAND,
     handler: (accessor, params) => {
-        const scrollController = accessor.get(ScrollController);
+        const instanceService = accessor.get(IUniverInstanceService);
+        const renderManagerService = accessor.get(IRenderManagerService);
+        const scrollController = renderManagerService
+            .getRenderById(instanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId())!
+            .with(SheetsScrollRenderController);
         return scrollController.scrollToRange(params!.range);
     },
 };

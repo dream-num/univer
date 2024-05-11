@@ -143,7 +143,7 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: React.
 
 
 export function ListFormulaInput(props: IFormulaInputProps) {
-    const { value, onChange: _onChange = () => { }, unitId, subUnitId, validResult, showError, ruleId } = props;
+    const { value, onChange: _onChange = () => { /* empty */ }, unitId, subUnitId, validResult, showError, ruleId } = props;
     const { formula1 = '', formula2 = '' } = value || {};
     const containerRef = useRef<HTMLDivElement>(null);
     const [isFormulaStr, setIsFormulaStr] = useState(() => isFormulaString(formula1) ? '1' : '0');

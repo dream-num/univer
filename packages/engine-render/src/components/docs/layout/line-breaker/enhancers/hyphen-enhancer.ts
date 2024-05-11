@@ -48,6 +48,10 @@ function getHyphenPosition(lastPos: number, hyphenSlice: string[], index: number
     return hyphenPos;
 }
 
+function isUpperCase(word: string) {
+    return word.length > 0 && word === word.toUpperCase();
+}
+
 export class LineBreakerHyphenEnhancer implements IBreakPoints {
     private _curBreak: Nullable<Break> = null;
 
@@ -63,7 +67,12 @@ export class LineBreakerHyphenEnhancer implements IBreakPoints {
 
     private _content = '';
 
-    constructor(private _lineBreaker: LineBreaker, private _hyphen: Hyphen, private _lang: Lang) {
+    constructor(
+        private _lineBreaker: LineBreaker,
+        private _hyphen: Hyphen,
+        private _lang: Lang,
+        private _doNotHyphenateCaps = false
+    ) {
         this._content = _lineBreaker.content;
     }
 
@@ -79,7 +88,7 @@ export class LineBreakerHyphenEnhancer implements IBreakPoints {
             // Check if next break is in word.
             const word = getWord(this._content.slice(this._curBreak.position, this._nextBreak.position));
 
-            if (word.length) {
+            if (word.length && !(isUpperCase(word) && this._doNotHyphenateCaps)) {
                 this._isInWord = true;
                 this._word = word;
                 // hyphenation.

@@ -145,11 +145,12 @@ export function shaping(
     const lang = languageDetector.detect(content);
 
     const needHyphen = hyphenConfig(paragraphStyle, sectionBreakConfig);
+    const doNotHyphenateCaps = sectionBreakConfig.doNotHyphenateCaps === BooleanNumber.TRUE;
 
     if (lang !== Lang.UNKNOWN && needHyphen) {
         // Use hyphen enhancer when the lang pattern is loaded.
         if (hyphen.hasPattern(lang)) {
-            breaker = new LineBreakerHyphenEnhancer(breaker, hyphen, lang) as unknown as LineBreaker;
+            breaker = new LineBreakerHyphenEnhancer(breaker, hyphen, lang, doNotHyphenateCaps) as unknown as LineBreaker;
         } else {
             hyphen.loadPattern(lang);
         }

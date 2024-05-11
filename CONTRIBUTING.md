@@ -1,4 +1,4 @@
-<!-- https://univer.ai/guides/contributing/ -->
+<!-- https://univer.ai/guides/sheet/contributing/ -->
 
 # Univer Contributing Guide
 

@@ -73,12 +73,12 @@ Univer 的亮点包括：
 | <h3>🎨 Univer Slides</h3>                    |                   |
 | [Slides](https://www.univer.ai/examples/slides/)<br>一个包含图文本、浮动图片、表格等元素的画布演示                                  | [![](./docs/img/examples-slides.gif)](https://www.univer.ai/examples/slides/)                           |
 | <h3>🧩 Univer Innovation</h3>                    |                   |
-| [Zen Mode](https://univer.ai/zh-cn/guides/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA)<br>Sheet 的单元格是一个 Doc？                                  | [![](./docs/img/zen-mode.gif)](https://univer.ai/zh-cn/guides/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA)                           |
+| [Zen Mode](https://univer.ai/zh-CN/guides/sheet/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA)<br>Sheet 的单元格是一个 Doc？                                  | [![](./docs/img/zen-mode.gif)](https://univer.ai/zh-CN/guides/sheet/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA)                           |
 | [Univer (SaaS version)](https://univer.ai/)<br>通过 Univer，我们使用户能够根据自己的意愿创建 3 种形式的页面。 通过将工作表、文档和幻灯片的功能合并在一起，Univer 使个人和团队能够轻松创建、组织和简化工作流程。                                  | [![](./docs/img/univer-workspace-drag-chart.gif)](https://youtu.be/kpV0MvQuFZA)                           |
 
 ## 使用
 
-我们建议通过将 Univer 作为 npm 包使用，请参考文档上的[快速开始](https://univer.ai/guides/quick-start/)小节。我们还准备了一个[在线 playground](https://univer.ai/playground/)，你无需在本地安装 Univer 就可以体验使用 Univer 开发。
+我们建议通过将 Univer 作为 npm 包使用，请参考文档上的[快速开始](https://univer.ai/zh-CN/guides/sheet/getting-started/quickstart)小节。我们还准备了一个[在线 playground](https://univer.ai/playground/)，你无需在本地安装 Univer 就可以体验使用 Univer 开发。
 
 Univer 基于插件化架构设计，你可以安装以下包来增强 Univer 的功能。
 
@@ -144,7 +144,7 @@ Univer 持续稳定发展离不开它的支持者和赞助者，如果你想要�
 
 ## 链接
 
-- [文档](https://univer.ai/guides/introduction/)
+- [文档](https://univer.ai/zh-CN/guides/sheet/introduction)
 - [在线 Playground](https://univer.ai/playground/)
 - [官方网站](https://univer.ai)
 
@@ -154,7 +154,7 @@ Univer 持续稳定发展离不开它的支持者和赞助者，如果你想要�
 - [Github Discussions](https://github.com/dream-num/univer/discussions)
 - 微信扫描下方二维码，加入 Univer 中文社群
 
-![wecom-qr-code](https://univer.ai/_astro/business-qr-code.3zPwMdHH_ZGnJEl.webp)
+![wecom-qr-code](https://univer.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fqrcode.45c72be6.png&w=828&q=75)
 
 ## 授权
 

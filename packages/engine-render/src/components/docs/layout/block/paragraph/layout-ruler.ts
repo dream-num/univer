@@ -1019,17 +1019,8 @@ function __maxFontBoundingBoxByGlyphGroup(glyphGroup: IDocumentSkeletonGlyph[]) 
     return maxBox;
 }
 
-function __getSpanGroupByLine(line: IDocumentSkeletonLine) {
-    const divides = line.divides;
-    const dividesLen = divides.length;
-    const glyphGroup = [];
-
-    for (let i = 0; i < dividesLen; i++) {
-        const divide = divides[i];
-        glyphGroup.push(...divide.glyphGroup);
-    }
-
-    return glyphGroup;
+function __getSpanGroupByLine({ divides }: IDocumentSkeletonLine) {
+    return divides.flatMap((divide) => divide.glyphGroup);
 }
 
 function __isNullLine(line: IDocumentSkeletonLine) {

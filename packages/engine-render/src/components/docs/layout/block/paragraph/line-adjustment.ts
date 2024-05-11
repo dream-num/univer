@@ -257,6 +257,11 @@ function addHyphenDash(
             hyphenDashGlyph.parent = lastGlyph.parent;
             hyphenDashGlyph.left = lastGlyph.left + lastGlyph.width;
             divide.glyphGroup.push(hyphenDashGlyph);
+            // In latin paragraph layout, most lines end with spaces,
+            // and when hyphens are added to some lines, the hyphens will bulge out,
+            // and when the ends are aligned, they will not appear to be aligned,
+            // so the hyphenated divide needs to be compressed
+            divide.width -= hyphenDashGlyph.width;
         }
     }
 }

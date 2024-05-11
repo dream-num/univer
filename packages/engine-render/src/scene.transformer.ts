@@ -26,7 +26,7 @@ import { ScrollTimer } from './scroll-timer';
 import type { IRectProps } from './shape/rect';
 import { Rect } from './shape/rect';
 
-import { degToRad, radToDeg } from './basics/tools';
+import { degToRad, precisionTo, radToDeg } from './basics/tools';
 import type { Scene } from './scene';
 import type { IPoint } from './basics/vector2';
 import { Vector2 } from './basics/vector2';
@@ -215,6 +215,12 @@ export class Transformer extends Disposable implements ITransformerConfig {
     clearCopperControl() {
         this._copperControl?.dispose();
         this._copperControl = null;
+    }
+
+    setSelectedControl(applyObject: BaseObject) {
+        applyObject = this._findGroupObject(applyObject);
+        this._selectedObjectMap.set(applyObject.oKey, applyObject);
+        this._createControl(applyObject);
     }
 
     // eslint-disable-next-line complexity
@@ -680,7 +686,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _resizeLeftTop(moveObject: BaseObject, moveLeft: number, moveTop: number, originState: IAbsoluteTransform): ITransformState {
-        const { left, top, width, height } = moveObject.getState();
+        const { left = 0, top = 0, width = 0, height = 0 } = moveObject.getState();
         const { width: originWidth = width, height: originHeight = height, left: originLeft = left, top: originTop = top } = originState;
         const aspectRatio = originWidth / originHeight;
 
@@ -695,7 +701,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _resizeRightBottom(moveObject: BaseObject, moveLeft: number, moveTop: number, originState: IAbsoluteTransform): ITransformState {
-        const { left, top, width, height } = moveObject.getState();
+        const { left = 0, top = 0, width = 0, height = 0 } = moveObject.getState();
         const { width: originWidth = width, height: originHeight = height, left: originLeft = left, top: originTop = top } = originState;
         const aspectRatio = originWidth / originHeight;
 
@@ -710,7 +716,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _resizeLeftBottom(moveObject: BaseObject, moveLeft: number, moveTop: number, originState: IAbsoluteTransform): ITransformState {
-        const { left, top, width, height } = moveObject.getState();
+        const { left = 0, top = 0, width = 0, height = 0 } = moveObject.getState();
         const { width: originWidth = width, height: originHeight = height, left: originLeft = left, top: originTop = top } = originState;
         const aspectRatio = originWidth / originHeight;
 
@@ -725,7 +731,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _resizeRightTop(moveObject: BaseObject, moveLeft: number, moveTop: number, originState: IAbsoluteTransform): ITransformState {
-        const { left, top, width, height } = moveObject.getState();
+        const { left = 0, top = 0, width = 0, height = 0 } = moveObject.getState();
         const { width: originWidth = width, height: originHeight = height, left: originLeft = left, top: originTop = top } = originState;
         const aspectRatio = originWidth / originHeight;
 
@@ -1147,7 +1153,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _createResizeAnchor(type: TransformerManagerType, applyObject: BaseObject, zIndex: number) {
-        const { height, width, scaleX, scaleY } = applyObject.getState();
+        const { height = 0, width = 0, scaleX = 1, scaleY = 1 } = applyObject.getState();
 
         const { anchorFill, anchorStroke, anchorStrokeWidth, anchorCornerRadius, anchorSize } = this._getConfig(applyObject);
 
@@ -1174,7 +1180,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _createCopperResizeAnchor(type: TransformerManagerType, applyObject: BaseObject, zIndex: number) {
-        const { height, width, scaleX, scaleY } = applyObject.getState();
+        const { height = 0, width = 0, scaleX = 1, scaleY = 1 } = applyObject.getState();
 
         const { anchorFill, anchorStroke, anchorStrokeWidth, anchorSize } = this._getConfig(applyObject);
 
@@ -1388,7 +1394,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _createControl(applyObject: BaseObject, isSkipOnCropper = true) {
-        const { left, top, height, width, angle, scaleX, scaleY, ancestorLeft, ancestorTop, skewX, skewY, flipX, flipY } = applyObject;
+        const { left = 0, top = 0, height = 0, width = 0, angle = 0 } = applyObject.getState();
         const { isCropper, resizeEnabled, rotateAnchorOffset, rotateSize, rotateCornerRadius, borderEnabled, borderStroke, borderStrokeWidth, borderSpacing, enabledAnchors } = this._getConfig(applyObject);
         if (isSkipOnCropper && isCropper) {
             return;
@@ -1447,7 +1453,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         const transformerControl = new Group(`${TransformerManagerType.GROUP}_${oKey}`, ...groupElements);
         transformerControl.zIndex = zIndex;
         transformerControl.evented = false;
-        transformerControl.transformByState({ height, width, left, top, angle });
+        transformerControl.transformByState({ left, top });
         const scene = this.getScene();
         scene.addObject(transformerControl, layerIndex);
 
@@ -1472,6 +1478,9 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _updateActiveObjectList(applyObject: BaseObject, evt: IPointerEvent | IMouseEvent) {
         const { isCropper } = this._getConfig(applyObject);
+
+        applyObject = this._findGroupObject(applyObject);
+
         if (this._selectedObjectMap.has(applyObject.oKey)) {
             return;
         }
@@ -1488,6 +1497,19 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._createControl(applyObject);
     }
 
+    private _findGroupObject(applyObject: BaseObject) {
+        if (!applyObject.isInGroup) {
+            return applyObject;
+        }
+
+        const group = applyObject.ancestorGroup as Nullable<Group>;
+        if (!group) {
+            return applyObject;
+        } else {
+            return group;
+        }
+    }
+
     private _addCancelObserver(scene: Scene) {
         this._cancelFocusObserver?.dispose();
         this._cancelFocusObserver = scene.onPointerDownObserver.add(() => {
@@ -1495,10 +1517,10 @@ export class Transformer extends Disposable implements ITransformerConfig {
         });
     }
 
-    private _smoothAccuracy(num: number, isCropper = false, accuracy: number = 10) {
+    private _smoothAccuracy(num: number, isCropper = false, accuracy: number = 1) {
         if (isCropper) {
-            return Math.round(num * 1000) / 1000;
+            return precisionTo(num, 3);
         }
-        return Math.round(num * accuracy) / accuracy;
+        return precisionTo(num, accuracy);
     }
 }

@@ -25,7 +25,6 @@ export enum GroupType {
 }
 
 export interface ISetImageGroupOperationParams {
-    drawings: IDrawingSearch[];
     groupType: GroupType;
 }
 

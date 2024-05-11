@@ -22,6 +22,7 @@ import { CreateCopySingle } from '@univerjs/icons';
 import { Button, Select } from '@univerjs/design';
 import clsx from 'clsx';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { AutoImageCropOperation, CropType } from '../../commands/operations/image-crop.operation';
 import styles from './index.module.less';
 
 
@@ -30,37 +31,10 @@ export interface IImageCropperProps {
     cropperShow: boolean;
 }
 
-enum CropType {
-    FREE = '0',
-    R1_1 = '1',
-    R16_9 = '2',
-    R9_16 = '3',
-    R5_4 = '4',
-    R4_5 = '5',
-    R4_3 = '6',
-    R3_4 = '7',
-    R3_2 = '8',
-    R2_3 = '9',
-}
-
-enum AlignType {
-    default = '0',
-    left = '1',
-    center = '2',
-    right = '3',
-    top = '4',
-    middle = '5',
-    bottom = '6',
-    horizon = '7',
-    vertical = '8',
-}
-
 
 export const ImageCropper = (props: IImageCropperProps) => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
-    const drawingManagerService = useDependency(IDrawingManagerService);
-    const renderManagerService = useDependency(IRenderManagerService);
 
     const { drawings, cropperShow } = props;
 
@@ -69,16 +43,6 @@ export const ImageCropper = (props: IImageCropperProps) => {
     if (drawingParam == null) {
         return;
     }
-
-    const { unitId } = drawingParam;
-
-    const renderObject = renderManagerService.getRenderById(unitId);
-    const scene = renderObject?.scene;
-    if (scene == null) {
-        return;
-    }
-    const transformer = scene.getTransformerByCreate();
-
 
     const [cropValue, setCropValue] = useState<string>(CropType.FREE as string);
     const cropOptions = [
@@ -123,6 +87,12 @@ export const ImageCropper = (props: IImageCropperProps) => {
         return isShow ? 'block' : 'none';
     };
 
+    const onCropperBtnClick = (val: CropType) => {
+        commandService.executeCommand(AutoImageCropOperation.id, {
+            cropType: val,
+        });
+    };
+
     return (
         <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)} style={{ display: gridDisplay(cropperShow) }}>
             <div className={styles.imageCommonPanelRow}>
@@ -132,7 +102,7 @@ export const ImageCropper = (props: IImageCropperProps) => {
             </div>
             <div className={clsx(styles.imageCommonPanelRow, styles.imageCommonPanelRowVertical)}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
-                    <Button size="small">
+                    <Button size="small" onClick={() => { onCropperBtnClick(cropValue as CropType); }}>
                         <div className={clsx(styles.imageCommonPanelInline)}><CreateCopySingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.crop.start')}</div>
                     </Button>

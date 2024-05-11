@@ -16,8 +16,6 @@
 
 import { createIdentifier } from '@wendellhu/redi';
 import type { Nullable } from '../../shared';
-import type { ISize } from '../../services/drawing/drawing-interfaces';
-
 
 export enum ImageSourceType {
     URL = 'URL',

@@ -16,7 +16,7 @@
 
 import type { IDrawingSearch } from '@univerjs/core';
 
-export function getImageShapeKeyByDrawingSearch(param: IDrawingSearch): string {
+export function getDrawingShapeKeyByDrawingSearch(param: IDrawingSearch): string {
     const { unitId, subUnitId, drawingId } = param;
     return `${unitId}#-#${subUnitId}#-#${drawingId}`;
 }

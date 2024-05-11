@@ -21,6 +21,7 @@ import React, { useState } from 'react';
 import { Select } from '@univerjs/design';
 import clsx from 'clsx';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { AlignType, SetImageAlignOperation } from '../../commands/operations/image-align.operation';
 import styles from './index.module.less';
 
 export interface IImageAlignProps {
@@ -29,26 +30,12 @@ export interface IImageAlignProps {
 
 }
 
-enum AlignType {
-    default = '0',
-    left = '1',
-    center = '2',
-    right = '3',
-    top = '4',
-    middle = '5',
-    bottom = '6',
-    horizon = '7',
-    vertical = '8',
-}
-
 
 export const ImageAlign = (props: IImageAlignProps) => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
-    const drawingManagerService = useDependency(IDrawingManagerService);
-    const renderManagerService = useDependency(IRenderManagerService);
 
-    const { drawings, alignShow } = props;
+    const { alignShow } = props;
 
     const [alignValue, setAlignValue] = useState<string>(AlignType.default as string);
     const alignOptions = [
@@ -94,12 +81,13 @@ export const ImageAlign = (props: IImageAlignProps) => {
                 },
             ],
         },
-
-
     ];
 
     function handleAlignChange(value: string | number | boolean) {
         setAlignValue((value as string));
+        commandService.executeCommand(SetImageAlignOperation.id, {
+            alignType: value as AlignType,
+        });
     }
 
     const gridDisplay = (isShow: boolean) => {

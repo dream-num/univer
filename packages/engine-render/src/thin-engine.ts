@@ -96,6 +96,8 @@ export abstract class ThinEngine<T extends IDisposable> extends Disposable {
         this._scenes = {};
     }
 
+    getParent() {}
+
     remainScene(key: string) {
         const scenes = this.getScenes();
         if (scenes[key]) {

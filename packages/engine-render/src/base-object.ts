@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
+import type { EventState, IKeyValue, ITransformState, Nullable, Observer } from '@univerjs/core';
 import { Observable } from '@univerjs/core';
 
 import type { EVENT_TYPE } from './basics/const';
@@ -219,6 +219,19 @@ export abstract class BaseObject {
             return parent?.ancestorTransform.multiply(this.transform);
         }
         return this.transform;
+    }
+
+    get ancestorGroup() {
+        let group: Nullable<BaseObject> = null;
+        let parent = this.getParent();
+        while (parent != null) {
+            if (parent.classType === RENDER_CLASS_TYPE.GROUP) {
+                group = parent;
+                break;
+            }
+            parent = parent.getParent();
+        }
+        return group;
     }
 
     get skewX() {
@@ -532,7 +545,7 @@ export abstract class BaseObject {
         return this._parent;
     }
 
-    getState() {
+    getState(): ITransformState {
         return {
             left: this.left,
             top: this.top,

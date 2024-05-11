@@ -18,18 +18,18 @@ import type { IDrawingSearch, IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
 export enum AlignType {
-    left,
-    center,
-    right,
-    top,
-    middle,
-    bottom,
-    horizon,
-    vertical,
+    default = '0',
+    left = '1',
+    center = '2',
+    right = '3',
+    top = '4',
+    middle = '5',
+    bottom = '6',
+    horizon = '7',
+    vertical = '8',
 }
 
 export interface ISetImageAlignOperationParams {
-    drawings: IDrawingSearch[];
     alignType: AlignType;
 }
 

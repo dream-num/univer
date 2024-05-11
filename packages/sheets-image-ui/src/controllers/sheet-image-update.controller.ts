@@ -62,14 +62,18 @@ export class SheetImageUpdateController extends Disposable {
             this._commandService.onCommandExecuted(async (command: ICommandInfo) => {
                 if (command.id === InsertCellImageOperation.id || command.id === InsertFloatImageOperation.id) {
                     const params = command.params as IInsertImageOperationParams;
-                    if (params.file == null) {
+                    if (params.files == null) {
                         return;
                     }
 
                     if (command.id === InsertCellImageOperation.id) {
-                        await this._insertCellImage(params.file);
+                        params.files.forEach(async (file) => {
+                            await this._insertCellImage(file);
+                        });
                     } else {
-                        await this._insertFloatImage(params.file);
+                        params.files.forEach(async (file) => {
+                            await this._insertFloatImage(file);
+                        });
                     }
                 }
             })
@@ -264,7 +268,7 @@ export class SheetImageUpdateController extends Disposable {
     }
 
     private _updateImageListener() {
-        this._drawingManagerService.extraUpdate$.subscribe((params) => {
+        this._drawingManagerService.externalUpdate$.subscribe((params) => {
             const drawings: ISetDrawingCommandParam[] = [];
 
             if (params.length === 0) {

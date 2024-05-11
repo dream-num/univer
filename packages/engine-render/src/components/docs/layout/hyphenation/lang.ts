@@ -94,4 +94,6 @@ export enum Lang {
     Tr = 'tr',
     Uk = 'uk',
     ZhLatnPinyin = 'zh-latn-pinyin',
+    // unknown language and no need to hyphenation.
+    UNKNOWN = 'unknown',
 }

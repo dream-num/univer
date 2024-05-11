@@ -34,6 +34,7 @@ import { createSkeletonSection } from './model/section';
 import { dealWithSection } from './block/section';
 import { createSkeletonPage } from './model/page';
 import { Hyphen } from './hyphenation/hyphen';
+import { LanguageDetector } from './hyphenation/language-detector';
 
 export enum DocumentSkeletonState {
     PENDING = 'pending',
@@ -65,6 +66,8 @@ export class DocumentSkeleton extends Skeleton {
 
     // Use for hyphenation.
     private _hyphen = new Hyphen();
+
+    private _languageDetector = new LanguageDetector();
 
     private _iteratorCount = 0;
 
@@ -521,6 +524,7 @@ export class DocumentSkeleton extends Skeleton {
             sectionBreakConfigCache: new Map(),
             paragraphsOpenNewPage: new Set(),
             hyphen: this._hyphen,
+            languageDetector: this._languageDetector,
         };
     }
 

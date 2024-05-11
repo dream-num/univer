@@ -20,7 +20,7 @@ import type { IBreakPoints, LineBreaker } from '../line-breaker';
 import type { Hyphen } from '../../hyphenation/hyphen';
 import type { Lang } from '../../hyphenation/lang';
 
-export function isLetter(char: string): boolean {
+export function isLetter(char: string) {
     return char.length > 0 && !/\s|(?![\'])[\!-\@\[-\`\{-\~\u2013-\u203C]/.test(char);
 }
 
@@ -90,6 +90,7 @@ export class LineBreakerHyphenEnhancer implements IBreakPoints {
                 return this._nextBreak;
             }
         } else {
+            // No need to add `-` to last hyphen slice, so use length - 1.
             if (this._hyphenIndex < this._hyphenSlice.length - 1) {
                 const position = getHyphenPosition(this._curBreak!.position, this._hyphenSlice, this._hyphenIndex);
 

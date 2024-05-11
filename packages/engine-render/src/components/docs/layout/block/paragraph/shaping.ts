@@ -112,13 +112,15 @@ export function shaping(
         drawings = {},
     } = sectionBreakConfig;
     const shapedTextList: IShapedText[] = [];
-    const breaker = new LineBreaker(content);
+    let breaker = new LineBreaker(content);
     const { endIndex } = paragraphNode;
     const { paragraphStyle = {} } = viewModel.getParagraph(endIndex) || { startIndex: 0 };
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
     let last = 0;
     let bk;
     let lastGlyphIndex = 0;
+
+    const { hyphen, languageDetector } = ctx;
 
     const paragraphBody = prepareParagraphBody(viewModel.getBody()!, endIndex);
 
@@ -133,10 +135,19 @@ export function shaping(
     // Add custom extension for linebreak.
     tabLineBreakExtension(breaker);
 
-    const enhancedBreaker = new LineBreakerHyphenEnhancer(breaker, ctx.hyphen, Lang.EnUs);
+    const lang = languageDetector.detect(content);
+
+    if (lang !== Lang.UNKNOWN) {
+        // Use hyphen enhancer when the lang pattern is loaded.
+        if (hyphen.hasPattern(lang)) {
+            breaker = new LineBreakerHyphenEnhancer(breaker, hyphen, lang) as unknown as LineBreaker;
+        } else {
+            hyphen.loadPattern(lang);
+        }
+    }
 
     // eslint-disable-next-line no-cond-assign
-    while ((bk = enhancedBreaker.nextBreakPoint())) {
+    while ((bk = breaker.nextBreakPoint())) {
         // get the string between the last break and this one
         const word = content.slice(last, bk.position);
         const shapedGlyphs: IDocumentSkeletonGlyph[] = [];

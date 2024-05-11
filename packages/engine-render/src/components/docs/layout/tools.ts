@@ -60,6 +60,7 @@ import { getFontStyleString, isFunction } from '../../../basics/tools';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { Hyphen } from './hyphenation/hyphen';
+import type { LanguageDetector } from './hyphenation/language-detector';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages[pages.length - 1];
@@ -813,6 +814,8 @@ export interface ILayoutContext {
     paragraphsOpenNewPage: Set<number>;
     // Use for hyphenation.
     hyphen: Hyphen;
+    // Use for detect language for paragraph content.
+    languageDetector: LanguageDetector;
 }
 
 const DEFAULT_SECTION_BREAK: ISectionBreak = {

@@ -15,6 +15,7 @@ exports.baseRules = {
         enums: 'always-multiline',
         functions: 'never',
     }],
+    'no-empty-function': 'off',
     'style/arrow-parens': ['error', 'always'],
     'ts/no-redeclare': 'off',
     'antfu/if-newline': 'off',

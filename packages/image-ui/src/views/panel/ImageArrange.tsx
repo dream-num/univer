@@ -15,9 +15,9 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { ICommandService, LocaleService } from '@univerjs/core';
+import { ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { CreateCopySingle } from '@univerjs/icons';
 import { Button } from '@univerjs/design';
 import clsx from 'clsx';
@@ -31,14 +31,27 @@ export interface IImageArrangeProps {
 }
 
 export const ImageArrange = (props: IImageArrangeProps) => {
-    const { arrangeShow, drawings } = props;
+    const { arrangeShow, drawings: focusDrawings } = props;
 
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const drawingManagerService = useDependency(IDrawingManagerService);
 
     const gridDisplay = (isShow: boolean) => {
         return isShow ? 'block' : 'none';
     };
+
+    const [drawings, setDrawings] = useState<IDrawingParam[]>(focusDrawings);
+
+    useEffect(() => {
+        const focusDispose = drawingManagerService.focus$.subscribe((drawings) => {
+            setDrawings(drawings);
+        });
+
+        return () => {
+            focusDispose.unsubscribe(); ;
+        };
+    }, []);
 
     const onArrangeBtnClick = (arrangeType: ArrangeType) => {
         commandService.executeCommand(SetDrawingArrangeCommand.id, {

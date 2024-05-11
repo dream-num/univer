@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -22,7 +22,7 @@ import { COMPONENT_IMAGE_POPUP_MENU } from '../views/image-popup-menu/component-
 import { ImagePopupMenu } from '../views/image-popup-menu/ImagePopupMenu';
 import zhCN from '../locale/zh-CN';
 import enUS from '../locale/en-US';
-import { CloseImageCropOperation, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
+import { AutoImageCropOperation, CloseImageCropOperation, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ImageViewer } from '../views/image-viewer/ImageViewer';
 import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
@@ -73,6 +73,7 @@ export class ImageUIController extends Disposable {
             ImageResetSizeOperation,
             SetImageGroupOperation,
             SetImageAlignOperation,
+            AutoImageCropOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

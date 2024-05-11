@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, IDrawingSearch, Nullable } from '@univerjs/core';
-import { DrawingTypeEnum, ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
+import type { IDrawingParam } from '@univerjs/core';
+import { ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useEffect, useRef, useState } from 'react';
-import { CreateCopySingle } from '@univerjs/icons';
-import { Button, Checkbox, Input, InputNumber, Select } from '@univerjs/design';
+import React, { useEffect, useState } from 'react';
+import { Checkbox, InputNumber } from '@univerjs/design';
 import clsx from 'clsx';
 import type { BaseObject, IChangeObserverConfig } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { getUpdateParams } from '../../utils/get-update-params';
 import styles from './index.module.less';
-import { ImageArrange } from './ImageArrange';
 
 
 export interface IImageTransformProps {
@@ -76,41 +75,9 @@ export const ImageTransform = (props: IImageTransformProps) => {
     const [rotation, setRotation] = useState(originRotation);
     const [lockRatio, setLockRatio] = useState(transformer.keepRatio);
 
-    function getUpdateParams(objects: Map<string, BaseObject>): Nullable<IDrawingParam>[] {
-        const params: Nullable<IDrawingParam>[] = [];
-        objects.forEach((object) => {
-            const { oKey, left, top, height, width, angle } = object;
-
-            const searchParam = drawingManagerService.getDrawingOKey(oKey);
-
-            if (searchParam == null) {
-                params.push(null);
-                return true;
-            }
-
-            const { unitId, subUnitId, drawingId } = searchParam;
-
-            params.push({
-                unitId,
-                subUnitId,
-                drawingId,
-                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-                transform: {
-                    left,
-                    top,
-                    height,
-                    width,
-                    angle,
-                },
-            });
-        });
-
-        return params;
-    }
-
     const changeObs = (state: IChangeObserverConfig) => {
         const { objects } = state;
-        const params = getUpdateParams(objects);
+        const params = getUpdateParams(objects, drawingManagerService);
 
         if (params.length !== 1) {
             return;
@@ -190,7 +157,7 @@ export const ImageTransform = (props: IImageTransformProps) => {
 
         setWidth(val);
 
-        drawingManagerService.extraUpdateNotification([updateParam]);
+        drawingManagerService.externalUpdateNotification([updateParam]);
 
         transformer.clearControls(false);
         transformer.refreshControls();
@@ -211,7 +178,7 @@ export const ImageTransform = (props: IImageTransformProps) => {
 
         setHeight(val);
 
-        drawingManagerService.extraUpdateNotification([updateParam]);
+        drawingManagerService.externalUpdateNotification([updateParam]);
 
         transformer.clearControls(false);
         transformer.refreshControls();
@@ -227,7 +194,7 @@ export const ImageTransform = (props: IImageTransformProps) => {
 
         setXPosition(val);
 
-        drawingManagerService.extraUpdateNotification([updateParam]);
+        drawingManagerService.externalUpdateNotification([updateParam]);
 
         transformer.clearControls(false);
         transformer.refreshControls();
@@ -242,7 +209,7 @@ export const ImageTransform = (props: IImageTransformProps) => {
 
         setYPosition(val);
 
-        drawingManagerService.extraUpdateNotification([updateParam]);
+        drawingManagerService.externalUpdateNotification([updateParam]);
 
         transformer.clearControls(false);
         transformer.refreshControls();
@@ -257,7 +224,7 @@ export const ImageTransform = (props: IImageTransformProps) => {
 
         setRotation(val);
 
-        drawingManagerService.extraUpdateNotification([updateParam]);
+        drawingManagerService.externalUpdateNotification([updateParam]);
 
         transformer.clearControls(false);
         transformer.refreshControls();

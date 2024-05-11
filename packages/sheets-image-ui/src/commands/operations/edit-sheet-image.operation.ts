@@ -35,7 +35,7 @@ export const EditSheetImageOperation: IOperation<IDrawingSearch> = {
         if (params == null) {
             return false;
         }
-        drawingManagerService.focusDrawing(params);
+        drawingManagerService.focusDrawing([params]);
         commandService.executeCommand(SidebarSheetImageOperation.id, { value: 'open' });
         return true;
     },

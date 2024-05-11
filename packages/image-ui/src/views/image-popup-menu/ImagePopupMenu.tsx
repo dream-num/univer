@@ -15,13 +15,12 @@
  */
 
 import type { IDrawingSearch } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { Autofill, MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import React, { useCallback, useEffect, useState } from 'react';
-import { RemoveImageMutation } from '@univerjs/drawing';
+import React, { useState } from 'react';
 import styles from './index.module.less';
 
 

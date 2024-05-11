@@ -454,6 +454,17 @@ export class Scene extends ThinScene {
         }
     }
 
+    getObjectIncludeInGroup(oKey: string) {
+        for (const layer of this._layers) {
+            const objects = layer.getObjects();
+            for (const object of objects) {
+                if (object.oKey === oKey) {
+                    return object;
+                }
+            }
+        }
+    }
+
     fuzzyMathObjects(oKey: string) {
         const objects: BaseObject[] = [];
         for (const layer of this._layers) {

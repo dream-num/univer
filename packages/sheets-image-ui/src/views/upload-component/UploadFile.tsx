@@ -43,19 +43,22 @@ export const UploadFileMenu = (props: IUploadFileProps) => {
     const imageAccept = ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(',');
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files ? event.target.files[0] : null;
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
+        const fileList = event.target.files;
 
-        if (file == null) {
+        if (fileList == null) {
             return;
         }
 
+        const files: File[] = Array.from(fileList);
+
         if (type === UploadFileType.floatImage) {
-            commandService.executeCommand(InsertFloatImageOperation.id, { file });
+            commandService.executeCommand(InsertFloatImageOperation.id, { files });
         } else if (type === UploadFileType.cellImage) {
-            commandService.executeCommand(InsertCellImageOperation.id, { file });
+            commandService.executeCommand(InsertCellImageOperation.id, { files });
+        }
+
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
         }
     };
 
@@ -67,6 +70,7 @@ export const UploadFileMenu = (props: IUploadFileProps) => {
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 accept={imageAccept}
+                multiple
             />
         </div>
     );

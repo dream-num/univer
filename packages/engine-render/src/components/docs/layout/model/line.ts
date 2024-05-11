@@ -386,7 +386,7 @@ function __getSplitWidthNoAngle(
     }
 
     let resultLeft = left - distL;
-    let resultWidth = width + distR;
+    let resultWidth = width + distL + distR;
     const ruler = ___getWrapTextRuler(wrapText, resultLeft, resultWidth, columnWidth);
 
     if (ruler === WrapTextRuler.LEFT) {

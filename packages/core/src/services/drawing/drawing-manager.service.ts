@@ -86,7 +86,7 @@ export interface IDrawingManagerService {
     readonly remove$: Observable<IDrawingParam[]>;
     readonly add$: Observable<IDrawingParam[]>;
     readonly update$: Observable<IDrawingParam[]>;
-    readonly extraUpdate$: Observable<IDrawingParam[]>;
+    readonly externalUpdate$: Observable<IDrawingParam[]>;
     readonly focus$: Observable<IDrawingParam[]>;
     readonly order$: Observable<IDrawingOrderMapParam>;
 
@@ -101,13 +101,13 @@ export interface IDrawingManagerService {
     update<T extends IDrawingParam>(updateParam: T): void;
     batchUpdate<T extends IDrawingParam>(updateParams: T[]): void;
 
-    extraUpdateNotification<T extends IDrawingParam>(updateParams: T[]): void;
+    externalUpdateNotification<T extends IDrawingParam>(updateParams: T[]): void;
 
     getDrawingByParam<T extends IDrawingParam>(param: Nullable<IDrawingSearch>): Nullable<T>;
 
     getDrawingOKey<T extends IDrawingParam>(oKey: string): Nullable<T>;
 
-    focusDrawing(param: Nullable<IDrawingSearch>): void;
+    focusDrawing(params: Nullable<IDrawingSearch[]>): void;
     getFocusDrawings(): IDrawingParam[];
 
     forwardDrawings(unitId: string, subUnitId: string, drawingIds: string[]): void;
@@ -137,8 +137,8 @@ export class DrawingManagerService implements IDisposable, IDrawingManagerServic
     private readonly _update$ = new Subject<IDrawingParam[]>();
     readonly update$ = this._update$.asObservable();
 
-    private readonly _extraUpdate$ = new Subject<IDrawingParam[]>();
-    readonly extraUpdate$ = this._extraUpdate$.asObservable();
+    private readonly _externalUpdate$ = new Subject<IDrawingParam[]>();
+    readonly externalUpdate$ = this._externalUpdate$.asObservable();
 
     private _focus$ = new Subject<IDrawingParam[]>();
     focus$: Observable<IDrawingParam[]> = this._focus$.asObservable();
@@ -192,8 +192,8 @@ export class DrawingManagerService implements IDisposable, IDrawingManagerServic
         this._update$.next(objects);
     }
 
-    extraUpdateNotification<T extends IDrawingParam>(updateParams: T[]) {
-        this._extraUpdate$.next(updateParams);
+    externalUpdateNotification<T extends IDrawingParam>(updateParams: T[]) {
+        this._externalUpdate$.next(updateParams);
     }
 
     getDrawingByParam<T extends IDrawingParam>(param: Nullable<IDrawingSearch>): Nullable<T> {
@@ -205,21 +205,26 @@ export class DrawingManagerService implements IDisposable, IDrawingManagerServic
         return this._getCurrentBySearch<T>({ unitId, subUnitId, drawingId });
     }
 
-    focusDrawing(param: Nullable<IDrawingSearch>): void {
-        if (param == null) {
+    focusDrawing(params: Nullable<IDrawingSearch[]>): void {
+        if (params == null) {
             this._focusDrawings = [];
             this._focus$.next([]);
             return;
         }
-        const { unitId, subUnitId, drawingId } = param;
-        const item = this._drawingManagerInfo[unitId]?.[subUnitId]?.[drawingId];
-        if (item == null) {
-            this._focusDrawings = [];
-            this._focus$.next([]);
-            return;
+
+        const drawingParams: IDrawingParam[] = [];
+        params.forEach((param) => {
+            const { unitId, subUnitId, drawingId } = param;
+            const item = this._drawingManagerInfo[unitId]?.[subUnitId]?.[drawingId];
+            if (item != null) {
+                drawingParams.push(item);
+            }
+        });
+
+        if (drawingParams.length > 0) {
+            this._focusDrawings = drawingParams;
+            this._focus$.next(drawingParams);
         }
-        this._focusDrawings.push(item);
-        this._focus$.next([item]);
     }
 
     getFocusDrawings() {

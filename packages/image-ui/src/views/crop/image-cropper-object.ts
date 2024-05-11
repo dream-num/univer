@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-import type { IKeyValue, ITransformState, Nullable } from '@univerjs/core';
-import type { BaseObject, Engine, IShapeProps, IViewportBound, Scene, UniverRenderingContext, Vector2 } from '@univerjs/engine-render';
-import { Canvas, degToRad, Rect, Shape, Transform } from '@univerjs/engine-render';
-import type { IImageData } from '@univerjs/drawing';
-
+import type { ISrcRect, ITransformState, Nullable, PresetGeometryType } from '@univerjs/core';
+import type { Engine, IShapeProps, IViewportBound, Scene, UniverRenderingContext, Vector2 } from '@univerjs/engine-render';
+import { Canvas, Rect, Shape } from '@univerjs/engine-render';
 
 export interface IImageCropperObjectProps extends IShapeProps {
-    applyObject: BaseObject;
-    imageData?: IImageData;
+    /**
+     * 20.1.8.55 srcRect (Source Rectangle)
+     */
+    srcRect?: Nullable<ISrcRect>;
+
+    /**
+     * 20.1.9.18 prstGeom (Preset geometry)
+     */
+    prstGeom?: Nullable<PresetGeometryType>;
+    applyTransform?: ITransformState;
     dragPadding?: number;
 }
 
@@ -32,9 +38,9 @@ enum ImageCropperObjectType {
 }
 
 export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropperObjectProps> extends Shape<T> {
-    private _applyObject: Nullable<BaseObject>;
-
-    private _imageData: Nullable<IImageData>;
+    private _srcRect: Nullable<ISrcRect>;
+    private _prstGeom: Nullable<PresetGeometryType>;
+    private _applyTransform: Nullable<ITransformState>;
 
     private _dragPadding = 8;
 
@@ -54,12 +60,16 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
 
         super(key, props);
 
-        if (props?.applyObject) {
-            this._applyObject = props.applyObject;
+        if (props?.srcRect) {
+            this._srcRect = props.srcRect;
         }
 
-        if (props?.imageData) {
-            this._imageData = props.imageData;
+        if (props?.prstGeom) {
+            this._prstGeom = props.prstGeom;
+        }
+
+        if (props?.applyTransform) {
+            this._applyTransform = props.applyTransform;
         }
 
         if (props?.dragPadding) {
@@ -69,33 +79,21 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
         this._applyProps();
     }
 
-    get applyObject() {
-        return this._applyObject;
-    }
 
-    set applyObject(value: Nullable<BaseObject>) {
-        this._applyObject = value;
-        this._applyProps();
-    }
-
-    get imageData() {
-        return this._imageData;
-    }
-
-    set imageData(value: Nullable<IImageData>) {
-        this._imageData = value;
+    refreshSrcRect(value: Nullable<ISrcRect>, transform: Nullable<ITransformState>) {
+        this._srcRect = value;
+        this._applyTransform = transform;
         this._applyProps();
     }
 
     get srcRect() {
-        return this._imageData?.srcRect;
+        return this._srcRect;
     }
 
     override dispose() {
         super.dispose();
         this._cacheCanvas?.dispose();
-        this._applyObject = null;
-        this._imageData = null;
+        this._srcRect = null;
     }
 
     override isHit(coord: Vector2) {
@@ -140,14 +138,8 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
     }
 
     protected override _draw(ctx: UniverRenderingContext) {
-        const applyObject = this._applyObject;
-        if (!applyObject) {
-            return;
-        }
-
         // const { left, top, width, height, angle } = applyObject;
-
-        const scene = applyObject.getScene() as Scene;
+        const scene = this.getScene() as Scene;
 
 
         const engine = scene.getEngine() as Engine;
@@ -184,8 +176,8 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
 
     private _clipForApplyObject(cacheCtx: UniverRenderingContext) {
         let objectType = ImageCropperObjectType.RECT;
-        const imageData = this._imageData;
-        if (imageData != null && imageData.prstGeom != null) {
+
+        if (this._prstGeom != null) {
             objectType = ImageCropperObjectType.PATH;
         }
         cacheCtx.globalCompositeOperation = 'destination-out';
@@ -203,19 +195,19 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
     }
 
     private _applyProps() {
-        if (this._applyObject == null) {
+        if (this._applyTransform == null) {
             return;
         }
-        const imageData = this._imageData;
+
         let cropLeft = 0;
         let cropTop = 0;
         let cropRight = 0;
         let cropBottom = 0;
 
-        const { left: applyLeft, top: applyTop, width: applyWidth, height: applyHeight, angle, strokeWidth: applyStrokeWidth } = this._applyObject;
+        const { left: applyLeft = 0, top: applyTop = 0, width: applyWidth = 0, height: applyHeight = 0, angle } = this._applyTransform;
 
-        if (imageData != null && imageData.srcRect != null) {
-            const { left = 0, top = 0, right = 0, bottom = 0 } = imageData.srcRect;
+        if (this._srcRect != null) {
+            const { left = 0, top = 0, right = 0, bottom = 0 } = this._srcRect;
             cropLeft = left;
             cropTop = top;
             cropRight = right;

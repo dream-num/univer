@@ -16,7 +16,7 @@
 
 export { SetDrawingArrangeMutation, type ISetImageArrangeMutationParams } from './commands/mutations/set-drawing-arrange.mutation';
 export { SetDrawingArrangeCommand, ArrangeType, type ISetDrawingArrangeCommandParams } from './commands/commands/set-drawing-arrange.command';
-export { getImageShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
+export { getDrawingShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
 export { getImageSize } from './utils/get-image-size';
 export { UniverDrawingPlugin } from './plugin';
 export { type IImageData } from './models/image-model-interface';

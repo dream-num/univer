@@ -82,7 +82,7 @@ export abstract class SheetComponent extends RenderComponent<SpreadsheetSkeleton
         endColumn: number
     ): Nullable<{ startRow: number; startColumn: number; endRow: number; endColumn: number }>;
 
-    protected abstract _draw(ctx: UniverRenderingContext, bounds?: IViewportBound): void;
+    protected abstract _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo): void;
 
     /**
      * TODO: DR-Univer, fix as unknown as
@@ -94,7 +94,7 @@ export abstract class SheetComponent extends RenderComponent<SpreadsheetSkeleton
 }
 
 export abstract class SpreadsheetHeader extends SheetComponent {
-    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportBound): void {
+    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo): void {
         this.draw(ctx, bounds);
     }
 }

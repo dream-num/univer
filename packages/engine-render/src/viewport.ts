@@ -172,7 +172,7 @@ export class Viewport {
     /**
      * viewbound of cache area, cache area is slightly bigger than viewbound.
      */
-    private _cacheBound: IBoundRectNoAngle;
+    private _cacheBound: IBoundRectNoAngle | null;
     private _preCacheBound: IBoundRectNoAngle | null;
 
     /**
@@ -245,7 +245,6 @@ export class Viewport {
             this._resizeHandler();
         });
         this._resizeHandler();
-        // this._testDisplayCache();
     }
 
     initCacheCanvas(props?: IViewProps) {
@@ -269,12 +268,12 @@ export class Viewport {
             cacheCanvas.getCanvasEle().style.zIndex = '100';
             cacheCanvas.getCanvasEle().style.position = 'fixed';
             cacheCanvas.getCanvasEle().style.background = '#fff';
-            cacheCanvas.getCanvasEle().style.pointerEvents = 'none'; // 禁用事件响应
-            cacheCanvas.getCanvasEle().style.border = '1px solid black'; // 设置边框样式
+            cacheCanvas.getCanvasEle().style.pointerEvents = 'none';
+            cacheCanvas.getCanvasEle().style.border = '1px solid black';
             cacheCanvas.getCanvasEle().style.transformOrigin = '100% 100%';
             cacheCanvas.getCanvasEle().style.transform = 'scale(0.5)';
-            cacheCanvas.getCanvasEle().style.translate = '20% 20%';
-            cacheCanvas.getCanvasEle().style.opacity = '0.9';
+            cacheCanvas.getCanvasEle().style.translate = '20% 0%';
+            cacheCanvas.getCanvasEle().style.opacity = '1';
             document.body.appendChild(cacheCanvas.getCanvasEle());
         };
         if (['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(this.viewportKey)) {
@@ -387,6 +386,18 @@ export class Viewport {
         return this._cacheBound;
     }
 
+    set cacheBound(val) {
+        this._cacheBound = val;
+    }
+
+    get preCacheBound() {
+        return this._preCacheBound;
+    }
+
+    set preCacheBound(val: IBoundRectNoAngle | null) {
+        this._preCacheBound = val;
+    }
+
     enable() {
         this._active = true;
     }
@@ -433,10 +444,7 @@ export class Viewport {
         //     }
         // });
         this._setWithAndHeight(position);
-
-
         this._resizeCacheCanvasAndScrollBar();
-        this.markForceDirty();
     }
 
     setPadding(param: IPosition) {
@@ -800,10 +808,9 @@ export class Viewport {
 
 
         const viewBound = {
-            // 这里若对 top left 做 Math.floor 对 right bottom Math.ceil 操作, 放大后, 贴图会模糊
-            top: topLeft.y,
             left: topLeft.x,
             right: bottomRight.x,
+            top: topLeft.y,
             bottom: bottomRight.y,
         };
         this._viewBound = viewBound;
@@ -840,7 +847,7 @@ export class Viewport {
             isDirty: this.isDirty ? 0b10 : 0b00,
             isForceDirty: this.isForceDirty,
             allowCache: this._allowCache,
-            cacheBound: this.cacheBound,
+            cacheBound: this.cacheBound!,
             diffCacheBounds,
             cacheViewPortPosition,
             shouldCacheUpdate,
@@ -874,7 +881,7 @@ export class Viewport {
     }
 
 
-    // eslint-disable-next-line complexity
+    // eslint-disable-next-line complexity, max-lines-per-function
     onMouseWheel(evt: IWheelEvent, state: EventState) {
         if (!this._scrollBar || this.isActive === false) {
             return;
@@ -1083,6 +1090,8 @@ export class Viewport {
         const canvasW = width !== 0 ? width + this.bufferEdgeX * 2 * scaleX : 0;
         const canvasH = height !== 0 ? height + this.bufferEdgeY * 2 * scaleY : 0;
         this._cacheCanvas?.setSize(canvasW, canvasH);
+        this.cacheBound = null;
+        this.preCacheBound = null;
 
         const contentWidth = (this._scene.width - this._paddingEndX) * this._scene.scaleX;
         const contentHeight = (this._scene.height - this._paddingEndY) * this._scene.scaleY;
@@ -1267,9 +1276,9 @@ export class Viewport {
     expandBounds(value: { top: number; left: number; bottom: number; right: number }) {
         const onePixelFix = FIX_ONE_PIXEL_BLUR_OFFSET * 2;
         return {
+            right: value.right + this.bufferEdgeX + onePixelFix,
             left: Math.max(this.leftOrigin, value.left - this.bufferEdgeX) - onePixelFix,
             top: Math.max(this.topOrigin, value.top - this.bufferEdgeY) - onePixelFix,
-            right: value.right + this.bufferEdgeX + onePixelFix,
             bottom: value.bottom + this.bufferEdgeY + onePixelFix,
         } as IBoundRectNoAngle;
     }
@@ -1284,6 +1293,7 @@ export class Viewport {
 
     private _shouldCacheUpdate(viewBound: IBoundRectNoAngle, cacheBounds:
         IBoundRectNoAngle | null, diffX: number, diffY: number): number {
+        if (!this._cacheCanvas) return 0b00;
         if (!cacheBounds) return 0b01;
         const viewBoundOutCacheArea = !(viewBound.right <= cacheBounds.right && viewBound.top >= cacheBounds.top
             && viewBound.left >= cacheBounds.left && viewBound.bottom <= cacheBounds.bottom)

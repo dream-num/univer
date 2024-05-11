@@ -146,5 +146,5 @@ export abstract class DocComponent extends RenderComponent<
         return false;
     }
 
-    protected abstract _draw(ctx: UniverRenderingContext, bounds?: IViewportBound): void;
+    protected abstract _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo): void;
 }

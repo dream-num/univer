@@ -59,7 +59,7 @@ export class Font extends SheetExtension {
         diffRanges: IRange[],
         moreBoundsInfo: { viewRanges: IRange[]; checkOutOfViewBound?: boolean; viewPortKey: string }
     ) {
-        const { viewRanges = [], checkOutOfViewBound, viewPortKey } = moreBoundsInfo;
+        const { viewRanges = [], checkOutOfViewBound } = moreBoundsInfo;
         const { stylesCache, dataMergeCache, overflowCache, worksheet } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         if (!spreadsheetSkeleton || !worksheet) {

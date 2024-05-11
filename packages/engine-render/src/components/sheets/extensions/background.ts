@@ -16,7 +16,7 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 
-import { getColor, inViewRanges } from '../../../basics/tools';
+import { fixLineWidthByScale, getColor, inViewRanges, mergeRangeIfIntersects } from '../../../basics/tools';
 import type { UniverRenderingContext } from '../../../context';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
@@ -29,8 +29,8 @@ const UNIQUE_KEY = 'DefaultBackgroundExtension';
  * in prev version background ext is higer than font ext. now turing back lower than font ext.
  * font ext zindex is 30.
  */
-const DOC_EXTENSION_Z_INDEX = 20;
-const PRINTING_Z_INDEX = 20;
+const DOC_EXTENSION_Z_INDEX = 21;
+const PRINTING_Z_INDEX = 21;
 
 export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
@@ -48,7 +48,7 @@ export class Background extends SheetExtension {
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges: IRange[],
-        { viewRanges }: { viewRanges?: IRange[]; diffRanges?: IRange[]; checkOutOfViewBound?: boolean }
+        { viewRanges, checkOutOfViewBound }: { viewRanges: IRange[]; checkOutOfViewBound: boolean; viewPortKey: string }
     ) {
         const { stylesCache } = spreadsheetSkeleton;
         const { background, backgroundPositions } = stylesCache;
@@ -69,6 +69,7 @@ export class Background extends SheetExtension {
         }
         ctx.save();
         // ctx.setGlobalCompositeOperation('destination-over');
+        const { scaleX, scaleY } = ctx.getScale();
         background &&
             Object.keys(background).forEach((rgb: string) => {
                 const backgroundCache = background[rgb];
@@ -77,34 +78,42 @@ export class Background extends SheetExtension {
 
                 const backgroundPaths = new Path2D(); // 使用 Path 对象代替原有的 ctx.moveTo ctx.lineTo, Path 性能更好
                 backgroundCache.forValue((rowIndex, columnIndex) => {
-                    // 当前单元格不在视野范围内, 提前退出
-                    // 和 font 不同的是, 不需要考虑合并单元格且单元格横跨 viewport 的情况.
-                    // 因为即使合并后, 也会进入 forValue 迭代, 此刻单元格状态是 isMerged, 也能从 cellInfo 中获取颜色信息
-                    // 同时, 后续绘制使用了 Path2D,  而不是 ctx.lineTo moveTo 这样的方式绘制, 效率上高很多, 不再有必要判断是否合并
-                    if (!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
+                    if (!checkOutOfViewBound && !inViewRanges(viewRanges, rowIndex, columnIndex)) {
                         return true;
                     }
-                    const cellInfo = backgroundPositions?.getValue(rowIndex, columnIndex);
 
+                    // 合并单元格可能从视野外很远的位置开始, 因此需要全局遍历
+                    const cellInfo = backgroundPositions?.getValue(rowIndex, columnIndex);
                     if (cellInfo == null) {
                         return true;
                     }
-                    const { startY, endY, startX, endX } = cellInfo;
-                    // const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+                    let { startY, endY, startX, endX } = cellInfo;
+                    const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+                    const mergeTo = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
+                    const combineWithMergeRanges = mergeRangeIfIntersects(mergeTo, [mergeInfo]);
 
-                    // // 合并后的单元格, 非左上角单元格(因为在)
-                    // if (isMerged) {
-                    //     return true;
-                    // }
-                    // // 合并单元格, 但是区域是合并的左上角
-                    // if (isMergedMainCell) {
-                    //     startY = mergeInfo.startY;
-                    //     endY = mergeInfo.endY;
-                    //     startX = mergeInfo.startX;
-                    //     endX = mergeInfo.endX;
-                    // }
+                    // 不在范围(视野 + 合并单元格)内, 提前退出
+                    if (!inViewRanges(combineWithMergeRanges!, rowIndex, columnIndex)) {
+                        return true;
+                    }
 
-                    backgroundPaths.rect(startX, startY, endX - startX, endY - startY);
+                    // 合并后的单元格 && 非左上角单元格  // 此刻需要使用左上角单元格的背景色
+                    if (isMerged) {
+                        return true;
+                    }
+                    // 合并单元格, 但是区域是合并的左上角
+                    if (isMergedMainCell) {
+                        startY = mergeInfo.startY;
+                        endY = mergeInfo.endY;
+                        startX = mergeInfo.startX;
+                        endX = mergeInfo.endX;
+                    }
+                    // precise is a workaround for windows, macOS does not have this issue.
+                    const startXPrecise = fixLineWidthByScale(startX, scaleX);
+                    const startYPrecise = fixLineWidthByScale(startY, scaleY);
+                    const endXPrecise = fixLineWidthByScale(endX, scaleX);
+                    const endYPrecise = fixLineWidthByScale(endY, scaleY);
+                    backgroundPaths.rect(startXPrecise, startYPrecise, endXPrecise - startXPrecise, endYPrecise - startYPrecise);
                 });
                 ctx.fill(backgroundPaths);
             });

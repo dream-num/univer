@@ -54,7 +54,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
             return false;
         }
         ctx.save();
-        ctx.globalCompositeOperation = 'destination-over';
+        // ctx.globalCompositeOperation = 'destination-over';
         Range.foreach(spreadsheetSkeleton.rowColumnSegment, (row, col) => {
             const cellData = worksheet.getCell(row, col) as IIconSetCellData;
             if (cellData?.iconSet) {

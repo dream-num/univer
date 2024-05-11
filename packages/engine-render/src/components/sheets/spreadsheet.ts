@@ -118,7 +118,6 @@ export class Spreadsheet extends SheetComponent {
      * diffRange 根据 diffCacheBounds 得到
      * @param ctx
      * @param viewportInfo
-     * @returns
      */
     override draw(ctx: UniverRenderingContext, viewportInfo: IViewportInfo) {
         // const { parent = { scaleX: 1, scaleY: 1 } } = this;
@@ -128,7 +127,7 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
-
+        this._drawAuxiliary(ctx);
         const parentScale = this.getParentScale();
 
         const diffRanges = this._refreshIncrementalState && viewportInfo?.diffCacheBounds
@@ -136,15 +135,14 @@ export class Spreadsheet extends SheetComponent {
             : undefined;
         const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo?.cacheBound)];
         const extensions = this.getExtensionsByOrder();
-
         for (const extension of extensions) {
-            const m = ctx.getTransform();
-            ctx.setTransform(m.a, m.b, m.c, m.d, Math.ceil(m.e), Math.ceil(m.f));
+            // const timeKey = `extension ${viewportInfo.viewPortKey}:${extension.constructor.name}`;
+            // console.time(timeKey);
             extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges, {
                 viewRanges,
-                diffRanges,
                 checkOutOfViewBound: true,
             });
+            // console.timeEnd(timeKey);
         }
     }
 
@@ -216,6 +214,7 @@ export class Spreadsheet extends SheetComponent {
      * @param state
      */
     makeForceDirty(state = true) {
+        this.makeDirty(state);
         this._forceDirty = state;
     }
 
@@ -231,8 +230,8 @@ export class Spreadsheet extends SheetComponent {
      * @param state
      */
     override makeDirty(state: boolean = true) {
+        (this.getParent() as Scene)?.getViewports().forEach((vp) => vp.markDirty(state));
         super.makeDirty(state);
-        (this.getParent() as Scene)?.getViewports().forEach((vp) => vp.markDirty());
         if (state === false) {
             this._dirtyBounds = [];
         }
@@ -243,8 +242,8 @@ export class Spreadsheet extends SheetComponent {
         this._dirtyBounds = dirtyBounds;
     }
 
-    renderByViewport(mainCtx: UniverRenderingContext, viewportBoundsInfo: IViewportInfo, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { diffBounds, diffX, diffY, viewPortPosition, isDirty, isForceDirty, cacheCanvas, leftOrigin, topOrigin, bufferEdgeX, bufferEdgeY } = viewportBoundsInfo as Required<IViewportInfo>;
+    renderByViewport(mainCtx: UniverRenderingContext, viewportInfo: IViewportInfo, spreadsheetSkeleton: SpreadsheetSkeleton) {
+        const { diffBounds, diffX, diffY, viewPortPosition, cacheCanvas, leftOrigin, topOrigin, bufferEdgeX, bufferEdgeY, isDirty: isViewportDirty, isForceDirty: isViewportForceDirty } = viewportInfo as Required<IViewportInfo>;
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
         const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
         const bufferEdgeSizeX = bufferEdgeX * scaleX / window.devicePixelRatio;
@@ -252,25 +251,25 @@ export class Spreadsheet extends SheetComponent {
 
         const cacheCtx = cacheCanvas.getContext();
         cacheCtx.save();
-
         const { left, top, right, bottom } = viewPortPosition;
         const dw = right - left + rowHeaderWidth;
         const dh = bottom - top + columnHeaderHeight;
-
+        const isForceDirty = isViewportForceDirty || this.isForceDirty();
+        const isDirty = isViewportDirty || this.isDirty();
         if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || isForceDirty || isDirty) {
             if (isDirty || isForceDirty) {
-                this.refreshCacheCanvas(viewportBoundsInfo, { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY });
+                this.refreshCacheCanvas(viewportInfo, { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY });
             }
-        } else if (diffBounds.length !== 0 || diffX !== 0 || diffY === 0) {
+        } else if (diffBounds.length !== 0 || diffX !== 0 || diffY !== 0) {
             // scrolling && no dirty
-            this.paintNewAreaOfCacheCanvas(viewportBoundsInfo, {
+            this.paintNewAreaOfCacheCanvas(viewportInfo, {
                 cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeight, rowHeaderWidth,
             });
         }
-        // support for browser native zoom
+        // support for browser native zoom (only windows has this problem)
         const sourceLeft = bufferEdgeSizeX * Math.min(1, window.devicePixelRatio);
         const sourceTop = bufferEdgeSizeY * Math.min(1, window.devicePixelRatio);
-        this._applyCache(mainCtx, cacheCanvas, sourceLeft, sourceTop, dw, dh, left, top, dw, dh);
+        this._applyCache(cacheCanvas, mainCtx, sourceLeft, sourceTop, dw, dh, left, top, dw, dh);
         cacheCtx.restore();
     }
 
@@ -287,7 +286,6 @@ export class Spreadsheet extends SheetComponent {
     }) {
         const { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeight, rowHeaderWidth } = param;
         const { shouldCacheUpdate, diffCacheBounds, diffX, diffY } = viewportBoundsInfo;
-
         cacheCtx.save();
         cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
         cacheCtx.globalCompositeOperation = 'copy';
@@ -344,7 +342,7 @@ export class Spreadsheet extends SheetComponent {
     /**
      * 整个 viewport 重绘
      */
-    refreshCacheCanvas(viewportBoundsInfo: IViewportInfo, param: {
+    refreshCacheCanvas(viewportInfo: IViewportInfo, param: {
         cacheCanvas: Canvas; cacheCtx: UniverRenderingContext; mainCtx: UniverRenderingContext;
         topOrigin: number;
         leftOrigin: number;
@@ -368,7 +366,7 @@ export class Spreadsheet extends SheetComponent {
         cacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
 
         // extension 绘制时按照内容的左上角计算, 不考虑 rowHeaderWidth
-        this.draw(cacheCtx, viewportBoundsInfo);
+        this.draw(cacheCtx, viewportInfo);
         cacheCtx.restore();
     }
 
@@ -383,7 +381,6 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
-
         spreadsheetSkeleton.calculateWithoutClearingCache(viewportInfo);
 
         const segment = spreadsheetSkeleton.rowColumnSegment;
@@ -394,14 +391,12 @@ export class Spreadsheet extends SheetComponent {
         ) {
             return;
         }
-
         mainCtx.save();
 
 
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
         mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
 
-        this._drawAuxiliary(mainCtx, viewportInfo);
 
         const { viewPortKey } = viewportInfo;
             // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet
@@ -434,11 +429,10 @@ export class Spreadsheet extends SheetComponent {
      * @param dy
      * @param dw
      * @param dh
-     * @returns
      */
     protected _applyCache(
-        ctx: UniverRenderingContext,
         cacheCanvas: Canvas,
+        ctx: UniverRenderingContext,
         sx: number = 0,
         sy: number = 0,
         sw: number = 0,
@@ -453,21 +447,25 @@ export class Spreadsheet extends SheetComponent {
         }
 
         const pixelRatio = cacheCanvas.getPixelRatio();
-
         const cacheCtx = cacheCanvas.getContext();
         cacheCtx.save();
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
+        const fn = (num: number, scale: number) => {
+            return Math.round(num * scale);
+        };
         ctx.imageSmoothingEnabled = false;
+        // ctx.imageSmoothingEnabled = true;
+        // ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(
             cacheCanvas.getCanvasEle(),
-            sx * pixelRatio,
-            sy * pixelRatio,
+            fn(sx, pixelRatio),
+            fn(sy, pixelRatio),
             sw * pixelRatio,
             sh * pixelRatio,
-            dx * pixelRatio,
-            dy * pixelRatio,
+            fn(dx, pixelRatio),
+            fn(dy, pixelRatio),
             dw * pixelRatio,
             dh * pixelRatio
         );
@@ -526,17 +524,15 @@ export class Spreadsheet extends SheetComponent {
      * draw gridlines
      * @param ctx
      * @param bounds
-     * @returns
      */
     // eslint-disable-next-line max-lines-per-function
-    private _drawAuxiliary(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
+    private _drawAuxiliary(ctx: UniverRenderingContext) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (spreadsheetSkeleton == null) {
             return;
         }
 
-        const { rowColumnSegment, dataMergeCache, overflowCache, stylesCache, showGridlines } = spreadsheetSkeleton;
-        const { border, backgroundPositions } = stylesCache;
+        const { rowColumnSegment, dataMergeCache, overflowCache, showGridlines } = spreadsheetSkeleton;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE || this._forceDisableGridlines) {
             return;
@@ -652,7 +648,7 @@ export class Spreadsheet extends SheetComponent {
         // overflow cell
         this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
 
-        this._clearBackground(ctx, backgroundPositions);
+        // this._clearBackground(ctx, backgroundPositions);
 
         ctx.restore();
     }

@@ -210,3 +210,27 @@ export function isSingleCellSelection(selection: Nullable<ISelectionWithStyle & 
     const { range, primary } = selection;
     return Rectangle.equals(range, primary);
 }
+/**
+ * Create an iterator to iterate over cells in range.
+ * It will skip the row that has been filtered.
+ * @param sheet bind a sheet
+ * @returns iterator
+ */
+export function createRangeIteratorWithSkipFilteredRows(sheet: Worksheet) {
+    function forOperableEach(ranges: IRange, operator: (row: number, col: number, range: IRange) => void) {
+        function iterate(range: IRange) {
+            for (let r = range.startRow; r <= range.endRow; r++) {
+                if (sheet.getRowFiltered(r)) {
+                    continue;
+                }
+                for (let c = range.startColumn; c <= range.endColumn; c++) {
+                    operator(r, c, range);
+                }
+            }
+        };
+        iterate(ranges);
+    }
+    return {
+        forOperableEach,
+    };
+}

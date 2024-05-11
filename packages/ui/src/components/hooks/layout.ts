@@ -17,6 +17,8 @@
 import { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
+
+import type { Nullable } from '@univerjs/core';
 /**
  * These hooks are used for browser layout
  * Prefer to client-side
@@ -77,7 +79,7 @@ function detectElementOverViewport(element: HTMLElement) {
 }
 
 /** Allow the element to scroll when its height over the viewport height */
-export function useScrollOnOverViewport(element: HTMLElement | undefined | null, disabled: boolean = false) {
+export function useScrollOnOverViewport(element: Nullable<HTMLElement>, disabled: boolean = false) {
     useEffect(() => {
         if (canUseDom() || !element || disabled) {
             return;

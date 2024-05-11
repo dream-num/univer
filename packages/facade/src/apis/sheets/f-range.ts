@@ -44,7 +44,8 @@ import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
 import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 
 import { FormulaDataModel } from '@univerjs/engine-formula';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
+import { ISheetClipboardService } from '@univerjs/sheets-ui';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import {
     covertCellValue,
@@ -64,9 +65,12 @@ export class FRange {
         private readonly _workbook: Workbook,
         private readonly _worksheet: Worksheet,
         private readonly _range: IRange,
+        @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
-    ) { }
+    ) {
+        // empty
+    }
 
     getRow(): number {
         return this._range.startRow;
@@ -483,5 +487,18 @@ export class FRange {
             .forValue((row, col, value) => {
                 callback(row, col, value);
             });
+    }
+
+    /**
+     * Generate HTML content for the range.
+     */
+    generateHTML(): string {
+        const copyContent = this._injector.get(ISheetClipboardService).generateCopyContent(
+            this._workbook.getUnitId(),
+            this._worksheet.getSheetId(),
+            this._range
+        );
+
+        return copyContent?.html ?? '';
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import {
     Disposable,
     ErrorService,
@@ -70,6 +70,14 @@ export const PREDEFINED_HOOK_NAME = {
     SPECIAL_PASTE_BESIDES_BORDER: 'special-paste-besides-border',
 };
 
+interface ICopyContent {
+    copyId: string;
+    plain: string;
+    html: string;
+    matrixFragment: ObjectMatrix<ICellDataWithSpanInfo>;
+    discreteRange: IDiscreteRange;
+}
+
 /**
  * This service provide hooks for sheet features to supplement content or modify behavior of clipboard.
  */
@@ -77,12 +85,14 @@ export const PREDEFINED_HOOK_NAME = {
 HtmlToUSMService.use(PastePluginWord);
 HtmlToUSMService.use(PastePluginLark);
 HtmlToUSMService.use(PastePluginUniver);
+
 export interface ISheetClipboardService {
     copy(): Promise<boolean>;
     cut(): Promise<boolean>;
     paste(item: ClipboardItem, pasteType?: string): Promise<boolean>; // get content from a ClipboardItem and paste it.
     legacyPaste(html?: string, text?: string): Promise<boolean>; // paste a HTML string or plain text directly.
 
+    generateCopyContent(workbookId: string, worksheetId: string, range: IRange): Nullable<ICopyContent>;
     copyContentCache(): CopyContentCache; // return the cache content for inner copy/cut/paste.
     addClipboardHook(hook: ISheetClipboardHook): IDisposable; // add a hook to the clipboard service
     getClipboardHooks(): ISheetClipboardHook[]; // get all hooks
@@ -131,6 +141,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return this._copyContentCache;
     }
 
+    generateCopyContent(workbookId: string, worksheetId: string, range: IRange): Nullable<ICopyContent> {
+        const hooks = this._clipboardHooks;
+        hooks.forEach((h) => h.onBeforeCopy?.(workbookId, worksheetId, range));
+        const copyContent = this._generateCopyContent(workbookId, worksheetId, range, hooks);
+        hooks.forEach((h) => h.onAfterCopy?.());
+        return copyContent;
+    }
+
     async copy(copyType = COPY_TYPE.COPY): Promise<boolean> {
         const selection = this._selectionManagerService.getLast();
         if (!selection) {
@@ -139,12 +157,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
-        const hooks = this._clipboardHooks;
 
-        // 1. tell hooks to get ready for copying
-        hooks.forEach((h) => h.onBeforeCopy?.(workbook.getUnitId(), worksheet.getSheetId(), selection.range));
-
-        const copyContent = this._generateCopyContent(workbook.getUnitId(), worksheet.getSheetId(), selection.range, hooks);
+        const copyContent = this.generateCopyContent(workbook.getUnitId(), worksheet.getSheetId(), selection.range);
         if (!copyContent) {
             return false;
         }
@@ -169,9 +183,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const style = this._selectionManagerService.createCopyPasteSelection();
         this._copyMarkId = this._markSelectionService.addShape({ ...selection, style });
-
-        // 6. tell hooks to clean up
-        hooks.forEach((h) => h.onAfterCopy?.());
 
         return true;
     }
@@ -227,7 +238,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     addClipboardHook(hook: ISheetClipboardHook): IDisposable {
         if (this._clipboardHooks.findIndex((h) => h.id === hook.id) !== -1) {
             this._logService.error('[SheetClipboardService]', 'hook already exists', hook.id);
-            return { dispose: () => { } };
+            return { dispose: () => { /* empty */ } };
         }
         // hook added should be ordered at meaning while
         const insertIndex = this._clipboardHooks.findIndex((existingHook) => {
@@ -252,7 +263,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return this._clipboardHooks;
     }
 
-    private _generateCopyContent(unitId: string, subUnitId: string, range: IRange, hooks: ISheetClipboardHook[]) {
+    private _generateCopyContent(unitId: string, subUnitId: string, range: IRange, hooks: ISheetClipboardHook[]): Nullable<ICopyContent> {
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
 

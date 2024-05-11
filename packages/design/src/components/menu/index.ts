@@ -15,3 +15,4 @@
  */
 
 export { Menu, MenuItem, MenuItemGroup, SubMenu } from './Menu';
+export type { MenuRef } from 'rc-menu';

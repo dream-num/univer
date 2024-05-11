@@ -44,7 +44,7 @@ export { Dropdown, type IDropdownProps } from './components/dropdown';
 export { FormDualColumnLayout, type IFormDualColumnLayoutProps, FormLayout, type IFormLayoutProps } from './components/form-layout';
 export { type IInputProps, type IInputWithSlotProps, Input, InputWithSlot } from './components/input';
 export { type IInputNumberProps, InputNumber } from './components/input-number';
-export { Menu, MenuItem, MenuItemGroup, SubMenu } from './components/menu';
+export { type MenuRef, Menu, MenuItem, MenuItemGroup, SubMenu } from './components/menu';
 export { type IMessageMethodOptions, type IMessageProps, Message, MessageType } from './components/message';
 export { type IPagerProps, Pager } from './components/pager';
 export { type IPopupProps, Popup, RectPopup, type IRectPopupProps } from './components/popup';

@@ -23,6 +23,7 @@ import type { HTTPRequest } from '../request';
 import type { HTTPEvent, HTTPResponseBody } from '../response';
 import { HTTPResponse, HTTPResponseError } from '../response';
 import { HTTPHeaders } from '../headers';
+import { HTTPStatusCode } from '../http';
 import type { IHTTPImplementation } from './implementation';
 
 // CREDIT: This implementation is inspired by (and uses lots of code from) Angular's HttpClient implementation.
@@ -78,7 +79,7 @@ export class FetchHTTPImplementation implements IHTTPImplementation {
             body = await this._readBody(request, response, subscriber);
         }
 
-        const ok = status >= 200 && status < 300;
+        const ok = status >= HTTPStatusCode.Ok && status < HTTPStatusCode.MultipleChoices;
         if (ok) {
             subscriber.next(new HTTPResponse({
                 body,

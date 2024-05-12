@@ -69,4 +69,9 @@ export class HTTPRequest {
 
         return body ? `${body}` : null;
     }
+
+    getHeadersInit(): HeadersInit {
+        const headersInit = this.headers.toHeadersInit();
+        return headersInit;
+    }
 }

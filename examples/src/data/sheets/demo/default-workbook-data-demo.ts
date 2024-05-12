@@ -23548,7 +23548,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             }),
         },
         {
-            name: 'SHEET_AUTO_FILTER',
+            name: 'SHEET_FILTER_PLUGIN',
             data: JSON.stringify({
                 'sheet-0011': {
                     ref: {

@@ -71,7 +71,7 @@
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.3"
+        "@wendellhu/redi": "^0.14.0"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

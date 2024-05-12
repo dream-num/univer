@@ -387,8 +387,8 @@ importers:
         specifier: workspace:*
         version: link:../sheets
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.3
+        specifier: ^0.14.0
+        version: 0.14.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -511,8 +511,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.3
+        specifier: ^0.14.0
+        version: 0.14.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -643,8 +643,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.3
+        specifier: ^0.14.0
+        version: 0.14.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -746,8 +746,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.3
+        specifier: ^0.14.0
+        version: 0.14.0
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -792,8 +792,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.3
+        specifier: ^0.14.0
+        version: 0.14.0
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -879,8 +879,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.3
+        specifier: ^0.14.0
+        version: 0.14.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -915,8 +915,8 @@ importers:
         specifier: workspace:*
         version: link:../sheets
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.3
+        specifier: ^0.14.0
+        version: 0.14.0
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
@@ -997,8 +997,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.3
+        specifier: ^0.14.0
+        version: 0.14.0
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1058,8 +1058,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.3
+        specifier: ^0.14.0
+        version: 0.14.0
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1197,8 +1197,8 @@ importers:
         specifier: workspace:*
         version: link:../sheets-ui
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.3
+        specifier: ^0.14.0
+        version: 0.14.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1462,8 +1462,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.3
+        specifier: ^0.14.0
+        version: 0.14.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1575,8 +1575,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.3
+        specifier: ^0.14.0
+        version: 0.14.0
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1738,8 +1738,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.3
+        specifier: ^0.14.0
+        version: 0.14.0
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -4244,9 +4244,6 @@ packages:
 
   '@webassemblyjs/wast-printer@1.12.1':
     resolution: {integrity: sha512-+X4WAlOisVWQMikjbcvY2e0rwPsKQ9F688lksZhBcPycBBuii3O7m8FACbDMWDojpAqvjIncrG8J0XHKyQfVeA==}
-
-  '@wendellhu/redi@0.13.3':
-    resolution: {integrity: sha512-Fsk+L7zVs+R56GnymqLEgH+WaliLhHFwxrKkIppEAQB10uH7YQLRja+jvXKTbaQpNWZvF5jiK5qJHyTkURv8Pg==}
 
   '@wendellhu/redi@0.14.0':
     resolution: {integrity: sha512-UzK+Jd51u3c85Qxu+aUkQzTtDGjz4w8FsTjHyAMpkXC8n1bV3aFYpRjorADEWlbeQPC+kRBBiWjaraEZG61uYg==}
@@ -13715,8 +13712,6 @@ snapshots:
     dependencies:
       '@webassemblyjs/ast': 1.12.1
       '@xtuc/long': https://r2.cnpmjs.org/@xtuc/long/-/long-4.2.2.tgz
-
-  '@wendellhu/redi@0.13.3': {}
 
   '@wendellhu/redi@0.14.0': {}
 

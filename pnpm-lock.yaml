@@ -1354,6 +1354,9 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
+      '@univerjs/icons':
+        specifier: ^0.1.45
+        version: 0.1.45(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1646,6 +1649,12 @@ importers:
 
   packages/thread-comment-ui:
     dependencies:
+      '@univerjs/icons':
+        specifier: ^0.1.45
+        version: 0.1.45(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@univerjs/protocol':
+        specifier: ^0.1.20
+        version: 0.1.20(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment

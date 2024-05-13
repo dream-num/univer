@@ -70,6 +70,8 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
+        "@univerjs/icons": "^0.1.45",
+        "@univerjs/protocol": "^0.1.20",
         "@univerjs/thread-comment": "workspace:*"
     },
     "devDependencies": {

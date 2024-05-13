@@ -16,6 +16,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import type { IThreadComment } from '@univerjs/thread-comment';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { ICommandService, LocaleService, type UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
@@ -78,7 +79,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     return comment.root;
                 }
                 return null;
-            }).filter(Boolean);
+            }).filter(Boolean) as IThreadComment[];
         }
 
         return comments;

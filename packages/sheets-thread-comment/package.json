@@ -61,16 +61,15 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/engine-render": "workspace:^",
-        "@univerjs/icons": "^0.1.29",
-        "@univerjs/shared": "workspace:*",
-        "@univerjs/sheets": "workspace:^",
-        "@univerjs/sheets-ui": "workspace:^",
+        "@univerjs/engine-formula": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/thread-comment": "workspace:*",
+        "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": ">=0.12.13",
-        "clsx": ">=2.0.0",
-        "react": ">=16.9.0",
+        "@wendellhu/redi": "^0.14.0",
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -80,7 +79,7 @@
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/engine-formula": "workspace:^",
+        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",

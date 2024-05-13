@@ -65,6 +65,7 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/docs": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/sheets": "workspace:*",

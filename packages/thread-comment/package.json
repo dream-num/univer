@@ -61,17 +61,13 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/icons": "^0.1.29",
-        "@univerjs/protocol": "^0.1.17",
-        "@univerjs/sheets": "workspace:^",
-        "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": ">=0.12.13",
-        "clsx": ">=2.0.0",
-        "react": ">=16.9.0",
+        "@univerjs/sheets": "workspace:*",
+        "@wendellhu/redi": "^0.14.0",
         "rxjs": ">=7.0.0"
     },
-    "dependencies": {},
+    "dependencies": {
+        "@univerjs/protocol": "^0.1.20"
+    },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",

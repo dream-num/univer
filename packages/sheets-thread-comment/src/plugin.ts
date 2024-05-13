@@ -39,7 +39,6 @@ const defaultConfig: IThreadCommentUIConfig = {
     }],
 };
 
-
 export class UniverSheetsThreadCommentPlugin extends UniverThreadCommentUIPlugin {
     static override pluginName = SHEETS_THREAD_COMMENT;
     static override type = UniverInstanceType.UNIVER_SHEET;

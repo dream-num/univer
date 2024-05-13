@@ -16,7 +16,7 @@
 
 import React, { forwardRef } from 'react';
 import type { MentionsInputProps } from 'react-mentions';
-import { Mention, MentionsInput } from 'react-mentions';
+import { MentionsInput } from 'react-mentions';
 import styles from './index.module.less';
 
 export interface IMentionsProps extends MentionsInputProps {}

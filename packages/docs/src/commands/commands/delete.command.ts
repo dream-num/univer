@@ -39,6 +39,7 @@ export const DeleteLeftCommand: ICommand = {
 
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const docSkeletonManagerService = accessor.get(DocSkeletonManagerService);
@@ -62,23 +63,23 @@ export const DeleteLeftCommand: ICommand = {
 
         const { startOffset, collapsed, segmentId, style } = activeRange;
 
-        const preSpan = skeleton.findNodeByCharIndex(startOffset);
+        const curGlyph = skeleton.findNodeByCharIndex(startOffset);
 
         // is in bullet list?
-        const preIsBullet = hasListGlyph(preSpan);
+        const isBullet = hasListGlyph(curGlyph);
         // is in indented paragraph?
-        const preIsIndent = isIndentByGlyph(preSpan, docDataModel.getBody());
+        const isIndent = isIndentByGlyph(curGlyph, docDataModel.getBody());
 
         let cursor = startOffset;
 
-        // Get the deleted span. It maybe null or undefined when the preSpan is first span in skeleton.
-        const span = skeleton.findNodeByCharIndex(startOffset - 1);
+        // Get the deleted glyph. It maybe null or undefined when the curGlyph is first glyph in skeleton.
+        const preGlyph = skeleton.findNodeByCharIndex(startOffset - 1);
 
         const isUpdateParagraph =
-            isFirstGlyph(preSpan) && span !== preSpan && (preIsBullet === true || preIsIndent === true);
+            isFirstGlyph(curGlyph) && preGlyph !== curGlyph && (isBullet === true || isIndent === true);
 
-        if (isUpdateParagraph) {
-            const paragraph = getParagraphByGlyph(preSpan, docDataModel.getBody());
+        if (isUpdateParagraph && collapsed) {
+            const paragraph = getParagraphByGlyph(curGlyph, docDataModel.getBody());
 
             if (paragraph == null) {
                 return false;
@@ -90,7 +91,7 @@ export const DeleteLeftCommand: ICommand = {
 
             const paragraphStyle = paragraph.paragraphStyle;
 
-            if (preIsBullet === true) {
+            if (isBullet === true) {
                 const paragraphStyle = paragraph.paragraphStyle;
 
                 if (paragraphStyle) {
@@ -102,7 +103,7 @@ export const DeleteLeftCommand: ICommand = {
                         updateParagraph.paragraphStyle.hanging = undefined;
                     }
                 }
-            } else if (preIsIndent === true) {
+            } else if (isIndent === true) {
                 const bullet = paragraph.bullet;
 
                 if (bullet) {
@@ -141,17 +142,17 @@ export const DeleteLeftCommand: ICommand = {
         } else {
             if (collapsed === true) {
                 // No need to delete when the cursor is at the first position of the first paragraph.
-                if (span == null) {
+                if (preGlyph == null) {
                     return true;
                 }
 
-                if (span.content === '\r') {
+                if (preGlyph.content === '\r') {
                     result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
                         direction: DeleteDirection.LEFT,
                         range: activeRange,
                     });
                 } else {
-                    cursor -= span.count;
+                    cursor -= preGlyph.count;
 
                     const textRanges = [
                         {
@@ -160,12 +161,13 @@ export const DeleteLeftCommand: ICommand = {
                             style,
                         },
                     ];
+
                     result = await commandService.executeCommand(DeleteCommand.id, {
                         unitId: docDataModel.getUnitId(),
                         range: activeRange,
                         segmentId,
                         direction: DeleteDirection.LEFT,
-                        len: span.count,
+                        len: preGlyph.count,
                         textRanges,
                     });
                 }
@@ -270,6 +272,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
 
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IMergeTwoParagraphParams) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -296,7 +299,10 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         }
 
         const startIndex = direction === DeleteDirection.LEFT ? startOffset : startOffset + 1;
-        const endIndex = docDataModel.getBody()?.paragraphs?.find((p) => p.startIndex >= startIndex)?.startIndex!;
+        const endIndex = docDataModel
+            .getBody()
+            ?.paragraphs
+            ?.find((p) => p.startIndex >= startIndex)?.startIndex!;
         const body = getParagraphBody(docDataModel.getBody()!, startIndex, endIndex);
 
         const cursor = direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset;

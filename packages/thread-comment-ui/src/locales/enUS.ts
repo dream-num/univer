@@ -33,5 +33,17 @@ export default {
             edit: 'Edit',
             delete: 'Delete This Comment',
         },
+        filter: {
+            sheet: {
+                all: 'All sheet',
+                current: 'Current sheet',
+            },
+            status: {
+                all: 'All comments',
+                resolved: 'Resolved',
+                unsolved: 'Not resolved',
+                concernMe: 'Concern me',
+            },
+        },
     },
 };

@@ -24,7 +24,7 @@ export default {
             addComment: '新建评论',
         },
         editor: {
-            placeholder: 'Reply or add others with @',
+            placeholder: '回复',
             reply: '回复',
             cancel: '取消',
             save: '保存',
@@ -32,6 +32,18 @@ export default {
         item: {
             edit: '编辑',
             delete: '删除',
+        },
+        filter: {
+            sheet: {
+                all: '所有表格',
+                current: '当前表格',
+            },
+            status: {
+                all: '所有评论',
+                resolved: '已解决',
+                unsolved: '未解决',
+                concernMe: '与我有关',
+            },
         },
     },
 };

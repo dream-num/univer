@@ -17,6 +17,7 @@
 import type { Meta } from '@storybook/react';
 import React, { useState } from 'react';
 
+import { Mention } from 'react-mentions';
 import { Mentions } from './Mentions';
 
 const meta: Meta<typeof Mentions> = {
@@ -41,7 +42,7 @@ export const InputBasic = {
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                 >
-                    <Mentions.Mention
+                    <Mention
                         trigger="@"
                         data={[
                             {

@@ -176,7 +176,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                         </Button>
                         <Button
                             type="primary"
-                            disabled={!localComment.text}
+                            disabled={!localComment.text.length}
                             onClick={() => {
                                 onSave?.(localComment);
                                 setEditing(false);

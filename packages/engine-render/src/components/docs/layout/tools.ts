@@ -702,6 +702,37 @@ export function clearFontCreateConfigCache() {
     fontCreateConfigCache.reset();
 }
 
+export function getFontConfigFromLastGlyph(
+    glyph: IDocumentSkeletonGlyph,
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphStyle: IParagraphStyle
+) {
+    const { ts, fontStyle } = glyph;
+    const {
+        gridType = GridType.LINES,
+        charSpace = 0,
+        pageSize = {
+            width: Number.POSITIVE_INFINITY,
+            height: Number.POSITIVE_INFINITY,
+        },
+        marginRight = 0,
+        marginLeft = 0,
+    } = sectionBreakConfig;
+    const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+    const pageWidth = pageSize.width || Number.POSITIVE_INFINITY - marginLeft - marginRight;
+
+    const result = {
+        fontStyle: fontStyle!,
+        textStyle: ts!,
+        charSpace,
+        gridType,
+        snapToGrid,
+        pageWidth,
+    };
+
+    return result;
+}
+
 export function getFontCreateConfig(
     index: number,
     bodyModel: DocumentViewModel,

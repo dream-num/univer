@@ -17,7 +17,7 @@
 import type { IParagraphStyle } from '@univerjs/core';
 import { HorizontalAlign } from '@univerjs/core';
 import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
-import { getFontCreateConfig, getGlyphGroupWidth, lineIterator } from '../../tools';
+import { getFontConfigFromLastGlyph, getGlyphGroupWidth, lineIterator } from '../../tools';
 import { createHyphenDashGlyph, glyphShrinkLeft, glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';
 import { hasCJK, hasCJKText, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../../basics/tools';
 import { BreakPointType } from '../../line-breaker/break';
@@ -246,12 +246,11 @@ function addHyphenDash(
     paragraphStyle: IParagraphStyle
 ) {
     for (const divide of line.divides) {
-        const { st, glyphGroup, breakType } = divide;
+        const { glyphGroup, breakType } = divide;
         const lastGlyph = glyphGroup[glyphGroup.length - 1];
 
         if (lastGlyph && isLetter(lastGlyph.content) && breakType === BreakPointType.Hyphen) {
-            const index = st + glyphGroup.reduce((total, g) => total + g.count, 0);
-            const config = getFontCreateConfig(index, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+            const config = getFontConfigFromLastGlyph(lastGlyph, sectionBreakConfig, paragraphStyle);
 
             const hyphenDashGlyph = createHyphenDashGlyph(config);
             hyphenDashGlyph.parent = lastGlyph.parent;

@@ -46,8 +46,16 @@ describe('test hyphenation', () => {
 
     describe('test basic use of hyphen', () => {
         it('should hyphenate word correctly', () => {
+            const cache = hyphen?.fetchHyphenCache(Lang.EnUs);
+            let wordCache = cache?.get('hyphenation');
+            expect(wordCache).not.toBeDefined();
+
             const result = hyphen?.hyphenate('hyphenation', Lang.EnUs);
             expect(result).toEqual(['hy', 'phen', 'ation']);
+
+            wordCache = cache?.get('hyphenation');
+            expect(wordCache).toBeDefined();
+            expect(cache?.get('hyphenation')).toEqual(['hy', 'phen', 'ation']);
         });
     });
 

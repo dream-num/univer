@@ -67,6 +67,11 @@ export class Hyphen implements IDisposable {
         this._loadExceptionsToCache(lang, pattern);
     }
 
+    // Only used for text.
+    fetchHyphenCache(lang: Lang) {
+        return this._hyphenCache.get(lang);
+    }
+
     hasPattern(lang: Lang) {
         return this._patterns.has(lang);
     }

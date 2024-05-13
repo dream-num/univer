@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
-
 import type { Nullable } from '@univerjs/core';
 import { useEffect, useRef, useState } from 'react';
 import type { Observable, Subscription } from 'rxjs';
@@ -61,8 +59,8 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
     const depsRef = useRef<any[] | undefined>(deps ?? undefined);
     const initializedRef = useRef<boolean>(false);
 
-    // This state is only for trigger React to re-render. We do not use `setValue` directly because it may cause
-    // memory leaking.
+  // This state is only for trigger React to re-render. We do not use `setValue` directly because it may cause
+  // memory leaking.
     const [_, setRenderCounter] = useState<number>(0);
 
     const valueRef = useRef((() => {
@@ -79,38 +77,42 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
         return innerDefaultValue ?? defaultValue;
     })());
 
+    useEffect(() => {
+        const shouldResubscribe = (() => {
+            if (typeof depsRef.current !== 'undefined') {
+                const _deps = deps ?? [];
+                if (showArrayNotEqual(depsRef.current, _deps)) {
+                    depsRef.current = _deps;
+                    return true;
+                }
 
-    const shouldResubscribe = (() => {
-        if (typeof depsRef.current !== 'undefined') {
-            const _deps = deps ?? [];
-            if (showArrayNotEqual(depsRef.current, _deps)) {
-                depsRef.current = _deps;
-                return true;
+                return false;
             }
 
-            return false;
+            return true;
+        })();
+
+        let subscription: Subscription | null = null;
+        if (shouldResubscribe && observable) {
+            subscriptionRef.current?.unsubscribe();
+            subscriptionRef.current = null;
+
+            observableRef.current = unwrap(observable);
+            subscription = subscriptionRef.current = observableRef.current.subscribe((value) => {
+                valueRef.current = value;
+                setRenderCounter((prev) => prev + 1);
+            });
         }
 
-        return observableRef.current !== observable;
-    })();
-
-    // Subscribe on first rendering and re-subscribe when deps change.
-    if ((!subscriptionRef.current || shouldResubscribe) && observable) {
-        observableRef.current = unwrap(observable);
-        subscriptionRef.current?.unsubscribe();
-        subscriptionRef.current = observableRef.current.subscribe((value) => {
-            valueRef.current = value;
-            setRenderCounter((prev) => prev + 1);
-        });
-    }
-
-    useEffect(() => () => {
-        subscriptionRef.current?.unsubscribe();
-        subscriptionRef.current = null;
-    }, []);
+        return () => {
+            subscription?.unsubscribe();
+            subscriptionRef.current = null;
+        };
+    }, [deps, observable]);
 
     if (shouldHaveSyncValue && !initializedRef.current) {
         throw new Error('[useObservable]: expect shouldHaveSyncValue but not getting a sync value!');
     }
+
     return valueRef.current;
 }

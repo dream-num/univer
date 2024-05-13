@@ -15,8 +15,7 @@
  */
 
 import { isRealNum } from '@univerjs/core';
-import type {
-    MenuRef as DesignMenuRef } from '@univerjs/design';
+
 import {
     Menu as DesignMenu,
     MenuItem as DesignMenuItem,
@@ -26,7 +25,7 @@ import {
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { isObservable } from 'rxjs';
 
 import type {
@@ -173,10 +172,14 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
 
 export const Menu = (props: IBaseMenuProps) => {
     const { overViewport, ...restProps } = props;
-    const menuRef = useRef<DesignMenuRef>(null);
-    useScrollOnOverViewport(menuRef.current?.list, overViewport !== 'scroll');
+    const [menuEl, setMenuEl] = useState<HTMLDListElement>();
+    useScrollOnOverViewport(overViewport === 'scroll' ? menuEl : null);
+
     return (
-        <DesignMenu ref={menuRef} selectable={false}>
+        <DesignMenu
+            ref={(ref) => ref?.list && setMenuEl(ref.list)}
+            selectable={false}
+        >
             <MenuOptionsWrapper {...restProps} />
             <MenuWrapper {...restProps} />
         </DesignMenu>

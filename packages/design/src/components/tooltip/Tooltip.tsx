@@ -16,12 +16,12 @@
 
 import type { TooltipRef } from 'rc-tooltip';
 import RcTooltip from 'rc-tooltip';
-import type { Ref } from 'react';
-import React, { forwardRef, useContext } from 'react';
+import React, { forwardRef, useContext, useImperativeHandle, useState } from 'react';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 import { placements } from './placements';
+import { useIsEllipsis } from './hooks';
 
 export interface ITooltipProps {
     visible?: boolean;
@@ -31,21 +31,36 @@ export interface ITooltipProps {
     title: (() => React.ReactNode) | React.ReactNode;
 
     children: React.ReactElement;
+    /* Tooltip only show if text is ellipsis */
+    showIfEllipsis?: boolean;
 
     onVisibleChange?: (visible: boolean) => void;
 
     style?: React.CSSProperties;
 }
 
-export const Tooltip = forwardRef((props: ITooltipProps, ref: Ref<TooltipRef>) => {
-    const { children, visible, placement = 'top', title, onVisibleChange, style } = props;
+type NullableTooltipRef = TooltipRef | null;
+
+export const Tooltip = forwardRef<NullableTooltipRef, ITooltipProps>((props, ref) => {
+    const {
+        children,
+        visible,
+        placement = 'top',
+        title,
+        onVisibleChange,
+        style,
+        showIfEllipsis = false,
+    } = props;
 
     const { mountContainer } = useContext(ConfigContext);
+    const [tooltipRef, setTooltipRef] = useState<NullableTooltipRef>(null);
+    useImperativeHandle<NullableTooltipRef, NullableTooltipRef>(ref, () => tooltipRef, [tooltipRef]);
 
+    const isEllipsis = useIsEllipsis(showIfEllipsis ? tooltipRef?.nativeElement : null);
     return mountContainer && (
         <RcTooltip
-            visible={visible}
-            ref={ref}
+            visible={(showIfEllipsis && !isEllipsis) ? false : visible}
+            ref={(r) => setTooltipRef(r)}
             prefixCls={styles.tooltip}
             getTooltipContainer={() => mountContainer}
             overlay={<div className={styles.tooltipContent}>{typeof title === 'function' ? title() : title}</div>}

@@ -124,8 +124,12 @@ export function Dialog(props: IDialogProps) {
                 onMouseOut={() => {
                     setDragDisabled(true);
                 }}
-                onFocus={() => {}}
-                onBlur={() => {}}
+                onFocus={() => {
+                    // empty
+                }}
+                onBlur={() => {
+                    // empty
+                }}
             >
                 {title}
             </div>

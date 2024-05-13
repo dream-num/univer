@@ -22,29 +22,23 @@ import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
-import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
-import { SheetContextMenuController } from './controllers/contextmenu/contextmenu.controller';
 import { EditingController } from './controllers/editor/editing.controller';
 import { EndEditController } from './controllers/editor/end-edit.controller';
 import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
 import { StartEditController } from './controllers/editor/start-edit.controller';
-import { EditorBridgeController } from './controllers/editor-bridge.controller';
-import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
-import { HeaderFreezeRenderController } from './controllers/freeze.render-controller';
-import { HeaderMenuController } from './controllers/header-menu.controller';
-import { HeaderMoveController } from './controllers/header-move.controller';
-import { HeaderResizeController } from './controllers/header-resize.render-controller';
-import { HeaderUnhideRenderController } from './controllers/header-unhide.render-controller';
-import { MarkSelectionController } from './controllers/mark-selection.controller';
-import { MoveRangeController } from './controllers/move-range.controller';
-import { ScrollController } from './controllers/scroll.controller';
-import { SelectionController } from './controllers/selection.controller';
+import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
+import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
+import { HeaderMenuRenderController } from './controllers/render-controllers/header-menu.render-controller';
+import { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
+import { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
+import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
+import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
+import { SelectionRenderController } from './controllers/render-controllers/selection.render-controller';
 import { SheetRenderController } from './controllers/sheet-render.controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
-import { ZoomController } from './controllers/zoom.controller';
 import { zhCN } from './locale';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
@@ -63,14 +57,20 @@ import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.s
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
 import { SheetCanvasView } from './views/sheet-canvas-view';
-import { HoverController } from './controllers/hover.controller';
+import { HoverRenderController } from './controllers/hover-render.controller';
 import { HoverManagerService } from './services/hover-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
-import { CellAlertController } from './controllers/cell-alert.controller';
+import { CellAlertRenderController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 import { ForceStringRenderController } from './controllers/force-string-render.controller';
-import { ForceStringAlertController } from './controllers/force-string-alert.controller';
+import { ForceStringAlertRenderController } from './controllers/force-string-alert-render.controller';
+import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
+import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
+import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
+import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
+import { AutoFillController } from './controllers/auto-fill.controller';
+import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN_NAME';
@@ -93,9 +93,6 @@ export class UniverSheetsUIPlugin extends Plugin {
     override onStarting(injector: Injector): void {
         (
             [
-                // views
-                [SheetCanvasView],
-
                 // services
                 [ShortcutExperienceService],
                 [IEditorBridgeService, { useClass: EditorBridgeService }],
@@ -105,14 +102,10 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [ICellEditorManagerService, { useClass: CellEditorManagerService }],
                 [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
                 [IAutoFillService, { useClass: AutoFillService }],
+
                 [ScrollManagerService],
                 [SheetSkeletonManagerService],
-                [
-                    ISelectionRenderService,
-                    {
-                        useClass: SelectionRenderService,
-                    },
-                ],
+                [ISelectionRenderService, { useClass: SelectionRenderService }],
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
                 [HoverManagerService],
@@ -122,32 +115,17 @@ export class UniverSheetsUIPlugin extends Plugin {
                 // controllers
                 [ActiveWorksheetController],
                 [AutoHeightController],
-                [EditorBridgeController],
                 [EndEditController],
                 [FormulaEditorController],
-                [FormatPainterController],
                 [HeaderFreezeRenderController],
-                [HeaderMenuController],
-                [HeaderMoveController],
-                [HeaderResizeController],
-                [MoveRangeController],
-                [ScrollController],
-                [SelectionController],
                 [SheetClipboardController],
-                [SheetContextMenuController],
                 [SheetRenderController],
                 [SheetUIController],
                 [StartEditController],
-                [ZoomController],
-                [AutoFillController],
                 [StatusBarController],
                 [EditingController],
-                [MarkSelectionController],
-                [HoverController],
-                [CellAlertController],
-                [CellCustomRenderController],
-                [ForceStringRenderController],
-                [ForceStringAlertController],
+                [AutoFillController],
+                [FormatPainterController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }
@@ -158,15 +136,40 @@ export class UniverSheetsUIPlugin extends Plugin {
     }
 
     private _registerRenderControllers(): void {
-        ([HeaderFreezeRenderController, HeaderUnhideRenderController, HeaderResizeController]).forEach((controller) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderControllers(UniverInstanceType.UNIVER_SHEET, controller));
+        ([
+            SheetCanvasView,
+            // https://github.com/dream-num/univer-pro/issues/669
+            // HeaderMoveRenderController must be initialized before SelectionRenderController.
+            // Before HMRC expected selections remain unchanged when user clicks on the header. If we don't initialize HMRC before SRC,
+            // the selections will be changed by SRC first. Maybe we should merge row/col header related render controllers to one class.
+            HeaderMoveRenderController,
+            SelectionRenderController,
+            HeaderFreezeRenderController,
+            HeaderUnhideRenderController,
+            HeaderResizeRenderController,
+            SheetsZoomRenderController,
+            SheetsScrollRenderController,
+            FormatPainterRenderController,
+            HeaderMenuRenderController,
+            CellAlertRenderController,
+            ForceStringAlertRenderController,
+            MarkSelectionRenderController,
+            HoverRenderController,
+            ForceStringRenderController,
+            CellCustomRenderController,
+            SheetContextMenuRenderController,
+            EditorBridgeRenderController,
+        ]).forEach((controller) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
         });
     }
 
     private _markSheetAsFocused() {
         const univerInstanceService = this._univerInstanceService;
-        univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(filter((v) => !!v)).subscribe((workbook) => {
-            univerInstanceService.focusUnit(workbook!.getUnitId());
-        });
+        univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .pipe(filter((v) => !!v))
+            .subscribe((workbook) => {
+                univerInstanceService.focusUnit(workbook!.getUnitId());
+            });
     }
 }

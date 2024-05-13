@@ -26,7 +26,9 @@ export class DesktopZenZoneService implements IZenZoneService {
     readonly visible$ = new Subject<boolean>();
     readonly componentKey$ = new Subject<string>();
 
-    constructor(@Inject(ComponentManager) private readonly _componentManager: ComponentManager) {}
+    constructor(@Inject(ComponentManager) private readonly _componentManager: ComponentManager) {
+        // super
+    }
 
     set(key: string, component: ForwardRefExoticComponent<any>): IDisposable {
         this._componentManager.register(key, component);

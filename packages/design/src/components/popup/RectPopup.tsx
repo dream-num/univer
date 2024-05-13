@@ -78,9 +78,9 @@ const calcPopupPosition = (layout: IPopupLayoutInfo) => {
 };
 
 function RectPopup(props: IRectPopupProps) {
-    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside, closeOnSelfTarget } = props;
+    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside } = props;
     const nodeRef = useRef<HTMLElement>(null);
-    const clickOtherFn = useEvent(onClickOutside ?? (() => { }));
+    const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
 
     const [position, setPosition] = useState<Partial<IAbsolutePosition>>({
         top: -9999,

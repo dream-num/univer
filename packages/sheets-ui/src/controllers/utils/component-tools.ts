@@ -45,6 +45,13 @@ function isRenderManagerService(renderManagerService: IRenderManagerService | IR
     return typeof (renderManagerService as IRenderContext).isMainScene === 'undefined';
 }
 
+/**
+ * @deprecated
+ *
+ * @param univerInstanceService
+ * @param renderManagerService
+ * @returns
+ */
 export function getSheetObject(
     univerInstanceService: IUniverInstanceService | Workbook,
     renderManagerService: IRenderManagerService | IRenderContext

@@ -21,6 +21,8 @@ import type { HTTPHeaders } from './headers';
  */
 export type HTTPEvent<T> = HTTPResponse<T> | HTTPResponseError;
 
+export type HTTPResponseBody = string | ArrayBuffer | Blob | object | null;
+
 /** Wraps (success) response info. */
 export class HTTPResponse<T> {
     readonly body: T;
@@ -47,9 +49,9 @@ export class HTTPResponse<T> {
 }
 
 export class HTTPResponseError {
-    readonly headers: HTTPHeaders;
-    readonly status: number;
-    readonly statusText: string;
+    readonly headers?: HTTPHeaders;
+    readonly status?: number;
+    readonly statusText?: string;
     readonly error: any;
 
     constructor({
@@ -58,9 +60,9 @@ export class HTTPResponseError {
         statusText,
         error,
     }: {
-        headers: HTTPHeaders;
-        status: number;
-        statusText: string;
+        headers?: HTTPHeaders;
+        status?: number;
+        statusText?: string;
         error: any;
     }) {
         this.headers = headers;
@@ -75,5 +77,7 @@ export class ResponseHeader {
         readonly headers: HTTPHeaders,
         readonly status: number,
         readonly statusText: string
-    ) {}
+    ) {
+        // empty
+    }
 }

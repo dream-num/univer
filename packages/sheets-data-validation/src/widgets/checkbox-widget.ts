@@ -74,7 +74,9 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DataValidationFormulaService) private readonly _formulaService: DataValidationFormulaService,
         @Inject(ThemeService) private readonly _themeService: ThemeService
-    ) {}
+    ) {
+        // super
+    }
 
     calcCellAutoHeight(info: ICellRenderContext): number | undefined {
         const { style } = info;

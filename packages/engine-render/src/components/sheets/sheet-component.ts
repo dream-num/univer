@@ -23,7 +23,7 @@ import { RenderComponent } from '../component';
 import type { SHEET_EXTENSION_TYPE } from './extensions/sheet-extension';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
 
-export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]> {
+export abstract class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]> {
     constructor(
         oKey: string,
         private _skeleton?: SpreadsheetSkeleton
@@ -64,27 +64,25 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
         };
     }
 
-    getDocuments(): any {}
+    abstract getDocuments(): any;
 
-    getNoMergeCellPositionByIndex(
+    abstract getNoMergeCellPositionByIndex(
         rowIndex: number,
         columnIndex: number
-    ): Nullable<{ startY: number; startX: number; endX: number; endY: number }> {}
+    ): Nullable<{ startY: number; startX: number; endX: number; endY: number }>;
 
     getScrollXYByRelativeCoords(coord: Vector2) {
         return { x: 0, y: 0 };
     }
 
-    getSelectionBounding(
+    abstract getSelectionBounding(
         startRow: number,
         startColumn: number,
         endRow: number,
         endColumn: number
-    ): Nullable<{ startRow: number; startColumn: number; endRow: number; endColumn: number }> {}
+    ): Nullable<{ startRow: number; startColumn: number; endRow: number; endColumn: number }>;
 
-    protected _draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
-        /* abstract */
-    }
+    protected abstract _draw(ctx: UniverRenderingContext, bounds?: IViewportBound): void;
 
     /**
      * TODO: DR-Univer, fix as unknown as
@@ -95,7 +93,7 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
     }
 }
 
-export class SpreadsheetHeader extends SheetComponent {
+export abstract class SpreadsheetHeader extends SheetComponent {
     protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportBound): void {
         this.draw(ctx, bounds);
     }

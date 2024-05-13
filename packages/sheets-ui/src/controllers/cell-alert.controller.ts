@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
 import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
+import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
 import { CellAlert } from '../views/cell-alert/CellAlertPopup';
 import { CELL_ALERT_KEY } from '../views/cell-alert';
 
-@OnLifecycle(LifecycleStages.Starting, CellAlertController)
-export class CellAlertController extends Disposable {
+@OnLifecycle(LifecycleStages.Starting, CellAlertRenderController)
+export class CellAlertRenderController extends Disposable implements IRenderController {
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @Inject(ComponentManager) private _componentManager: ComponentManager
     ) {
         super();

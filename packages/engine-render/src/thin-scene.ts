@@ -23,7 +23,7 @@ import { RENDER_CLASS_TYPE } from './basics/const';
 import type { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ITransformChangeState } from './basics/interfaces';
 import { Transform } from './basics/transform';
-import type { IViewportBound, Vector2 } from './basics/vector2';
+import type { Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 
 export abstract class ThinScene extends Disposable {
@@ -162,33 +162,31 @@ export abstract class ThinScene extends Disposable {
         // }
     }
 
-    triggerPointerUp(evt: IPointerEvent | IMouseEvent) {}
+    abstract triggerPointerUp(evt: IPointerEvent | IMouseEvent): void;
 
-    triggerMouseWheel(evt: IWheelEvent) {}
+    abstract triggerMouseWheel(evt: IWheelEvent): void;
 
-    triggerPointerMove(evt: IPointerEvent | IMouseEvent) {}
+    abstract triggerPointerMove(evt: IPointerEvent | IMouseEvent): void;
 
-    triggerDblclick(evt: IPointerEvent | IMouseEvent) {}
+    abstract triggerDblclick(evt: IPointerEvent | IMouseEvent): void;
 
-    triggerTripleClick(evt: IPointerEvent | IMouseEvent) {}
+    abstract triggerTripleClick(evt: IPointerEvent | IMouseEvent): void;
 
-    triggerPointerDown(evt: IPointerEvent | IMouseEvent) {}
+    abstract triggerPointerDown(evt: IPointerEvent | IMouseEvent): void;
 
-    triggerPointerOut(evt: IPointerEvent | IMouseEvent) {}
+    abstract triggerPointerOut(evt: IPointerEvent | IMouseEvent): void;
 
-    triggerPointerLeave(evt: IPointerEvent | IMouseEvent) {}
+    abstract triggerPointerLeave(evt: IPointerEvent | IMouseEvent): void;
 
-    triggerPointerOver(evt: IPointerEvent | IMouseEvent) {}
+    abstract triggerPointerOver(evt: IPointerEvent | IMouseEvent): void;
 
-    triggerPointerEnter(evt: IPointerEvent | IMouseEvent) {}
+    abstract triggerPointerEnter(evt: IPointerEvent | IMouseEvent): void;
 
-    renderObjects(ctx: UniverRenderingContext, bounds?: IViewportBound) {}
+    abstract render(parentCtx?: UniverRenderingContext): void;
 
-    render(parentCtx?: UniverRenderingContext) {}
+    abstract getParent(): any;
 
-    getParent(): any {}
-
-    override dispose() {
+    override dispose(): void {
         this.onTransformChangeObservable.clear();
         this.onFileLoadedObservable.clear();
         this.onPointerDownObserver.clear();
@@ -201,22 +199,23 @@ export abstract class ThinScene extends Disposable {
         this.onMouseWheelObserver.clear();
         this.onKeyDownObservable.clear();
         this.onKeyUpObservable.clear();
+
         super.dispose();
     }
 
-    getObject(oKey: string): Nullable<BaseObject> {}
+    abstract getObject(oKey: string): Nullable<BaseObject>;
 
-    addObject(o: BaseObject, zIndex: number = 1) {}
+    abstract addObject(o: BaseObject, zIndex?: number): void;
 
-    addObjects(objects: BaseObject[], zIndex: number = 1) {}
+    abstract addObjects(objects: BaseObject[], zIndex?: number): void;
 
-    getEngine(): any {}
+    abstract getEngine(): any;
 
-    setObjectBehavior(o: BaseObject) {}
+    abstract setObjectBehavior(o: BaseObject): void;
 
-    applyTransformer(o: BaseObject) {}
+    abstract applyTransformer(o: BaseObject): void;
 
-    makeDirtyNoParent(state: boolean = true) {
+    makeDirtyNoParent(state: boolean = true): ThinScene {
         return this;
     }
 
@@ -224,15 +223,15 @@ export abstract class ThinScene extends Disposable {
         return this;
     }
 
-    pick(coord: Vector2): Nullable<BaseObject | ThinScene> {}
+    abstract pick(coord: Vector2): Nullable<BaseObject | ThinScene>;
 
     getViewports(): any[] {
         return [];
     }
 
-    addViewport(...viewport: any[]) {}
+    abstract addViewport(...viewport: any[]): void;
 
-    removeViewport(key: string) {}
+    abstract removeViewport(key: string): void;
 
     getAncestorScale() {
         return {
@@ -248,11 +247,7 @@ export abstract class ThinScene extends Disposable {
         };
     }
 
-    setCursor(val: CURSOR_TYPE) {
+    abstract setCursor(val: CURSOR_TYPE): void;
 
-    }
-
-    resetCursor() {
-
-    }
+    abstract resetCursor(): void;
 }

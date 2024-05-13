@@ -55,7 +55,9 @@ export class DocumentViewModel implements IDisposable {
         });
     }
 
-    selfPlus(len: number, index: number) {}
+    selfPlus(len: number, index: number) {
+        // empty
+    }
 
     getPositionInParent() {
         return 0;

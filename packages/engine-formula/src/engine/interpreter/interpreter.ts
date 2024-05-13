@@ -32,8 +32,6 @@ export class Interpreter extends Disposable {
         super();
     }
 
-    override dispose(): void {}
-
     async executeAsync(node: BaseAstNode): Promise<FunctionVariantType> {
         // if (!this._interpreterCalculateProps) {
         //     return ErrorValueObject.create(ErrorType.ERROR);

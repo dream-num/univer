@@ -98,7 +98,9 @@ export class Observer<T = void> {
          */
         public callback: (eventData: T, eventState: EventState) => void,
         public observable: Observable<T>
-    ) {}
+    ) {
+        // empty
+    }
 }
 
 /**

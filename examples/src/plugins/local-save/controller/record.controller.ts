@@ -19,7 +19,9 @@ import { Inject } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
 export class RecordController {
-    constructor(@Inject(ICommandService) private _commandService: ICommandService) {}
+    constructor(@Inject(ICommandService) private _commandService: ICommandService) {
+        // empty
+    }
 
     record() {
         return new Observable<{ type: 'start' } | { type: 'finish'; data: Blob }>((subscribe) => {

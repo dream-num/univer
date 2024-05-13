@@ -15,7 +15,9 @@
  */
 
 export class HTTPParams {
-    constructor(readonly params?: { [key: string]: string | number | boolean }) {}
+    constructor(readonly params?: { [key: string]: string | number | boolean }) {
+        // empty
+    }
 
     toString(): string {
         if (!this.params) {

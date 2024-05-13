@@ -144,14 +144,14 @@ describe('ProgressService', () => {
         let visibleCompleted = false;
 
         const changeSubscription = result.current.progressChange$.subscribe({
-            next: (step) => {},
+            next: (step) => { /* empty */ },
             complete: () => {
                 changeCompleted = true;
             },
         });
 
         const visibleSubscription = result.current.progressVisible$.subscribe({
-            next: (visible) => {},
+            next: (visible) => { /* empty */ },
             complete: () => {
                 visibleCompleted = true;
             },

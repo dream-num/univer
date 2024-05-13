@@ -41,6 +41,7 @@ import {
 } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
+import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { combineLatest, merge, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
@@ -71,24 +72,26 @@ export class NumfmtController extends Disposable implements INumfmtController {
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(ThemeService) private _themeService: ThemeService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(ICommandService) private _commandService: ICommandService,
+        @ICommandService private _commandService: ICommandService,
         @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
-        @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
-        @Inject(INumfmtService) private _numfmtService: INumfmtService,
+        @IRenderManagerService private _renderManagerService: IRenderManagerService,
+        @INumfmtService private _numfmtService: INumfmtService,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @Inject(ISidebarService) private _sidebarService: ISidebarService,
+        @ISidebarService private _sidebarService: ISidebarService,
         @Inject(LocaleService) private _localeService: LocaleService
     ) {
         super();
+
         this._initRealTimeRenderingInterceptor();
         this._initPanel();
         this._initCommands();
+        this._initCloseListener();
         this._commandExecutedListener();
     }
 
-    openPanel = () => {
+    openPanel(): boolean {
         const sidebarService = this._sidebarService;
         const selectionManagerService = this._selectionManagerService;
         const commandService = this._commandService;
@@ -102,6 +105,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         if (!range) {
             return false;
         }
+
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const sheet = workbook.getActiveSheet();
 
@@ -148,7 +152,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
             value: { defaultPattern: pattern, defaultValue, row: range.startRow, col: range.startColumn },
         };
 
-        sidebarService.open({
+        this._sidebarDisposable = sidebarService.open({
             header: { title: localeService.t('sheet.numfmt.title') },
             children: {
                 label: SHEET_NUMFMT_PLUGIN,
@@ -160,6 +164,8 @@ export class NumfmtController extends Disposable implements INumfmtController {
                 commandService.executeCommand(CloseNumfmtPanelOperator.id);
             },
         });
+
+        return true;
     };
 
     private _initCommands() {
@@ -181,13 +187,13 @@ export class NumfmtController extends Disposable implements INumfmtController {
     }
 
     private _initRealTimeRenderingInterceptor() {
-        const isPanelOpenObserver = new Observable<boolean>((subscribe) => {
+        const isPanelOpenObserver = new Observable<boolean>((subscriber) => {
             this._commandService.onCommandExecuted((commandInfo) => {
                 if (commandInfo.id === OpenNumfmtPanelOperator.id) {
-                    subscribe.next(true);
+                    subscriber.next(true);
                 }
                 if (commandInfo.id === CloseNumfmtPanelOperator.id) {
-                    subscribe.next(false);
+                    subscriber.next(false);
                 }
             });
         });
@@ -305,5 +311,15 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     })
             )
         );
+    }
+
+    private _sidebarDisposable: IDisposable | null = null;
+    private _initCloseListener(): void {
+        this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((unit) => {
+            if (!unit) {
+                this._sidebarDisposable?.dispose();
+                this._sidebarDisposable = null;
+            }
+        });
     }
 }

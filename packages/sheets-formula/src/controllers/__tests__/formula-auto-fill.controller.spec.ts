@@ -32,6 +32,7 @@ import {
     SetSelectionsOperation,
 } from '@univerjs/sheets';
 import {
+    AutoFillCommand,
     AutoFillController,
     AutoFillService,
     IAutoFillService,
@@ -81,6 +82,7 @@ describe('Test auto fill with formula', () => {
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
+        commandService.registerCommand(AutoFillCommand);
 
         getValues = (
             startRow: number,

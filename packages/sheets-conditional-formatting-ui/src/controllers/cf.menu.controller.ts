@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { ComponentManager, IMenuService, ISidebarService } from '@univerjs/ui';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import { FactoryManageConditionalFormattingRule } from '../menu/manage-rule';
@@ -24,17 +25,26 @@ import { ConditionFormattingPanel } from '../components/panel';
 const CF_PANEL_KEY = 'sheet.conditional.formatting.panel';
 @OnLifecycle(LifecycleStages.Ready, ConditionalFormattingMenuController)
 export class ConditionalFormattingMenuController extends Disposable {
+    private _sidebarDisposable: IDisposable | null = null;
+
     constructor(
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private _injector: Injector,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @Inject(IMenuService) private _menuService: IMenuService,
         @Inject(ISidebarService) private _sidebarService: ISidebarService,
         @Inject(LocaleService) private _localeService: LocaleService
-
     ) {
         super();
+
         this._initMenu();
         this._initPanel();
+
+        this.disposeWithMe(
+            this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((sheet) => {
+                if (!sheet) this._sidebarDisposable?.dispose();
+            })
+        );
     }
 
     openPanel(rule?: IConditionFormattingRule) {
@@ -44,8 +54,10 @@ export class ConditionalFormattingMenuController extends Disposable {
                 label: CF_PANEL_KEY,
                 rule,
             },
+            onClose: () => this._sidebarDisposable = null,
         };
-        this._sidebarService.open(props);
+
+        this._sidebarDisposable = this._sidebarService.open(props);
     }
 
     private _initMenu() {

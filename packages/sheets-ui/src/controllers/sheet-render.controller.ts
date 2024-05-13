@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Workbook } from '@univerjs/core';
-import {
-    CommandType,
+import type { ICommandInfo,
+    Workbook } from '@univerjs/core';
+import { CommandType,
     ICommandService,
     IContextService,
     IUniverInstanceService,
@@ -57,8 +57,7 @@ export class SheetRenderController extends RxDisposable {
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
-
-        this._init();
+        Promise.resolve().then(() => this._init());
     }
 
     /**
@@ -78,50 +77,64 @@ export class SheetRenderController extends RxDisposable {
 
     private _init() {
         this._initialRenderRefresh();
-        this._initSheetDisposeListener();
+        this._initWorkbookListener();
         this._initCommandListener();
         this._initContextListener();
     }
 
     private _initialRenderRefresh(): void {
-        this.disposeWithMe(
-            this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-                if (!param) return null;
+        this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+            if (!param) return null;
 
-                const { skeleton: spreadsheetSkeleton, unitId, sheetId } = param;
-                const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-                const worksheet = workbook?.getSheetBySheetId(sheetId);
-                if (workbook == null || worksheet == null) return;
+            const { skeleton: spreadsheetSkeleton, unitId, sheetId } = param;
+            const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+            const worksheet = workbook?.getSheetBySheetId(sheetId);
+            if (workbook == null || worksheet == null) return;
 
-                const currentRender = this._renderManagerService.getRenderById(unitId);
-                if (currentRender == null) return;
+            const currentRender = this._renderManagerService.getRenderById(unitId);
+            if (currentRender == null) return;
 
-                const { mainComponent, components } = currentRender;
-                const spreadsheet = mainComponent as Spreadsheet;
-                const spreadsheetRowHeader = components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
-                const spreadsheetColumnHeader = components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
-                const spreadsheetLeftTopPlaceholder = components.get(SHEET_VIEW_KEY.LEFT_TOP) as Rect;
-                const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+            const { mainComponent, components } = currentRender;
+            const spreadsheet = mainComponent as Spreadsheet;
+            const spreadsheetRowHeader = components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
+            const spreadsheetColumnHeader = components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+            const spreadsheetLeftTopPlaceholder = components.get(SHEET_VIEW_KEY.LEFT_TOP) as Rect;
+            const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
 
-                spreadsheet?.updateSkeleton(spreadsheetSkeleton);
-                spreadsheetRowHeader?.updateSkeleton(spreadsheetSkeleton);
-                spreadsheetColumnHeader?.updateSkeleton(spreadsheetSkeleton);
-                spreadsheetLeftTopPlaceholder?.transformByState({
-                    width: rowHeaderWidth,
-                    height: columnHeaderHeight,
-                });
-            })
-        );
+            spreadsheet?.updateSkeleton(spreadsheetSkeleton);
+            spreadsheetRowHeader?.updateSkeleton(spreadsheetSkeleton);
+            spreadsheetColumnHeader?.updateSkeleton(spreadsheetSkeleton);
+            spreadsheetLeftTopPlaceholder?.transformByState({
+                width: rowHeaderWidth,
+                height: columnHeaderHeight,
+            });
+        }));
     }
 
-    private _initSheetDisposeListener(): void {
+    private _initWorkbookListener(): void {
+        this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((workbook) => this._createSheetRenderer(workbook));
+
         this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(takeUntil(this.dispose$))
             .subscribe((workbook) => {
                 const unitId = workbook.getUnitId();
 
                 this._sheetSkeletonManagerService.removeSkeleton({ unitId });
+                this._renderManagerService.removeRender(unitId);
             });
+
+        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .forEach((workbook) => this._createSheetRenderer(workbook));
+    }
+
+    private _createSheetRenderer(workbook: Workbook): void {
+        const unitId = workbook.getUnitId();
+        this._renderManagerService.createRender(unitId);
+        this._renderManagerService.setCurrent(unitId);
+        const sheetId = workbook.getActiveSheet().getSheetId();
+        this._sheetSkeletonManagerService.setCurrent({ sheetId, unitId });
     }
 
     private _initCommandListener(): void {

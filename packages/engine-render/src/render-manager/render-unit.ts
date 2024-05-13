@@ -16,7 +16,7 @@
 
 import type { Nullable, UnitModel, UnitType } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
-import type { IDisposable, Injector } from '@wendellhu/redi';
+import type { DependencyIdentifier, IDisposable, Injector } from '@wendellhu/redi';
 import type { Engine } from '../engine';
 import type { Scene } from '../scene';
 import type { RenderComponentType } from './render-manager.service';
@@ -28,6 +28,8 @@ export interface IRender {
     mainComponent: Nullable<RenderComponentType>;
     components: Map<string, RenderComponentType>;
     isMainScene: boolean;
+
+    with<T>(dependency: DependencyIdentifier<T>): T;
 }
 
 // eslint-disable-next-line ts/no-explicit-any
@@ -37,7 +39,7 @@ export interface IRenderController extends IDisposable {}
 /**
  * This object encapsulates methods or properties to render each element.
  */
-export interface IRenderContext<T extends UnitModel = UnitModel> extends IRender {
+export interface IRenderContext<T extends UnitModel = UnitModel> extends Omit<IRender, 'with'> {
     unit: T;
     type: UnitType;
 }
@@ -52,9 +54,9 @@ export class RenderUnit extends Disposable implements IRender {
     get type(): UnitType { return this._renderContext.type; }
 
     private readonly _injector: Injector;
-    private readonly _renderControllers: IRenderController[] = [];
 
     private _renderContext: IRenderContext<UnitModel>;
+
     set isMainScene(is: boolean) { this._renderContext.isMainScene = is; }
     get isMainScene(): boolean { return this._renderContext.isMainScene; }
     set engine(engine: Engine) { this._renderContext.engine = engine; }
@@ -74,7 +76,7 @@ export class RenderUnit extends Disposable implements IRender {
         this._injector = parentInjector.createChild();
 
         this._renderContext = {
-            unit: init.unit,
+            unit: init.unit, // model
             unitId: init.unit.getUnitId(),
             type: init.unit.type,
             components: new Map(),
@@ -86,8 +88,16 @@ export class RenderUnit extends Disposable implements IRender {
     }
 
     override dispose() {
-        this._renderControllers.forEach((controller) => controller.dispose());
-        this._renderControllers.length = 0;
+        this._injector.dispose();
+
+        super.dispose();
+    }
+
+    /**
+     * Get render controller hold by this render unit.
+     */
+    with<T>(dependency: DependencyIdentifier<T>): T {
+        return this._injector.get(dependency);
     }
 
     addRenderControllers(ctors: IRenderControllerCtor[]) {
@@ -95,8 +105,9 @@ export class RenderUnit extends Disposable implements IRender {
     }
 
     private _initControllers(ctors: IRenderControllerCtor[]): void {
-        ctors
-            .map((ctor) => this._injector.createInstance(ctor, this._renderContext))
-            .forEach((controller) => this._renderControllers.push(controller));
+        const j = this._injector;
+
+        ctors.forEach((ctor) => j.add([ctor, { useFactory: () => j.createInstance(ctor, this._renderContext) }]));
+        ctors.forEach((ctor) => j.get(ctor));
     }
 }

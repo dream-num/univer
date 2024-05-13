@@ -18,21 +18,17 @@ import type {
     Workbook } from '@univerjs/core';
 import {
     Disposable,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     RANGE_TYPE,
     toDisposable,
-    UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderController, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { IContextMenuService, MenuPosition } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
 import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { SheetMenuPosition } from '../menu/menu';
-import { getSheetObject } from '../utils/component-tools';
+import { SHEET_VIEW_KEY } from '../../common/keys';
 
 /**
  * This controller subscribe to context menu events in
@@ -41,31 +37,20 @@ import { getSheetObject } from '../utils/component-tools';
  *
  * @todo RenderUnit
  */
-@OnLifecycle(LifecycleStages.Rendered, SheetContextMenuController)
-export class SheetContextMenuController extends Disposable {
+export class SheetContextMenuRenderController extends Disposable implements IRenderController {
     constructor(
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        private readonly _context: IRenderContext<Workbook>,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SelectionManagerService)
         private readonly _selectionManagerService: SelectionManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
-        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
-            if (workbook) {
-                this._addListeners();
-            }
-        });
+        this._addListeners();
     }
 
     private _addListeners(): void {
-        const objects = getSheetObject(this._univerInstanceService, this._renderManagerService);
-        if (!objects) {
-            return;
-        }
-
-        const spreadsheetPointerDownObserver = objects.spreadsheet.onPointerDownObserver;
+        const spreadsheetPointerDownObserver = (this._context?.mainComponent as Spreadsheet)?.onPointerDownObserver;
         const spreadsheetObserver = spreadsheetPointerDownObserver.add((event) => {
             if (event.button === 2) {
                 const selections = this._selectionManagerService.getSelections();
@@ -74,7 +59,7 @@ export class SheetContextMenuController extends Disposable {
                     return;
                 }
                 const rangeType = currentSelection.range.rangeType;
-                const range = this._selectionRenderService.convertSelectionRangeToData(currentSelection).rangeWithCoord;
+                const range = this._selectionRenderService.convertSelectionToCoord(currentSelection).rangeWithCoord;
                 const isPointerInRange = () => {
                     if (!range) {
                         return false;
@@ -107,7 +92,9 @@ export class SheetContextMenuController extends Disposable {
         });
         this.disposeWithMe(toDisposable(() => spreadsheetPointerDownObserver.remove(spreadsheetObserver)));
 
-        const rowHeaderPointerDownObserver = objects.spreadsheetRowHeader.onPointerDownObserver;
+        const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+        const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
+        const rowHeaderPointerDownObserver = spreadsheetRowHeader.onPointerDownObserver;
         const rowHeaderObserver = rowHeaderPointerDownObserver.add((event) => {
             if (event.button === 2) {
                 this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU);
@@ -115,7 +102,7 @@ export class SheetContextMenuController extends Disposable {
         });
         this.disposeWithMe(toDisposable(() => spreadsheetPointerDownObserver.remove(rowHeaderObserver)));
 
-        const colHeaderPointerDownObserver = objects.spreadsheetColumnHeader.onPointerDownObserver;
+        const colHeaderPointerDownObserver = spreadsheetColumnHeader.onPointerDownObserver;
         const colHeaderObserver = colHeaderPointerDownObserver.add((event) => {
             if (event.button === 2) {
                 this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);

@@ -32,7 +32,9 @@ export class Vector2 implements IPoint {
         public x: number = 0,
         /** defines the second coordinate */
         public y: number = 0
-    ) {}
+    ) {
+        // empty
+    }
 
     // Statics
 

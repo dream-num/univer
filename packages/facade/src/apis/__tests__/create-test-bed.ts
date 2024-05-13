@@ -43,7 +43,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { ISelectionRenderService, SelectionRenderService, SheetCanvasView, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { ISelectionRenderService, SelectionRenderService, SheetCanvasView, SheetRenderController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/ui';
 import { SheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { FUniver } from '../facade';
@@ -105,7 +105,8 @@ export interface ITestBed {
     injector: Injector;
 }
 
-export function createTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
+
+export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
@@ -131,22 +132,30 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
                     useFactory: () => this._injector.createInstance(DescriptionService, undefined),
                 },
             ]);
+
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }]);
             injector.add([ISocketService, { useClass: WebSocketService }]);
             injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
             injector.add([ISelectionRenderService, { useClass: SelectionRenderService }]);
-            injector.add([SheetCanvasView]);
+            injector.add([SheetRenderController]);
             injector.add([IShortcutService, { useClass: DesktopShortcutService }]);
             injector.add([IPlatformService, { useClass: DesktopPlatformService }]);
             injector.add([SheetSkeletonManagerService]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
+
             SheetsConditionalFormattingPlugin.dependencyList.forEach((d) => {
                 injector.add(d);
             });
+
             dependencies?.forEach((d) => injector.add(d));
+
+            const renderManagerService = injector.get(IRenderManagerService);
+            ([
+                SheetCanvasView,
+            ]).forEach((renderController) => renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, renderController));
         }
     }
 

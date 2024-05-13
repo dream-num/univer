@@ -20,7 +20,6 @@ import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/en
 import { Inject } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
 
-import { getDocObject } from '../basics/component-tools';
 import { InsertCommand } from '../commands/commands/core-editing.command';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 
@@ -37,16 +36,16 @@ export class NormalInputController extends Disposable {
     ) {
         super();
 
-        this._initialize();
-
-        this._commandExecutedListener();
+        this._init();
     }
 
     override dispose(): void {
+        super.dispose();
+
         this._onInputSubscription?.unsubscribe();
     }
 
-    private _initialize() {
+    private _init() {
         this._initialNormalInput();
     }
 
@@ -99,11 +98,5 @@ export class NormalInputController extends Disposable {
                 segmentId,
             });
         });
-    }
-
-    private _commandExecutedListener() { }
-
-    private _getDocObject() {
-        return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
 }

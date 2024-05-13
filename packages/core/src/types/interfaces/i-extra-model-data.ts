@@ -27,11 +27,4 @@ export interface IExtraModelData {
      * default is null
      */
     container?: string;
-
-    /**
-     * Specify the unitID of the parent render. In this case, the scene will enter
-     * the sceneViewer and become a child application of the parent scene.
-     * default is null
-     */
-    parentRenderUnitId?: string;
 }

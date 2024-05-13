@@ -48,7 +48,7 @@ export class Engine extends ThinEngine<Scene> {
 
     private _activeRenderLoops = new Array<() => void>();
 
-    private _renderFunction = () => { };
+    private _renderFunction = () => { /* empty */ };
 
     private _requestNewFrameHandler: number = -1;
 
@@ -168,6 +168,7 @@ export class Engine extends ThinEngine<Scene> {
             this.resize();
 
             this._resizeObserver?.unobserve(this._container as HTMLElement);
+            this._resizeObserver = null;
 
             let timer: number | undefined;
             this._resizeObserver = new ResizeObserver(() => {
@@ -180,11 +181,10 @@ export class Engine extends ThinEngine<Scene> {
             });
             this._resizeObserver.observe(this._container);
 
-            this.disposeWithMe(
-                toDisposable(() => {
-                    this._resizeObserver?.unobserve(this._container as HTMLElement);
-                })
-            );
+            this.disposeWithMe(() => {
+                this._resizeObserver?.unobserve(this._container as HTMLElement);
+                if (timer !== undefined) window.cancelIdleCallback(timer);
+            });
         }
     }
 
@@ -237,7 +237,8 @@ export class Engine extends ThinEngine<Scene> {
 
         this._activeRenderLoops = [];
         this.getCanvas().dispose();
-        this._canvas = null;
+        // this._canvas = null; // 不应该这么做, 上面已经调用了 _canvas 的 dispose 方法
+        // 并且 idleCallback --> resize 时需要 _canvas 对象
         this.onBeginFrameObservable.clear();
         this.onEndFrameObservable.clear();
         this.onTransformChangeObservable.clear();
@@ -679,7 +680,7 @@ export class Engine extends ThinEngine<Scene> {
         // IE11 only supports captureEvent:boolean, not options:object, and it defaults to false.
         // Feature detection technique copied from: https://github.com/github/eventlistener-polyfill (MIT license)
         let passiveSupported = false;
-        const noop = () => { };
+        const noop = () => { /* empty */ };
 
         try {
             const options: object = {

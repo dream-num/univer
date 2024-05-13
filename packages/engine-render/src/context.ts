@@ -985,7 +985,11 @@ export class UniverPrintingContext extends UniverRenderingContext2D {
         this._context.restore();
     }
 
-    override clearRectForTexture(x: number, y: number, width: number, height: number) { }
+    override clearRectForTexture(x: number, y: number, width: number, height: number) {
+        // empty
+    }
 
-    override setGlobalCompositeOperation(val: GlobalCompositeOperation) { }
+    override setGlobalCompositeOperation(val: GlobalCompositeOperation) {
+        // empty
+    }
 }

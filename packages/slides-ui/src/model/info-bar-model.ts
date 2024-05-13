@@ -15,7 +15,9 @@
  */
 
 export class InfoBarModel {
-    constructor(private _name: string) {}
+    constructor(private _name: string) {
+        // super
+    }
 
     get name(): string {
         return this._name;

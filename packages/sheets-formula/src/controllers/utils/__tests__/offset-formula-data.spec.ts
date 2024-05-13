@@ -20,7 +20,7 @@ import { describe, expect, it } from 'vitest';
 import { removeFormulaData } from '../offset-formula-data';
 
 describe('Utils offset formula data test', () => {
-    describe('function removeFormulaData', () => {
+    describe('function removeFormulaData, remove sheet', () => {
         it('remove data', () => {
             const unitId = 'workbook-01';
             const sheetId = 'sheet-0011';
@@ -78,6 +78,56 @@ describe('Utils offset formula data test', () => {
             const formulaData = {};
 
             removeFormulaData(formulaData, unitId, sheetId);
+
+            expect(formulaData).toStrictEqual({});
+        });
+    });
+
+    describe('function removeUnitFormulaData, remove unit', () => {
+        it('remove data', () => {
+            const unitId = 'workbook-01';
+            const sheetId = 'sheet-0011';
+            const formulaData = {
+                [unitId]: {
+                    [sheetId]: {
+                        0: {
+                            0: {
+                                f: '=SUM(A1)',
+                            },
+                        },
+                    },
+                },
+                'unit-2': {
+                },
+            };
+
+            removeFormulaData(formulaData, unitId);
+
+            expect(formulaData).toStrictEqual({
+                'unit-2': {},
+            });
+        });
+
+        it('remove blank workbook', () => {
+            const unitId = 'workbook-01';
+            const formulaData = {
+                [unitId]: {},
+                'unit-2': {},
+            };
+
+            removeFormulaData(formulaData, unitId);
+
+            expect(formulaData).toStrictEqual({
+                'unit-2': {},
+            });
+        });
+
+
+        it('remove blank object', () => {
+            const unitId = 'workbook-01';
+            const formulaData = {};
+
+            removeFormulaData(formulaData, unitId);
 
             expect(formulaData).toStrictEqual({});
         });

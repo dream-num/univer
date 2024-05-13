@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
-import type { IRender, IWheelEvent, Scene } from '@univerjs/engine-render';
+import type { Workbook, Worksheet } from '@univerjs/core';
+import { ICommandService, RxDisposable, toDisposable } from '@univerjs/core';
+import type { IRenderContext, IRenderController, IWheelEvent } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
     Layer,
@@ -30,7 +30,7 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
-import { BehaviorSubject, takeUntil } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';
 import {
@@ -41,106 +41,44 @@ import {
 } from '../common/keys';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-/**
- * @todo RenderUnit
- */
-@OnLifecycle(LifecycleStages.Ready, SheetCanvasView)
-export class SheetCanvasView extends RxDisposable {
-    private _scene!: Scene;
-
+export class SheetCanvasView extends RxDisposable implements IRenderController {
     private readonly _fps$ = new BehaviorSubject<string>('');
-
     readonly fps$ = this._fps$.asObservable();
 
     constructor(
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        private readonly _context: IRenderContext<Workbook>,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
-        this._initialize();
-    }
 
-    private _initialize() {
-        this._init();
+        this._addNewRender(this._context.unit);
     }
 
     override dispose(): void {
         this._fps$.complete();
     }
 
-    private _init() {
-        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._create(workbook));
-        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._dispose(workbook));
-        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => this._create(workbook));
-    }
-
-    private _dispose(workbook: Workbook) {
-        const unitId = workbook.getUnitId();
-        this._renderManagerService.removeRender(unitId);
-    }
-
-    private _create(workbook: Nullable<Workbook>) {
-        if (!workbook) {
-            return;
-        }
-
-        const unitId = workbook.getUnitId();
-        if (!this._renderManagerService.has(unitId)) {
-            this._addNewRender(workbook);
-        }
-    }
-
     private _addNewRender(workbook: Workbook) {
-        const unitId = workbook.getUnitId();
-        const container = workbook.getContainer();
-
-        const parentRenderUnitId = workbook.getParentRenderUnitId();
-
-        if (container != null && parentRenderUnitId != null) {
-            throw new Error('container or parentRenderUnitId can only exist one');
-        }
-
-        const isAddedToExistedScene = container == null && parentRenderUnitId != null;
-        if (isAddedToExistedScene) {
-            this._renderManagerService.createRenderWithParent(unitId, parentRenderUnitId);
-        } else {
-            this._renderManagerService.createRender(unitId);
-        }
-
-        const currentRender = this._renderManagerService.getRenderById(unitId);
-
-        if (currentRender == null) {
-            return;
-        }
-
-        const { scene, engine } = currentRender;
+        const { scene, engine } = this._context;
 
         scene.openTransformer();
-
-        this._scene = scene;
-
         scene.addLayer(new Layer(scene, [], 0), new Layer(scene, [], 2));
 
-        if (currentRender != null) {
-            this._addComponent(currentRender, workbook);
-        }
+        this._addComponent(workbook);
 
         const should = workbook.getShouldRenderLoopImmediately();
-
-        if (should && !isAddedToExistedScene) {
+        if (should) {
             engine.runRenderLoop(() => {
                 scene.render();
                 this._fps$.next(Math.round(engine.getFps()).toString());
             });
         }
-
-        this._renderManagerService.setCurrent(unitId);
     }
 
-    private _addComponent(renderUnit: IRender, workbook: Workbook) {
-        const scene = this._scene;
+    private _addComponent(workbook: Workbook) {
+        const { scene, components } = this._context;
 
         const worksheet = workbook.getActiveSheet();
 
@@ -148,7 +86,7 @@ export class SheetCanvasView extends RxDisposable {
 
         const sheetId = worksheet.getSheetId();
 
-        const _viewMain = this._addViewport(worksheet);
+        this._addViewport(worksheet);
 
         const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
         const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW);
@@ -162,11 +100,11 @@ export class SheetCanvasView extends RxDisposable {
             strokeWidth: 1,
         });
 
-        renderUnit.mainComponent = spreadsheet;
-        renderUnit.components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
-        renderUnit.components.set(SHEET_VIEW_KEY.ROW, spreadsheetRowHeader);
-        renderUnit.components.set(SHEET_VIEW_KEY.COLUMN, spreadsheetColumnHeader);
-        renderUnit.components.set(SHEET_VIEW_KEY.LEFT_TOP, SpreadsheetLeftTopPlaceholder);
+        this._context.mainComponent = spreadsheet;
+        components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
+        components.set(SHEET_VIEW_KEY.ROW, spreadsheetRowHeader);
+        components.set(SHEET_VIEW_KEY.COLUMN, spreadsheetColumnHeader);
+        components.set(SHEET_VIEW_KEY.LEFT_TOP, SpreadsheetLeftTopPlaceholder);
 
         scene.addObjects([spreadsheet], SHEET_COMPONENT_MAIN_LAYER_INDEX);
         scene.addObjects(
@@ -175,19 +113,10 @@ export class SheetCanvasView extends RxDisposable {
         );
 
         scene.enableLayerCache(SHEET_COMPONENT_MAIN_LAYER_INDEX, SHEET_COMPONENT_HEADER_LAYER_INDEX);
-
-        this._sheetSkeletonManagerService.setCurrent({ sheetId, unitId });
-
-        // viewMain?.onScrollStopObserver.add(() => {
-        //     spreadsheet.makeForceDirty();
-        // });
     }
 
     private _addViewport(worksheet: Worksheet) {
-        const scene = this._scene;
-        if (scene == null) {
-            return;
-        }
+        const scene = this._context.scene;
 
         const { rowHeader, columnHeader } = worksheet.getConfig();
 
@@ -326,12 +255,8 @@ export class SheetCanvasView extends RxDisposable {
                             }
                         }
                     }
-                    if (evt.inputIndex === PointerInput.MouseWheelZ) {
-                        // TODO
-                        // ...
-                    }
 
-                    this._scene.makeDirty(true);
+                    this._context.scene.makeDirty(true);
                 })
             )
         );

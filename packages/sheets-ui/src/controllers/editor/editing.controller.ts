@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type {
-    Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IUndoRedoService,
@@ -26,9 +25,7 @@ import {
     RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { getDocObject } from '@univerjs/docs';
 import type { ISheetData } from '@univerjs/engine-formula';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
@@ -36,14 +33,11 @@ import { takeUntil } from 'rxjs';
 export class EditingController extends RxDisposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(IUndoRedoService) private readonly _undoRedoService: IUndoRedoService
     ) {
         super();
 
         this._initialize();
-
-        this._commandExecutedListener();
     }
 
     private _initialize() {
@@ -96,54 +90,5 @@ export class EditingController extends RxDisposable {
                     columnData: sheetConfig.columnData,
                 };
             });
-
-        const formulaData = {
-            'workbook-01': {
-                'sheet-0011': {
-                    9: {
-                        8: {
-                            f: '=sum(A1:C3)',
-                        },
-                    },
-                    20: {
-                        8: {
-                            f: '=1+(3*4=4)*5+1',
-                        },
-                    },
-                    22: {
-                        8: {
-                            f: '=1--1',
-                        },
-                    },
-                    23: {
-                        8: {
-                            f: '=1--1%',
-                        },
-                    },
-                },
-            },
-        };
-
-        // this._formulaEngineService
-        //     .execute('workbook-01', {
-        //         unitData: {
-        //             'workbook-01': sheetData,
-        //         },
-        //         formulaData,
-        //         sheetNameMap: {},
-        //         forceCalculate: true,
-        //         dirtyRanges: [],
-        //     })
-        //     .then((res) => {
-        //         console.log(res.sheetData, res.arrayFormulaRange);
-        //     });
-
-        // console.log('calculate', this._formulaEngineService.calculate(`=  -@A4:B5`, false));
-    }
-
-    private _commandExecutedListener() {}
-
-    private _getDocObject() {
-        return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
 }

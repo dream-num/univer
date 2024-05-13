@@ -19,7 +19,7 @@ import { Registry } from '@univerjs/core';
 import type { Scene } from '@univerjs/engine-render';
 import type { Injector } from '@wendellhu/redi';
 
-export class ObjectAdaptor {
+export abstract class ObjectAdaptor {
     zIndex = 0;
 
     viewKey: PageElementType | null = null;
@@ -31,9 +31,12 @@ export class ObjectAdaptor {
         return this;
     }
 
-    convert(pageElement: IPageElement, mainScene: Scene) {}
+    abstract convert(pageElement: IPageElement, mainScene: Scene): void;
 
-    create(injector: Injector) {}
+    create(injector: Injector): void {
+        // FIXME: should not be empty
+        // empty
+    }
 }
 
 export const CanvasObjectProviderRegistry = Registry.create();

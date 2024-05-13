@@ -114,6 +114,15 @@ export class FUniver {
     }
 
     /**
+     * Dispose the UniverSheet by the `unitId`. The UniverSheet would be unload from the application.
+     * @param unitId The `unitId` of the UniverSheet.
+     * @returns If the UniverSheet is disposed successfully, return `true`, otherwise return `false`.
+     */
+    disposeUnit(unitId: string): boolean {
+        return this._univerInstanceService.disposeUnit(unitId);
+    }
+
+    /**
      * Get the spreadsheet API handler by the spreadsheet id.
      * @param id The spreadsheet id.
      * @returns Spreadsheet API instance.
@@ -196,7 +205,6 @@ export class FUniver {
      */
     registerSheetRowHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
         const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SheetComponent;
-
         const registerDisposable = sheetComponent.register(...extensions);
 
         return toDisposable(() => {
@@ -254,10 +262,6 @@ export class FUniver {
     }
 
     // #endregion
-
-    // #region editing
-
-    // #callback
 
     // #region listeners
 
@@ -328,7 +332,6 @@ export class FUniver {
      */
     private _getSheetRenderComponent(unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> {
         const render = this._renderManagerService.getRenderById(unitId);
-
         if (!render) {
             throw new Error('Render not found');
         }
@@ -336,7 +339,6 @@ export class FUniver {
         const { components } = render;
 
         const renderComponent = components.get(viewKey);
-
         if (!renderComponent) {
             throw new Error('Render component not found');
         }

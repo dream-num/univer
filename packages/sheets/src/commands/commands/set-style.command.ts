@@ -44,6 +44,7 @@ import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
+import { createRangeIteratorWithSkipFilteredRows } from './utils/selection-utils';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -74,7 +75,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
 
-        const { unitId, subUnitId } = target;
+        const { unitId, subUnitId, worksheet } = target;
         const { range, style } = params;
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -87,35 +88,26 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
 
         const cellValue = new ObjectMatrix<ICellData>();
 
+        const iterator = createRangeIteratorWithSkipFilteredRows(worksheet);
+
         if (Tools.isArray(style.value)) {
             for (let i = 0; i < ranges.length; i++) {
-                const { startRow, endRow, startColumn, endColumn } = ranges[i];
-
-                for (let r = 0; r <= endRow - startRow; r++) {
-                    for (let c = 0; c <= endColumn - startColumn; c++) {
-                        cellValue.setValue(r + startRow, c + startColumn, {
-                            s: {
-                                [style.type]: style.value[r][c],
-                            },
-                        });
-                    }
-                }
+                iterator.forOperableEach(ranges[i], (r, c, range) => {
+                    cellValue.setValue(r + range.startRow, c + range.startColumn, {
+                        s: {
+                            [style.type]: (style.value as T[][])[r][c],
+                        },
+                    });
+                });
             }
         } else {
             for (let i = 0; i < ranges.length; i++) {
-                const { startRow, endRow, startColumn, endColumn } = ranges[i];
-
                 const styleObj: ICellData = {
                     s: {
                         [style.type]: style.value,
                     },
                 };
-
-                for (let r = startRow; r <= endRow; r++) {
-                    for (let c = startColumn; c <= endColumn; c++) {
-                        cellValue.setValue(r, c, styleObj);
-                    }
-                }
+                iterator.forOperableEach(ranges[i], (r, c) => cellValue.setValue(r, c, styleObj));
             }
         }
 

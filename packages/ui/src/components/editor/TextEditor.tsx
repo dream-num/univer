@@ -219,14 +219,11 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             valueChange(editor);
         });
 
-        // Clean up on unmount
         return () => {
             resizeObserver.unobserve(editor);
-
+            resizeObserver.disconnect();
             registerSubscription.dispose();
-
             focusStyleSubscription?.unsubscribe();
-
             valueChangeSubscription?.unsubscribe();
         };
     }, []);

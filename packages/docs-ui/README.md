@@ -10,7 +10,7 @@
 `@univerjs/docs-ui` package provides the User Interface for Docs.
 
 :::info
-`@univerjs/docs-ui` is still in the experimental phase. It is not recommended for use in production environments. You can learn about the iteration plans on the [roadmap](/guides/roadmap).
+`@univerjs/docs-ui` is still in the experimental phase. It is not recommended for use in production environments. You can learn about the iteration plans on the [roadmap](https://univer.ai/guides/sheet/roadmap).
 :::
 
 ## Usage

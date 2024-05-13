@@ -23,8 +23,14 @@ export class TextSelectionRenderManager {
     private readonly _textSelectionInner$ = new BehaviorSubject<Nullable<ITextSelectionInnerParam>>(null);
 
     readonly textSelectionInner$ = this._textSelectionInner$.asObservable();
-    removeAllTextRanges() {}
-    addTextRanges() {}
+
+    removeAllTextRanges() {
+        // empty
+    }
+
+    addTextRanges() {
+        // empty
+    }
 }
 
 export const ITextSelectionRenderManager = createIdentifier<TextSelectionRenderManager>(

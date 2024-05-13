@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, ICommandInfo, IRange, Nullable } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     ColorKit,
     Disposable,
     ICommandService,
-    LifecycleStages,
     ObjectMatrix,
-    OnLifecycle,
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
@@ -33,6 +31,7 @@ import {
     SetArrayFormulaDataMutation,
     SetFormulaCalculationResultMutation,
 } from '@univerjs/engine-formula';
+import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import {
@@ -43,11 +42,11 @@ import {
 } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 
-@OnLifecycle(LifecycleStages.Rendered, FormulaEditorShowController)
-export class FormulaEditorShowController extends Disposable {
+export class FormulaEditorShowController extends Disposable implements IRenderController {
     private _previousShape: Nullable<SelectionShape>;
 
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @Inject(IEditorBridgeService) private _editorBridgeService: IEditorBridgeService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
@@ -192,16 +191,12 @@ export class FormulaEditorShowController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
-                if (
-                    command.id === SetFormulaCalculationResultMutation.id ||
-                    (command.id === SetArrayFormulaDataMutation.id && options && options.remove)
-                ) {
-                    this._removeArrayFormulaRangeShape();
-                }
-            })
-        );
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
+            if (command.id === SetFormulaCalculationResultMutation.id || (command.id === SetArrayFormulaDataMutation.id && options && options.remove)
+            ) {
+                this._removeArrayFormulaRangeShape();
+            }
+        }));
     }
 
     private _createArrayFormulaRangeShape(arrayRange: IRange, unitId: string) {
@@ -221,7 +216,7 @@ export class FormulaEditorShowController extends Disposable {
         };
 
         const { scene } = this._renderManagerService.getRenderById(unitId) || {};
-        const { rangeWithCoord, primaryWithCoord } = this._selectionRenderService.convertSelectionRangeToData({
+        const { rangeWithCoord, primaryWithCoord } = this._selectionRenderService.convertSelectionToCoord({
             range: arrayRange,
             primary: null,
             style,

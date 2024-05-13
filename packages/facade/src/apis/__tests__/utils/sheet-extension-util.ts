@@ -29,6 +29,7 @@ export class ColumnHeaderCustomExtension extends SheetExtension {
     }
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+        // empty
     }
 }
 
@@ -43,6 +44,7 @@ export class RowHeaderCustomExtension extends SheetExtension {
     }
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+        // empty
     }
 }
 
@@ -57,5 +59,6 @@ export class MainCustomExtension extends SheetExtension {
     }
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+        // empty
     }
 }

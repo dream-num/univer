@@ -30,14 +30,21 @@ export abstract class Plugin extends Disposable {
 
     protected abstract _injector: Injector;
 
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    onStarting(injector: Injector): void {}
+    onStarting(_injector: Injector): void {
+        // empty
+    }
 
-    onReady(): void {}
+    onReady(): void {
+        // empty
+    }
 
-    onRendered(): void {}
+    onRendered(): void {
+        // empty
+    }
 
-    onSteady(): void {}
+    onSteady(): void {
+        // empty
+    }
 
     getUniverInstanceType(): UniverInstanceType {
         return (this.constructor as typeof Plugin).type;

@@ -75,7 +75,9 @@ export class SelectionManagerService implements IDisposable {
     private _dirty: boolean = true;
 
     // FIMXE: this dependency is not correct!
-    constructor(@Inject(ThemeService) private readonly _themeService: ThemeService) {}
+    constructor(@Inject(ThemeService) private readonly _themeService: ThemeService) {
+        // empty
+    }
 
     getCurrent() {
         return this._currentSelection;

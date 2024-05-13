@@ -26,7 +26,9 @@ export class FSelection {
         private readonly _worksheet: Worksheet,
         private readonly _selections: Readonly<ISelectionWithStyle[]>,
         @Inject(Injector) private readonly _injector: Injector
-    ) {}
+    ) {
+        // empty
+    }
 
     getActiveRange(): FRange | null {
         const active = this._selections.find((selection) => !!selection.primary);

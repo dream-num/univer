@@ -33,6 +33,7 @@
         "@univerjs/sheets-find-replace": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
+        "@univerjs/sheets-sort": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/sheets-zen-editor": "workspace:*",
         "@univerjs/slides": "workspace:*",

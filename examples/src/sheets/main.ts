@@ -22,6 +22,7 @@ import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
@@ -91,6 +92,9 @@ univer.registerPlugin(UniverSheetsDataValidationPlugin);
 
 // filter
 univer.registerPlugin(UniverSheetsFilterPlugin);
+
+// sort
+univer.registerPlugin(UniverSheetsSortPlugin);
 
 // sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);

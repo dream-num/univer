@@ -32,6 +32,10 @@ export const SheetsThreadCommentPanel = () => {
     const commandService = useDependency(ICommandService);
     const subUnitId$ = useMemo(() => workbook.activeSheet$.pipe(map((i) => i?.getSheetId())), [workbook.activeSheet$]);
 
+    const getSubUnitName = (id: string) => {
+        return workbook.getSheetBySheetId(id)?.getName() ?? '';
+    };
+
     const handleAdd = () => {
         commandService.executeCommand(ShowAddSheetCommentModalOperation.id);
     };
@@ -42,6 +46,7 @@ export const SheetsThreadCommentPanel = () => {
             subUnitId$={subUnitId$}
             type={UniverInstanceType.UNIVER_SHEET}
             onAdd={handleAdd}
+            getSubUnitName={getSubUnitName}
         />
     );
 };

@@ -34,10 +34,11 @@ export interface IThreadCommentPanelProps {
     subUnitId$: Observable<string | undefined>;
     type: UniverInstanceType;
     onAdd: () => void;
+    getSubUnitName: (subUnitId: string) => string;
 }
 
 export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
-    const { unitId, subUnitId$, type, onAdd } = props;
+    const { unitId, subUnitId$, type, onAdd, getSubUnitName } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
     const localeService = useDependency(LocaleService);
@@ -141,6 +142,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
             </div>
             {statuedComments?.map((comment) => (
                 <ThreadCommentTree
+                    getSubUnitName={getSubUnitName}
                     key={comment.id}
                     id={comment.id}
                     unitId={comment.unitId}

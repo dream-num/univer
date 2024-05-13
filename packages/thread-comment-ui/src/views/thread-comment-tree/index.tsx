@@ -38,6 +38,7 @@ export interface IThreadCommentTreeProps {
     onClick?: () => void;
     showHighlight?: boolean;
     onClose?: () => void;
+    getSubUnitName: (subUnitId: string) => string;
 }
 
 export interface IThreadCommentItemProps {
@@ -154,7 +155,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
 };
 
 export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
-    const { id, unitId, subUnitId, refStr, showEdit = true, onClick, showHighlight, onClose } = props;
+    const { id, unitId, subUnitId, refStr, showEdit = true, onClick, showHighlight, onClose, getSubUnitName } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [editingId, setEditingId] = useState('');
     useObservable(threadCommentModel.commentMap$);
@@ -209,6 +210,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 <div className={styles.threadCommentTitlePosition}>
                     <div className={styles.threadCommentTitleHighlight} />
                     {refStr || comments?.root.ref}
+                    {' · '}
+                    {getSubUnitName(comments?.root.subUnitId ?? subUnitId)}
                 </div>
                 {comments
                     ? (

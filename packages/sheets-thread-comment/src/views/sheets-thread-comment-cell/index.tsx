@@ -17,12 +17,14 @@
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 import { ThreadCommentTree } from '@univerjs/thread-comment-ui';
-import { Tools, UniverInstanceType } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import { SheetsThreadCommentModel } from '../../models/sheets-thread-comment.model';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 
 export const SheetsThreadCommentCell = () => {
+    const univerInstanceService = useDependency(IUniverInstanceService);
     const sheetsThreadCommentPopupService = useDependency(SheetsThreadCommentPopupService);
     const activePopup = useObservable(sheetsThreadCommentPopupService.activePopup$);
     const sheetThreadCommentModel = useDependency(SheetsThreadCommentModel);
@@ -37,6 +39,10 @@ export const SheetsThreadCommentCell = () => {
         sheetsThreadCommentPopupService.hidePopup();
     };
 
+    const getSubUnitName = (id: string) => {
+        return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(id)?.getName() ?? '';
+    };
+
     return (
         <ThreadCommentTree
             id={rootId}
@@ -45,6 +51,7 @@ export const SheetsThreadCommentCell = () => {
             type={UniverInstanceType.UNIVER_SHEET}
             refStr={ref}
             onClose={onClose}
+            getSubUnitName={getSubUnitName}
         />
     );
 };

@@ -13,7 +13,7 @@ packages/design @jikkai
 packages/engine-formula @DR-Univer
 packages/engine-numfmt @Gggpound
 packages/engine-render @DR-Univer @lumixraku
-packages/find-replace @wzhudev
+packages/find-replace @siam-ese
 packages/image @DR-Univer
 packages/network @wzhudev
 packages/rpc @wzhudev
@@ -42,7 +42,7 @@ packages/sheets/src/services/ref-range @Gggpound
 packages/sheets/src/services/ref-range @weird94
 packages/sheets/src/services/sheet-interceptor @Gggpound
 ## find-replace
-packages/sheets-find-replace @wzhudev
+packages/sheets-find-replace @siam-ese
 ## number-format
 packages/sheets-numfmt @Gggpound
 ## formula

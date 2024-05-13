@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+import { Disposable } from '@univerjs/core';
+import { ISidebarService } from '@univerjs/ui';
+import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
 type ActiveCommentInfo = { unitId: string; subUnitId: string; commentId: string } | undefined;
 
-export class ThreadCommentPanelService {
+export class ThreadCommentPanelService extends Disposable {
     private _panelVisible = false;
     private _panelVisible$ = new BehaviorSubject<boolean>(false);
 
@@ -27,6 +30,23 @@ export class ThreadCommentPanelService {
 
     panelVisible$ = this._panelVisible$.asObservable();
     activeCommentId$ = this._activeCommentId$.asObservable();
+
+    constructor(
+        @Inject(ISidebarService) private _sidebarService: ISidebarService
+    ) {
+        super();
+        this._init();
+    }
+
+    private _init() {
+        this.disposeWithMe(
+            this._sidebarService.sidebarOptions$.subscribe((opt) => {
+                if (!opt.visible) {
+                    this.setPanelVisible(false);
+                }
+            })
+        );
+    }
 
     get panelVisible() {
         return this._panelVisible;

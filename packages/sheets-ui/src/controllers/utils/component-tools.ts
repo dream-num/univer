@@ -106,7 +106,8 @@ export function getCoordByOffset(
     evtOffsetY: number,
     scene: Scene,
     skeleton: SpreadsheetSkeleton,
-    viewport?: Viewport
+    viewport?: Viewport,
+    closeFirst?: boolean
 ) {
     const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
@@ -121,7 +122,8 @@ export function getCoordByOffset(
         newEvtOffsetY,
         scaleX,
         scaleY,
-        scrollXY
+        scrollXY,
+        closeFirst
     );
 
     const { row, column } = moveActualSelection;

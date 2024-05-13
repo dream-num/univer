@@ -19,6 +19,10 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { BaseFunction } from '../../base-function';
 
 export class Divided extends BaseFunction {
+    override minParams = 2;
+
+    override maxParams = 2;
+
     override calculate(variant1: BaseValueObject, variant2: BaseValueObject) {
         if (variant1.isError()) {
             return variant1;

@@ -99,6 +99,7 @@ import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../vie
 import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
 import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
 import { SidebarDefinedNameOperation } from '../commands/operations/sidebar-defined-name.operation';
+import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import {
     ClearSelectionAllMenuItemFactory,
@@ -320,6 +321,8 @@ export class SheetUIController extends Disposable {
             InsertRangeMoveRightConfirmCommand,
             DeleteRangeMoveLeftConfirmCommand,
             SidebarDefinedNameOperation,
+            AutoFillCommand,
+            AutoClearContentCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });

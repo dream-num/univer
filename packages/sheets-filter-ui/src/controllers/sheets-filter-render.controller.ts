@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import { CommandType, fromCallback, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, ThemeService } from '@univerjs/core';
-import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { IRange, Workbook } from '@univerjs/core';
+import { CommandType, fromCallback, ICommandService, RxDisposable, ThemeService } from '@univerjs/core';
+import type { IRenderContext, IRenderController, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
@@ -42,13 +42,13 @@ interface ISheetsFilterRenderParams {
     skeleton: SpreadsheetSkeleton;
 }
 
-@OnLifecycle(LifecycleStages.Ready, SheetsFilterRenderController)
-export class SheetsFilterRenderController extends RxDisposable {
+export class SheetsFilterRenderController extends RxDisposable implements IRenderController {
     private _filterRangeShape: SelectionShape | null = null;
     private _buttonRenderDisposable: IDisposable | null = null;
     private _filterButtonShapes: SheetsFilterButtonShape[] = [];
 
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsFilterService) private readonly _sheetsFilterService: SheetsFilterService,
@@ -56,7 +56,6 @@ export class SheetsFilterRenderController extends RxDisposable {
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetRenderController) private _sheetRenderController: SheetRenderController,
         @ICommandService private readonly _commandService: ICommandService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
@@ -77,16 +76,11 @@ export class SheetsFilterRenderController extends RxDisposable {
         this._sheetSkeletonManagerService.currentSkeleton$
             .pipe(
                 switchMap((skeletonParams) => {
-                    if (!skeletonParams) {
-                        return of(null);
-                    }
+                    if (!skeletonParams) return of(null);
 
                     const { unitId } = skeletonParams;
-                    const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-                    if (!workbook) {
-                        return of(null);
-                    }
 
+                    const workbook = this._context.unit;
                     const worksheetId = workbook.getActiveSheet().getSheetId();
                     const filterModel = this._sheetsFilterService.getFilterModel(unitId, worksheetId) ?? undefined;
                     const getParams = (): ISheetsFilterRenderParams => ({
@@ -131,7 +125,7 @@ export class SheetsFilterRenderController extends RxDisposable {
         }
 
         const { scene } = renderer;
-        const { rangeWithCoord, style } = this._selectionRenderService.convertSelectionRangeToData({
+        const { rangeWithCoord, style } = this._selectionRenderService.convertSelectionToCoord({
             range,
             primary: null,
             style: null,

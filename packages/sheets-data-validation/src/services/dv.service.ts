@@ -39,7 +39,9 @@ export class SheetDataValidationService {
 
     constructor(
         @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel
-    ) { }
+    ) {
+        // empty
+    }
 
     private _ensureManager(unitId: string, subUnitId: string) {
         return this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;

@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IMutationInfo, Nullable, Workbook } from '@univerjs/core';
 import {
     Direction,
     Disposable,
+    ICommandService,
+    IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    RANGE_TYPE,
+    Rectangle,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
-import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import { SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
+import { discreteRangeToRange } from '../../controllers/utils/range-tools';
 import {
     chnNumberRule,
     chnWeek2Rule,
@@ -67,6 +73,7 @@ export interface IAutoFillService {
     getAllHooks(): ISheetAutoFillHook[];
     getActiveHooks(): ISheetAutoFillHook[];
     addHook(hook: ISheetAutoFillHook): IDisposable;
+    fillData(triggerUnitId: string, triggerSubUnitId: string): boolean;
 }
 
 export interface IApplyMenuItem {
@@ -119,9 +126,10 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
     readonly menu$ = this._menu$.asObservable();
     constructor(
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService
+        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
+        @ICommandService private _commandService: ICommandService,
+        @IUndoRedoService private _undoRedoService: IUndoRedoService
     ) {
         super();
         this._init();
@@ -260,6 +268,67 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
     setShowMenu(show: boolean) {
         this._showMenu$.next(show);
+    }
+
+    fillData(triggerUnitId: string, triggerSubUnitId: string) {
+        const {
+            source,
+            target,
+            unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId(),
+            subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId(),
+        } = this.autoFillLocation || {};
+        const direction = this.direction;
+        if (!source || !target || unitId !== triggerUnitId || subUnitId !== triggerSubUnitId) {
+            return false;
+        }
+
+        const selection = Rectangle.union(discreteRangeToRange(source), discreteRangeToRange(target));
+        const applyType = this.applyType;
+        const activeHooks = this.getActiveHooks();
+
+        this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+            selections: [
+                {
+                    primary: { ...(this._selectionManagerService.getLast()?.primary ?? selection) },
+                    range: {
+                        ...selection,
+                        rangeType: RANGE_TYPE.NORMAL,
+                    },
+                },
+            ],
+            unitId,
+            subUnitId,
+        });
+
+        const undos: IMutationInfo[] = [];
+        const redos: IMutationInfo[] = [];
+        activeHooks.forEach((hook) => {
+            const { undos: hookUndos, redos: hookRedos } =
+                hook.onFillData?.({ source, target, unitId, subUnitId }, direction, applyType) || {};
+            if (hookUndos) {
+                undos.push(...hookUndos);
+            }
+            if (hookRedos) {
+                redos.push(...hookRedos);
+            }
+        });
+
+
+        const result = redos.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
+        if (result) {
+            // add to undo redo services
+            this._undoRedoService.pushUndoRedo({
+                unitID: unitId,
+                undoMutations: undos,
+                redoMutations: redos,
+            });
+        }
+        // this._commandService.executeCommand(AutoFillCommand.id);
+        activeHooks.forEach((hook) => {
+            hook.onAfterFillData?.({ source, target, unitId, subUnitId }, direction, applyType);
+        });
+        this.setShowMenu(true);
+        return true;
     }
 }
 

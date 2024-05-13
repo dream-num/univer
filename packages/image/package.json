@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/image",
-    "version": "0.1.9",
+    "version": "0.1.10",
     "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -63,7 +63,7 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@wendellhu/redi": "^0.13.3",
+        "@wendellhu/redi": "^0.14.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -76,7 +76,7 @@
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.3",
+        "@wendellhu/redi": "^0.14.0",
         "less": "^4.2.0",
         "react": "18.2.0",
         "rxjs": "^7.8.1",

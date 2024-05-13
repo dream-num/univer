@@ -23,15 +23,11 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { BaseFunction } from '../../base-function';
 
 export class Maxifs extends BaseFunction {
+    override minParams = 3;
+
+    override maxParams = 255;
+
     override calculate(maxRange: BaseValueObject, ...variants: BaseValueObject[]) {
-        if (maxRange === null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
-        if (variants.length < 2) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
         if (maxRange.isError()) {
             return ErrorValueObject.create(ErrorType.NA);
         }

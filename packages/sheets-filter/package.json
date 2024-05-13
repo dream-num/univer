@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-filter",
-    "version": "0.1.9",
+    "version": "0.1.10",
     "private": false,
     "description": "A library for filtering data in Univer Sheet",
     "author": "DreamNum <developer@univer.ai>",
@@ -59,7 +59,7 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "^0.13.3",
+        "@wendellhu/redi": "^0.14.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {},
@@ -67,7 +67,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "^0.13.3",
+        "@wendellhu/redi": "^0.14.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
         "vite": "^5.2.10",

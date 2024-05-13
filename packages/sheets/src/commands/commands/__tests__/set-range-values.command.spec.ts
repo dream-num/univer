@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, IStyleData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, IDocumentData, IStyleData, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
+    BooleanNumber,
     CellValueType,
     ICommandService,
     IUniverInstanceService,
+    LocaleType,
     RANGE_TYPE,
     RedoCommand,
     Tools,
     UndoCommand,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -33,12 +36,61 @@ import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import { SetRangeValuesCommand } from '../set-range-values.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
+const getTestWorkbookDataDemo = (): IWorkbookData => ({
+    id: 'test',
+    appVersion: '3.0.0-alpha',
+    sheets: {
+        sheet1: {
+            id: 'sheet1',
+            name: 'sheet1',
+            cellData: {
+                0: {
+                    0: {
+                        v: 'A1',
+                    },
+                    1: {
+                        v: 'A2',
+                    },
+                },
+            },
+            columnData: {
+                1: {
+                    hd: BooleanNumber.FALSE,
+                },
+            },
+            rowData: {
+                1: {
+                    hd: BooleanNumber.FALSE,
+                },
+            },
+        },
+        sheet2: {
+            id: 'sheet2',
+            name: 'sheet2',
+            cellData: {
+                0: {
+                    0: {
+                        v: 'A1',
+                    },
+                    1: {
+                        v: 'A2',
+                    },
+                },
+            },
+        },
+    },
+    locale: LocaleType.ZH_CN,
+    name: '',
+    sheetOrder: [],
+    styles: {},
+});
+
 describe('Test set range values commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
     let selectionManager: SelectionManagerService;
-    let getValue: () => Nullable<ICellData>;
+    let getValue: (sheetId?: string) => Nullable<ICellData>;
     let getValues: (
         startRow: number,
         startColumn: number,
@@ -48,7 +100,7 @@ describe('Test set range values commands', () => {
     let getStyle: () => any;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed();
+        const testBed = createCommandTestBed(getTestWorkbookDataDemo());
         univer = testBed.univer;
         get = testBed.get;
 
@@ -70,10 +122,10 @@ describe('Test set range values commands', () => {
             },
         ]);
 
-        getValue = (): Nullable<ICellData> =>
+        getValue = (sheetId?: string): Nullable<ICellData> =>
             get(IUniverInstanceService)
                 .getUniverSheetInstance('test')
-                ?.getSheetBySheetId('sheet1')
+                ?.getSheetBySheetId(sheetId || 'sheet1')
                 ?.getRange(0, 0, 0, 0)
                 .getValue();
 
@@ -211,6 +263,69 @@ describe('Test set range values commands', () => {
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual(getResultParams().value);
+
+                // reset
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            });
+
+            it('set value in other worksheet', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            0: {
+                                0: {
+                                    v: 'a1',
+                                },
+                            },
+                        },
+                        subUnitId: 'sheet2', // set value to sheet2
+                    };
+
+                    return params;
+                }
+
+                const unit = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                const subUnitId = unit?.getActiveSheet()?.getSheetId();
+
+                // current sheet is sheet1
+                expect(subUnitId).toBe('sheet1');
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+
+                // check sheet1's value
+                expect(getValue('sheet1')).toStrictEqual({
+                    v: 'A1',
+                });
+
+                // check sheet2's value
+                expect(getValue('sheet2')).toStrictEqual({
+                    v: 'a1',
+                    t: CellValueType.STRING,
+                });
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+
+                expect(getValue('sheet1')).toStrictEqual({
+                    v: 'A1',
+                });
+
+                expect(getValue('sheet2')).toStrictEqual({
+                    v: 'A1',
+                    t: CellValueType.STRING,
+                });
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+
+                expect(getValue('sheet1')).toStrictEqual({
+                    v: 'A1',
+                });
+
+                expect(getValue('sheet2')).toStrictEqual({
+                    v: 'a1',
+                    t: CellValueType.STRING,
+                });
 
                 // reset
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();

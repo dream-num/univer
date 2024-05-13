@@ -15,7 +15,7 @@
  */
 
 import type { LocaleService } from '@univerjs/core';
-import type { IFunctionInfo } from '@univerjs/engine-formula';
+import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 
 export function getFunctionTypeValues(
     enumObj: any,
@@ -42,4 +42,16 @@ export function getFunctionName(item: IFunctionInfo, localeService: LocaleServic
     }
 
     return functionName;
+}
+
+export function generateParam(param: IFunctionParam) {
+    if (!param.require && !param.repeat) {
+        return `[${param.name}]`;
+    } else if (param.require && !param.repeat) {
+        return param.name;
+    } else if (!param.require && param.repeat) {
+        return `[${param.name},...]`;
+    } else if (param.require && param.repeat) {
+        return `${param.name},...`;
+    }
 }

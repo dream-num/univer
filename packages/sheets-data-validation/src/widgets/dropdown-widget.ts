@@ -130,7 +130,9 @@ export class DropdownWidget implements IBaseDataValidationWidget {
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService
-    ) { }
+    ) {
+        // super
+    }
 
     zIndex?: number | undefined;
     onPointerEnter?: ((info: ICellRenderContext) => void) | undefined;

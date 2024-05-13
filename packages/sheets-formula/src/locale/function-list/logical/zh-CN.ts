@@ -173,8 +173,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'rows', detail: '数组中的行数。 必须大于零' },
-            number2: { name: 'cols', detail: '数组中的列数。 必须大于零' },
+            number1: { name: '行数', detail: '数组中的行数。 必须大于零' },
+            number2: { name: '列数', detail: '数组中的列数。 必须大于零' },
             value3: {
                 name: 'lambda',
                 detail: '调用 LAMBDA 来创建数组。 LAMBDA 接受两个参数:row数组的行索引, col数组的列索引',

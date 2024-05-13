@@ -165,7 +165,7 @@ export class DataValidationRenderController extends RxDisposable {
                         worksheet,
                     },
                     componentKey: validator.dropdown,
-                    onHide: () => { },
+                    onHide: () => { /* empty */ },
                 });
             }
         }));

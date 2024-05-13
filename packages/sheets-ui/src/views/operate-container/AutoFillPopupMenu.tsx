@@ -19,16 +19,12 @@ import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } 
 import { Dropdown } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Autofill, CheckMarkSingle, MoreDownSingle } from '@univerjs/icons';
-import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, SetRangeValuesMutation, SetWorksheetActiveOperation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { AutoClearContentCommand } from '../../commands/commands/auto-fill.command';
 import { RefillCommand } from '../../commands/commands/refill.command';
-import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
-import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import { APPLY_TYPE } from '../../services/auto-fill/type';
@@ -79,29 +75,9 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
 
 
     useEffect(() => {
-        const endCommands = [
-            SetCellEditVisibleOperation.id,
-            AutoClearContentCommand.id,
-            SetZoomRatioOperation.id,
-            SetWorksheetActiveOperation.id,
-            SetRangeValuesMutation.id,
-            MoveRangeMutation.id,
-            RemoveRowMutation.id,
-            RemoveColMutation.id,
-            InsertRowMutation.id,
-            InsertColMutation.id,
-            MoveRowsMutation.id,
-            MoveColsMutation.id,
-            SetWorksheetColWidthMutation.id,
-            SetWorksheetRowHeightMutation.id,
-        ];
         const disposable = commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
             if (command.id === SetScrollOperation.id) {
                 forceUpdate();
-            }
-            const fromCollab = options?.fromCollab;
-            if (endCommands.includes(command.id) && !fromCollab) {
-                setAnchor({ row: -1, col: -1 });
             }
         });
         return disposable.dispose;
@@ -134,6 +110,8 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
                     const lastRow = Math.max(source.rows[source.rows.length - 1], target.rows[target.rows.length - 1]);
                     const lastCol = Math.max(source.cols[source.cols.length - 1], target.cols[target.cols.length - 1]);
                     setAnchor({ row: lastRow, col: lastCol });
+                } else {
+                    setAnchor({ row: -1, col: -1 });
                 }
             })
         );

@@ -15,6 +15,7 @@
  */
 
 import { Disposable, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -34,9 +35,12 @@ import { TEST_EDITOR_CONTAINER_COMPONENT } from '../views/test-editor/component-
 // @ts-ignore
 import VueI18nIcon from '../components/VueI18nIcon.vue';
 
+import { CreateEmptySheetCommand, DisposeCurrentUnitCommand } from '../commands/commands/unit.command';
 import {
     ConfirmMenuItemFactory,
+    CreateEmptySheetMenuItemFactory,
     DialogMenuItemFactory,
+    DisposeCurrentUnitMenuItemFactory,
     LocaleMenuItemFactory,
     MessageMenuItemFactory,
     NotificationMenuItemFactory,
@@ -44,6 +48,7 @@ import {
     SetEditableMenuItemFactory,
     SidebarMenuItemFactory,
     ThemeMenuItemFactory,
+    UnitMenuItemFactory,
 } from './menu';
 
 export class DebuggerController extends Disposable {
@@ -69,6 +74,8 @@ export class DebuggerController extends Disposable {
             SidebarOperation,
             SetEditable,
             SaveSnapshotOptions,
+            DisposeCurrentUnitCommand,
+            CreateEmptySheetCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         this._injector.add([ExportController]);
@@ -76,7 +83,7 @@ export class DebuggerController extends Disposable {
     }
 
     private _initializeContextMenu() {
-        [
+        ([
             LocaleMenuItemFactory,
             ThemeMenuItemFactory,
             NotificationMenuItemFactory,
@@ -86,7 +93,10 @@ export class DebuggerController extends Disposable {
             SidebarMenuItemFactory,
             SetEditableMenuItemFactory,
             SaveSnapshotSetEditableMenuItemFactory,
-        ].forEach((factory) => {
+            UnitMenuItemFactory,
+            DisposeCurrentUnitMenuItemFactory,
+            CreateEmptySheetMenuItemFactory,
+        ] as IMenuItemFactory[]).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

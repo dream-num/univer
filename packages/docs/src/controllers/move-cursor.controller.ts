@@ -53,16 +53,14 @@ export class MoveCursorController extends Disposable {
     ) {
         super();
 
-        this._initialize();
-
         this._commandExecutedListener();
     }
 
     override dispose(): void {
+        super.dispose();
+
         this._onInputSubscription?.unsubscribe();
     }
-
-    private _initialize() { }
 
     private _commandExecutedListener() {
         const updateCommandList = [MoveCursorOperation.id, MoveSelectionOperation.id];

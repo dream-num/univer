@@ -23,7 +23,8 @@ import type { IEvent } from './basics/i-events';
 import type { ITransformChangeState } from './basics/interfaces';
 import type { Canvas } from './canvas';
 
-// FIXME: T should extends something that is disposable
+// FIXME: ThinEngine and ThinScene should be removed
+
 export abstract class ThinEngine<T extends IDisposable> extends Disposable {
     onInputChangedObservable = new Observable<IEvent>();
 
@@ -79,7 +80,7 @@ export abstract class ThinEngine<T extends IDisposable> extends Disposable {
         return scene;
     }
 
-    setRemainCapture() {}
+    abstract setRemainCapture(): void;
 
     hasActiveScene(): boolean {
         return this._activeScene != null;

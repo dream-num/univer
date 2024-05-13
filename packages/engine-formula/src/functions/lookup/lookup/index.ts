@@ -23,6 +23,10 @@ import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Lookup extends BaseFunction {
+    override minParams = 2;
+
+    override maxParams = 3;
+
     override needsExpandParams = true;
 
     override calculate(
@@ -30,10 +34,6 @@ export class Lookup extends BaseFunction {
         lookupVectorOrArray: ArrayValueObject,
         resultVector?: BaseValueObject
     ) {
-        if (lookupValue == null || lookupVectorOrArray == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
         if (lookupValue.isError()) {
             return lookupValue;
         }

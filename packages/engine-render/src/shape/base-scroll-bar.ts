@@ -38,7 +38,7 @@ export interface IScrollBarProps {
     mainScene?: ThinScene;
 }
 
-export class BaseScrollBar extends Disposable {
+export abstract class BaseScrollBar extends Disposable {
     enableHorizontal: boolean = true;
 
     enableVertical: boolean = true;
@@ -193,14 +193,14 @@ export class BaseScrollBar extends Disposable {
         return this.verticalThumbRect?.visible || false;
     }
 
-    resize(
-        parentWidth: Nullable<number> = 0,
-        parentHeight: Nullable<number> = 0,
-        contentWidth: number = 0,
-        contentHeight: number = 0
-    ) {}
+    abstract resize(
+        parentWidth: Nullable<number>,
+        parentHeight: Nullable<number>,
+        contentWidth: number,
+        contentHeight: number
+    ): void;
 
-    makeDirty(state: boolean) {}
+    abstract makeDirty(state: boolean): void;
 
-    render(ctx: UniverRenderingContext, left: number = 0, top: number = 0) {}
+    abstract render(ctx: UniverRenderingContext, left?: number, top?: number): void;
 }

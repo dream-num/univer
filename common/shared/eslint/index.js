@@ -1,5 +1,6 @@
 exports.baseRules = {
     curly: ['error', 'multi-line'],
+    'no-empty-function': ['error'],
     'eol-last': ['error', 'always'],
     'import/no-cycle': 'error',
     'import/no-self-import': 'error',
@@ -14,6 +15,7 @@ exports.baseRules = {
         enums: 'always-multiline',
         functions: 'never',
     }],
+    'no-empty-function': 'off',
     'style/arrow-parens': ['error', 'always'],
     'ts/no-redeclare': 'off',
     'antfu/if-newline': 'off',

@@ -38,10 +38,6 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
         return this._snapshot.container;
     }
 
-    getParentRenderUnitId() {
-        return this._snapshot.parentRenderUnitId;
-    }
-
     getSnapshot() {
         return this._snapshot;
     }

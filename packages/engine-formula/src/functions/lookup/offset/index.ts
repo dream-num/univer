@@ -24,6 +24,10 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Offset extends BaseFunction {
+    override minParams = 3;
+
+    override maxParams = 5;
+
     override needsReferenceObject = true;
 
     override calculate(
@@ -33,10 +37,6 @@ export class Offset extends BaseFunction {
         height?: FunctionVariantType,
         width?: FunctionVariantType
     ) {
-        if (reference == null || rows == null || columns == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
         if (reference.isError()) {
             return reference;
         }

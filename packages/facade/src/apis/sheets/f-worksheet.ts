@@ -29,7 +29,9 @@ export class FWorksheet {
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService
-    ) {}
+    ) {
+        // empty
+    }
 
     /**
      * Returns the worksheet id

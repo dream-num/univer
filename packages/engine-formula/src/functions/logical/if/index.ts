@@ -22,11 +22,11 @@ import { BooleanValueObject, NullValueObject } from '../../../engine/value-objec
 import { BaseFunction } from '../../base-function';
 
 export class If extends BaseFunction {
-    override calculate(logicalTest: BaseValueObject, valueIfTrue: BaseValueObject, valueIfFalse: BaseValueObject = BooleanValueObject.create(false)) {
-        if (logicalTest == null || valueIfTrue == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
+    override minParams = 2;
 
+    override maxParams = 3;
+
+    override calculate(logicalTest: BaseValueObject, valueIfTrue: BaseValueObject, valueIfFalse: BaseValueObject = BooleanValueObject.create(false)) {
         if (logicalTest.isError()) {
             return logicalTest;
         }

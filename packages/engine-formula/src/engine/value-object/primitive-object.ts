@@ -534,6 +534,11 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
+            // Parameters in MOD caused an out of range error. Namely, the error occurs when the following is true: (divisor * 1125900000000) is less than or equal to dividend.
+            if (Math.abs(value) * 1125900000000 <= Math.abs(currentValue)) {
+                return ErrorValueObject.create(ErrorType.NUM);
+            }
+
             const result = mod(currentValue, value);
 
             if (!Number.isFinite(result)) {

@@ -63,7 +63,7 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
-import { IClipboardInterfaceService, IMessageService, textTrim } from '@univerjs/ui';
+import { IMessageService, textTrim } from '@univerjs/ui';
 import { Inject, Injector, Optional } from '@wendellhu/redi';
 
 import { ITextSelectionRenderManager, ptToPx } from '@univerjs/engine-render';
@@ -109,7 +109,6 @@ export class SheetClipboardController extends RxDisposable {
         @IContextService private readonly _contextService: IContextService,
         @IConfigService private readonly _configService: IConfigService,
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
-        @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(LocaleService) private readonly _localService: LocaleService,
@@ -526,6 +525,7 @@ export class SheetClipboardController extends RxDisposable {
         if (currentSkeleton == null) {
             return null;
         }
+
         const { skeleton } = currentSkeleton;
         const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
         const p = documentModel?.getSnapshot();

@@ -15,7 +15,6 @@
  */
 
 import { DisposableCollection, sortRules, toDisposable } from '@univerjs/core';
-
 import type { IDisposable } from '@wendellhu/redi';
 import { BaseObject } from '../base-object';
 import type { IViewportBound } from '../basics/vector2';
@@ -38,9 +37,12 @@ export class RenderComponent<T, U, V> extends BaseObject {
             disposableCollection.add(
                 toDisposable(() => {
                     this._extensions.delete(extension.uKey);
+                    extension.parent = null;
                 })
             );
         }
+
+        this.disposeWithMe(disposableCollection);
 
         return disposableCollection;
     }

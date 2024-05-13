@@ -23,11 +23,11 @@ import { createStringValueObjectByRawValue } from '../../../engine/value-object/
 import { BaseFunction } from '../../base-function';
 
 export class Concatenate extends BaseFunction {
-    override calculate(...textValues: BaseValueObject[]) {
-        if (textValues.length === 0) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
+    override minParams = 1;
 
+    override maxParams = 255;
+
+    override calculate(...textValues: BaseValueObject[]) {
         let maxRowLength = 0;
         let maxColumnLength = 0;
 

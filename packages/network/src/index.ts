@@ -17,8 +17,10 @@
 export { HTTPHeaders } from './services/http/headers';
 export { HTTPService } from './services/http/http.service';
 export { IHTTPImplementation } from './services/http/implementations/implementation';
+export { FetchHTTPImplementation } from './services/http/implementations/fetch';
 export { XHRHTTPImplementation } from './services/http/implementations/xhr';
 export { HTTPRequest, type HTTPRequestMethod } from './services/http/request';
+export { type HTTPResponseType, HTTPStatusCode } from './services/http/http';
 export { HTTPResponse, type HTTPEvent, HTTPResponseError } from './services/http/response';
 export {
     type ISocket,

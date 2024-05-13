@@ -407,7 +407,7 @@ export const FUNCTION_LIST_LOOKUP: IFunctionInfo[] = [
                 name: 'formula.functionList.INDEX.functionParameter.rowNum.name',
                 detail: 'formula.functionList.INDEX.functionParameter.rowNum.detail',
                 example: '1',
-                require: 1,
+                require: 0,
                 repeat: 0,
             },
             {

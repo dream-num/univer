@@ -63,7 +63,11 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         super();
     }
 
-    initialize(): void {
+    override onStarting(): void {
+        this._init();
+    }
+
+    _init(): void {
         this._localeService.load({
             zhCN,
         });
@@ -99,9 +103,5 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));
-    }
-
-    override onStarting(): void {
-        this.initialize();
     }
 }

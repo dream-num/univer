@@ -25,8 +25,10 @@ import type { IMessageService } from '../message.service';
  */
 export class MockMessageService implements IMessageService {
     show(_options: IMessageMethodOptions & Omit<IMessageProps, 'key'>): IDisposable {
-        return toDisposable(() => {});
+        return toDisposable(() => { /* empty */ });
     }
 
-    setContainer(): void {}
+    setContainer(): void {
+        // empty
+    }
 }

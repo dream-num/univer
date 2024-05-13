@@ -22,24 +22,36 @@ import {
 import type { IRenderContext } from '@univerjs/engine-render';
 import type { ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import {
+    InsertColMutation,
+    InsertRowMutation,
+    RemoveColMutation,
+    RemoveRowMutation,
     SetColHiddenMutation,
     SetColVisibleMutation,
     SetRowHiddenMutation,
     SetRowVisibleMutation,
     SetSpecificColsVisibleCommand,
     SetSpecificRowsVisibleCommand,
+    SetWorksheetColWidthMutation,
+    SetWorksheetRowIsAutoHeightMutation,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
-import { SHEET_COMPONENT_UNHIDE_LAYER_INDEX } from '../common/keys';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { HeaderUnhideShape, HeaderUnhideShapeType, UNHIDE_ICON_SIZE } from '../views/header-unhide-shape';
-import { getCoordByCell, getSheetObject } from './utils/component-tools';
+import { SHEET_COMPONENT_UNHIDE_LAYER_INDEX } from '../../common/keys';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import { HeaderUnhideShape, HeaderUnhideShapeType, UNHIDE_ICON_SIZE } from '../../views/header-unhide-shape';
+import { getCoordByCell, getSheetObject } from '../utils/component-tools';
 
 const HEADER_UNHIDE_CONTROLLER_SHAPE = '__SpreadsheetHeaderUnhideSHAPEControllerShape__';
 
 const RENDER_COMMANDS: string[] = [
+    InsertColMutation.id,
+    InsertRowMutation.id,
+    RemoveColMutation.id,
+    RemoveRowMutation.id,
+    SetWorksheetColWidthMutation.id,
+    SetWorksheetRowIsAutoHeightMutation.id,
     SetRowHiddenMutation.id,
     SetRowVisibleMutation.id,
     SetColHiddenMutation.id,
@@ -72,38 +84,33 @@ export class HeaderUnhideRenderController extends RxDisposable {
     private _init(): void {
         let activeSheetId: string = '';
 
-        this._context.unit.activeSheet$.pipe(takeUntil(this.dispose$))
-            .subscribe((worksheet) => {
-                this._clearShapes();
+        this._context.unit.activeSheet$.pipe(takeUntil(this.dispose$)).subscribe((worksheet) => {
+            this._clearShapes();
 
-                if (!worksheet) {
-                    activeSheetId = '';
-                    return;
-                };
+            if (!worksheet) {
+                activeSheetId = '';
+                return;
+            };
 
-                activeSheetId = worksheet.getSheetId();
-                this._update(this._workbook, worksheet);
-            });
+            activeSheetId = worksheet.getSheetId();
+            this._update(this._workbook, worksheet);
+        });
 
         // Re-render hidden rows / cols when specific commands are executed.
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command) => {
-                if (
-                    !RENDER_COMMANDS.includes(command.id) ||
-                    !command.params ||
-                    !(command.params as ISheetCommandSharedParams).unitId ||
-                    (command.params as ISheetCommandSharedParams).subUnitId !== activeSheetId
-                ) {
-                    return;
-                }
+        this.disposeWithMe(this._commandService.onCommandExecuted((command) => {
+            if (!RENDER_COMMANDS.includes(command.id) ||
+                !command.params ||
+                !(command.params as ISheetCommandSharedParams).unitId ||
+                (command.params as ISheetCommandSharedParams).subUnitId !== activeSheetId) {
+                return;
+            }
 
-                const workbook = this._workbook;
-                const worksheet = workbook.getSheetBySheetId((command.params as ISheetCommandSharedParams).subUnitId);
-                if (worksheet) {
-                    this._update(workbook, worksheet);
-                }
-            })
-        );
+            const workbook = this._workbook;
+            const worksheet = workbook.getSheetBySheetId((command.params as ISheetCommandSharedParams).subUnitId);
+            if (worksheet) {
+                this._update(workbook, worksheet);
+            }
+        }));
     }
 
     private _update(workbook: Workbook, worksheet: Worksheet): void {
@@ -176,6 +183,7 @@ export class HeaderUnhideRenderController extends RxDisposable {
 
         scene.addObjects(colShapes, SHEET_COMPONENT_UNHIDE_LAYER_INDEX);
         scene.addObjects(rowShapes, SHEET_COMPONENT_UNHIDE_LAYER_INDEX);
+
         // 3. clear the previous shapes and update the shapes
         this._clearShapes();
         this._shapes = { cols: colShapes, rows: rowShapes };

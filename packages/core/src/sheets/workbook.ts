@@ -173,10 +173,6 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         return true;
     }
 
-    getParentRenderUnitId() {
-        return this._snapshot.parentRenderUnitId;
-    }
-
     getSheetOrders(): Readonly<string[]> {
         return this._snapshot.sheetOrder;
     }

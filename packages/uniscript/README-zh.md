@@ -14,11 +14,11 @@
 用户可以在 @univerjs/uniscript 提供的代码编辑器中编写业务逻辑，以达成更加灵活的业务需求。如图所示，用户可以编写一段 Uniscript 用于从选区中读取身份证号并验证这些身份证号的合法性，把不合法的身份证号的背景标记为红色。
 
 :::caution
-Uniscript 仍在试验阶段，建议不要在生产环境中使用。你可以在[路线图](https://univer.ai/zh-cn/guides/introduction/roadmap/)了解 Uniscript 的迭代计划。
+Uniscript 仍在试验阶段，建议不要在生产环境中使用。你可以在[路线图](https://univer.ai/zh-CN/guides/sheet/roadmap/)了解 Uniscript 的迭代计划。
 :::
 
 :::tip
-Uniscript 的 DSL 实际上是一套封装 Univer 内部实现细节的 Facade API，这套 API 定义在[这里](https://univer.ai/guides/facade/)。
+Uniscript 的 DSL 实际上是一套封装 Univer 内部实现细节的 Facade API，这套 API 定义在[这里](https://univer.ai/guides/sheet/facade/facade)。
 :::
 
 ## 使用指南

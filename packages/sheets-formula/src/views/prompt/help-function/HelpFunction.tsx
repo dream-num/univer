@@ -24,6 +24,7 @@ import React, { useEffect, useState } from 'react';
 import { IEditorService } from '@univerjs/ui';
 import type { IHelpFunctionOperationParams } from '../../../services/prompt.service';
 import { IFormulaPromptService } from '../../../services/prompt.service';
+import { generateParam } from '../../../services/utils';
 import styles from './index.module.less';
 
 export function HelpFunction() {
@@ -213,7 +214,7 @@ const Help = (props: IHelpProps) => {
                             className={active === i ? styles.formulaHelpFunctionActive : styles.formulaHelpParamActive}
                             onClick={() => onClick(i)}
                         >
-                            {item.repeat ? `[${item.name},...]` : item.name}
+                            {generateParam(item)}
                         </span>
                         {i === value.length - 1 ? '' : ','}
                     </span>

@@ -34,7 +34,9 @@ export function toDisposable(v: DisposableLike): IDisposable {
     let disposed = false;
 
     if (!v) {
-        return toDisposable(() => { });
+        return toDisposable(() => {
+            // empty
+        });
     }
 
     if (isSubscription(v)) {

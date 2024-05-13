@@ -23,7 +23,7 @@ export { expandToContinuousRange } from './commands/commands/utils/selection-uti
 export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from './commands/commands/set-selection.command';
 export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from './commands/operations/cell-edit.operation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';
-export { ScrollController } from './controllers/scroll.controller';
+export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 export { deriveStateFromActiveSheet$ } from './controllers/menu/menu-util';
 export { SheetRenderController } from './controllers/sheet-render.controller';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
@@ -47,6 +47,7 @@ export {
     getSheetObject,
     getTransformCoord,
 } from './controllers/utils/component-tools';
+export { useActiveWorkbook, useActiveWorksheet } from './components/hook';
 export { whenSheetEditorFocused } from './controllers/shortcuts/utils';
 export type { IEditorBridgeServiceParam } from './services/editor-bridge.service';
 export { enUS, zhCN } from './locale';
@@ -81,7 +82,7 @@ export { UniverSheetsUIPlugin } from './sheets-ui-plugin';
 export { SheetCanvasView } from './views/sheet-canvas-view';
 export { HoverManagerService } from './services/hover-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
-export { HoverController } from './controllers/hover.controller';
+export { HoverRenderController } from './controllers/hover-render.controller';
 export { SHEET_VIEW_KEY } from './common/keys';
 export { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 export { mergeSetRangeValues } from './services/clipboard/utils';

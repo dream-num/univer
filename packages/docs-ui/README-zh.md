@@ -10,7 +10,7 @@
 `@univerjs/docs-ui` 提供了 Doc 的 UI。
 
 :::info
-`@univerjs/docs-ui` 仍在试验阶段，建议不要在生产环境中使用。你可以在[路线图](/guides/roadmap)了解迭代计划。
+`@univerjs/docs-ui` 仍在试验阶段，建议不要在生产环境中使用。你可以在[路线图](https://univer.ai/guides/sheet/roadmap)了解迭代计划。
 :::
 
 ## 使用指南

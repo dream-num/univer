@@ -57,10 +57,16 @@ export const SetRangeValuesCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const target = getSheetCommandTarget(univerInstanceService);
-        if (!target) return false;
-
+        // use subUnitId and unitId from params first
+        const target = getSheetCommandTarget(univerInstanceService, {
+            subUnitId: params.subUnitId,
+            unitId: params.unitId,
+        });
+        if (!target) {
+            return false;
+        }
         const { subUnitId, unitId } = target;
+
         const { value, range } = params;
         const currentSelections = range ? [range] : selectionManagerService.getSelectionRanges();
         if (!currentSelections || !currentSelections.length) {

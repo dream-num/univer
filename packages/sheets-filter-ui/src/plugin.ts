@@ -21,7 +21,6 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { zhCN } from './locale';
 import { SheetsFilterUIController } from './controllers/sheets-filter-ui.controller';
 import { SheetsFilterPanelService } from './services/sheets-filter-panel.service';
-import { SheetsFilterRenderController } from './controllers/sheets-filter-render.controller';
 
 const NAME = 'UNIVER_SHEETS_FILTER_UI_PLUGIN';
 
@@ -45,7 +44,6 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
         ([
             [SheetsFilterPanelService],
             [SheetsFilterUIController],
-            [SheetsFilterRenderController],
         ] as Dependency[]).forEach((d) => injector.add(d));
     }
 }

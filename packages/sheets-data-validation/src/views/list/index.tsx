@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { memo, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Injector } from '@wendellhu/redi';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
@@ -28,21 +28,30 @@ import { AddSheetDataValidationCommand } from '../../commands/commands/data-vali
 import { DataValidationPanelService } from '../../services/data-validation-panel.service';
 import styles from './index.module.less';
 
-export const DataValidationList = memo(() => {
+export function DataValidationList() {
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook = useObservable(
+        () => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET),
+        undefined,
+        undefined,
+        []
+    );
+
+    if (!workbook) return null;
+    return <DataValidationListWithWorkbook workbook={workbook} />;
+}
+
+function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
     const dataValidationModel = useDependency(DataValidationModel);
     const commandService = useDependency(ICommandService);
     const injector = useDependency(Injector);
     const dataValidationPanelService = useDependency(DataValidationPanelService);
-    const workbook = useObservable(
-        () => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET),
-        undefined,
-        true,
-        []
-    ) as Workbook;
+
     const localeService = useDependency(LocaleService);
     const [rules, setRules] = useState<ISheetDataValidationRule[]>([]);
-    const worksheet = useObservable(workbook.activeSheet$, workbook.getActiveSheet()) ?? workbook.getActiveSheet();
+
+    const { workbook } = props;
+    const worksheet = useObservable(workbook.activeSheet$, undefined, true)!;
     const unitId = workbook.getUnitId();
     const subUnitId = worksheet.getSheetId();
     const manager = dataValidationModel.ensureManager(unitId, subUnitId);
@@ -110,4 +119,4 @@ export const DataValidationList = memo(() => {
             </div>
         </div>
     );
-});
+};

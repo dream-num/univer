@@ -24,11 +24,13 @@ import { HoverManagerService } from '@univerjs/sheets-ui';
 export class FSheetHooks {
     constructor(
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService
-    ) { }
+    ) {
+        // empty
+    }
 
     /**
      * Subscribe to the location information of the currently hovered cell
-     * @returns
+     * @returns a disposable object that can be used to unsubscribe from the event
      */
     onCellPointerMove(callback: (cellPos: Nullable<IHoverCellPosition>) => void): IDisposable {
         return toDisposable(this._hoverManagerService.currentCell$.subscribe(callback));

@@ -91,7 +91,9 @@ export interface IUndoRedoStatus {
 const STACK_CAPACITY = 20;
 
 abstract class MultiImplementationCommand implements IDisposable {
-    dispose(): void { }
+    dispose(): void {
+        // empty
+    }
 
     async dispatchToHandlers(): Promise<boolean> {
         return false;

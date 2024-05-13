@@ -51,11 +51,16 @@ export const OpenValidationPanelOperation: ICommand<IOpenValidationPanelOperatio
             subUnitId,
             rule,
         });
-        sidebarService.open({
+
+        const disposable = sidebarService.open({
             header: { title: isAdd ? 'dataValidation.panel.addTitle' : 'dataValidation.panel.title' },
             children: { label: DATA_VALIDATION_PANEL },
             width: 312,
+            onClose: () => dataValidationPanelService.close(),
         });
+
+        dataValidationPanelService.setCloseDisposable(disposable);
+
         return true;
     },
 };

@@ -203,7 +203,9 @@ export class NodePositionConvertToCursor {
     constructor(
         private _documentOffsetConfig: IDocumentOffsetConfig,
         private _docSkeleton: DocumentSkeleton
-    ) {}
+    ) {
+        // super
+    }
 
     getRangePointData(startOrigin: Nullable<INodePosition>, endOrigin: Nullable<INodePosition>) {
         const borderBoxPointGroup: IPoint[][] = [];

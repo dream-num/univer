@@ -24,7 +24,7 @@ import { Subject } from 'rxjs';
 import type { IHoverCellPosition } from '@univerjs/sheets-ui';
 import { HoverManagerService } from '@univerjs/sheets-ui';
 import type { FUniver } from '../../facade';
-import { createTestBed } from '../../__tests__/create-test-bed';
+import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 import { FSheetHooks } from '../f-sheet-hooks';
 
 describe('Test FSheetHooks', () => {
@@ -59,7 +59,7 @@ describe('Test FSheetHooks', () => {
             currentCell$: currentCell$.asObservable(),
         };
 
-        const testBed = createTestBed(undefined, [
+        const testBed = createFacadeTestBed(undefined, [
             [HoverManagerService, { useValue: mockHoverManagerService }],
         ]);
         get = testBed.get;

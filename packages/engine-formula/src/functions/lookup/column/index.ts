@@ -22,6 +22,10 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Column extends BaseFunction {
+    override minParams = 0;
+
+    override maxParams = 1;
+
     override calculate(
         reference?: BaseValueObject
     ) {

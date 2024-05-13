@@ -16,14 +16,30 @@
 
 import type { IFunctionParam } from '@univerjs/engine-formula';
 import React from 'react';
+import { generateParam } from '../../../services/utils';
 
 interface IFunctionHelpProps {
     prefix?: string;
     value?: IFunctionParam[];
 }
 
+/**
+ * Determine the parameter format
+ * ┌─────────┬────────┬─────────────┐
+ * │ Require │ Repeat │  Parameter  │
+ * ├─────────┼────────┼─────────────┤
+ * │ 0       │ 0      │ [Number]    │
+ * │ 1       │ 0      │ Number      │
+ * │ 0       │ 1      │ [Number,...] │
+ * │ 1       │ 1      │ Number,...   │
+ * └─────────┴────────┴─────────────┘
+ *
+ * @param props
+ * @returns
+ */
 export function FunctionHelp(props: IFunctionHelpProps) {
     const { prefix, value } = props;
+
     return (
         <div>
             <span>
@@ -33,7 +49,7 @@ export function FunctionHelp(props: IFunctionHelpProps) {
             {value &&
                 value.map((item: IFunctionParam, i: number) => (
                     <span key={i}>
-                        <span>{item.repeat ? `[${item.name},...]` : item.name}</span>
+                        <span>{generateParam(item)}</span>
                         {i === value.length - 1 ? '' : ','}
                     </span>
                 ))}

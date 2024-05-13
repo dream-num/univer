@@ -23,15 +23,11 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { BaseFunction } from '../../base-function';
 
 export class Sumifs extends BaseFunction {
+    override minParams = 3;
+
+    override maxParams = 255;
+
     override calculate(sumRange: BaseValueObject, ...variants: BaseValueObject[]) {
-        if (sumRange == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
-        if (variants.length < 2) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
         if (sumRange.isError()) {
             return ErrorValueObject.create(ErrorType.NA);
         }

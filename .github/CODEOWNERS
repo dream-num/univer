@@ -8,53 +8,45 @@ packages/core/src/services/resource-loader @Gggpound
 packages/core/src/services/resource-manager @Gggpound
 packages/core/src/services/permission @Gggpound
 
-# engines
-packages/engine-render @DR-Univer @lumixraku
+# basics
+packages/design @jikkai
 packages/engine-formula @DR-Univer
 packages/engine-numfmt @Gggpound
-
-# ui
-packages/ui @jikkai @wzhudev @Jocs
+packages/engine-render @DR-Univer @lumixraku
+packages/find-replace @siam-ese
+packages/image @DR-Univer
+packages/network @wzhudev
+packages/rpc @wzhudev
+packages/ui @jikkai @Jocs
 packages/ui/src/services/clipboard @ybzky
 packages/ui/src/services/popup/canvas-popup.service.ts @weird94
-packages/design @jikkai
-
-# common
-packages/image @DR-Univer
 packages/uniscript @wzhudev
-packages/find-replace @wzhudev
 
 # facade
 packages/facade @dushusir @hexf00
 
-# network
-packages/rpc @wzhudev
-packages/network @wzhudev
-
-# docs
+# business - docs
 packages/docs @DR-Univer @Jocs
 packages/docs-ui @jikkai @Jocs
 
-# sheets
+# business - sheets
 packages/sheets @wzhudev @DR-Univer
-packages/sheets/src/services/numfmt @Gggpound
-packages/sheets/src/services/ref-range @Gggpound
-packages/sheets/src/services/ref-range @weird94
-packages/sheets/src/services/sheet-interceptor @Gggpound
 packages/sheets-ui @jikkai @wzhudev
 packages/sheets-ui/src/controllers/clipboard @yuhongz
 packages/sheets-ui/src/controllers/editor @Jocs
 packages/sheets-ui/src/services/clipboard @yuhongz
 packages/sheets-ui/src/services/editor @Jocs
 packages/sheets-ui/src/services/editor-bridge.service.ts @Jocs
+packages/sheets/src/services/numfmt @Gggpound
+packages/sheets/src/services/ref-range @Gggpound
+packages/sheets/src/services/ref-range @weird94
+packages/sheets/src/services/sheet-interceptor @Gggpound
 ## find-replace
-packages/sheets-find-replace @wzhudev
+packages/sheets-find-replace @siam-ese
 ## number-format
 packages/sheets-numfmt @Gggpound
 ## formula
 packages/sheets-formula @DR-Univer @Dushusir
-## misc
-packages/sheets-zen-editor @Jocs
 ## conditional-formatting
 packages/sheets-conditional-formatting @Gggpound
 packages/sheets-conditional-formatting-ui @Gggpound
@@ -62,9 +54,11 @@ packages/sheets-conditional-formatting-ui @Gggpound
 packages/data-validation @weird94
 packages/sheet-data-validation @weird94
 ## filter
-packages/sheets-filter @wzhudev @yuhongz
-packages/sheets-filter-ui @wzhudev @yuhongz
+packages/sheets-filter @ybzky @yuhongz
+packages/sheets-filter-ui @ybzky @yuhongz
+## misc
+packages/sheets-zen-editor @Jocs
 
-# slides
-packages/slides @wzhudev @DR-Univer @jikkai
-packages/slides-ui @jikkai @wzhudev
+# business - slides
+packages/slides @DR-Univer @jikkai
+packages/slides-ui @jikkai

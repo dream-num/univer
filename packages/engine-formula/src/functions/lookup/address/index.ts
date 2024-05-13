@@ -24,6 +24,10 @@ import { StringValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 
 export class Address extends BaseFunction {
+    override minParams = 2;
+
+    override maxParams = 5;
+
     override calculate(
         rowNumber: BaseValueObject,
         columnNumber: BaseValueObject,
@@ -31,10 +35,6 @@ export class Address extends BaseFunction {
         a1?: BaseValueObject,
         sheetText?: BaseValueObject
     ) {
-        if (rowNumber == null || columnNumber == null) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
         if (rowNumber.isError()) {
             return rowNumber;
         }

@@ -77,8 +77,8 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                             <div className={styles.sheetsFilterPanelValuesItem}>
                                 <div className={styles.sheetsFilterPanelValuesItemInner}>
                                     <Checkbox checked={item.checked} onChange={() => onFilterCheckToggled(item, !item.checked)}></Checkbox>
-                                    <Tooltip showIfEllipsis placement="top" title={`这是一段AI生成的占位符文字，没有实际的意义，仅仅在于延长文字的生命 ${item.value}`}>
-                                        <span className={styles.sheetsFilterPanelValuesItemText}>{`这是一段AI生成的占位符文字，没有实际的意义，仅仅在于延长文字的生命 ${item.value}`}</span>
+                                    <Tooltip showIfEllipsis placement="top" title={item.value}>
+                                        <span className={styles.sheetsFilterPanelValuesItemText}>{item.value}</span>
                                     </Tooltip>
                                     <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${item.count})`}</span>
                                     <Button

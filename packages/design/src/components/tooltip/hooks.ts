@@ -20,7 +20,7 @@ import canUseDom from 'rc-util/lib/Dom/canUseDom';
 
 
 /**
- * All elements are observed by a single ResizeObserver is got greater performance than each elements observed by separate ResizeObserver
+ * All elements are observed by a single ResizeObserver is got greater performance than each element observed by separate ResizeObserver
  * See issue https://github.com/WICG/resize-observer/issues/59#issuecomment-408098151
  */
 let _resizeObserver: ResizeObserver;

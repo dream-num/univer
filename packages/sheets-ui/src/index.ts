@@ -89,3 +89,4 @@ export type { IAutoFillLocation } from './services/auto-fill/type';
 export type { IDiscreteRange } from './controllers/utils/range-tools';
 export { virtualizeDiscreteRanges, rangeToDiscreteRange } from './controllers/utils/range-tools';
 export { type IHoverCellPosition } from './services/hover-manager.service';
+export { AutoHeightController } from './controllers/auto-height.controller';

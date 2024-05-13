@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type {
     ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,
@@ -33,10 +33,14 @@ import {
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { Subject } from 'rxjs';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, AutoHeightController)
-export class AutoHeightController {
+export class AutoHeightController extends Disposable {
+    private _autoHeightDirtyRanges$ = new Subject<IRange[]>();
+    autoHeightDirtyRanges$ = this._autoHeightDirtyRanges$.asObservable();
+
     constructor(
         @Inject(Injector) private _injector: Injector,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
@@ -44,6 +48,7 @@ export class AutoHeightController {
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
+        super();
         this._initialize();
     }
 
@@ -92,7 +97,7 @@ export class AutoHeightController {
         const { _sheetInterceptorService: sheetInterceptorService, _selectionManagerService: selectionManagerService } =
             this;
         // for intercept'SetRangeValuesCommand' command.
-        sheetInterceptorService.interceptCommand({
+        this.disposeWithMe(sheetInterceptorService.interceptCommand({
             getMutations: (command: { id: string; params: ISetRangeValuesRangeMutationParams }) => {
                 if (command.id !== SetRangeValuesCommand.id) {
                     return {
@@ -103,9 +108,9 @@ export class AutoHeightController {
 
                 return this._getUndoRedoParamsOfAutoHeight(command.params.range);
             },
-        });
+        }));
         // for intercept 'sheet.command.set-row-is-auto-height' command.
-        sheetInterceptorService.interceptCommand({
+        this.disposeWithMe(sheetInterceptorService.interceptCommand({
             getMutations: (command: { id: string; params: ISetWorksheetRowIsAutoHeightMutationParams }) => {
                 if (command.id !== SetWorksheetRowIsAutoHeightCommand.id) {
                     return {
@@ -116,10 +121,10 @@ export class AutoHeightController {
 
                 return this._getUndoRedoParamsOfAutoHeight(command.params.ranges);
             },
-        });
+        }));
 
         // for intercept set style command.
-        sheetInterceptorService.interceptCommand({
+        this.disposeWithMe(sheetInterceptorService.interceptCommand({
             getMutations: (command: { id: string; params: ISetStyleCommandParams<number> }) => {
                 if (command.id !== SetStyleCommand.id) {
                     return {
@@ -150,6 +155,14 @@ export class AutoHeightController {
 
                 return this._getUndoRedoParamsOfAutoHeight(selections);
             },
-        });
+        }));
+
+        this.disposeWithMe(this.autoHeightDirtyRanges$.subscribe((ranges) => {
+            this._getUndoRedoParamsOfAutoHeight(ranges);
+        }));
+    }
+
+    markRangeAutoHeightDirty(ranges: IRange[]) {
+        this._autoHeightDirtyRanges$.next(ranges);
     }
 }

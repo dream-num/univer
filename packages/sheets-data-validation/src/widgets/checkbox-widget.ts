@@ -76,8 +76,9 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {}
 
-    calcCellAutoHeight(): number | undefined {
-        return undefined;
+    calcCellAutoHeight(info: ICellRenderContext): number | undefined {
+        const { style } = info;
+        return (style?.fs ?? 10) * 1.6;
     }
 
     private async _parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
@@ -162,6 +163,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
 
         return false;
     }
+
 
     async onPointerDown(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
         if (evt.button === 2) {

@@ -17,7 +17,7 @@
 /* eslint-disable ts/no-explicit-any */
 
 import type { Nullable } from '@univerjs/core';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Observable, Subscription } from 'rxjs';
 
 type ObservableOrFn<T> = Observable<T> | (() => Observable<T>);
@@ -51,15 +51,17 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
  * @param shouldHaveSyncValue If true, the observable should emit a value synchronously.
  * @param deps The dependencies to trigger a re-subscription.
  */
-export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: T, shouldHaveSyncValue?: boolean, deps: any[] = []): T | undefined {
+export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: T, shouldHaveSyncValue?: boolean, deps?: any[]): T | undefined {
     if (typeof observable === 'function' && !deps) {
         throw new Error('[useObservable]: expect deps when observable is a function! Otherwise it would cause an infinite loop.');
     }
 
     const observableRef = useRef<Observable<T> | null>(null);
     const subscriptionRef = useRef<Subscription | null>(null);
-    const depsRef = useRef<any[] | undefined>(deps ?? undefined);
     const initializedRef = useRef<boolean>(false);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const destObservable = useMemo(() => observable, [...(typeof deps !== 'undefined' ? deps : [observable])]);
 
     // This state is only for trigger React to re-render. We do not use `setValue` directly because it may cause
     // memory leaking.
@@ -67,8 +69,8 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
 
     const valueRef = useRef((() => {
         let innerDefaultValue: T | undefined;
-        if (observable) {
-            const sub = unwrap(observable).subscribe((value) => {
+        if (destObservable) {
+            const sub = unwrap(destObservable).subscribe((value) => {
                 initializedRef.current = true;
                 innerDefaultValue = value;
             });
@@ -80,26 +82,9 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
     })());
 
     useEffect(() => {
-        const shouldResubscribe = (() => {
-            if (typeof depsRef.current !== 'undefined') {
-                const _deps = deps ?? [];
-                if (showArrayNotEqual(depsRef.current, _deps)) {
-                    depsRef.current = _deps;
-                    return true;
-                }
-
-                return false;
-            }
-
-            return true;
-        })();
-
         let subscription: Subscription | null = null;
-        if (shouldResubscribe && observable) {
-            subscriptionRef.current?.unsubscribe();
-            subscriptionRef.current = null;
-
-            observableRef.current = unwrap(observable);
+        if (destObservable) {
+            observableRef.current = unwrap(destObservable);
             subscription = subscriptionRef.current = observableRef.current.subscribe((value) => {
                 valueRef.current = value;
                 setRenderCounter((prev) => prev + 1);
@@ -110,8 +95,7 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
             subscription?.unsubscribe();
             subscriptionRef.current = null;
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [observable, ...deps]);
+    }, [destObservable]);
 
     if (shouldHaveSyncValue && !initializedRef.current) {
         throw new Error('[useObservable]: expect shouldHaveSyncValue but not getting a sync value!');

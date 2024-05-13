@@ -22,4 +22,6 @@ export { SheetsThreadCommentController } from './controllers/sheets-thread-comme
 export { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
 export { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
 export { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
-export { SHEETS_THREAD_COMMENT, UniverSheetsThreadCommentPlugin } from './plugin';
+export { UniverSheetsThreadCommentPlugin } from './plugin';
+export { SHEETS_THREAD_COMMENT } from './types/const';
+export { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thread-comment-copy-paste.controller';

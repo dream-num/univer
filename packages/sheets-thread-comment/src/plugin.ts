@@ -25,8 +25,8 @@ import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
 import { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 import { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
 import { SheetsThreadCommentRenderController } from './controllers/sheets-thread-comment-render.controller';
-
-export const SHEETS_THREAD_COMMENT = 'SHEETS_THREAD_COMMENT';
+import { SHEETS_THREAD_COMMENT } from './types/const';
+import { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thread-comment-copy-paste.controller';
 
 const defaultConfig: IThreadCommentUIConfig = {
     mentions: [{
@@ -59,6 +59,7 @@ export class UniverSheetsThreadCommentPlugin extends UniverThreadCommentUIPlugin
             [SheetsThreadCommentController],
             [SheetsThreadCommentRefRangeController],
             [SheetsThreadCommentRenderController],
+            [SheetsThreadCommentCopyPasteController],
             [SheetsThreadCommentPopupService],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);

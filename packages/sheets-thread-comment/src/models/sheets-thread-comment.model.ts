@@ -187,7 +187,6 @@ export class SheetsThreadCommentModel extends Disposable {
 
     getByLocation(unitId: string, subUnitId: string, row: number, column: number): string | undefined {
         const matrix = this._ensureCommentMatrix(unitId, subUnitId);
-
         return matrix.getValue(row, column);
     }
 

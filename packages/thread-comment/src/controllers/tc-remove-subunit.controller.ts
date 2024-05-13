@@ -26,7 +26,7 @@ import { AddCommentMutation, DeleteCommentMutation, type IDeleteCommentMutationP
 export class ThreadCommentRemoveSubUnitController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @Inject(ThreadCommentModel) private _threadCommentModel: ThreadCommentModel
     ) {
         super();

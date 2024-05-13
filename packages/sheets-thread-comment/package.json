@@ -85,7 +85,7 @@
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.3",
+        "@wendellhu/redi": "^0.14.0",
         "clsx": "^2.1.0",
         "less": "^4.2.0",
         "react": "^18.2.0",

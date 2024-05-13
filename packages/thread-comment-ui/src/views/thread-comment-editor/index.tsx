@@ -153,8 +153,8 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                         key={mention.trigger}
                         trigger={mention.trigger}
                         data={mention.getMentions ?
-                            (query) => mention.getMentions!(query)
-                                .then((res) => res.map(transformMention)) as any
+                            (query, callback) => mention.getMentions!(query)
+                                .then((res) => res.map(transformMention)).then(callback) as any
                             : (mention.mentions ?? []).map(transformMention)}
                         displayTransform={(id, label) => `@${label} `}
                         renderSuggestion={mention.renderSuggestion ?? defaultRenderSuggestion}

@@ -92,11 +92,12 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                     });
 
                     return combineLatest([
+                        this._selectionRenderService.usable$,
                         fromCallback(this._commandService.onCommandExecuted),
-                        this._selectionRenderService.usable$.pipe(filter(Boolean)),
                     ]).pipe(
-                        filter(([[command]]) =>
-                            command.type === CommandType.MUTATION
+                        filter(([usable, [command]]) =>
+                            usable
+                            && command.type === CommandType.MUTATION
                             && (command.params as ISheetCommandSharedParams).unitId === workbook.getUnitId()
                             && FILTER_MUTATIONS.has(command.id)
                         ),

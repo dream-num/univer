@@ -30,14 +30,6 @@ function unwrap<T>(o: ObservableOrFn<T>): Observable<T> {
     return o;
 }
 
-function showArrayNotEqual(arr1: unknown[], arr2: unknown[]): boolean {
-    if (arr1.length !== arr2.length) {
-        return true;
-    }
-
-    return arr1.some((value, index) => value !== arr2[index]);
-}
-
 export function useObservable<T>(observable: ObservableOrFn<T>, defaultValue: T | undefined, shouldHaveSyncValue?: true): T;
 export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue: T): T;
 export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: undefined): T | undefined;

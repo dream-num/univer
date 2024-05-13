@@ -15,7 +15,9 @@
  */
 
 import type { ICellData, Nullable, Styles } from '@univerjs/core';
-import numfmt from '@univerjs/engine-numfmt';
+// @ts-ignore
+import numfmt from 'numfmt';
+import { operatorToken } from '../../basics/token';
 
 const currencySymbols = [
     '$',
@@ -46,6 +48,20 @@ const currencySymbols = [
     '₾',
     '₿',
 ];
+
+type FormatType =
+    | 'currency'
+    | 'date'
+    | 'datetime'
+    | 'error'
+    | 'fraction'
+    | 'general'
+    | 'grouped'
+    | 'number'
+    | 'percent'
+    | 'scientific'
+    | 'text'
+    | 'time';
 
 enum NumberFormatType {
     General,
@@ -188,10 +204,54 @@ function getNumberFormatType(pattern: string): NumberFormatType {
         return NumberFormatType.Accounting;
     }
 
-    const type = numfmt.getInfo(pattern).type || 'unknown';
+    const type = numfmt.getInfo(pattern).type as FormatType || 'unknown';
     return NumberFormatTypeMap[type];
 }
 
 function isAccounting(pattern: string) {
     return !!currencySymbols.find((code) => pattern.includes(code)) && pattern.startsWith('_(');
 };
+
+
+/**
+ * The number format of the formula inherits the number format of the referenced cell, usually taking the format of the cell at the front position, but some formats have higher priority, there are some special cases.
+ *
+ * e.g.
+ * Currency * Currency = General
+ * Currency / Currency = General
+ *
+ * For two cells with the same number format, the calculated result should inherit the following number format
+ * ┌─────┬─────────┬──────────┬────────────┬─────────┬─────────┬────────────┬──────────┬────────────┬──────┬─────────┬──────────┐
+ * │     │ Number  │ Currency │ Accounting │ Date    │ Time    │ Percentage │ Fraction │ Scientific │ Text │ Special │ Custom   │
+ * ├─────┼─────────┼──────────┼────────────┼─────────┼─────────┼────────────┼──────────┼────────────┼──────┼─────────┼──────────┤
+ * │  +  │ Number  │ Currency │ Accounting │ General │ Time    │ Percentage │ Fraction │ Scientific │ Text │ Special │ General  │
+ * │  -  │ Number  │ Currency │ Accounting │ General │ Time    │ Percentage │ Fraction │ Scientific │ Text │ Special │ General  │
+ * │  *  │ General │ General  │ General    │ General │ General │ Percentage │ Fraction │ Scientific │ Text │ General │ General  │
+ * │  /  │ General │ General  │ General    │ General │ General │ Percentage │ Fraction │ Scientific │ Text │ General │ General  │
+ * └─────┴─────────┴──────────┴────────────┴─────────┴─────────┴────────────┴──────────┴────────────┴──────┴─────────┴──────────┘
+ *
+ * @param previousPattern
+ * @param nextPattern
+ */
+export function comparePatternPriority(previousPattern: string, nextPattern: string, operator: operatorToken) {
+    const previousPatternType = getNumberFormatType(previousPattern);
+    const nextPatternType = getNumberFormatType(nextPattern);
+
+    if (operator === operatorToken.PLUS || operator === operatorToken.MINUS) {
+        if ((previousPatternType === NumberFormatType.Date && nextPatternType === NumberFormatType.Date) || (previousPatternType === NumberFormatType.Custom && nextPatternType === NumberFormatType.Custom)) {
+            return '';
+        }
+
+        return nextPattern;
+    }
+
+    if (operator === operatorToken.MULTIPLY || operator === operatorToken.DIVIDED) {
+        if ((previousPatternType === NumberFormatType.Percentage && nextPatternType === NumberFormatType.Percentage) || (previousPatternType === NumberFormatType.Fraction && nextPatternType === NumberFormatType.Fraction) || (previousPatternType === NumberFormatType.Scientific && nextPatternType === NumberFormatType.Scientific) || (previousPatternType === NumberFormatType.Text && nextPatternType === NumberFormatType.Text)) {
+            return nextPattern;
+        }
+
+        return '';
+    }
+
+    return previousPattern || nextPattern;
+}

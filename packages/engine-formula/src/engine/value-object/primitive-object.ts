@@ -20,10 +20,11 @@ import { isRealNum } from '@univerjs/core';
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
-import { compareToken } from '../../basics/token';
+import { compareToken, operatorToken } from '../../basics/token';
 import { compareWithWildcard, isWildcard } from '../utils/compare';
 import { ceil, floor, mod, pow, round } from '../utils/math-kit';
 import { FormulaAstLRU } from '../../basics/cache-lru';
+import { comparePatternPriority } from '../utils/numfmt-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 export type PrimitiveValueType = string | boolean | number | null;
@@ -442,7 +443,7 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         // Set number format
-        object.setPattern(this.getPattern() || valueObject.getPattern());
+        object.setPattern(comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.PLUS));
 
         return object;
     }
@@ -467,7 +468,7 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         // Set number format
-        object.setPattern(this.getPattern() || valueObject.getPattern());
+        object.setPattern(comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.MINUS));
 
         return object;
     }
@@ -484,7 +485,7 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         // Set number format
-        object.setPattern(this.getPattern() || valueObject.getPattern());
+        object.setPattern(comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.MULTIPLY));
 
         return object;
     }
@@ -505,7 +506,7 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         // Set number format
-        object.setPattern(this.getPattern() || valueObject.getPattern());
+        object.setPattern(comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.DIVIDED));
 
         return object;
     }

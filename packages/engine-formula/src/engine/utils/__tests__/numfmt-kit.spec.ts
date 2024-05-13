@@ -15,7 +15,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { compareNumfmtPriority } from '../numfmt-kit';
+import { compareNumfmtPriority, comparePatternPriority } from '../numfmt-kit';
+import { operatorToken } from '../../../basics/token';
 
 const numfmtMap = {
     currency: '"¥"#,##0.00_);[Red]("¥"#,##0.00)',
@@ -160,5 +161,24 @@ describe('Test numfmt kit', () => {
         expect(compareNumfmtPriority(numfmtMap.accounting, numfmtMap.time)).toBe(numfmtMap.time);
         expect(compareNumfmtPriority(numfmtMap.accounting, numfmtMap.unknown)).toBe(numfmtMap.unknown);
         expect(compareNumfmtPriority(numfmtMap.accounting, numfmtMap.accounting)).toBe(numfmtMap.accounting);
+    });
+
+    it('Function comparePatternPriority', () => {
+        // Currency + Currency = Currency
+        expect(comparePatternPriority(numfmtMap.currency, numfmtMap.currency, operatorToken.PLUS)).toBe(numfmtMap.currency);
+        // Currency - Currency = Currency
+        expect(comparePatternPriority(numfmtMap.currency, numfmtMap.currency, operatorToken.MINUS)).toBe(numfmtMap.currency);
+        // Currency * Currency = General
+        expect(comparePatternPriority(numfmtMap.currency, numfmtMap.currency, operatorToken.MULTIPLY)).toBe('');
+        // Currency / Currency = General
+        expect(comparePatternPriority(numfmtMap.currency, numfmtMap.currency, operatorToken.DIVIDED)).toBe('');
+        // Date + Date = General
+        expect(comparePatternPriority(numfmtMap.date, numfmtMap.date, operatorToken.PLUS)).toBe('');
+        // Date - Date = General
+        expect(comparePatternPriority(numfmtMap.date, numfmtMap.date, operatorToken.MINUS)).toBe('');
+        // Date * Date = General
+        expect(comparePatternPriority(numfmtMap.date, numfmtMap.date, operatorToken.MULTIPLY)).toBe('');
+        // Date / Date = General
+        expect(comparePatternPriority(numfmtMap.date, numfmtMap.date, operatorToken.DIVIDED)).toBe('');
     });
 });

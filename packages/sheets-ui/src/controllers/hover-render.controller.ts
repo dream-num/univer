@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
+import { Disposable, DisposableCollection, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { HoverManagerService } from '../services/hover-manager.service';
+import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
+import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, HoverRenderController)
 export class HoverRenderController extends Disposable implements IRenderController {
@@ -27,7 +29,7 @@ export class HoverRenderController extends Disposable implements IRenderControll
         private readonly _context: IRenderContext<Workbook>,
         @IRenderManagerService private _renderManagerService: IRenderManagerService,
         @Inject(HoverManagerService) private _hoverManagerService: HoverManagerService,
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
+        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
 
@@ -35,22 +37,34 @@ export class HoverRenderController extends Disposable implements IRenderControll
     }
 
     private _initPointerEvent() {
-        const currentRender = this._renderManagerService.getRenderById(
-            this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
-        );
-        if (!currentRender) {
-            return;
-        }
+        const disposeSet = new DisposableCollection();
+        const handleSkeletonChange = (skeletonParam: Nullable<ISheetSkeletonManagerParam>) => {
+            disposeSet.dispose();
+            if (!skeletonParam) {
+                return;
+            }
 
-        const { scene } = currentRender;
-        const observer = scene.onPointerMoveObserver.add((evt) => {
-            this._hoverManagerService.onMouseMove(evt.offsetX, evt.offsetY);
-        });
+            const currentRender = this._renderManagerService.getRenderById(skeletonParam.unitId);
 
-        this.disposeWithMe({
-            dispose() {
-                scene.onPointerMoveObserver.remove(observer);
-            },
-        });
+            if (!currentRender) {
+                return;
+            }
+
+            const { scene } = currentRender;
+            const observer = scene.onPointerMoveObserver.add((evt) => {
+                this._hoverManagerService.onMouseMove(evt.offsetX, evt.offsetY);
+            });
+
+            disposeSet.add({
+                dispose() {
+                    scene.onPointerMoveObserver.remove(observer);
+                },
+            });
+        };
+
+        handleSkeletonChange(this._sheetSkeletonManagerService.getCurrent());
+        this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((skeletonParam) => {
+            handleSkeletonChange(skeletonParam);
+        }));
     }
 }

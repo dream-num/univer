@@ -23,7 +23,7 @@ export class UserManagerService {
     private _userChange$ = new Subject<{ type: 'add' | 'delete'; user: IUser } | { type: 'clear' }>();
     public userChange$ = this._userChange$.asObservable();
 
-    private _currentUser: IUser;
+    private _currentUser: IUser | null;
     private _currentUser$ = new BehaviorSubject<IUser | null>(null);
     public currentUser$ = this._currentUser$.asObservable();
 

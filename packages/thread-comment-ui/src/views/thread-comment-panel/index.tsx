@@ -17,7 +17,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
-import { ICommandService, LocaleService, type UniverInstanceType } from '@univerjs/core';
+import { ICommandService, LocaleService, type UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import { Button, Select } from '@univerjs/design';
 import { IncreaseSingle } from '@univerjs/icons';
@@ -40,6 +40,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
     const localeService = useDependency(LocaleService);
+    const userService = useDependency(UserManagerService);
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [unitComments, setUnitComments] = useState(() => threadCommentModel.getUnit(unitId));
     const panelService = useDependency(ThreadCommentPanelService);
@@ -47,6 +48,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const update = useObservable(threadCommentModel.commentUpdate$);
     const commandService = useDependency(ICommandService);
     const subUnitId = useObservable(subUnitId$);
+    const currentUser = userService.getCurrentUser();
     const comments = useMemo(() => {
         if (unit === 'all') {
             return unitComments.map((i) => i[1]).flat().filter((i) => !i.parentId).map((i) => ({
@@ -67,11 +69,20 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
             return comments.filter((comment) => !comment.resolved);
         }
         if (status === 'concern_me') {
-            //
+            if (!currentUser?.userID) {
+                return comments;
+            }
+
+            return comments.map((comment) => threadCommentModel.getCommentWithChildren(comment.unitId, comment.subUnitId, comment.id)).map((comment) => {
+                if (comment?.relativeUsers.has(currentUser.userID)) {
+                    return comment.root;
+                }
+                return null;
+            }).filter(Boolean);
         }
 
         return comments;
-    }, [comments, status]);
+    }, [comments, currentUser?.userID, status, threadCommentModel]);
 
     const isFiltering = status !== 'all' || unit !== 'all';
 

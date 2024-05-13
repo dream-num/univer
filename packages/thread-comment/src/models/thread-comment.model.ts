@@ -123,18 +123,23 @@ export class ThreadCommentModel {
     addComment(unitId: string, subUnitId: string, comment: IThreadComment) {
         const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
 
-        const parentId = comment.parentId;
+        let parentId = comment.parentId;
         if (parentId) {
-            const parent = commentMap[parentId];
-            if (!parent) {
-                return false;
+            let parent = commentMap[parentId];
+            // find the top root
+            while (parent?.parentId) {
+                parent = commentMap[parent.parentId];
+                parentId = parent.parentId!;
             }
-            let children = commentChildrenMap.get(parentId);
-            if (!children) {
-                children = [];
+
+            if (parent) {
+                let children = commentChildrenMap.get(parentId);
+                if (!children) {
+                    children = [];
+                }
+                children.push(comment.id);
+                commentChildrenMap.set(parentId, children);
             }
-            children.push(comment.id);
-            commentChildrenMap.set(parentId, children);
         } else {
             commentChildrenMap.set(comment.id, []);
         }
@@ -222,12 +227,23 @@ export class ThreadCommentModel {
             return undefined;
         }
 
+        const relativeUsers = new Set<string>();
         const children = commentChildrenMap.get(commentId) ?? [];
         const childrenComments = children?.map((childId) => commentMap[childId]!);
+
+        [current, ...childrenComments].forEach((comment) => {
+            relativeUsers.add(comment.personId);
+            comment.text.forEach((node) => {
+                if (node.type === 'mention' && node.content.type === 'user') {
+                    relativeUsers.add(node.content.id);
+                }
+            });
+        });
 
         return {
             root: current,
             children: childrenComments,
+            relativeUsers,
         };
     }
 

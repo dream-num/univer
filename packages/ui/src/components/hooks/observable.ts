@@ -49,7 +49,6 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
     }
 
     const observableRef = useRef<Observable<T> | null>(null);
-    const subscriptionRef = useRef<Subscription | null>(null);
     const initializedRef = useRef<boolean>(false);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,16 +76,13 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
         let subscription: Subscription | null = null;
         if (destObservable) {
             observableRef.current = unwrap(destObservable);
-            subscription = subscriptionRef.current = observableRef.current.subscribe((value) => {
+            subscription = observableRef.current.subscribe((value) => {
                 valueRef.current = value;
                 setRenderCounter((prev) => prev + 1);
             });
         }
 
-        return () => {
-            subscription?.unsubscribe();
-            subscriptionRef.current = null;
-        };
+        return () => subscription?.unsubscribe();
     }, [destObservable]);
 
     if (shouldHaveSyncValue && !initializedRef.current) {

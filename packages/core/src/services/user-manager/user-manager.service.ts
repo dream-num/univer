@@ -15,13 +15,30 @@
  */
 
 import type { IUser } from '@univerjs/protocol';
-import { Subject } from 'rxjs';
+import { UnitRole } from '@univerjs/protocol';
+
+import { BehaviorSubject, Subject } from 'rxjs';
+import { createDefaultUser } from './const';
 
 
 export class UserManagerService {
     private _model = new Map<string, IUser>();
     private _userChange$ = new Subject<{ type: 'add' | 'delete'; user: IUser } | { type: 'clear' }>();
     public userChange$ = this._userChange$.asObservable();
+    private _currentUser$ = new BehaviorSubject<IUser | undefined>(createDefaultUser(UnitRole.UNRECOGNIZED));
+    /**
+     * When the current user undergoes a switch or change
+     * @memberof UserManagerService
+     */
+    public currentUser$ = this._currentUser$.asObservable();
+
+    get currentUser() {
+        return this._currentUser$.getValue() || createDefaultUser(UnitRole.UNRECOGNIZED);
+    }
+
+    set currentUser(user: IUser) {
+        this._currentUser$.next(user);
+    }
 
     addUser(user: IUser) {
         this._model.set(user.userID, user);

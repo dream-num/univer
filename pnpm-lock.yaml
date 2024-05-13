@@ -341,8 +341,8 @@ importers:
   packages/core:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.20
-        version: 0.1.20(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.28
+        version: 0.1.28(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       nanoid:
         specifier: 5.0.7
         version: 5.0.7
@@ -1641,8 +1641,8 @@ importers:
         specifier: workspace:*
         version: link:../network
       '@univerjs/protocol':
-        specifier: ^0.1.20
-        version: 0.1.20(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.28
+        version: 0.1.28(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -4068,8 +4068,8 @@ packages:
       react: '*'
       react-dom: '*'
 
-  '@univerjs/protocol@0.1.20':
-    resolution: {integrity: sha512-obplLf02e+x+E/Hezh3ES9H/JsFtHgYla7C1G1ffTVbbrqmRssebQ5birqgMcVx1Sj3WG5vsCJ0forISNRjkLg==}
+  '@univerjs/protocol@0.1.28':
+    resolution: {integrity: sha512-yJHt7/sSZeONKy3s8OISeM5tCDpd3KdTd8JNy2nR/OBb+jylloYR84PTTMOEbRyKUwoKL6jpv3sIISUmnqpFmQ==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
       '@grpc/grpc-js': ^1.9.14
@@ -13394,7 +13394,7 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@univerjs/protocol@0.1.20(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)':
+  '@univerjs/protocol@0.1.28(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)':
     dependencies:
       '@grpc/grpc-js': 1.10.6
       rxjs: 7.8.1

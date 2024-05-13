@@ -180,28 +180,7 @@ export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
         if (!params) {
             return false;
         }
-        const { unitId, subUnitId, commentId } = params;
-        const threadCommentModel = accessor.get(ThreadCommentModel);
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const currentComment = threadCommentModel.getComment(unitId, subUnitId, commentId);
-
-        undoRedoService.pushUndoRedo({
-            redoMutations: [{
-                id: ResolveCommentMutation.id,
-                params,
-            }],
-            undoMutations: [{
-                id: ResolveCommentMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    resolved: currentComment?.resolved,
-                    commentId,
-                },
-            }],
-            unitID: unitId,
-        });
 
         commandService.executeCommand(
             ResolveCommentMutation.id,

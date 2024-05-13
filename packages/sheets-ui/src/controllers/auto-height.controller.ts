@@ -33,14 +33,10 @@ import {
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { Subject } from 'rxjs';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, AutoHeightController)
 export class AutoHeightController extends Disposable {
-    private _autoHeightDirtyRanges$ = new Subject<IRange[]>();
-    autoHeightDirtyRanges$ = this._autoHeightDirtyRanges$.asObservable();
-
     constructor(
         @Inject(Injector) private _injector: Injector,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
@@ -52,7 +48,7 @@ export class AutoHeightController extends Disposable {
         this._initialize();
     }
 
-    private _getUndoRedoParamsOfAutoHeight(ranges: IRange[]) {
+    getUndoRedoParamsOfAutoHeight(ranges: IRange[]) {
         const {
             _univerInstanceService: univerInstanceService,
             _sheetSkeletonManagerService: sheetSkeletonService,
@@ -71,12 +67,10 @@ export class AutoHeightController extends Disposable {
             unitId,
             rowsAutoHeightInfo,
         };
-
         const undoParams: ISetWorksheetRowAutoHeightMutationParams = SetWorksheetRowAutoHeightMutationFactory(
             injector,
             redoParams
         );
-
         return {
             undos: [
                 {
@@ -106,7 +100,7 @@ export class AutoHeightController extends Disposable {
                     };
                 }
 
-                return this._getUndoRedoParamsOfAutoHeight(command.params.range);
+                return this.getUndoRedoParamsOfAutoHeight(command.params.range);
             },
         }));
         // for intercept 'sheet.command.set-row-is-auto-height' command.
@@ -119,7 +113,7 @@ export class AutoHeightController extends Disposable {
                     };
                 }
 
-                return this._getUndoRedoParamsOfAutoHeight(command.params.ranges);
+                return this.getUndoRedoParamsOfAutoHeight(command.params.ranges);
             },
         }));
 
@@ -153,16 +147,8 @@ export class AutoHeightController extends Disposable {
                     };
                 }
 
-                return this._getUndoRedoParamsOfAutoHeight(selections);
+                return this.getUndoRedoParamsOfAutoHeight(selections);
             },
         }));
-
-        this.disposeWithMe(this.autoHeightDirtyRanges$.subscribe((ranges) => {
-            this._getUndoRedoParamsOfAutoHeight(ranges);
-        }));
-    }
-
-    markRangeAutoHeightDirty(ranges: IRange[]) {
-        this._autoHeightDirtyRanges$.next(ranges);
     }
 }

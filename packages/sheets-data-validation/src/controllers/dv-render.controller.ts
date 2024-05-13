@@ -16,8 +16,9 @@
 
 
 import type { ICellDataForSheetInterceptor, ICellRenderContext, Workbook } from '@univerjs/core';
-import { DataValidationRenderMode, DataValidationStatus, DataValidationType, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType, WrapStrategy } from '@univerjs/core';
-import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
+import { DataValidationRenderMode, DataValidationStatus, DataValidationType, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, sequenceExecute, UniverInstanceType, WrapStrategy } from '@univerjs/core';
+import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-validation';
+import { DataValidationModel, DataValidatorRegistryService, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -59,7 +60,8 @@ export class DataValidationRenderController extends RxDisposable {
         @Inject(DataValidationDropdownManagerService) private readonly _dropdownManagerService: DataValidationDropdownManagerService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(AutoHeightController) private readonly _autoHeightController: AutoHeightController
+        @Inject(AutoHeightController) private readonly _autoHeightController: AutoHeightController,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
         this._init();
@@ -332,12 +334,11 @@ export class DataValidationRenderController extends RxDisposable {
     }
 
     private _initAutoHeight() {
-        this.disposeWithMe(
-            this._dataValidationModel.ruleChange$.subscribe((payload) => {
-                if (payload.rule) {
-                    this._autoHeightController.markRangeAutoHeightDirty(payload.rule.ranges);
-                }
-            })
-        );
+        this._dataValidationModel.ruleChange$.subscribe((info) => {
+            if (info.rule?.ranges) {
+                const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(info.rule.ranges);
+                sequenceExecute(mutations.redos, this._commandService);
+            }
+        });
     }
 }

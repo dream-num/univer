@@ -79,6 +79,14 @@ export class Engine extends ThinEngine<Scene> {
 
     private _pointerLeaveEvent!: (evt: any) => void;
 
+    private _dragEnterEvent!: (evt: any) => void;
+
+    private _dragLeaveEvent!: (evt: any) => void;
+
+    private _dragOverEvent!: (evt: any) => void;
+
+    private _dropEvent!: (evt: any) => void;
+
     private _remainCapture: number = -1;
 
     /** previous pointer position */
@@ -103,6 +111,8 @@ export class Engine extends ThinEngine<Scene> {
 
         this._handleKeyboardAction();
         this._handlePointerAction();
+        this._handleDragAction();
+
         if (mode !== CanvasRenderMode.Printing) {
             this._matchMediaHandler();
         }
@@ -233,7 +243,12 @@ export class Engine extends ThinEngine<Scene> {
         canvasEle.removeEventListener(`${eventPrefix}down`, this._pointerDownEvent);
         canvasEle.removeEventListener(`${eventPrefix}up`, this._pointerUpEvent);
         canvasEle.removeEventListener('blur', this._pointerBlurEvent);
+        canvasEle.removeEventListener('dragenter', this._dragEnterEvent);
+        canvasEle.removeEventListener('dragleave', this._dragLeaveEvent);
+        canvasEle.removeEventListener('dragover', this._dragOverEvent);
+        canvasEle.removeEventListener('drop', this._dropEvent);
         canvasEle.removeEventListener(this._getWheelEventName(), this._pointerWheelEvent);
+
 
         this._activeRenderLoops = [];
         this.getCanvas().dispose();
@@ -662,6 +677,106 @@ export class Engine extends ThinEngine<Scene> {
             this._pointerWheelEvent,
             this._getPassive() ? { passive: false } : false
         );
+    }
+
+    private _handleDragAction() {
+        this._dragEnterEvent = (evt: any) => {
+            const deviceType = this._getPointerType(evt);
+            // Store previous values for event
+            const deviceEvent = evt as IPointerEvent;
+            deviceEvent.deviceType = deviceType;
+
+            deviceEvent.currentState = 4;
+
+            this.onInputChangedObservable.notifyObservers(deviceEvent);
+        };
+
+        this._dragLeaveEvent = (evt: any) => {
+            const deviceType = this._getPointerType(evt);
+            // Store previous values for event
+            const deviceEvent = evt as IPointerEvent;
+            deviceEvent.deviceType = deviceType;
+
+            deviceEvent.currentState = 5;
+
+            this.onInputChangedObservable.notifyObservers(deviceEvent);
+        };
+
+        this._dragOverEvent = (evt: any) => {
+            // prevent default to allow drop
+            evt.preventDefault();
+
+            const deviceType = this._getPointerType(evt);
+            // Store previous values for event
+            const previousHorizontal = this.pointer[PointerInput.Horizontal];
+            const previousVertical = this.pointer[PointerInput.Vertical];
+            const previousDeltaHorizontal = this.pointer[PointerInput.DeltaHorizontal];
+            const previousDeltaVertical = this.pointer[PointerInput.DeltaVertical];
+
+            this.pointer[PointerInput.Horizontal] = evt.clientX;
+            this.pointer[PointerInput.Vertical] = evt.clientY;
+            this.pointer[PointerInput.DeltaHorizontal] = evt.movementX;
+            this.pointer[PointerInput.DeltaVertical] = evt.movementY;
+            // console.log('pointerMoveEvent_1', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this._pointer);
+            const deviceEvent = evt as IPointerEvent;
+            deviceEvent.deviceType = deviceType;
+
+            if (previousHorizontal !== evt.clientX) {
+                deviceEvent.inputIndex = PointerInput.Horizontal;
+                deviceEvent.previousState = previousHorizontal;
+                deviceEvent.currentState = this.pointer[PointerInput.Horizontal];
+
+                this.onInputChangedObservable.notifyObservers(deviceEvent);
+            }
+            if (previousVertical !== evt.clientY) {
+                deviceEvent.inputIndex = PointerInput.Vertical;
+                deviceEvent.previousState = previousVertical;
+                deviceEvent.currentState = this.pointer[PointerInput.Vertical];
+
+                this.onInputChangedObservable.notifyObservers(deviceEvent);
+            }
+            if (this.pointer[PointerInput.DeltaHorizontal] !== 0) {
+                deviceEvent.inputIndex = PointerInput.DeltaHorizontal;
+                deviceEvent.previousState = previousDeltaHorizontal;
+                deviceEvent.currentState = this.pointer[PointerInput.DeltaHorizontal];
+
+                this.onInputChangedObservable.notifyObservers(deviceEvent);
+            }
+            if (this.pointer[PointerInput.DeltaVertical] !== 0) {
+                deviceEvent.inputIndex = PointerInput.DeltaVertical;
+                deviceEvent.previousState = previousDeltaVertical;
+                deviceEvent.currentState = this.pointer[PointerInput.DeltaVertical];
+
+                this.onInputChangedObservable.notifyObservers(deviceEvent);
+            }
+
+            // Lets Propagate the event for move with same position.
+            if (!this._usingSafari && evt.button !== -1) {
+                deviceEvent.inputIndex = evt.button + 2;
+                deviceEvent.previousState = this.pointer[evt.button + 2];
+                this.pointer[evt.button + 2] = this.pointer[evt.button + 2] ? 0 : 1; // Reverse state of button if evt.button has value
+                deviceEvent.currentState = this.pointer[evt.button + 2];
+                this.onInputChangedObservable.notifyObservers(deviceEvent);
+            }
+        };
+
+        this._dropEvent = (evt: any) => {
+            const deviceType = this._getPointerType(evt);
+            // Store previous values for event
+            const deviceEvent = evt as IPointerEvent;
+            deviceEvent.deviceType = deviceType;
+
+
+            deviceEvent.currentState = 6;
+
+            this.onInputChangedObservable.notifyObservers(deviceEvent);
+        };
+
+        const canvasEle = this.getCanvasElement();
+        canvasEle.addEventListener('dragenter', this._dragEnterEvent);
+        canvasEle.addEventListener('dragleave', this._dragLeaveEvent);
+        canvasEle.addEventListener('dragover', this._dragOverEvent);
+        canvasEle.addEventListener('drop', this._dropEvent);
     }
 
     private _getWheelEventName(): string {

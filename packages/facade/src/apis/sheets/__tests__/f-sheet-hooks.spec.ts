@@ -109,7 +109,7 @@ describe('Test FSheetHooks', () => {
     });
 
     it('Test onCellPointerMove', () => {
-        sheetHooks.onCellPointerMove((cellPos) => {
+        sheetHooks.onCellPointerOver((cellPos) => {
             expect(cellPos).toEqual({ location: { workbook, worksheet, unitId: workbook.getUnitId(), subUnitId: worksheet.getSheetId(), row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
         });
 

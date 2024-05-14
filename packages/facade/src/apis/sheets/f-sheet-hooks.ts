@@ -18,21 +18,50 @@ import { type Nullable, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 
-import type { IHoverCellPosition } from '@univerjs/sheets-ui';
-import { HoverManagerService } from '@univerjs/sheets-ui';
+import type { IDragCellPosition, IHoverCellPosition } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService } from '@univerjs/sheets-ui';
 
 export class FSheetHooks {
     constructor(
-        @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService
-    ) {
+        @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
+        @Inject(DragManagerService) private readonly _dragManagerService: DragManagerService
+    ) { 
         // empty
     }
 
     /**
-     * Subscribe to the location information of the currently hovered cell
-     * @returns a disposable object that can be used to unsubscribe from the event
+     * The onCellPointerMove event is fired when a pointing device is moved into a cell's hit test boundaries.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
      */
     onCellPointerMove(callback: (cellPos: Nullable<IHoverCellPosition>) => void): IDisposable {
+        return toDisposable(this._hoverManagerService.currentPosition$.subscribe(callback));
+    }
+
+    /**
+     * The onCellPointerOver event is fired when a pointing device is moved into a cell's hit test boundaries.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onCellPointerOver(callback: (cellPos: Nullable<IHoverCellPosition>) => void): IDisposable {
         return toDisposable(this._hoverManagerService.currentCell$.subscribe(callback));
+    }
+
+    /**
+     * The onCellDragOver event is fired when an element or text selection is being dragged into a cell's hit test boundaries.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onCellDragOver(callback: (cellPos: Nullable<IDragCellPosition>) => void): IDisposable {
+        return toDisposable(this._dragManagerService.currentCell$.subscribe(callback));
+    }
+
+    /**
+     * The onCellDrop event is fired when an element or text selection is being dropped on the cell
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onCellDrop(callback: (cellPos: Nullable<IDragCellPosition>) => void) {
+        return toDisposable(this._dragManagerService.endCell$.subscribe(callback));
     }
 }

@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-import type { IPosition, Nullable, Workbook } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { ISheetLocation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { distinctUntilChanged, Subject } from 'rxjs';
+import type { IDragEvent } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getHoverCellPosition } from '../common/utils';
 import { ScrollManagerService } from './scroll-manager.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
+import type { IHoverCellPosition } from './hover-manager.service';
 
-export interface IHoverCellPosition {
-    position: IPosition;
-    location: ISheetLocation;
+export interface IDragCellPosition extends IHoverCellPosition {
+    dataTransfer: DataTransfer;
 }
 
-export class HoverManagerService extends Disposable {
-    private _currentCell$ = new Subject<Nullable<IHoverCellPosition>>();
-
-    // Notify when hovering over different cells
+export class DragManagerService extends Disposable {
+    private _currentCell$ = new Subject<Nullable<IDragCellPosition>>();
     currentCell$ = this._currentCell$.asObservable().pipe(distinctUntilChanged((
         (pre, aft) => (
             pre?.location?.unitId === aft?.location?.unitId
@@ -42,10 +40,8 @@ export class HoverManagerService extends Disposable {
         )
     )));
 
-    // Notify when mouse position changes
-    currentPosition$ = this._currentCell$.asObservable();
-
-    private _lastPosition: Nullable<{ offsetX: number; offsetY: number }> = null;
+    private _endCell$ = new Subject<Nullable<IDragCellPosition>>();
+    endCell$ = this._endCell$.asObservable();
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -55,29 +51,28 @@ export class HoverManagerService extends Disposable {
     ) {
         super();
 
-        // TODO@weird94: any better solution here?
         this._initCellDisposableListener();
     }
 
     override dispose(): void {
         super.dispose();
         this._currentCell$.complete();
+        this._endCell$.complete();
     }
 
     private _initCellDisposableListener(): void {
         this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
-            if (!workbook) this._currentCell$.next(null);
+            if (!workbook) {
+                this._currentCell$.next(null);
+                this._endCell$.next(null);
+            }
         }));
     }
 
-    private _calcActiveCell() {
-        if (!this._lastPosition) return;
-
-        const { offsetX, offsetY } = this._lastPosition;
+    private _calcActiveCell(offsetX: number, offsetY: number): Nullable<IHoverCellPosition> {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
-            this._currentCell$.next(null);
-            return;
+            return null;
         }
 
         const worksheet = workbook.getActiveSheet();
@@ -88,34 +83,42 @@ export class HoverManagerService extends Disposable {
 
         if (!skeletonParam || !scrollInfo || !currentRender) return;
 
-        const hoverPosition = getHoverCellPosition(currentRender, workbook, worksheet, skeletonParam, offsetX, offsetY);
+        return getHoverCellPosition(currentRender, workbook, worksheet, skeletonParam, offsetX, offsetY);
+    }
 
-        if (!hoverPosition) {
+    onDragOver(evt: IDragEvent) {
+        const { offsetX, offsetY, dataTransfer } = evt;
+        const activeCell = this._calcActiveCell(offsetX, offsetY);
+
+        if (!activeCell) {
             this._currentCell$.next(null);
             return;
         }
 
-        const { location, position } = hoverPosition;
+        const { location, position } = activeCell;
 
         this._currentCell$.next({
             location,
             position,
+            dataTransfer,
         });
     }
 
-    onMouseMove(offsetX: number, offsetY: number) {
-        this._lastPosition = {
-            offsetX,
-            offsetY,
-        };
-        this._calcActiveCell();
-    }
+    onDrop(evt: IDragEvent) {
+        const { offsetX, offsetY, dataTransfer } = evt;
+        const activeCell = this._calcActiveCell(offsetX, offsetY);
 
-    onScrollStart() {
-        this._currentCell$.next(null);
-    }
+        if (!activeCell) {
+            this._endCell$.next(null);
+            return;
+        }
 
-    onScrollEnd() {
-        this._calcActiveCell();
+        const { location, position } = activeCell;
+
+        this._endCell$.next({
+            location,
+            position,
+            dataTransfer,
+        });
     }
 }

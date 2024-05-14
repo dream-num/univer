@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IContextService, Nullable } from '@univerjs/core';
-import { FOCUSING_DOC, FOCUSING_UNIVER_EDITOR, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE } from '@univerjs/core';
+import { FOCUSING_DOC, FOCUSING_UNIVER_EDITOR, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, isFormulaId, isFormulaString } from '@univerjs/core';
 import type { ErrorType } from '@univerjs/engine-formula';
 import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
 
@@ -33,7 +33,8 @@ export function whenEditorStandalone(contextService: IContextService) {
  * @returns
  */
 export function extractFormulaError(cell: Nullable<ICellData>) {
-    if (typeof cell?.v === 'string' && ERROR_TYPE_SET.has(cell.v as ErrorType)) {
+    // Must contain a formula
+    if (typeof cell?.v === 'string' && (isFormulaString(cell.f) || isFormulaId(cell.si)) && ERROR_TYPE_SET.has(cell.v as ErrorType)) {
         return cell.v as ErrorType;
     }
 

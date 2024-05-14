@@ -26,7 +26,7 @@ import { getCoordByCell, ISelectionRenderService, SelectionShape, SheetRenderCon
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
+import { combineLatest, filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
 import type { ISheetsFilterButtonShapeProps } from '../views/widgets/filter-button.shape';
 import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../views/widgets/filter-button.shape';
 
@@ -73,9 +73,13 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
 
     private _initRenderer(): void {
         // Subscribe to skeleton change and filter model change.
-        this._sheetSkeletonManagerService.currentSkeleton$
+        combineLatest([
+            this._selectionRenderService.usable$,
+            this._sheetSkeletonManagerService.currentSkeleton$,
+        ])
             .pipe(
-                switchMap((skeletonParams) => {
+                filter(([usable]) => usable),
+                switchMap(([_, skeletonParams]) => {
                     if (!skeletonParams) return of(null);
 
                     const { unitId } = skeletonParams;
@@ -91,17 +95,16 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                         skeleton: skeletonParams.skeleton,
                     });
 
-                    return fromCallback(this._commandService.onCommandExecuted)
-                        .pipe(
-                            filter(([command]) =>
-                                command.type === CommandType.MUTATION
-                                && (command.params as ISheetCommandSharedParams).unitId === workbook.getUnitId()
-                                && FILTER_MUTATIONS.has(command.id)
-                            ),
-                            throttleTime(20, undefined, { leading: false, trailing: true }),
-                            map(getParams),
-                            startWith(getParams()) // must trigger once
-                        );
+                    return fromCallback(this._commandService.onCommandExecuted).pipe(
+                        filter(([command]) =>
+                            command.type === CommandType.MUTATION
+                            && (command.params as ISheetCommandSharedParams).unitId === workbook.getUnitId()
+                            && FILTER_MUTATIONS.has(command.id)
+                        ),
+                        throttleTime(20, undefined, { leading: false, trailing: true }),
+                        map(getParams),
+                        startWith(getParams()) // must trigger once
+                    );
                 }),
                 takeUntil(this.dispose$)
             )

@@ -42,7 +42,7 @@
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
-        "@wendellhu/redi": "^0.14.0",
+        "@wendellhu/redi": "^0.15.1",
         "clsx": "^2.1.1",
         "monaco-editor": "0.47.0",
         "react": "18.2.0",

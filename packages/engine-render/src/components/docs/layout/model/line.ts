@@ -225,8 +225,8 @@ function _calculateDividesByDrawings(
     return _calculateDivideByDrawings(columnWidth, drawingsMix);
 }
 
-export function setDivideFullState(divide: IDocumentSkeletonDivide, state: boolean) {
-    divide.isFull = state;
+export function updateDivideInfo(divide: IDocumentSkeletonDivide, states: Partial<IDocumentSkeletonDivide>) {
+    Object.assign(divide, states);
 }
 
 export function setLineMarginBottom(line: IDocumentSkeletonLine, marginBottom: number) {
@@ -386,7 +386,7 @@ function __getSplitWidthNoAngle(
     }
 
     let resultLeft = left - distL;
-    let resultWidth = width + distR;
+    let resultWidth = width + distL + distR;
     const ruler = ___getWrapTextRuler(wrapText, resultLeft, resultWidth, columnWidth);
 
     if (ruler === WrapTextRuler.LEFT) {

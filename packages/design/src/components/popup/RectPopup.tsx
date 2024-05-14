@@ -89,8 +89,16 @@ function RectPopup(props: IRectPopupProps) {
 
     const style = useMemo(() => ({ ...position, overflow: 'inherit' }), [position]);
     useEffect(() => {
-        const { clientWidth, clientHeight } = nodeRef.current!;
-        const { innerWidth, innerHeight } = window;
+        if (!nodeRef.current) {
+            return;
+        }
+        const { clientWidth, clientHeight } = nodeRef.current;
+        const parent = nodeRef.current.parentElement;
+        if (!parent) {
+            return;
+        }
+        const { clientWidth: innerWidth, clientHeight: innerHeight } = parent;
+
         setPosition(
             calcPopupPosition(
                 {
@@ -125,9 +133,8 @@ function RectPopup(props: IRectPopupProps) {
             ) {
                 return;
             }
-
-            const x = e.clientX;
-            const y = e.clientY;
+            const x = e.offsetX;
+            const y = e.offsetY;
             if (x <= anchorRect.right && x >= anchorRect.left && y <= anchorRect.bottom && y >= anchorRect.top) {
                 return;
             }
@@ -144,8 +151,8 @@ function RectPopup(props: IRectPopupProps) {
     return (
         <section
             ref={nodeRef}
-            className={styles.popup}
             style={style}
+            className={styles.popupAbsolute}
             onClick={(e) => {
                 e.stopPropagation();
             }}

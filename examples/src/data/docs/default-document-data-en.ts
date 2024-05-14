@@ -45,10 +45,14 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
                 positionV: {
                     relativeFrom: ObjectRelativeFromV.PAGE,
-                    posOffset: 510,
+                    posOffset: 560,
                 },
                 angle: 0,
             },
+            distL: 10,
+            distB: 10,
+            distR: 10,
+            distT: 10,
             layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
             behindDoc: BooleanNumber.FALSE,
             wrapText: WrapTextType.BOTH_SIDES,
@@ -68,7 +72,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
                 positionV: {
                     relativeFrom: ObjectRelativeFromV.PAGE,
-                    posOffset: 200,
+                    posOffset: 220,
                 },
                 angle: 0,
             },
@@ -79,7 +83,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
     },
     body: {
         dataStream:
-            'What’s New in the 2022 Gartner Hype Cycle for Emerging Technologies\rEmerging technologies for 2022 fit into three main themes: evolving/expanding immersive experiences, accelerated artificial intelligence automation, and optimized technologist delivery.\rThe 2022 Gartner Hype Cycle identifies 25 must-know emerging technologies designed to help enterprise architecture and technology innovation leaders: \rExpand immersive experiences\rAccelerate artificial intelligence (AI) automation\rOptimize technologist delivery \rThese technologies are expected to greatly impact business and society over the next two to 10 years, but will especially enable CIOs and IT leaders to deliver on digital business transformation. \rThree Hype Cycle themes to think about in 2022 and beyond\rThe 2022 Gartner Hype Cycle features emerging technologies and distills insights from more than 2,000 technologies into a succinct high-potential set. Most technologies have multiple use cases but enterprise architecture and technology innovation leaders should prioritize those with the greatest potential benefit for their organization. (They will also need to launch a proof-of-concept project to demonstrate the feasibility of a technology for their target use case.)\b\r\nThe benefit of these technologies is that they provide individuals with more control over their identities and data, and expand their range of experiences into virtual venues and ecosystems that can be integrated with digital currencies. These technologies also provide new ways to reach customers to strengthen or open up new revenue streams.\rDigital twin of the customer (DToC) is a dynamic virtual representation of a customer that simulates and learns to emulate and anticipate behavior. It can be used to modify and enhance the customer experience (CX) and support new digitalization efforts, products, services and opportunities. DToC will take five to 10 years until mainstream adoption but will be transformational to organizations.\rOther critical technologies in immersive experiences include the following:\rDecentralized identity (DCI) allows an entity (typically a human user) to control their own digital identity by leveraging technologies such as blockchain or other distributed ledger technologies (DLTs), along with digital wallets.\rDigital humans are interactive, AI-driven representations that have some of the characteristics, personality, knowledge and mindset of a human.\rInternal talent marketplaces match internal employees and, in some cases, a pool of contingent workers, to time-boxed projects and various work opportunities, with no recruiter involvement.\r\n',
+            'What’s New in the 2022 Gartner Hype Cycle for Emerging Technologies\rEmerging technologies for 2022 fit into three main themes: evolving/expanding immersive experiences, accelerated artificial intelligence automation, and OPTIMIZED technologist delivery.\rThe 2022 Gartner Hype Cycle identifies 25 must-know emerging technologies designed to help enterprise architecture and technology innovation leaders: \rExpand immersive experiences\rAccelerate artificial intelligence (AI) automation\rOptimize technologist delivery \rThese technologies are expected to greatly impact business and society over the next two to 10 years, but will especially enable CIOs and IT leaders to deliver on digital business transformation. \rThree Hype Cycle themes to think about in 2022 and beyond\rThe 2022 Gartner Hype Cycle features emerging technologies and distills insights from more than 2,000 technologies into a succinct high-potential set. Most technologies have multiple use cases but enterprise architecture and technology innovation leaders should prioritize those with the greatest potential benefit for their organization. (They will also need to launch a proof-of-concept project to demonstrate the feasibility of a technology for their target use case.)\b\r\nThe benefit of these technologies is that they provide individuals with more control over their identities and data, and expand their range of experiences into virtual venues and ecosystems that can be integrated with digital currencies. These technologies also provide new ways to reach customers to strengthen or open up new revenue streams.\rDigital twin of the customer (DToC) is a dynamic virtual representation of a customer that simulates and learns to emulate and anticipate behavior. It can be used to modify and enhance the customer experience (CX) and support new digitalization efforts, products, services and opportunities. DToC will take five to 10 years until mainstream adoption but will be transformational to organizations.\rOther critical technologies in immersive experiences include the following:\rDecentralized identity (DCI) allows an entity (typically a human user) to control their own digital identity by leveraging technologies such as blockchain or other distributed ledger technologies (DLTs), along with digital wallets.\rDigital humans are interactive, AI-driven representations that have some of the characteristics, personality, knowledge and mindset of a human.\rInternal talent marketplaces match internal employees and, in some cases, a pool of contingent workers, to time-boxed projects and various work opportunities, with no recruiter involvement.\r\n',
         textRuns: [
             {
                 st: 0,
@@ -253,6 +257,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 paragraphStyle: {
                     spaceAbove: 30,
                     lineSpacing: 1.5,
+                    suppressHyphenation: BooleanNumber.FALSE,
                 },
             },
             {
@@ -441,6 +446,10 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             vertexAngle: 0,
             centerAngle: 0,
         },
+        autoHyphenation: BooleanNumber.TRUE,
+        doNotHyphenateCaps: BooleanNumber.FALSE,
+        consecutiveHyphenLimit: 2,
+        // hyphenationZone: 50,
         // gridType: GridType.LINES_AND_CHARS,
         // linePitch: 24,
         // charSpace: 12,

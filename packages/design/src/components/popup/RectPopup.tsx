@@ -88,8 +88,16 @@ function RectPopup(props: IRectPopupProps) {
     });
 
     useEffect(() => {
-        const { clientWidth, clientHeight } = nodeRef.current!;
-        const { innerWidth, innerHeight } = window;
+        if (!nodeRef.current) {
+            return;
+        }
+        const { clientWidth, clientHeight } = nodeRef.current;
+        const parent = nodeRef.current.parentElement;
+        if (!parent) {
+            return;
+        }
+        const { clientWidth: innerWidth, clientHeight: innerHeight } = parent;
+
         setPosition(
             calcPopupPosition(
                 {

@@ -174,6 +174,13 @@ const dataValidation = [
     },
 ];
 
+const comments = [
+    {
+        text: [{ type: 'text', content: '123' }], dT: '2024/05/14 15:45', id: 'tk2xKQvpQxUdwgL14Ol1h', ref: 'K10', personId: 'mockId', unitId: 'workbook-01', subUnitId: 'sheet-0011' },
+    {
+        text: [{ type: 'text', content: '112' }, { type: 'text', content: ' ' }, { type: 'mention', content: { label: 'MockUser', type: 'user', id: 'mockId' } }], dT: '2024/05/14 15:46', id: 'C39ujIlQki1eHXILBrh2u', ref: 'K10', personId: 'mockId', parentId: 'tk2xKQvpQxUdwgL14Ol1h', unitId: 'workbook-01', subUnitId: 'sheet-0011' },
+];
+
 export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'workbook-01',
     locale: LocaleType.ZH_CN,
@@ -23541,6 +23548,12 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
         // },
     },
     resources: [
+        {
+            name: 'SHEET_THREAD_COMMENT_PLUGIN',
+            data: JSON.stringify({
+                'sheet-0011': comments,
+            }),
+        },
         {
             name: DATA_VALIDATION_PLUGIN_NAME,
             data: JSON.stringify({

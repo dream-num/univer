@@ -321,4 +321,8 @@ export class ThreadCommentModel {
             (tree) => Object.keys(tree[unitId]?.[subUnitId])
         ));
     }
+
+    getAll() {
+        return this._commentsMap;
+    }
 }

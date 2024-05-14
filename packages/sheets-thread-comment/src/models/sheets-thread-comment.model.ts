@@ -16,7 +16,7 @@
 
 
 import { Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
-import type { CommentUpdate } from '@univerjs/thread-comment';
+import type { CommentUpdate, IThreadComment } from '@univerjs/thread-comment';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { Inject } from '@wendellhu/redi';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
@@ -42,6 +42,10 @@ export class SheetsThreadCommentModel extends Disposable {
         this._init();
     }
 
+    private _init() {
+        this._initData();
+        this._initUpdateTransform();
+    }
 
     private _ensureCommentMatrix(unitId: string, subUnitId: string) {
         let unitMap = this._matrixMap.get(unitId);
@@ -77,16 +81,49 @@ export class SheetsThreadCommentModel extends Disposable {
         return subUnitMap;
     }
 
-
     private _ensure(unitId: string, subUnitId: string) {
         const matrix = this._ensureCommentMatrix(unitId, subUnitId);
         const locationMap = this._ensureCommentLocationMap(unitId, subUnitId);
         return { matrix, locationMap };
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    private _initData() {
+        const data = this._threadCommentModel.getAll();
+
+        for (const unitId in data) {
+            const unitMap = data[unitId];
+            for (const subUnitId in unitMap) {
+                const subUnitMap = unitMap[subUnitId];
+                for (const id in subUnitMap) {
+                    const comment = subUnitMap[id];
+                    this._addComment(unitId, subUnitId, comment);
+                }
+            }
+        }
+    }
+
+    private _addComment(unitId: string, subUnitId: string, comment: IThreadComment) {
+        const location = singleReferenceToGrid(comment.ref);
+        const parentId = comment.parentId;
+        const { row, column } = location;
+        const commentId = comment.id;
+        const { matrix, locationMap } = this._ensure(unitId, subUnitId);
+
+        if (!parentId && row >= 0 && column >= 0) {
+            matrix.setValue(row, column, commentId);
+            locationMap.set(commentId, { row, column });
+        }
+
+        this._commentUpdate$.next({
+            unitId,
+            subUnitId,
+            payload: comment,
+            type: 'add',
+            ...location,
+        });
+    }
+
     private _initUpdateTransform() {
-        // eslint-disable-next-line max-lines-per-function
         this.disposeWithMe(this._threadCommentModel.commentUpdate$.subscribe((update) => {
             const { unitId, subUnitId } = update;
             const type = this._univerInstanceService.getUnitType(unitId);
@@ -96,20 +133,7 @@ export class SheetsThreadCommentModel extends Disposable {
             const { matrix, locationMap } = this._ensure(unitId, subUnitId);
             switch (update.type) {
                 case 'add': {
-                    const location = singleReferenceToGrid(update.payload.ref);
-                    const parentId = update.payload.parentId;
-                    const { row, column } = location;
-                    const commentId = update.payload.id;
-
-                    if (!parentId && row >= 0 && column >= 0) {
-                        matrix.setValue(row, column, commentId);
-                        locationMap.set(commentId, { row, column });
-                    }
-
-                    this._commentUpdate$.next({
-                        ...update,
-                        ...location,
-                    });
+                    this._addComment(update.unitId, update.subUnitId, update.payload);
                     break;
                 }
                 case 'delete': {
@@ -178,12 +202,6 @@ export class SheetsThreadCommentModel extends Disposable {
             }
         }));
     }
-
-
-    private _init() {
-        this._initUpdateTransform();
-    }
-
 
     getByLocation(unitId: string, subUnitId: string, row: number, column: number): string | undefined {
         const matrix = this._ensureCommentMatrix(unitId, subUnitId);

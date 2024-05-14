@@ -117,9 +117,8 @@ function RectPopup(props: IRectPopupProps) {
             if (excludeOutside && (excludeOutside.indexOf(e.target as any) > -1)) {
                 return;
             }
-
-            const x = e.clientX;
-            const y = e.clientY;
+            const x = e.offsetX;
+            const y = e.offsetY;
             if (x <= anchorRect.right && x >= anchorRect.left && y <= anchorRect.bottom && y >= anchorRect.top) {
                 return;
             }
@@ -136,7 +135,7 @@ function RectPopup(props: IRectPopupProps) {
     return (
         <section
             ref={nodeRef}
-            className={styles.popup}
+            className={styles.popupAbsolute}
             style={position}
             onClick={(e) => {
                 e.stopPropagation();

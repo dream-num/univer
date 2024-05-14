@@ -53,7 +53,7 @@ function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
     const { workbook } = props;
     const worksheet = useObservable(workbook.activeSheet$, undefined, true)!;
     const unitId = workbook.getUnitId();
-    const subUnitId = worksheet.getSheetId();
+    const subUnitId = worksheet?.getSheetId();
     const manager = dataValidationModel.ensureManager(unitId, subUnitId);
 
     useEffect(() => {

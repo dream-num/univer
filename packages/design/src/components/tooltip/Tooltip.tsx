@@ -16,7 +16,7 @@
 
 import type { TooltipRef } from 'rc-tooltip';
 import RcTooltip from 'rc-tooltip';
-import React, { forwardRef, useContext, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useContext, useImperativeHandle, useRef } from 'react';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
@@ -53,14 +53,14 @@ export const Tooltip = forwardRef<NullableTooltipRef, ITooltipProps>((props, ref
     } = props;
 
     const { mountContainer } = useContext(ConfigContext);
-    const [tooltipRef, setTooltipRef] = useState<NullableTooltipRef>(null);
-    useImperativeHandle<NullableTooltipRef, NullableTooltipRef>(ref, () => tooltipRef, [tooltipRef]);
+    const tooltipRef = useRef<NullableTooltipRef>(null);
+    useImperativeHandle<NullableTooltipRef, NullableTooltipRef>(ref, () => tooltipRef.current);
 
-    const isEllipsis = useIsEllipsis(showIfEllipsis ? tooltipRef?.nativeElement : null);
+    const isEllipsis = useIsEllipsis(showIfEllipsis ? tooltipRef.current?.nativeElement : null);
     return mountContainer && (
         <RcTooltip
             visible={(showIfEllipsis && !isEllipsis) ? false : visible}
-            ref={(r) => setTooltipRef(r)}
+            ref={tooltipRef}
             prefixCls={styles.tooltip}
             getTooltipContainer={() => mountContainer}
             overlay={<div className={styles.tooltipContent}>{typeof title === 'function' ? title() : title}</div>}

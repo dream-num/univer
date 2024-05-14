@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { MutableRefObject } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
 
 
@@ -23,48 +22,33 @@ import canUseDom from 'rc-util/lib/Dom/canUseDom';
  * All elements are observed by a single ResizeObserver is got greater performance than each element observed by separate ResizeObserver
  * See issue https://github.com/WICG/resize-observer/issues/59#issuecomment-408098151
  */
-let _resizeObserver: ResizeObserver;
-const _resizeObserverCallbacks: Set<MutableRefObject<ResizeObserverCallback>> = new Set();
+const _resizeObserverCallbacks: Set<ResizeObserverCallback> = new Set();
+const _resizeObserver: ResizeObserver = new ResizeObserver((...args) => {
+    _resizeObserverCallbacks.forEach((callback) => callback(...args));
+});
 
-export function useGlobalResizeObserver(callback: ResizeObserverCallback) {
-    const callbackRef = useRef<ResizeObserverCallback>(callback);
-    callbackRef.current = callback;
-
-    const observer = useRef<ResizeObserver>();
-    if (!observer.current) {
-        if (!_resizeObserver) {
-            /** assign global a ResizeObserver */
-            _resizeObserver = new ResizeObserver((...args) => {
-                _resizeObserverCallbacks.forEach((callback) => callback.current(...args));
-            });
-        }
-        observer.current = _resizeObserver;
-    }
-
-    useEffect(() => {
-        if (!_resizeObserverCallbacks.has(callbackRef)) {
-            _resizeObserverCallbacks.add(callbackRef);
-        }
-        return () => {
-            observer.current?.disconnect();
-            _resizeObserverCallbacks.delete(callbackRef);
-        };
-    }, []);
-
-    return observer.current;
+export function resizeObserverCtor(callback: ResizeObserverCallback) {
+    _resizeObserverCallbacks.add(callback);
+    return {
+        observe: _resizeObserver.observe.bind(_resizeObserver),
+        unobserve(target: Element) {
+            _resizeObserverCallbacks.delete(callback);
+            _resizeObserver.unobserve(target);
+        },
+    };
 }
-
 
 export function useIsEllipsis(element: HTMLElement | null | undefined) {
     const [isEllipsis, setIsEllipsis] = useState(false);
-    const resizeObserver = useGlobalResizeObserver(() => {
-        element && setIsEllipsis(element.scrollWidth > element.offsetWidth);
-    });
 
     useEffect(() => {
         if (!canUseDom() || !element) {
             return;
         }
+
+        const resizeObserver = resizeObserverCtor(() => {
+            element && setIsEllipsis(element.scrollWidth > element.offsetWidth);
+        });
         setIsEllipsis(element.scrollWidth > element.offsetWidth);
         resizeObserver.observe(element);
         return () => {

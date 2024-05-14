@@ -15,4 +15,4 @@
  */
 
 export { type ITooltipProps, Tooltip } from './Tooltip';
-export { useGlobalResizeObserver } from './hooks';
+export { resizeObserverCtor } from './hooks';

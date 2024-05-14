@@ -18,7 +18,7 @@ import { useEffect, useRef } from 'react';
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
 
 import type { Nullable } from '@univerjs/core';
-import { useGlobalResizeObserver } from '@univerjs/design';
+import { resizeObserverCtor } from '@univerjs/design';
 import { useEvent } from './event';
 /**
  * These hooks are used for browser layout
@@ -55,12 +55,11 @@ export function useScrollOnOverViewport(element: Nullable<HTMLElement>) {
         }
     });
 
-    const resizeObserver = useGlobalResizeObserver(updater);
-
     useEffect(() => {
         if (!canUseDom() || !element) {
             return;
         }
+        const resizeObserver = resizeObserverCtor(updater);
         const rect = element.getBoundingClientRect();
         initialRectRef.current = {
             width: rect.width,

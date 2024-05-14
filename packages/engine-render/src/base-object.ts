@@ -372,6 +372,10 @@ export abstract class BaseObject {
         this._transformerConfig = config;
     }
 
+    get maxZIndex() {
+        return this._zIndex;
+    }
+
     makeDirty(state: boolean = true) {
         this._dirty = state;
 

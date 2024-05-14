@@ -22,10 +22,9 @@ import {
     IUndoRedoService,
 } from '@univerjs/core';
 
-import type { ISheetDrawingServiceParam } from '@univerjs/sheets';
+import type { ISheetDrawing } from '@univerjs/sheets';
 import { InsertDrawingMutation, ISheetDrawingService, RemoveDrawingMutation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-import { InsertImageMutation, RemoveImageMutation } from '@univerjs/drawing';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import type { IDeleteDrawingCommandParams } from './interfaces';
 
@@ -41,16 +40,13 @@ export const RemoveSheetImageCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const sheetDrawingService = accessor.get(ISheetDrawingService);
-        const drawingManagerService = accessor.get(IDrawingManagerService);
-
 
         if (!params) return false;
 
         const { unitId, drawings } = params;
 
-        const sheetDrawingParams: ISheetDrawingServiceParam[] = [];
-        const imageDrawingParams: IDrawingParam[] = [];
-        const removeImageMutationParams = drawings;
+        const sheetDrawingParams: ISheetDrawing[] = [];
+
         const unitIds: string[] = [];
 
         drawings.forEach((param) => {
@@ -58,33 +54,25 @@ export const RemoveSheetImageCommand: ICommand = {
 
             unitIds.push(unitId);
 
-            const oldSheetDrawing = sheetDrawingService.getDrawingItem({ unitId, subUnitId, drawingId });
+            const oldSheetDrawing = sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
             if (oldSheetDrawing) {
                 sheetDrawingParams.push(oldSheetDrawing);
-            }
-
-            const oldImageDrawing = drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
-            if (oldImageDrawing) {
-                imageDrawingParams.push(oldImageDrawing);
             }
         });
 
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const result1 = commandService.syncExecuteCommand(RemoveDrawingMutation.id, sheetDrawingParams);
-        const result2 = commandService.syncExecuteCommand(RemoveImageMutation.id, removeImageMutationParams);
+        const result = commandService.syncExecuteCommand(RemoveDrawingMutation.id, sheetDrawingParams);
 
-        if (result1 && result2) {
+        if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
                     { id: InsertDrawingMutation.id, params: sheetDrawingParams },
-                    { id: InsertImageMutation.id, params: imageDrawingParams },
                     { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
                 redoMutations: [
                     { id: RemoveDrawingMutation.id, params: sheetDrawingParams },
-                    { id: RemoveImageMutation.id, params: removeImageMutationParams },
                     { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
             });

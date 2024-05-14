@@ -71,7 +71,6 @@
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
         "@wendellhu/redi": "^0.13.3",
         "less": "^4.2.0",
         "react": "18.2.0",

@@ -15,18 +15,19 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-import { ISheetDrawingService, type ISheetDrawingServiceParam } from '../../services/sheet-drawing.service';
+import { CommandType, IDrawingManagerService } from '@univerjs/core';
+import { ISheetDrawingService, type ISheetImage } from '../../services/sheet-drawing.service';
 
 
-export const InsertDrawingMutation: IMutation<ISheetDrawingServiceParam[]> = {
+export const InsertDrawingMutation: IMutation<ISheetImage[]> = {
     id: 'sheet.mutation.insert-drawing',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const sheetDrawingService = accessor.get(ISheetDrawingService);
+        const drawingManagerService = accessor.get(IDrawingManagerService);
 
-
-        sheetDrawingService.batchAddDrawing(params);
+        sheetDrawingService.batchAdd(params);
+        drawingManagerService.batchAdd(params);
 
         return true;
     },

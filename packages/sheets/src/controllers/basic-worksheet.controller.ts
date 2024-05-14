@@ -116,6 +116,7 @@ import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.ope
 import { SetDrawingMutation } from '../commands/mutations/set-drawing.mutation';
 import { InsertDrawingMutation } from '../commands/mutations/insert-drawing.mutation';
 import { RemoveDrawingMutation } from '../commands/mutations/remove-drawing.mutation';
+import { SetDrawingArrangeMutation } from '../commands/mutations/set-drawing-arrange.mutation';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
 
 export interface IStyleTypeValue<T> {
@@ -229,6 +230,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             InsertDrawingMutation,
             RemoveDrawingMutation,
             SetDrawingMutation,
+            SetDrawingArrangeMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         this._configService.setConfig(MAX_CELL_PER_SHEET_KEY, MAX_CELL_PER_SHEET_DEFAULT);

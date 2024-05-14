@@ -162,8 +162,8 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     showHighlight={activeCommentId?.commentId === comment.id}
                     onClick={() => {
                         commandService.executeCommand(SetActiveCommentOperation.id, {
-                            unitId,
-                            subUnitId,
+                            unitId: comment.unitId,
+                            subUnitId: comment.subUnitId,
                             commentId: comment.id,
                         });
                     }}

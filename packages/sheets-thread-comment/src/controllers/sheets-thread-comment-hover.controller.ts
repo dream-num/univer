@@ -34,7 +34,6 @@ export class SheetsThreadCommentHoverController extends Disposable {
     private _initHoverEvent() {
         this._hoverManagerService.currentCell$.subscribe((cell) => {
             const currentPopup = this._sheetsThreadCommentPopupService.activePopup;
-            // console.log('===hover', cell);
             if (cell && ((currentPopup && currentPopup.temp) || !currentPopup)) {
                 const { location } = cell;
                 const { unitId, subUnitId, row, col } = location;

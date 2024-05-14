@@ -65,6 +65,7 @@ export class SheetsThreadCommentPopupService extends Disposable {
 
         this._activePopup = location;
         this._activePopup$.next(location);
+
         const popupDisposable = this._canvasPopupManagerService.attachPopupToCell(
             row,
             col,

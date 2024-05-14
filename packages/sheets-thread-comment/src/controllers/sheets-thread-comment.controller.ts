@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { CommentSingle } from '@univerjs/icons';
 import { SetActiveCommentOperation, THREAD_COMMENT_PANEL, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { SelectionMoveType, SetSelectionsOperation } from '@univerjs/sheets';
+import { SelectionMoveType, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { ScrollToCellCommand } from '@univerjs/sheets-ui';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
@@ -42,7 +43,8 @@ export class SheetsThreadCommentController extends Disposable {
         @Inject(SheetsThreadCommentPopupService) private readonly _sheetsThreadCommentPopupService: SheetsThreadCommentPopupService,
         @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel,
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService,
-        @IShortcutService private readonly _shortcutService: IShortcutService
+        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._initMenu();
@@ -110,7 +112,7 @@ export class SheetsThreadCommentController extends Disposable {
     }
 
     private _initPanelListener() {
-        this.disposeWithMe(this._threadCommentPanelService.activeCommentId$.subscribe((commentInfo) => {
+        this.disposeWithMe(this._threadCommentPanelService.activeCommentId$.subscribe(async (commentInfo) => {
             if (commentInfo) {
                 const { unitId, subUnitId, commentId } = commentInfo;
                 const comment = this._sheetsThreadCommentModel.getComment(unitId, subUnitId, commentId);
@@ -118,8 +120,24 @@ export class SheetsThreadCommentController extends Disposable {
                     return;
                 }
 
+                const currentUnit = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                if (!currentUnit) {
+                    return;
+                }
+                const currentUnitId = currentUnit.getUnitId();
+                if (currentUnitId !== unitId) {
+                    return;
+                }
+                const currentSheetId = currentUnit.getActiveSheet().getSheetId();
+                if (currentSheetId !== subUnitId) {
+                    await this._commandService.executeCommand(SetWorksheetActiveOperation.id, {
+                        unitId,
+                        subUnitId,
+                    });
+                }
+
                 const location = singleReferenceToGrid(comment.ref);
-                this._commandService.executeCommand(ScrollToCellCommand.id, {
+                await this._commandService.executeCommand(ScrollToCellCommand.id, {
                     range: {
                         startColumn: location.column,
                         endColumn: location.column,

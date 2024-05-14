@@ -199,7 +199,7 @@ export class SelectionRenderService implements ISelectionRenderService {
      * This service relies on the scene and skeleton to work
      * Use usable$ to check if this service works
      */
-    private readonly _usable$ = new Subject<boolean>();
+    private readonly _usable$ = new BehaviorSubject<boolean>(false);
 
     readonly usable$ = this._usable$.asObservable();
 

@@ -22,7 +22,6 @@ import {
     ConfigService,
     ContextService,
     DesktopLogService,
-    DrawingManagerService,
     ErrorService,
     ICommandService,
     IConfigService,
@@ -103,7 +102,6 @@ const preview: Preview = {
             [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
             [IConfigService, { useClass: ConfigService }],
             [IContextService, { useClass: ContextService }],
-            [IDrawingManagerService, { useClass: DrawingManagerService, lazy: true }],
             [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
 
             // services

@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-export { SetDrawingArrangeMutation, type ISetImageArrangeMutationParams } from './commands/mutations/set-drawing-arrange.mutation';
-export { SetDrawingArrangeCommand, ArrangeType, type ISetDrawingArrangeCommandParams } from './commands/commands/set-drawing-arrange.command';
+export { DrawingManagerService, UnitDrawingService } from './services/drawing-manager.service';
 export { getDrawingShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
 export { getImageSize } from './utils/get-image-size';
 export { UniverDrawingPlugin } from './plugin';
 export { type IImageData } from './models/image-model-interface';
-export { InsertImageMutation } from './commands/mutations/insert-image.mutations';
-export { RemoveImageMutation } from './commands/mutations/remove-image.mutations';
-export { SetImageMutation } from './commands/mutations/set-image.mutations';
 export { ALLOW_IMAGE_LIST } from './services/image-remote.service';
 

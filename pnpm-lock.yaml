@@ -589,9 +589,6 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
       '@wendellhu/redi':
         specifier: ^0.13.3
         version: 0.13.3
@@ -912,6 +909,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula

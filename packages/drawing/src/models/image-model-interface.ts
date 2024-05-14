@@ -17,10 +17,6 @@
 import type { IDrawingParam, ImageSourceType, ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
 
 
-export interface IImageDataValue {
-
-}
-
 export interface IImageData extends IDrawingParam {
     imageSourceType: ImageSourceType;
     source: string;

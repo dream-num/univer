@@ -2,12 +2,11 @@
     "recommendations": [
         "dbaeumer.vscode-eslint",
         "editorconfig.editorconfig",
-        "esbenp.prettier-vscode",
         "gruntfuggly.todo-tree",
         "intellsmi.comment-translate",
+        "kingwl.vscode-vitest-runner",
         "streetsidesoftware.code-spell-checker",
         "tldraw-org.tldraw-vscode",
-        "kingwl.vscode-vitest-runner",
         "usernamehw.errorlens"
     ]
 }

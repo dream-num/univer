@@ -17,6 +17,8 @@
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 
 
+import { Inject } from '@wendellhu/redi';
+import { SheetRenderController } from '@univerjs/sheets-ui';
 import { ReorderRangeCommand } from '../commands/sheets-reorder.command';
 import { ReorderRangeMutation } from '../commands/sheets-reorder.mutation';
 
@@ -24,10 +26,13 @@ import { ReorderRangeMutation } from '../commands/sheets-reorder.mutation';
 @OnLifecycle(LifecycleStages.Ready, SheetsSortController)
 export class SheetsSortController extends Disposable {
     constructor(
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(SheetRenderController) private _sheetRenderController: SheetRenderController
     ) {
         super();
-
+        [
+            ReorderRangeMutation,
+        ].forEach((m) => this.disposeWithMe(this._sheetRenderController.registerSkeletonChangingMutations(m.id)));
         this._initCommands();
     }
 
@@ -36,7 +41,6 @@ export class SheetsSortController extends Disposable {
             ReorderRangeMutation,
             ReorderRangeCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
-        window.zz = this._commandService;
     }
 }
 

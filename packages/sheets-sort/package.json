@@ -59,10 +59,13 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
         "@wendellhu/redi": "^0.13.3",
         "rxjs": ">=7.0.0"
     },
-    "dependencies": {},
+    "dependencies": {
+
+    },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",

@@ -15,14 +15,25 @@
  */
 
 import type { IDisposable } from '@wendellhu/redi';
+import type { Nullable } from '@univerjs/core';
 import { Lang } from './lang';
 import { EnUs } from './patterns/en-us';
 import type { IHyphenPattern, RawHyphenPattern } from './tools';
 import { createCharIterator, createStringSlicer, parsePattern, snackToPascal } from './tools';
 
-class Hyphen implements IDisposable {
+export class Hyphen implements IDisposable {
     private _patterns: Map<Lang, IHyphenPattern> = new Map();
     private _hyphenCache: Map<Lang, Map<string, string[]>> = new Map();
+
+    private static _instance: Nullable<Hyphen> = null;
+
+    static getInstance(): Hyphen {
+        if (this._instance == null) {
+            this._instance = new Hyphen();
+        }
+
+        return this._instance;
+    }
 
     constructor() {
         this._preloadPatterns();
@@ -178,5 +189,3 @@ class Hyphen implements IDisposable {
         this._hyphenCache.clear();
     }
 }
-
-export const hyphen = new Hyphen();

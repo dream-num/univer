@@ -73,9 +73,13 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
 
     private _initRenderer(): void {
         // Subscribe to skeleton change and filter model change.
-        this._sheetSkeletonManagerService.currentSkeleton$
+        combineLatest([
+            this._selectionRenderService.usable$,
+            this._sheetSkeletonManagerService.currentSkeleton$,
+        ])
             .pipe(
-                switchMap((skeletonParams) => {
+                filter(([usable]) => usable),
+                switchMap(([_, skeletonParams]) => {
                     if (!skeletonParams) return of(null);
 
                     const { unitId } = skeletonParams;
@@ -91,13 +95,9 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                         skeleton: skeletonParams.skeleton,
                     });
 
-                    return combineLatest([
-                        this._selectionRenderService.usable$,
-                        fromCallback(this._commandService.onCommandExecuted),
-                    ]).pipe(
-                        filter(([usable, [command]]) =>
-                            usable
-                            && command.type === CommandType.MUTATION
+                    return fromCallback(this._commandService.onCommandExecuted).pipe(
+                        filter(([command]) =>
+                            command.type === CommandType.MUTATION
                             && (command.params as ISheetCommandSharedParams).unitId === workbook.getUnitId()
                             && FILTER_MUTATIONS.has(command.id)
                         ),

@@ -15,7 +15,7 @@
  */
 
 import type { IDrawingSearch, IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import { CommandType, IDrawingManagerService } from '@univerjs/core';
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 
 
@@ -24,8 +24,10 @@ export const RemoveDrawingMutation: IMutation<IDrawingSearch[]> = {
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const sheetDrawingService = accessor.get(ISheetDrawingService);
+        const drawingManagerService = accessor.get(IDrawingManagerService);
 
-        sheetDrawingService.batchRemoveDrawing(params);
+        sheetDrawingService.batchRemove(params);
+        drawingManagerService.batchRemove(params);
 
         return true;
     },

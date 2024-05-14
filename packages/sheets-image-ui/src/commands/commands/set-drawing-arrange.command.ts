@@ -21,17 +21,17 @@ import {
     IDrawingManagerService,
     IUndoRedoService,
 } from '@univerjs/core';
+import { ArrangeType } from '@univerjs/image-ui';
+import { SetDrawingArrangeMutation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-import type { ISetImageArrangeMutationParams } from '../mutations/set-drawing-arrange.mutation';
-import { SetDrawingArrangeMutation } from '../mutations/set-drawing-arrange.mutation';
 
 
-export enum ArrangeType {
-    forward,
-    backward,
-    front,
-    back,
+export interface ISetImageArrangeMutationParams {
+    unitId: string;
+    subUnitId: string;
+    drawingIds: string[];
 }
+
 
 export interface ISetDrawingArrangeCommandParams extends ISetImageArrangeMutationParams {
     arrangeType: ArrangeType;
@@ -70,7 +70,6 @@ export const SetDrawingArrangeCommand: ICommand = {
         }
 
         const newDrawingOrder = [...drawingManagerService.getDrawingOrder(unitId, subUnitId)];
-
 
         const result = commandService.syncExecuteCommand(SetDrawingArrangeMutation.id, { unitId, subUnitId, drawingIds: newDrawingOrder });
 

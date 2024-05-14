@@ -76,6 +76,7 @@
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",

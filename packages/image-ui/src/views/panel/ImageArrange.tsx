@@ -21,7 +21,7 @@ import React, { useEffect, useState } from 'react';
 import { CreateCopySingle } from '@univerjs/icons';
 import { Button } from '@univerjs/design';
 import clsx from 'clsx';
-import { ArrangeType, SetDrawingArrangeCommand } from '@univerjs/drawing';
+import { ArrangeType } from '../../utils/arrange-type';
 import styles from './index.module.less';
 
 
@@ -54,12 +54,26 @@ export const ImageArrange = (props: IImageArrangeProps) => {
     }, []);
 
     const onArrangeBtnClick = (arrangeType: ArrangeType) => {
-        commandService.executeCommand(SetDrawingArrangeCommand.id, {
-            unitId: drawings[0].unitId,
-            subUnitId: drawings[0].subUnitId,
-            drawingIds: drawings.map((drawing) => drawing.drawingId),
-            arrangeType,
-        });
+        // commandService.executeCommand(SetDrawingArrangeCommand.id, {
+        //     unitId: drawings[0].unitId,
+        //     subUnitId: drawings[0].subUnitId,
+        //     drawingIds: drawings.map((drawing) => drawing.drawingId),
+        //     arrangeType,
+        // });
+
+        const unitId = drawings[0].unitId;
+        const subUnitId = drawings[0].subUnitId;
+        const drawingIds = drawings.map((drawing) => drawing.drawingId);
+
+        if (arrangeType === ArrangeType.forward) {
+            drawingManagerService.forwardDrawings(unitId, subUnitId, drawingIds);
+        } else if (arrangeType === ArrangeType.backward) {
+            drawingManagerService.backwardDrawing(unitId, subUnitId, drawingIds);
+        } else if (arrangeType === ArrangeType.front) {
+            drawingManagerService.frontDrawing(unitId, subUnitId, drawingIds);
+        } else if (arrangeType === ArrangeType.back) {
+            drawingManagerService.backDrawing(unitId, subUnitId, drawingIds);
+        }
     };
 
     return (

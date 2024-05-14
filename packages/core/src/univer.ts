@@ -22,10 +22,6 @@ import { CommandService, ICommandService } from './services/command/command.serv
 import { ConfigService, IConfigService } from './services/config/config.service';
 import { ContextService, IContextService } from './services/context/context.service';
 import { ErrorService } from './services/error/error.service';
-import {
-    DrawingManagerService,
-    IDrawingManagerService,
-} from './services/drawing/drawing-manager.service';
 import { IUniverInstanceService, UniverInstanceService } from './services/instance/instance.service';
 import { LifecycleStages } from './services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from './services/lifecycle/lifecycle.service';
@@ -180,7 +176,6 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
         [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
         [IConfigService, { useClass: ConfigService }],
         [IContextService, { useClass: ContextService }],
-        [IDrawingManagerService, { useClass: DrawingManagerService, lazy: true }],
         [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
         [IResourceLoaderService, { useClass: ResourceLoaderService, lazy: true }],
     ], override);

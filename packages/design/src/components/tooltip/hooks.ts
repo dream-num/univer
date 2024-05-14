@@ -23,11 +23,14 @@ import canUseDom from 'rc-util/lib/Dom/canUseDom';
  * See issue https://github.com/WICG/resize-observer/issues/59#issuecomment-408098151
  */
 const _resizeObserverCallbacks: Set<ResizeObserverCallback> = new Set();
-const _resizeObserver: ResizeObserver = new ResizeObserver((...args) => {
-    _resizeObserverCallbacks.forEach((callback) => callback(...args));
-});
+let _resizeObserver: ResizeObserver;
 
 export function resizeObserverCtor(callback: ResizeObserverCallback) {
+    if (!_resizeObserver) {
+        _resizeObserver = new ResizeObserver((...args) => {
+            _resizeObserverCallbacks.forEach((callback) => callback(...args));
+        });
+    }
     return {
         observe(target: Element, options?: ResizeObserverOptions | undefined) {
             _resizeObserverCallbacks.add(callback);

@@ -97,6 +97,13 @@ export function createSkeletonTabGlyph(config: IFontCreateConfig, glyphWidth?: n
     return _createSkeletonWordOrLetter(GlyphType.TAB, DT.TAB, config, glyphWidth);
 }
 
+export function createHyphenDashGlyph(config: IFontCreateConfig) {
+    const dashLetterGlyph = _createSkeletonWordOrLetter(GlyphType.LETTER, '-', config);
+    dashLetterGlyph.count = 0;
+
+    return dashLetterGlyph;
+}
+
 // It is used to create inline custom blocks, such as inline images, to occupy placeholders in the layout.
 export function createSkeletonCustomBlockGlyph(config: IFontCreateConfig, glyphWidth = 0, glyphHeight = 0, objectId = ''): IDocumentSkeletonGlyph {
     const { fontStyle, textStyle } = config;

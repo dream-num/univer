@@ -18,6 +18,7 @@ import type { INumberUnit } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule } from '@univerjs/core';
 import type {
     IDocumentSkeletonColumn,
+    IDocumentSkeletonDivide,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
@@ -30,7 +31,7 @@ import {
     collisionDetection,
     createAndUpdateBlockAnchor,
     createSkeletonLine,
-    setDivideFullState,
+    updateDivideInfo,
 } from '../../model/line';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
@@ -53,6 +54,7 @@ import {
     isColumnFull,
     lineIterator,
 } from '../../tools';
+import { BreakPointType } from '../../line-breaker/break';
 
 export function layoutParagraph(
     ctx: ILayoutContext,
@@ -60,7 +62,8 @@ export function layoutParagraph(
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
-    paragraphStart: boolean = false
+    paragraphStart: boolean = false,
+    breakPointType = BreakPointType.Normal
 ) {
     if (paragraphStart) {
         // elementIndex === 0 表示段落开始的第一个字符，需要新起一行，与之前的段落区分开
@@ -74,12 +77,12 @@ export function layoutParagraph(
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
 
             const bulletGlyph = createSkeletonBulletGlyph(glyphGroup[0], bulletSkeleton, charSpaceApply);
-            _lineOperator(ctx, [bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+            _lineOperator(ctx, [bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType);
         } else {
-            _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+            _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType);
         }
     } else {
-        _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+        _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType);
     }
 
     return [...pages];
@@ -134,6 +137,51 @@ function isGlyphGroupBeyondContentBox(glyphGroup: IDocumentSkeletonGlyph[], left
     return isBeyondContentBox;
 }
 
+// Gets the number of consecutive lines ending with a hyphen.
+function _getConsecutiveHyphenLineCount(divide: IDocumentSkeletonDivide) {
+    const column = divide.parent?.parent;
+
+    if (column == null) {
+        return 0;
+    }
+
+    let count = 0;
+
+    for (let i = column.lines.length - 1; i >= 0; i--) {
+        const line = column.lines[i];
+        const lastDivide = line.divides[line.divides.length - 1];
+        if (lastDivide.breakType === BreakPointType.Hyphen) {
+            count++;
+        } else {
+            break;
+        }
+    }
+
+    return count;
+}
+
+function _popHyphenSlice(divide: IDocumentSkeletonDivide) {
+    const glyphGroup: IDocumentSkeletonGlyph[] = [];
+
+    let lastGlyph = divide.glyphGroup.pop();
+
+    while (lastGlyph && lastGlyph.content !== ' ') {
+        glyphGroup.unshift(lastGlyph);
+
+        lastGlyph = divide.glyphGroup.pop();
+    }
+
+    // If the hyphenated word slice is the first word slice of the divide,
+    // ignore this rule and recovery divide.
+    if (divide.glyphGroup.length === 0) {
+        divide.glyphGroup.push(...glyphGroup);
+
+        glyphGroup.length = 0;
+    }
+
+    return glyphGroup;
+}
+
 function _divideOperator(
     ctx: ILayoutContext,
     glyphGroup: IDocumentSkeletonGlyph[],
@@ -141,6 +189,7 @@ function _divideOperator(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
     paragraphStart = false,
+    breakPointType = BreakPointType.Normal,
     defaultSpanLineHeight?: number
 ) {
     const lastPage = getLastPage(pages);
@@ -148,15 +197,21 @@ function _divideOperator(
 
     if (divideInfo) {
         const width = __getGlyphGroupWidth(glyphGroup);
-        const { divide } = divideInfo;
+        const { divide, isLast } = divideInfo;
         const lastGlyph = divide?.glyphGroup?.[divide.glyphGroup.length - 1];
         const lastWidth = lastGlyph?.width || 0;
         const lastLeft = lastGlyph?.left || 0;
         const preOffsetLeft = lastWidth + lastLeft;
+        const { hyphenationZone } = sectionBreakConfig;
 
         if (preOffsetLeft + width > divide.width) {
             // width 超过 divide 宽度
-            setDivideFullState(divide, true);
+            updateDivideInfo(divide, {
+                isFull: true,
+            });
+            const hyphenLineCount = _getConsecutiveHyphenLineCount(divideInfo.divide);
+            const { consecutiveHyphenLimit = Number.POSITIVE_INFINITY } = sectionBreakConfig;
+
             // 处理 word 或者数字串超过 divide width 的情况，主要分两种情况
             // 1. 以段落符号结尾时候，即使超过 divide 宽度，也需要将换行符追加到 divide 结尾。
             // 2. 空行中，英文单词或者连续数字超过 divide 宽度的情况，将把英文单词、数字串拆分，一部分追加到上一行，剩下的放在新的一行中，
@@ -203,9 +258,31 @@ function _divideOperator(
                         sectionBreakConfig,
                         paragraphConfig,
                         paragraphStart,
+                        breakPointType,
                         defaultSpanLineHeight
                     );
                 }
+            } else if (hyphenLineCount > consecutiveHyphenLimit) {
+                const hyphenSliceGlyphGroup = _popHyphenSlice(divide);
+
+                if (hyphenSliceGlyphGroup.length > 0) {
+                    updateDivideInfo(divide, {
+                        breakType: BreakPointType.Normal,
+                    });
+
+                    _divideOperator(ctx, hyphenSliceGlyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, BreakPointType.Hyphen);
+                }
+
+                _divideOperator(
+                    ctx,
+                    glyphGroup,
+                    pages,
+                    sectionBreakConfig,
+                    paragraphConfig,
+                    paragraphStart,
+                    breakPointType,
+                    defaultSpanLineHeight
+                );
             } else {
                 _divideOperator(
                     ctx,
@@ -214,9 +291,32 @@ function _divideOperator(
                     sectionBreakConfig,
                     paragraphConfig,
                     paragraphStart,
+                    breakPointType,
                     defaultSpanLineHeight
                 );
             }
+        } else if ( // Determine if first word slice appears inside the hyphenation zone.
+            isLast &&
+            hyphenationZone &&
+            hyphenationZone > 0 &&
+            preOffsetLeft >= divide.width - hyphenationZone &&
+            breakPointType === BreakPointType.Hyphen &&
+            divide.breakType === BreakPointType.Normal
+        ) {
+            updateDivideInfo(divide, {
+                isFull: true,
+            });
+
+            _divideOperator(
+                ctx,
+                glyphGroup,
+                pages,
+                sectionBreakConfig,
+                paragraphConfig,
+                paragraphStart,
+                breakPointType,
+                defaultSpanLineHeight
+            );
         } else {
             // w 不超过 divide 宽度，加入到 divide 中去
             const currentLine = divide.parent;
@@ -265,6 +365,7 @@ function _divideOperator(
                         sectionBreakConfig,
                         paragraphConfig,
                         lineIsStart,
+                        breakPointType,
                         boundingBoxAscent + boundingBoxDescent
                     );
 
@@ -280,16 +381,17 @@ function _divideOperator(
                         );
                     }
 
-                    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+                    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType);
 
                     return;
                 }
             }
 
             addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+            updateDivideInfo(divide, { breakType: breakPointType });
         }
     } else {
-        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
     }
 }
 
@@ -300,13 +402,14 @@ function _lineOperator(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
     paragraphStart: boolean = false,
+    breakPointType: BreakPointType = BreakPointType.Normal,
     defaultSpanLineHeight?: number
 ) {
     let lastPage = getLastPage(pages);
     let columnInfo = getLastNotFullColumnInfo(lastPage);
     if (!columnInfo || !columnInfo.column) {
         // 如果列不存在，则做一个兜底策略，新增一页。
-        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig);
+        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, undefined, breakPointType);
         lastPage = getLastPage(pages);
         columnInfo = getLastNotFullColumnInfo(lastPage);
     }
@@ -331,7 +434,6 @@ function _lineOperator(
     const {
         paragraphStyle = {},
         paragraphAffectSkeDrawings,
-        paragraphInlineSkeDrawings,
         skeHeaders,
         skeFooters,
         drawingAnchor,
@@ -438,7 +540,7 @@ function _lineOperator(
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
         // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
-        _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
         return;
     }
 
@@ -480,7 +582,7 @@ function _lineOperator(
     column.lines.push(newLine);
     newLine.parent = column;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, drawingAnchor);
-    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+    _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
 }
 
 function __updateAndPositionDrawings(
@@ -658,15 +760,16 @@ function _columnOperator(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
     paragraphStart: boolean = false,
+    breakPointType = BreakPointType.Normal,
     defaultSpanLineHeight?: number
 ) {
     const lastPage = getLastPage(pages);
     const columnIsFull = isColumnFull(lastPage);
 
     if (columnIsFull === true) {
-        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _pageOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
     } else {
-        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
     }
 }
 
@@ -677,13 +780,14 @@ function _pageOperator(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
     paragraphStart: boolean = false,
+    breakPointType = BreakPointType.Normal,
     defaultSpanLineHeight?: number
 ) {
     const curSkeletonPage: IDocumentSkeletonPage = getLastPage(pages);
     const { skeHeaders, skeFooters } = paragraphConfig;
 
     pages.push(createSkeletonPage(ctx, sectionBreakConfig, { skeHeaders, skeFooters }, curSkeletonPage?.pageNumber));
-    _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+    _columnOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, breakPointType, defaultSpanLineHeight);
 }
 
 /**
@@ -887,7 +991,7 @@ function __getDrawingPosition(
     const isPageBreak = __checkPageBreak(column);
 
     for (const drawing of needPositionDrawings) {
-        const { initialState, drawingOrigin } = drawing;
+        const { drawingOrigin } = drawing;
 
         if (!drawingOrigin) {
             continue;
@@ -1007,17 +1111,8 @@ function __maxFontBoundingBoxByGlyphGroup(glyphGroup: IDocumentSkeletonGlyph[]) 
     return maxBox;
 }
 
-function __getSpanGroupByLine(line: IDocumentSkeletonLine) {
-    const divides = line.divides;
-    const dividesLen = divides.length;
-    const glyphGroup = [];
-
-    for (let i = 0; i < dividesLen; i++) {
-        const divide = divides[i];
-        glyphGroup.push(...divide.glyphGroup);
-    }
-
-    return glyphGroup;
+function __getSpanGroupByLine({ divides }: IDocumentSkeletonLine) {
+    return divides.flatMap((divide) => divide.glyphGroup);
 }
 
 function __isNullLine(line: IDocumentSkeletonLine) {

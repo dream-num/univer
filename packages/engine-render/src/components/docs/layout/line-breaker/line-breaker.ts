@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+/* eslint-disable ts/naming-convention */
+
 import type { Nullable } from '@univerjs/core';
 
-import { Break } from './break';
+import { Break, BreakPointType } from './break';
 import { AI, AL, BA, BK, CJ, CR, HL, HY, LF, NL, NS, RI, SA, SG, SP, WJ, XX, ZWJ } from './classes';
 import { CI_BRK, CP_BRK, DI_BRK, IN_BRK, pairTable, PR_BRK } from './pairs';
 import type { ILineBreakRule } from './rule';
@@ -61,7 +63,12 @@ function mapFirst(c: number) {
             return c;
     }
 }
-export class LineBreaker {
+
+export interface IBreakPoints {
+    nextBreakPoint(): Nullable<Break>;
+}
+
+export class LineBreaker implements IBreakPoints {
     private _pos: number = 0;
     private _lastPos: number = 0;
     private _curClass: Nullable<number> = null;
@@ -72,9 +79,7 @@ export class LineBreaker {
     private _LB30a: number = 0;
     private _rule: Rule = new Rule();
 
-    constructor(public string: string) {
-        // empty
-    }
+    constructor(public content: string) {}
 
     use(extension: ILineBreakExtension) {
         extension(this);
@@ -88,7 +93,7 @@ export class LineBreaker {
         return this;
     }
 
-    nextBreak() {
+    nextBreakPoint() {
         // get the first char if we're at the beginning of the string
         if (this._curClass == null) {
             const firstClass = this._nextCharClass();
@@ -98,7 +103,7 @@ export class LineBreaker {
             this._LB30a = 0;
         }
 
-        while (this._pos < this.string.length) {
+        while (this._pos < this.content.length) {
             this._lastPos = this._pos;
             const lastClass = this._nextClass;
             this._nextClass = this._nextCharClass();
@@ -106,7 +111,7 @@ export class LineBreaker {
             // explicit newline
             if (this._curClass === BK || (this._curClass === CR && this._nextClass !== LF)) {
                 this._curClass = mapFirst(mapClass(this._nextClass));
-                return new Break(this._lastPos, true);
+                return new Break(this._lastPos, BreakPointType.Mandatory);
             }
 
             if (this._rule.shouldBreak(this._codePoint!, this._nextClass)) {
@@ -128,17 +133,17 @@ export class LineBreaker {
             }
         }
 
-        if (this._lastPos < this.string.length) {
-            this._lastPos = this.string.length;
-            return new Break(this.string.length);
+        if (this._lastPos < this.content.length) {
+            this._lastPos = this.content.length;
+            return new Break(this.content.length);
         }
 
         return null;
     }
 
     private _getNextCodePoint() {
-        const code = this.string.charCodeAt(this._pos++);
-        const next = this.string.charCodeAt(this._pos);
+        const code = this.content.charCodeAt(this._pos++);
+        const next = this.content.charCodeAt(this._pos);
 
         // If a surrogate pair
         if (code >= 0xD800 && code <= 0xDBFF && next >= 0xDC00 && next <= 0xDFFF) {

@@ -19,7 +19,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { tabLineBreakExtension } from '../extensions/tab-linebreak-extension';
-import { LineBreaker } from '../linebreaker';
+import { LineBreaker } from '../line-breaker';
 
 describe('unicode line break tests', () => {
     // these tests are weird, possibly incorrect or just tailored differently. we skip them.
@@ -50,7 +50,7 @@ describe('unicode line break tests', () => {
         const breaker = new LineBreaker(str);
         const breaks: string[] = [];
         let last = 0;
-        while ((bk = breaker.nextBreak())) {
+        while ((bk = breaker.nextBreakPoint())) {
             breaks.push(str.slice(last, bk.position));
             last = bk.position;
         }
@@ -85,7 +85,7 @@ describe('line break extensions tests', () => {
         let last = 0;
         let bk;
 
-        while ((bk = breaker.nextBreak())) {
+        while ((bk = breaker.nextBreakPoint())) {
             breaks.push(data.slice(last, bk.position));
             last = bk.position;
         }
@@ -101,7 +101,7 @@ describe('line break extensions tests', () => {
         let last = 0;
         let bk;
 
-        while ((bk = breaker.nextBreak())) {
+        while ((bk = breaker.nextBreakPoint())) {
             breaks.push(data.slice(last, bk.position));
             last = bk.position;
         }

@@ -176,6 +176,8 @@ describe('Test indirect', () => {
 
     let selectionEndParam: ISelectionWithCoordAndStyle[];
 
+    let selectionServiceUsable: boolean;
+
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
             [IShortcutService, { useClass: DesktopShortcutService }],
@@ -226,6 +228,10 @@ describe('Test indirect', () => {
             selectionEndParam = param;
         });
 
+        selectionRenderService.usable$.subscribe((param) => {
+            selectionServiceUsable = param;
+        });
+
         selectionRenderService.eventTrigger(mockEvent);
 
         scene.triggerPointerMove({ ...mockEvent, offsetX: 200 });
@@ -235,6 +241,8 @@ describe('Test indirect', () => {
 
     describe('normal', () => {
         it('Observer is valid', () => {
+            expect(selectionServiceUsable).toBeTruthy();
+
             expect(selectionStartParam == null).toBeFalsy();
 
             expect(selectionMovingParam == null).toBeFalsy();

@@ -22,8 +22,8 @@ import type { IDialogPartMethodOptions } from '../../views/components/dialog-par
 import type { IDialogService } from './dialog.service';
 
 export class DesktopDialogService extends Disposable implements IDialogService {
-    private _dialogOptions: IDialogPartMethodOptions[] = [];
-    private readonly _dialogOptions$ = new Subject<IDialogPartMethodOptions[]>();
+    protected _dialogOptions: IDialogPartMethodOptions[] = [];
+    protected readonly _dialogOptions$ = new Subject<IDialogPartMethodOptions[]>();
 
     override dispose(): void {
         super.dispose();
@@ -62,6 +62,6 @@ export class DesktopDialogService extends Disposable implements IDialogService {
     }
 
     getDialogs$() {
-        return this._dialogOptions$;
+        return this._dialogOptions$.asObservable();
     }
 }

@@ -68,7 +68,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "^0.13.3",
+        "@wendellhu/redi": "^0.15.1",
         "dayjs": ">=1.11.0",
         "rxjs": ">=7.0.0"
     },
@@ -79,7 +79,7 @@
         "@univerjs/icons-svg": "^0.1.44",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "^0.13.3",
+        "@wendellhu/redi": "^0.15.1",
         "dayjs": "^1.11.10",
         "rxjs": "^7.8.1",
         "sharp": "^0.33.3",

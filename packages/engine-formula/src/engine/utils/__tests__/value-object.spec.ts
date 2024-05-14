@@ -59,6 +59,7 @@ describe('Test object cover', () => {
     it('Function objectValueToCellValue', () => {
         expect(objectValueToCellValue(NumberValueObject.create(1))).toStrictEqual({ v: 1, t: CellValueType.NUMBER });
         expect(objectValueToCellValue(StringValueObject.create('Univer'))).toStrictEqual({ v: 'Univer', t: CellValueType.STRING });
+        expect(objectValueToCellValue(StringValueObject.create('0'))).toStrictEqual({ v: '0', t: CellValueType.STRING });
         expect(objectValueToCellValue(BooleanValueObject.create(true))).toStrictEqual({ v: 1, t: CellValueType.BOOLEAN });
         expect(objectValueToCellValue(BooleanValueObject.create(false))).toStrictEqual({ v: 0, t: CellValueType.BOOLEAN });
         expect(objectValueToCellValue(NullValueObject.create())).toStrictEqual({ v: null });

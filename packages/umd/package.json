@@ -70,7 +70,7 @@
         "@univerjs/slides-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
-        "@wendellhu/redi": "^0.13.3",
+        "@wendellhu/redi": "^0.15.1",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.10",
         "monaco-editor": "0.48.0",

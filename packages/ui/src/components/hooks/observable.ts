@@ -17,7 +17,7 @@
 /* eslint-disable ts/no-explicit-any */
 
 import type { Nullable } from '@univerjs/core';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Observable, Subscription } from 'rxjs';
 
 type ObservableOrFn<T> = Observable<T> | (() => Observable<T>);
@@ -30,18 +30,10 @@ function unwrap<T>(o: ObservableOrFn<T>): Observable<T> {
     return o;
 }
 
-function showArrayNotEqual(arr1: unknown[], arr2: unknown[]): boolean {
-    if (arr1.length !== arr2.length) {
-        return true;
-    }
-
-    return arr1.some((value, index) => value !== arr2[index]);
-}
-
 export function useObservable<T>(observable: ObservableOrFn<T>, defaultValue: T | undefined, shouldHaveSyncValue?: true): T;
 export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue: T): T;
 export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: undefined): T | undefined;
-export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: T, shouldHaveSyncValue?: true, deps?: any[]): T;
+export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue: undefined, shouldHaveSyncValue: true, deps?: any[]): T;
 export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: T, shouldHaveSyncValue?: boolean, deps?: any[]): T | undefined;
 /**
  * A hook to subscribe to an observable and get the latest value.
@@ -57,9 +49,10 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
     }
 
     const observableRef = useRef<Observable<T> | null>(null);
-    const subscriptionRef = useRef<Subscription | null>(null);
-    const depsRef = useRef<any[] | undefined>(deps ?? undefined);
     const initializedRef = useRef<boolean>(false);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const destObservable = useMemo(() => observable, [...(typeof deps !== 'undefined' ? deps : [observable])]);
 
     // This state is only for trigger React to re-render. We do not use `setValue` directly because it may cause
     // memory leaking.
@@ -67,8 +60,8 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
 
     const valueRef = useRef((() => {
         let innerDefaultValue: T | undefined;
-        if (observable) {
-            const sub = unwrap(observable).subscribe((value) => {
+        if (destObservable) {
+            const sub = unwrap(destObservable).subscribe((value) => {
                 initializedRef.current = true;
                 innerDefaultValue = value;
             });
@@ -79,38 +72,22 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
         return innerDefaultValue ?? defaultValue;
     })());
 
-
-    const shouldResubscribe = (() => {
-        if (typeof depsRef.current !== 'undefined') {
-            const _deps = deps ?? [];
-            if (showArrayNotEqual(depsRef.current, _deps)) {
-                depsRef.current = _deps;
-                return true;
-            }
-
-            return false;
+    useEffect(() => {
+        let subscription: Subscription | null = null;
+        if (destObservable) {
+            observableRef.current = unwrap(destObservable);
+            subscription = observableRef.current.subscribe((value) => {
+                valueRef.current = value;
+                setRenderCounter((prev) => prev + 1);
+            });
         }
 
-        return observableRef.current !== observable;
-    })();
-
-    // Subscribe on first rendering and re-subscribe when deps change.
-    if ((!subscriptionRef.current || shouldResubscribe) && observable) {
-        observableRef.current = unwrap(observable);
-        subscriptionRef.current?.unsubscribe();
-        subscriptionRef.current = observableRef.current.subscribe((value) => {
-            valueRef.current = value;
-            setRenderCounter((prev) => prev + 1);
-        });
-    }
-
-    useEffect(() => () => {
-        subscriptionRef.current?.unsubscribe();
-        subscriptionRef.current = null;
-    }, []);
+        return () => subscription?.unsubscribe();
+    }, [destObservable]);
 
     if (shouldHaveSyncValue && !initializedRef.current) {
         throw new Error('[useObservable]: expect shouldHaveSyncValue but not getting a sync value!');
     }
+
     return valueRef.current;
 }

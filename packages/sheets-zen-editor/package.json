@@ -71,7 +71,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.3",
+        "@wendellhu/redi": "^0.15.1",
         "clsx": ">=2.0.0",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
@@ -87,7 +87,7 @@
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.3",
+        "@wendellhu/redi": "^0.15.1",
         "clsx": "^2.1.1",
         "less": "^4.2.0",
         "react": "18.2.0",

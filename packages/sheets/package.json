@@ -67,7 +67,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@wendellhu/redi": "^0.13.3",
+        "@wendellhu/redi": "^0.15.1",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {
@@ -76,7 +76,7 @@
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@wendellhu/redi": "^0.13.3",
+        "@wendellhu/redi": "^0.15.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
         "vite": "^5.2.10",

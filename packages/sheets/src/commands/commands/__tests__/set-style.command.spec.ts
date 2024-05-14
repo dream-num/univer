@@ -84,16 +84,16 @@ describe("Test commands used for updating cells' styles", () => {
 
     afterEach(() => univer.dispose());
 
-    describe('inner range for loop', () => {
+    describe('set style', () => {
         it('set array of style', async () => {
             const range = { startRow: 1, startColumn: 1, endColumn: 3, endRow: 3, rangeType: RANGE_TYPE.NORMAL };
 
             function getFontColor(row: number, col: number) {
                 return get(IUniverInstanceService)
-                    .getUniverSheetInstance('test')
-                    ?.getSheetBySheetId('sheet1')
-                    ?.getRange(row, col)
-                    ?.getFontColor();
+                    .getUniverSheetInstance('test')!
+                    .getSheetBySheetId('sheet1')!
+                    .getRange(row, col)
+                    .getFontColor();
             }
 
             const defaultColor = '#000';

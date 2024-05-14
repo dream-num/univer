@@ -381,6 +381,10 @@ export abstract class BaseObject extends Disposable {
         this._transformerConfig = config;
     }
 
+    get maxZIndex() {
+        return this._zIndex;
+    }
+
     makeDirty(state: boolean = true) {
         this._dirty = state;
 

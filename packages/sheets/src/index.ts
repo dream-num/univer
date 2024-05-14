@@ -301,4 +301,5 @@ export { getMoveRangeUndoRedoMutations } from './commands/commands/move-range.co
 export { InsertDrawingMutation } from './commands/mutations/insert-drawing.mutation';
 export { RemoveDrawingMutation } from './commands/mutations/remove-drawing.mutation';
 export { SetDrawingMutation } from './commands/mutations/set-drawing.mutation';
-export { type ISheetDrawingServiceParam, type ISheetDrawingServiceUpdateParam, type ISheetDrawingPosition, ISheetDrawingService } from './services/sheet-drawing.service';
+export { type ISheetDrawing, type ISheetUpdateDrawing, type ISheetDrawingPosition, ISheetDrawingService } from './services/sheet-drawing.service';
+export { SetDrawingArrangeMutation } from './commands/mutations/set-drawing-arrange.mutation';

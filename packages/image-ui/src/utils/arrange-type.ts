@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-import type { IMutation } from '@univerjs/core';
-import { CommandType, IDrawingManagerService } from '@univerjs/core';
-import type { IImageData } from '../../models/image-model-interface';
-
-
-export const InsertImageMutation: IMutation<IImageData[]> = {
-    id: 'sheet.mutation.insert-image',
-    type: CommandType.MUTATION,
-    handler: (accessor, params) => {
-        const drawingManagerService = accessor.get(IDrawingManagerService);
-
-        drawingManagerService.batchAdd(params);
-
-        return true;
-    },
-};
+export enum ArrangeType {
+    forward,
+    backward,
+    front,
+    back,
+}

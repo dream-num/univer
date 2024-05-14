@@ -16,11 +16,11 @@
 
 
 import type { DrawingTypeEnum, IDrawingParam } from '@univerjs/core';
-import type { ISheetDrawingServiceParam } from '@univerjs/sheets';
+import type { ISheetDrawing } from '@univerjs/sheets';
 
 
 export interface IDrawingCommandParams {
-    sheetDrawingParam: ISheetDrawingServiceParam;
+    sheetDrawingParam: ISheetDrawing;
     drawingParam: IDrawingParam;
 }
 
@@ -43,7 +43,7 @@ export interface IDeleteDrawingCommandParams {
 
 
 export interface IPartialDrawingCommandParam {
-    sheetDrawingParam?: Partial<ISheetDrawingServiceParam>;
+    sheetDrawingParam?: Partial<ISheetDrawing>;
     drawingParam?: Partial<IDrawingParam>;
 }
 

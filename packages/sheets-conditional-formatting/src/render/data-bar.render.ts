@@ -17,7 +17,7 @@
 import type { IRange, IScale } from '@univerjs/core';
 import { Range } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import { FIX_ONE_PIXEL_BLUR_OFFSET, SheetExtension } from '@univerjs/engine-render';
+import { FIX_ONE_PIXEL_BLUR_OFFSET, SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
 import type { IDataBarCellData } from './type';
 
 export const dataBarUKey = 'sheet-conditional-rule-data-bar';
@@ -150,3 +150,5 @@ export class DataBar extends SheetExtension {
         ctx.fill();
     }
 }
+
+SpreadsheetExtensionRegistry.add(DataBar);

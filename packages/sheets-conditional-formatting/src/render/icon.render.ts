@@ -17,7 +17,7 @@
 import type { IRange, IScale } from '@univerjs/core';
 import { Range } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import { SheetExtension } from '@univerjs/engine-render';
+import { SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
 import type { IIconType } from '../models/icon-map';
 import { EMPTY_ICON_TYPE, iconMap } from '../models/icon-map';
 import type { IIconSetCellData } from './type';
@@ -115,3 +115,5 @@ export class ConditionalFormattingIcon extends SheetExtension {
         return `${iconType}_${iconIndex}`;
     }
 }
+
+SpreadsheetExtensionRegistry.add(ConditionalFormattingIcon);

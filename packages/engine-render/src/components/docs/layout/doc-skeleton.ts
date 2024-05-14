@@ -33,7 +33,7 @@ import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, setPageParent,
 import { createSkeletonSection } from './model/section';
 import { dealWithSection } from './block/section';
 import { createSkeletonPage } from './model/page';
-import { Hyphen } from './hyphenation/hyphen';
+import { hyphen } from './hyphenation/hyphen';
 import { LanguageDetector } from './hyphenation/language-detector';
 
 export enum DocumentSkeletonState {
@@ -65,7 +65,7 @@ export class DocumentSkeleton extends Skeleton {
     private _findLiquid: Liquid = new Liquid();
 
     // Use for hyphenation.
-    private _hyphen = new Hyphen();
+    private _hyphen = hyphen;
 
     private _languageDetector = new LanguageDetector();
 

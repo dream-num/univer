@@ -20,7 +20,7 @@ import { EnUs } from './patterns/en-us';
 import type { IHyphenPattern, RawHyphenPattern } from './tools';
 import { createCharIterator, createStringSlicer, parsePattern, snackToPascal } from './tools';
 
-export class Hyphen implements IDisposable {
+class Hyphen implements IDisposable {
     private _patterns: Map<Lang, IHyphenPattern> = new Map();
     private _hyphenCache: Map<Lang, Map<string, string[]>> = new Map();
 
@@ -178,3 +178,5 @@ export class Hyphen implements IDisposable {
         this._hyphenCache.clear();
     }
 }
+
+export const hyphen = new Hyphen();

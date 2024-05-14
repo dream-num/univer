@@ -25,6 +25,7 @@ const locale = {
             date: '请输入合法的日期或公式',
             list: '请输入至少一个合法选项',
             listInvalid: '列表源必须是分隔列表或对单行或列的引用。',
+            checkboxEqual: '为勾选和未勾选的单元格内容输入不同的值。',
         },
         panel: {
             title: '管理数据验证',

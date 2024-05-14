@@ -16,11 +16,12 @@
 
 
 import type { ICellDataForSheetInterceptor, ICellRenderContext, Workbook } from '@univerjs/core';
-import { DataValidationRenderMode, DataValidationStatus, DataValidationType, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType, WrapStrategy } from '@univerjs/core';
-import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
+import { DataValidationRenderMode, DataValidationStatus, DataValidationType, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, sequenceExecute, UniverInstanceType, WrapStrategy } from '@univerjs/core';
+import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-validation';
+import { DataValidationModel, DataValidatorRegistryService, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
-import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
@@ -58,7 +59,9 @@ export class DataValidationRenderController extends RxDisposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(DataValidationDropdownManagerService) private readonly _dropdownManagerService: DataValidationDropdownManagerService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(AutoHeightController) private readonly _autoHeightController: AutoHeightController,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
         this._init();
@@ -70,6 +73,7 @@ export class DataValidationRenderController extends RxDisposable {
         this._initSkeletonChange();
         this._initDropdown();
         this._initViewModelIntercept();
+        this._initAutoHeight();
     }
 
     private _initMenu() {
@@ -204,7 +208,7 @@ export class DataValidationRenderController extends RxDisposable {
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
-                    // eslint-disable-next-line max-lines-per-function
+                    // eslint-disable-next-line max-lines-per-function, complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId } = pos;
                         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
@@ -327,5 +331,14 @@ export class DataValidationRenderController extends RxDisposable {
                 }
             )
         );
+    }
+
+    private _initAutoHeight() {
+        this._dataValidationModel.ruleChange$.subscribe((info) => {
+            if (info.rule?.ranges) {
+                const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(info.rule.ranges);
+                sequenceExecute(mutations.redos, this._commandService);
+            }
+        });
     }
 }

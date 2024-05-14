@@ -77,12 +77,15 @@ export { ErrorService, type IError } from './services/error/error.service';
 export type { IOffset, IScale, ISize, ITransformState, IOtherTransform, IAbsoluteTransform, ISrcRect } from './services/drawing/drawing-interfaces';
 export {
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
-    DrawingManagerService,
     type DrawingType,
     DrawingTypeEnum,
     type IDrawingSearch,
     type IDrawingParam,
     IDrawingManagerService,
+    type IUnitDrawingService,
+    type IDrawingOrderMap,
+    type IDrawingMap,
+    type IDrawingOrderMapParam,
 } from './services/drawing/drawing-manager.service';
 export { IUniverInstanceService } from './services/instance/instance.service';
 export { LifecycleStages, OnLifecycle, runOnLifecycle } from './services/lifecycle/lifecycle';
@@ -187,3 +190,4 @@ export { DataValidationType } from './types/enum/data-validation-type';
 export { DataValidationStatus } from './types/enum/data-validation-status';
 
 installShims();
+

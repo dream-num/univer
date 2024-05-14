@@ -28,6 +28,7 @@ import { offsetRotationAxis } from './basics/offset-rotation-axis';
 
 export class Group extends BaseObject {
     private _objects: BaseObject[] = [];
+    private _selfSizeMode = false;
 
     constructor(key?: string, ...objects: BaseObject[]) {
         super(key);
@@ -43,6 +44,9 @@ export class Group extends BaseObject {
     }
 
     override getState() {
+        if (this._selfSizeMode) {
+            return super.getState();
+        }
         let groupLeft = Number.MAX_SAFE_INTEGER;
         let groupTop = Number.MAX_SAFE_INTEGER;
         let groupRight = Number.MIN_SAFE_INTEGER;
@@ -71,14 +75,24 @@ export class Group extends BaseObject {
     }
 
     override get width(): number {
-        return this.getState().width;
+        if (this._selfSizeMode) {
+            return super.width;
+        }
+        return this.getState().width || 0;
     }
 
     override get height(): number {
-        return this.getState().height;
+        if (this._selfSizeMode) {
+            return super.height;
+        }
+        return this.getState().height || 0;
     }
 
     override set width(val: number) {
+        if (this._selfSizeMode) {
+            super.width = val;
+            return;
+        }
         const preWidth = this.width;
         const numDelta = val - preWidth;
         this._objects.forEach((o) => {
@@ -87,6 +101,10 @@ export class Group extends BaseObject {
     }
 
     override set height(val: number) {
+        if (this._selfSizeMode) {
+            super.height = val;
+            return;
+        }
         const preHeight = this.height;
         const numDelta = val - preHeight;
         this._objects.forEach((o) => {
@@ -94,9 +112,28 @@ export class Group extends BaseObject {
         });
     }
 
+    override get maxZIndex() {
+        let maxZIndex = 0;
+        for (const object of this._objects) {
+            maxZIndex = Math.max(maxZIndex, object.zIndex);
+        }
+        return maxZIndex;
+    }
+
+    openSelfSizeMode() {
+        this._selfSizeMode = true;
+    }
+
+    closeSelfSizeMode() {
+        this._selfSizeMode = false;
+    }
+
     reCalculateObjects() {
+        if (this._selfSizeMode) {
+            return;
+        }
         const state = this.getState();
-        const { left, top } = state;
+        const { left = 0, top = 0 } = state;
         for (const object of this._objects) {
             object.transformByState({
                 left: object.left - left,
@@ -169,23 +206,36 @@ export class Group extends BaseObject {
         }
     }
 
-    removeSelfObjectAndTransform(oKey: string) {
-        const objects = this.getObjects();
+    removeSelfObjectAndTransform(oKey: string, width?: number, height?: number) {
+        const objects = [...this.getObjects()];
         const objectsLength = objects.length;
+
+        if (width == null) {
+            width = this.width;
+        }
+
+        if (height == null) {
+            height = this.height;
+        }
 
         for (let i = 0; i < objectsLength; i++) {
             const o = objects[i];
             if (o.oKey === oKey) {
                 objects.splice(i, 1);
-                this._transformObject(o);
+                this._transformObject(o, width, height);
+                o.parent = this.parent;
+                o.groupKey = undefined;
+                o.isInGroup = false;
+
+                this._objects = objects;
                 return;
             }
         }
     }
 
-    private _transformObject(object: BaseObject) {
-        const groupCenterX = this.width / 2;
-        const groupCenterY = this.height / 2;
+    private _transformObject(object: BaseObject, groupWidth: number, groupHeight: number) {
+        const groupCenterX = this.left + groupWidth / 2;
+        const groupCenterY = this.top + groupHeight / 2;
 
         const objectX = object.left - this.left;
         const objectY = object.top - this.top;
@@ -198,6 +248,7 @@ export class Group extends BaseObject {
         object.transformByState({
             left: finalPoint.x,
             top: finalPoint.y,
+            angle: this.angle + object.angle,
         });
     }
 
@@ -205,7 +256,7 @@ export class Group extends BaseObject {
         const objects: BaseObject[] = [];
         this._objects.sort(sortRules);
         for (const o of this._objects) {
-            if (!o.isInGroup && o.visible) {
+            if (o.visible) {
                 objects.push(o);
             }
         }
@@ -220,8 +271,8 @@ export class Group extends BaseObject {
         ctx.save();
         const m = this.transform.getMatrix();
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        this._objects.sort(sortRules);
-        for (const object of this._objects) {
+        const objects = this.getObjectsByOrder();
+        for (const object of objects) {
             object.render(ctx, this._transformBounds(bounds));
         }
         ctx.restore();

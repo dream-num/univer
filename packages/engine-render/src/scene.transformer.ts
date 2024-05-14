@@ -1394,13 +1394,14 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _createControl(applyObject: BaseObject, isSkipOnCropper = true) {
-        const { left = 0, top = 0, height = 0, width = 0, angle = 0 } = applyObject.getState();
+        const { left = 0, top = 0, height = 0, width = 0 } = applyObject.getState();
+        const angle = applyObject.angle;
         const { isCropper, resizeEnabled, rotateAnchorOffset, rotateSize, rotateCornerRadius, borderEnabled, borderStroke, borderStrokeWidth, borderSpacing, enabledAnchors } = this._getConfig(applyObject);
         if (isSkipOnCropper && isCropper) {
             return;
         }
         const oKey = applyObject.oKey;
-        const zIndex = this._selectedObjectMap.size + applyObject.zIndex + 1;
+        const zIndex = this._selectedObjectMap.size + applyObject.maxZIndex + 1;
         const layerIndex = applyObject.getLayerIndex() || DEFAULT_TRANSFORMER_LAYER_INDEX;
         const groupElements: BaseObject[] = [];
 
@@ -1453,7 +1454,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
         const transformerControl = new Group(`${TransformerManagerType.GROUP}_${oKey}`, ...groupElements);
         transformerControl.zIndex = zIndex;
         transformerControl.evented = false;
-        transformerControl.transformByState({ left, top });
+        transformerControl.openSelfSizeMode();
+        transformerControl.transformByState({ left, top, angle, width, height });
         const scene = this.getScene();
         scene.addObject(transformerControl, layerIndex);
 

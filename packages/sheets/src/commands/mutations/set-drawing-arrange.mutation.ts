@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-import type { IMutation } from '@univerjs/core';
+import type { IDrawingOrderMapParam, IMutation } from '@univerjs/core';
 import { CommandType, IDrawingManagerService } from '@univerjs/core';
-import type { IImageData } from '../../models/image-model-interface';
+import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 
 
-export const SetImageMutation: IMutation<IImageData[]> = {
-    id: 'sheet.mutation.set-image',
+export const SetDrawingArrangeMutation: IMutation<IDrawingOrderMapParam> = {
+    id: 'sheet.mutation.set-image-arrange',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const drawingManagerService = accessor.get(IDrawingManagerService);
+        const sheetDrawingService = accessor.get(ISheetDrawingService);
 
-        drawingManagerService.batchUpdate(params);
+        const { unitId, subUnitId, drawingIds } = params;
+
+
+        drawingManagerService.replaceDrawingOrder(unitId, subUnitId, drawingIds);
+        sheetDrawingService.replaceDrawingOrder(unitId, subUnitId, drawingIds);
 
         return true;
     },

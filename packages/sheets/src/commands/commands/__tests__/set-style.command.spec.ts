@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { IColorStyle, ITextDecoration, ITextRotation,
-    Univer } from '@univerjs/core';
+import type { IColorStyle, ITextDecoration, ITextRotation, Univer } from '@univerjs/core';
 import {
     BooleanNumber,
     FontItalic,
@@ -34,8 +33,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
-import type {
-    ISetStyleCommandParams } from '../set-style.command';
+import type { ISetStyleCommandParams } from '../set-style.command';
 import {
     SetBackgroundColorCommand,
     SetBoldCommand,

@@ -36,8 +36,6 @@ export class UniverDrawingPlugin extends Plugin {
 
     override onStarting(_injector: Injector): void {
         this._initDependencies(_injector);
-        this._injector = _injector;
-
         this._mockAddImage();
     }
 

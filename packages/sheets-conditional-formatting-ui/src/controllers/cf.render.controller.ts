@@ -20,10 +20,10 @@ import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { bufferTime, filter } from 'rxjs/operators';
-import type { ISheetFontRenderExtension, Spreadsheet } from '@univerjs/engine-render';
+import type { ISheetFontRenderExtension } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
-import { ConditionalFormattingIcon, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel, DataBar, dataBarUKey, DEFAULT_PADDING, DEFAULT_WIDTH, IconUKey } from '@univerjs/sheets-conditional-formatting';
+import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
 
 import type { IConditionalFormattingCellData } from '@univerjs/sheets-conditional-formatting';
 
@@ -42,29 +42,6 @@ export class RenderController extends Disposable {
         super();
         this._initViewModelInterceptor();
         this._initSkeleton();
-        this._initRender();
-    }
-
-    _initRender() {
-        const list: [string, new () => any][] = [[dataBarUKey, DataBar], [IconUKey, ConditionalFormattingIcon]];
-        const register = (renderId: string) => {
-            const render = renderId && this._renderManagerService.getRenderById(renderId);
-            const spreadsheetRender = render && render.mainComponent as Spreadsheet;
-            if (spreadsheetRender) {
-                list.forEach(([key, Instance]) => {
-                    if (!spreadsheetRender.getExtensionByKey(key)) {
-                        spreadsheetRender.register(new Instance());
-                    }
-                });
-            }
-        };
-        this.disposeWithMe(this._renderManagerService.currentRender$.subscribe((renderId) => {
-            renderId && register(renderId);
-        }));
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        if (workbook) {
-            register(workbook.getUnitId());
-        }
     }
 
     _initSkeleton() {

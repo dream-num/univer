@@ -25,6 +25,8 @@ import { SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 
 export interface IThreadCommentPopup extends ISheetLocationBase {
     commentId?: string;
+    // when triggered by hover, temp is set to be `true`
+    temp?: boolean;
 }
 
 export class SheetsThreadCommentPopupService extends Disposable {

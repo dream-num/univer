@@ -25,3 +25,4 @@ export { SheetsThreadCommentPopupService } from './services/sheets-thread-commen
 export { UniverSheetsThreadCommentPlugin } from './plugin';
 export { SHEETS_THREAD_COMMENT } from './types/const';
 export { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thread-comment-copy-paste.controller';
+export { SheetsThreadCommentHoverController } from './controllers/sheets-thread-comment-hover.controller';

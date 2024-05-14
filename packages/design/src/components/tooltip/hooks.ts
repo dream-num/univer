@@ -28,9 +28,11 @@ const _resizeObserver: ResizeObserver = new ResizeObserver((...args) => {
 });
 
 export function resizeObserverCtor(callback: ResizeObserverCallback) {
-    _resizeObserverCallbacks.add(callback);
     return {
-        observe: _resizeObserver.observe.bind(_resizeObserver),
+        observe(target: Element, options?: ResizeObserverOptions | undefined) {
+            _resizeObserverCallbacks.add(callback);
+            _resizeObserver.observe(target, options);
+        },
         unobserve(target: Element) {
             _resizeObserverCallbacks.delete(callback);
             _resizeObserver.unobserve(target);

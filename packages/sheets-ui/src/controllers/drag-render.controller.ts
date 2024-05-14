@@ -16,13 +16,15 @@
 
 import type { Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { IRenderController, IRenderManagerService } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { DragManagerService } from '../services/drag-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DragRenderController)
-export class DragRenderController extends Disposable  implements IRenderController {
+export class DragRenderController extends Disposable implements IRenderController {
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @IRenderManagerService private _renderManagerService: IRenderManagerService,
         @Inject(DragManagerService) private _dragManagerService: DragManagerService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService

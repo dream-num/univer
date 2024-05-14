@@ -39,6 +39,7 @@ export interface IThreadCommentTreeProps {
     showHighlight?: boolean;
     onClose?: () => void;
     getSubUnitName: (subUnitId: string) => string;
+    prefix?: string;
 }
 
 export interface IThreadCommentItemProps {
@@ -50,12 +51,13 @@ export interface IThreadCommentItemProps {
     onClick?: () => void;
     resolved?: boolean;
     onReply: (user: IUser | undefined) => void;
+    prefix?: string;
 }
 
 const MOCK_ID = '__mock__';
 
 const ThreadCommentItem = (props: IThreadCommentItemProps) => {
-    const { item, unitId, subUnitId, editing, onEditingChange, onReply } = props;
+    const { item, unitId, subUnitId, editing, onEditingChange, onReply, prefix } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const userManagerService = useDependency(UserManagerService);
@@ -155,7 +157,18 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
 };
 
 export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
-    const { id, unitId, subUnitId, refStr, showEdit = true, onClick, showHighlight, onClose, getSubUnitName } = props;
+    const {
+        id,
+        unitId,
+        subUnitId,
+        refStr,
+        showEdit = true,
+        onClick,
+        showHighlight,
+        onClose,
+        getSubUnitName,
+        prefix,
+    } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [editingId, setEditingId] = useState('');
     useObservable(threadCommentModel.commentMap$);
@@ -204,7 +217,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     };
 
     return (
-        <div className={styles.threadComment} onClick={onClick}>
+        <div className={styles.threadComment} onClick={onClick} id={`${prefix}-${unitId}-${subUnitId}-${id}`}>
             {showHighlight ? <div className={styles.threadCommentHighlight} /> : null}
             <div className={styles.threadCommentTitle}>
                 <div className={styles.threadCommentTitlePosition}>

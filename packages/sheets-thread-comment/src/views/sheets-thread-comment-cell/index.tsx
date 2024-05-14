@@ -45,6 +45,7 @@ export const SheetsThreadCommentCell = () => {
 
     return (
         <ThreadCommentTree
+            prefix="cell"
             id={rootId}
             unitId={unitId}
             subUnitId={subUnitId}

@@ -51,6 +51,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const commandService = useDependency(ICommandService);
     const subUnitId = useObservable(subUnitId$);
     const currentUser = userService.getCurrentUser();
+    const prefix = 'panel';
     const comments = useMemo(() => {
         if (unit === 'all') {
             return unitComments.map((i) => i[1]).flat().filter((i) => !i.parentId).map((i) => ({
@@ -101,6 +102,14 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         }
     }, [unitId, threadCommentModel, update]);
 
+    useEffect(() => {
+        if (!activeCommentId) {
+            return;
+        }
+        const { unitId, subUnitId, commentId } = activeCommentId;
+        const id = `${prefix}-${unitId}-${subUnitId}-${commentId}`;
+        document.getElementById(id)?.scrollIntoView();
+    }, [activeCommentId]);
 
     return (
         <div className={styles.threadCommentPanel}>
@@ -142,6 +151,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
             </div>
             {statuedComments?.map((comment) => (
                 <ThreadCommentTree
+                    prefix={prefix}
                     getSubUnitName={getSubUnitName}
                     key={comment.id}
                     id={comment.id}

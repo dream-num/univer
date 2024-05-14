@@ -25,7 +25,7 @@ const univer = new Univer({
     locale: LocaleType.ZH_CN,
 });
 
-univer.registerPlugin(UniverSheetsPlugin);
+univer.registerPlugin(UniverSheetsPlugin, { onlyRegisterFormulaRelatedMutations: true });
 univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverRPCWorkerThreadPlugin);
 univer.registerPlugin(UniverSheetsFilterPlugin);

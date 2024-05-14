@@ -25,7 +25,7 @@ export class FSheetHooks {
     constructor(
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(DragManagerService) private readonly _dragManagerService: DragManagerService
-    ) { 
+    ) {
         // empty
     }
 

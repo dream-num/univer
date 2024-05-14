@@ -50,6 +50,7 @@ export interface ISelectionRenderService {
     readonly controlFillConfig$: Observable<IControlFillConfig | null>;
     readonly selectionMoving$: Observable<ISelectionWithCoordAndStyle[]>;
     readonly selectionMoveStart$: Observable<ISelectionWithCoordAndStyle[]>;
+    readonly usable$: Observable<boolean>;
 
     enableHeaderHighlight(): void;
     disableHeaderHighlight(): void;
@@ -193,6 +194,14 @@ export class SelectionRenderService implements ISelectionRenderService {
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
 
     private _activeViewport: Nullable<Viewport>;
+
+    /**
+     * This service relies on the scene and skeleton to work
+     * Use usable$ to check if this service works
+     */
+    private readonly _usable$ = new Subject<boolean>();
+
+    readonly usable$ = this._usable$.asObservable();
 
     constructor(
         @Inject(ThemeService) private readonly _themeService: ThemeService,
@@ -352,6 +361,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._skeleton = skeleton;
         this._scene = scene;
         this._activeViewport = viewport || scene?.getViewports()[0];
+        this._usable$.next(Boolean(skeleton && scene));
     }
 
     getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[] {

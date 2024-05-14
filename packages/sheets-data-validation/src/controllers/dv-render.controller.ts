@@ -17,8 +17,7 @@
 
 import type { ICellDataForSheetInterceptor, ICellRenderContext, Workbook } from '@univerjs/core';
 import { DataValidationRenderMode, DataValidationStatus, DataValidationType, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, sequenceExecute, UniverInstanceType, WrapStrategy } from '@univerjs/core';
-import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-validation';
-import { DataValidationModel, DataValidatorRegistryService, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
+import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';

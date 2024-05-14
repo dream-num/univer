@@ -45,6 +45,9 @@ export const SheetsThreadCommentCell = () => {
 
     return (
         <ThreadCommentTree
+            onClick={() => {
+                sheetsThreadCommentPopupService.persistPopup();
+            }}
             prefix="cell"
             id={rootId}
             unitId={unitId}

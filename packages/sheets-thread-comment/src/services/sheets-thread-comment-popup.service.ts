@@ -73,7 +73,6 @@ export class SheetsThreadCommentPopupService extends Disposable {
                 onClickOutside: () => {
                     this.hidePopup();
                 },
-                offset: [0, 3],
                 direction: 'vertical',
                 excludeOutside: [
                     ...Array.from(document.querySelectorAll('.univer-thread-comment')),
@@ -106,5 +105,17 @@ export class SheetsThreadCommentPopupService extends Disposable {
 
         this._activePopup = null;
         this._activePopup$.next(null);
+    }
+
+    persistPopup() {
+        if (!this._activePopup || !this._activePopup.temp) {
+            return;
+        }
+        this._activePopup = {
+            ...this._activePopup,
+            temp: false,
+        };
+
+        this._activePopup$.next(this._activePopup);
     }
 }

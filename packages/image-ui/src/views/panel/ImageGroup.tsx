@@ -111,19 +111,19 @@ export const ImageGroup = (props: IImageGroupProps) => {
                 </div>
             </div>
             <div className={styles.imageCommonPanelRow}>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan3)}>
+                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
                     <Button size="small" onClick={() => { onGroupBtnClick(GroupType.group); }} style={{ display: gridDisplay(groupBtnShow) }}>
                         <div className={clsx(styles.imageCommonPanelInline)}><CreateCopySingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.group')}</div>
                     </Button>
                 </div>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan3)}>
+                {/* <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan3)}>
                     <Button size="small" onClick={() => { onGroupBtnClick(GroupType.regroup); }} style={{ display: gridDisplay(groupBtnShow) }}>
                         <div className={clsx(styles.imageCommonPanelInline)}><CreateCopySingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.reGroup')}</div>
                     </Button>
-                </div>
-                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan3)}>
+                </div> */}
+                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
                     <Button size="small" onClick={() => { onGroupBtnClick(GroupType.ungroup); }} style={{ display: gridDisplay(ungroupBtnShow) }}>
                         <div className={clsx(styles.imageCommonPanelInline)}><CreateCopySingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.unGroup')}</div>

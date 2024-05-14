@@ -23,7 +23,6 @@ import {
 
 import { SetDrawingMutation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-import { SetImageMutation } from '@univerjs/drawing';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import type { ISetDrawingCommandParams } from './interfaces';
 
@@ -43,26 +42,19 @@ export const SetSheetImageCommand: ICommand = {
         const { unitId, drawings } = params;
 
         const newSheetDrawingParams = drawings.map((param) => param.newDrawing.sheetDrawingParam);
-        const newImageDrawingParams = drawings.map((param) => param.newDrawing.drawingParam);
-
         const oldSheetDrawingParams = drawings.map((param) => param.oldDrawing.sheetDrawingParam);
-        const oldImageDrawingParams = drawings.map((param) => param.oldDrawing.drawingParam);
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const result2 = commandService.syncExecuteCommand(SetImageMutation.id, newImageDrawingParams);
-        const result1 = commandService.syncExecuteCommand(SetDrawingMutation.id, newSheetDrawingParams);
+        const result = commandService.syncExecuteCommand(SetDrawingMutation.id, newSheetDrawingParams);
 
-
-        if (result1 && result2) {
+        if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    { id: SetImageMutation.id, params: oldImageDrawingParams },
                     { id: SetDrawingMutation.id, params: oldSheetDrawingParams },
                     { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
                 ],
                 redoMutations: [
-                    { id: SetImageMutation.id, params: newImageDrawingParams },
                     { id: SetDrawingMutation.id, params: newSheetDrawingParams },
                     { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
                 ],

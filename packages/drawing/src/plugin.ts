@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { IImageRemoteService, LocaleService, Plugin } from '@univerjs/core';
+import { IDrawingManagerService, IImageRemoteService, LocaleService, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { ImageController } from './controllers/image.controller';
 import { ImageRemoteService } from './services/image-remote.service';
+import { DrawingManagerService } from './services/drawing-manager.service';
 
 const PLUGIN_NAME = 'DRAWING_PLUGIN';
 
@@ -117,8 +117,9 @@ export class UniverDrawingPlugin extends Plugin {
         const dependencies: Dependency[] = [
             // services
             [IImageRemoteService, { useClass: ImageRemoteService }],
+            [IDrawingManagerService, { useClass: DrawingManagerService }],
             // controllers
-            [ImageController],
+            // [ImageController],
         ];
 
         dependencies.forEach((dependency) => injector.add(dependency));

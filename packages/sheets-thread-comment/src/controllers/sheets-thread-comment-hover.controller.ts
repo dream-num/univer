@@ -40,14 +40,17 @@ export class SheetsThreadCommentHoverController extends Disposable {
                 const commentId = this._sheetsThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
 
                 if (commentId) {
-                    this._sheetsThreadCommentPopupService.showPopup({
-                        unitId,
-                        subUnitId,
-                        row,
-                        col,
-                        commentId,
-                        temp: true,
-                    });
+                    const comment = this._sheetsThreadCommentModel.getComment(unitId, subUnitId, commentId);
+                    if (comment && !comment.resolved) {
+                        this._sheetsThreadCommentPopupService.showPopup({
+                            unitId,
+                            subUnitId,
+                            row,
+                            col,
+                            commentId,
+                            temp: true,
+                        });
+                    }
                 } else {
                     if (currentPopup) {
                         this._sheetsThreadCommentPopupService.hidePopup();

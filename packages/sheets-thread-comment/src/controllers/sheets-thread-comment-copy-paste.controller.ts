@@ -110,6 +110,8 @@ export class SheetsThreadCommentCopyPasteController extends Disposable {
                                         comment: {
                                             ...item,
                                             ref: transformRef(item.ref, sourcePos, targetPos),
+                                            unitId: targetUnitId,
+                                            subUnitId: targetSubUnitId,
                                         },
                                     },
                                 });

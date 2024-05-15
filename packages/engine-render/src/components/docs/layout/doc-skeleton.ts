@@ -67,7 +67,7 @@ export class DocumentSkeleton extends Skeleton {
     // Use for hyphenation.
     private _hyphen = Hyphen.getInstance();
 
-    private _languageDetector = new LanguageDetector();
+    private _languageDetector = LanguageDetector.getInstance();
 
     private _iteratorCount = 0;
 

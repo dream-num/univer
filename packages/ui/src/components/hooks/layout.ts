@@ -25,52 +25,68 @@ import { useEvent } from './event';
  * Prefer to client-side
  */
 
-/** Allow the element to scroll when its height over the viewport height */
-export function useScrollOnOverViewport(element: Nullable<HTMLElement>) {
+/**
+ * Allow the element to scroll when its height over the container height
+ * @param element
+ * Container means the window view that the element displays in.
+ * Recommend pass the sheet mountContainer as container
+ * @param container
+ */
+export function useScrollYOverContainer(element: Nullable<HTMLElement>, container: Nullable<HTMLElement>) {
     const initialRectRef = useRef({
         width: 0,
         height: 0,
     });
     const updater = useEvent(() => {
-        if (!element) {
+        if (!element || !container) {
             return;
         }
 
-        const { y: rectY } = element.getBoundingClientRect();
-        const { innerHeight } = window;
-        const initialHeight = initialRectRef.current?.height || 0;
-
         const elStyle = element.style;
-        if (rectY < 0) {
+        const elRect = element.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        if (elRect.y < 0 && elRect.y + elRect.height <= 0) {
             /* The element is hidden in viewport */
             return;
         }
+        if (Math.abs(elRect.y) < Math.abs(containerRect.y)) {
+            /* The position of element is higher than container  */
+            elStyle.overflowY = '';
+            elStyle.maxHeight = '';
+            return;
+        }
 
-        if (innerHeight >= rectY + initialHeight) {
+        const relativeY = elRect.y - containerRect.y;
+
+        const initialHeight = initialRectRef.current?.height || 0;
+
+        if (containerRect.height >= relativeY + initialHeight) {
             elStyle.overflowY = '';
             elStyle.maxHeight = '';
         } else {
             elStyle.overflowY = 'scroll';
-            elStyle.maxHeight = `${innerHeight - rectY}px`;
+            elStyle.maxHeight = `${containerRect.height - relativeY}px`;
         }
     });
 
     useEffect(() => {
-        if (!canUseDom() || !element) {
+        if (!canUseDom() || !element || !container) {
             return;
         }
-        const resizeObserver = resizeObserverCtor(updater);
         const rect = element.getBoundingClientRect();
         initialRectRef.current = {
             width: rect.width,
             height: rect.height,
         };
+
         updater();
-        window.addEventListener('resize', updater);
+
+        const resizeObserver = resizeObserverCtor(updater);
         resizeObserver.observe(element);
+        window.addEventListener('resize', updater);
         return () => {
             resizeObserver.unobserve(element);
             window.removeEventListener('resize', updater);
         };
-    }, [element]);
+    }, [element, container]);
 }

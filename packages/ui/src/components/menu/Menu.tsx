@@ -40,7 +40,8 @@ import { MenuGroup, MenuItemType } from '../../services/menu/menu';
 import { IMenuService } from '../../services/menu/menu.service';
 import { CustomLabel } from '../custom-label/CustomLabel';
 import { useObservable } from '../hooks/observable';
-import { useScrollOnOverViewport } from '../hooks/layout.ts';
+import { useScrollYOverContainer } from '../hooks/layout.ts';
+import { ILayoutService } from '../../services/layout/layout.service';
 import styles from './index.module.less';
 
 // TODO: @jikkai disabled and hidden are not working
@@ -173,7 +174,9 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
 export const Menu = (props: IBaseMenuProps) => {
     const { overViewport, ...restProps } = props;
     const [menuEl, setMenuEl] = useState<HTMLDListElement>();
-    useScrollOnOverViewport(overViewport === 'scroll' ? menuEl : null);
+    const layoutService = useDependency(ILayoutService);
+
+    useScrollYOverContainer(overViewport === 'scroll' ? menuEl : null, layoutService.rootContainerElement);
 
     return (
         <DesignMenu

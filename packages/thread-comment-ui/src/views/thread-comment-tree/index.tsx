@@ -91,7 +91,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                                 <ReplyToCommentSingle />
                             </div>
                         )}
-                    {isCommentBySelf && !isMock
+                    {isCommentBySelf && !isMock && !resolved
                         ? (
                             <Dropdown
                                 overlay={(

@@ -80,9 +80,7 @@ export class PluginHolder extends Disposable {
             // It has to been async because the finalize may execute synchronously after we
             // make the subscription. For example, the lifecycle service is already in stage "steady".
             .pipe(finalize(() => { Promise.resolve().then(() => subscription.dispose()); }))
-            .subscribe((stage) => {
-                this._pluginsRunLifecycle(plugins, stage);
-            }));
+            .subscribe((stage) => { this._pluginsRunLifecycle(plugins, stage); }));
     }
 
 

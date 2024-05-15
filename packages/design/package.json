@@ -74,18 +74,18 @@
     "dependencies": {
         "@rc-component/color-picker": "^1.5.3",
         "@rc-component/trigger": "^1.18.3",
-        "@univerjs/icons": "^0.1.44",
+        "@univerjs/icons": "^0.1.45",
         "rc-dialog": "^9.4.0",
         "rc-dropdown": "^4.2.0",
         "rc-input": "^1.4.5",
         "rc-input-number": "^9.0.0",
         "rc-menu": "^9.13.0",
-        "rc-picker": "^4.3.0",
+        "rc-picker": "^4.5.0",
         "rc-segmented": "^2.3.0",
-        "rc-select": "^14.13.0",
+        "rc-select": "^14.13.3",
         "rc-textarea": "^1.6.3",
         "rc-tooltip": "^6.2.0",
-        "rc-util": "^5.39.1",
+        "rc-util": "^5.39.3",
         "react-draggable": "^4.4.6",
         "react-grid-layout": "^1.4.4",
         "react-transition-group": "^4.4.5"
@@ -98,12 +98,12 @@
         "@types/react-transition-group": "^4.4.10",
         "@univerjs/shared": "workspace:*",
         "clsx": "^2.1.1",
-        "dayjs": "^1.11.10",
+        "dayjs": "^1.11.11",
         "less": "^4.2.0",
         "react": "18.2.0",
         "react-dom": "18.2.0",
         "typescript": "^5.4.5",
-        "vite": "^5.2.10",
-        "vitest": "^1.5.0"
+        "vite": "^5.2.11",
+        "vitest": "^1.6.0"
     }
 }

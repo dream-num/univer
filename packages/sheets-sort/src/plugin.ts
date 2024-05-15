@@ -19,6 +19,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SheetsSortController } from './controllers/sheets-sort.controller';
+import { ISheetsSortService, SheetsSortService } from './services/sheet-sort.service';
 
 const NAME = 'UNIVER_SHEETS_SORT_PLUGIN';
 
@@ -33,6 +34,7 @@ export class UniverSheetsSortPlugin extends Plugin {
     override onStarting(injector: Injector): void {
         ([
             [SheetsSortController],
+            [ISheetsSortService, { useClass: SheetsSortService }],
         ] as Dependency[]).forEach((d) => injector.add(d));
     }
 }

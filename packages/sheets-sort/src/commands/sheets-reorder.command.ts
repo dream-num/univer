@@ -21,6 +21,7 @@ import { CellValueType, CommandType, ICommandService, IUniverInstanceService } f
 import type { ICellData, ICommand, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
+import { ISheetsSortService } from '../services/sheet-sort.service';
 import { ReorderRangeMutation } from './sheets-reorder.mutation';
 
 export enum SortType {
@@ -52,13 +53,15 @@ export enum ORDER {
 
 export type CellValue = number | string | null;
 
-export type ICellValueCompareFn = (type: SortType, a: Nullable<ICellData>, b: Nullable<ICellData>) => number;
+export type ICellValueCompareFn = (type: SortType, a: Nullable<ICellData>, b: Nullable<ICellData>) => Nullable<number>;
+
 
 export const ReorderRangeCommand: ICommand = {
     id: 'sheet.command.reorder-range',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params: IReorderRangeCommandParams) => {
         const { range, orderRules, hasTitle, unitId, subUnitId } = params;
+        const sortService = accessor.get(ISheetsSortService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getUnit(unitId) as Workbook;
         const worksheet = workbook.getSheetBySheetId(subUnitId);
@@ -77,8 +80,9 @@ export const ReorderRangeCommand: ICommand = {
                 value: getRowCellData(worksheet, rowIndex, orderRules),
             });
         }
+        const compareFns: ICellValueCompareFn[] = sortService.getAllCompareFns();
 
-        toReorder.sort(reorderFnGenerator(orderRules, sortValue));
+        toReorder.sort(reorderFnGenerator(orderRules, combineCompareFnsAsOne(compareFns)));
 
         const order: number[] = [];
         toReorder.forEach(({ index, value }) => {
@@ -133,18 +137,31 @@ export function getValueByType(cellData: Nullable<ICellData>): CellValue {
     }
 }
 
+function combineCompareFnsAsOne(compareFns: ICellValueCompareFn[]) {
+    return (type: SortType, a: Nullable<ICellData>, b: Nullable<ICellData>) => {
+        for (let i = 0; i < compareFns.length; i++) {
+            const res = compareFns[i](type, a, b);
+            // null means can't compare in this fn.
+            if (res != null) {
+                return res;
+            }
+        }
+        // All fns can't compare these two value, means equal.
+        return 0;
+    };
+}
 
 function reorderFnGenerator(orderRules: IOrderRule[], valueCompare: ICellValueCompareFn) {
     return function (a: IRowComparator, b: IRowComparator): number {
-        let ret: number;
+        let ret: Nullable<number> = null;
 
         for (let index = 0; index < orderRules.length; index++) {
             const aCellData = a.value[index];
             const bCellData = b.value[index];
             ret = valueCompare(orderRules[index].type, aCellData, bCellData);
 
-            if (ret !== 0) {
-                return ret;
+            if (ret !== 0 || ret !== null || ret !== undefined) {
+                return ret as number;
             }
         }
 

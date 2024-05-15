@@ -1353,8 +1353,8 @@ importers:
         specifier: workspace:*
         version: link:../sheets
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.4
+        specifier: ^0.14.0
+        version: 0.14.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -4278,9 +4278,6 @@ packages:
 
   '@webassemblyjs/wast-printer@1.12.1':
     resolution: {integrity: sha512-+X4WAlOisVWQMikjbcvY2e0rwPsKQ9F688lksZhBcPycBBuii3O7m8FACbDMWDojpAqvjIncrG8J0XHKyQfVeA==}
-
-  '@wendellhu/redi@0.13.4':
-    resolution: {integrity: sha512-oYjBbatXf1wNZyLWtjiv4U2oMvqjju4+G5mE23GQj5o4ekIBh+a5+6LrsczKgiiElR6h68B1cWFhBA3e+tMbng==}
 
   '@wendellhu/redi@0.14.0':
     resolution: {integrity: sha512-UzK+Jd51u3c85Qxu+aUkQzTtDGjz4w8FsTjHyAMpkXC8n1bV3aFYpRjorADEWlbeQPC+kRBBiWjaraEZG61uYg==}
@@ -13749,8 +13746,6 @@ snapshots:
     dependencies:
       '@webassemblyjs/ast': 1.12.1
       '@xtuc/long': https://r2.cnpmjs.org/@xtuc/long/-/long-4.2.2.tgz
-
-  '@wendellhu/redi@0.13.4': {}
 
   '@wendellhu/redi@0.14.0': {}
 

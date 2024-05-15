@@ -109,7 +109,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         }
         const { unitId, subUnitId, commentId } = activeCommentId;
         const id = `${prefix}-${unitId}-${subUnitId}-${commentId}`;
-        document.getElementById(id)?.scrollIntoView();
+        document.getElementById(id)?.scrollIntoView({ block: 'center' });
     }, [activeCommentId]);
 
     return (

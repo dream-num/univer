@@ -91,8 +91,8 @@
         "jsdom": "^24.0.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.10",
-        "vitest": "^1.5.0",
+        "vite": "^5.2.11",
+        "vitest": "^1.6.0",
         "vitest-canvas-mock": "^0.3.3"
     }
 }

@@ -19,6 +19,7 @@ import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStag
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, RenderManagerService, Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
+import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 
@@ -48,15 +49,17 @@ export class CellCustomRenderController extends Disposable implements IRenderCon
         const disposableCollection = new DisposableCollection();
 
         const workbook = this._context.unit;
-        disposableCollection.dispose();
-        if (workbook) {
-            const unitId = workbook.getUnitId();
-
-            const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
+        // eslint-disable-next-line max-lines-per-function
+        const handleSkeletonChange = (skeletonParam: Nullable<ISheetSkeletonManagerParam>) => {
+            disposableCollection.dispose();
+            if (!skeletonParam) {
+                return;
+            }
+            const { unitId, skeleton } = skeletonParam;
+            const currentRender = this._renderManagerService.getRenderById(unitId);
             if (currentRender && currentRender.mainComponent) {
                 const spreadsheet = currentRender.mainComponent as Spreadsheet;
                 const getActiveRender = (evt: IPointerEvent | IMouseEvent) => {
-                    const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton!;
                     const { offsetX, offsetY } = evt;
                     const scene = currentRender.scene;
                     const worksheet = workbook.getActiveSheet();
@@ -164,8 +167,10 @@ export class CellCustomRenderController extends Disposable implements IRenderCon
                 disposable && disposableCollection.add(disposable);
                 moveDisposable && disposableCollection.add(moveDisposable);
             }
-        }
+        };
 
+        this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe(handleSkeletonChange));
+        handleSkeletonChange(this._sheetSkeletonManagerService.getCurrent());
         this.disposeWithMe(disposableCollection);
     }
 }

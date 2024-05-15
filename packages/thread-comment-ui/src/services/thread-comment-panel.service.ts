@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
+import { Disposable, toDisposable } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
@@ -46,6 +46,10 @@ export class ThreadCommentPanelService extends Disposable {
                 }
             })
         );
+
+        this.disposeWithMe(toDisposable(() => {
+            this._sidebarService.close();
+        }));
     }
 
     get panelVisible() {

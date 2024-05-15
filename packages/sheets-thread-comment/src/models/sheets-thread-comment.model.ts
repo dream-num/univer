@@ -127,10 +127,16 @@ export class SheetsThreadCommentModel extends Disposable {
         this.disposeWithMe(this._threadCommentModel.commentUpdate$.subscribe((update) => {
             const { unitId, subUnitId } = update;
 
-            const type = this._univerInstanceService.getUnitType(unitId);
-            if (type !== UniverInstanceType.UNIVER_SHEET) {
-                return;
+            try {
+                const type = this._univerInstanceService.getUnitType(unitId);
+                if (type !== UniverInstanceType.UNIVER_SHEET) {
+                    return;
+                }
+            } catch (error) {
+                // do nothing
             }
+
+
             const { matrix, locationMap } = this._ensure(unitId, subUnitId);
             switch (update.type) {
                 case 'add': {

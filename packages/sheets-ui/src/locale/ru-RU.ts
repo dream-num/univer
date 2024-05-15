@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
@@ -418,6 +419,7 @@ const locale: typeof zhCN = {
         add: 'Добавить',
         addLast: 'больше строк внизу',
         backTop: 'Вернуться наверх',
+        // eslint-disable-next-line no-template-curly-in-string
         pageInfo: 'Всего ${total}, ${totalPage} страниц, текущая ${currentPage}',
         nextPage: 'Следующая',
 
@@ -426,6 +428,7 @@ const locale: typeof zhCN = {
 
         tipRowHeightLimit: 'Высота строки должна быть в пределах от 0 до 545',
         tipColumnWidthLimit: 'Ширина столбца должна быть в пределах от 0 до 2038',
+        // eslint-disable-next-line no-template-curly-in-string
         pageInfoFull: 'Всего ${total}, ${totalPage} страниц, все данные отображены',
         problem: 'Произошла проблема',
         forceStringInfo: 'Число хранится как текст',
@@ -528,5 +531,4 @@ const locale: typeof zhCN = {
 };
 
 export default locale;
-
 

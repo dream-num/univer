@@ -17,7 +17,7 @@
 export enum LocaleType {
     EN_US = 'enUS',
     ZH_CN = 'zhCN',
-    RU_RU = "ruRU",
+    RU_RU = 'ruRU',
 }
 
 export type LocaleTypes = `${LocaleType}`;

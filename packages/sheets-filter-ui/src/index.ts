@@ -15,4 +15,4 @@
  */
 
 export { UniverSheetsFilterUIPlugin } from './plugin';
-export { zhCN, enUS, ruRU } from "./locale";
+export { zhCN, enUS, ruRU } from './locale';

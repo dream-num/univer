@@ -27,7 +27,7 @@ import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.ser
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../../commands/sheets-filter.command';
 import type { IOpenFilterPanelOperationParams } from '../../commands/sheets-filter.operation';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/sheets-filter.operation';
-import { zhCN, enUS, ruRU } from '../../locale';
+import { enUS, ruRU, zhCN } from '../../locale';
 import { WithCustomFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
 import { FilterPanel } from './SheetsFilterPanel';
 

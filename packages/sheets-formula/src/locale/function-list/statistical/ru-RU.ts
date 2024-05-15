@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import enUS from "./en-US";
+import enUS from './en-US';
 
 export default enUS;
 

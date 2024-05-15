@@ -65,7 +65,6 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@wendellhu/redi": "^0.15.1",
         "rxjs": ">=7.0.0"

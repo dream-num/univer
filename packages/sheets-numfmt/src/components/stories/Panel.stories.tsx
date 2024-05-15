@@ -20,7 +20,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { RediContext } from '@wendellhu/redi/react-bindings';
 import React, { useContext, useState } from 'react';
 
-import { enUS, zhCN, ruRU } from '../../locale';
+import { enUS, ruRU, zhCN } from '../../locale';
 import type { ISheetNumfmtPanelProps } from '../index';
 import { SheetNumfmtPanel } from '../index';
 import { UserHabitController } from '../../controllers/user-habit.controller';

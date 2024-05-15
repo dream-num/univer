@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, IMutation, IObjectArrayPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { BooleanNumber, IMutation, IObjectArrayPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import type { IRowAutoHeightInfo } from '@univerjs/engine-render';
 import type { IAccessor } from '@wendellhu/redi';
@@ -202,7 +202,7 @@ export const SetWorksheetRowAutoHeightMutation: IMutation<ISetWorksheetRowAutoHe
     handler: (accessor, params) => {
         const { unitId, subUnitId, rowsAutoHeightInfo } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = univerInstanceService.getUnit<Workbook>(unitId);
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
 
         if (!worksheet || !workbook) {

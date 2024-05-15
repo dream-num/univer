@@ -57,7 +57,7 @@ import {
 import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
-import { delay, filter } from 'rxjs';
+import { filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
@@ -156,10 +156,9 @@ export class StartEditController extends Disposable {
 
     private _initialEditFocusListener() {
         this.disposeWithMe(
-            // Delay for sometime until the `editorObject` is ready.
-            // FIXME: this solution is hacking. There shouldn't be so many modules to
-            // deal with sheet editors hence create so many time-sequence problems.
-            this._editorBridgeService.currentEditCellState$.pipe(delay(16)).subscribe((editCellState) => {
+            // TODO: After the sheet dispose, recreate the sheet, the first cell edit may be unsuccessful,
+            // it should be the editor initialization late, and we need to pay attention to this problem in the future.
+            this._editorBridgeService.currentEditCellState$.subscribe((editCellState) => {
                 if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
                     return;
                 }

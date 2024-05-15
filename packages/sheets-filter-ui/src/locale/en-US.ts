@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     'sheets-filter': {
         toolbar: {
             'smart-toggle-filter-tooltip': 'Toggle Filter',
@@ -64,3 +64,5 @@ export default {
         },
     },
 };
+
+export default locale;

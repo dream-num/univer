@@ -6,10 +6,17 @@ export default ({ mode }) => createViteConfig({
         setupFiles: ['./vitest.setup.ts'],
         environment: 'jsdom',
         deps: {
-            inline: ['vitest-canvas-mock'],
+            optimizer: {
+                web: {
+                    include: ['vitest-canvas-mock'],
+                },
+            },
         },
-        // For this config, check https://github.com/vitest-dev/vitest/issues/740
-        threads: false,
+        poolOptions: {
+            threads: {
+                singleThread: true,
+            },
+        },
         environmentOptions: {
             jsdom: {
                 resources: 'usable',

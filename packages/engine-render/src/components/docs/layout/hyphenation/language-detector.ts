@@ -16,6 +16,7 @@
 
 import type { IDisposable } from '@wendellhu/redi';
 import { franc } from 'franc-min';
+import type { Nullable } from '@univerjs/core';
 import { Lang } from './lang';
 
 const LANG_MAP_TO_HYPHEN_LANG: Record<string, Lang> = {
@@ -107,6 +108,16 @@ const LANG_MAP_TO_HYPHEN_LANG: Record<string, Lang> = {
 export class LanguageDetector implements IDisposable {
     // language cache for special text.
     private _detectCache = new Map<string, Lang>();
+
+    private static _instance: Nullable<LanguageDetector> = null;
+
+    static getInstance(): LanguageDetector {
+        if (this._instance == null) {
+            this._instance = new LanguageDetector();
+        }
+
+        return this._instance;
+    }
 
     detect(text: string): Lang {
         let lang = this._detectCache.get(text);

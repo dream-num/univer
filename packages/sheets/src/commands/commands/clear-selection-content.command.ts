@@ -100,10 +100,11 @@ function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<ICel
                     p: null,
                     f: null,
                     si: null,
+                    custom: null,
                 });
             }
         }
     });
 
-    return cellValue.getData();
+    return cellValue.clone();
 }

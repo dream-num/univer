@@ -48,7 +48,7 @@ export class Background extends SheetExtension {
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges: IRange[],
-        { viewRanges, checkOutOfViewBound }: { viewRanges: IRange[]; checkOutOfViewBound: boolean; viewPortKey: string }
+        { viewRanges, checkOutOfViewBound }: { viewRanges: IRange[]; checkOutOfViewBound: boolean; viewportKey: string }
     ) {
         const { stylesCache } = spreadsheetSkeleton;
         const { background, backgroundPositions } = stylesCache;

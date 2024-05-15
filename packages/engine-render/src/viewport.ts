@@ -247,10 +247,10 @@ export class Viewport {
     initCacheCanvas(props?: IViewProps) {
         if (props?.allowCache) {
             this._cacheCanvas = new UniverCanvas();
+            this.bufferEdgeX = props?.bufferEdgeX || 0;
+            this.bufferEdgeY = props?.bufferEdgeY || 0;
         }
-        this._allowCache = props?.allowCache || true;
-        this.bufferEdgeX = props?.bufferEdgeX || 0;
-        this.bufferEdgeY = props?.bufferEdgeY || 0;
+        this._allowCache = props?.allowCache || false;
     }
 
     /**
@@ -736,7 +736,7 @@ export class Viewport {
                 bottom: 0,
                 right: 0,
             },
-            viewPortKey: this.viewportKey,
+            viewportKey: this.viewportKey,
             // isDirty: this.isDirty,
             isForceDirty: this.isForceDirty,
             allowCache: false,
@@ -839,7 +839,7 @@ export class Viewport {
             diffX,
             diffY,
             viewPortPosition,
-            viewPortKey: this.viewportKey,
+            viewportKey: this.viewportKey,
             isDirty: this.isDirty ? 0b10 : 0b00,
             isForceDirty: this.isForceDirty,
             allowCache: this._allowCache,
@@ -1464,7 +1464,9 @@ export class Viewport {
      */
     private _resizeHandler() {
         if (!this._cacheCanvas) return;
-        const mainCanvas = this.scene.getEngine().getCanvas();
+        const engine = this.scene.getEngine();
+        if (!engine) return;
+        const mainCanvas = engine.getCanvas();
         const width = mainCanvas.getWidth();
         const height = mainCanvas.getHeight();
         this._mainCanvasW = width;

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ICellData, IStyleData, Nullable } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { RenderComponentType, SheetComponent } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -47,10 +47,6 @@ describe('Test FUniver', () => {
         endColumn: number
     ) => Nullable<IStyleData>;
     let getSheetRenderComponent: (unitId: string, viewKey: SHEET_VIEW_KEY) => Nullable<RenderComponentType>;
-
-    beforeEach(() => {
-        vi.stubGlobal('jest', vi);
-    });
 
     beforeEach(() => {
         const testBed = createFacadeTestBed();

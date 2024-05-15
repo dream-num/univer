@@ -189,6 +189,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             bottom: 0,
             top: columnHeaderHeightScale,
             width: rowHeaderWidthScale,
+            isRelativeY: true,
             isWheelPreventDefaultX: true,
         });
 

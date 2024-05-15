@@ -392,19 +392,24 @@ export class Spreadsheet extends SheetComponent {
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
         mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
 
-        const { viewPortKey } = viewportInfo;
+        const { viewportKey: viewPortKey } = viewportInfo;
             // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet
             // zIndex 0 spreadsheet  this.getObjectsByOrder() ---> [spreadsheet]
             // zIndex 2 rowHeader & colHeader & freezeBorder this.getObjectsByOrder() ---> [SpreadsheetRowHeader, SpreadsheetColumnHeader, _Rect]
             // zIndex 3 selection  this.getObjectsByOrder() ---> [group]
 
             // SpreadsheetRowHeader SpreadsheetColumnHeader 并不在 spreadsheet 中处理
-        if (['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(viewPortKey)) {
+        if (this.sheetContentViewport().includes(viewPortKey)) {
             if (viewportInfo && viewportInfo.cacheCanvas) {
                 this.renderByViewport(mainCtx, viewportInfo, spreadsheetSkeleton);
             } else {
                 this._draw(mainCtx, viewportInfo);
             }
+        } else if (this.sheetHeaderViewport().includes(viewPortKey)) {
+            // doing nothing, other components(SpreadsheetRowHeader...) will render
+        } else {
+            // embed in doc & slide
+            this._draw(mainCtx, viewportInfo);
         }
 
         mainCtx.restore();
@@ -681,6 +686,14 @@ export class Spreadsheet extends SheetComponent {
             ctx.stroke();
             ctx.closePath();
         }
+    }
+
+    sheetContentViewport() {
+        return ['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'];
+    }
+
+    sheetHeaderViewport() {
+        return ['viewRowTop', 'viewRowBottom', 'viewColumnLeft', 'viewColumnRight', 'viewLeftTop'];
     }
 
     private _clearBackground(ctx: UniverRenderingContext, backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>) {

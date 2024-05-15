@@ -126,6 +126,7 @@ export class SheetsThreadCommentModel extends Disposable {
     private _initUpdateTransform() {
         this.disposeWithMe(this._threadCommentModel.commentUpdate$.subscribe((update) => {
             const { unitId, subUnitId } = update;
+
             const type = this._univerInstanceService.getUnitType(unitId);
             if (type !== UniverInstanceType.UNIVER_SHEET) {
                 return;
@@ -137,17 +138,9 @@ export class SheetsThreadCommentModel extends Disposable {
                     break;
                 }
                 case 'delete': {
-                    const { commentId, isRoot } = update.payload;
-                    const comment = this._threadCommentModel.getComment(unitId, subUnitId, commentId);
-                    if (!comment) {
-                        return;
-                    }
+                    const { isRoot, comment } = update.payload;
                     const location = singleReferenceToGrid(comment.ref);
                     if (isRoot) {
-                        const comment = this._threadCommentModel.getComment(unitId, subUnitId, commentId);
-                        if (!comment) {
-                            return;
-                        }
                         const { row, column } = location;
                         if (row >= 0 && column >= 0) {
                             matrix.realDeleteValue(row, column);

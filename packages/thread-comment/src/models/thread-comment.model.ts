@@ -35,6 +35,7 @@ export type CommentUpdate = {
     payload: {
         commentId: string;
         isRoot: boolean;
+        comment: IThreadComment;
     };
 } | {
     unitId: string;
@@ -263,15 +264,8 @@ export class ThreadCommentModel {
             }
             delete commentMap[commentId];
         } else {
-            const children = commentChildrenMap.get(commentId);
-
             delete commentMap[commentId];
             commentChildrenMap.delete(commentId);
-            if (children) {
-                children.forEach((childId) => {
-                    delete commentMap[childId];
-                });
-            }
         }
 
         this._commentUpdate$.next({
@@ -281,6 +275,7 @@ export class ThreadCommentModel {
             payload: {
                 commentId,
                 isRoot: !current.parentId,
+                comment: current,
             },
         });
         this._refreshCommentsMap$();

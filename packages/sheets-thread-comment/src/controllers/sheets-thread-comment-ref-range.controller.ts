@@ -46,7 +46,6 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
 
     private _register(unitId: string, subUnitId: string, comment: ISheetThreadComment) {
         const commentId = comment.id;
-
         const oldRange: IRange = {
             startColumn: comment.column,
             endColumn: comment.column,
@@ -56,7 +55,6 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
 
         const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
             const resultRange = handleDefaultRangeChangeWithEffectRefCommands(oldRange, commandInfo);
-
             if (resultRange && resultRange.startColumn === oldRange.startColumn && resultRange.startRow === oldRange.startRow) {
                 return {
                     undos: [],

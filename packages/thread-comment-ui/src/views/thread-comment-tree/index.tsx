@@ -51,12 +51,13 @@ export interface IThreadCommentItemProps {
     onClick?: () => void;
     resolved?: boolean;
     onReply: (user: IUser | undefined) => void;
+    isRoot?: boolean;
 }
 
 const MOCK_ID = '__mock__';
 
 const ThreadCommentItem = (props: IThreadCommentItemProps) => {
-    const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved } = props;
+    const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved, isRoot } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const userManagerService = useDependency(UserManagerService);
@@ -66,7 +67,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const isMock = item.id === MOCK_ID;
     const handleDeleteItem = () => {
         commandService.executeCommand(
-            DeleteCommentCommand.id,
+            isRoot ? DeleteCommentTreeCommand.id : DeleteCommentCommand.id,
             {
                 unitId,
                 subUnitId,
@@ -254,6 +255,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                             subUnitId={subUnitId}
                             item={item}
                             key={item.id}
+                            isRoot={item.id === comments?.root.id}
                             editing={editingId === item.id}
                             resolved={comments?.root.resolved}
                             onEditingChange={(editing) => {

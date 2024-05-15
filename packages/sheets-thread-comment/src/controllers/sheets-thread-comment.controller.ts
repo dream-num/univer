@@ -144,7 +144,7 @@ export class SheetsThreadCommentController extends Disposable {
                         startColumn: location.column,
                         endColumn: location.column,
                         startRow: location.row,
-                        endRow: location.column,
+                        endRow: location.row,
                     },
                 });
                 this._sheetsThreadCommentPopupService.showPopup({

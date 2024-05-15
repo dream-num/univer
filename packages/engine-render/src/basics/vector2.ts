@@ -875,7 +875,7 @@ export interface IViewportInfo {
      * 例如冻结从第四列开始, left 就是 4 * column + rowHeaderWidth
      */
     viewPortPosition: IBoundRectNoAngle;
-    viewPortKey: string;
+    viewportKey: string;
     /**
      * 后续会通过 number 来表示究竟是什么原因导致的标脏 这里采用二进制数值方便运算
      */

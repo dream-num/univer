@@ -57,7 +57,7 @@ export class Font extends SheetExtension {
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges: IRange[],
-        moreBoundsInfo: { viewRanges: IRange[]; checkOutOfViewBound?: boolean; viewPortKey: string }
+        moreBoundsInfo: { viewRanges: IRange[]; checkOutOfViewBound?: boolean; viewportKey: string }
     ) {
         const { viewRanges = [], checkOutOfViewBound } = moreBoundsInfo;
         const { stylesCache, dataMergeCache, overflowCache, worksheet } = spreadsheetSkeleton;

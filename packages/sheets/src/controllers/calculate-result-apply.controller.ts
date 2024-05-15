@@ -17,11 +17,10 @@
 import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
 import type { ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
-import { SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import { handleNumfmtInCell, SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 
 import { Inject } from '@wendellhu/redi';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
-import { handleNumfmtInCell } from '../basics/numfmt-kit';
 
 @OnLifecycle(LifecycleStages.Ready, CalculateResultApplyController)
 export class CalculateResultApplyController extends Disposable {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
@@ -52,6 +52,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const commandService = useDependency(ICommandService);
     const subUnitId = useObservable(subUnitId$);
     const currentUser = userService.getCurrentUser();
+    const shouldScroll = useRef(true);
     const prefix = 'panel';
     const comments = useMemo(() => {
         if (unit === 'all') {
@@ -105,6 +106,10 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
 
     useEffect(() => {
         if (!activeCommentId) {
+            return;
+        }
+        if (!shouldScroll.current) {
+            shouldScroll.current = true;
             return;
         }
         const { unitId, subUnitId, commentId } = activeCommentId;
@@ -162,6 +167,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     showEdit={activeCommentId?.commentId === comment.id}
                     showHighlight={activeCommentId?.commentId === comment.id}
                     onClick={() => {
+                        shouldScroll.current = false;
                         commandService.executeCommand(SetActiveCommentOperation.id, {
                             unitId: comment.unitId,
                             subUnitId: comment.subUnitId,

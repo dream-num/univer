@@ -66,7 +66,6 @@ export class SheetCanvasPopManagerService extends Disposable {
         const cellInfo = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
 
         const { scaleX, scaleY } = scene.getAncestorScale();
-
         const scrollXY = {
             x: activeViewport.actualScrollX,
             y: activeViewport.actualScrollY,

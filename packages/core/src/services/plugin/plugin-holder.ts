@@ -16,8 +16,10 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import { type Ctor, Inject, Injector } from '@wendellhu/redi';
+import type { Ctor } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
+import { finalize } from 'rxjs';
 import { LifecycleStages } from '../lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from '../lifecycle/lifecycle.service';
 import { Disposable } from '../../shared/lifecycle';
@@ -74,12 +76,11 @@ export class PluginHolder extends Disposable {
         const plugins = this._pluginRegistry.getRegisterPlugins().map(({ plugin, options }) => this._initPlugin(plugin, options));
         this._pluginRegistry.removePlugins();
 
-        const lifecycleSubscription = this.disposeWithMe(this._lifecycleService.subscribeWithPrevious().subscribe((stage) => {
-            this._pluginsRunLifecycle(plugins, stage);
-            if (stage === LifecycleStages.Steady) {
-                lifecycleSubscription.dispose();
-            }
-        }));
+        const subscription = this.disposeWithMe(this._lifecycleService.subscribeWithPrevious()
+            // It has to been async because the finalize may execute synchronously after we
+            // make the subscription. For example, the lifecycle service is already in stage "steady".
+            .pipe(finalize(() => { Promise.resolve().then(() => subscription.dispose()); }))
+            .subscribe((stage) => { this._pluginsRunLifecycle(plugins, stage); }));
     }
 
 

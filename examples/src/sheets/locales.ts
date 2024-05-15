@@ -27,6 +27,18 @@ import { enUS as UniverSheetsZenEditorEnUS } from '@univerjs/sheets-zen-editor';
 import { enUS as UniverUIEnUS } from '@univerjs/ui';
 import { enUS as UniverSheetsFilterUIEnUS } from '@univerjs/sheets-filter-ui';
 
+import { ruRU as UniverDesignRuRU } from '@univerjs/design';
+import { ruRU as UniverDocsUIRuRU } from '@univerjs/docs-ui';
+import { ruRU as UniverSheetsRuRU } from '@univerjs/sheets';
+import { ruRU as UniverSheetsUIRuRU } from '@univerjs/sheets-ui';
+import { ruRU as UniverFindReplaceRuRU } from '@univerjs/find-replace';
+import { ruRU as UniverSheetsFormulaRuRU } from '@univerjs/sheets-formula';
+import { ruRU as UniverSheetsDataValidationRuRU } from '@univerjs/sheets-data-validation';
+import { ruRU as UniverSheetsConditionalFormattingUIRuRU } from '@univerjs/sheets-conditional-formatting-ui';
+import { ruRU as UniverSheetsZenEditorRuRU } from '@univerjs/sheets-zen-editor';
+import { ruRU as UniverUIRuRU } from '@univerjs/ui';
+import { ruRU as UniverSheetsFilterUIRuRU } from '@univerjs/sheets-filter-ui';
+
 export const locales = {
     [LocaleType.EN_US]: Tools.deepMerge(
         UniverSheetsEnUS,
@@ -39,6 +51,19 @@ export const locales = {
         UniverSheetsZenEditorEnUS,
         UniverUIEnUS,
         UniverDesignEnUS,
-        UniverSheetsFilterUIEnUS
+        UniverSheetsFilterUIEnUS,
+    ),
+    [LocaleType.RU_RU]: Tools.deepMerge(
+        UniverSheetsRuRU,
+        UniverDocsUIRuRU,
+        UniverFindReplaceRuRU,
+        UniverSheetsUIRuRU,
+        UniverSheetsFormulaRuRU,
+        UniverSheetsDataValidationRuRU,
+        UniverSheetsConditionalFormattingUIRuRU,
+        UniverSheetsZenEditorRuRU,
+        UniverUIRuRU,
+        UniverDesignRuRU,
+        UniverSheetsFilterUIRuRU,
     ),
 };

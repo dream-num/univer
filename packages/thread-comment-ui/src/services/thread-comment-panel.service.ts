@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, toDisposable } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, filter } from 'rxjs';
 
 type ActiveCommentInfo = { unitId: string; subUnitId: string; commentId: string } | undefined;
 
@@ -32,7 +32,8 @@ export class ThreadCommentPanelService extends Disposable {
     activeCommentId$ = this._activeCommentId$.asObservable();
 
     constructor(
-        @Inject(ISidebarService) private _sidebarService: ISidebarService
+        @Inject(ISidebarService) private readonly _sidebarService: ISidebarService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._init();
@@ -47,9 +48,12 @@ export class ThreadCommentPanelService extends Disposable {
             })
         );
 
-        this.disposeWithMe(toDisposable(() => {
-            this._sidebarService.close();
-        }));
+        this.disposeWithMe(
+            this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET)
+                .pipe(filter((sheet) => !sheet)).subscribe(() => {
+                    this._sidebarService.close();
+                })
+        );
     }
 
     get panelVisible() {

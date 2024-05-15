@@ -21,9 +21,11 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useMemo } from 'react';
 import { map } from 'rxjs';
 import { ShowAddSheetCommentModalOperation } from '../../commands/operations/comment.operation';
+import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 
 export const SheetsThreadCommentPanel = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
+    const sheetsThreadCommentPopupService = useDependency(SheetsThreadCommentPopupService);
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     if (!workbook) {
         return null;
@@ -40,6 +42,10 @@ export const SheetsThreadCommentPanel = () => {
         commandService.executeCommand(ShowAddSheetCommentModalOperation.id);
     };
 
+    const handleResolve = () => {
+        sheetsThreadCommentPopupService.hidePopup();
+    };
+
     return (
         <ThreadCommentPanel
             unitId={unitId}
@@ -47,6 +53,7 @@ export const SheetsThreadCommentPanel = () => {
             type={UniverInstanceType.UNIVER_SHEET}
             onAdd={handleAdd}
             getSubUnitName={getSubUnitName}
+            onResolve={handleResolve}
         />
     );
 };

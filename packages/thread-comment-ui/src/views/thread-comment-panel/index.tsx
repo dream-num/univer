@@ -35,10 +35,11 @@ export interface IThreadCommentPanelProps {
     type: UniverInstanceType;
     onAdd: () => void;
     getSubUnitName: (subUnitId: string) => string;
+    onResolve?: (id: string) => void;
 }
 
 export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
-    const { unitId, subUnitId$, type, onAdd, getSubUnitName } = props;
+    const { unitId, subUnitId$, type, onAdd, getSubUnitName, onResolve } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
     const localeService = useDependency(LocaleService);
@@ -167,6 +168,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                             commentId: comment.id,
                         });
                     }}
+                    onClose={() => onResolve?.(comment.id)}
                 />
             ))}
             {statuedComments.length

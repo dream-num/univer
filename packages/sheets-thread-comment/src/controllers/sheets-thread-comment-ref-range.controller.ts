@@ -15,16 +15,14 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { Disposable, DisposableCollection, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { Disposable, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import type { IAddCommentMutationParams, IUpdateCommentRefMutationParams } from '@univerjs/thread-comment';
-import { AddCommentMutation, DeleteCommentMutation, UpdateCommentRefMutation } from '@univerjs/thread-comment';
-import { serializeRange } from '@univerjs/engine-formula';
-import { distinctUntilChanged, map, merge, Observable, switchMap } from 'rxjs';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { AddCommentMutation, DeleteCommentMutation, ThreadCommentModel, UpdateCommentRefMutation } from '@univerjs/thread-comment';
+import { serializeRange, singleReferenceToGrid } from '@univerjs/engine-formula';
 import type { ISheetThreadComment } from '../types/interfaces/i-sheet-thread-comment';
 import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
 
@@ -34,11 +32,11 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
 
     constructor(
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel
-
+        @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel,
+        @Inject(ThreadCommentModel) private readonly _threadCommentModel: ThreadCommentModel
     ) {
         super();
+        this._initData();
         this._initRefRange();
     }
 
@@ -73,9 +71,7 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
                         params: {
                             unitId,
                             subUnitId,
-                            payload: {
-                                commentId,
-                            },
+                            commentId,
                         },
                     }],
                     undos: [{
@@ -116,69 +112,66 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
 
         this._disposableMap.set(
             this._getIdWithUnitId(unitId, subUnitId, commentId),
-            this._refRangeService.registerRefRange(oldRange, handleRangeChange)
+            this._refRangeService.registerRefRange(oldRange, handleRangeChange, unitId, subUnitId)
         );
+    }
+
+    private _initData() {
+        const data = this._threadCommentModel.getAll();
+
+        for (const unitId in data) {
+            const unitMap = data[unitId];
+            for (const subUnitId in unitMap) {
+                const subUnitMap = unitMap[subUnitId];
+                for (const id in subUnitMap) {
+                    const comment = subUnitMap[id];
+                    const ref = comment.ref;
+                    const pos = singleReferenceToGrid(ref);
+                    this._register(unitId, subUnitId, {
+                        ...comment,
+                        ...pos,
+                    });
+                }
+            }
+        }
     }
 
     private _initRefRange() {
         this.disposeWithMe(
-            merge(
-                this._sheetSkeletonManagerService.currentSkeleton$.pipe(
-                    map((skeleton) => skeleton?.sheetId),
-                    distinctUntilChanged()
-                )
-            )
-                .pipe(
-                    switchMap(
-                        () =>
-                            new Observable<DisposableCollection>((subscribe) => {
-                                const disposableCollection = new DisposableCollection();
-                                subscribe.next(disposableCollection);
-                                return () => {
-                                    disposableCollection.dispose();
-                                };
-                            })
-                    )
-                ).subscribe((disposableCollection) => {
-                    disposableCollection.add(
-                        toDisposable(
-                            this._sheetsThreadCommentModel.commentUpdate$.subscribe((option) => {
-                                const { unitId, subUnitId } = option;
-                                switch (option.type) {
-                                    case 'add': {
-                                        const comment = option.payload;
-                                        this._register(option.unitId, option.subUnitId, {
-                                            ...comment,
-                                            row: option.row,
-                                            column: option.column,
-                                        });
-                                        break;
-                                    }
-                                    case 'delete': {
-                                        const disposable = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, option.payload.commentId));
-                                        disposable?.dispose();
-                                        break;
-                                    }
-                                    case 'updateRef': {
-                                        const comment = this._sheetsThreadCommentModel.getComment(unitId, subUnitId, option.payload.commentId);
-                                        if (!comment) {
-                                            return;
-                                        }
+            this._sheetsThreadCommentModel.commentUpdate$.subscribe((option) => {
+                const { unitId, subUnitId } = option;
+                switch (option.type) {
+                    case 'add': {
+                        const comment = option.payload;
+                        this._register(option.unitId, option.subUnitId, {
+                            ...comment,
+                            row: option.row,
+                            column: option.column,
+                        });
+                        break;
+                    }
+                    case 'delete': {
+                        const disposable = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, option.payload.commentId));
+                        disposable?.dispose();
+                        break;
+                    }
+                    case 'updateRef': {
+                        const comment = this._sheetsThreadCommentModel.getComment(unitId, subUnitId, option.payload.commentId);
+                        if (!comment) {
+                            return;
+                        }
 
-                                        const disposable = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, comment.id));
-                                        disposable?.dispose();
-                                        this._register(option.unitId, option.subUnitId, {
-                                            ...comment,
-                                            row: option.row,
-                                            column: option.column,
-                                        });
-                                        break;
-                                    }
-                                }
-                            })
-                        )
-                    );
-                })
+                        const disposable = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, comment.id));
+                        disposable?.dispose();
+                        this._register(option.unitId, option.subUnitId, {
+                            ...comment,
+                            row: option.row,
+                            column: option.column,
+                        });
+                        break;
+                    }
+                }
+            })
         );
 
         this.disposeWithMe(toDisposable(() => {

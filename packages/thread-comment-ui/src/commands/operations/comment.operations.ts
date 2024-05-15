@@ -54,10 +54,6 @@ export const SetActiveCommentOperation: ICommand<ISetActiveCommentOperationParam
     id: 'thread-comment-ui.operation.set-active-comment',
     type: CommandType.OPERATION,
     handler(accessor, params) {
-        if (!params) {
-            return false;
-        }
-
         const panelService = accessor.get(ThreadCommentPanelService);
         panelService.setActiveComment(params);
         return true;

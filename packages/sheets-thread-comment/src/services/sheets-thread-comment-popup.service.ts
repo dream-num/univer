@@ -57,7 +57,18 @@ export class SheetsThreadCommentPopupService extends Disposable {
     }
 
     showPopup(location: IThreadCommentPopup, onHide?: () => void) {
-        const { row, col } = location;
+        const { row, col, unitId, subUnitId } = location;
+        if (
+            this._activePopup &&
+            row === this._activePopup.row &&
+            col === this._activePopup.col &&
+            unitId === this._activePopup.unitId &&
+            subUnitId === this.activePopup?.subUnitId
+        ) {
+            this._activePopup = location;
+            this._activePopup$.next(location);
+            return;
+        }
         this._lastPopup && this._lastPopup.dispose();
         if (this._zenZoneService.visible) {
             return;

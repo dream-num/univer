@@ -63,15 +63,17 @@ export class SheetsThreadCommentController extends Disposable {
         this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetSelectionsOperation.id) {
                 const params = commandInfo.params as ISetSelectionsOperationParams;
-
-                if (params.type === SelectionMoveType.MOVE_END && params.selections[0].primary) {
-                    const unitId = params.unitId;
-                    const subUnitId = params.subUnitId;
-                    const row = params.selections[0].primary.actualRow;
-                    const col = params.selections[0].primary.actualColumn;
+                const { unitId, subUnitId, selections, type } = params;
+                if ((type === SelectionMoveType.MOVE_END || type === undefined) && selections[0].primary) {
+                    const row = selections[0].primary.actualRow;
+                    const col = selections[0].primary.actualColumn;
                     if (!this._sheetsThreadCommentModel.showCommentMarker(unitId, subUnitId, row, col)) {
+                        if (this._threadCommentPanelService.activeCommentId) {
+                            this._commandService.executeCommand(SetActiveCommentOperation.id);
+                        }
                         return;
                     }
+
                     const commentId = this._sheetsThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
                     if (commentId) {
                         this._commandService.executeCommand(SetActiveCommentOperation.id, {
@@ -152,6 +154,8 @@ export class SheetsThreadCommentController extends Disposable {
                     col: location.column,
                     commentId: comment.id,
                 });
+            } else {
+                this._sheetsThreadCommentPopupService.hidePopup();
             }
         }));
     }

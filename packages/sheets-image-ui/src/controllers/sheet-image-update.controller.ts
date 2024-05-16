@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, ITransformState, IUnitDrawingService, Nullable, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IRange, ITransformState, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, DrawingTypeEnum, ICommandService, IDrawingManagerService, IImageRemoteService, ImageSourceType, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageData } from '@univerjs/drawing';
@@ -25,8 +25,12 @@ import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSheetImageCommand } from '../commands/commands/insert-sheet-image.command';
-import type { IInsertDrawingCommandParams, IPartialDrawingCommandParam, ISetDrawingCommandParam, ISetDrawingCommandParams } from '../commands/commands/interfaces';
+import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
 import { SetSheetImageCommand } from '../commands/commands/set-sheet-image.command';
+import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
+import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
+import { GroupSheetImageCommand } from '../commands/commands/group-sheet-image.command';
+import { UngroupSheetImageCommand } from '../commands/commands/ungroup-sheet-image.command';
 
 
 const SHEET_IMAGE_WIDTH_LIMIT = 500;
@@ -52,6 +56,10 @@ export class SheetImageUpdateController extends Disposable {
         this._initCommandListeners();
 
         this._updateImageListener();
+
+        this._updateOrderListener();
+
+        this._groupDrawingListener();
     }
 
     /**
@@ -127,7 +135,7 @@ export class SheetImageUpdateController extends Disposable {
             return;
         }
 
-        const imageDrawingDataParam: IImageData = {
+        const sheetDrawingParam: ISheetDrawing = {
             unitId,
             subUnitId,
             drawingId: imageId,
@@ -135,23 +143,12 @@ export class SheetImageUpdateController extends Disposable {
             imageSourceType,
             source,
             transform: this._transformImagePositionToTransform(sheetTransform),
-        };
-
-        const sheetDrawingParam: ISheetDrawing = {
             sheetTransform,
-            drawingId: imageId,
-            unitId,
-            subUnitId,
-            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
         };
-
 
         this._commandService.executeCommand(InsertSheetImageCommand.id, {
             unitId,
-            drawings: [{
-                sheetDrawingParam,
-                drawingParam: imageDrawingDataParam,
-            }],
+            drawings: [sheetDrawingParam],
         } as IInsertDrawingCommandParams);
     }
 
@@ -267,9 +264,22 @@ export class SheetImageUpdateController extends Disposable {
         };
     }
 
+    private _updateOrderListener() {
+        this._drawingManagerService.featurePluginOrderUpdate$.subscribe((params) => {
+            const { unitId, subUnitId, drawingIds, arrangeType } = params;
+
+            this._commandService.executeCommand(SetDrawingArrangeCommand.id, {
+                unitId,
+                subUnitId,
+                drawingIds,
+                arrangeType,
+            } as ISetDrawingArrangeCommandParams);
+        });
+    }
+
     private _updateImageListener() {
-        this._drawingManagerService.externalUpdate$.subscribe((params) => {
-            const drawings: ISetDrawingCommandParam[] = [];
+        this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
+            const drawings: Partial<ISheetDrawing>[] = [];
 
             if (params.length === 0) {
                 return;
@@ -283,40 +293,31 @@ export class SheetImageUpdateController extends Disposable {
 
                 const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
 
-                const imageDrawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
+                // const imageDrawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
 
-                if (sheetDrawing == null || imageDrawing == null) {
+                if (sheetDrawing == null) {
                     return;
                 }
 
 
-                const sheetTransform = this._transformToImagePosition({ ...imageDrawing.transform, ...transform });
+                const sheetTransform = this._transformToImagePosition({ ...sheetDrawing.transform, ...transform });
 
                 if (sheetTransform == null) {
                     return;
                 }
 
-                const oldDrawing: IPartialDrawingCommandParam = {
-                    sheetDrawingParam: { ...sheetDrawing },
-                    drawingParam: { ...imageDrawing },
-                };
+                // const oldDrawing: Partial<ISheetDrawing> = {
+                //     ...sheetDrawing,
+                // };
 
-                const newDrawing: IPartialDrawingCommandParam = {
-                    sheetDrawingParam: {
-                        sheetTransform: { ...sheetTransform },
-                        unitId, subUnitId, drawingId,
-                    },
-                    drawingParam: {
-                        unitId, subUnitId, drawingId, drawingType,
-                        transform: { ...transform, ...this._transformImagePositionToTransform(sheetTransform) },
-                    },
+                const newDrawing: Partial<ISheetDrawing> = {
+                    unitId, subUnitId, drawingId, drawingType,
+                    transform: { ...transform, ...this._transformImagePositionToTransform(sheetTransform) },
+                    sheetTransform: { ...sheetTransform },
                 };
 
 
-                drawings.push({
-                    newDrawing,
-                    oldDrawing,
-                });
+                drawings.push(newDrawing);
             });
 
             if (drawings.length > 0) {
@@ -325,6 +326,17 @@ export class SheetImageUpdateController extends Disposable {
                     drawings,
                 } as ISetDrawingCommandParams);
             }
+        });
+    }
+
+
+    private _groupDrawingListener() {
+        this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
+            this._commandService.executeCommand(GroupSheetImageCommand.id, params);
+        });
+
+        this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {
+            this._commandService.executeCommand(UngroupSheetImageCommand.id, params);
         });
     }
 
@@ -382,9 +394,5 @@ export class SheetImageUpdateController extends Disposable {
             from,
             to,
         };
-    }
-
-    private _removeImageListener() {
-
     }
 }

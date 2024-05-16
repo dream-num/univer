@@ -47,3 +47,20 @@ export const Playground = {
         );
     },
 };
+
+export const RadioGroupVertical = {
+    render() {
+        const [value, setValue] = useState('');
+
+        function handleChange(value: string | number | boolean) {
+            setValue(value as string);
+        }
+
+        return (
+            <RadioGroup value={value} onChange={handleChange} direction="vertical">
+                <Radio value="test">test</Radio>
+                <Radio value="test1">test1</Radio>
+            </RadioGroup>
+        );
+    },
+};

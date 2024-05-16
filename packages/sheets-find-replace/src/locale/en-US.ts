@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     'sheet-find-replace': {
         replace: {
             'partial-failure': 'Failed to replace some cells',
@@ -22,3 +24,5 @@ export default {
         },
     },
 };
+
+export default locale;

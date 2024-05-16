@@ -70,17 +70,17 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@wendellhu/redi": "^0.14.0",
+        "@wendellhu/redi": "^0.15.1",
         "clsx": ">=2.0.0",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "react-dom": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.44",
+        "@univerjs/icons": "^0.1.45",
         "localforage": "^1.10.0",
-        "rc-notification": "^5.4.0",
-        "rc-util": "^5.39.1"
+        "rc-notification": "^5.5.0",
+        "rc-util": "^5.39.3"
     },
     "optionalDependencies": {
         "vue": ">=3.0.0"
@@ -96,15 +96,15 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@wendellhu/redi": "^0.14.0",
+        "@wendellhu/redi": "^0.15.1",
         "clsx": "^2.1.1",
         "less": "^4.2.0",
         "react": "18.2.0",
         "react-dom": "18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.10",
-        "vitest": "^1.5.0",
-        "vue": "^3.4.24"
+        "vite": "^5.2.11",
+        "vitest": "^1.6.0",
+        "vue": "^3.4.27"
     }
 }

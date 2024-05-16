@@ -76,7 +76,6 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
             endColumn: Math.max(worksheet.getMaxColumns() - 1, 0),
         };
 
-
         const filterOutRowsInRemove: number[] = [];
         for (let i = totalRange.startRow; i <= totalRange.endRow; i++) {
             if (worksheet.getRowFiltered(i)) {

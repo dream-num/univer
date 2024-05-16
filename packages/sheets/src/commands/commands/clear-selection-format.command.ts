@@ -118,5 +118,5 @@ export function generateNullCellValue(ranges: IRange[]): IObjectMatrixPrimitiveT
         }
     });
 
-    return cellValue.getData();
+    return cellValue.clone();
 }

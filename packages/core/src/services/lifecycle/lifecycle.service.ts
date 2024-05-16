@@ -92,7 +92,13 @@ export class LifecycleService extends Disposable {
                 subscriber.next(LifecycleStages.Rendered);
             }
 
-            return this._lifecycle$.subscribe(subscriber);
+            this._lifecycle$.subscribe((stage) => {
+                subscriber.next(stage);
+
+                if (stage === LifecycleStages.Steady) {
+                    subscriber.complete();
+                }
+            });
         });
     }
 

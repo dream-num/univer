@@ -33,6 +33,8 @@ import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, setPageParent,
 import { createSkeletonSection } from './model/section';
 import { dealWithSection } from './block/section';
 import { createSkeletonPage } from './model/page';
+import { Hyphen } from './hyphenation/hyphen';
+import { LanguageDetector } from './hyphenation/language-detector';
 
 export enum DocumentSkeletonState {
     PENDING = 'pending',
@@ -61,6 +63,11 @@ export class DocumentSkeleton extends Skeleton {
     private _skeletonData: Nullable<IDocumentSkeletonCached>;
 
     private _findLiquid: Liquid = new Liquid();
+
+    // Use for hyphenation.
+    private _hyphen = Hyphen.getInstance();
+
+    private _languageDetector = LanguageDetector.getInstance();
 
     private _iteratorCount = 0;
 
@@ -249,7 +256,6 @@ export class DocumentSkeleton extends Skeleton {
 
         return glyphGroup[glyph];
     }
-
 
     findNodeByCoord(
         coord: Vector2,
@@ -516,6 +522,8 @@ export class DocumentSkeleton extends Skeleton {
             paragraphConfigCache: new Map(),
             sectionBreakConfigCache: new Map(),
             paragraphsOpenNewPage: new Set(),
+            hyphen: this._hyphen,
+            languageDetector: this._languageDetector,
         };
     }
 

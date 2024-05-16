@@ -31,7 +31,6 @@ import { FilterConditionItems } from '../../models/conditions';
 import { ExtendCustomFilterOperator } from '../../models/extended-operators';
 import { SetSheetsFilterCriteriaCommand } from '../../commands/sheets-filter.command';
 
-
 const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
     id: 'sheet.operation.set-cell-edit-visible',
     type: CommandType.OPERATION,
@@ -39,7 +38,6 @@ const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> 
         return true;
     },
 };
-
 
 function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
     const univer = new Univer();

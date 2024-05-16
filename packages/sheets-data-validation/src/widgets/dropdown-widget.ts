@@ -205,7 +205,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         const map = this._ensureMap(subUnitId);
         const key = this._generateKey(row, col);
 
-
         const list = validator.getListWithColor(rule);
         const value = getCellValueOrigin(data);
         const valueStr = `${value ?? ''}`;
@@ -229,7 +228,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             if (
                 tb === WrapStrategy.WRAP
             ) {
-                docModel.updateDocumentDataPageSize(realWidth);
+                docModel.updateDocumentDataPageSize(Math.max(realWidth, 1));
             }
 
             documentSkeleton.calculate();
@@ -295,7 +294,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             if (
                 tb === WrapStrategy.WRAP
             ) {
-                docModel.updateDocumentDataPageSize(realWidth);
+                docModel.updateDocumentDataPageSize(Math.max(realWidth, 1));
             }
 
             documentSkeleton.calculate();
@@ -329,7 +328,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             }
 
             ctx.translate(MARGIN_H, paddingTop);
-            const rectWidth = cellWidth - MARGIN_H * 2;
+            const rectWidth = Math.max(cellWidth - MARGIN_H * 2, 1);
             const rectHeight = fontHeight;
             Rect.drawWith(ctx, {
                 width: rectWidth,
@@ -398,7 +397,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             if (
                 tb === WrapStrategy.WRAP
             ) {
-                docModel.updateDocumentDataPageSize(realWidth);
+                docModel.updateDocumentDataPageSize(Math.max(realWidth, 1));
             }
 
             documentSkeleton.calculate();
@@ -414,7 +413,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             if (
                 tb === WrapStrategy.WRAP
             ) {
-                docModel.updateDocumentDataPageSize(realWidth);
+                docModel.updateDocumentDataPageSize(Math.max(realWidth, 1));
             }
 
             documentSkeleton.calculate();

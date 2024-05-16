@@ -84,7 +84,6 @@ export class DocCanvasView extends RxDisposable {
         }
     }
 
-
     private _addNewRender() {
         const documentModel = this._currentDocumentModel;
 

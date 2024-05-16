@@ -828,11 +828,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         offsetY: number,
         scaleX: number,
         scaleY: number,
-        scrollXY: { x: number; y: number }
+        scrollXY: { x: number; y: number },
+        closeFirst?: boolean
     ) {
-        const row = this.getRowPositionByOffsetY(offsetY, scaleY, scrollXY);
+        const row = this.getRowPositionByOffsetY(offsetY, scaleY, scrollXY, closeFirst);
 
-        const column = this.getColumnPositionByOffsetX(offsetX, scaleX, scrollXY);
+        const column = this.getColumnPositionByOffsetX(offsetX, scaleX, scrollXY, closeFirst);
 
         return {
             row,
@@ -848,7 +849,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @returns
      */
 
-    getColumnPositionByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }) {
+    getColumnPositionByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }, closeFirst?: boolean) {
         offsetX = this.getTransformOffsetX(offsetX, scaleX, scrollXY);
 
         const { columnWidthAccumulation } = this;
@@ -859,6 +860,13 @@ export class SpreadsheetSkeleton extends Skeleton {
             column = columnWidthAccumulation.length - 1;
         } else if (column === -1) {
             column = 0;
+        }
+
+        if (closeFirst) {
+            // check if upper column was closer than current
+            if (Math.abs(columnWidthAccumulation[column] - offsetX) < Math.abs(offsetX - (columnWidthAccumulation[column - 1] ?? 0))) {
+                column = column + 1;
+            }
         }
 
         // if (column === -1) {
@@ -882,7 +890,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param scrollXY.x
      * @param scrollXY.y
      */
-    getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }) {
+    getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }, closeFirst?: boolean) {
         const { rowHeightAccumulation } = this;
 
         offsetY = this.getTransformOffsetY(offsetY, scaleY, scrollXY);
@@ -895,6 +903,12 @@ export class SpreadsheetSkeleton extends Skeleton {
             row = 0;
         }
 
+        if (closeFirst) {
+             // check if upper row was closer than current
+            if (Math.abs(rowHeightAccumulation[row] - offsetY) < Math.abs(offsetY - (rowHeightAccumulation[row - 1] ?? 0))) {
+                row = row + 1;
+            }
+        }
         // if (row === -1) {
         //     const rowLength = rowHeightAccumulation.length - 1;
         //     const lastRowValue = rowHeightAccumulation[rowLength];

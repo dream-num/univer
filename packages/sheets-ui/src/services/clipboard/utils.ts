@@ -153,7 +153,6 @@ export function mergeSetRangeValues(mutations: IMutationInfo[]) {
     return newMutations;
 }
 
-
 export function rangeIntersectWithDiscreteRange(range: IRange, discrete: IDiscreteRange) {
     const { startRow, endRow, startColumn, endColumn } = range;
     for (let i = startRow; i <= endRow; i++) {
@@ -164,7 +163,6 @@ export function rangeIntersectWithDiscreteRange(range: IRange, discrete: IDiscre
         }
     }
 }
-
 
 export function discreteRangeContainsRange(discrete: IDiscreteRange, range: IRange) {
     const { startRow, endRow, startColumn, endColumn } = range;

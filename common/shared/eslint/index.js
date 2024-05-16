@@ -2,10 +2,9 @@ exports.baseRules = {
     curly: ['error', 'multi-line'],
     'no-empty-function': ['error'],
     'eol-last': ['error', 'always'],
-    'import/no-cycle': 'error',
     'import/no-self-import': 'error',
     'ts/no-explicit-any': 'warn',
-    'style/no-multiple-empty-lines': ['error', { max: 2, maxEOF: 1 }],
+    'style/no-multiple-empty-lines': ['error', { max: 1, maxEOF: 1 }],
     'style/brace-style': ['warn', '1tbs', { allowSingleLine: true }],
     'style/comma-dangle': ['error', {
         arrays: 'always-multiline',
@@ -41,6 +40,7 @@ exports.baseRules = {
     ],
     'react/no-unstable-context-value': 'warn',
     'react/no-unstable-default-props': 'warn',
+    'command/command': 'off',
 
     // TODO: debatable rules
     'test/prefer-lowercase-title': 'off',

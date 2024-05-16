@@ -69,11 +69,8 @@ export function isLastGlyph(glyph: Nullable<IDocumentSkeletonGlyph>) {
 
 export function isFirstGlyph(glyph: Nullable<IDocumentSkeletonGlyph>) {
     const divide = glyph?.parent;
-
     const line = divide?.parent;
-
     const glyphGroup = divide?.glyphGroup;
-
     const divides = line?.divides;
 
     if (glyphGroup && glyph && divides && divide) {

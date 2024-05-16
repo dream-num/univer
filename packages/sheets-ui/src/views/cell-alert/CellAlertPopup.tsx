@@ -36,7 +36,6 @@ export function CellAlert({ popup }: { popup: ICanvasPopup }) {
         [CellAlertType.WARNING]: <WarningSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconWarning)} />,
     };
 
-
     return (
         <div className={styles.cellAlert}>
             <div className={styles.cellAlertTitle}>

@@ -95,7 +95,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
             // Engine
             [LexerTreeBuilder],
 
-
             //Controllers
             [
                 FormulaController,

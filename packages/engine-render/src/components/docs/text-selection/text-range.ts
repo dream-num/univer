@@ -45,7 +45,7 @@ const ID_LENGTH = 6;
 const BLINK_ON = 500;
 const BLINK_OFF = 500;
 
-export const TEXT_RANGE_LAYER_INDEX = 1;
+export const TEXT_RANGE_LAYER_INDEX = 3;
 
 export function cursorConvertToTextRange(
     scene: Scene,

@@ -141,7 +141,6 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: React.
     );
 };
 
-
 export function ListFormulaInput(props: IFormulaInputProps) {
     const { value, onChange: _onChange = () => { /* empty */ }, unitId, subUnitId, validResult, showError, ruleId } = props;
     const { formula1 = '', formula2 = '' } = value || {};
@@ -286,7 +285,6 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                     });
                     return;
                 }
-
 
                 onChange?.({
                     formula1: isFormulaString(str) ? str : '',

@@ -24,6 +24,9 @@ describe('test "SetRangeValuesMutation" ', () => {
             expect(checkCellValueType('string', CellValueType.BOOLEAN)).toBe(CellValueType.STRING);
             expect(checkCellValueType('string', CellValueType.NUMBER)).toBe(CellValueType.STRING);
             expect(checkCellValueType('string', CellValueType.STRING)).toBe(CellValueType.STRING);
+            expect(checkCellValueType('0', CellValueType.STRING)).toBe(CellValueType.NUMBER);
+            expect(checkCellValueType('true', CellValueType.STRING)).toBe(CellValueType.BOOLEAN);
+            expect(checkCellValueType('false', CellValueType.STRING)).toBe(CellValueType.BOOLEAN);
 
             expect(checkCellValueType(123, CellValueType.STRING)).toBe(CellValueType.NUMBER);
             expect(checkCellValueType(123, CellValueType.BOOLEAN)).toBe(CellValueType.NUMBER); // not a valid boolean number, casted to number

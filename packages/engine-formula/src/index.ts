@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 export type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -149,3 +148,4 @@ export { IFormulaCurrentConfigService, FormulaCurrentConfigService } from './ser
 export { IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 
 export type { IRangeChange } from './models/formula-data.model';
+export { handleNumfmtInCell } from './engine/utils/numfmt-kit';

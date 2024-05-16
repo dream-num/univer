@@ -19,11 +19,11 @@ import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Unive
 import { Inject } from '@wendellhu/redi';
 import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
 import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
-import { ThreadCommentModel } from '../models/thread-comment.model';
-import { AddCommentMutation, DeleteCommentMutation, type IDeleteCommentMutationParams } from '../commands/mutations/comment.mutation';
+import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
+import { AddCommentMutation, DeleteCommentMutation, ThreadCommentModel } from '@univerjs/thread-comment';
 
-@OnLifecycle(LifecycleStages.Ready, ThreadCommentRemoveSubUnitController)
-export class ThreadCommentRemoveSubUnitController extends Disposable {
+@OnLifecycle(LifecycleStages.Ready, ThreadCommentRemoveSheetsController)
+export class ThreadCommentRemoveSheetsController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,

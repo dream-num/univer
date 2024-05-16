@@ -23,7 +23,7 @@ import { whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { ShowAddSheetCommentModalOperation } from '../commands/operations/comment.operation';
 import { COMMENT_SINGLE_ICON } from '../types/const';
 
-export const threadCommentMenu = (accessor: IAccessor) => {
+export const threadCommentMenuFactory = (accessor: IAccessor) => {
     return {
         id: ShowAddSheetCommentModalOperation.id,
         type: MenuItemType.BUTTON,
@@ -34,7 +34,7 @@ export const threadCommentMenu = (accessor: IAccessor) => {
     } as IMenuItem;
 };
 
-export const threadPanelMenu = (accessor: IAccessor) => {
+export const threadPanelMenuFactory = (accessor: IAccessor) => {
     return {
         id: ToggleSheetCommentPanelOperation.id,
         type: MenuItemType.BUTTON,

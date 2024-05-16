@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommand, Workbook } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { getSheetCommandTarget, SelectionManagerService } from '@univerjs/sheets';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 import { SheetsThreadCommentModel } from '../../models/sheets-thread-comment.model';
@@ -28,25 +28,23 @@ export const ShowAddSheetCommentModalOperation: ICommand = {
     handler(accessor) {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+
         const sheetsThreadCommentPopupService = accessor.get(SheetsThreadCommentPopupService);
         const threadCommentPanelService = accessor.get(ThreadCommentPanelService);
         const activeCell = selectionManagerService.getFirst()?.primary;
         const current = selectionManagerService.getCurrent();
         const model = accessor.get(SheetsThreadCommentModel);
+
         if (!current || !activeCell) {
             return false;
         }
 
         const { unitId, sheetId } = current;
-        const workbook = univerInstanceService.getUnit<Workbook>(current.unitId, UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
+        const result = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId: sheetId });
+        if (!result) {
             return false;
         }
-
-        const worksheet = workbook.getSheetBySheetId(sheetId);
-        if (!worksheet) {
-            return false;
-        }
+        const { workbook, worksheet } = result;
         const location: ISheetLocation = {
             workbook,
             worksheet,

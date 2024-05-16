@@ -30,7 +30,7 @@ import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
 import { enUS, zhCN } from '../locales';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
 import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
-import { AddCommentShortcut, threadCommentMenu, threadPanelMenu } from './menu';
+import { AddCommentShortcut, threadCommentMenuFactory, threadPanelMenuFactory } from './menu';
 
 @OnLifecycle(LifecycleStages.Starting, SheetsThreadCommentController)
 export class SheetsThreadCommentController extends Disposable {
@@ -89,10 +89,10 @@ export class SheetsThreadCommentController extends Disposable {
 
     private _initMenu() {
         [
-            threadCommentMenu,
-            threadPanelMenu,
-        ].forEach((menu) => {
-            this._menuService.addMenuItem(menu(this._injector));
+            threadCommentMenuFactory,
+            threadPanelMenuFactory,
+        ].forEach((menuFactory) => {
+            this._menuService.addMenuItem(menuFactory(this._injector));
         });
     }
 

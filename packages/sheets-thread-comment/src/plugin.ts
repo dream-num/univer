@@ -24,10 +24,11 @@ import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thre
 import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
 import { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 import { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
-import { SheetsThreadCommentRenderController } from './controllers/sheets-thread-comment-render.controller';
+import { SheetsThreadCommentRenderController } from './controllers/render-controllers/render.controller';
 import { SHEETS_THREAD_COMMENT } from './types/const';
 import { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thread-comment-copy-paste.controller';
 import { SheetsThreadCommentHoverController } from './controllers/sheets-thread-comment-hover.controller';
+import { ThreadCommentRemoveSheetsController } from './controllers/sheets-thread-comment-remove.controller';
 
 const defaultConfig: IThreadCommentUIConfig = {
     mentions: [{
@@ -62,6 +63,7 @@ export class UniverSheetsThreadCommentPlugin extends UniverThreadCommentUIPlugin
             [SheetsThreadCommentRenderController],
             [SheetsThreadCommentCopyPasteController],
             [SheetsThreadCommentHoverController],
+            [ThreadCommentRemoveSheetsController],
 
             [SheetsThreadCommentPopupService],
         ] as Dependency[]).forEach((dep) => {

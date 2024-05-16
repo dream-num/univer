@@ -118,6 +118,7 @@ Commands' names should follow the convention below:
 export interface ISomeCommandParams {
     // Define the parameters here
 }
+
 export const SomeCommand = ICommand<ISomeCommandParams> = {
     id: '<business-type>.<command-type>.<command-name>',
 };
@@ -128,12 +129,25 @@ For example:
 ```typescript
 // ✅
 export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParams> = {
-    id: 'sheet.command.set-selection-frozen',
+    id: 'sheet.command.set-selection-frozen', // note this should be in single format
 }
 
 // 🚫
 export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParams> = {
-    id: 'SetSelectionFrozenCommmand',
+    id: 'sheets.command.set-selection-frozen',
+}
+
+// 🚫
+export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParams> = {
+    id: 'SetSelectionFrozenCommand',
+}
+```
+
+If this command is for general purpose, the `business-type` should be the plugin's name. For example:
+
+```typescript
+export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
+    id: 'thread-comment.command.resolve-comment',
 }
 ```
 

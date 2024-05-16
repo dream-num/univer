@@ -115,7 +115,7 @@ export function getDataValidationDiffMutations(unitId: string, subUnitId: string
 
 export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataValidationRangeCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.updateDataValidationRuleRange',
+    id: 'sheet.command.updateDataValidationRuleRange',
     async  handler(accessor, params) {
         if (!params) {
             return false;
@@ -154,7 +154,7 @@ export interface IAddSheetDataValidationCommandParams {
 
 export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.addDataValidation',
+    id: 'sheet.command.addDataValidation',
     async handler(accessor, params) {
         if (!params) {
             return false;

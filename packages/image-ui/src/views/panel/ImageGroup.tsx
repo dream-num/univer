@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
-import { ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingParam } from '@univerjs/core';
+import { DrawingTypeEnum, ICommandService, IDrawingManagerService, LocaleService, Tools } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { CreateCopySingle } from '@univerjs/icons';
 import { Button } from '@univerjs/design';
 import clsx from 'clsx';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { GroupType, SetImageGroupOperation } from '../../commands/operations/image-group.operation';
+import { getGroupState, IRenderManagerService, transformObjectOutOfGroup } from '@univerjs/engine-render';
 import { getUpdateParams } from '../../utils/get-update-params';
 import styles from './index.module.less';
 
@@ -49,10 +48,81 @@ export const ImageGroup = (props: IImageGroupProps) => {
         return isShow ? 'block' : 'none';
     };
 
-    const onGroupBtnClick = (groupType: GroupType) => {
-        commandService.executeCommand(SetImageGroupOperation.id, {
-            groupType,
+    const onGroupBtnClick = () => {
+        const focusDrawings = drawingManagerService.getFocusDrawings();
+        const { unitId, subUnitId } = focusDrawings[0];
+        const groupId = Tools.generateRandomId(10);
+        const groupTransform = getGroupState(0, 0, focusDrawings.map((o) => o.transform || {}));
+        const groupParam = {
+            unitId,
+            subUnitId,
+            drawingId: groupId,
+            drawingType: DrawingTypeEnum.DRAWING_GROUP,
+            transform: groupTransform,
+        } as IDrawingParam;
+
+        const children = focusDrawings.map((drawing) => {
+            const transform = drawing.transform || { left: 0, top: 0 };
+            const { unitId, subUnitId, drawingId } = drawing;
+            return {
+                unitId, subUnitId, drawingId,
+                transform: {
+                    ...transform,
+                    left: transform.left! - groupTransform.left,
+                    top: transform.top! - groupTransform.top,
+                },
+                groupId,
+            };
+        }) as IDrawingParam[];
+
+        drawingManagerService.featurePluginGroupUpdateNotification([{
+            parent: groupParam,
+            children,
+        }]);
+    };
+
+
+    const ungroup = (param: IDrawingParam) => {
+        if (param.drawingType !== DrawingTypeEnum.DRAWING_GROUP) {
+            return;
+        }
+
+        const { unitId, subUnitId, drawingId, transform: groupTransform = { width: 0, height: 0 } } = param;
+
+        if (groupTransform == null) {
+            return;
+        }
+
+        const objects = drawingManagerService.getDrawingsByGroup({ unitId, subUnitId, drawingId });
+
+        if (objects.length === 0) {
+            return;
+        }
+
+        const children = objects.map((object) => {
+            const { transform } = object;
+            const { unitId, subUnitId, drawingId } = object;
+            const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0);
+            return {
+                unitId, subUnitId, drawingId,
+                transform: newTransform,
+                groupId: undefined,
+            };
         });
+
+        return {
+            parent: param,
+            children,
+        } as IDrawingGroupUpdateParam;
+    };
+
+    const onUngroupBtnClick = () => {
+        const focusDrawings = drawingManagerService.getFocusDrawings();
+        const params = focusDrawings.map((drawing) =>
+            ungroup(drawing)
+        ).filter((o) => o != null) as IDrawingGroupUpdateParam[];
+
+        drawingManagerService.featurePluginUngroupUpdateNotification(params);
     };
 
     useEffect(() => {
@@ -112,7 +182,7 @@ export const ImageGroup = (props: IImageGroupProps) => {
             </div>
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
-                    <Button size="small" onClick={() => { onGroupBtnClick(GroupType.group); }} style={{ display: gridDisplay(groupBtnShow) }}>
+                    <Button size="small" onClick={() => { onGroupBtnClick(); }} style={{ display: gridDisplay(groupBtnShow) }}>
                         <div className={clsx(styles.imageCommonPanelInline)}><CreateCopySingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.group')}</div>
                     </Button>
@@ -124,7 +194,7 @@ export const ImageGroup = (props: IImageGroupProps) => {
                     </Button>
                 </div> */}
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
-                    <Button size="small" onClick={() => { onGroupBtnClick(GroupType.ungroup); }} style={{ display: gridDisplay(ungroupBtnShow) }}>
+                    <Button size="small" onClick={() => { onUngroupBtnClick(); }} style={{ display: gridDisplay(ungroupBtnShow) }}>
                         <div className={clsx(styles.imageCommonPanelInline)}><CreateCopySingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.unGroup')}</div>
                     </Button>

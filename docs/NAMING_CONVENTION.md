@@ -81,7 +81,7 @@ export const ILogService = createIdentifier<ILogService>('log-service');
 
 ## Plugins' Names
 
-Plugin names should be all in format of `{BUSINESS_TYPE}_${PLUGIN_NAME}_PLUGIN`. Words should be separated by underscores and suffixed. For example:
+Plugin names should be all in format of `<BUSINESS_TYPE>_<PLUGIN_NAME>_PLUGIN`. Words should be separated by underscores and suffixed. For example:
 
 ```typescript
 // ✅

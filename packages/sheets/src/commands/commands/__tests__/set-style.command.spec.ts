@@ -82,50 +82,48 @@ describe("Test commands used for updating cells' styles", () => {
 
     afterEach(() => univer.dispose());
 
-    describe('set style', () => {
-        it('set array of style', async () => {
-            const range = { startRow: 1, startColumn: 1, endColumn: 3, endRow: 3, rangeType: RANGE_TYPE.NORMAL };
+    it('set array of style', async () => {
+        const range = { startRow: 1, startColumn: 1, endColumn: 3, endRow: 3, rangeType: RANGE_TYPE.NORMAL };
 
-            function getFontColor(row: number, col: number) {
-                return get(IUniverInstanceService)
-                    .getUniverSheetInstance('test')!
-                    .getSheetBySheetId('sheet1')!
-                    .getRange(row, col)
-                    .getFontColor();
-            }
+        function getFontColor(row: number, col: number) {
+            return get(IUniverInstanceService)
+                .getUniverSheetInstance('test')!
+                .getSheetBySheetId('sheet1')!
+                .getRange(row, col)
+                .getFontColor();
+        }
 
-            const defaultColor = '#000';
-            const color1 = '#aaa';
-            const color2 = '#bbb';
-            const color3 = '#ccc';
-            const commandParams: ISetStyleCommandParams<IColorStyle[][]> = {
-                range,
-                /** Set style by array */
-                style: {
-                    type: 'cl',
-                    value: [
-                        [{ rgb: color1 }, { rgb: color1 }, { rgb: color1 }],
-                        [{ rgb: color2 }, { rgb: color2 }, { rgb: color2 }],
-                        [{ rgb: color3 }, { rgb: color3 }, { rgb: color3 }],
-                    ],
-                },
-            };
-            expect(await commandService.executeCommand(SetStyleCommand.id, commandParams)).toBeTruthy();
-            expect(getFontColor(0, 0)).toBe(defaultColor);
-            expect(getFontColor(1, 1)).toBe(color1);
-            expect(getFontColor(2, 1)).toBe(color2);
-            expect(getFontColor(3, 1)).toBe(color3);
-            // undo
-            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-            expect(getFontColor(1, 1)).toBe(defaultColor);
-            expect(getFontColor(2, 1)).toBe(defaultColor);
-            expect(getFontColor(3, 1)).toBe(defaultColor);
-            // redo
-            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-            expect(getFontColor(1, 1)).toBe(color1);
-            expect(getFontColor(2, 1)).toBe(color2);
-            expect(getFontColor(3, 1)).toBe(color3);
-        });
+        const defaultColor = '#000';
+        const color1 = '#aaa';
+        const color2 = '#bbb';
+        const color3 = '#ccc';
+        const commandParams: ISetStyleCommandParams<IColorStyle[][]> = {
+            range,
+            /** Set style by array */
+            style: {
+                type: 'cl',
+                value: [
+                    [{ rgb: color1 }, { rgb: color1 }, { rgb: color1 }],
+                    [{ rgb: color2 }, { rgb: color2 }, { rgb: color2 }],
+                    [{ rgb: color3 }, { rgb: color3 }, { rgb: color3 }],
+                ],
+            },
+        };
+        expect(await commandService.executeCommand(SetStyleCommand.id, commandParams)).toBeTruthy();
+        expect(getFontColor(0, 0)).toBe(defaultColor);
+        expect(getFontColor(1, 1)).toBe(color1);
+        expect(getFontColor(2, 1)).toBe(color2);
+        expect(getFontColor(3, 1)).toBe(color3);
+        // undo
+        expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+        expect(getFontColor(1, 1)).toBe(defaultColor);
+        expect(getFontColor(2, 1)).toBe(defaultColor);
+        expect(getFontColor(3, 1)).toBe(defaultColor);
+        // redo
+        expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+        expect(getFontColor(1, 1)).toBe(color1);
+        expect(getFontColor(2, 1)).toBe(color2);
+        expect(getFontColor(3, 1)).toBe(color3);
     });
 
     describe('bold', () => {

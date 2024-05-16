@@ -21,6 +21,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { ImageCommonPanel } from '@univerjs/image-ui';
 import styles from '@univerjs/image-ui/views/panel/index.module.less';
+import { SheetDrawingAnchor } from './SheetDrawingAnchor';
 
 export const SheetImagePanel = () => {
     const drawingManagerService = useDependency(IDrawingManagerService);
@@ -45,6 +46,7 @@ export const SheetImagePanel = () => {
     return (
         <div className={styles.imageCommonPanel}>
             <ImageCommonPanel drawings={drawings} />
+            <SheetDrawingAnchor drawings={drawings} />
         </div>
     );
 };

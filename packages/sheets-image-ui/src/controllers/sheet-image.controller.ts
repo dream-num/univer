@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { AdditionAndSubtractionSingle, Insert } from '@univerjs/icons';
+import { AdditionAndSubtractionSingle } from '@univerjs/icons';
 import { UploadFileMenu } from '../views/upload-component/UploadFile';
 import { COMPONENT_UPLOAD_FILE_MENU } from '../views/upload-component/component-name';
 import { ImageMenuFactory, ImageUploadIcon, UploadCellImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
@@ -32,6 +32,8 @@ import { SheetImagePanel } from '../views/sheet-image-panel/SheetImagePanel';
 import { SidebarSheetImageOperation } from '../commands/operations/open-image-panel.operation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 import { EditSheetImageOperation } from '../commands/operations/edit-sheet-image.operation';
+import { GroupSheetImageCommand } from '../commands/commands/group-sheet-image.command';
+import { UngroupSheetImageCommand } from '../commands/commands/ungroup-sheet-image.command';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetImageUIController)
 export class SheetImageUIController extends Disposable {
@@ -76,6 +78,8 @@ export class SheetImageUIController extends Disposable {
             SidebarSheetImageOperation,
             ClearSheetDrawingTransformerOperation,
             EditSheetImageOperation,
+            GroupSheetImageCommand,
+            UngroupSheetImageCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

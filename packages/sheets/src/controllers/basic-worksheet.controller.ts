@@ -112,10 +112,7 @@ import { InsertDefinedNameCommand } from '../commands/commands/insert-defined-na
 import { RemoveDefinedNameCommand } from '../commands/commands/remove-defined-name.command';
 import { SetDefinedNameCommand } from '../commands/commands/set-defined-name.command';
 import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
-import { SetDrawingMutation } from '../commands/mutations/set-drawing.mutation';
-import { InsertDrawingMutation } from '../commands/mutations/insert-drawing.mutation';
-import { RemoveDrawingMutation } from '../commands/mutations/remove-drawing.mutation';
-import { SetDrawingArrangeMutation } from '../commands/mutations/set-drawing-arrange.mutation';
+import { SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './config';
 
@@ -233,10 +230,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 InsertDefinedNameCommand,
                 RemoveDefinedNameCommand,
                 SetDefinedNameCommand,
-                InsertDrawingMutation,
-                RemoveDrawingMutation,
-                SetDrawingMutation,
-                SetDrawingArrangeMutation,
+                SetDrawingApplyMutation,
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }
 

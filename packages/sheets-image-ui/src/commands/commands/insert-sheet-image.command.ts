@@ -18,11 +18,13 @@ import type { ICommand } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
+    IDrawingManagerService,
     IUndoRedoService,
 } from '@univerjs/core';
 
-import { InsertDrawingMutation, RemoveDrawingMutation } from '@univerjs/sheets';
+import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import type { IInsertDrawingCommandParams } from './interfaces';
 
@@ -36,6 +38,7 @@ export const InsertSheetImageCommand: ICommand = {
     handler: (accessor: IAccessor, params?: IInsertDrawingCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const sheetDrawingService = accessor.get(ISheetDrawingService);
 
         if (!params) return false;
 
@@ -43,23 +46,25 @@ export const InsertSheetImageCommand: ICommand = {
 
         const drawings = params.drawings;
 
-        const sheetDrawingParams = drawings.map((param) => param.sheetDrawingParam);
-        const unitIds: string[] = drawings.map((param) => param.sheetDrawingParam.unitId);
+        // const sheetDrawingParams = drawings.map((param) => param.sheetDrawingParam);
+        const unitIds: string[] = drawings.map((param) => param.unitId);
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.syncExecuteCommand(InsertDrawingMutation.id, sheetDrawingParams);
+        const jsonOp = sheetDrawingService.getBatchAddOp(drawings) as IDrawingJsonUndo1;
 
-        const unitId = params.unitId;
+        const { unitId, subUnitId, undo, redo, objects } = jsonOp;
+
+        const result = commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type: DrawingApplyType.INSERT });
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    { id: RemoveDrawingMutation.id, params: sheetDrawingParams },
+                    { id: SetDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects, type: DrawingApplyType.REMOVE } },
                     { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
                 redoMutations: [
-                    { id: InsertDrawingMutation.id, params: sheetDrawingParams },
+                    { id: SetDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type: DrawingApplyType.INSERT } },
                     { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
                 ],
             });

@@ -66,13 +66,15 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.44"
+        "@univerjs/icons": "^0.1.44",
+        "ot-json1": "^1.0.2"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@wendellhu/redi": "^0.13.3",
         "less": "^4.2.0",
+        "ot-json1": "^1.0.2",
         "react": "18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",

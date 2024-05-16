@@ -15,13 +15,12 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
+import { ArrangeType, ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { CreateCopySingle } from '@univerjs/icons';
 import { Button } from '@univerjs/design';
 import clsx from 'clsx';
-import { ArrangeType } from '../../utils/arrange-type';
 import styles from './index.module.less';
 
 
@@ -65,15 +64,17 @@ export const ImageArrange = (props: IImageArrangeProps) => {
         const subUnitId = drawings[0].subUnitId;
         const drawingIds = drawings.map((drawing) => drawing.drawingId);
 
-        if (arrangeType === ArrangeType.forward) {
-            drawingManagerService.forwardDrawings(unitId, subUnitId, drawingIds);
-        } else if (arrangeType === ArrangeType.backward) {
-            drawingManagerService.backwardDrawing(unitId, subUnitId, drawingIds);
-        } else if (arrangeType === ArrangeType.front) {
-            drawingManagerService.frontDrawing(unitId, subUnitId, drawingIds);
-        } else if (arrangeType === ArrangeType.back) {
-            drawingManagerService.backDrawing(unitId, subUnitId, drawingIds);
-        }
+        drawingManagerService.featurePluginOrderUpdateNotification({ unitId, subUnitId, drawingIds, arrangeType });
+
+        // if (arrangeType === ArrangeType.forward) {
+        //     drawingManagerService.forwardDrawings(unitId, subUnitId, drawingIds);
+        // } else if (arrangeType === ArrangeType.backward) {
+        //     drawingManagerService.backwardDrawing(unitId, subUnitId, drawingIds);
+        // } else if (arrangeType === ArrangeType.front) {
+        //     drawingManagerService.frontDrawing(unitId, subUnitId, drawingIds);
+        // } else if (arrangeType === ArrangeType.back) {
+        //     drawingManagerService.backDrawing(unitId, subUnitId, drawingIds);
+        // }
     };
 
     return (

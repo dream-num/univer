@@ -18,15 +18,9 @@
 import type { DrawingTypeEnum, IDrawingParam } from '@univerjs/core';
 import type { ISheetDrawing } from '@univerjs/sheets';
 
-
-export interface IDrawingCommandParams {
-    sheetDrawingParam: ISheetDrawing;
-    drawingParam: IDrawingParam;
-}
-
 export interface IInsertDrawingCommandParams {
     unitId: string;
-    drawings: IDrawingCommandParams[];
+    drawings: ISheetDrawing[];
 }
 
 export interface IDeleteDrawingCommandParam {
@@ -41,18 +35,7 @@ export interface IDeleteDrawingCommandParams {
     drawings: IDeleteDrawingCommandParam[];
 }
 
-
-export interface IPartialDrawingCommandParam {
-    sheetDrawingParam?: Partial<ISheetDrawing>;
-    drawingParam?: Partial<IDrawingParam>;
-}
-
-export interface ISetDrawingCommandParam {
-    newDrawing: IPartialDrawingCommandParam;
-    oldDrawing: IPartialDrawingCommandParam;
-}
-
 export interface ISetDrawingCommandParams {
     unitId: string;
-    drawings: ISetDrawingCommandParam[];
+    drawings: Partial<ISheetDrawing>[];
 }

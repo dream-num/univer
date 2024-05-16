@@ -731,7 +731,6 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
             return;
         }
 
-
         const {
             viewMain,
             viewMainLeftTop,

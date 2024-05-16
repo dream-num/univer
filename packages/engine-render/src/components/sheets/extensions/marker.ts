@@ -42,7 +42,6 @@ export class Marker extends SheetExtension {
 
         const mergeCellRendered = new Set<string>();
 
-
         Range.foreach(rowColumnSegment, (row, col) => {
             let cellData = worksheet.getCell(row, col);
             const cellInfo = this.getCellIndex(

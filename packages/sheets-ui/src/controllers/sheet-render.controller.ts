@@ -158,7 +158,6 @@ export class SheetRenderController extends RxDisposable {
                         return;
                     }
 
-
                     if (command.id !== SetWorksheetActiveOperation.id) {
                         this._sheetSkeletonManagerService.makeDirty(
                             {

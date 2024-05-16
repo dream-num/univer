@@ -251,10 +251,15 @@ export class Layer extends Disposable {
     }
 
     private _draw(mainCtx: UniverRenderingContext, isMaxLayer: boolean) {
-        const viewports = this._scene.getViewports();
-        for (const [index, vp] of viewports.entries()) {
-            vp.render(mainCtx, this.getObjectsByOrder(), isMaxLayer, index === viewports.length - 1);
+        const viewports = this._scene.getViewports().filter((vp) => vp.shouldIntoRender());
+        const objects = this.getObjectsByOrder();
+        for (const [_index, vp] of viewports.entries()) {
+            vp.render(mainCtx, objects, isMaxLayer);
         }
+        objects.forEach((o) => {
+            o.makeDirty(false);
+            (o as unknown as { makeForceDirty?: (state: boolean) => void }).makeForceDirty?.(false);
+        });
     }
 
     private _applyCache(ctx?: UniverRenderingContext) {

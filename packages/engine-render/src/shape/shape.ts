@@ -304,7 +304,6 @@ export abstract class Shape<T> extends BaseObject {
         ctx.strokeStyle = stroke!;
     }
 
-
     override render(mainCtx: UniverRenderingContext, bounds?: IViewportInfo) {
         if (!this.visible) {
             this.makeDirty(false);

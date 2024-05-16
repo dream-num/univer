@@ -175,7 +175,6 @@ export function SidebarMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     };
 }
 
-
 export function SetEditableMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: SetEditable.id,

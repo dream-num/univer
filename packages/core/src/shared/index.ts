@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 export * from './array-search';
 export * from './blob';
 export * from './color/color';

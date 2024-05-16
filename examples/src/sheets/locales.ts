@@ -27,7 +27,6 @@ import { enUS as UniverSheetsZenEditorEnUS, ruRU as UniverSheetsZenEditorRuRU } 
 import { enUS as UniverUIEnUS, ruRU as UniverUIRuRU } from '@univerjs/ui';
 import { enUS as UniverSheetsFilterUIEnUS, ruRU as UniverSheetsFilterUIRuRU } from '@univerjs/sheets-filter-ui';
 
-
 export const locales = {
     [LocaleType.EN_US]: Tools.deepMerge(
         UniverSheetsEnUS,

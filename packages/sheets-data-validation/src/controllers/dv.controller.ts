@@ -98,7 +98,6 @@ export class DataValidationController extends RxDisposable {
         this.disposeWithMe(disposableCollection);
     }
 
-
     private _initCommandInterceptor() {
         this._sheetInterceptorService.interceptCommand({
             getMutations: (commandInfo) => {

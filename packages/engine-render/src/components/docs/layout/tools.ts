@@ -499,7 +499,6 @@ export function columnIterator(
     }
 }
 
-
 export function getPositionHorizon(
     positionH: IObjectPositionH,
     column: IDocumentSkeletonColumn,
@@ -593,7 +592,6 @@ export function getPositionHorizon(
         }
     }
 }
-
 
 export function getPositionVertical(
     positionV: IObjectPositionV,

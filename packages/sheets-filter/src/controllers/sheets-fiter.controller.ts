@@ -26,7 +26,6 @@ import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilter
 import type { FilterColumn } from '../models/filter-model';
 import { mergeSetFilterCriteria } from '../utils';
 
-
 @OnLifecycle(LifecycleStages.Ready, SheetsFilterController)
 export class SheetsFilterController extends Disposable {
     constructor(
@@ -543,7 +542,6 @@ export class SheetsFilterController extends Disposable {
             };
             const setNewFilterRange = { id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: newFilterRange } as ISetSheetsFilterRangeMutationParams };
             const setOldFilterRange = { id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: filterRange } as ISetSheetsFilterRangeMutationParams };
-
 
             redos.push(removeFilter, setNewFilterRange);
 

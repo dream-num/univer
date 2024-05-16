@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import { describe, expect, it } from 'vitest';
 
 import { removeFormulaData } from '../offset-formula-data';
@@ -121,7 +120,6 @@ describe('Utils offset formula data test', () => {
                 'unit-2': {},
             });
         });
-
 
         it('remove blank object', () => {
             const unitId = 'workbook-01';

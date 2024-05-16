@@ -108,7 +108,6 @@ if (!IS_E2E) {
 //     univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 // }, 7000);
 
-
 // debugger plugin
 univer.registerPlugin(DebuggerPlugin);
 

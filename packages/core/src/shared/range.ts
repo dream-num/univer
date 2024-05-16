@@ -39,7 +39,6 @@ export function moveRangeByOffset(range: IRange, refOffsetX: number, refOffsetY:
         newRange = { ...newRange, startColumn: newRange.startColumn + refOffsetX };
     }
 
-
     if (endAbsoluteRefType === AbsoluteRefType.NONE) {
         newRange = { ...newRange, endRow: newRange.endRow + refOffsetY, endColumn: newRange.endColumn + refOffsetX };
     } else if (endAbsoluteRefType === AbsoluteRefType.COLUMN) {

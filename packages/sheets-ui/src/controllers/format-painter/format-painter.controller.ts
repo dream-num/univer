@@ -50,7 +50,6 @@ export class FormatPainterController extends Disposable {
         this._commandExecutedListener();
     }
 
-
     private _commandExecutedListener() {
         this.disposeWithMe(
             toDisposable(

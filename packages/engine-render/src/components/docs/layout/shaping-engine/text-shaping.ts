@@ -45,7 +45,6 @@ export interface IOpenTypeGlyphInfo {
 const fontCache = new Map<string, Opentype.Font>();
 const glyphCache: Map<string, IOpenTypeGlyphInfo[]> = new Map();
 
-
 function shapeChunk(
     content: string,
     charPosition: number,

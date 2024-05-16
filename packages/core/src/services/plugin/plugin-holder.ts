@@ -83,7 +83,6 @@ export class PluginHolder extends Disposable {
             .subscribe((stage) => { this._pluginsRunLifecycle(plugins, stage); }));
     }
 
-
     protected _pluginsRunLifecycle(plugins: Plugin[], lifecycle: LifecycleStages): void {
         plugins.forEach((p) => {
             switch (lifecycle) {

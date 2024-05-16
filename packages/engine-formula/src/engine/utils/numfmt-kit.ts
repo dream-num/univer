@@ -212,7 +212,6 @@ function isAccounting(pattern: string) {
     return !!currencySymbols.find((code) => pattern.includes(code)) && pattern.startsWith('_(');
 };
 
-
 /**
  * The number format of the formula inherits the number format of the referenced cell, usually taking the format of the cell at the front position, but some formats have higher priority, there are some special cases.
  *

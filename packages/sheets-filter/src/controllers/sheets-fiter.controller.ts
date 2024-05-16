@@ -713,7 +713,7 @@ export class SheetsFilterController extends Disposable {
                     const cellValue = (command.params as ISetRangeValuesMutationParams).cellValue;
                     if (cellValue) {
                         for (let col = extendRegion.startColumn; col <= extendRegion.endColumn; col++) {
-                            const cell = cellValue[extendRegion.startRow][col];
+                            const cell = cellValue?.[extendRegion.startRow]?.[col];
                             if (cell && Object.keys(cell).length !== 0) {
                                 const worksheet = (this._univerInstanceService.getUnit(unitId) as Workbook)?.getSheetBySheetId(subUnitId);
                                 if (worksheet) {

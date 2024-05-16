@@ -19,6 +19,7 @@ import RcSelect from 'rc-select';
 import React, { useContext } from 'react';
 
 import type { LabelInValueType } from 'rc-select/lib/Select';
+import clsx from 'clsx';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
@@ -47,11 +48,18 @@ export interface ISelectProps {
 
     style?: React.CSSProperties;
 
+    /**
+     * Whether the borderless style is used
+     * @default false
+     */
+    borderless?: boolean;
+
     className?: string;
     /**
      * select mode
      */
     mode?: 'combobox' | 'multiple' | 'tags' | undefined;
+
     dropdownRender?: (
         menu: React.ReactElement<any, string | React.JSXElementConstructor<any>>
     ) => React.ReactElement<any, string | React.JSXElementConstructor<any>>;
@@ -75,6 +83,7 @@ export function Select(props: ISelectProps) {
         style,
         className,
         mode,
+        borderless = false,
         dropdownRender,
         labelRender,
         open,
@@ -84,6 +93,10 @@ export function Select(props: ISelectProps) {
     } = props;
 
     const { mountContainer } = useContext(ConfigContext);
+
+    const _className = clsx(className, {
+        [styles.selectBorderless]: borderless,
+    });
 
     return mountContainer && (
         <RcSelect
@@ -96,7 +109,7 @@ export function Select(props: ISelectProps) {
             suffixIcon={<MoreDownSingle />}
             onChange={onChange}
             style={style}
-            className={className}
+            className={_className}
             dropdownRender={dropdownRender}
             labelRender={labelRender}
             open={open}

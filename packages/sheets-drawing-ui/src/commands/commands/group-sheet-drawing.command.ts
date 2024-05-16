@@ -31,7 +31,7 @@ import { groupToUngroup } from './utils';
 /**
  * The command to insert new defined name
  */
-export const GroupSheetImageCommand: ICommand = {
+export const GroupSheetDrawingCommand: ICommand = {
     id: 'sheet.command.group-sheet-image',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params?: IDrawingGroupUpdateParam[]) => {

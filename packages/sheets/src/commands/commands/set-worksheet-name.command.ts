@@ -66,8 +66,16 @@ export const SetWorksheetNameCommand: ICommand = {
             params,
         });
 
-        const redos = [...(interceptorCommands.preRedos ?? []), { id: SetWorksheetNameMutation.id, params: redoMutationParams }, ...interceptorCommands.redos];
-        const undos = [...(interceptorCommands.preUndos ?? []), { id: SetWorksheetNameMutation.id, params: undoMutationParams }, ...interceptorCommands.undos];
+        const redos = [
+            ...(interceptorCommands.preRedos ?? []),
+            { id: SetWorksheetNameMutation.id, params: redoMutationParams },
+            ...interceptorCommands.redos,
+        ];
+        const undos = [
+            ...(interceptorCommands.preUndos ?? []),
+            { id: SetWorksheetNameMutation.id, params: undoMutationParams },
+            ...interceptorCommands.undos,
+        ];
 
         const result = await sequenceExecute(redos, commandService).result;
         if (result) {
@@ -79,19 +87,5 @@ export const SetWorksheetNameCommand: ICommand = {
             return true;
         }
         return false;
-
-        // const result = commandService.syncExecuteCommand(SetWorksheetNameMutation.id, redoMutationParams);
-
-        // if (result) {
-        //     undoRedoService.pushUndoRedo({
-        //         unitID: unitId,
-        //         undoMutations: [{ id: SetWorksheetNameMutation.id, params: undoMutationParams }],
-        //         redoMutations: [{ id: SetWorksheetNameMutation.id, params: redoMutationParams }],
-        //     });
-
-        //     return true;
-        // }
-
-        // return false;
     },
 };

@@ -134,6 +134,10 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         return this._snapshot.name;
     }
 
+    setName(name: string): void {
+        this._snapshot.name = name;
+    }
+
     getUnitId() {
         return this._unitId;
     }

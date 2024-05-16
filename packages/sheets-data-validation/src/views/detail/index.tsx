@@ -41,7 +41,6 @@ const debounceExecuteFactory = (commandService: ICommandService) => debounce(
     275
 );
 
-
 export function DataValidationDetail() {
     const [key, setKey] = useState(0);
     const dataValidationPanelService = useDependency(DataValidationPanelService);

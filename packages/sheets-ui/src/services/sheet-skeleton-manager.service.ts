@@ -35,7 +35,6 @@ export interface ISheetSkeletonManagerSearch {
     commandId?: string; // WTF: why?
 }
 
-
 // TODO@wzhudev: this should be moved to a `RenderUnit` as well.
 
 /**
@@ -93,6 +92,9 @@ export class SheetSkeletonManagerService implements IDisposable {
     removeSkeleton(searchParam: Pick<ISheetSkeletonManagerSearch, 'unitId'>) {
         const index = this._sheetSkeletonParam.findIndex((param) => param.unitId === searchParam.unitId);
         if (index !== -1) {
+            const skeletonParam = this._sheetSkeletonParam[index];
+            skeletonParam.skeleton.dispose();
+
             this._sheetSkeletonParam.splice(index, 1);
             this._currentSkeletonBefore$.next(null);
             this._currentSkeleton$.next(null);

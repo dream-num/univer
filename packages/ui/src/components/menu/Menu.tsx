@@ -170,7 +170,6 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
     );
 }
 
-
 export const Menu = (props: IBaseMenuProps) => {
     const { overViewport, ...restProps } = props;
     const menuRef = useRef<DesignMenuRef>(null);

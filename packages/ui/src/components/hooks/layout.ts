@@ -24,7 +24,6 @@ import type { Nullable } from '@univerjs/core';
  * Prefer to client-side
  */
 
-
 /**
  * To detect whether the element is displayed over the viewport
  * @param element

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * TODO: @jikkai
  * 1. monaco-editor is not included in the build. User may not able to use uniscript by default.

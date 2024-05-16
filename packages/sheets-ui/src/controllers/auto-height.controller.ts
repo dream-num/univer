@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type {
     ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,
@@ -36,7 +36,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, AutoHeightController)
-export class AutoHeightController {
+export class AutoHeightController extends Disposable {
     constructor(
         @Inject(Injector) private _injector: Injector,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
@@ -44,10 +44,11 @@ export class AutoHeightController {
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
+        super();
         this._initialize();
     }
 
-    private _getUndoRedoParamsOfAutoHeight(ranges: IRange[]) {
+    getUndoRedoParamsOfAutoHeight(ranges: IRange[]) {
         const {
             _univerInstanceService: univerInstanceService,
             _sheetSkeletonManagerService: sheetSkeletonService,
@@ -66,12 +67,10 @@ export class AutoHeightController {
             unitId,
             rowsAutoHeightInfo,
         };
-
         const undoParams: ISetWorksheetRowAutoHeightMutationParams = SetWorksheetRowAutoHeightMutationFactory(
             injector,
             redoParams
         );
-
         return {
             undos: [
                 {
@@ -92,7 +91,7 @@ export class AutoHeightController {
         const { _sheetInterceptorService: sheetInterceptorService, _selectionManagerService: selectionManagerService } =
             this;
         // for intercept'SetRangeValuesCommand' command.
-        sheetInterceptorService.interceptCommand({
+        this.disposeWithMe(sheetInterceptorService.interceptCommand({
             getMutations: (command: { id: string; params: ISetRangeValuesRangeMutationParams }) => {
                 if (command.id !== SetRangeValuesCommand.id) {
                     return {
@@ -101,11 +100,11 @@ export class AutoHeightController {
                     };
                 }
 
-                return this._getUndoRedoParamsOfAutoHeight(command.params.range);
+                return this.getUndoRedoParamsOfAutoHeight(command.params.range);
             },
-        });
+        }));
         // for intercept 'sheet.command.set-row-is-auto-height' command.
-        sheetInterceptorService.interceptCommand({
+        this.disposeWithMe(sheetInterceptorService.interceptCommand({
             getMutations: (command: { id: string; params: ISetWorksheetRowIsAutoHeightMutationParams }) => {
                 if (command.id !== SetWorksheetRowIsAutoHeightCommand.id) {
                     return {
@@ -114,12 +113,12 @@ export class AutoHeightController {
                     };
                 }
 
-                return this._getUndoRedoParamsOfAutoHeight(command.params.ranges);
+                return this.getUndoRedoParamsOfAutoHeight(command.params.ranges);
             },
-        });
+        }));
 
         // for intercept set style command.
-        sheetInterceptorService.interceptCommand({
+        this.disposeWithMe(sheetInterceptorService.interceptCommand({
             getMutations: (command: { id: string; params: ISetStyleCommandParams<number> }) => {
                 if (command.id !== SetStyleCommand.id) {
                     return {
@@ -148,8 +147,8 @@ export class AutoHeightController {
                     };
                 }
 
-                return this._getUndoRedoParamsOfAutoHeight(selections);
+                return this.getUndoRedoParamsOfAutoHeight(selections);
             },
-        });
+        }));
     }
 }

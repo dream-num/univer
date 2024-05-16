@@ -396,6 +396,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
         return viewports.find((i) => i.isHit(new Vector2(evt.offsetX, evt.offsetY))) || null;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _freezeDown(
         evt: IPointerEvent | IMouseEvent,
         freezeObjectHeaderRect: Rect,
@@ -427,7 +428,6 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
             this._changeToColumn = oldFreeze.startColumn;
             this._changeToRow = oldFreeze.startRow;
         }
-
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const activeViewport = this._getActiveViewport(moveEvt);
 
@@ -436,7 +436,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                 moveEvt.offsetY,
                 scene,
                 skeleton,
-                activeViewport || undefined
+                activeViewport || undefined,
+                true
             );
             scene.setCursor(CURSOR_TYPE.GRABBING);
 
@@ -484,6 +485,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
             // this._columnMoving(newMoveOffsetX, newMoveOffsetY, matchSelectionData, initialType);
         });
 
+        // eslint-disable-next-line max-lines-per-function, complexity
         this._upObserver = scene.onPointerUpObserver.add(() => {
             scene.resetCursor();
             scene.enableEvent();

@@ -143,7 +143,6 @@ export class FWorkbook {
         return this._injector.createInstance(FWorksheet, this._workbook, worksheet);
     }
 
-
     /**
      * Sets the given worksheet to be the active worksheet in the workbook.
      * @param sheet The worksheet to set as the active worksheet.

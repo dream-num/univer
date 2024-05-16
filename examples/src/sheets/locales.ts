@@ -15,17 +15,17 @@
  */
 
 import { LocaleType, Tools } from '@univerjs/core';
-import { enUS as UniverDesignEnUS } from '@univerjs/design';
-import { enUS as UniverDocsUIEnUS } from '@univerjs/docs-ui';
-import { enUS as UniverSheetsEnUS } from '@univerjs/sheets';
-import { enUS as UniverSheetsUIEnUS } from '@univerjs/sheets-ui';
-import { enUS as UniverFindReplaceEnUS } from '@univerjs/find-replace';
-import { enUS as UniverSheetsFormulaEnUS } from '@univerjs/sheets-formula';
-import { enUS as UniverSheetsDataValidationEnUS } from '@univerjs/sheets-data-validation';
-import { enUS as UniverSheetsConditionalFormattingUIEnUS } from '@univerjs/sheets-conditional-formatting-ui';
-import { enUS as UniverSheetsZenEditorEnUS } from '@univerjs/sheets-zen-editor';
-import { enUS as UniverUIEnUS } from '@univerjs/ui';
-import { enUS as UniverSheetsFilterUIEnUS } from '@univerjs/sheets-filter-ui';
+import { enUS as UniverDesignEnUS, ruRU as UniverDesignRuRU } from '@univerjs/design';
+import { enUS as UniverDocsUIEnUS, ruRU as UniverDocsUIRuRU } from '@univerjs/docs-ui';
+import { enUS as UniverSheetsEnUS, ruRU as UniverSheetsRuRU } from '@univerjs/sheets';
+import { enUS as UniverSheetsUIEnUS, ruRU as UniverSheetsUIRuRU } from '@univerjs/sheets-ui';
+import { enUS as UniverFindReplaceEnUS, ruRU as UniverFindReplaceRuRU } from '@univerjs/find-replace';
+import { enUS as UniverSheetsFormulaEnUS, ruRU as UniverSheetsFormulaRuRU } from '@univerjs/sheets-formula';
+import { enUS as UniverSheetsDataValidationEnUS, ruRU as UniverSheetsDataValidationRuRU } from '@univerjs/sheets-data-validation';
+import { enUS as UniverSheetsConditionalFormattingUIEnUS, ruRU as UniverSheetsConditionalFormattingUIRuRU } from '@univerjs/sheets-conditional-formatting-ui';
+import { enUS as UniverSheetsZenEditorEnUS, ruRU as UniverSheetsZenEditorRuRU } from '@univerjs/sheets-zen-editor';
+import { enUS as UniverUIEnUS, ruRU as UniverUIRuRU } from '@univerjs/ui';
+import { enUS as UniverSheetsFilterUIEnUS, ruRU as UniverSheetsFilterUIRuRU } from '@univerjs/sheets-filter-ui';
 
 export const locales = {
     [LocaleType.EN_US]: Tools.deepMerge(
@@ -40,5 +40,18 @@ export const locales = {
         UniverUIEnUS,
         UniverDesignEnUS,
         UniverSheetsFilterUIEnUS
+    ),
+    [LocaleType.RU_RU]: Tools.deepMerge(
+        UniverSheetsRuRU,
+        UniverDocsUIRuRU,
+        UniverFindReplaceRuRU,
+        UniverSheetsUIRuRU,
+        UniverSheetsFormulaRuRU,
+        UniverSheetsDataValidationRuRU,
+        UniverSheetsConditionalFormattingUIRuRU,
+        UniverSheetsZenEditorRuRU,
+        UniverUIRuRU,
+        UniverDesignRuRU,
+        UniverSheetsFilterUIRuRU
     ),
 };

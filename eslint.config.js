@@ -8,6 +8,7 @@ export default antfu({
         indent: 4,
         semi: true,
     },
+    regexp: false,
     react: true,
     yaml: {
         overrides: {

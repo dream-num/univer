@@ -17,7 +17,6 @@
 import type { IUser } from '@univerjs/protocol';
 import { Subject } from 'rxjs';
 
-
 export class UserManagerService {
     private _model = new Map<string, IUser>();
     private _userChange$ = new Subject<{ type: 'add' | 'delete'; user: IUser } | { type: 'clear' }>();

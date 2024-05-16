@@ -60,7 +60,7 @@ export function CheckboxFormulaInput(props: IFormulaInputProps) {
                             onChange={(newValue) => {
                                 onChange?.({
                                     ...value,
-                                    formula1: newValue,
+                                    formula1: newValue || undefined,
                                 });
                             }}
                         />
@@ -77,7 +77,7 @@ export function CheckboxFormulaInput(props: IFormulaInputProps) {
                             onChange={(newValue) => {
                                 onChange?.({
                                     ...value,
-                                    formula2: newValue,
+                                    formula2: newValue || undefined,
                                 });
                             }}
                         />

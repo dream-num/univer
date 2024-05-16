@@ -95,7 +95,6 @@ export class SheetsZoomRenderController extends Disposable implements IRenderCon
         }));
     }
 
-
     private _updateViewZoom(zoomRatio: number) {
         const sheetObject = this._getSheetObject();
         sheetObject?.scene.scale(zoomRatio, zoomRatio);

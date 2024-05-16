@@ -69,7 +69,6 @@ export const InsertRangeMoveDownConfirmCommand: ICommand = {
             return commandService.executeCommand(InsertRangeMoveDownCommand.id);
         }
 
-
         const result = await confirmService.confirm({
             id: InsertRangeMoveDownConfirmCommand.id,
             title: { title: localeService.t('merge.confirm.waring') },

@@ -70,7 +70,6 @@ export class ImageLoadController extends Disposable {
         );
     }
 
-
     private _floatingObjectListener() {
         this.disposeWithMe(
             toDisposable(

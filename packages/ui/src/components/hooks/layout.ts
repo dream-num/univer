@@ -14,94 +14,79 @@
  * limitations under the License.
  */
 
-import { useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { useEffect, useRef } from 'react';
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
 
 import type { Nullable } from '@univerjs/core';
+import { resizeObserverCtor } from '@univerjs/design';
+import { useEvent } from './event';
 /**
  * These hooks are used for browser layout
  * Prefer to client-side
  */
 
 /**
- * To detect whether the element is displayed over the viewport
+ * Allow the element to scroll when its height over the container height
  * @param element
- * @returns $value To notice you detected result
+ * Container means the window view that the element displays in.
+ * Recommend pass the sheet mountContainer as container
+ * @param container
  */
-function detectElementOverViewport(element: HTMLElement) {
-    const state$ = new BehaviorSubject<{
-        x: boolean;
-        y: boolean;
-        xe: boolean;
-        ye: boolean;
-    }>({
-        /** Element displayed on x-axis is not fully show */
-        x: false,
-        /** Element displayed on y-axis is not fully show  */
-        y: false,
-        /** Element border is equal to viewport x edge */
-        xe: false,
-        /** Element border is equal to viewport y edge */
-        ye: false,
+export function useScrollYOverContainer(element: Nullable<HTMLElement>, container: Nullable<HTMLElement>) {
+    const initialRectRef = useRef({
+        width: 0,
+        height: 0,
     });
-
-    function update() {
-        const rect = element.getBoundingClientRect();
-        const { innerHeight, innerWidth } = window;
-
-        const overX = rect.x >= 0;
-        const overY = rect.y >= 0;
-
-        state$.next({
-            x: overX && rect.x + rect.width > innerWidth,
-            xe: overX && rect.x + rect.width === innerWidth,
-            y: overY && rect.y + rect.height > innerHeight,
-            ye: overY && rect.y + rect.height === innerHeight,
-        });
-    }
-
-    const observer = new ResizeObserver(update);
-    observer.observe(element);
-    window.addEventListener('resize', update);
-
-    update();
-
-    return {
-        value$: state$.asObservable(),
-        dispose() {
-            observer.disconnect();
-            window.removeEventListener('resize', update);
-            state$.complete();
-        },
-    };
-}
-
-/** Allow the element to scroll when its height over the viewport height */
-export function useScrollOnOverViewport(element: Nullable<HTMLElement>, disabled: boolean = false) {
-    useEffect(() => {
-        if (canUseDom() || !element || disabled) {
+    const updater = useEvent(() => {
+        if (!element || !container) {
             return;
         }
 
-        const detector = detectElementOverViewport(element);
-        detector.value$.subscribe(({ y, ye }) => {
-            const elStyle = element.style;
-            const rect = element.getBoundingClientRect();
-            // When element height over viewport sets height to fit in viewport
-            if (y) {
-                elStyle.overflowY = 'scroll';
-                elStyle.maxHeight = `${window.innerHeight - rect.y}px`;
-            } else if (!ye) {
-                /**
-                 * If element height is equal to viewport, it may be because of my previous adjustment
-                 * On height is less than viewport then set to auto
-                 */
-                elStyle.overflowY = '';
-                elStyle.maxHeight = '';
-            }
-        });
+        const elStyle = element.style;
+        const elRect = element.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        if (elRect.y < 0 && elRect.y + elRect.height <= 0) {
+            /* The element is hidden in viewport */
+            return;
+        }
+        if (Math.abs(elRect.y) < Math.abs(containerRect.y)) {
+            /* The position of element is higher than container  */
+            elStyle.overflowY = '';
+            elStyle.maxHeight = '';
+            return;
+        }
 
-        return detector.dispose;
-    }, [element, disabled]);
+        const relativeY = elRect.y - containerRect.y;
+
+        const initialHeight = initialRectRef.current?.height || 0;
+
+        if (containerRect.height >= relativeY + initialHeight) {
+            elStyle.overflowY = '';
+            elStyle.maxHeight = '';
+        } else {
+            elStyle.overflowY = 'scroll';
+            elStyle.maxHeight = `${containerRect.height - relativeY}px`;
+        }
+    });
+
+    useEffect(() => {
+        if (!canUseDom() || !element || !container) {
+            return;
+        }
+        const rect = element.getBoundingClientRect();
+        initialRectRef.current = {
+            width: rect.width,
+            height: rect.height,
+        };
+
+        updater();
+
+        const resizeObserver = resizeObserverCtor(updater);
+        resizeObserver.observe(element);
+        window.addEventListener('resize', updater);
+        return () => {
+            resizeObserver.unobserve(element);
+            window.removeEventListener('resize', updater);
+        };
+    }, [element, container]);
 }

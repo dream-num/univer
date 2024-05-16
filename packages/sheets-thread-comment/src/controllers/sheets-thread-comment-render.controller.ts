@@ -59,6 +59,7 @@ export class SheetsThreadCommentRenderController extends Disposable {
 
                         return next(cell);
                     },
+                    priority: 100,
                 }
             )
         );

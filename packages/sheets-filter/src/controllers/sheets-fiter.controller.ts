@@ -663,7 +663,7 @@ export class SheetsFilterController extends Disposable {
 
 
     private _commandExecutedListener() {
-        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
             const { unitId, subUnitId } = command.params as unknown as ISheetCommandSharedParams || {};
 
             const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
@@ -707,7 +707,7 @@ export class SheetsFilterController extends Disposable {
             }
 
             // extend filter range when set range values
-            if (command.id === SetRangeValuesMutation.id) {
+            if (command.id === SetRangeValuesMutation.id && !options?.fromCollab && !options?.onlyLocal) {
                 const extendRegion = this._getExtendRegion(unitId, subUnitId);
                 if (extendRegion) {
                     const cellValue = (command.params as ISetRangeValuesMutationParams).cellValue;

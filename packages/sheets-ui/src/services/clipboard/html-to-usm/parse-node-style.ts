@@ -61,7 +61,6 @@ export function extractNodeStyle(node: HTMLElement, predefinedStyles?: CSSStyleD
     return docStyles;
 }
 
-
 // eslint-disable-next-line complexity
 function parseStyleByProperty(styles: CSSStyleDeclaration, docStyles: ITextStyle) {
     for (let i = 0; i < styles.length; i++) {

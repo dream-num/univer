@@ -103,7 +103,6 @@ export interface IShapedText {
     breakPointType: BreakPointType;
 }
 
-
 export function shaping(
     ctx: ILayoutContext,
     content: string,

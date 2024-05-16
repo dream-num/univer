@@ -1020,7 +1020,6 @@ function __getDrawingPosition(
     return drawings;
 }
 
-
 // 更新 paragraphAffectSkeDrawings 的绝对位置，相对于段落的第一行布局
 function __updateDrawingPosition(
     column: IDocumentSkeletonColumn,

@@ -105,7 +105,6 @@ export interface ITestBed {
     injector: Injector;
 }
 
-
 export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();

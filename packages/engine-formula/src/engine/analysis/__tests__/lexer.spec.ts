@@ -71,7 +71,6 @@ describe('lexer test', () => {
     let formulaCurrentConfigService: IFormulaCurrentConfigService;
     let lexerTreeBuilder: LexerTreeBuilder;
 
-
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA);
         univer = testBed.univer;
@@ -81,7 +80,6 @@ describe('lexer test', () => {
         definedNamesService = get(IDefinedNamesService);
         formulaCurrentConfigService = get(IFormulaCurrentConfigService);
         lexerTreeBuilder = get(LexerTreeBuilder);
-
 
         formulaCurrentConfigService.setExecuteUnitId('test');
         formulaCurrentConfigService.setExecuteSubUnitId('sheet1');

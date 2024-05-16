@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import { CellValueType, isRealNum, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';

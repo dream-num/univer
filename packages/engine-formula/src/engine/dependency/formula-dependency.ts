@@ -161,13 +161,11 @@ export class FormulaDependencyGenerator extends Disposable {
             this._formulaASTCache.clear();
         }
 
-
         this._registerFormulas(formulaDataKeys, formulaData, unitData, treeList);
 
         this._registerOtherFormulas(otherFormulaData, otherFormulaDataKeys, treeList);
 
         this._registerFeatureFormulas(treeList);
-
 
         const dependencyTreeCache = new FormulaDependencyTreeCache();
 
@@ -657,7 +655,6 @@ export class FormulaDependencyGenerator extends Disposable {
         if (this._includeTreeFeature(tree) === true) {
             return true;
         }
-
 
         if (this._includeOtherFormula(tree) === true) {
             return true;

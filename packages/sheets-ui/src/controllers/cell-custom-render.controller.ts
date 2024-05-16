@@ -22,7 +22,6 @@ import { Inject } from '@wendellhu/redi';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-
 /**
  * @todo RenderUnit
  */
@@ -42,7 +41,6 @@ export class CellCustomRenderController extends Disposable implements IRenderCon
         super();
         this._initEventBinding();
     }
-
 
     // eslint-disable-next-line max-lines-per-function
     private _initEventBinding() {

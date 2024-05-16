@@ -257,7 +257,6 @@ export class DocumentSkeleton extends Skeleton {
         return glyphGroup[glyph];
     }
 
-
     findNodeByCoord(
         coord: Vector2,
         pageLayoutType: PageLayoutType,

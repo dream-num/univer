@@ -24,7 +24,6 @@ import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { UniverInstanceType } from '../../common/unit';
 import type { IResourceLoaderService } from './type';
 
-
 export class ResourceLoaderService extends Disposable implements IResourceLoaderService {
     constructor(
         @Inject(IResourceManagerService) private readonly _resourceManagerService: IResourceManagerService,

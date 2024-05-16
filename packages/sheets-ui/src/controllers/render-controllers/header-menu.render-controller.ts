@@ -76,7 +76,6 @@ export class HeaderMenuRenderController extends Disposable implements IRenderCon
         const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
 
-
         this._observers.forEach((observer) => {
             spreadsheetRowHeader.onPointerEnterObserver.remove(observer);
             spreadsheetRowHeader.onPointerMoveObserver.remove(observer);
@@ -109,7 +108,6 @@ export class HeaderMenuRenderController extends Disposable implements IRenderCon
     private _initialHover(initialType: HEADER_HOVER_TYPE = HEADER_HOVER_TYPE.ROW) {
         const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
-
 
         const eventBindingObject =
             initialType === HEADER_HOVER_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;

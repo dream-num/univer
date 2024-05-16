@@ -278,7 +278,6 @@ export class TriggerCalculationController extends Disposable {
                         debouncedPushTask(completedArrayFormulasCount);
                     }
 
-
                     // if (totalArrayFormulasToCalculate > 0) {
                     // console.warn(
                     //     `Stage ${stage} Array formula.There are ${totalArrayFormulasToCalculate} functions to be executed, ${completedArrayFormulasCount} complete.`
@@ -330,7 +329,6 @@ export class TriggerCalculationController extends Disposable {
                         needStartProgress = false;
                         this._formulaCalculationDoneCount = 0;
                     }
-
 
                     console.warn(`execution result${result}`);
                 }

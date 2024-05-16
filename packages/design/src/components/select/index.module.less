@@ -168,6 +168,24 @@
         .search-input-without-border();
     }
 
+    &-borderless {
+        &:not(.@{select-prefix}-customize-input) {
+            .@{select-prefix}-selector {
+                border-color: transparent;
+            }
+        }
+
+        &.@{select-prefix} {
+            // =============== Focused ===============
+            &-focused,
+            &:hover {
+                .@{select-prefix}-selector {
+                    border-color: transparent !important;
+                }
+            }
+        }
+    }
+
     // ================ Icons ================
     &-allow-clear {
         &.@{select-prefix}-multiple .@{select-prefix}-selector {

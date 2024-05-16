@@ -47,6 +47,10 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
                 label: '简体中文',
                 value: LocaleType.ZH_CN,
             },
+            {
+                label: 'Русский',
+                value: LocaleType.RU_RU,
+            },
         ],
     };
 }

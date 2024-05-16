@@ -50,7 +50,7 @@ export {
 export { useActiveWorkbook, useActiveWorksheet } from './components/hook';
 export { whenSheetEditorFocused } from './controllers/shortcuts/utils';
 export type { IEditorBridgeServiceParam } from './services/editor-bridge.service';
-export { enUS, zhCN } from './locale';
+export { enUS, zhCN, ruRU } from './locale';
 export { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 export { getAutoFillRepeatRange } from './services/auto-fill/tools';
 export type { ICopyDataPiece, ISheetAutoFillHook } from './services/auto-fill/type';

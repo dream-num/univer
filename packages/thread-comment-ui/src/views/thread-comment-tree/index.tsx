@@ -26,6 +26,7 @@ import { Dropdown, Menu, MenuItem } from '@univerjs/design';
 import type { IUser } from '@univerjs/protocol';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { ThreadCommentEditor } from '../thread-comment-editor';
+import { transformDocument2TextNodes, transformTextNodes2Document } from '../thread-comment-editor/util';
 import styles from './index.module.less';
 
 export interface IThreadCommentTreeProps {
@@ -137,7 +138,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                 )
                 : (
                     <div className={styles.threadCommentItemContent}>
-                        {item.text.map((item, i) => {
+                        {transformDocument2TextNodes(item.text).map((item, i) => {
                             switch (item.type) {
                                 case 'mention':
                                     return (
@@ -186,7 +187,9 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             // mock empty comment
             [{
                 id: MOCK_ID,
-                text: [],
+                text: {
+                    dataStream: '\n\r',
+                },
                 personId: currentUser?.userID ?? '',
                 ref: refStr ?? '',
                 dT: '',
@@ -270,15 +273,13 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                 if (!user) {
                                     return;
                                 }
-                                editorRef.current?.reply([{
+                                editorRef.current?.reply(transformTextNodes2Document([{
                                     type: 'mention',
                                     content: {
-                                        type: 'user',
                                         id: user.userID,
                                         label: user.name,
-                                        extra: user,
                                     },
-                                }]);
+                                }]));
                             }}
                         />
                     )

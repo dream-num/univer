@@ -57,13 +57,11 @@ export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
     },
 };
 
-
 export interface IUpdateCommentCommandParams {
     unitId: string;
     subUnitId: string;
     payload: IUpdateCommentPayload;
 }
-
 
 export const UpdateCommentCommand: ICommand<IUpdateCommentCommandParams> = {
     id: 'thread-comment.command.update-comment',
@@ -165,7 +163,6 @@ export const UpdateCommentRefCommand: ICommand<IUpdateCommentRefCommandParams> =
     },
 };
 
-
 export interface IResolveCommentCommandParams {
     unitId: string;
     subUnitId: string;
@@ -189,7 +186,6 @@ export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
         return true;
     },
 };
-
 
 export interface IDeleteCommentCommandParams {
     unitId: string;

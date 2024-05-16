@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import { Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { CommentUpdate, IThreadComment } from '@univerjs/thread-comment';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
@@ -135,7 +134,6 @@ export class SheetsThreadCommentModel extends Disposable {
             } catch (error) {
                 // do nothing
             }
-
 
             const { matrix, locationMap } = this._ensure(unitId, subUnitId);
             switch (update.type) {

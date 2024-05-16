@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand } from '@univerjs/core';
-import type { IThreadComment, TextNode } from '../../types/interfaces/i-thread-comment';
+import type { ICommand, IDocumentBody } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
 import { ThreadCommentModel } from '../../models/thread-comment.model';
 
 export interface IAddCommentMutationParams {
@@ -39,7 +40,7 @@ export const AddCommentMutation: ICommand<IAddCommentMutationParams> = {
 
 export interface IUpdateCommentPayload {
     commentId: string;
-    text: TextNode[];
+    text: IDocumentBody;
     attachments?: string[];
     updated?: boolean;
     updateT?: string;
@@ -50,7 +51,6 @@ export interface IUpdateCommentMutationParams {
     subUnitId: string;
     payload: IUpdateCommentPayload;
 }
-
 
 export const UpdateCommentMutation: ICommand<IUpdateCommentMutationParams> = {
     id: 'thread-comment.mutation.update-comment',
@@ -89,7 +89,6 @@ export const UpdateCommentRefMutation: ICommand<IUpdateCommentRefMutationParams>
     },
 };
 
-
 export interface IResolveCommentMutationParams {
     unitId: string;
     subUnitId: string;
@@ -109,7 +108,6 @@ export const ResolveCommentMutation: ICommand<IResolveCommentMutationParams> = {
         return threadCommentModel.resolveComment(unitId, subUnitId, commentId, resolved);
     },
 };
-
 
 export interface IDeleteCommentMutationParams {
     unitId: string;

@@ -33,11 +33,13 @@ import { ThreadCommentRemoveSheetsController } from './controllers/sheets-thread
 const defaultConfig: IThreadCommentUIConfig = {
     mentions: [{
         trigger: '@',
-        mentions: [{
-            id: 'mock',
-            label: 'MockUser',
-            type: 'user',
-        }],
+        async getMentions() {
+            return [{
+                id: 'mock',
+                label: 'MockUser',
+                type: 'user',
+            }];
+        },
     }],
 };
 

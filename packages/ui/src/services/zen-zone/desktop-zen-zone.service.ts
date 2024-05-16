@@ -35,7 +35,6 @@ export class DesktopZenZoneService implements IZenZoneService {
         // super
     }
 
-
     set(key: string, component: ForwardRefExoticComponent<any>): IDisposable {
         this._componentManager.register(key, component);
         this.componentKey$.next(key);

@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
+import type { IDocumentBody } from '@univerjs/core';
+
 export interface IThreadCommentMention {
-    type: string;
     label: string;
     id: string;
     icon?: string;
-    extra?: any;
 }
-
-export type TextNode = {
-    type: 'text';
-    content: string;
-} | {
-    type: 'mention';
-    content: IThreadCommentMention;
-};
 
 export interface IThreadComment {
     id: string;
@@ -37,7 +29,7 @@ export interface IThreadComment {
     updateT?: string;
     personId: string;
     parentId?: string;
-    text: TextNode[];
+    text: IDocumentBody;
     attachments?: string[];
     resolved?: boolean;
     updated?: boolean;

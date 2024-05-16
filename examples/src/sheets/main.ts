@@ -110,20 +110,22 @@ const mockUser = {
 univer.registerPlugin(UniverSheetsThreadCommentPlugin, {
     mentions: [{
         trigger: '@',
-        mentions: [
-            {
-                id: mockUser.userID,
-                label: mockUser.name,
-                type: 'user',
-                icon: mockUser.avatar,
-            },
-            {
-                id: '2',
-                label: 'User2',
-                type: 'user',
-                icon: mockUser.avatar,
-            },
-        ],
+        getMentions: async () => {
+            return [
+                {
+                    id: mockUser.userID,
+                    label: mockUser.name,
+                    type: 'user',
+                    icon: mockUser.avatar,
+                },
+                {
+                    id: '2',
+                    label: 'User2',
+                    type: 'user',
+                    icon: mockUser.avatar,
+                },
+            ];
+        },
     }],
 });
 // Uncomment the following lines to test if the document is disposed correctly without memory leaks.
@@ -136,7 +138,6 @@ univer.registerPlugin(UniverSheetsThreadCommentPlugin, {
 
 // debugger plugin
 univer.registerPlugin(DebuggerPlugin);
-
 
 const injector = univer.__getInjector();
 const userManagerService = injector.get(UserManagerService);

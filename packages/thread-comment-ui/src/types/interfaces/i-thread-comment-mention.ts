@@ -18,8 +18,7 @@ import type { IThreadCommentMention } from '@univerjs/thread-comment';
 import type { MentionProps } from '@univerjs/design';
 
 export interface IThreadCommentMentionConfig {
-    getMentions?: (search: string) => Promise<IThreadCommentMention[]>;
-    mentions?: IThreadCommentMention[];
+    getMentions: (search: string) => Promise<IThreadCommentMention[]>;
     trigger: string;
     renderSuggestion?: MentionProps['renderSuggestion'];
 }

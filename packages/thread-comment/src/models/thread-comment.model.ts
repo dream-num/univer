@@ -15,6 +15,7 @@
  */
 
 import { BehaviorSubject, map, Subject } from 'rxjs';
+import { CustomRangeType } from '@univerjs/core';
 import type { IThreadComment } from '../types/interfaces/i-thread-comment';
 import type { IUpdateCommentPayload, IUpdateCommentRefPayload } from '../commands/mutations/comment.mutation';
 
@@ -234,9 +235,9 @@ export class ThreadCommentModel {
 
         [current, ...childrenComments].forEach((comment) => {
             relativeUsers.add(comment.personId);
-            comment.text.forEach((node) => {
-                if (node.type === 'mention' && node.content.type === 'user') {
-                    relativeUsers.add(node.content.id);
+            comment.text.customRanges?.forEach((range) => {
+                if (range.rangeType === CustomRangeType.MENTION) {
+                    relativeUsers.add(range.rangeId);
                 }
             });
         });
@@ -247,7 +248,6 @@ export class ThreadCommentModel {
             relativeUsers,
         };
     }
-
 
     deleteComment(unitId: string, subUnitId: string, commentId: string) {
         const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
@@ -297,7 +297,6 @@ export class ThreadCommentModel {
         if (!unitMap) {
             return;
         }
-
 
         Object.entries(unitMap).forEach(([subUnitId, subUnitMap]) => {
             Object.values(subUnitMap).forEach((comment) => {

@@ -61,7 +61,6 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
         "@wendellhu/redi": "^0.15.1",
         "rxjs": ">=7.0.0"
     },

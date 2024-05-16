@@ -22,7 +22,7 @@ import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 
 // Univer web worker is also a univer application.
 const univer = new Univer({
-    locale: LocaleType.RU_RU,
+    locale: LocaleType.ZH_CN,
 });
 
 univer.registerPlugin(UniverSheetsPlugin);

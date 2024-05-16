@@ -36,7 +36,6 @@ const meta: Meta = {
 
 export default meta;
 
-
 function FindDialogDemo() {
     const { injector } = useContext(RediContext);
 
@@ -57,6 +56,7 @@ function FindDialogDemo() {
 
         return injector;
     });
+
     const memoizedValue = useMemo(() => ({ injector: inject }), [inject]);
 
     return (

@@ -48,7 +48,7 @@ const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
 // univer
 const univer = new Univer({
     theme: defaultTheme,
-    locale: LocaleType.RU_RU,
+    locale: LocaleType.ZH_CN,
     locales,
     logLevel: LogLevel.VERBOSE,
 });

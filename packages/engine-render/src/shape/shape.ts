@@ -283,7 +283,7 @@ export abstract class Shape<T> extends BaseObject {
         //     scaleY = scaleY === 0 ? 1 : scaleY;
         //     ctx.scale(1 / scaleX, 1 / scaleY);
         // }
-        this._setLineDash(ctx);
+        // this._setLineDash(ctx);
         this._setStrokeStyles(ctx, props);
 
         ctx.stroke();

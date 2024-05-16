@@ -113,6 +113,8 @@ import { RemoveDefinedNameCommand } from '../commands/commands/remove-defined-na
 import { SetDefinedNameCommand } from '../commands/commands/set-defined-name.command';
 import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
 import { SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
+import { SetWorkbookNameCommand } from '../commands/commands/set-workbook-name.command';
+import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './config';
 
@@ -221,6 +223,9 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             RemoveNumfmtMutation,
             EmptyMutation,
             ScrollToCellOperation,
+            InsertDefinedNameCommand,
+            RemoveDefinedNameCommand,
+            SetDefinedNameCommand,
 
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
@@ -229,9 +234,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             // TODO: more commands should be moved into this array
             [
                 SetWorksheetShowCommand,
-                InsertDefinedNameCommand,
-                RemoveDefinedNameCommand,
-                SetDefinedNameCommand,
                 SetDrawingApplyMutation,
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }

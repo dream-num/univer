@@ -113,6 +113,8 @@ import { InsertDefinedNameCommand } from '../commands/commands/insert-defined-na
 import { RemoveDefinedNameCommand } from '../commands/commands/remove-defined-name.command';
 import { SetDefinedNameCommand } from '../commands/commands/set-defined-name.command';
 import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
+import { SetWorkbookNameCommand } from '../commands/commands/set-workbook-name.command';
+import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
 
 export interface IStyleTypeValue<T> {
@@ -125,6 +127,7 @@ export interface IStyleTypeValue<T> {
  */
 @OnLifecycle(LifecycleStages.Starting, BasicWorksheetController)
 export class BasicWorksheetController extends Disposable implements IDisposable {
+    // eslint-disable-next-line max-lines-per-function
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IConfigService private readonly _configService: IConfigService
@@ -200,6 +203,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetTextRotationCommand,
             SetTextWrapCommand,
             SetVerticalTextAlignCommand,
+            SetWorkbookNameCommand,
+            SetWorkbookNameMutation,
             SetWorksheetActivateCommand,
             SetWorksheetActiveOperation,
             SetWorksheetColWidthMutation,

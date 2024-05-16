@@ -18,7 +18,7 @@ Before:
 
 After: -->
 
-## PR Request Checklist
+## Pull Request Checklist
 
 - [ ] Related tickets or issues have been linked in the PR description (or missing issue).
 - [ ] [Naming convention](https://github.com/dream-num/univer/blob/dev/docs/NAMING_CONVENTION.md) is followed (**do please** check it especially when you created new plugins, commands and resources).

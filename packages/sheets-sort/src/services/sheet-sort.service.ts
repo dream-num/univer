@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable, Workbook } from '@univerjs/core';
-import { Disposable,
-    ICommandService,
+import type { IRange, Workbook } from '@univerjs/core';
+import { Disposable, ICommandService,
+    ILogService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    Range,
+    Rectangle,
     UniverInstanceType,
 } from '@univerjs/core';
 
@@ -30,7 +32,6 @@ import { expandToContinuousRange } from '@univerjs/sheets-ui';
 
 import { type ICellValueCompareFn, type IOrderRule, ReorderRangeCommand, SortType } from '../commands/sheets-reorder.command';
 
-export const SHEET_FILTER_SNAPSHOT_ID = 'SHEET_FILTER_PLUGIN';
 
 export interface ISortOption {
     range: IRange;
@@ -45,19 +46,10 @@ export const ISheetsSortService = createIdentifier<SheetsSortService>('univer.sh
 @OnLifecycle(LifecycleStages.Ready, SheetsSortService)
 export class SheetsSortService extends Disposable {
     private _compareFns: ICellValueCompareFn[] = [];
-    // private readonly _filterModels = new Map<string, Map<string, FilterModel>>();
-
-    // private readonly _loadedUnitId$ = new BehaviorSubject<Nullable<string>>(null);
-    // readonly loadedUnitId$ = this._loadedUnitId$.asObservable();
-
-    // private readonly _activeFilterModel$ = new BehaviorSubject<Nullable<FilterModel>>(null);
-    // /** An observable value emitting the current Workbook's active Worksheet's filter model (if there is one). */
-    // readonly activeFilterModel$ = this._activeFilterModel$.asObservable();
-    // /** The current Workbook's active Worksheet's filter model (if there is one). */
-    // get activeFilterModel(): Nullable<FilterModel> { return this._activeFilterModel$.getValue(); }
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @ILogService private readonly _logService: ILogService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService) {
         super();
@@ -66,6 +58,11 @@ export class SheetsSortService extends Disposable {
     async triggerSortDirectly(asc: boolean) {
         const location = await this.detectSortRange();
         if (!location) {
+            return false;
+        }
+
+        const mergeCheck = this._mergeCheck(location);
+        if (!mergeCheck) {
             return false;
         }
         const primary = this._selectionManagerService.getLast()?.primary;
@@ -83,9 +80,44 @@ export class SheetsSortService extends Disposable {
         return true;
     }
 
+    private _mergeCheck(location: ISheetRangeLocation) {
+        const { unitId, subUnitId, range } = location;
+        const sheet = (this._univerInstanceService.getUnit(unitId) as Workbook)?.getSheetBySheetId(subUnitId);
+        if (!sheet) {
+            return false;
+        }
+        const mergeDataInRange = sheet.getMergeData().filter((merge) => Rectangle.contains(range, merge));
+        if (mergeDataInRange.length === 0) {
+            return true;
+        }
+        const mergeCols = mergeDataInRange[0].endColumn - mergeDataInRange[0].startColumn;
+        const mergeRows = mergeDataInRange[0].endRow - mergeDataInRange[0].startRow;
+        // Every merge-cell should have the same size.
+        const sizeCheck = mergeDataInRange.every((merge) => merge.endColumn - merge.startColumn === mergeCols && merge.endRow - merge.startRow === mergeRows);
+        if (!sizeCheck) {
+            this._logService.warn('[Sort Error]: Different size of merge-cells detected in sort range, sorting aborted.');
+            // TODO: @yuhongz add toast here
+            return false;
+        }
+        Range.foreach(range, (row, col) => {
+            const outOfMergeCell = !mergeDataInRange.some((merge) => Rectangle.contains(merge, { startRow: row, startColumn: col, endRow: row, endColumn: col }));
+            if (outOfMergeCell) {
+                this._logService.warn('[Sort Error]: Different size of merge-cells detected in sort range, sorting aborted.');
+                // TODO: @yuhongz add toast here
+                return false;
+            }
+        });
+        return true;
+    }
+
     async triggerSortCustomize() {
         const location = await this.detectSortRange();
         if (!location) {
+            return false;
+        }
+
+        const mergeCheck = this._mergeCheck(location);
+        if (!mergeCheck) {
             return false;
         }
         // open customize dialog
@@ -132,7 +164,7 @@ export class SheetsSortService extends Disposable {
             return null;
         }
         let range;
-        // 2. single cell selection -> detection max range
+        // 2. single cell selection -> detect max range
         if (isSingleCellSelection(selection)) {
             range = expandToContinuousRange(selection.range, { up: true, down: true, left: true, right: true }, worksheet);
         } else {

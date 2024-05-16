@@ -47,7 +47,7 @@ export class SheetsSortController extends Disposable {
         // test code here
         // window.zz = () => {
         //     this._commandService.executeCommand(ReorderRangeCommand.id, {
-        //         range: { startRow: 0, endRow: 10, startColumn: 10, endColumn: 10 },
+        //         range: { startRow: 0, endRow: 9, startColumn: 10, endColumn: 10 },
         //         orderRules: [{ type: 0, colIndex: 10 }],
         //         unitId: 'workbook-01',
         //         subUnitId: 'sheet-0011',
@@ -101,7 +101,7 @@ export class SheetsSortController extends Disposable {
         if (a?.t === CellValueType.FORCE_STRING) {
             return Number.parseFloat(`${a.v}`);
         }
-        return null;
+        return `${a.v}`;
     }
 }
 

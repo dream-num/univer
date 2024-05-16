@@ -17,11 +17,12 @@
 // This file provides a ton of mutations to manipulate `FilterModel`.
 // These models would be held on `SheetsFilterService`.
 
-import { CellValueType, CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { CellValueType, CommandType, ICommandService, IUniverInstanceService, Rectangle } from '@univerjs/core';
 import type { ICellData, ICommand, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import { ISheetsSortService } from '../services/sheet-sort.service';
+import type { IReorderRangeMutationParams } from './sheets-reorder.mutation';
 import { ReorderRangeMutation } from './sheets-reorder.mutation';
 
 export enum SortType {
@@ -69,24 +70,40 @@ export const ReorderRangeCommand: ICommand = {
             return false;
         }
 
+        const mergeDataInRange = worksheet.getMergeData().filter((mergeData) => {
+            return Rectangle.contains(range, mergeData);
+        });
+        const mergeMainRowIndexes = mergeDataInRange.map((mergeData) => {
+            return mergeData.startRow;
+        });
+
         const { startRow, endRow } = range;
         const toReorder: IRowComparator[] = [];
+
+        const oldOrder: number[] = [];
         for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
             if (worksheet.getRowFiltered(rowIndex)) {
                 continue;
             }
+
+            if (mergeDataInRange.length && !mergeMainRowIndexes.includes(rowIndex)) {
+                continue;
+            }
+
             toReorder.push({
                 index: rowIndex,
                 value: getRowCellData(worksheet, rowIndex, orderRules),
             });
+            oldOrder.push(rowIndex);
         }
         const compareFns: ICellValueCompareFn[] = sortService.getAllCompareFns();
 
         toReorder.sort(reorderFnGenerator(orderRules, combineCompareFnsAsOne(compareFns)));
 
-        const order: number[] = [];
-        toReorder.forEach(({ index, value }) => {
-            order.push(index - startRow);
+        const order: { [key: number]: number } = {};
+
+        toReorder.forEach(({ index, value }, oldIndex) => {
+            order[oldOrder[oldIndex]] = index;
         });
 
         const commandService = accessor.get(ICommandService);
@@ -95,9 +112,7 @@ export const ReorderRangeCommand: ICommand = {
             subUnitId,
             order,
             range,
-        });
-
-        return true;
+        } as IReorderRangeMutationParams);
     },
 
 };

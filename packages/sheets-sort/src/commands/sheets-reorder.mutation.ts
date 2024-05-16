@@ -24,7 +24,7 @@ import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 
 export interface IReorderRangeMutationParams extends ISheetCommandSharedParams {
     range: IRange;
-    order: number[];
+    order: { [key: number]: number };
 }
 
 export const ReorderRangeMutation: IMutation<IReorderRangeMutationParams> = {
@@ -40,9 +40,11 @@ export const ReorderRangeMutation: IMutation<IReorderRangeMutationParams> = {
         }
         const cellDataMatrix = new ObjectMatrix<Nullable<ICellData>>();
         Range.foreach(range, (row, col) => {
-            const targetRow = order[row - range.startRow];
-            const cloneCell = Tools.deepClone(worksheet.getCellRaw(targetRow, col));
-            cellDataMatrix.setValue(row, col, cloneCell);
+            if (order.hasOwnProperty(row)) {
+                const targetRow = order[row];
+                const cloneCell = Tools.deepClone(worksheet.getCellRaw(targetRow, col));
+                cellDataMatrix.setValue(row, col, cloneCell);
+            }
         });
 
         const worksheetCellDataMatrix = worksheet.getCellMatrix();

@@ -17,16 +17,16 @@
 import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { SheetImageUIController } from './controllers/sheet-image.controller';
 import { enUS, zhCN } from './locale';
-import { SheetImageUpdateController } from './controllers/sheet-image-update.controller';
-import { SheetImageDataController } from './controllers/sheet-image-data.controller';
-import { ImagePopupMenuController } from './controllers/image-popup-menu.controller';
+import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
+import { SheetDrawingDataController } from './controllers/sheet-drawing-data.controller';
+import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
+import { SheetDrawingUIController } from './controllers/sheet-drawing.controller';
 
 
 const PLUGIN_NAME = 'SHEETS_IMAGE_UI_PLUGIN';
 
-export class UniverSheetsImageUIPlugin extends Plugin {
+export class UniverSheetsDrawingUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = PLUGIN_NAME;
     constructor(
@@ -52,10 +52,10 @@ export class UniverSheetsImageUIPlugin extends Plugin {
             // services
 
             // controllers
-            [SheetImageUIController],
-            [SheetImageUpdateController],
-            [SheetImageDataController],
-            [ImagePopupMenuController],
+            [SheetDrawingUIController],
+            [SheetDrawingUpdateController],
+            [SheetDrawingDataController],
+            [DrawingPopupMenuController],
 
         ];
 

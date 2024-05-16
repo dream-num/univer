@@ -32,7 +32,7 @@ import type { IInsertDrawingCommandParams } from './interfaces';
 /**
  * The command to insert new defined name
  */
-export const InsertSheetImageCommand: ICommand = {
+export const InsertSheetDrawingCommand: ICommand = {
     id: 'sheet.command.insert-sheet-image',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params?: IInsertDrawingCommandParams) => {

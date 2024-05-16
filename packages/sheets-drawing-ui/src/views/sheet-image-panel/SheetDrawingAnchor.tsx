@@ -26,7 +26,7 @@ import type { ISheetDrawing } from '@univerjs/sheets';
 import { SheetDrawingAnchorType } from '@univerjs/sheets';
 import type { BaseObject } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetSheetImageCommand } from '../../commands/commands/set-sheet-image.command';
+import { SetSheetDrawingCommand } from '../../commands/commands/set-sheet-drawing.command';
 
 
 export interface ISheetDrawingAnchorProps {
@@ -134,7 +134,7 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
             };
         });
 
-        commandService.executeCommand(SetSheetImageCommand.id, {
+        commandService.executeCommand(SetSheetDrawingCommand.id, {
             unitId: focusDrawings[0].unitId,
             drawings: updateParams,
         });

@@ -166,7 +166,6 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         return false;
     }
 
-
     async onPointerDown(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
         if (evt.button === 2) {
             return;

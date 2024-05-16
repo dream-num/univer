@@ -19,8 +19,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { LocaleService } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import List from 'rc-virtual-list';
-import { Button, Checkbox, Input } from '@univerjs/design';
-
+import { Button, Checkbox, Input, Tooltip } from '@univerjs/design';
 import type { ByValuesModel, IFilterByValueItem } from '../../services/sheets-filter-panel.service';
 import { statisticFilterByValueItems } from '../../models/utils';
 import styles from './index.module.less';
@@ -78,7 +77,9 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                             <div className={styles.sheetsFilterPanelValuesItem}>
                                 <div className={styles.sheetsFilterPanelValuesItemInner}>
                                     <Checkbox checked={item.checked} onChange={() => onFilterCheckToggled(item, !item.checked)}></Checkbox>
-                                    <span className={styles.sheetsFilterPanelValuesItemText}>{item.value}</span>
+                                    <Tooltip showIfEllipsis placement="top" title={item.value}>
+                                        <span className={styles.sheetsFilterPanelValuesItemText}>{item.value}</span>
+                                    </Tooltip>
                                     <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${item.count})`}</span>
                                     <Button
                                         className={styles.sheetsFilterPanelValuesItemExcludeButton}

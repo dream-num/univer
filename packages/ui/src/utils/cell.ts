@@ -404,7 +404,6 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
             }
         }
 
-
         if (key === 'border-color') {
             const colors = handleBorder(value, ')');
             if (!styleList.bd) {

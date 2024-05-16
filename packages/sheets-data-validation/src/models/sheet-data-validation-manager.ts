@@ -70,7 +70,6 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         this._ruleMatrix = new RuleMatrix(matrix);
     }
 
-
     private _addRuleSideEffect(rule: ISheetDataValidationRule) {
         const { unitId, subUnitId } = this;
 

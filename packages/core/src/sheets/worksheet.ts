@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import type { Nullable } from '../shared';
 import { ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';

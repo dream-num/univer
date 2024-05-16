@@ -89,7 +89,6 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         value: SCOPE_WORKBOOK_VALUE,
     }];
 
-
     const isFormula = (token: string) => {
         return !isReferenceStrings(token);
     };
@@ -113,7 +112,6 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
         setValidString('');
     }, [state]);
-
 
     workbook.getSheetOrders().forEach((sheetId) => {
         const sheet = workbook.getSheetBySheetId(sheetId);

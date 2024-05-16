@@ -47,3 +47,20 @@ export const Playground = {
         );
     },
 };
+
+export const CheckboxGroupVertical = {
+    render() {
+        const [value, setValue] = useState<string[]>([]);
+
+        function handleChange(value: Array<string | number | boolean>) {
+            setValue(value as string[]);
+        }
+
+        return (
+            <CheckboxGroup value={value} onChange={handleChange} direction="vertical">
+                <Checkbox value="test">test</Checkbox>
+                <Checkbox value="test1">test1</Checkbox>
+            </CheckboxGroup>
+        );
+    },
+};

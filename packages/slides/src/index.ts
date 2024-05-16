@@ -16,4 +16,4 @@
 
 export * from './slides-plugin';
 export * from './views/render';
-export { enUS, zhCN } from './locale';
+export { enUS, zhCN, ruRU } from './locale';

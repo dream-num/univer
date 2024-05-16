@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     'sheets-filter': {
         toolbar: {
             'smart-toggle-filter-tooltip': 'Toggle Filter',
@@ -64,3 +66,5 @@ export default {
         },
     },
 };
+
+export default locale;

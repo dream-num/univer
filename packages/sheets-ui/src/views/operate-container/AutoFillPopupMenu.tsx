@@ -73,7 +73,6 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
     };
     const forceUpdate = useUpdate();
 
-
     useEffect(() => {
         const disposable = commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
             if (command.id === SetScrollOperation.id) {

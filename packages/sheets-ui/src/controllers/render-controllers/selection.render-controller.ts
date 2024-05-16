@@ -117,7 +117,6 @@ export class SelectionRenderController extends Disposable implements IRenderCont
                     formulaOrRefString = formulaOrRefString.substring(1);
                 }
 
-
                 const result = isReferenceStrings(formulaOrRefString);
 
                 if (!result) {
@@ -125,7 +124,6 @@ export class SelectionRenderController extends Disposable implements IRenderCont
                 }
 
                 const selections = await this._getSelections(workbook, unitId, formulaOrRefString);
-
 
                 this._selectionManagerService.replace(selections);
 

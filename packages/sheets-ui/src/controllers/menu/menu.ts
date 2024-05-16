@@ -1103,7 +1103,6 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 });
             }
 
-
             const disposable = commandService.onCommandExecuted((command) => {
                 if (affectedCommands.findIndex((c) => c === command.id) !== -1) subscriber.next(!hasHiddenRowsInSelections());
             });

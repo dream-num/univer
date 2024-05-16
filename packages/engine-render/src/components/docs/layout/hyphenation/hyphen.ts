@@ -73,7 +73,6 @@ export class Hyphen implements IDisposable {
         let pattern = await import(`./patterns/${lang}.ts`);
         pattern = pattern[snackToPascal(lang)];
 
-
         this._patterns.set(lang, parsePattern(pattern));
         this._loadExceptionsToCache(lang, pattern);
     }
@@ -99,7 +98,6 @@ export class Hyphen implements IDisposable {
         }
 
         const { levelsTable, pattern } = this._patterns.get(lang)!;
-
 
         const levels = new Array(word.length + 1).fill(0);
         const loweredText = (`.${word.toLocaleLowerCase()}.`).split('');
@@ -166,7 +164,6 @@ export class Hyphen implements IDisposable {
         levels[0] = levels[1] = levels[levels.length - 1] = levels[levels.length - 2] = 0;
 
         let hyphenatedText = '';
-
 
         for (let i = 0; i < levels.length; i++) {
             hyphenatedText += (levels[i] % 2 === 1 ? '-' : '') + word.charAt(i);

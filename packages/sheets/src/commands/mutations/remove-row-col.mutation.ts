@@ -72,7 +72,6 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
             }
         }
 
-
         const rowCount = range.endRow - range.startRow + 1;
         spliceArray(range.startRow, rowCount, rowPrimitive);
 

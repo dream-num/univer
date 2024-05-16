@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type enUS from './en-US';
-
-const zLocale: typeof enUS = {
+const locale = {
     'sheets-filter': {
         toolbar: {
             'smart-toggle-filter-tooltip': '筛选',
@@ -67,4 +65,4 @@ const zLocale: typeof enUS = {
     },
 };
 
-export default zLocale;
+export default locale;

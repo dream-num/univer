@@ -81,7 +81,7 @@ export const ILogService = createIdentifier<ILogService>('log-service');
 
 ## Plugins' Names
 
-Plugin names should be all in capitalized letters and suffixed by `PLUGIN`. Words should be separated by underscores and suffixed. For example:
+Plugin names should be all in format of `{BUSINESS_TYPE}_${PLUGIN_NAME}_PLUGIN`. Words should be separated by underscores and suffixed. For example:
 
 ```typescript
 // ✅
@@ -108,7 +108,7 @@ export class FilterPlugin extends Plugin {}
 
 ### Resource key
 
-Resource keys should reuse the corresponding plugin's name.
+Resource key should be identical to the corresponding plugin's name.
 
 ## Commands
 
@@ -118,6 +118,7 @@ Commands' names should follow the convention below:
 export interface ISomeCommandParams {
     // Define the parameters here
 }
+
 export const SomeCommand = ICommand<ISomeCommandParams> = {
     id: '<business-type>.<command-type>.<command-name>',
 };
@@ -128,11 +129,28 @@ For example:
 ```typescript
 // ✅
 export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParams> = {
-    id: 'sheet.command.set-selection-frozen',
+    id: 'sheet.command.set-selection-frozen', // note this should be in single format
 }
 
 // 🚫
 export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParams> = {
-    id: 'SetSelectionFrozenCommmand',
+    id: 'sheets.command.set-selection-frozen',
+}
+
+// 🚫
+export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParams> = {
+    id: 'SetSelectionFrozenCommand',
 }
 ```
+
+If this command is for general purpose, the `business-type` should be the plugin's name. For example:
+
+```typescript
+export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
+    id: 'thread-comment.command.resolve-comment',
+}
+```
+
+## Id
+
+All IDs should be in pascal case: `id` or `Id`.

@@ -256,13 +256,15 @@ export { getInsertRangeMutations, getRemoveRangeMutations } from './commands/uti
 export { handleInsertRangeMutation } from './commands/utils/handle-range-mutation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
-export { enUS, zhCN } from './locale';
+export { enUS, zhCN, ruRU } from './locale';
 export { NumfmtService } from './services/numfmt/numfmt.service';
 export type { INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
 export { INumfmtService } from './services/numfmt/type';
 export { RefRangeService } from './services/ref-range/ref-range.service';
 export type { EffectRefRangeParams, IOperator } from './services/ref-range/type';
 export { EffectRefRangId, OperatorType } from './services/ref-range/type';
+export { type ISetWorkbookNameCommandParams, SetWorkbookNameCommand } from './commands/commands/set-workbook-name.command';
+export { type ISetWorkbookNameMutationParams, SetWorkbookNameMutation } from './commands/mutations/set-workbook-name.mutation';
 export {
     handleBaseInsertRange,
     handleBaseMoveRowsCols,

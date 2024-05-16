@@ -45,6 +45,12 @@ export interface ICheckboxGroupProps {
     disabled?: boolean;
 
     /**
+     * Direction of the radio group
+     * @default 'horizontal'
+     */
+    direction?: 'horizontal' | 'vertical';
+
+    /**
      * The callback function triggered when switching options
      */
     onChange: (value: Array<string | number | boolean>) => void;
@@ -54,7 +60,7 @@ export interface ICheckboxGroupProps {
  * CheckboxGroup Component
  */
 export function CheckboxGroup(props: ICheckboxGroupProps) {
-    const { children, className, style, value, disabled, onChange } = props;
+    const { children, className, style, value, disabled, direction = 'horizontal', onChange } = props;
 
     const handleChange = (item: string | number | boolean) => {
         if (value.includes(item)) {
@@ -64,7 +70,9 @@ export function CheckboxGroup(props: ICheckboxGroupProps) {
         }
     };
 
-    const _className = clsx(className, styles.checkboxGroup);
+    const _className = clsx(className, styles.checkboxGroup, {
+        [styles.checkboxGroupDirectionVertical]: direction === 'vertical',
+    });
 
     return (
         <div className={_className} style={style}>

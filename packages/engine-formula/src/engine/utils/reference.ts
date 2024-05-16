@@ -38,12 +38,10 @@ export function getAbsoluteRefTypeWithSingleString(singleRefString: string) {
 
     let isRowAbsolute = remainChar.indexOf('$') > -1;
 
-
     if (Tools.isStringNumber(remainChar) && isColumnAbsolute && !isRowAbsolute) {
         isColumnAbsolute = false;
         isRowAbsolute = true;
     }
-
 
     if (isColumnAbsolute && isRowAbsolute) {
         return AbsoluteRefType.ALL;
@@ -353,7 +351,6 @@ export function isReferenceStrings(refString: string) {
         return isReferenceStringWithEffectiveColumn(refString.trim());
     });
 }
-
 
 /**
  * Determine whether the sheet name needs to be wrapped in quotes

@@ -16,11 +16,22 @@
 
 import React from 'react';
 
+import clsx from 'clsx';
 import type { IRadioProps } from '../radio/Radio';
 import styles from './index.module.less';
 
 export interface IRadioGroupProps {
     children: React.ReactNode[];
+
+    /**
+     * The class name of the checkbox group
+     */
+    className?: string;
+
+    /**
+     * The style of the checkbox group
+     */
+    style?: React.CSSProperties;
 
     /**
      * Define which radio is selected
@@ -34,6 +45,12 @@ export interface IRadioGroupProps {
     disabled?: boolean;
 
     /**
+     * Direction of the radio group
+     * @default 'horizontal'
+     */
+    direction?: 'horizontal' | 'vertical';
+
+    /**
      * The callback function triggered when switching options
      */
     onChange: (value: string | number | boolean) => void;
@@ -43,14 +60,18 @@ export interface IRadioGroupProps {
  * RadioGroup Component
  */
 export function RadioGroup(props: IRadioGroupProps) {
-    const { children, value, disabled = false, onChange } = props;
+    const { children, className, style, value, disabled = false, direction = 'horizontal', onChange } = props;
 
     const handleChange = (value: string | number | boolean) => {
         onChange(value);
     };
 
+    const _className = clsx(className, styles.radioGroup, {
+        [styles.radioGroupDirectionVertical]: direction === 'vertical',
+    });
+
     return (
-        <div className={styles.radioGroup}>
+        <div className={_className} style={style}>
             {React.Children.map(children, (child, index) => {
                 if (React.isValidElement<IRadioProps>(child)) {
                     return React.cloneElement(child, {

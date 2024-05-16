@@ -47,7 +47,6 @@ export interface IDesktopUIController extends IUIController {
     getComponents(part: DesktopUIPart): Set<() => ComponentType>;
 }
 
-
 export class DesktopUIController extends Disposable implements IDesktopUIController {
     private _componentsByPart: Map<DesktopUIPart, Set<() => ComponentType>> = new Map();
 

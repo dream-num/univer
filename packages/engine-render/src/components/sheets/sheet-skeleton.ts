@@ -882,7 +882,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         return column;
     }
 
-
     /**
      *
      * @param offsetY scaled offset y

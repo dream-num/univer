@@ -17,7 +17,6 @@
 import type { IRange, ISelectionCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
 import { BooleanNumber, sortRules } from '@univerjs/core';
 
-
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 
 // import { clearLineByBorderType } from '../../basics/draw';
@@ -204,7 +203,6 @@ export class Spreadsheet extends SheetComponent {
         };
     }
 
-
     isForceDirty(): boolean {
         return this._forceDirty;
     }
@@ -316,7 +314,6 @@ export class Spreadsheet extends SheetComponent {
                 const h = diffBottom - diffTop + onePixelFix;
                 cacheCtx.rectByPrecision(x, y, w, h);
 
-
                 // 使用 clearRect 后, 很浅很细的白色线(even not zoom has blank line)
                 const onePixelFix2 = FIX_ONE_PIXEL_BLUR_OFFSET;
                 cacheCtx.clearRect(x + onePixelFix2, y + onePixelFix2, w - onePixelFix2 * 2, h - onePixelFix2 * 2);
@@ -337,7 +334,6 @@ export class Spreadsheet extends SheetComponent {
         }
         this._refreshIncrementalState = false;
     }
-
 
     /**
      * 整个 viewport 重绘
@@ -393,10 +389,8 @@ export class Spreadsheet extends SheetComponent {
         }
         mainCtx.save();
 
-
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
         mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
-
 
         const { viewPortKey } = viewportInfo;
             // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet

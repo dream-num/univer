@@ -128,7 +128,6 @@ export class Font extends SheetExtension {
                         return true;
                     }
 
-
                     if (isMergedMainCell) {
                         startY = mergeInfo.startY;
                         endY = mergeInfo.endY;

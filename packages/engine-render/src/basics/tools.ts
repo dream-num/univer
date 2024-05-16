@@ -825,7 +825,6 @@ export function mergeRangeIfIntersects(mainRanges: IRange[], ranges: IRange[]) {
     return mainRanges;
 }
 
-
 export function clampRanges(range: IRange) {
     return {
         startRow: Math.max(0, range.startRow),

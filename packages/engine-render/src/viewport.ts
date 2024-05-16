@@ -27,7 +27,6 @@ import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
 import { Vector2 } from './basics/vector2';
 import { subtractViewportRange } from './basics/viewport-subtract';
 import { Canvas as UniverCanvas } from './canvas';
-import { Spreadsheet } from './components/sheets/spreadsheet';
 import type { UniverRenderingContext } from './context';
 import type { Scene } from './scene';
 import type { BaseScrollBar } from './shape/base-scroll-bar';
@@ -168,7 +167,6 @@ export class Viewport {
 
     private _preViewportInfo: Nullable<IViewportInfo>;
 
-
     /**
      * viewbound of cache area, cache area is slightly bigger than viewbound.
      */
@@ -201,7 +199,6 @@ export class Viewport {
      */
     bufferEdgeX: number = 0;
     bufferEdgeY: number = 0;
-
 
     constructor(viewportKey: string, scene: ThinScene, props?: IViewProps) {
         this._viewportKey = viewportKey;
@@ -649,15 +646,7 @@ export class Viewport {
         return composeResult;
     }
 
-    /**
-     * engine.renderLoop ---> scene.render ---> layer.render ---> viewport.render
-     * that means each layer call all viewports to render !!!
-     * @param parentCtx 如果 layer._allowCache true, 那么 parentCtx 是 layer 中的 cacheCtx
-     * @param objects
-     * @param isMaxLayer
-     * @param isLast
-     */
-    render(parentCtx?: UniverRenderingContext, objects: BaseObject[] = [], isMaxLayer = false, isLast = false) {
+    shouldIntoRender() {
         if (
             this.isActive === false ||
             this.width == null ||
@@ -665,6 +654,21 @@ export class Viewport {
             this.width <= 1 ||
             this.height <= 1
         ) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * engine.renderLoop ---> scene.render ---> layer.render ---> viewport.render
+     * that means each layer call all viewports to render
+     * @param parentCtx 如果 layer._allowCache true, 那么 parentCtx 是 layer 中的 cacheCtx
+     * @param objects
+     * @param isMaxLayer
+     * @param isLast last viewport would
+     */
+    render(parentCtx?: UniverRenderingContext, objects: BaseObject[] = [], isMaxLayer = false) {
+        if (!this.shouldIntoRender()) {
             return;
         }
         const mainCtx = parentCtx || (this._scene.getEngine()?.getCanvas().getContext() as UniverRenderingContext);
@@ -694,12 +698,6 @@ export class Viewport {
             o.render(mainCtx, viewPortInfo);
         });
 
-        if (isLast) {
-            objects.forEach((o) => {
-                o.makeDirty(false);
-                if (o instanceof Spreadsheet) o.makeForceDirty?.(false);
-            });
-        }
         this.markDirty(false);
         this.markForceDirty(false);
 
@@ -720,7 +718,6 @@ export class Viewport {
 
         this._scrollRendered();
     }
-
 
     private _makeDefaultViewport() {
         return {
@@ -806,7 +803,6 @@ export class Viewport {
         const topLeft = this.getRelativeVector(Vector2.FromArray([xFrom, yFrom]));
         const bottomRight = this.getRelativeVector(Vector2.FromArray([xTo, yTo]));
 
-
         const viewBound = {
             left: topLeft.x,
             right: bottomRight.x,
@@ -879,7 +875,6 @@ export class Viewport {
         const svCoord = sceneTrans.applyPoint(coord.subtract(Vector2.FromArray([scroll.x, scroll.y])));
         return svCoord;
     }
-
 
     // eslint-disable-next-line complexity, max-lines-per-function
     onMouseWheel(evt: IWheelEvent, state: EventState) {
@@ -1246,7 +1241,6 @@ export class Viewport {
             isTrigger,
         });
 
-
         if (this._scrollBar) {
             this._scrollBar.makeDirty(true);
         }
@@ -1310,7 +1304,6 @@ export class Viewport {
             (diffY < 0 && Math.abs(viewBound.bottom - cacheBounds.bottom) < edgeY)) ? 0b10 : 0b00;
 
         const shouldCacheUpdate = nearEdge | viewBoundOutCacheArea;
-
 
         // 这样判断不足, 例如当 viewBound 在 cache top 的边缘但是往下滑动
         // 只要是在 cacheBounds 核心区域内就利用 cache

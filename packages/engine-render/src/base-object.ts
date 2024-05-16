@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IKeyValue, ITransformState, Nullable, Observer } from '@univerjs/core';
-import { Observable } from '@univerjs/core';
+import { Disposable, Observable } from '@univerjs/core';
 
 import type { EVENT_TYPE } from './basics/const';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
@@ -276,7 +276,6 @@ export abstract class BaseObject extends Disposable {
         return this._debounceParentDirty;
     }
 
-
     get cursor() {
         return this._cursor;
     }
@@ -304,7 +303,6 @@ export abstract class BaseObject extends Disposable {
     set debounceParentDirty(state: boolean) {
         this._debounceParentDirty = state;
     }
-
 
     set cursor(val: CURSOR_TYPE) {
         this.setCursor(val);

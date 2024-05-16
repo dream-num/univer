@@ -16,7 +16,7 @@
 
 import type { Workbook, Worksheet } from '@univerjs/core';
 import { ICommandService, RxDisposable, toDisposable } from '@univerjs/core';
-import type { IRenderContext, IRenderController, IWheelEvent } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderController, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
     Layer,
@@ -62,8 +62,6 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
 
     private _addNewRender(workbook: Workbook) {
         const { scene, engine } = this._context;
-
-        this._scene = scene;
 
         scene.addLayer(new Layer(scene, [], 0), new Layer(scene, [], 2));
 
@@ -116,6 +114,7 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
         scene.enableLayerCache(SHEET_COMPONENT_MAIN_LAYER_INDEX, SHEET_COMPONENT_HEADER_LAYER_INDEX);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _addViewport(worksheet: Worksheet) {
         const scene = this._context.scene;
 
@@ -178,25 +177,14 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
             active: false,
         });
 
-        this._initMouseWheel(viewMain);
-
-
-        // create a scroll bar
-        const scrollBar = new ScrollBar(viewMain);
-
-        scene.attachControl();
-
-        return viewMain;
-    }
-
-    // mouse scroll
-    private _initMouseWheel(viewMain: Viewport) {
+        // mouse scroll
         this.disposeWithMe(
             toDisposable(
-                this._scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
+                scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
                     if (evt.ctrlKey) {
                         return;
                     }
+
                     let offsetX = 0;
                     let offsetY = 0;
 
@@ -213,7 +201,8 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
                         }
                         this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
 
-                        if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                        // 临界点时执行浏览器行为
+                        if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
                             if (!isLimitedStore?.isLimitedX) {
                                 state.stopPropagation();
                             }
@@ -236,7 +225,8 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
                             }
                             this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
 
-                            if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                            // 临界点时执行浏览器行为
+                            if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
                                 if (!isLimitedStore?.isLimitedX) {
                                     state.stopPropagation();
                                 }
@@ -253,7 +243,8 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
                             }
                             this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY });
 
-                            if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                            // 临界点时执行浏览器行为
+                            if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
                                 if (!isLimitedStore?.isLimitedY) {
                                     state.stopPropagation();
                                 }
@@ -269,5 +260,12 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
                 })
             )
         );
+
+        // create a scroll bar
+        new ScrollBar(viewMain);
+
+        scene.attachControl();
+
+        return viewMain;
     }
 }

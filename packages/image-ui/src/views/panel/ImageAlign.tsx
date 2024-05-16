@@ -15,12 +15,11 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 import { Select } from '@univerjs/design';
 import clsx from 'clsx';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { AlignType, SetImageAlignOperation } from '../../commands/operations/image-align.operation';
 import styles from './index.module.less';
 

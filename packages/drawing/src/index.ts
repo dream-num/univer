@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { DrawingManagerService, UnitDrawingService } from './services/drawing-manager.service';
+export { DrawingManagerService, UnitDrawingService, type IDrawingJson1Type, type IDrawingJsonUndo1 } from './services/drawing-manager.service';
 export { getDrawingShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
 export { getImageSize } from './utils/get-image-size';
 export { UniverDrawingPlugin } from './plugin';

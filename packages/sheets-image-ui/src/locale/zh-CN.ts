@@ -36,6 +36,12 @@ const locale: typeof enUS = {
         crop: '裁剪',
         reset: '重置大小',
     },
+    'drawing-anchor': {
+        title: '锚点属性',
+        both: '与单元格一起移动和调整大小',
+        position: '移动但不调整大小与单元格',
+        none: '不要移动或调整大小与单元格',
+    },
 };
 
 export default locale;

@@ -22,6 +22,12 @@ import type { ITransformState } from './drawing-interfaces';
 
 export const DEFAULT_DOCUMENT_SUB_COMPONENT_ID = '__default_document_sub_component_id20231101__';
 
+export enum ArrangeType {
+    forward,
+    backward,
+    front,
+    back,
+}
 
 export enum DrawingTypeEnum {
     UNRECOGNIZED = -1,
@@ -31,15 +37,19 @@ export enum DrawingTypeEnum {
     DRAWING_TABLE = 3,
     DRAWING_SMART_ART = 4,
     DRAWING_VIDEO = 5,
-    DRAWING_UNIT = 6,
+    DRAWING_GROUP = 6,
+    DRAWING_UNIT = 7,
 }
 
 export type DrawingType = DrawingTypeEnum | number;
 
-
-export interface IDrawingSearch {
+export interface IDrawingSpace {
     unitId: string;
     subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
+}
+
+
+export interface IDrawingSearch extends IDrawingSpace {
     drawingId: string;
 }
 
@@ -59,16 +69,8 @@ export interface IDrawingSubunitMap<T extends IDrawingParam> {
 }
 
 export interface IDrawingMapItem<T extends IDrawingParam> {
-    [drawingId: string]: T;
-}
-
-
-export interface IDrawingOrderMap {
-    [unitId: string]: IDrawingSubunitOrderMap;
-}
-
-export interface IDrawingSubunitOrderMap {
-    [subUnitId: string]: string[];
+    data: { [drawingId: string]: T };
+    order: string[];
 }
 
 export interface IDrawingOrderMapParam {
@@ -77,78 +79,71 @@ export interface IDrawingOrderMapParam {
     drawingIds: string[];
 }
 
-// export interface IDrawingManagerService {
-//     readonly remove$: Observable<IDrawingParam[]>;
-//     readonly add$: Observable<IDrawingParam[]>;
-//     readonly update$: Observable<IDrawingParam[]>;
-//     readonly externalUpdate$: Observable<IDrawingParam[]>;
-//     readonly focus$: Observable<IDrawingParam[]>;
-//     readonly order$: Observable<IDrawingOrderMapParam>;
+export interface IDrawingOrderUpdateParam extends IDrawingOrderMapParam {
+    arrangeType: ArrangeType;
+}
 
-//     dispose(): void;
+export interface IDrawingGroupUpdateParam {
+    parent: IDrawingParam;
+    children: IDrawingParam[];
+}
 
-//     add<T extends IDrawingParam>(insertParam: T): void;
-//     batchAdd<T extends IDrawingParam>(insertParams: T[]): void;
-
-//     remove(searchParam: IDrawingSearch): void;
-//     batchRemove(removeParams: IDrawingSearch[]): void;
-
-//     update<T extends IDrawingParam>(updateParam: T): void;
-//     batchUpdate<T extends IDrawingParam>(updateParams: T[]): void;
-
-//     externalUpdateNotification<T extends IDrawingParam>(updateParams: T[]): void;
-
-//     getDrawingByParam<T extends IDrawingParam>(param: Nullable<IDrawingSearch>): Nullable<T>;
-
-//     getDrawingOKey<T extends IDrawingParam>(oKey: string): Nullable<T>;
-
-//     focusDrawing(params: Nullable<IDrawingSearch[]>): void;
-//     getFocusDrawings(): IDrawingParam[];
-
-//     forwardDrawings(unitId: string, subUnitId: string, drawingIds: string[]): void;
-//     backwardDrawing(unitId: string, subUnitId: string, drawingIds: string[]): void;
-//     frontDrawing(unitId: string, subUnitId: string, drawingIds: string[]): void;
-//     backDrawing(unitId: string, subUnitId: string, drawingIds: string[]): void;
-//     replaceDrawingOrder(unitId: string, subUnitId: string, drawingIds: string[]): void;
-//     getDrawingOrder(unitId: string, subUnitId: string): string[];
-// }
 
 export interface IUnitDrawingService<T extends IDrawingParam> extends IDisposable {
-    drawingManagerInfo: IDrawingMap<T>;
-    drawingOrderMap: IDrawingOrderMap;
+    drawingManagerData: IDrawingMap<T>;
 
-    readonly remove$: Observable<T[]>;
-    readonly add$: Observable<T[]>;
-    readonly update$: Observable<T[]>;
+    readonly remove$: Observable<IDrawingSearch[]>;
+    readonly add$: Observable<IDrawingSearch[]>;
+    readonly update$: Observable<IDrawingSearch[]>;
     readonly order$: Observable<IDrawingOrderMapParam>;
-    readonly externalUpdate$: Observable<T[]>;
     readonly focus$: Observable<IDrawingParam[]>;
+    readonly group$: Observable<IDrawingGroupUpdateParam[]>;
+    readonly ungroup$: Observable<IDrawingGroupUpdateParam[]>;
+
+    readonly featurePluginUpdate$: Observable<T[]>;
+    readonly featurePluginOrderUpdate$: Observable<IDrawingOrderUpdateParam>;
+    readonly featurePluginGroupUpdate$: Observable<IDrawingGroupUpdateParam[]>;
+    readonly featurePluginUngroupUpdate$: Observable<IDrawingGroupUpdateParam[]>;
 
     dispose(): void;
 
-    add(insertParam: T): void;
-    batchAdd(insertParams: T[]): void;
-
-    remove(searchParam: IDrawingSearch): void;
-    batchRemove(removeParams: IDrawingSearch[]): void;
-
-    update(updateParam: T): void;
-    batchUpdate(updateParams: T[]): void;
+    getBatchAddOp(insertParams: T[]): unknown;
+    getBatchRemoveOp(removeParams: IDrawingSearch[]): unknown;
+    getBatchUpdateOp(updateParams: T[]): unknown;
+    removeNotification(removeParams: IDrawingSearch[]): void;
+    addNotification(insertParams: IDrawingSearch[]): void;
+    updateNotification(updateParams: IDrawingSearch[]): void;
+    orderNotification(orderParams: IDrawingOrderMapParam): void;
 
     getDrawingByParam(param: Nullable<IDrawingSearch>): Nullable<T>;
+    getOldDrawingByParam(param: Nullable<IDrawingSearch>): Nullable<T>;
     getDrawingOKey(oKey: string): Nullable<T>;
 
     focusDrawing(params: Nullable<IDrawingSearch[]>): void;
     getFocusDrawings(): IDrawingParam[];
 
-    forwardDrawings(unitId: string, subUnitId: string, drawingIds: string[]): void;
-    backwardDrawing(unitId: string, subUnitId: string, drawingIds: string[]): void;
-    frontDrawing(unitId: string, subUnitId: string, drawingIds: string[]): void;
-    backDrawing(unitId: string, subUnitId: string, drawingIds: string[]): void;
-    replaceDrawingOrder(unitId: string, subUnitId: string, drawingIds: string[]): void;
-    getDrawingOrder(unitId: string, subUnitId: string): string[];
+    getGroupDrawingOp(groupParams: IDrawingGroupUpdateParam[]): unknown;
+    getUngroupDrawingOp(groupParams: IDrawingGroupUpdateParam[]): unknown;
+    groupUpdateNotification(groupParams: IDrawingGroupUpdateParam[]): void;
+    ungroupUpdateNotification(groupParams: IDrawingGroupUpdateParam[]): void;
+    getDrawingsByGroup(groupParam: IDrawingSearch): IDrawingParam[];
 
-    externalUpdateNotification(updateParams: T[]): void;
+    getForwardDrawingsOp(orderParams: IDrawingOrderMapParam): unknown;
+    getBackwardDrawingOp(orderParams: IDrawingOrderMapParam): unknown;
+    getFrontDrawingsOp(orderParams: IDrawingOrderMapParam): unknown;
+    getBackDrawingsOp(orderParams: IDrawingOrderMapParam): unknown;
+    // replaceDrawingOrder(unitId: string, subUnitId: string, drawingIds: string[]): void;
+    getDrawingOrder(unitId: string, subUnitId: string): string[];
+    orderUpdateNotification(orderParams: IDrawingOrderMapParam): void;
+
+    featurePluginUpdateNotification(updateParams: T[]): void;
+    featurePluginOrderUpdateNotification(drawingOrderUpdateParam: IDrawingOrderUpdateParam): void;
+    featurePluginGroupUpdateNotification(groupParams: IDrawingGroupUpdateParam[]): void;
+    featurePluginUngroupUpdateNotification(groupParams: IDrawingGroupUpdateParam[]): void;
+    // featurePluginAddNotification(insertParams: T[]): void;
+    // featurePluginRemoveNotification(removeParams: IDrawingSearch[]): void;
+
+    applyJson1(unitId: string, subUnitId: string, jsonOp: unknown): void;
 }
 
 export interface IDrawingManagerService extends IUnitDrawingService<IDrawingParam> {}

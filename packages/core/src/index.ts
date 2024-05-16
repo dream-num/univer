@@ -83,12 +83,15 @@ export {
     type DrawingType,
     DrawingTypeEnum,
     type IDrawingSearch,
+    type IDrawingSpace,
     type IDrawingParam,
     IDrawingManagerService,
+    type IDrawingOrderUpdateParam,
     type IUnitDrawingService,
-    type IDrawingOrderMap,
     type IDrawingMap,
     type IDrawingOrderMapParam,
+    type IDrawingGroupUpdateParam,
+    ArrangeType,
 } from './services/drawing/drawing-manager.service';
 export { IUniverInstanceService } from './services/instance/instance.service';
 export { LifecycleStages, OnLifecycle, runOnLifecycle } from './services/lifecycle/lifecycle';

@@ -97,6 +97,7 @@ function updateTextRuns(
     return removeTextRuns;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function coverTextRuns(
     updateDataTextRuns: ITextRun[],
     removeTextRuns: ITextRun[],

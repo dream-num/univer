@@ -24,8 +24,6 @@
         "@univerjs/facade": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/icons": "^0.1.46",
-        "@univerjs/image": "workspace:*",
-        "@univerjs/image-ui": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",

@@ -29,7 +29,6 @@ import { ImageResetSizeOperation } from '../commands/operations/image-reset-size
 import { SetImageGroupOperation } from '../commands/operations/image-group.operation';
 import { SetImageAlignOperation } from '../commands/operations/image-align.operation';
 
-
 @OnLifecycle(LifecycleStages.Rendered, ImageUIController)
 export class ImageUIController extends Disposable {
     constructor(
@@ -57,13 +56,13 @@ export class ImageUIController extends Disposable {
 
     private _initMenus(): void {
         // init menus
-        (
-            [
+        // (
+        //     [
 
-            ] as IMenuItemFactory[]
-        ).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
-        });
+        //     ] as IMenuItemFactory[]
+        // ).forEach((factory) => {
+        //     this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+        // });
     }
 
     private _initCommands() {

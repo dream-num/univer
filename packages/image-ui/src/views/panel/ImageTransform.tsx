@@ -157,7 +157,7 @@ export const ImageTransform = (props: IImageTransformProps) => {
 
         setWidth(val);
 
-        drawingManagerService.externalUpdateNotification([updateParam]);
+        drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
         transformer.clearControls(false);
         transformer.refreshControls();
@@ -178,7 +178,7 @@ export const ImageTransform = (props: IImageTransformProps) => {
 
         setHeight(val);
 
-        drawingManagerService.externalUpdateNotification([updateParam]);
+        drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
         transformer.clearControls(false);
         transformer.refreshControls();
@@ -194,7 +194,7 @@ export const ImageTransform = (props: IImageTransformProps) => {
 
         setXPosition(val);
 
-        drawingManagerService.externalUpdateNotification([updateParam]);
+        drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
         transformer.clearControls(false);
         transformer.refreshControls();
@@ -209,7 +209,7 @@ export const ImageTransform = (props: IImageTransformProps) => {
 
         setYPosition(val);
 
-        drawingManagerService.externalUpdateNotification([updateParam]);
+        drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
         transformer.clearControls(false);
         transformer.refreshControls();
@@ -224,7 +224,7 @@ export const ImageTransform = (props: IImageTransformProps) => {
 
         setRotation(val);
 
-        drawingManagerService.externalUpdateNotification([updateParam]);
+        drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
         transformer.clearControls(false);
         transformer.refreshControls();

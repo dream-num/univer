@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum, type IDrawingManagerService, type IDrawingParam, type Nullable } from '@univerjs/core';
+import type { IDrawingManagerService, IDrawingParam, Nullable } from '@univerjs/core';
 import type { BaseObject } from '@univerjs/engine-render';
 
 export function getUpdateParams(objects: Map<string, BaseObject>, drawingManagerService: IDrawingManagerService): Nullable<IDrawingParam>[] {
@@ -29,13 +29,13 @@ export function getUpdateParams(objects: Map<string, BaseObject>, drawingManager
             return true;
         }
 
-        const { unitId, subUnitId, drawingId } = searchParam;
+        const { unitId, subUnitId, drawingId, drawingType } = searchParam;
 
         params.push({
             unitId,
             subUnitId,
             drawingId,
-            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+            drawingType,
             transform: {
                 left,
                 top,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingOrderMapParam, IDrawingParam, IDrawingSearch, ITransformState, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IDrawingGroupUpdateParam, IDrawingOrderMapParam, IDrawingParam, IDrawingSearch, ITransformState, Nullable } from '@univerjs/core';
 import {
     checkIfMove,
     Disposable,
@@ -81,6 +81,8 @@ export class ImageUpdateController extends Disposable {
         this._commandExecutedListener();
 
         this._drawingArrangeListener();
+
+        this._drawingGroupListener();
     }
 
     private _commandExecutedListener() {
@@ -106,39 +108,54 @@ export class ImageUpdateController extends Disposable {
                         return;
                     }
                     this._drawingAlign(params);
-                } else if (command.id === SetImageGroupOperation.id) {
-                    const params = command.params as ISetImageGroupOperationParams;
-                    if (params == null) {
-                        return;
-                    }
-                    this._drawingGroup(params);
                 }
+                //  else if (command.id === SetImageGroupOperation.id) {
+                //     const params = command.params as ISetImageGroupOperationParams;
+                //     if (params == null) {
+                //         return;
+                //     }
+                //     this._drawingGroup(params);
+                // }
             })
         );
     }
 
-    private _drawingGroup(params: ISetImageGroupOperationParams) {
-        const { groupType } = params;
-        const drawings = this._drawingManagerService.getFocusDrawings();
+    private _drawingGroupListener() {
+        this.disposeWithMe(
+            this._drawingManagerService.group$.subscribe((params) => {
+                this._groupDrawings(params);
+            })
+        );
 
-        if (drawings.length === 0) {
-            return;
-        }
-
-        switch (groupType) {
-            case GroupType.group:
-                this._groupDrawings(drawings);
-                break;
-            case GroupType.regroup:
-                this._regroupDrawings(drawings);
-                break;
-            case GroupType.ungroup:
-                this._ungroupDrawings(drawings);
-                break;
-            default:
-                break;
-        }
+        this.disposeWithMe(
+            this._drawingManagerService.ungroup$.subscribe((params) => {
+                this._ungroupDrawings(params);
+            })
+        );
     }
+
+    // private _drawingGroup(params: ISetImageGroupOperationParams) {
+    //     const { groupType } = params;
+    //     const drawings = this._drawingManagerService.getFocusDrawings();
+
+    //     if (drawings.length === 0) {
+    //         return;
+    //     }
+
+    //     switch (groupType) {
+    //         case GroupType.group:
+    //             this._groupDrawings(drawings);
+    //             break;
+    //         case GroupType.regroup:
+    //             this._regroupDrawings(drawings);
+    //             break;
+    //         case GroupType.ungroup:
+    //             this._ungroupDrawings(drawings);
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    // }
 
     private _getSceneAndTransformerByDrawingSearch(unitId: Nullable<string>) {
         if (unitId == null) {
@@ -158,8 +175,18 @@ export class ImageUpdateController extends Disposable {
         return { scene, transformer };
     }
 
-    private _groupDrawings(drawings: IDrawingSearch[]) {
-        const renderObject = this._getSceneAndTransformerByDrawingSearch(drawings[0].unitId);
+    private _groupDrawings(drawings: IDrawingGroupUpdateParam[]) {
+        drawings.forEach((drawing) => {
+            this._groupDrawing(drawing);
+        });
+    }
+
+    private _groupDrawing(params: IDrawingGroupUpdateParam) {
+        const { parent, children } = params;
+
+        const { unitId, subUnitId, drawingId } = parent;
+
+        const renderObject = this._getSceneAndTransformerByDrawingSearch(parent.unitId);
 
         if (renderObject == null) {
             return;
@@ -170,16 +197,21 @@ export class ImageUpdateController extends Disposable {
         this._commandService.syncExecuteCommand(CloseImageCropOperation.id);
 
         const objects: BaseObject[] = [];
-        const updateParams: IImageData[] = [];
 
-
-        drawings.forEach((drawing) => {
+        children.forEach((drawing) => {
             const imageShapeKey = getDrawingShapeKeyByDrawingSearch(drawing);
             const object = scene.getObjectIncludeInGroup(imageShapeKey);
 
-            if (object != null && !objects.includes(object)) {
-                objects.push(object);
+            if (object == null || objects.includes(object)) {
+                return;
             }
+
+
+            objects.push(object);
+
+            const { transform } = drawing;
+
+            transform && object.transformByState(transform);
 
             // const group = object?.ancestorGroup;
             // if (group != null && objects.includes(group) === false) {
@@ -193,69 +225,80 @@ export class ImageUpdateController extends Disposable {
             return;
         }
 
-        const groupKey = `group_${objects[0].oKey}`;
+
+        const groupKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
         const group = new Group(groupKey);
 
         scene.addObject(group, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(group);
 
         group.addObjects(...objects);
-        group.reCalculateObjects();
+        // group.reCalculateObjects();
+        parent.transform && group.transformByState({ left: parent.transform.left, top: parent.transform.top });
 
         transformer.clearSelectedObjects();
         transformer.setSelectedControl(group);
     }
 
-    private _regroupDrawings(drawings: IDrawingSearch[]) {
-        const renderObject = this._getSceneAndTransformerByDrawingSearch(drawings[0].unitId);
+    // private _regroupDrawings(drawings: IDrawingSearch[]) {
+    //     const renderObject = this._getSceneAndTransformerByDrawingSearch(drawings[0].unitId);
 
-        if (renderObject == null) {
-            return;
-        }
+    //     if (renderObject == null) {
+    //         return;
+    //     }
 
-        const { scene, transformer } = renderObject;
+    //     const { scene, transformer } = renderObject;
 
-        const objects: BaseObject[] = [];
+    //     const objects: BaseObject[] = [];
 
-        let firstGroup: Nullable<Group> = null;
+    //     let firstGroup: Nullable<Group> = null;
 
+    //     drawings.forEach((drawing) => {
+    //         const imageShapeKey = getDrawingShapeKeyByDrawingSearch(drawing);
+    //         const o = scene.getObject(imageShapeKey);
+
+    //         if (o == null) {
+    //             return true;
+    //         }
+
+    //         const group = o.ancestorGroup as Nullable<Group>;
+
+    //         if (group != null && firstGroup == null) {
+    //             firstGroup = group;
+    //         } else if (group != null && !objects.includes(group)) {
+    //             objects.push(group);
+    //         } else if (!objects.includes(o)) {
+    //             objects.push(o);
+    //         }
+    //     });
+
+    //     if (firstGroup == null) {
+    //         return;
+    //     }
+
+    //     if (objects.length === 0) {
+    //         return;
+    //     }
+
+    //     (firstGroup as Group).addObjects(...objects);
+
+    //     (firstGroup as Group).reCalculateObjects();
+
+    //     transformer.clearSelectedObjects();
+
+    //     transformer.setSelectedControl(firstGroup);
+    // }
+
+
+    private _ungroupDrawings(drawings: IDrawingGroupUpdateParam[]) {
         drawings.forEach((drawing) => {
-            const imageShapeKey = getDrawingShapeKeyByDrawingSearch(drawing);
-            const o = scene.getObject(imageShapeKey);
-
-            if (o == null) {
-                return true;
-            }
-
-            const group = o.ancestorGroup as Nullable<Group>;
-
-            if (group != null && firstGroup == null) {
-                firstGroup = group;
-            } else if (group != null && !objects.includes(group)) {
-                objects.push(group);
-            } else if (!objects.includes(o)) {
-                objects.push(o);
-            }
+            this._ungroupDrawing(drawing);
         });
-
-        if (firstGroup == null) {
-            return;
-        }
-
-        if (objects.length === 0) {
-            return;
-        }
-
-        (firstGroup as Group).addObjects(...objects);
-
-        (firstGroup as Group).reCalculateObjects();
-
-        transformer.clearSelectedObjects();
-
-        transformer.setSelectedControl(firstGroup);
     }
 
-    private _ungroupDrawings(drawings: IDrawingSearch[]) {
-        const renderObject = this._getSceneAndTransformerByDrawingSearch(drawings[0].unitId);
+    private _ungroupDrawing(drawing: IDrawingGroupUpdateParam) {
+        const { parent, children } = drawing;
+
+        const renderObject = this._getSceneAndTransformerByDrawingSearch(parent.unitId);
 
         if (renderObject == null) {
             return;
@@ -263,37 +306,57 @@ export class ImageUpdateController extends Disposable {
 
         const { scene, transformer } = renderObject;
 
-        const objects: Group[] = [];
+        // const objects: BaseObject[] = [];
 
 
-        drawings.forEach((drawing) => {
-            const imageShapeKey = getDrawingShapeKeyByDrawingSearch(drawing);
-            const o = scene.getObjectIncludeInGroup(imageShapeKey);
+        children.forEach((drawing) => {
+            const drawingKey = getDrawingShapeKeyByDrawingSearch(drawing);
+            const object = scene.getObjectIncludeInGroup(drawingKey);
 
-            if (o == null) {
+            if (object == null) {
                 return true;
             }
 
-            const group = o.ancestorGroup as Nullable<Group>;
-            if (group != null && !objects.includes(group)) {
-                objects.push(group);
-            } else if (o instanceof Group && !objects.includes(o)) {
-                objects.push(o);
+            if (object == null) {
+                return;
             }
+
+
+            // objects.push(object);
+
+            const { transform } = drawing;
+
+            transform && object.transformByState(transform);
+
+            // const group = o.ancestorGroup as Nullable<Group>;
+            // if (group != null && !objects.includes(group)) {
+            //     objects.push(group);
+            // } else if (o instanceof Group && !objects.includes(o)) {
+            //     objects.push(o);
+            // }
         });
 
-        if (objects.length === 0) {
-            return;
-        }
 
-
-        objects.forEach((group) => {
-            const { width, height } = group;
-            group.getObjects().forEach((object) => {
-                group.removeSelfObjectAndTransform(object.oKey, width, height);
-            });
-            group.dispose();
+        const groupKey = getDrawingShapeKeyByDrawingSearch(parent);
+        const group = scene.getObject(groupKey) as Group;
+        const { width, height } = group;
+        group.getObjects().forEach((object) => {
+            group.removeSelfObjectAndTransform(object.oKey, width, height);
         });
+        group.dispose();
+
+        // if (objects.length === 0) {
+        //     return;
+        // }
+
+
+        // objects.forEach((group) => {
+        //     const { width, height } = group;
+        //     group.getObjects().forEach((object) => {
+        //         group.removeSelfObjectAndTransform(object.oKey, width, height);
+        //     });
+        //     group.dispose();
+        // });
 
         transformer.clearSelectedObjects();
     }
@@ -408,7 +471,7 @@ export class ImageUpdateController extends Disposable {
             }
         });
 
-        this._drawingManagerService.externalUpdateNotification(updateParams);
+        this._drawingManagerService.featurePluginUpdateNotification(updateParams);
 
         transformer.refreshControls();
     }
@@ -503,7 +566,7 @@ export class ImageUpdateController extends Disposable {
             } as IImageData);
         });
 
-        this._drawingManagerService.externalUpdateNotification(updateParams);
+        this._drawingManagerService.featurePluginUpdateNotification(updateParams);
 
         sceneList.forEach((scene) => {
             const transformer = scene.getTransformerByCreate();
@@ -546,8 +609,16 @@ export class ImageUpdateController extends Disposable {
         this.disposeWithMe(
             this._drawingManagerService.add$.subscribe((params) => {
                 const sceneList: Scene[] = [];
-                (params as IImageData[]).forEach((param) => {
-                    const { unitId, subUnitId, drawingId, transform } = param;
+                (params).forEach((param) => {
+                    const { unitId, subUnitId, drawingId } = param;
+
+                    const imageParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
+
+                    if (imageParam == null) {
+                        return;
+                    }
+
+                    const { transform } = imageParam;
 
                     const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
 
@@ -574,15 +645,15 @@ export class ImageUpdateController extends Disposable {
                     const imageConfig: IImageProps = { left, top, width, height, zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1 };
 
 
-                    const imageNativeCache = this._getImageSourceCache(param);
+                    const imageNativeCache = this._getImageSourceCache(imageParam);
                     if (imageNativeCache != null) {
                         imageConfig.image = imageNativeCache;
                     } else {
-                        imageConfig.url = param.source;
+                        imageConfig.url = imageParam.source;
                     }
 
                     const image = new Image(imageShapeKey, imageConfig);
-                    this._addImageSourceCache(param, image.getNative());
+                    this._addImageSourceCache(imageParam, image.getNative());
 
                     scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(image);
 
@@ -685,7 +756,7 @@ export class ImageUpdateController extends Disposable {
     private _drawingRemoveListener() {
         this.disposeWithMe(
             this._drawingManagerService.remove$.subscribe((params) => {
-                (params as IImageData[]).forEach((param) => {
+                (params).forEach((param) => {
                     const { unitId, subUnitId, drawingId } = param;
 
                     const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
@@ -712,8 +783,16 @@ export class ImageUpdateController extends Disposable {
     private _drawingUpdateListener() {
         this.disposeWithMe(
             this._drawingManagerService.update$.subscribe((params) => {
-                (params as IImageData[]).forEach((param) => {
-                    const { unitId, subUnitId, drawingId, transform } = param;
+                (params).forEach((param) => {
+                    const { unitId, subUnitId, drawingId } = param;
+
+                    const imageParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
+
+                    if (imageParam == null) {
+                        return;
+                    }
+
+                    const { transform } = imageParam;
 
                     const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
 
@@ -752,6 +831,13 @@ export class ImageUpdateController extends Disposable {
         }) as IDrawingParam[];
     }
 
+        // group?.getObjects().forEach((o) => {
+    //     const drawing = this._drawingManagerService.getDrawingOKey(o.oKey);
+    //     if (drawing != null) {
+    //         const { unitId, subUnitId, drawingId } = drawing;
+    //         drawings.push({ unitId, subUnitId, drawingId });
+    //     }
+    // });
     private _addListenerOnImage(scene: Scene) {
         const transformer = scene.getTransformerByCreate();
 
@@ -766,10 +852,7 @@ export class ImageUpdateController extends Disposable {
                     startTransforms = objectArray.map((object) => {
                         const { left, top, height, width, angle, oKey, groupKey, isInGroup } = object;
                         const drawing = this._drawingManagerService.getDrawingOKey(oKey);
-                        if (drawing != null) {
-                            const { unitId, subUnitId, drawingId } = drawing;
-                            drawings.push({ unitId, subUnitId, drawingId });
-                        } else if (isInGroup || object instanceof Group) {
+                        if (isInGroup || object instanceof Group) {
                             let group: Group;
                             if (object instanceof Group) {
                                 group = object;
@@ -781,20 +864,22 @@ export class ImageUpdateController extends Disposable {
                             if (groupDrawing) {
                                 const { unitId, subUnitId, drawingId } = groupDrawing;
                                 drawings.push({ unitId, subUnitId, drawingId });
+                                const { left, top, height, width, angle } = group;
+                                return { left, top, height, width, angle };
                             }
-                            // group?.getObjects().forEach((o) => {
-                            //     const drawing = this._drawingManagerService.getDrawingOKey(o.oKey);
-                            //     if (drawing != null) {
-                            //         const { unitId, subUnitId, drawingId } = drawing;
-                            //         drawings.push({ unitId, subUnitId, drawingId });
-                            //     }
-                            // });
+                        } else if (drawing != null) {
+                            const { unitId, subUnitId, drawingId } = drawing;
+                            drawings.push({ unitId, subUnitId, drawingId });
+
+                            return { left, top, height, width, angle };
                         }
-                        return { left, top, height, width, angle };
-                    });
+                        return null;
+                    }).filter((transform) => transform != null) as ITransformState[];
 
                     if (drawings.length > 0) {
                         this._drawingManagerService.focusDrawing(drawings);
+                    } else {
+                        this._drawingManagerService.focusDrawing(null);
                     }
                 })
             )
@@ -825,7 +910,7 @@ export class ImageUpdateController extends Disposable {
 
                     if (params.length > 0) {
                         // this._drawingManagerService.batchUpdate(params);
-                        this._drawingManagerService.externalUpdateNotification(params);
+                        this._drawingManagerService.featurePluginUpdateNotification(params);
                     }
                 })
             )

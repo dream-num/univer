@@ -21,8 +21,10 @@ import {
     IUndoRedoService,
 } from '@univerjs/core';
 
-import { SetDrawingMutation } from '@univerjs/sheets';
+import type { ISheetDrawing } from '@univerjs/sheets';
+import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import type { ISetDrawingCommandParams } from './interfaces';
 
@@ -36,26 +38,31 @@ export const SetSheetImageCommand: ICommand = {
     handler: (accessor: IAccessor, params?: ISetDrawingCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const sheetDrawingService = accessor.get(ISheetDrawingService);
 
         if (!params) return false;
 
-        const { unitId, drawings } = params;
+        const { drawings } = params;
 
-        const newSheetDrawingParams = drawings.map((param) => param.newDrawing.sheetDrawingParam);
-        const oldSheetDrawingParams = drawings.map((param) => param.oldDrawing.sheetDrawingParam);
+        // const newSheetDrawingParams = drawings.map((param) => param.newDrawing);
+        // const oldSheetDrawingParams = drawings.map((param) => param.oldDrawing);
+
+        const jsonOp = sheetDrawingService.getBatchUpdateOp(drawings as ISheetDrawing[]) as IDrawingJsonUndo1;
+
+        const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.syncExecuteCommand(SetDrawingMutation.id, newSheetDrawingParams);
+        const result = commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE });
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    { id: SetDrawingMutation.id, params: oldSheetDrawingParams },
+                    { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.UPDATE } },
                     { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
                 ],
                 redoMutations: [
-                    { id: SetDrawingMutation.id, params: newSheetDrawingParams },
+                    { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.UPDATE } },
                     { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
                 ],
             });

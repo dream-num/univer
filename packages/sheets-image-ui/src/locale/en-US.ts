@@ -34,6 +34,12 @@ const locale = {
         crop: 'Crop',
         reset: 'Reset Size',
     },
+    'drawing-anchor': {
+        title: 'Anchor Properties',
+        both: 'Move and size with cells',
+        position: "Move but don't size with cells",
+        none: "Don't move or size with cells",
+    },
 };
 
 export default locale;

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, Nullable } from '@univerjs/core';
-import { DrawingTypeEnum, IDrawingManagerService } from '@univerjs/core';
+import type { IDrawingParam } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
-import type { BaseObject } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getUpdateParams } from '../../utils/get-update-params';
 import { ImageArrange } from './ImageArrange';

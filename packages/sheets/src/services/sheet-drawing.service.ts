@@ -25,21 +25,31 @@ interface ICellPosition {
     rowOffset: number; // row offset, unit is EMUs
 }
 
+export enum SheetDrawingAnchorType {
+    Position = '0',
+    Both = '1',
+    None = '2',
+}
 
 export interface ISheetDrawingPosition extends IOtherTransform {
     from: ICellPosition;
     to: ICellPosition;
 }
 
-export interface ISheetImage extends IImageData {
+export interface ISheetDrawingBase {
     sheetTransform: ISheetDrawingPosition;
+    anchorType?: SheetDrawingAnchorType;
+}
+
+export interface ISheetImage extends IImageData, ISheetDrawingBase {
+
 }
 
 /**
  * test type
  */
-export interface ISheetShape extends IDrawingParam {
-    sheetTransform: ISheetDrawingPosition;
+export interface ISheetShape extends IDrawingParam, ISheetDrawingBase {
+
 }
 
 export type ISheetDrawing = ISheetImage | ISheetShape;

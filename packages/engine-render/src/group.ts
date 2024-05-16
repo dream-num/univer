@@ -24,7 +24,7 @@ import { isString } from './basics/tools';
 import type { IViewportInfo, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { ThinScene } from './thin-scene';
-import { offsetRotationAxis } from './basics/offset-rotation-axis';
+import { getGroupState, transformObjectOutOfGroup } from './basics/group-transform';
 
 export class Group extends BaseObject {
     private _objects: BaseObject[] = [];
@@ -47,31 +47,23 @@ export class Group extends BaseObject {
         if (this._selfSizeMode) {
             return super.getState();
         }
-        let groupLeft = Number.MAX_SAFE_INTEGER;
-        let groupTop = Number.MAX_SAFE_INTEGER;
-        let groupRight = Number.MIN_SAFE_INTEGER;
-        let groupBottom = Number.MIN_SAFE_INTEGER;
+        // let groupLeft = Number.MAX_SAFE_INTEGER;
+        // let groupTop = Number.MAX_SAFE_INTEGER;
+        // let groupRight = Number.MIN_SAFE_INTEGER;
+        // let groupBottom = Number.MIN_SAFE_INTEGER;
 
-        this._objects.forEach((o) => {
-            const { left, top, width, height } = o;
-            groupLeft = Math.min(groupLeft, left);
-            groupTop = Math.min(groupTop, top);
-            groupRight = Math.max(groupRight, left + width);
-            groupBottom = Math.max(groupBottom, top + height);
-        });
+        // this._objects.forEach((o) => {
+        //     const { left, top, width, height } = o;
+        //     groupLeft = Math.min(groupLeft, left);
+        //     groupTop = Math.min(groupTop, top);
+        //     groupRight = Math.max(groupRight, left + width);
+        //     groupBottom = Math.max(groupBottom, top + height);
+        // });
 
-        const groupWidth = groupRight - groupLeft;
-        const groupHeight = groupBottom - groupTop;
+        // const groupWidth = groupRight - groupLeft;
+        // const groupHeight = groupBottom - groupTop;
 
-        return {
-            left: groupLeft + this.left,
-            top: groupTop + this.top,
-            width: groupWidth,
-            height: groupHeight,
-            angle: 0,
-            scaleX: 1,
-            scaleY: 1,
-        };
+        return getGroupState(this.left, this.top, this._objects.map((o) => o.getState()));
     }
 
     override get width(): number {
@@ -206,7 +198,7 @@ export class Group extends BaseObject {
         }
     }
 
-    removeSelfObjectAndTransform(oKey: string, width?: number, height?: number) {
+    removeSelfObjectAndTransform(oKey: string, width?: number, height?: number, isTransform = false) {
         const objects = [...this.getObjects()];
         const objectsLength = objects.length;
 
@@ -222,7 +214,7 @@ export class Group extends BaseObject {
             const o = objects[i];
             if (o.oKey === oKey) {
                 objects.splice(i, 1);
-                this._transformObject(o, width, height);
+                isTransform && this._transformObject(o, width, height);
                 o.parent = this.parent;
                 o.groupKey = undefined;
                 o.isInGroup = false;
@@ -234,22 +226,8 @@ export class Group extends BaseObject {
     }
 
     private _transformObject(object: BaseObject, groupWidth: number, groupHeight: number) {
-        const groupCenterX = this.left + groupWidth / 2;
-        const groupCenterY = this.top + groupHeight / 2;
-
-        const objectX = object.left - this.left;
-        const objectY = object.top - this.top;
-
-        const objectCenterX = objectX + object.width / 2;
-        const objectCenterY = objectY + object.height / 2;
-
-        const finalPoint = offsetRotationAxis(new Vector2(groupCenterX, groupCenterY), this.angle, new Vector2(objectX, objectY), new Vector2(objectCenterX, objectCenterY));
-
-        object.transformByState({
-            left: finalPoint.x,
-            top: finalPoint.y,
-            angle: this.angle + object.angle,
-        });
+        const transform = transformObjectOutOfGroup(object.getState(), this.getState(), groupWidth, groupHeight);
+        object.transformByState(transform);
     }
 
     getObjectsByOrder() {

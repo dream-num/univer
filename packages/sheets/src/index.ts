@@ -298,8 +298,5 @@ export { SetDefinedNameCommand, type ISetDefinedNameCommandParams } from './comm
 export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';
 export type { FormatType } from './services/numfmt/type';
 export { getMoveRangeUndoRedoMutations } from './commands/commands/move-range.command';
-export { InsertDrawingMutation } from './commands/mutations/insert-drawing.mutation';
-export { RemoveDrawingMutation } from './commands/mutations/remove-drawing.mutation';
-export { SetDrawingMutation } from './commands/mutations/set-drawing.mutation';
-export { type ISheetDrawing, type ISheetUpdateDrawing, type ISheetDrawingPosition, ISheetDrawingService } from './services/sheet-drawing.service';
-export { SetDrawingArrangeMutation } from './commands/mutations/set-drawing-arrange.mutation';
+export { type ISheetDrawing, type ISheetUpdateDrawing, type ISheetDrawingPosition, ISheetDrawingService, SheetDrawingAnchorType, type ISheetDrawingBase } from './services/sheet-drawing.service';
+export { SetDrawingApplyMutation, type ISetDrawingApplyMutationParams, DrawingApplyType } from './commands/mutations/set-drawing-apply.mutation';

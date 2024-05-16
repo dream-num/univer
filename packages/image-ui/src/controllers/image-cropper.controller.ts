@@ -222,7 +222,7 @@ export class ImageCropperController extends Disposable {
                 }
 
 
-                const imageData = this._drawingManagerService.getDrawingByParam<IImageData>({ unitId, subUnitId, drawingId });
+                const imageData = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
 
                 if (imageData == null) {
                     return;
@@ -311,17 +311,17 @@ export class ImageCropperController extends Disposable {
 
                 const srcRect = this._getSrcRectByTransformState(imageShape, imageCropperObject);
 
-                const drawingParam = this._drawingManagerService.getDrawingOKey<IDrawingParam>(imageShape.oKey);
+                const drawingParam = this._drawingManagerService.getDrawingOKey(imageShape.oKey);
                 if (drawingParam != null) {
                     const { left, top, height, width } = imageCropperObject;
-                    this._drawingManagerService.externalUpdateNotification([{
+                    this._drawingManagerService.featurePluginUpdateNotification([{
                         ...drawingParam,
                         transform: {
                             ...drawingParam.transform,
                             left, top, height, width,
                         },
                         srcRect: srcRect.srcRectAngle,
-                    }]);
+                    }] as IImageData[]);
                 }
                 imageShape.setSrcRect({ ...srcRect.srcRectAngle });
                 imageShape.closeRenderByCropper();

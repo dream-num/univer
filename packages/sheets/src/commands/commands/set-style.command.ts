@@ -93,9 +93,9 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
         if (Tools.isArray(style.value)) {
             for (let i = 0; i < ranges.length; i++) {
                 iterator.forOperableEach(ranges[i], (r, c, range) => {
-                    cellValue.setValue(r + range.startRow, c + range.startColumn, {
+                    cellValue.setValue(r, c, {
                         s: {
-                            [style.type]: (style.value as T[][])[r][c],
+                            [style.type]: (style.value as T[][])[r - range.startRow][c - range.startColumn],
                         },
                     });
                 });

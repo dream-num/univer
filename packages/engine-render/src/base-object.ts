@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IKeyValue, ITransformState, Nullable, Observer } from '@univerjs/core';
-import { Observable } from '@univerjs/core';
+import { Disposable, Observable } from '@univerjs/core';
 
 import type { EVENT_TYPE } from './basics/const';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';

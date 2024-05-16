@@ -24,20 +24,20 @@ import { ISheetDrawingService, SelectionManagerService } from '@univerjs/sheets'
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
-import { InsertSheetImageCommand } from '../commands/commands/insert-sheet-image.command';
+import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
-import { SetSheetImageCommand } from '../commands/commands/set-sheet-image.command';
+import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
 import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
-import { GroupSheetImageCommand } from '../commands/commands/group-sheet-image.command';
-import { UngroupSheetImageCommand } from '../commands/commands/ungroup-sheet-image.command';
+import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
+import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 
 
 const SHEET_IMAGE_WIDTH_LIMIT = 500;
 const SHEET_IMAGE_HEIGHT_LIMIT = 500;
 
-@OnLifecycle(LifecycleStages.Rendered, SheetImageUpdateController)
-export class SheetImageUpdateController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, SheetDrawingUpdateController)
+export class SheetDrawingUpdateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -146,7 +146,7 @@ export class SheetImageUpdateController extends Disposable {
             sheetTransform,
         };
 
-        this._commandService.executeCommand(InsertSheetImageCommand.id, {
+        this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId,
             drawings: [sheetDrawingParam],
         } as IInsertDrawingCommandParams);
@@ -321,7 +321,7 @@ export class SheetImageUpdateController extends Disposable {
             });
 
             if (drawings.length > 0) {
-                this._commandService.executeCommand(SetSheetImageCommand.id, {
+                this._commandService.executeCommand(SetSheetDrawingCommand.id, {
                     unitId: params[0].unitId,
                     drawings,
                 } as ISetDrawingCommandParams);
@@ -332,11 +332,11 @@ export class SheetImageUpdateController extends Disposable {
 
     private _groupDrawingListener() {
         this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
-            this._commandService.executeCommand(GroupSheetImageCommand.id, params);
+            this._commandService.executeCommand(GroupSheetDrawingCommand.id, params);
         });
 
         this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {
-            this._commandService.executeCommand(UngroupSheetImageCommand.id, params);
+            this._commandService.executeCommand(UngroupSheetDrawingCommand.id, params);
         });
     }
 

@@ -102,6 +102,10 @@ univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // sheet permission
 univer.registerPlugin(UniverSheetsPermissionUIPlugin);
+// image
+univer.registerPlugin(UniverDrawingPlugin);
+univer.registerPlugin(UniverImageUIPlugin);
+univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {

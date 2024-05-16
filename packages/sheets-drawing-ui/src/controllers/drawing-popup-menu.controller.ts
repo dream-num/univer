@@ -24,11 +24,11 @@ import { COMPONENT_IMAGE_POPUP_MENU, ImageResetSizeOperation, OpenImageCropOpera
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { takeUntil } from 'rxjs';
 import { ImageCropperObject } from '@univerjs/image-ui/views/crop/image-cropper-object.js';
-import { RemoveSheetImageCommand } from '../commands/commands/remove-sheet-image.command';
-import { EditSheetImageOperation } from '../commands/operations/edit-sheet-image.operation';
+import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
+import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 
-@OnLifecycle(LifecycleStages.Rendered, ImagePopupMenuController)
-export class ImagePopupMenuController extends RxDisposable {
+@OnLifecycle(LifecycleStages.Rendered, DrawingPopupMenuController)
+export class DrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
 
     constructor(
@@ -138,7 +138,7 @@ export class ImagePopupMenuController extends RxDisposable {
                     disposePopups.forEach((dispose) => dispose.dispose());
 
                     // if (changeSelf === true) {
-                    //     this._commandService.executeCommand(SidebarSheetImageOperation.id, { value: 'close' });
+                    //     this._commandService.executeCommand(SidebarSheetDrawingOperation.id, { value: 'close' });
                     // }
                 })
             )
@@ -150,14 +150,14 @@ export class ImagePopupMenuController extends RxDisposable {
             {
                 label: 'image-popup.edit',
                 index: 0,
-                commandId: EditSheetImageOperation.id,
+                commandId: EditSheetDrawingOperation.id,
                 commandParams: { unitId, subUnitId, drawingId },
                 disable: false,
             },
             {
                 label: 'image-popup.delete',
                 index: 1,
-                commandId: RemoveSheetImageCommand.id,
+                commandId: RemoveSheetDrawingCommand.id,
                 commandParams: { unitId, drawings: [{ unitId, subUnitId, drawingId }] },
                 disable: false,
             },

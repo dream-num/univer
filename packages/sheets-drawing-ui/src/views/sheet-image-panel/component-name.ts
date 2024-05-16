@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { UniverSheetsImageUIPlugin } from './plugin';
+export const COMPONENT_SHEET_DRAWING_PANEL = 'COMPONENT_SHEET_DRAWING_PANEL';

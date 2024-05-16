@@ -63,8 +63,6 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
     private _addNewRender(workbook: Workbook) {
         const { scene, engine } = this._context;
 
-        this._scene = scene;
-
         scene.addLayer(new Layer(scene, [], 0), new Layer(scene, [], 2));
 
         this._addComponent(workbook);
@@ -254,10 +252,11 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
     private _initMouseWheel(viewMain: Viewport) {
         this.disposeWithMe(
             toDisposable(
-                this._scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
+                scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
                     if (evt.ctrlKey) {
                         return;
                     }
+
                     let offsetX = 0;
                     let offsetY = 0;
 
@@ -275,7 +274,8 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
                         }
                         this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
 
-                        if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                        // 临界点时执行浏览器行为
+                        if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
                             if (!isLimitedStore?.isLimitedX) {
                                 state.stopPropagation();
                             }
@@ -298,7 +298,8 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
                             }
                             this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
 
-                            if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                            // 临界点时执行浏览器行为
+                            if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
                                 if (!isLimitedStore?.isLimitedX) {
                                     state.stopPropagation();
                                 }
@@ -315,7 +316,8 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
                             }
                             this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY });
 
-                            if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                            // 临界点时执行浏览器行为
+                            if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
                                 if (!isLimitedStore?.isLimitedY) {
                                     state.stopPropagation();
                                 }

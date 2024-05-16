@@ -126,8 +126,8 @@ export class SheetsThreadCommentCopyPasteController extends Disposable {
                                 targetUndos.unshift({
                                     id: DeleteCommentMutation.id,
                                     params: {
-                                        unitId: sourceUnitId,
-                                        subUnitId: sourceSubUnitId,
+                                        unitId: targetUnitId,
+                                        subUnitId: targetSubUnitId,
                                         commentId: item.id,
                                     },
                                 });

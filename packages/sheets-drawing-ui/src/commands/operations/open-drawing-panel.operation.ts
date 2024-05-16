@@ -19,14 +19,14 @@ import { CommandType, IDrawingManagerService, IUniverInstanceService, LocaleServ
 import { ISidebarService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { getSheetCommandTarget } from '@univerjs/sheets';
-import { COMPONENT_SHEET_IMAGE_PANEL } from '../../views/sheet-image-panel/component-name';
+import { COMPONENT_SHEET_DRAWING_PANEL } from '../../views/sheet-image-panel/component-name';
 
 
 export interface IUIComponentCommandParams {
     value: string;
 }
 
-export const SidebarSheetImageOperation: ICommand = {
+export const SidebarSheetDrawingOperation: ICommand = {
     id: 'sidebar.operation.sheet-image',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IUIComponentCommandParams) => {
@@ -42,7 +42,7 @@ export const SidebarSheetImageOperation: ICommand = {
             case 'open':
                 sidebarService.open({
                     header: { title: localeService.t('sheetImage.panel.title') },
-                    children: { label: COMPONENT_SHEET_IMAGE_PANEL },
+                    children: { label: COMPONENT_SHEET_DRAWING_PANEL },
                     onClose: () => {
                         drawingManagerService.focusDrawing(null);
                     },

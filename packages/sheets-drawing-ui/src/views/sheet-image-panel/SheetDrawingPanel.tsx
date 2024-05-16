@@ -23,7 +23,7 @@ import { ImageCommonPanel } from '@univerjs/image-ui';
 import styles from '@univerjs/image-ui/views/panel/index.module.less';
 import { SheetDrawingAnchor } from './SheetDrawingAnchor';
 
-export const SheetImagePanel = () => {
+export const SheetDrawingPanel = () => {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const focusDrawings = drawingManagerService.getFocusDrawings();
 

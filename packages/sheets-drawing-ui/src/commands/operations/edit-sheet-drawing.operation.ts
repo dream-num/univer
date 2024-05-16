@@ -22,10 +22,10 @@ import {
 
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
-import { SidebarSheetImageOperation } from './open-image-panel.operation';
+import { SidebarSheetDrawingOperation } from './open-drawing-panel.operation';
 
 
-export const EditSheetImageOperation: IOperation<IDrawingSearch> = {
+export const EditSheetDrawingOperation: IOperation<IDrawingSearch> = {
     id: 'sheet.operation.edit-sheet-image',
     type: CommandType.OPERATION,
     handler: (accessor: IAccessor, params?: IDrawingSearch) => {
@@ -36,7 +36,7 @@ export const EditSheetImageOperation: IOperation<IDrawingSearch> = {
             return false;
         }
         drawingManagerService.focusDrawing([params]);
-        commandService.executeCommand(SidebarSheetImageOperation.id, { value: 'open' });
+        commandService.executeCommand(SidebarSheetDrawingOperation.id, { value: 'open' });
         return true;
     },
 };

@@ -32,7 +32,7 @@ import type { ISetDrawingCommandParams } from './interfaces';
 /**
  * The command to update defined name
  */
-export const SetSheetImageCommand: ICommand = {
+export const SetSheetDrawingCommand: ICommand = {
     id: 'sheet.command.set-sheet-image',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params?: ISetDrawingCommandParams) => {

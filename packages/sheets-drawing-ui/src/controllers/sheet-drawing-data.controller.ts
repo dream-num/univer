@@ -19,8 +19,8 @@ import { Inject } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '@univerjs/sheets';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetImageDataController)
-export class SheetImageDataController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, SheetDrawingDataController)
+export class SheetDrawingDataController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,

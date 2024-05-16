@@ -24,19 +24,20 @@ import { UploadFileMenu } from '../views/upload-component/UploadFile';
 import { COMPONENT_UPLOAD_FILE_MENU } from '../views/upload-component/component-name';
 import { ImageMenuFactory, ImageUploadIcon, UploadCellImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
-import { InsertSheetImageCommand } from '../commands/commands/insert-sheet-image.command';
-import { RemoveSheetImageCommand } from '../commands/commands/remove-sheet-image.command';
-import { SetSheetImageCommand } from '../commands/commands/set-sheet-image.command';
-import { COMPONENT_SHEET_IMAGE_PANEL } from '../views/sheet-image-panel/component-name';
-import { SheetImagePanel } from '../views/sheet-image-panel/SheetImagePanel';
-import { SidebarSheetImageOperation } from '../commands/operations/open-image-panel.operation';
-import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
-import { EditSheetImageOperation } from '../commands/operations/edit-sheet-image.operation';
-import { GroupSheetImageCommand } from '../commands/commands/group-sheet-image.command';
-import { UngroupSheetImageCommand } from '../commands/commands/ungroup-sheet-image.command';
+import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
+import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
+import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
+import { COMPONENT_SHEET_DRAWING_PANEL } from '../views/sheet-image-panel/component-name';
+import { SheetDrawingPanel } from '../views/sheet-image-panel/SheetDrawingPanel';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetImageUIController)
-export class SheetImageUIController extends Disposable {
+import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
+import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
+import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
+import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
+import { SidebarSheetDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
+
+@OnLifecycle(LifecycleStages.Rendered, SheetDrawingUIController)
+export class SheetDrawingUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
@@ -52,7 +53,7 @@ export class SheetImageUIController extends Disposable {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(ImageUploadIcon, AdditionAndSubtractionSingle));
         this.disposeWithMe(componentManager.register(COMPONENT_UPLOAD_FILE_MENU, UploadFileMenu));
-        this.disposeWithMe(componentManager.register(COMPONENT_SHEET_IMAGE_PANEL, SheetImagePanel));
+        this.disposeWithMe(componentManager.register(COMPONENT_SHEET_DRAWING_PANEL, SheetDrawingPanel));
     }
 
     private _initMenus(): void {
@@ -72,14 +73,14 @@ export class SheetImageUIController extends Disposable {
         [
             InsertFloatImageOperation,
             InsertCellImageOperation,
-            InsertSheetImageCommand,
-            RemoveSheetImageCommand,
-            SetSheetImageCommand,
-            SidebarSheetImageOperation,
+            InsertSheetDrawingCommand,
+            RemoveSheetDrawingCommand,
+            SetSheetDrawingCommand,
+            SidebarSheetDrawingOperation,
             ClearSheetDrawingTransformerOperation,
-            EditSheetImageOperation,
-            GroupSheetImageCommand,
-            UngroupSheetImageCommand,
+            EditSheetDrawingOperation,
+            GroupSheetDrawingCommand,
+            UngroupSheetDrawingCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

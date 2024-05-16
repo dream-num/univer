@@ -172,6 +172,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                             unitId: comment.unitId,
                             subUnitId: comment.subUnitId,
                             commentId: comment.id,
+                            temp: true,
                         });
                     }}
                     onClose={() => onResolve?.(comment.id)}

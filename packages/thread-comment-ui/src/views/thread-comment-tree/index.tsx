@@ -40,6 +40,7 @@ export interface IThreadCommentTreeProps {
     onClose?: () => void;
     getSubUnitName: (subUnitId: string) => string;
     prefix?: string;
+    autoFocus?: boolean;
 }
 
 export interface IThreadCommentItemProps {
@@ -168,6 +169,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         onClose,
         getSubUnitName,
         prefix,
+        autoFocus,
     } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [editingId, setEditingId] = useState('');
@@ -193,7 +195,6 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             }],
         ...comments?.children ?? [],
     ];
-
     const handleResolve = () => {
         commandService.executeCommand(ResolveCommentCommand.id, {
             unitId,
@@ -287,6 +288,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 ? (
                     <div>
                         <ThreadCommentEditor
+                            key={`${autoFocus}`}
                             ref={editorRef}
                             onSave={({ text, attachments }) => {
                                 commandService.executeCommand(
@@ -308,7 +310,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                     } as IAddCommentCommandParams
                                 );
                             }}
-                            autoFocus={!comments}
+                            autoFocus={autoFocus || (!comments)}
                             onCancel={() => {
                                 if (!comments) {
                                     onClose?.();

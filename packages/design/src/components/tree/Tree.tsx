@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import { CheckMarkSingle, DropdownSingle } from '@univerjs/icons';
+import { DropdownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useState } from 'react';
+import { Checkbox } from '../checkbox';
 
 import styles from './index.module.less';
+import { createCacheWithFindNodePathFromTree, filterLeafNode, isIntermediated, mergeTreeSelected } from './util';
 
 export enum TreeSelectionMode {
     ONLY_LEAF_NODE,
@@ -51,87 +53,107 @@ export interface ITreeProps {
     selectionMode?: TreeSelectionMode;
 
     /**
-     * Used for setting the currently selected value
+     * Used for setting the currently selected value,leaf node.
      */
-    value?: string | number | boolean;
+    valueGroup?: string[];
 
     /**
      * Set the handler to handle `click` event
      */
-    onChange?: (value: string | number | boolean) => void;
+    onChange?: (node: ITreeNodeProps, allSelectedNode: ITreeNodeProps[]) => void;
+
+    onExpend?: (value: string) => void;
 }
 
 type TreeItemProps = ITreeNodeProps & {
     _selected?: boolean;
     _expand?: boolean;
+    _intermediated?: boolean;
 };
 
 /**
  * Tree Component
  */
 export function Tree(props: ITreeProps) {
-    const { data = [], defaultExpandAll = false, selectionMode = TreeSelectionMode.ALL, value, onChange } = props;
+    const { data = [], defaultExpandAll = false, selectionMode = TreeSelectionMode.ALL, valueGroup = [], onChange, onExpend } = props;
+    const [update, forceUpdate] = useState({});
+    const expandKeySet = useMemo(() => {
+        return new Set<string>();
+    }, [data]);
 
-    const [expandKeys, setExpandKeys] = useState<Array<string | number | boolean>>([]);
+    const findNode = useMemo(() => createCacheWithFindNodePathFromTree(data), [data]);
+
+    const selectedNodeKeySet = useMemo(() => {
+        const set = new Set<string>();
+        valueGroup.forEach((key) => {
+            const path = findNode.findNodePathFromTreeWithCache(key);
+            path.forEach((k) => set.add(k));
+        });
+        return set;
+    }, [valueGroup, findNode]);
 
     useEffect(() => {
         function walkData(item: ITreeNodeProps) {
-            setExpandKeys((prev) => [...prev, item.key]);
-
+            expandKeySet.add(item.key);
             item.children?.forEach(walkData);
         }
         if (defaultExpandAll) {
             data.forEach(walkData);
         }
+        forceUpdate({});
     }, [defaultExpandAll, data]);
 
     const computedData = useMemo(() => {
-        return data.map(function walkData(item): TreeItemProps {
-            const { title, key, children } = item;
+        return data.map((item) => {
+            function walkData(item: ITreeNodeProps): TreeItemProps {
+                const { title, key, children } = item;
+                const isExpand = expandKeySet.has(key);
+                const isSelected = selectedNodeKeySet.has(key);
+                const intermediated = isIntermediated(selectedNodeKeySet, item);
 
-            return {
-                title,
-                key,
-                children: children && children.map(walkData),
-                _selected: key === value,
-                _expand: expandKeys.includes(key),
-            };
+                return {
+                    title,
+                    key,
+                    children: children && children.map((item) => walkData(item)),
+                    _selected: isSelected,
+                    _expand: isExpand,
+                    _intermediated: intermediated,
+                };
+            }
+            return walkData(item);
         });
-    }, [value, expandKeys]);
+    }, [selectedNodeKeySet, expandKeySet, update]);
 
-    function handleSelectItem(treeItem: ITreeNodeProps) {
-        if (treeItem.children) {
-            setExpandKeys((prev) => {
-                const index = prev.findIndex((key) => key === treeItem.key);
+    function handleChange(treeItem: TreeItemProps) {
+        const path: string[] = findNode.findNodePathFromTreeWithCache(treeItem.key);
+        const result = mergeTreeSelected(data, [...selectedNodeKeySet], path);
+        onChange?.(treeItem, filterLeafNode(data, result));
+    }
 
-                if (index === -1) {
-                    return [...prev, treeItem.key];
-                }
-
-                return [...prev.slice(0, index), ...prev.slice(index + 1)];
-            });
+    function handleExpendItem(treeItem: ITreeNodeProps) {
+        if (treeItem.children?.length) {
+            if (expandKeySet.has(treeItem.key)) {
+                expandKeySet.delete(treeItem.key);
+            } else {
+                expandKeySet.add(treeItem.key);
+            }
+            forceUpdate({});
         }
-
         if (selectionMode === TreeSelectionMode.ONLY_LEAF_NODE) {
             if (treeItem.children) {
                 return;
             }
         }
 
-        onChange?.(treeItem.key);
+        onExpend?.(treeItem.key);
     }
 
     function walkTree(treeItem: TreeItemProps) {
-        const { title, key, children, _selected, _expand } = treeItem;
-
+        const { title, key, children, _selected, _expand, _intermediated } = treeItem;
         return (
             <li
                 key={key}
                 className={styles.treeListItem}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectItem(treeItem);
-                }}
             >
                 <a
                     className={clsx(styles.treeListItemContent, {
@@ -143,16 +165,28 @@ export function Tree(props: ITreeProps) {
                             className={clsx(styles.treeIcon, {
                                 [styles.treeIconExpand]: _expand,
                             })}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleExpendItem(treeItem);
+                            }}
                         >
                             <DropdownSingle />
                         </span>
                     )}
-                    {_selected && (
-                        <span className={styles.treeListItemContentSelectedIcon}>
-                            <CheckMarkSingle />
-                        </span>
-                    )}
-                    <span>{title}</span>
+                    <Checkbox
+                        checked={_selected && !_intermediated}
+                        indeterminate={_selected && _intermediated}
+                        onChange={() => {
+                            handleChange(treeItem);
+                        }}
+                    />
+                    <span onClick={(e) => {
+                        e.stopPropagation();
+                        handleExpendItem(treeItem);
+                    }}
+                    >
+                        {title}
+                    </span>
                 </a>
                 {children && (
                     <ul

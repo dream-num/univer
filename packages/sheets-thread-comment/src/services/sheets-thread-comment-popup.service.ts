@@ -86,7 +86,7 @@ export class SheetsThreadCommentPopupService extends Disposable {
                 onClickOutside: () => {
                     this.hidePopup();
                 },
-                direction: 'vertical',
+                direction: 'horizontal',
                 excludeOutside: [
                     ...Array.from(document.querySelectorAll('.univer-thread-comment')),
                     document.getElementById('thread-comment-add'),

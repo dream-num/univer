@@ -92,22 +92,21 @@ export const transformDocument2TextNodes = (doc: IDocumentBody) => {
                 type: 'text',
                 content: dataStream.slice(lastIndex, range.startIndex),
             });
-            textNodes.push({
-                type: 'mention',
-                content: {
-                    label: dataStream.slice(range.startIndex, range.endIndex).slice(1, -1),
-                    id: range.rangeId,
-                },
-            });
-            lastIndex = range.endIndex;
         }
+        textNodes.push({
+            type: 'mention',
+            content: {
+                label: dataStream.slice(range.startIndex, range.endIndex).slice(1, -1),
+                id: range.rangeId,
+            },
+        });
+        lastIndex = range.endIndex;
     });
 
     textNodes.push({
         type: 'text',
         content: dataStream.slice(lastIndex, end),
     });
-
     return textNodes;
 };
 

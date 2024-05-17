@@ -85,7 +85,7 @@ function RectPopup(props: IRectPopupProps) {
         left: -9999,
     });
 
-    const style = useMemo(() => ({ ...position, overflow: 'inherit' }), [position]);
+    const style = useMemo(() => ({ ...position }), [position]);
     useEffect(() => {
         requestAnimationFrame(() => {
             if (!nodeRef.current) {

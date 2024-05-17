@@ -121,6 +121,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         <div className={styles.threadCommentPanel}>
             <div className={styles.threadCommentPanelForms}>
                 <Select
+                    borderless
                     value={unit}
                     onChange={(e) => setUnit(e)}
                     options={[
@@ -134,6 +135,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     ]}
                 />
                 <Select
+                    borderless
                     value={status}
                     onChange={(e) => setStatus(e)}
                     options={[

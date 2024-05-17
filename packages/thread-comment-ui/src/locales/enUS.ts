@@ -25,7 +25,7 @@ export default {
         },
         editor: {
             placeholder: 'Reply or add others with @',
-            reply: 'Reply',
+            reply: 'Comment',
             cancel: 'Cancel',
             save: 'Save',
         },

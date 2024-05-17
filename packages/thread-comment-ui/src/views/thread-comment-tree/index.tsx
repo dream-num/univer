@@ -18,7 +18,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import React, { useRef, useState } from 'react';
-import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle } from '@univerjs/icons';
+import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
 import { ICommandService, LocaleService, Tools, type UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import dayjs from 'dayjs';
@@ -68,6 +68,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const currentUser = useObservable(userManagerService.currentUser$);
     const isCommentBySelf = currentUser?.userID === item.personId;
     const isMock = item.id === MOCK_ID;
+    const [showReply, setShowReply] = useState(false);
     const handleDeleteItem = () => {
         commandService.executeCommand(
             isRoot ? DeleteCommentTreeCommand.id : DeleteCommentCommand.id,
@@ -83,19 +84,23 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     };
 
     return (
-        <div className={styles.threadCommentItem}>
+        <div className={styles.threadCommentItem} onMouseLeave={() => setShowReply(false)} onMouseEnter={() => setShowReply(true)}>
             <img className={styles.threadCommentItemHead} src={user?.avatar} />
             <div className={styles.threadCommentItemTitle}>
-                <div>
+                <div className={styles.threadCommentUsername}>
                     {user?.name || ' '}
                 </div>
                 <div>
                     {(isMock || resolved)
                         ? null
                         : (
-                            <div className={styles.threadCommentIcon} onClick={() => onReply(user)}>
-                                <ReplyToCommentSingle />
-                            </div>
+                            showReply
+                                ? (
+                                    <div className={styles.threadCommentIcon} onClick={() => onReply(user)}>
+                                        <ReplyToCommentSingle />
+                                    </div>
+                                )
+                                : null
                         )}
                     {isCommentBySelf && !isMock && !resolved
                         ? (
@@ -177,6 +182,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         autoFocus,
     } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
+
     const [editingId, setEditingId] = useState('');
     useObservable(threadCommentModel.commentMap$);
     const comments = id ? threadCommentModel.getCommentWithChildren(unitId, subUnitId, id) : null;
@@ -242,7 +248,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                 className={styles.threadCommentIcon}
                                 style={{ color: resolved ? 'rgb(var(--green-500))' : '' }}
                             >
-                                <ResolvedSingle />
+                                {resolved ? <ResolvedSingle /> : <SolveSingle />}
                             </div>
                             {currentUser?.userID === comments.root.personId
                                 ? (

@@ -24,12 +24,14 @@ import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { SelectionMoveType, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { ScrollToCellCommand } from '@univerjs/sheets-ui';
+import { DeleteCommentMutation } from '@univerjs/thread-comment';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
 import { enUS, zhCN } from '../locales';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
 import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
+import type { IDeleteCommentMutationParams } from '../../../thread-comment/lib/types';
 import { AddCommentShortcut, threadCommentMenuFactory, threadPanelMenuFactory } from './menu';
 
 @OnLifecycle(LifecycleStages.Starting, SheetsThreadCommentController)
@@ -82,6 +84,18 @@ export class SheetsThreadCommentController extends Disposable {
                             commentId,
                         });
                     }
+                }
+            }
+
+            if (commandInfo.id === DeleteCommentMutation.id) {
+                const params = commandInfo.params as IDeleteCommentMutationParams;
+                const active = this._sheetsThreadCommentPopupService.activePopup;
+                if (!active) {
+                    return;
+                }
+                const { unitId, subUnitId, commentId } = active;
+                if (params.unitId === unitId && params.subUnitId === subUnitId && params.commentId === commentId) {
+                    this._sheetsThreadCommentPopupService.hidePopup();
                 }
             }
         });

@@ -42,7 +42,6 @@ import { GroupType, SetImageGroupOperation } from '../commands/operations/image-
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';
 import { getUpdateParams } from '../utils/get-update-params';
 
-
 const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
 interface IDrawingTransformCache {
@@ -83,6 +82,8 @@ export class ImageUpdateController extends Disposable {
         this._drawingArrangeListener();
 
         this._drawingGroupListener();
+
+        this._drawingRefreshListener();
     }
 
     private _commandExecutedListener() {
@@ -206,7 +207,6 @@ export class ImageUpdateController extends Disposable {
                 return;
             }
 
-
             objects.push(object);
 
             const { transform } = drawing;
@@ -224,7 +224,6 @@ export class ImageUpdateController extends Disposable {
         if (objects.length === 0) {
             return;
         }
-
 
         const groupKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
         const group = new Group(groupKey);
@@ -288,7 +287,6 @@ export class ImageUpdateController extends Disposable {
     //     transformer.setSelectedControl(firstGroup);
     // }
 
-
     private _ungroupDrawings(drawings: IDrawingGroupUpdateParam[]) {
         drawings.forEach((drawing) => {
             this._ungroupDrawing(drawing);
@@ -308,7 +306,6 @@ export class ImageUpdateController extends Disposable {
 
         // const objects: BaseObject[] = [];
 
-
         children.forEach((drawing) => {
             const drawingKey = getDrawingShapeKeyByDrawingSearch(drawing);
             const object = scene.getObjectIncludeInGroup(drawingKey);
@@ -320,7 +317,6 @@ export class ImageUpdateController extends Disposable {
             if (object == null) {
                 return;
             }
-
 
             // objects.push(object);
 
@@ -336,7 +332,6 @@ export class ImageUpdateController extends Disposable {
             // }
         });
 
-
         const groupKey = getDrawingShapeKeyByDrawingSearch(parent);
         const group = scene.getObject(groupKey) as Group;
         const { width, height } = group;
@@ -348,7 +343,6 @@ export class ImageUpdateController extends Disposable {
         // if (objects.length === 0) {
         //     return;
         // }
-
 
         // objects.forEach((group) => {
         //     const { width, height } = group;
@@ -546,6 +540,10 @@ export class ImageUpdateController extends Disposable {
                 return true;
             }
 
+            if (imageData.drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
+                return;
+            }
+
             (imageShape as Image).resetSize();
 
             const { width, height } = (imageShape as Image).getNativeSize();
@@ -618,7 +616,11 @@ export class ImageUpdateController extends Disposable {
                         return;
                     }
 
-                    const { transform } = imageParam;
+                    const { transform, drawingType } = imageParam;
+
+                    if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
+                        return;
+                    }
 
                     const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
 
@@ -643,7 +645,6 @@ export class ImageUpdateController extends Disposable {
                     }
 
                     const imageConfig: IImageProps = { left, top, width, height, zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1 };
-
 
                     const imageNativeCache = this._getImageSourceCache(imageParam);
                     if (imageNativeCache != null) {
@@ -752,7 +753,6 @@ export class ImageUpdateController extends Disposable {
         };
     }
 
-
     private _drawingRemoveListener() {
         this.disposeWithMe(
             this._drawingManagerService.remove$.subscribe((params) => {
@@ -779,7 +779,6 @@ export class ImageUpdateController extends Disposable {
         );
     }
 
-
     private _drawingUpdateListener() {
         this.disposeWithMe(
             this._drawingManagerService.update$.subscribe((params) => {
@@ -792,7 +791,11 @@ export class ImageUpdateController extends Disposable {
                         return;
                     }
 
-                    const { transform } = imageParam;
+                    const { transform, drawingType } = imageParam;
+
+                    if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
+                        return;
+                    }
 
                     const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
 
@@ -810,6 +813,43 @@ export class ImageUpdateController extends Disposable {
                     const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
                     const imageShape = scene.getObject(imageShapeKey);
+
+                    if (imageShape == null) {
+                        return true;
+                    }
+
+                    imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                });
+            })
+        );
+    }
+
+    private _drawingRefreshListener() {
+        this.disposeWithMe(
+            this._drawingManagerService.refreshTransform$.subscribe((params) => {
+                (params).forEach((param) => {
+                    const { unitId, subUnitId, drawingId } = param;
+
+                    const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
+                    if (renderObject == null) {
+                        return;
+                    }
+                    const { scene, transformer } = renderObject;
+
+                    const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+                    const imageShape = scene.getObject(imageShapeKey);
+
+                    const drawingParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
+                    if (drawingParam == null) {
+                        return;
+                    }
+                    const { transform } = drawingParam;
+
+                    if (transform == null) {
+                        return true;
+                    }
+
+                    const { left = 0, top = 0, width = 0, height = 0, angle = 0, flipX = false, flipY = false, skewX = 0, skewY = 0 } = transform;
 
                     if (imageShape == null) {
                         return true;
@@ -918,7 +958,6 @@ export class ImageUpdateController extends Disposable {
     }
 
     private _imageSourceCache: Map<string, HTMLImageElement> = new Map();
-
 
     private _addImageSourceCache(imageData: IImageData, imageSource: Nullable<HTMLImageElement>) {
         const { source, imageSourceType } = imageData;

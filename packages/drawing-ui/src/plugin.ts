@@ -17,14 +17,14 @@
 import { LocaleService, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ImageUpdateController } from './controllers/image-update.controller';
-import { ImageUIController } from './controllers/image-ui.controller';
+import { DrawingUpdateController } from './controllers/drawing-update.controller';
+import { DrawingUIController } from './controllers/drawing-ui.controller';
 import { ImageCropperController } from './controllers/image-cropper.controller';
-
+import { ImageUpdateController } from './controllers/image-update.controller';
 
 const PLUGIN_NAME = 'IMAGE_UI_PLUGIN';
 
-export class UniverImageUIPlugin extends Plugin {
+export class UniverDrawingUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
@@ -45,10 +45,10 @@ export class UniverImageUIPlugin extends Plugin {
             // services
 
             // controllers
-            [ImageUpdateController],
-            [ImageUIController],
+            [DrawingUpdateController],
+            [DrawingUIController],
             [ImageCropperController],
-
+            [ImageUpdateController],
         ];
 
         dependencies.forEach((dependency) => injector.add(dependency));

@@ -17,19 +17,24 @@
 import type { IDrawingSearch, IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
-
-export enum GroupType {
-    group,
-    ungroup,
-    regroup,
+export enum AlignType {
+    default = '0',
+    left = '1',
+    center = '2',
+    right = '3',
+    top = '4',
+    middle = '5',
+    bottom = '6',
+    horizon = '7',
+    vertical = '8',
 }
 
-export interface ISetImageGroupOperationParams {
-    groupType: GroupType;
+export interface ISetDrawingAlignOperationParams {
+    alignType: AlignType;
 }
 
-export const SetImageGroupOperation: IOperation<ISetImageGroupOperationParams> = {
-    id: 'sheet.operation.set-image-group',
+export const SetDrawingAlignOperation: IOperation<ISetDrawingAlignOperationParams> = {
+    id: 'sheet.operation.set-image-align',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         return true;

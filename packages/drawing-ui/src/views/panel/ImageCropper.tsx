@@ -24,12 +24,10 @@ import clsx from 'clsx';
 import { AutoImageCropOperation, CropType } from '../../commands/operations/image-crop.operation';
 import styles from './index.module.less';
 
-
 export interface IImageCropperProps {
     drawings: IDrawingParam[];
     cropperShow: boolean;
 }
-
 
 export const ImageCropper = (props: IImageCropperProps) => {
     const commandService = useDependency(ICommandService);

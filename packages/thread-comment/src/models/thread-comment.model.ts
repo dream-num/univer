@@ -43,6 +43,14 @@ export type CommentUpdate = {
     subUnitId: string;
     type: 'updateRef';
     payload: IUpdateCommentRefPayload;
+} | {
+    unitId: string;
+    subUnitId: string;
+    type: 'resolve';
+    payload: {
+        commentId: string;
+        resolved: boolean;
+    };
 };
 
 export class ThreadCommentModel {
@@ -208,6 +216,15 @@ export class ThreadCommentModel {
         }
 
         oldComment.resolved = resolved;
+        this._commentUpdate$.next({
+            unitId,
+            subUnitId,
+            type: 'resolve',
+            payload: {
+                commentId,
+                resolved,
+            },
+        });
         this._refreshCommentsMap$();
         this._refreshCommentsTreeMap$();
         return true;

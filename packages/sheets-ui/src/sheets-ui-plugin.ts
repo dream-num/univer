@@ -73,7 +73,7 @@ import { AutoFillController } from './controllers/auto-fill.controller';
 import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
 
 export class UniverSheetsUIPlugin extends Plugin {
-    static override pluginName = 'SHEET_UI_PLUGIN_NAME';
+    static override pluginName = 'SHEET_UI_PLUGIN';
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

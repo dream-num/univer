@@ -19,7 +19,6 @@ import type { IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { ExportController, RecordController } from '../../local-save';
 import { ConfirmOperation } from '../commands/operations/confirm.operation';
 import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
@@ -50,6 +49,8 @@ import {
     ThemeMenuItemFactory,
     UnitMenuItemFactory,
 } from './menu';
+import { RecordController } from './local-save/record.controller';
+import { ExportController } from './local-save/export.controller';
 
 export class DebuggerController extends Disposable {
     constructor(

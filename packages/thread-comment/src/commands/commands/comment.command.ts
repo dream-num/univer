@@ -27,7 +27,7 @@ export interface IAddCommentCommandParams {
 
 export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
     id: 'thread-comment.command.add-comment',
-    type: CommandType.MUTATION,
+    type: CommandType.COMMAND,
     handler(accessor, params) {
         if (!params) {
             return false;
@@ -65,7 +65,7 @@ export interface IUpdateCommentCommandParams {
 
 export const UpdateCommentCommand: ICommand<IUpdateCommentCommandParams> = {
     id: 'thread-comment.command.update-comment',
-    type: CommandType.MUTATION,
+    type: CommandType.COMMAND,
     handler(accessor, params) {
         if (!params) {
             return false;
@@ -125,7 +125,7 @@ export interface IUpdateCommentRefCommandParams {
 
 export const UpdateCommentRefCommand: ICommand<IUpdateCommentRefCommandParams> = {
     id: 'thread-comment.command.update-comment-ref',
-    type: CommandType.MUTATION,
+    type: CommandType.COMMAND,
     handler(accessor, params) {
         if (!params) {
             return false;
@@ -172,7 +172,7 @@ export interface IResolveCommentCommandParams {
 
 export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
     id: 'thread-comment.command.resolve-comment',
-    type: CommandType.MUTATION,
+    type: CommandType.COMMAND,
     handler(accessor, params) {
         if (!params) {
             return false;
@@ -195,7 +195,7 @@ export interface IDeleteCommentCommandParams {
 
 export const DeleteCommentCommand: ICommand<IDeleteCommentCommandParams> = {
     id: 'thread-comment.command.delete-comment',
-    type: CommandType.MUTATION,
+    type: CommandType.COMMAND,
     handler(accessor, params) {
         if (!params) {
             return false;
@@ -239,7 +239,7 @@ export interface IDeleteCommentTreeCommandParams {
 
 export const DeleteCommentTreeCommand: ICommand<IDeleteCommentCommandParams> = {
     id: 'thread-comment.command.delete-comment-tree',
-    type: CommandType.MUTATION,
+    type: CommandType.COMMAND,
     handler(accessor, params) {
         if (!params) {
             return false;

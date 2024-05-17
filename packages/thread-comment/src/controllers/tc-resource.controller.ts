@@ -20,14 +20,16 @@ import { UniverType } from '@univerjs/protocol';
 import { ThreadCommentModel } from '../models/thread-comment.model';
 import { TC_PLUGIN_NAME } from '../types/const';
 import type { IThreadComment } from '../types/interfaces/i-thread-comment';
+import { IThreadCommentDataSourceService } from '../services/tc-datasource.service';
 
-export type ThreadCommentJSON = Record<string, IThreadComment[]>;
+export type UnitThreadCommentJSON = Record<string, IThreadComment[]>;
 
 @OnLifecycle(LifecycleStages.Starting, ThreadCommentResourceController)
 export class ThreadCommentResourceController extends Disposable {
     constructor(
         @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,
-        @Inject(ThreadCommentModel) private readonly _threadCommentModel: ThreadCommentModel
+        @Inject(ThreadCommentModel) private readonly _threadCommentModel: ThreadCommentModel,
+        @IThreadCommentDataSourceService private readonly _threadCommentDataSourceService: IThreadCommentDataSourceService
     ) {
         super();
         this._initSnapshot();
@@ -36,16 +38,17 @@ export class ThreadCommentResourceController extends Disposable {
     private _initSnapshot() {
         const toJson = (unitID: string) => {
             const map = this._threadCommentModel.getUnit(unitID);
-            const resultMap: ThreadCommentJSON = {};
+            const resultMap: UnitThreadCommentJSON = {};
             if (map) {
                 map.forEach(([key, v]) => {
                     resultMap[key] = v;
                 });
-                return JSON.stringify(resultMap);
+
+                return JSON.stringify(this._threadCommentDataSourceService.saveToSnapshot(resultMap));
             }
             return '';
         };
-        const parseJson = (json: string): ThreadCommentJSON => {
+        const parseJson = (json: string): UnitThreadCommentJSON => {
             if (!json) {
                 return {};
             }
@@ -65,28 +68,9 @@ export class ThreadCommentResourceController extends Disposable {
                 onUnLoad: (unitID) => {
                     this._threadCommentModel.deleteUnit(unitID);
                 },
-                onLoad: (unitID, value) => {
-                    Object.keys(value).forEach((subunitId) => {
-                        const commentList = value[subunitId];
-                        commentList.forEach((comment) => {
-                            this._threadCommentModel.addComment(unitID, subunitId, comment);
-                        });
-                    });
-                },
-            })
-        );
-
-        this.disposeWithMe(
-            this._resourceManagerService.registerPluginResource({
-                pluginName: `DOC_${TC_PLUGIN_NAME}`,
-                businesses: [UniverType.UNIVER_DOC],
-                toJson: (unitID) => toJson(unitID),
-                parseJson: (json) => parseJson(json),
-                onUnLoad: (unitID) => {
-                    this._threadCommentModel.deleteUnit(unitID);
-                },
-                onLoad: (unitID, value) => {
-                    Object.keys(value).forEach((subunitId) => {
+                onLoad: async (unitID, value) => {
+                    const unitComments = await this._threadCommentDataSourceService.loadFormSnapshot(value);
+                    Object.keys(unitComments).forEach((subunitId) => {
                         const commentList = value[subunitId];
                         commentList.forEach((comment) => {
                             this._threadCommentModel.addComment(unitID, subunitId, comment);

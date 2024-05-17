@@ -21,6 +21,7 @@ import { ThreadCommentResourceController } from './controllers/tc-resource.contr
 import { TC_PLUGIN_NAME } from './types/const';
 import { AddCommentMutation, DeleteCommentMutation, ResolveCommentMutation, UpdateCommentMutation, UpdateCommentRefMutation } from './commands/mutations/comment.mutation';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from './commands/commands/comment.command';
+import { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
 
 export class UniverThreadCommentPlugin extends Plugin {
     static override pluginName = TC_PLUGIN_NAME;
@@ -38,6 +39,7 @@ export class UniverThreadCommentPlugin extends Plugin {
         ([
             [ThreadCommentModel],
             [ThreadCommentResourceController],
+            [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
         ] as Dependency[]).forEach(
             (d) => {
                 injector.add(d);

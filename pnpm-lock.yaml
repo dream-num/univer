@@ -660,9 +660,6 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui

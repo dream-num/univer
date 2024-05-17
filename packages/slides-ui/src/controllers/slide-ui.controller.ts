@@ -15,8 +15,7 @@
  */
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IDesktopUIController } from '@univerjs/ui';
-import { DesktopUIPart, IUIController } from '@univerjs/ui';
+import { DesktopUIPart, IUIController, IUIPartsService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { SlideSideBar } from '../views/slide-bar/SlideBar';
@@ -30,7 +29,7 @@ import { SetSlidePageThumbOperation } from '../commands/operations/setThumb.oper
 export class SlideUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @IUIController private readonly _uiController: IDesktopUIController,
+        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -48,7 +47,7 @@ export class SlideUIController extends Disposable {
 
     private _initUIComponents(): void {
         this.disposeWithMe(
-            this._uiController.registerComponent(DesktopUIPart.LEFT_SIDEBAR, () => connectInjector(SlideSideBar, this._injector))
+            this._uiPartsService.registerComponent(DesktopUIPart.LEFT_SIDEBAR, () => connectInjector(SlideSideBar, this._injector))
         );
     }
 }

@@ -20,39 +20,17 @@ import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Optional } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { render as createRoot, unmount } from 'rc-util/lib/React/render';
-import type { ComponentType } from 'react';
 import React from 'react';
-import type { Observable } from 'rxjs';
-import { delay, filter, Subject, take } from 'rxjs';
+import { delay, filter, take } from 'rxjs';
 
 import { ILayoutService } from '../../services/layout/layout.service';
 import { App } from '../../views/App';
-import type { IWorkbenchOptions } from './ui.controller';
-import { IUIController } from './ui.controller';
-
-export enum DesktopUIPart {
-    HEADER = 'header',
-    HEADER_MENU = 'header-menu',
-    CONTENT = 'content',
-    FOOTER = 'footer',
-    LEFT_SIDEBAR = 'left-sidebar',
-}
+import { DesktopUIPart, IUIPartsService } from '../../services/parts/parts.service';
+import type { IUIController, IWorkbenchOptions } from './ui.controller';
 
 const STEADY_TIMEOUT = 3000;
 
-export interface IDesktopUIController extends IUIController {
-    componentRegistered$: Observable<void>;
-
-    registerComponent(part: DesktopUIPart, component: () => ComponentType): IDisposable;
-    getComponents(part: DesktopUIPart): Set<() => ComponentType>;
-}
-
-export class DesktopUIController extends Disposable implements IDesktopUIController {
-    private _componentsByPart: Map<DesktopUIPart, Set<() => ComponentType>> = new Map();
-
-    private readonly _componentRegistered$ = new Subject<void>();
-    readonly componentRegistered$ = this._componentRegistered$.asObservable();
-
+export class DesktopUIController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -93,26 +71,6 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
             })
         );
     }
-
-    registerComponent(part: DesktopUIPart, component: () => React.ComponentType): IDisposable {
-        const components = (
-            this._componentsByPart.get(part)
-            || this._componentsByPart.set(part, new Set()).get(part)!
-        ).add(component);
-
-        this._componentRegistered$.next();
-
-        return toDisposable(() => {
-            components.delete(component);
-            if (components.size === 0) {
-                this._componentsByPart.delete(part);
-            }
-        });
-    }
-
-    getComponents(part: DesktopUIPart): Set<() => ComponentType> {
-        return new Set([...(this._componentsByPart.get(part) || new Set())]);
-    }
 }
 
 function bootStrap(
@@ -137,15 +95,15 @@ function bootStrap(
     }
 
     const ConnectedApp = connectInjector(App, injector);
-    const desktopUIController = injector.get(IUIController) as IDesktopUIController;
+    const uiPartsService = injector.get(IUIPartsService);
     const onRendered = (canvasElement: HTMLElement) => callback(canvasElement, mountContainer);
 
     function render() {
-        const headerComponents = desktopUIController.getComponents(DesktopUIPart.HEADER);
-        const contentComponents = desktopUIController.getComponents(DesktopUIPart.CONTENT);
-        const footerComponents = desktopUIController.getComponents(DesktopUIPart.FOOTER);
-        const headerMenuComponents = desktopUIController.getComponents(DesktopUIPart.HEADER_MENU);
-        const leftSidebarComponents = desktopUIController.getComponents(DesktopUIPart.LEFT_SIDEBAR);
+        const headerComponents = uiPartsService.getComponents(DesktopUIPart.HEADER);
+        const contentComponents = uiPartsService.getComponents(DesktopUIPart.CONTENT);
+        const footerComponents = uiPartsService.getComponents(DesktopUIPart.FOOTER);
+        const headerMenuComponents = uiPartsService.getComponents(DesktopUIPart.HEADER_MENU);
+        const leftSidebarComponents = uiPartsService.getComponents(DesktopUIPart.LEFT_SIDEBAR);
 
         createRoot(
             <ConnectedApp
@@ -162,7 +120,7 @@ function bootStrap(
         );
     }
 
-    const updateSubscription = desktopUIController.componentRegistered$.subscribe(render);
+    const updateSubscription = uiPartsService.componentRegistered$.subscribe(render);
     render();
 
     return toDisposable(() => {

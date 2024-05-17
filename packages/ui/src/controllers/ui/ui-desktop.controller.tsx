@@ -26,7 +26,7 @@ import { delay, filter, take } from 'rxjs';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { App } from '../../views/App';
 import { DesktopUIPart, IUIPartsService } from '../../services/parts/parts.service';
-import type { IUIController, IWorkbenchOptions } from './ui.controller';
+import type { IWorkbenchOptions } from './ui.controller';
 
 const STEADY_TIMEOUT = 3000;
 
@@ -104,6 +104,7 @@ function bootStrap(
         const footerComponents = uiPartsService.getComponents(DesktopUIPart.FOOTER);
         const headerMenuComponents = uiPartsService.getComponents(DesktopUIPart.HEADER_MENU);
         const leftSidebarComponents = uiPartsService.getComponents(DesktopUIPart.LEFT_SIDEBAR);
+        const globalComponents = uiPartsService.getComponents(DesktopUIPart.GLOBAL);
 
         createRoot(
             <ConnectedApp
@@ -113,6 +114,7 @@ function bootStrap(
                 headerMenuComponents={headerMenuComponents}
                 leftSidebarComponents={leftSidebarComponents}
                 contentComponents={contentComponents}
+                globalComponents={globalComponents}
                 onRendered={onRendered}
                 footerComponents={footerComponents}
             />,

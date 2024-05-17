@@ -14,16 +14,28 @@
  * limitations under the License.
  */
 
-import { toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
+import { Disposable, toDisposable } from '@univerjs/core';
+import { type IDisposable, Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
+import { connectInjector } from '@wendellhu/redi/react-bindings';
 import type { IConfirmPartMethodOptions } from '../../views/components/confirm-part/interface';
+import { DesktopUIPart, IUIPartsService } from '../parts/parts.service';
+import { ConfirmPart } from '../../views/components/confirm-part/ConfirmPart';
 import type { IConfirmService } from './confirm.service';
 
-export class DesktopConfirmService implements IConfirmService {
+export class DesktopConfirmService extends Disposable implements IConfirmService {
     private _confirmOptions: IConfirmPartMethodOptions[] = [];
     readonly confirmOptions$ = new Subject<IConfirmPartMethodOptions[]>();
+
+    constructor(
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService
+    ) {
+        super();
+
+        this._initUIPart();
+    }
 
     open(option: IConfirmPartMethodOptions): IDisposable {
         if (this._confirmOptions.find((item) => item.id === option.id)) {
@@ -67,5 +79,11 @@ export class DesktopConfirmService implements IConfirmService {
             visible: item.id === id ? false : item.visible,
         }));
         this.confirmOptions$.next([...this._confirmOptions]);
+    }
+
+    protected _initUIPart(): void {
+        this.disposeWithMe(
+            this._uiPartsService.registerComponent(DesktopUIPart.GLOBAL, () => connectInjector(ConfirmPart, this._injector))
+        );
     }
 }

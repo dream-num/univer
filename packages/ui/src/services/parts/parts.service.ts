@@ -20,8 +20,8 @@ import { type Observable, Subject } from 'rxjs';
 import { toDisposable } from '@univerjs/core';
 import type { ComponentType } from '../../common/component-manager';
 
-// TODO: move mechanism from ui-desktop.controller to parts service
 export enum DesktopUIPart {
+    GLOBAL = 'global',
     HEADER = 'header',
     HEADER_MENU = 'header-menu',
     CONTENT = 'content',

@@ -32,7 +32,7 @@ export const SheetsThreadCommentCell = () => {
     if (!activePopup) {
         return null;
     }
-    const { row, col, unitId, subUnitId, temp } = activePopup;
+    const { row, col, unitId, subUnitId } = activePopup;
     const rootId = sheetThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
     const ref = `${Tools.chatAtABC(col)}${row + 1}`;
     const onClose = () => {
@@ -56,7 +56,6 @@ export const SheetsThreadCommentCell = () => {
             refStr={ref}
             onClose={onClose}
             getSubUnitName={getSubUnitName}
-            autoFocus={(!temp)}
         />
     );
 };

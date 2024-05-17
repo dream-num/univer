@@ -20,14 +20,13 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getUpdateParams } from '../../utils/get-update-params';
-import { ImageArrange } from './ImageArrange';
-import { ImageTransform } from './ImageTransform';
-import { ImageAlign } from './ImageAlign';
+import { DrawingArrange } from './DrawingArrange';
+import { DrawingTransform } from './DrawingTransform';
+import { DrawingAlign } from './DrawingAlign';
 import { ImageCropper } from './ImageCropper';
-import { ImageGroup } from './ImageGroup';
+import { DrawingGroup } from './DrawingGroup';
 
-
-export interface IImageCommonPanelProps {
+export interface IDrawingCommonPanelProps {
     drawings: IDrawingParam[];
     hasArrange?: boolean;
     hasTransform?: boolean;
@@ -36,7 +35,7 @@ export interface IImageCommonPanelProps {
     hasGroup?: boolean;
 }
 
-export const ImageCommonPanel = (props: IImageCommonPanelProps) => {
+export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
 
@@ -57,7 +56,6 @@ export const ImageCommonPanel = (props: IImageCommonPanelProps) => {
     }
     const transformer = scene.getTransformerByCreate();
 
-
     const [arrangeShow, setArrangeShow] = useState(true);
     const [transformShow, setTransformShow] = useState(true);
     const [alignShow, setAlignShow] = useState(false);
@@ -73,7 +71,6 @@ export const ImageCommonPanel = (props: IImageCommonPanelProps) => {
                 setCropperShow(false);
             }
         });
-
 
         const onChangeStartObserver = transformer.onChangeStartObservable.add((state) => {
             const { objects } = state;
@@ -103,14 +100,13 @@ export const ImageCommonPanel = (props: IImageCommonPanelProps) => {
         };
     }, []);
 
-
     return (
         <>
-            <ImageArrange arrangeShow={hasArrange === true ? arrangeShow : false} drawings={drawings} />
-            <ImageTransform transformShow={hasTransform === true ? transformShow : false} drawings={drawings} />
-            <ImageAlign alignShow={hasAlign === true ? alignShow : false} drawings={drawings} />
+            <DrawingArrange arrangeShow={hasArrange === true ? arrangeShow : false} drawings={drawings} />
+            <DrawingTransform transformShow={hasTransform === true ? transformShow : false} drawings={drawings} />
+            <DrawingAlign alignShow={hasAlign === true ? alignShow : false} drawings={drawings} />
             <ImageCropper cropperShow={hasCropper === true ? cropperShow : false} drawings={drawings} />
-            <ImageGroup hasGroup={hasGroup} drawings={drawings} />
+            <DrawingGroup hasGroup={hasGroup} drawings={drawings} />
         </>
     );
 };

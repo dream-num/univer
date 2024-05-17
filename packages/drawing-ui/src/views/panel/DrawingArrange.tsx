@@ -23,13 +23,12 @@ import { Button } from '@univerjs/design';
 import clsx from 'clsx';
 import styles from './index.module.less';
 
-
-export interface IImageArrangeProps {
+export interface IDrawingArrangeProps {
     arrangeShow: boolean;
     drawings: IDrawingParam[];
 }
 
-export const ImageArrange = (props: IImageArrangeProps) => {
+export const DrawingArrange = (props: IDrawingArrangeProps) => {
     const { arrangeShow, drawings: focusDrawings } = props;
 
     const commandService = useDependency(ICommandService);

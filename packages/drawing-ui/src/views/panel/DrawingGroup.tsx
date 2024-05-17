@@ -25,13 +25,12 @@ import { getGroupState, IRenderManagerService, transformObjectOutOfGroup } from 
 import { getUpdateParams } from '../../utils/get-update-params';
 import styles from './index.module.less';
 
-
-export interface IImageGroupProps {
+export interface IDrawingGroupProps {
     drawings: IDrawingParam[];
     hasGroup: boolean;
 }
 
-export const ImageGroup = (props: IImageGroupProps) => {
+export const DrawingGroup = (props: IDrawingGroupProps) => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const renderManagerService = useDependency(IRenderManagerService);
@@ -80,7 +79,6 @@ export const ImageGroup = (props: IImageGroupProps) => {
             children,
         }]);
     };
-
 
     const ungroup = (param: IDrawingParam) => {
         if (param.drawingType !== DrawingTypeEnum.DRAWING_GROUP) {
@@ -141,13 +139,11 @@ export const ImageGroup = (props: IImageGroupProps) => {
         }
         const transformer = scene.getTransformerByCreate();
 
-
         const onClearControlObserver = transformer.onClearControlObservable.add((changeSelf) => {
             if (changeSelf === true) {
                 setGroupShow(false);
             }
         });
-
 
         const onChangeStartObserver = transformer.onChangeStartObservable.add((state) => {
             const { objects } = state;
@@ -171,7 +167,6 @@ export const ImageGroup = (props: IImageGroupProps) => {
             onClearControlObserver?.dispose();
         };
     }, []);
-
 
     return (
         <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)} style={{ display: gridDisplay(hasGroup === true ? groupShow : false) }}>

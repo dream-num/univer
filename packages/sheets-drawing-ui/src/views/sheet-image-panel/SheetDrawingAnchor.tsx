@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-
 import type { IDrawingParam, Nullable } from '@univerjs/core';
 import { ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { Radio, RadioGroup } from '@univerjs/design';
 import clsx from 'clsx';
-import styles from '@univerjs/image-ui/views/panel/index.module.less';
+import styles from '@univerjs/drawing-ui/views/panel/index.module.less';
 import type { ISheetDrawing } from '@univerjs/sheets';
 import { SheetDrawingAnchorType } from '@univerjs/sheets';
 import type { BaseObject } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetSheetDrawingCommand } from '../../commands/commands/set-sheet-drawing.command';
-
 
 export interface ISheetDrawingAnchorProps {
     drawings: IDrawingParam[];
@@ -88,14 +86,12 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
         return params;
     }
 
-
     useEffect(() => {
         const onClearControlObserver = transformer.onClearControlObservable.add((changeSelf) => {
             if (changeSelf === true) {
                 setAnchorShow(false);
             }
         });
-
 
         const onChangeStartObserver = transformer.onChangeStartObservable.add((state) => {
             const { objects } = state;
@@ -115,7 +111,6 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
             onClearControlObserver?.dispose();
         };
     }, []);
-
 
     function handleChange(value: string | number | boolean) {
         setValue((value as SheetDrawingAnchorType));

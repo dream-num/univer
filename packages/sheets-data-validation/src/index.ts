@@ -31,4 +31,4 @@ export { DataValidationAutoFillController } from './controllers/dv-auto-fill.con
 export { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
 export { HideDataValidationDropdown, ShowDataValidationDropdown } from './commands/operations/data-validation.operation';
 export { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
-export { enUS, zhCN } from './locale';
+export { enUS, zhCN, ruRU } from './locale';

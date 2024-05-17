@@ -15,6 +15,6 @@
  */
 
 export { type ISetNumfmtCommandParams, SetNumfmtCommand } from './commands/commands/set-numfmt.command';
-export { enUS, zhCN } from './locale';
+export { enUS, zhCN, ruRU } from './locale';
 export { UniverSheetsNumfmtPlugin } from './numfmt-plugin';
 export { getPatternPreview } from './utils/pattern';

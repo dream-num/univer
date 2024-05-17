@@ -23,7 +23,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, NORMAL_SELECTION_PLUGIN_NAME, RefRangeService, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SelectionManagerService, SetSelectionsOperation, SheetInterceptorService } from '@univerjs/sheets';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
-import { SheetsFilterController } from '../../controllers/sheets-fiter.controller';
+import { SheetsFilterController } from '../../controllers/sheets-filter.controller';
 
 describe('Test "Filter Interceptor"', () => {
     let univer: Univer;

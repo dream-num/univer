@@ -205,7 +205,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         const map = this._ensureMap(subUnitId);
         const key = this._generateKey(row, col);
 
-
         const list = validator.getListWithColor(rule);
         const value = getCellValueOrigin(data);
         const valueStr = `${value ?? ''}`;

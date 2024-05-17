@@ -408,7 +408,6 @@ function parseColGroup(raw: string): IClipboardPropertyItem[] | null {
     const COLGROUP_TAG_REGEX = /<colgroup([\s\S]*?)>(.*?)<\/colgroup>/;
     const colgroupMatch = raw.match(COLGROUP_TAG_REGEX);
 
-
     const COL_TAG_REGEX = /<col([\s\S]*?)>/g;
     let colMatches;
     if (colgroupMatch?.[2]) {
@@ -589,7 +588,6 @@ function extractStyleProperty(styleString?: string, propertyName?: string) {
     }
     return null;
 }
-
 
 function getCellStyle(cell: Element) {
     let cellStyle = '';

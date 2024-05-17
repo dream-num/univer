@@ -14,5 +14,15 @@
  * limitations under the License.
  */
 
-export { ExportController } from './controller/export.controller';
-export { RecordController } from './controller/record.controller';
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
+    'sheet-find-replace': {
+        replace: {
+            'partial-failure': 'Не удалось заменить некоторые ячейки',
+            failure: 'Не удалось заменить все ячейки',
+        },
+    },
+};
+
+export default locale;

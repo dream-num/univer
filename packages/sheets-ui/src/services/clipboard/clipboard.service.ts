@@ -411,7 +411,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
-
         // 2. get filtered rows in the target pasting area and get the final pasting matrix
         // we also handle transpose pasting at this step
         // note: handle transpose before filtering
@@ -429,7 +428,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (!pasteTarget) {
             return false;
         }
-
 
         const worksheet = this._univerInstanceService
             .getUniverSheetInstance(pasteTarget.unitId)
@@ -483,7 +481,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 cellMatrix.setValue(row, col, newValue);
             }
         });
-
 
         const pasteTarget = this._getPastedRange(
             cellMatrix
@@ -1008,7 +1005,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             cols: newCols,
         };
     }
-
 
     /**
      * Determine whether the cells starting from the upper left corner of the range (merged or non-merged or combined) are consistent with the size of the original data

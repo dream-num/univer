@@ -187,7 +187,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             },
             {
                 st: 14,
-                ed: 3057,
+                ed: 3064,
                 ts: {
                     fs: 12,
                     ff: 'Microsoft YaHei',
@@ -703,12 +703,12 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         sectionBreaks: [
             {
                 startIndex: 3066,
-                columnProperties: [
-                    {
-                        width: ptToPixel(240),
-                        paddingEnd: ptToPixel(15),
-                    },
-                ],
+                // columnProperties: [
+                //     {
+                //         width: ptToPixel(240),
+                //         paddingEnd: ptToPixel(15),
+                //     },
+                // ],
                 columnSeparatorType: ColumnSeparatorType.NONE,
                 sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
                 // textDirection: textDirectionDocument,

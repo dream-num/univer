@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import type { IDocumentData } from '@univerjs/core';
 import {
     BooleanNumber,

@@ -91,7 +91,7 @@ describe('test case in apply utils', () => {
         it('the inserted textRun is between two testRuns', async () => {
             const removedTextRuns = deleteTextRuns(body as IDocumentBody, 10, 20);
 
-            expect(removedTextRuns.length).toBe(0);
+            expect(removedTextRuns.length).toBe(1);
             expect(body?.textRuns![2].st).toBe(20);
             expect(body?.textRuns![2].ed).toBe(30);
         });

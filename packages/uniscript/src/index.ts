@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export { enUS, zhCN } from './locale';
+export { enUS, zhCN, ruRU } from './locale';
 export { type IUniscriptConfig, UniverUniscriptPlugin } from './plugin';
 export { ScriptEditorService } from './services/script-editor.service';

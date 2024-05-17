@@ -59,7 +59,6 @@ enum HEADER_RESIZE_TYPE {
     COLUMN,
 }
 
-
 export class HeaderResizeRenderController extends Disposable implements IRenderController {
     private _currentRow: number = 0;
 
@@ -259,7 +258,6 @@ export class HeaderResizeRenderController extends Disposable implements IRenderC
             return;
         }
 
-
         this.disposeWithMe(
             toDisposable(
                 eventBindingObject.onPointerEnterObserver.add(() => {
@@ -442,7 +440,6 @@ export class HeaderResizeRenderController extends Disposable implements IRenderC
 
                     this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
                         const scene = this._context.scene;
-
 
                         this._clearObserverEvent();
                         this._resizeHelperShape?.dispose();

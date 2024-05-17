@@ -35,7 +35,6 @@ export interface ISheetSkeletonManagerSearch {
     commandId?: string; // WTF: why?
 }
 
-
 // TODO@wzhudev: this should be moved to a `RenderUnit` as well.
 
 /**

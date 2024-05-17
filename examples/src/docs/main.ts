@@ -22,13 +22,10 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverImagePlugin } from '@univerjs/image';
-
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { UniverDebuggerPlugin } from '@univerjs/debugger';
 
-import { DEFAULT_DOCUMENT_DATA_EN } from '../data';
-
-import { DebuggerPlugin } from '../plugins/debugger';
-
+import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { locales } from './locales';
 
 // package info
@@ -50,7 +47,7 @@ const univer = new Univer({
 // core plugins
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin);
-univer.registerPlugin(DebuggerPlugin);
+univer.registerPlugin(UniverDebuggerPlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
     header: true,
@@ -67,7 +64,7 @@ univer.registerPlugin(UniverDocsUIPlugin, {
 
 univer.registerPlugin(UniverImagePlugin);
 
-univer.createUniverDoc(DEFAULT_DOCUMENT_DATA_EN);
+univer.createUniverDoc(DEFAULT_DOCUMENT_DATA_CN);
 
 // use for console test
 declare global {

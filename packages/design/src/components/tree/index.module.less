@@ -8,7 +8,6 @@
         top: 50%;
         left: calc(-1 * var(--padding-lg));
         transform: translateY(-50%) rotateZ(-90deg);
-
         display: flex;
         align-items: center;
         justify-content: center;
@@ -39,16 +38,17 @@
             padding-left: var(--padding-xl);
 
             > a {
-                cursor: pointer;
                 position: relative;
-                display: block;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
             }
 
             &-content {
                 margin-bottom: 8px;
 
                 &-selected {
-                    font-weight: 500;
+                    // font-weight: 500;
                     color: rgb(var(--primary-color));
 
                     &-icon {

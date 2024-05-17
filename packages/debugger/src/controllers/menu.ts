@@ -47,6 +47,10 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
                 label: '简体中文',
                 value: LocaleType.ZH_CN,
             },
+            {
+                label: 'Русский',
+                value: LocaleType.RU_RU,
+            },
         ],
     };
 }
@@ -61,11 +65,11 @@ export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         selections: [
             {
                 label: 'green',
-                value: greenTheme,
+                value: greenTheme as any,
             },
             {
                 label: 'default',
-                value: defaultTheme,
+                value: defaultTheme as any,
             },
         ],
     };
@@ -170,7 +174,6 @@ export function SidebarMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         ],
     };
 }
-
 
 export function SetEditableMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {

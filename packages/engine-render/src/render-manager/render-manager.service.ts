@@ -52,7 +52,6 @@ const DEFAULT_SCENE_SIZE = { width: 1500, height: 1000 };
 
 const SCENE_NAMESPACE = '_UNIVER_SCENE_';
 
-
 export class RenderManagerService extends Disposable implements IRenderManagerService {
     private _defaultEngine!: Engine;
 

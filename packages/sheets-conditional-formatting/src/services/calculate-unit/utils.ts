@@ -288,7 +288,6 @@ export const getColorScaleFromValue = (colorList: { color: ColorKit; value: numb
     }
 };
 
-
 export const filterRange = (ranges: IRange[], maxRow: number, maxCol: number): IRange[] => {
     return ranges.map((range) => {
         if (range.startColumn > maxCol || range.startRow > maxRow) {

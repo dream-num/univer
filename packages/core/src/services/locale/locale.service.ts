@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import type { ILanguagePack, ILocales, LanguageValue } from '../../shared/locale';
@@ -25,7 +25,9 @@ import { LocaleType } from '../../types/enum/locale-type';
  * This service provides i18n and timezone / location features to other modules.
  */
 export class LocaleService extends Disposable {
-    private _currentLocale: LocaleType = LocaleType.ZH_CN;
+    private _currentLocale$ = new BehaviorSubject<LocaleType>(LocaleType.ZH_CN);
+    readonly currentLocale$ = this._currentLocale$.asObservable();
+    private get _currentLocale(): LocaleType { return this._currentLocale$.value; }
 
     private _locales: ILocales | null = null;
 
@@ -88,7 +90,7 @@ export class LocaleService extends Disposable {
     };
 
     setLocale(locale: LocaleType) {
-        this._currentLocale = locale;
+        this._currentLocale$.next(locale);
         this.localeChanged$.next();
     }
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import './extensions';
 
 import type { Nullable, Observer } from '@univerjs/core';
@@ -164,7 +163,6 @@ export class Documents extends DocComponent {
     override getEngine() {
         return (this.getScene() as Scene).getEngine();
     }
-
 
     override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         const skeletonData = this.getSkeleton()?.getSkeletonData();
@@ -423,7 +421,6 @@ export class Documents extends DocComponent {
                                         vertexAngle,
                                         alignOffset
                                     );
-
 
                                     const extensionOffset: IExtensionConfig = {
                                         originTranslate,

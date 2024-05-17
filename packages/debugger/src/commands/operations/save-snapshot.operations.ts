@@ -18,8 +18,8 @@
 import type { ICommand, IStyleData, IWorkbookData, Workbook } from '@univerjs/core';
 import { CommandType, IResourceLoaderService, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
-
-import { ExportController, RecordController } from '../../../local-save';
+import { RecordController } from '../../controllers/local-save/record.controller';
+import { ExportController } from '../../controllers/local-save/export.controller';
 
 export interface ISaveSnapshotParams {
     value: 'sheet' | 'workbook' | 'record';

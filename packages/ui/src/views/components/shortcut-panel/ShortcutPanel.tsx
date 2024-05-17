@@ -15,7 +15,7 @@
  */
 
 import { LocaleService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
 import React, { useCallback, useEffect } from 'react';
 
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';
@@ -38,6 +38,7 @@ interface IShortcutGroup {
 export function ShortcutPanel() {
     const shortcutService = useDependency(IShortcutService);
     const localeService = useDependency(LocaleService);
+    const currentLocale = useObservable(localeService.currentLocale$);
 
     const [shortcutItems, setShortcutItems] = React.useState<IShortcutGroup[]>([]);
 
@@ -75,16 +76,15 @@ export function ShortcutPanel() {
             .sort((a, b) => a.sequence - b.sequence);
 
         setShortcutItems(toRender);
-    }, [shortcutService, localeService]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [shortcutService, localeService, currentLocale]);
 
     useEffect(() => {
-        // first update
         updateShortcuts();
 
-        // subscribe to shortcut changes and re-render
         const subscription = shortcutService.shortcutChanged$.subscribe(() => updateShortcuts());
         return () => subscription.unsubscribe();
-    }, [shortcutService]);
+    }, [shortcutService, updateShortcuts]);
 
     return (
         <div className={styles.shortcutPanel}>
@@ -92,7 +92,7 @@ export function ShortcutPanel() {
                 <div className={styles.shortcutPanelGroup} key={group.name}>
                     <div className={styles.shortcutPanelGroupTitle}>{group.name}</div>
                     {group.items.map((item, index) => (
-                        <div className={styles.shortcutPanelItem} key={index}>
+                        <div className={styles.shortcutPanelItem} key={`${item.title}-${item.shortcut}`}>
                             <span className={styles.shortcutPanelItemTitle}>{item.title}</span>
                             <span className={styles.shortcutPanelItemShortcut}>{item.shortcut}</span>
                         </div>

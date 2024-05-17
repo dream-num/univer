@@ -406,10 +406,6 @@ importers:
         version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
   packages/debugger:
-    dependencies:
-      vue:
-        specifier: ^3.4.27
-        version: 3.4.27(typescript@5.4.5)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -441,6 +437,9 @@ importers:
       vitest:
         specifier: ^1.3.1
         version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+      vue:
+        specifier: ^3.4.27
+        version: 3.4.27(typescript@5.4.5)
 
   packages/design:
     dependencies:

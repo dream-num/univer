@@ -219,6 +219,9 @@ importers:
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../packages/drawing
+      '@univerjs/drawing-ui':
+        specifier: workspace:*
+        version: link:../packages/drawing-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../packages/engine-formula
@@ -651,9 +654,12 @@ importers:
 
   packages/drawing:
     dependencies:
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.44
-        version: 0.1.44(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.45
+        version: 0.1.45(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       ot-json1:
         specifier: ^1.0.2
         version: 1.0.2
@@ -664,9 +670,15 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.3
-        version: 0.13.3
+        specifier: ^0.15.1
+        version: 0.15.1
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -680,11 +692,60 @@ importers:
         specifier: ^5.4.5
         version: 5.4.5
       vite:
-        specifier: ^5.2.10
-        version: 5.2.10(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+        specifier: ^5.2.11
+        version: 5.2.11(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
       vitest:
-        specifier: ^1.5.0
-        version: 1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+        specifier: ^1.6.0
+        version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+
+  packages/drawing-ui:
+    dependencies:
+      '@univerjs/icons':
+        specifier: ^0.1.29
+        version: 0.1.45(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@wendellhu/redi':
+        specifier: ^0.15.1
+        version: 0.15.1
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.1
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.3.3
+        version: 5.4.5
+      vite:
+        specifier: ^5.1.4
+        version: 5.2.11(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+      vitest:
+        specifier: ^1.3.1
+        version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
   packages/engine-formula:
     dependencies:
@@ -877,52 +938,6 @@ importers:
         version: 7.8.1
       typescript:
         specifier: ^5.4.5
-        version: 5.4.5
-      vite:
-        specifier: ^5.2.11
-        version: 5.2.11(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
-      vitest:
-        specifier: ^1.6.0
-        version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
-
-  packages/image-ui:
-    dependencies:
-      '@univerjs/icons':
-        specifier: ^0.1.52
-        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-    devDependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/drawing':
-        specifier: workspace:*
-        version: link:../drawing
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-      '@univerjs/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
-      '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-      typescript:
-        specifier: ^5.3.3
         version: 5.4.5
       vite:
         specifier: ^5.2.11
@@ -1314,12 +1329,12 @@ importers:
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing
+      '@univerjs/drawing-ui':
+        specifier: workspace:*
+        version: link:../drawing-ui
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
-      '@univerjs/image-ui':
-        specifier: workspace:*
-        version: link:../image-ui
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -1333,8 +1348,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.0
-        version: 0.13.3
+        specifier: ^0.15.1
+        version: 0.15.1
       clsx:
         specifier: ^2.1.0
         version: 2.1.1
@@ -1352,10 +1367,10 @@ importers:
         version: 5.4.5
       vite:
         specifier: ^5.1.4
-        version: 5.2.10(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+        version: 5.2.11(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
       vitest:
         specifier: ^1.3.1
-        version: 1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+        version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
   packages/sheets-filter:
     devDependencies:

@@ -15,7 +15,6 @@
  */
 
 import { Disposable, ICommandService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-import type { IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { COMPONENT_IMAGE_POPUP_MENU } from '../views/image-popup-menu/component-name';
@@ -26,11 +25,10 @@ import { AutoImageCropOperation, CloseImageCropOperation, OpenImageCropOperation
 import { ImageViewer } from '../views/image-viewer/ImageViewer';
 import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
-import { SetImageGroupOperation } from '../commands/operations/image-group.operation';
-import { SetImageAlignOperation } from '../commands/operations/image-align.operation';
+import { SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
 
-@OnLifecycle(LifecycleStages.Rendered, ImageUIController)
-export class ImageUIController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, DrawingUIController)
+export class DrawingUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
@@ -70,8 +68,7 @@ export class ImageUIController extends Disposable {
             OpenImageCropOperation,
             CloseImageCropOperation,
             ImageResetSizeOperation,
-            SetImageGroupOperation,
-            SetImageAlignOperation,
+            SetDrawingAlignOperation,
             AutoImageCropOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }

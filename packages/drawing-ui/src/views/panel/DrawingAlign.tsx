@@ -20,17 +20,16 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 import { Select } from '@univerjs/design';
 import clsx from 'clsx';
-import { AlignType, SetImageAlignOperation } from '../../commands/operations/image-align.operation';
+import { AlignType, SetDrawingAlignOperation } from '../../commands/operations/drawing-align.operation';
 import styles from './index.module.less';
 
-export interface IImageAlignProps {
+export interface IDrawingAlignProps {
     drawings: IDrawingParam[];
     alignShow: boolean;
 
 }
 
-
-export const ImageAlign = (props: IImageAlignProps) => {
+export const DrawingAlign = (props: IDrawingAlignProps) => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
 
@@ -84,7 +83,7 @@ export const ImageAlign = (props: IImageAlignProps) => {
 
     function handleAlignChange(value: string | number | boolean) {
         setAlignValue((value as string));
-        commandService.executeCommand(SetImageAlignOperation.id, {
+        commandService.executeCommand(SetDrawingAlignOperation.id, {
             alignType: value as AlignType,
         });
     }

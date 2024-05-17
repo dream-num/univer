@@ -23,7 +23,6 @@ import clsx from 'clsx';
 import React, { useState } from 'react';
 import styles from './index.module.less';
 
-
 export interface IImagePopupMenuItem {
     label: string;
     index: number;
@@ -66,7 +65,6 @@ export const ImagePopupMenu: React.FC<IImagePopupMenuProps> = (props: IImagePopu
     const onVisibleChange = (visible: boolean) => {
         setVisible(visible);
     };
-
 
     const handleClick = (item: IImagePopupMenuItem) => {
         commandService.executeCommand(item.commandId, item.commandParams);

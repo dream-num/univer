@@ -81,6 +81,7 @@ export class TextSelectionController extends Disposable {
         }
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initialMain(unitId: string) {
         const docObject = this._getDocObjectById(unitId);
         if (docObject == null) {
@@ -133,6 +134,7 @@ export class TextSelectionController extends Disposable {
                           * The order of occurrence is such that PointerDown comes first.
                           * Translate the above text into English.
                           */
+                        this._setEditorFocus(unitId);
                         setTimeout(() => {
                             this._setEditorFocus(unitId);
                             this._textSelectionRenderManager.setCursorManually(offsetX, offsetY);

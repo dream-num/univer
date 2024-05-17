@@ -38,6 +38,9 @@ import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 
 import { FUniver } from '@univerjs/facade';
+import { UniverDrawingPlugin } from '@univerjs/drawing';
+import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
+import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { locales } from './locales';
 
@@ -96,7 +99,7 @@ univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // image
 univer.registerPlugin(UniverDrawingPlugin);
-univer.registerPlugin(UniverImageUIPlugin);
+univer.registerPlugin(UniverDrawingUIPlugin);
 univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 
 // create univer sheet instance

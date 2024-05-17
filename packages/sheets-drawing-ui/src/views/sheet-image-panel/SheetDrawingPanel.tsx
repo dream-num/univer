@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-
 import type { IDrawingParam } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
-import { ImageCommonPanel } from '@univerjs/image-ui';
-import styles from '@univerjs/image-ui/views/panel/index.module.less';
+import { DrawingCommonPanel } from '@univerjs/drawing-ui';
+import styles from '@univerjs/drawing-ui/views/panel/index.module.less';
 import { SheetDrawingAnchor } from './SheetDrawingAnchor';
 
 export const SheetDrawingPanel = () => {
@@ -45,7 +44,7 @@ export const SheetDrawingPanel = () => {
 
     return (
         <div className={styles.imageCommonPanel}>
-            <ImageCommonPanel drawings={drawings} />
+            <DrawingCommonPanel drawings={drawings} />
             <SheetDrawingAnchor drawings={drawings} />
         </div>
     );

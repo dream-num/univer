@@ -20,18 +20,17 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { Checkbox, InputNumber } from '@univerjs/design';
 import clsx from 'clsx';
-import type { BaseObject, IChangeObserverConfig } from '@univerjs/engine-render';
+import type { IChangeObserverConfig } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getUpdateParams } from '../../utils/get-update-params';
 import styles from './index.module.less';
 
-
-export interface IImageTransformProps {
+export interface IDrawingTransformProps {
     transformShow: boolean;
     drawings: IDrawingParam[];
 }
 
-export const ImageTransform = (props: IImageTransformProps) => {
+export const DrawingTransform = (props: IDrawingTransformProps) => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
@@ -66,7 +65,6 @@ export const ImageTransform = (props: IImageTransformProps) => {
         top: originY = 0,
         angle: originRotation = 0,
     } = transform;
-
 
     const [width, setWidth] = useState<number>(originWidth);
     const [height, setHeight] = useState(originHeight);
@@ -124,7 +122,6 @@ export const ImageTransform = (props: IImageTransformProps) => {
         }
     };
 
-
     useEffect(() => {
         const onChangeStartObserver = transformer.onChangeStartObservable.add((state) => {
             changeObs(state);
@@ -134,13 +131,11 @@ export const ImageTransform = (props: IImageTransformProps) => {
             changeObs(state);
         });
 
-
         return () => {
             onChangingObserver?.dispose();
             onChangeStartObserver?.dispose();
         };
     }, []);
-
 
     const handleWidthChange = (val: number | null) => {
         if (val == null) {
@@ -183,7 +178,6 @@ export const ImageTransform = (props: IImageTransformProps) => {
         transformer.clearControls(false);
         transformer.refreshControls();
     };
-
 
     const handleXChange = (val: number | null) => {
         if (val == null) {

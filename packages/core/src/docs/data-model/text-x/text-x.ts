@@ -19,13 +19,22 @@ import type { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
 import { type IDeleteAction, type IInsertAction, type IRetainAction, type TextXAction, TextXActionType } from '../action-types';
 import { ActionIterator } from './action-iterator';
-import { composeBody, isUselessRetainAction } from './utils';
+import { composeBody, getBodySlice, isUselessRetainAction } from './utils';
 
 function onlyHasDataStream(body: IDocumentBody) {
     return Object.keys(body).length === 1;
 }
 
 export class TextX {
+    static name = 'text-x';
+
+    static uri = 'https://github.com/dream-num/univer#text-x';
+
+    static apply(doc: IDocumentBody, actions: TextXAction[]): IDocumentBody {
+        // TODO: implement apply
+        return doc;
+    }
+
     static compose(thisActions: TextXAction[], otherActions: TextXAction[]): TextXAction[] {
         const thisIter = new ActionIterator(thisActions);
         const otherIter = new ActionIterator(otherActions);
@@ -77,6 +86,66 @@ export class TextX {
         textX.trimEndUselessRetainAction();
 
         return textX.serialize();
+    }
+
+    // `transform` is implemented in univer-pro in class TextXPro. do not use the method in TextX.
+    static transform(_thisActions: TextXAction[], _otherActions: TextXAction[], _priority = false): TextXAction[] {
+        throw new Error('transform is not implemented in TextX');
+    }
+
+    static isNoop(actions: TextXAction[]): boolean {
+        return actions.length === 0;
+    }
+
+    static invert(actions: TextXAction[]): TextXAction[] {
+        const invertedActions: TextXAction[] = [];
+
+        for (const action of actions) {
+            if (action.t === TextXActionType.INSERT) {
+                invertedActions.push({
+                    t: TextXActionType.DELETE,
+                    len: action.len,
+                    line: 0, // hardcode
+                    body: action.body,
+                    segmentId: action.segmentId,
+                });
+            } else if (action.t === TextXActionType.DELETE) {
+                if (action.body == null) {
+                    throw new Error('Can not invert DELETE action without body property, makeInvertible must be called first.');
+                }
+                invertedActions.push({
+                    t: TextXActionType.INSERT,
+                    body: action.body,
+                    len: action.len,
+                    line: 0, // hardcode
+                    segmentId: action.segmentId,
+                });
+            } else {
+                invertedActions.push(action);
+            }
+        }
+
+        return invertedActions;
+    }
+
+    static makeInvertible(actions: TextXAction[], doc: IDocumentBody): TextXAction[] {
+        const invertibleActions: TextXAction[] = [];
+
+        let index = 0;
+
+        for (const action of actions) {
+            if (action.t === TextXActionType.DELETE && action.body == null) {
+                const body = getBodySlice(doc, index, index + action.len);
+
+                action.body = body;
+            }
+
+            invertibleActions.push(action);
+
+            index += action.len;
+        }
+
+        return invertibleActions;
     }
 
     private _actions: TextXAction[] = [];
@@ -132,6 +201,7 @@ export class TextX {
         return this._actions;
     }
 
+    // eslint-disable-next-line complexity
     push(...args: TextXAction[]): this {
         if (args.length > 1) {
             for (const ac of args) {
@@ -197,7 +267,7 @@ export class TextX {
         return this;
     }
 
-    trimEndUselessRetainAction(): this {
+    protected trimEndUselessRetainAction(): this {
         let lastAction = this._actions[this._actions.length - 1];
 
         while (lastAction && lastAction.t === TextXActionType.RETAIN && isUselessRetainAction(lastAction)) {

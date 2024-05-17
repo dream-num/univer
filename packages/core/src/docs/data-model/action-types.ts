@@ -52,6 +52,7 @@ export interface IDeleteAction {
     t: TextXActionType.DELETE;
     len: number;
     line: number;
+    body?: IDocumentBody; // Add a body property to make this action invertible.
     segmentId?: string;
 }
 

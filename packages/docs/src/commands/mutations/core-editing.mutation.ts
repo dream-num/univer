@@ -92,6 +92,8 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         // Step 1: Update Doc Data Model.
         const undoActions = documentDataModel.apply(actions);
 
+        // console.log(undoActions);
+
         // Step 2: Update Doc View Model.
         const { segmentId } = actions[0];
         const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);

@@ -22,7 +22,7 @@ import { zhCN } from './locale';
 import { SheetsFilterUIController } from './controllers/sheets-filter-ui.controller';
 import { SheetsFilterPanelService } from './services/sheets-filter-panel.service';
 
-const NAME = 'UNIVER_SHEETS_FILTER_UI_PLUGIN';
+const NAME = 'SHEET_FILTER_UI_PLUGIN';
 
 export class UniverSheetsFilterUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;

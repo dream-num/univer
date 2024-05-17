@@ -17,7 +17,7 @@
 export { getUpdateParams } from './utils/get-update-params';
 export { ImageResetSizeOperation } from './commands/operations/image-reset-size.operation';
 export { CloseImageCropOperation, OpenImageCropOperation } from './commands/operations/image-crop.operation';
-export { ImageCommonPanel } from './views/panel/ImageCommonPanel';
+export { DrawingCommonPanel } from './views/panel/DrawingCommonPanel';
 export { ImagePopupMenu } from './views/image-popup-menu/ImagePopupMenu';
 export { COMPONENT_IMAGE_POPUP_MENU } from './views/image-popup-menu/component-name';
-export { UniverImageUIPlugin } from './plugin';
+export { UniverDrawingUIPlugin } from './plugin';

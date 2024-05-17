@@ -1609,9 +1609,6 @@ importers:
       '@univerjs/protocol':
         specifier: ^0.1.20
         version: 0.1.23(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*

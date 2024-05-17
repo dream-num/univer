@@ -54,12 +54,13 @@ export interface IThreadCommentItemProps {
     resolved?: boolean;
     onReply: (user: IUser | undefined) => void;
     isRoot?: boolean;
+    onClose?: () => void;
 }
 
 const MOCK_ID = '__mock__';
 
 const ThreadCommentItem = (props: IThreadCommentItemProps) => {
-    const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved, isRoot } = props;
+    const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved, isRoot, onClose } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const userManagerService = useDependency(UserManagerService);
@@ -76,6 +77,9 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                 commentId: item.id,
             }
         );
+        if (isRoot) {
+            onClose?.();
+        }
     };
 
     return (
@@ -255,6 +259,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 {renderComments.map(
                     (item) => (
                         <ThreadCommentItem
+                            onClose={onClose}
                             unitId={unitId}
                             subUnitId={subUnitId}
                             item={item}

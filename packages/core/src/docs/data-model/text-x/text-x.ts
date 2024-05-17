@@ -15,7 +15,7 @@
  */
 
 import { Tools } from '../../../shared/tools';
-import type { UpdateDocsAttributeType } from '../../../shared/command-enum';
+import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
 import { type IDeleteAction, type IInsertAction, type IRetainAction, type TextXAction, TextXActionType } from '../action-types';
 import { ActionIterator } from './action-iterator';
@@ -132,7 +132,7 @@ export class TextX {
                         body: action.oldBody,
                         oldBody: action.body,
                         len: action.len,
-                        coverType: action.coverType,
+                        coverType: UpdateDocsAttributeType.REPLACE,
                         segmentId: action.segmentId,
                     });
                 } else {

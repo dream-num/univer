@@ -42,6 +42,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params: IListOperationCommandParams) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

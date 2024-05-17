@@ -48,7 +48,6 @@ export interface IDrawingSpace {
     subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
 }
 
-
 export interface IDrawingSearch extends IDrawingSpace {
     drawingId: string;
 }
@@ -58,7 +57,6 @@ export interface IDrawingParam extends IDrawingSearch {
     transform?: Nullable<ITransformState>;
     groupId?: string;
 }
-
 
 export interface IDrawingMap<T extends IDrawingParam> {
     [unitId: string]: IDrawingSubunitMap<T>;
@@ -88,7 +86,6 @@ export interface IDrawingGroupUpdateParam {
     children: IDrawingParam[];
 }
 
-
 export interface IUnitDrawingService<T extends IDrawingParam> extends IDisposable {
     drawingManagerData: IDrawingMap<T>;
 
@@ -99,6 +96,7 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IDisposabl
     readonly focus$: Observable<IDrawingParam[]>;
     readonly group$: Observable<IDrawingGroupUpdateParam[]>;
     readonly ungroup$: Observable<IDrawingGroupUpdateParam[]>;
+    readonly refreshTransform$: Observable<IDrawingParam[]>;
 
     readonly featurePluginUpdate$: Observable<T[]>;
     readonly featurePluginOrderUpdate$: Observable<IDrawingOrderUpdateParam>;
@@ -107,6 +105,8 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IDisposabl
 
     dispose(): void;
 
+    refreshTransform(updateParams: IDrawingParam[]): void;
+
     getBatchAddOp(insertParams: T[]): unknown;
     getBatchRemoveOp(removeParams: IDrawingSearch[]): unknown;
     getBatchUpdateOp(updateParams: T[]): unknown;
@@ -114,6 +114,7 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IDisposabl
     addNotification(insertParams: IDrawingSearch[]): void;
     updateNotification(updateParams: IDrawingSearch[]): void;
     orderNotification(orderParams: IDrawingOrderMapParam): void;
+    refreshTransformNotification(refreshParams: IDrawingParam[]): void;
 
     getDrawingByParam(param: Nullable<IDrawingSearch>): Nullable<T>;
     getOldDrawingByParam(param: Nullable<IDrawingSearch>): Nullable<T>;

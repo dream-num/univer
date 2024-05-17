@@ -15,7 +15,7 @@
  */
 
 import { type Observable, Subject } from 'rxjs';
-import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, IUnitDrawingService, Nullable } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, ITransformState, IUnitDrawingService, Nullable } from '@univerjs/core';
 import { sortRules, sortRulesByDesc } from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
 import * as json1 from 'ot-json1';
@@ -68,6 +68,9 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     private _ungroup$ = new Subject<IDrawingGroupUpdateParam[]>();
     readonly ungroup$ = this._ungroup$.asObservable();
 
+    private _refreshTransform$ = new Subject<IDrawingParam[]>();
+    readonly refreshTransform$ = this._refreshTransform$.asObservable();
+
     // private readonly _externalUpdate$ = new Subject<T[]>();
     // readonly externalUpdate$ = this._externalUpdate$.asObservable();
 
@@ -111,6 +114,23 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             data: {},
             order: {},
         };
+    }
+
+    refreshTransform(updateParams: IDrawingParam[]) {
+        updateParams.forEach((updateParam) => {
+            const drawing = this.getDrawingByParam(updateParam);
+            if (drawing == null) {
+                return;
+            }
+            const param = this._getCurrentBySearch(updateParam);
+            if (param == null) {
+                return;
+            }
+
+            param.transform = updateParam.transform;
+        });
+
+        this.refreshTransformNotification(updateParams);
     }
 
     getBatchAddOp(insertParams: T[]): IDrawingJsonUndo1 {
@@ -198,6 +218,10 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         this._ungroup$.next(groupParams);
     }
 
+    refreshTransformNotification(refreshParams: IDrawingParam[]) {
+        this._refreshTransform$.next(refreshParams);
+    }
+
     getGroupDrawingOp(groupParams: IDrawingGroupUpdateParam[]): IDrawingJsonUndo1 {
         const ops: JSONOp[] = [];
         const { unitId, subUnitId } = groupParams[0].parent;
@@ -272,7 +296,6 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
         const { unitId: groupUnitId, subUnitId: groupSubUnitId, drawingId: groupDrawingId } = parent;
 
-
         const ops: JSONOp[] = [];
         children.forEach((child) => {
             const { unitId, subUnitId, drawingId } = child;
@@ -286,7 +309,6 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
         return ops.reduce(json1.type.compose, null);
     }
-
 
     applyJson1(unitId: string, subUnitId: string, jsonOp: JSONOp) {
         this._establishDrawingMap(unitId, subUnitId);

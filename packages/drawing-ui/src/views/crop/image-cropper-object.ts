@@ -79,7 +79,6 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
         this._applyProps();
     }
 
-
     refreshSrcRect(value: Nullable<ISrcRect>, transform: Nullable<ITransformState>) {
         this._srcRect = value;
         this._applyTransform = transform;
@@ -140,7 +139,6 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
     protected override _draw(ctx: UniverRenderingContext) {
         // const { left, top, width, height, angle } = applyObject;
         const scene = this.getScene() as Scene;
-
 
         const engine = scene.getEngine() as Engine;
 

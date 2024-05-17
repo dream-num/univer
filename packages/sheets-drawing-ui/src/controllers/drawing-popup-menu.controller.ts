@@ -20,10 +20,10 @@ import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { COMPONENT_IMAGE_POPUP_MENU, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/image-ui';
+import { COMPONENT_IMAGE_POPUP_MENU, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { takeUntil } from 'rxjs';
-import { ImageCropperObject } from '@univerjs/image-ui/views/crop/image-cropper-object.js';
+import { ImageCropperObject } from '@univerjs/drawing-ui/views/crop/image-cropper-object.js';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 
@@ -45,7 +45,6 @@ export class DrawingPopupMenuController extends RxDisposable {
 
         this._init();
     }
-
 
     private _init(): void {
         this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._create(workbook));

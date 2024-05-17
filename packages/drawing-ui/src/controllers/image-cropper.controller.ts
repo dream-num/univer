@@ -41,7 +41,6 @@ export class ImageCropperController extends Disposable {
     ) {
         super();
 
-
         this._init();
     }
 
@@ -128,7 +127,6 @@ export class ImageCropperController extends Disposable {
             bottom: precisionTo(height - (newTop + newHeight), 1),
         };
     }
-
 
     private _updateCropperObject(cropType: CropType, imageShape: Image) {
         const { left, top, width, height } = imageShape.calculateTransformWithSrcRect();
@@ -221,7 +219,6 @@ export class ImageCropperController extends Disposable {
                     this._sceneListenerOnImageMap.add(scene);
                 }
 
-
                 const imageData = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
 
                 if (imageData == null) {
@@ -243,7 +240,6 @@ export class ImageCropperController extends Disposable {
                 const transformer = scene.getTransformer();
 
                 transformer?.clearControls();
-
 
                 const imageCropperObject = new ImageCropperObject(`${imageShapeKey}-crop`, {
                     srcRect: imageShape.srcRect,
@@ -344,7 +340,6 @@ export class ImageCropperController extends Disposable {
 
         return applyObject;
     }
-
 
     private _addListenerOnImage(scene: Scene) {
         const transformer = scene.getTransformerByCreate();
@@ -448,7 +443,6 @@ export class ImageCropperController extends Disposable {
 
         const { left: applyLeft, top: applyTop, width: applyWidth, height: applyHeight, angle: applyAngle, strokeWidth: applyStrokeWidth } = applyObject;
 
-
         const newLeft = left - applyLeft;
         const newTop = top - applyTop;
 
@@ -479,7 +473,6 @@ export class ImageCropperController extends Disposable {
 
             const applyFinalPoint = vertexPoint.clone();
             applyFinalPoint.rotateByPoint(degToRad(-applyAngle), centerPoint);
-
 
             const newAngleLeft = left - applyFinalPoint.x;
             const newAngleTop = top - applyFinalPoint.y;

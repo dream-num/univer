@@ -116,7 +116,7 @@ export class SheetsThreadCommentController extends Disposable {
     private _initPanelListener() {
         this.disposeWithMe(this._threadCommentPanelService.activeCommentId$.subscribe(async (commentInfo) => {
             if (commentInfo) {
-                const { unitId, subUnitId, commentId } = commentInfo;
+                const { unitId, subUnitId, commentId, trigger } = commentInfo;
                 const comment = this._sheetsThreadCommentModel.getComment(unitId, subUnitId, commentId);
                 if (!comment || comment.resolved) {
                     return;
@@ -153,6 +153,7 @@ export class SheetsThreadCommentController extends Disposable {
                     row: location.row,
                     col: location.column,
                     commentId: comment.id,
+                    trigger,
                 });
             } else {
                 this._sheetsThreadCommentPopupService.hidePopup();

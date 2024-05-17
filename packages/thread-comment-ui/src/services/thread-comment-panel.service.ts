@@ -19,7 +19,7 @@ import { ISidebarService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject, filter } from 'rxjs';
 
-type ActiveCommentInfo = { unitId: string; subUnitId: string; commentId: string } | undefined;
+type ActiveCommentInfo = { unitId: string; subUnitId: string; commentId: string; trigger?: string } | undefined;
 
 export class ThreadCommentPanelService extends Disposable {
     private _panelVisible = false;

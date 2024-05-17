@@ -27,6 +27,7 @@ export interface IThreadCommentPopup extends ISheetLocationBase {
     commentId?: string;
     // when triggered by hover, temp is set to be `true`
     temp?: boolean;
+    trigger?: string;
 }
 
 export class SheetsThreadCommentPopupService extends Disposable {

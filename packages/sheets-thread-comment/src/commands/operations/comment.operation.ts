@@ -61,6 +61,7 @@ export const ShowAddSheetCommentModalOperation: ICommand = {
                 unitId,
                 subUnitId: sheetId,
                 commentId: rootId,
+                trigger: 'context-menu',
             });
         }
         return true;

@@ -123,6 +123,7 @@ export class SheetsSortService extends Disposable {
         // open customize dialog
         const sortOption: ISortOption = await this._openCustomizeDialog(location);
         this._applySort(sortOption, location.unitId, location.subUnitId);
+        return true;
     }
 
     registerCompareFn(fn: ICellValueCompareFn) {
@@ -150,7 +151,7 @@ export class SheetsSortService extends Disposable {
             orderRules: sortOption.orderRules,
             range: sortOption.range,
             unitId,
-            sheetId: subUnitId,
+            subUnitId,
         });
     }
 

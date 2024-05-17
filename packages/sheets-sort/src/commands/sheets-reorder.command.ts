@@ -57,6 +57,61 @@ export type CellValue = number | string | null;
 export type ICellValueCompareFn = (type: SortType, a: Nullable<ICellData>, b: Nullable<ICellData>) => Nullable<number>;
 
 
+export const SortRangeAscCommand: ICommand = {
+    id: 'sheet.command.sort-range-asc',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const sortService = accessor.get(ISheetsSortService);
+        return await sortService.triggerSortDirectly(true);
+    },
+};
+
+export const SortRangeDescCommand: ICommand = {
+    id: 'sheet.command.sort-range-desc',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const sortService = accessor.get(ISheetsSortService);
+        return await sortService.triggerSortDirectly(false);
+    },
+};
+
+export const SortRangeCustomCommand: ICommand = {
+    id: 'sheet.command.sort-range-custom',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const sortService = accessor.get(ISheetsSortService);
+        return await sortService.triggerSortCustomize();
+    },
+};
+
+export const SortRangeAscInCtxMenuCommand: ICommand = {
+    id: 'sheet.command.sort-range-asc-ctx',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const sortService = accessor.get(ISheetsSortService);
+        return await sortService.triggerSortDirectly(true);
+    },
+};
+
+export const SortRangeDescInCtxMenuCommand: ICommand = {
+    id: 'sheet.command.sort-range-desc-ctx',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const sortService = accessor.get(ISheetsSortService);
+        return await sortService.triggerSortDirectly(false);
+    },
+};
+
+export const SortRangeCustomInCtxMenuCommand: ICommand = {
+    id: 'sheet.command.sort-range-custom-ctx',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const sortService = accessor.get(ISheetsSortService);
+        return await sortService.triggerSortCustomize();
+    },
+};
+
+
 export const ReorderRangeCommand: ICommand = {
     id: 'sheet.command.reorder-range',
     type: CommandType.COMMAND,

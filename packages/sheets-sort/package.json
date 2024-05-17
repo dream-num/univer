@@ -60,11 +60,11 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
+        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.14.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

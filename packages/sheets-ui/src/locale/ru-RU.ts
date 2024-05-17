@@ -497,6 +497,7 @@ const locale: typeof zhCN = {
             'set-italic': 'Переключить курсив',
             'set-underline': 'Переключить подчеркивание',
             'set-strike-through': 'Переключить зачеркивание',
+            'start-editing': 'Начать редактирование',
         },
     },
     'sheet-view': 'Просмотр листа',

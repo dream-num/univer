@@ -493,6 +493,7 @@ const locale = {
             'set-italic': '切换斜体',
             'set-underline': '切换下划线',
             'set-strike-through': '切换删除线',
+            'start-editing': '开始编辑（选区切换到编辑器）',
         },
     },
     'sheet-view': '浏览表格',

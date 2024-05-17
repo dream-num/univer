@@ -65,11 +65,11 @@ export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         selections: [
             {
                 label: 'green',
-                value: greenTheme,
+                value: greenTheme as any,
             },
             {
                 label: 'default',
-                value: defaultTheme,
+                value: defaultTheme as any,
             },
         ],
     };

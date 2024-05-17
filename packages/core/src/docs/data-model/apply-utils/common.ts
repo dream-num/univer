@@ -378,6 +378,7 @@ export function insertCustomRanges(
     }
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function deleteTextRuns(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { textRuns } = body;
     const startIndex = currentIndex;
@@ -452,6 +453,16 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
         }
 
         body.textRuns = newTextRuns;
+    }
+
+    // In the case of no style before, add the style, removeTextRuns will be empty,
+    // in this case, you need to add an empty textRun for undo.
+    if (removeTextRuns.length === 0) {
+        removeTextRuns.push({
+            st: 0,
+            ed: textLength,
+            ts: {},
+        });
     }
 
     return removeTextRuns;

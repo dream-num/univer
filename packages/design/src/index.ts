@@ -56,7 +56,7 @@ export { type ISelectListProps, SelectList } from './components/select-list';
 export { type ISegmentedProps, Segmented } from './components/segmented';
 export { type ISliderProps, Slider } from './components/slider';
 export { type ITooltipProps, Tooltip, resizeObserverCtor } from './components/tooltip';
-export { type ITreeNodeProps, type ITreeProps, Tree, TreeSelectionMode } from './components/tree';
+export { type ITreeNodeProps, type ITreeProps, Tree, TreeSelectionMode, mergeTreeSelected, findSubTreeFromPath, findNodePathFromTree, filterLeafNode } from './components/tree';
 export { enUS, zhCN, ruRU } from './locale';
 export { type ILocale } from './locale/interface';
 export { defaultTheme, greenTheme, themeInstance } from './themes';

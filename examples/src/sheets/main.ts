@@ -35,10 +35,10 @@ import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
+import { UniverDebuggerPlugin } from '@univerjs/debugger';
+
 import { FUniver } from '@univerjs/facade';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
-
-import { DebuggerPlugin } from '../plugins/debugger';
 import { locales } from './locales';
 
 /* eslint-disable-next-line node/prefer-global/process */
@@ -128,16 +128,9 @@ univer.registerPlugin(UniverSheetsThreadCommentPlugin, {
         },
     }],
 });
-// Uncomment the following lines to test if the document is disposed correctly without memory leaks.
-// setTimeout(() => {
-//     univer.__getInjector().get(IUniverInstanceService).disposeUnit(DEFAULT_WORKBOOK_DATA_DEMO.id);
-// }, 5000);
-// setTimeout(() => {
-//     univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
-// }, 7000);
 
 // debugger plugin
-univer.registerPlugin(DebuggerPlugin);
+univer.registerPlugin(UniverDebuggerPlugin);
 
 const injector = univer.__getInjector();
 const userManagerService = injector.get(UserManagerService);

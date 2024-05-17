@@ -32,7 +32,7 @@ import { SelectionManagerService } from './services/selection-manager.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 
-const PLUGIN_NAME = 'sheets';
+const PLUGIN_NAME = 'SHEET_PLUGIN';
 
 export interface IUniverSheetsConfig {
     notExecuteFormula?: boolean;

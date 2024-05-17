@@ -20,7 +20,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import { SheetsFindReplaceController } from './controllers/sheet-find-replace.controller';
 
-const NAME = 'UNIVER_SHEETS_FIND_REPLACE_PLUGIN';
+const NAME = 'SHEET_FIND_REPLACE_PLUGIN';
 
 export class UniverSheetsFindReplacePlugin extends Plugin {
     static override pluginName = NAME;

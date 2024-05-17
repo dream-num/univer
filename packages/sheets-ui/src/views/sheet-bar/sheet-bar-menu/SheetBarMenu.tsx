@@ -65,6 +65,8 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
 
         if (item.hidden) {
             commandService.executeCommand(SetWorksheetShowCommand.id, {
+                unitId: workbook.getUnitId(),
+                subUnitId: sheetId,
                 value: sheetId,
             });
         } else if (!item.selected) {

@@ -20,8 +20,10 @@ import {
     Disposable,
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
+    FOCUSING_EDITOR_STANDALONE,
     FOCUSING_FORMULA_EDITOR,
     FOCUSING_SHEET,
+    FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE,
     HorizontalAlign,
     ICommandService,
     IContextService,
@@ -165,7 +167,7 @@ export class StartEditController extends Disposable {
 
                 const { position, documentLayoutObject, scaleX, editorUnitId } = editCellState;
                 const editorObject = this._getEditorObject();
-                if (editorObject == null) {
+                if (editorObject == null || this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) === true || this._contextService.getContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE) === true) {
                     return;
                 }
 

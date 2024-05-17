@@ -21,7 +21,7 @@ import { FindReplaceController } from './controllers/find-replace.controller';
 import { zhCN } from './locale';
 import { FindReplaceService, IFindReplaceService } from './services/find-replace.service';
 
-const PLUGIN_NAME = 'FIND_REPLACE';
+const PLUGIN_NAME = 'FIND_REPLACE_PLUGIN';
 
 export class UniverFindReplacePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

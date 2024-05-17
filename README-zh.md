@@ -53,28 +53,20 @@ Univer 的亮点包括：
 
 ## 例子
 
-| <h3>📊 Univer Sheets</h3>                     |                   |
-|:---------------------------------------|--------------------------------|
-| [Sheets](https://www.univer.ai/examples/sheets/)<br>已开放：单元格样式、公式。一季度：条件格式、数据验证、查找替换。二季度（暂定）：浮动图片、筛选、排序、批注、图表、数据透视表、超级表（table）、形状                |                [![](./docs/img/examples-sheets.gif)](https://www.univer.ai/examples/sheets/)            |
-| [Sheets Multi](https://www.univer.ai/examples/sheets-multi/)<br>在一个页面中可以创建多个 Univer 实例，让表格间可以实现互操作    | [![](./docs/img/examples-sheets-multi.gif)](https://www.univer.ai/examples/sheets-multi/)                           |
-| [Sheets Uniscript](https://www.univer.ai/examples/sheets-uniscript/)<br>在 Univer Sheets 中可以直接使用 JavaScript 语法操作表格中的数据，实现自动化 | [![](./docs/img/examples-sheets-uniscript.gif)](https://www.univer.ai/examples/sheets-uniscript/)                       |
-| [Sheets Big Data](https://www.univer.ai/examples/sheets-big-data/)<br>加载 1000 万单元格数据量，在 500ms 内完成 | [![](./docs/img/examples-sheets-big-data.gif)](https://www.univer.ai/examples/sheets-big-data/)                       |
-| [Sheets Collaboration (Pro Feature)](https://univer.ai/pro-examples/sheets-collaboration/)<br>请打开两个窗口或者邀请小伙伴一起体验 Univer Sheets 协同            | [![](./docs/img/pro-examples-sheets-collaboration.gif)](https://univer.ai/pro-examples/sheets-collaboration/)                           |
-| [Sheets Collaboration Playground (Pro Feature)](https://univer.ai/pro-examples/sheets-collaboration-playground/)<br>演示协同的过程，A 编辑表格后，B 到底是如何处理的？这里是一个有趣的实验  | [![](./docs/img/pro-examples-sheets-collaboration-playground.gif)](https://univer.ai/pro-examples/sheets-collaboration-playground/)                           |
-| [Sheets Import/Export (Pro Feature)](https://univer.ai/pro-examples/sheets-exchange/)<br>支持 xlsx 文件导入和导出                 | [![](./docs/img/pro-examples-sheets-exchange.gif)](https://univer.ai/pro-examples/sheets-exchange/)                           |
-| [Sheets Print (Pro Feature)](https://univer.ai/pro-examples/sheets-print/)<br>体验 Univer Sheets 的高清打印能力                     | [![](./docs/img/pro-examples-sheets-print.gif)](https://univer.ai/pro-examples/sheets-print/)                           |
-| <h3>📝 Univer Docs</h3>                    |                   |
-| [Docs](https://www.univer.ai/examples/docs/)<br>已开放：有序无序列表、段落设置、图文混排、分节展示多列/单列（暂定）：超链接、批注、表格、图表                                  | [![](./docs/img/examples-docs.gif)](https://www.univer.ai/examples/docs/)                           |
-| [Docs Multi](https://www.univer.ai/examples/docs-multi/)<br>在一个页面中可以创建多个 Univer 实例，让doc可以实现互操作 | [![](./docs/img/examples-docs-multi.gif)](https://www.univer.ai/examples/docs-multi/)                          |
-| [Docs Uniscript](https://www.univer.ai/examples/docs-uniscript/)<br>在 Univer Docs 中可以直接使用 JavaScript 语法操作内容 | [![](./docs/img/examples-docs-uniscript.gif)](https://www.univer.ai/examples/docs-uniscript/)                          |
-| [Docs Big Data](https://www.univer.ai/examples/docs-big-data/)<br>100 万字 Docs 加载演示 | [![](./docs/img/examples-docs-big-data.gif)](https://www.univer.ai/examples/docs-big-data/)                          |
-| [Docs Collaboration (Pro Feature)](https://univer.ai/pro-examples/docs-collaboration/)<br>请打开两个窗口或者邀请小伙伴一起体验 Univer Docs 协同               | [![](./docs/img/pro-examples-docs-collaboration.gif)](https://univer.ai/pro-examples/docs-collaboration/)                           |
-| [Docs Collaboration Playground (Pro Feature)](https://univer.ai/pro-examples/docs-collaboration-playground/)<br>演示协同的过程，A 编辑文档后，B 到底是如何处理的？这里是一个有趣的实验    | [![](./docs/img/pro-examples-docs-collaboration-playground.gif)](https://univer.ai/pro-examples/docs-collaboration-playground/)    |
-| <h3>🎨 Univer Slides</h3>                    |                   |
-| [Slides](https://www.univer.ai/examples/slides/)<br>一个包含图文本、浮动图片、表格等元素的画布演示                                  | [![](./docs/img/examples-slides.gif)](https://www.univer.ai/examples/slides/)                           |
-| <h3>🧩 Univer Innovation</h3>                    |                   |
-| [Zen Mode](https://univer.ai/zh-CN/guides/sheet/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA)<br>Sheet 的单元格是一个 Doc？                                  | [![](./docs/img/zen-mode.gif)](https://univer.ai/zh-CN/guides/sheet/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA)                           |
-| [Univer (SaaS version)](https://univer.ai/)<br>通过 Univer，我们使用户能够根据自己的意愿创建 3 种形式的页面。 通过将工作表、文档和幻灯片的功能合并在一起，Univer 使个人和团队能够轻松创建、组织和简化工作流程。                                  | [![](./docs/img/univer-workspace-drag-chart.gif)](https://youtu.be/kpV0MvQuFZA)                           |
+| &nbsp; | &nbsp; | &nbsp; |
+| :---: | :---: | :---: |
+| 📊 Sheets | 📊 Sheets Multi | 📊 Sheets Uniscript |
+| [![](./docs/img/examples-sheets.gif)](https://univer.ai/examples/sheets/) | [![](./docs/img/examples-sheets-multi.gif)](https://univer.ai/examples/sheets-multi/) | [![](./docs/img/examples-sheets-uniscript.gif)](https://univer.ai/examples/sheets-uniscript/) |
+| 📊 Sheets Big Data | 📊 Sheets Collaboration (Pro) | 📊 Sheets Collaboration Playground (Pro) |
+| [![](./docs/img/examples-sheets-big-data.gif)](https://univer.ai/examples/sheets-big-data/) | [![](./docs/img/pro-examples-sheets-collaboration.gif)](https://univer.ai/pro/examples/sheets-collaboration/) | [![](./docs/img/pro-examples-sheets-collaboration-playground.gif)](https://univer.ai/pro/examples/sheets-collaboration-playground/) |
+| 📊 Sheets Import/Export (Pro) | 📊 Sheets Print (Pro) | 📝 Docs |
+| [![](./docs/img/pro-examples-sheets-exchange.gif)](https://univer.ai/pro/examples/sheets-exchange/) | [![](./docs/img/pro-examples-sheets-print.gif)](https://univer.ai/pro/examples/sheets-print/) | [![](./docs/img/examples-docs.gif)](https://univer.ai/examples/docs/) |
+| 📝 Docs Multi | 📝 Docs Uniscript | 📝 Docs Big Data |
+| [![](./docs/img/examples-docs-multi.gif)](https://univer.ai/examples/docs-multi/) | [![](./docs/img/examples-docs-uniscript.gif)](https://univer.ai/examples/docs-uniscript/) | [![](./docs/img/examples-docs-big-data.gif)](https://univer.ai/examples/docs-big-data/) |
+| 📝 Docs Collaboration (Pro) | 📝 Docs Collaboration Playground (Pro) | 📽️ Slides |
+| [![](./docs/img/pro-examples-docs-collaboration.gif)](https://univer.ai/pro/examples/docs-collaboration/) | [![](./docs/img/pro-examples-docs-collaboration-playground.gif)](https://univer.ai/pro/examples/docs-collaboration-playground/) | [![](./docs/img/examples-slides.gif)](https://univer.ai/examples/slides/) |
+| 📊 Zen Mode | Univer Workspace (SaaS version) | &nbsp; |
+| [![](./docs/img/zen-mode.gif)](https://univer.ai/zh-CN/guides/sheet/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA) | [![](./docs/img/univer-workspace-drag-chart.gif)](https://youtu.be/kpV0MvQuFZA) | &nbsp; |
 
 ## 使用
 

@@ -1,8 +1,8 @@
 {
-    "name": "@univerjs/sheets-numfmt",
+    "name": "@univerjs/debugger",
     "version": "0.1.11",
-    "private": false,
-    "description": "UniverSheet numfmt plugin",
+    "private": true,
+    "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -17,12 +17,7 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "keywords": [
-        "univer"
-    ],
-    "sideEffects": [
-        "**/*.css"
-    ],
+    "keywords": [],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"
@@ -54,49 +49,35 @@
     "files": [
         "lib"
     ],
-    "engines": {
-        "node": ">=16.0.0",
-        "npm": ">=8.0.0"
-    },
     "scripts": {
-        "test": "vitest run",
-        "test:watch": "vitest",
-        "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
         "build": "tsc && vite build"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/engine-numfmt": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.15.1",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
-    "dependencies": {
-        "@univerjs/icons": "^0.1.45"
+    "optionalDependencies": {
+        "vue": ">=3.0.0"
     },
     "devDependencies": {
-        "@types/react": "^18.2.79",
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/engine-numfmt": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
+        "@vitejs/plugin-vue": "^5.0.4",
         "@wendellhu/redi": "^0.15.1",
-        "less": "^4.2.0",
-        "react": "18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
         "vite": "^5.2.11",
-        "vitest": "^1.6.0"
+        "vitest": "^1.6.0",
+        "vue": "^3.4.27"
     }
 }

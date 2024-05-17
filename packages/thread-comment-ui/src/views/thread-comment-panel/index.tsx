@@ -59,7 +59,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
             return unitComments.map((i) => i[1]).flat().filter((i) => !i.parentId).map((i) => ({
                 ...i,
                 timestamp: dayjs(i.dT).unix(),
-            })).sort((pre, aft) => pre.timestamp - aft.timestamp);
+            })).sort((pre, aft) => aft.timestamp - pre.timestamp);
         } else {
             return unitComments.find((i) => i[0] === subUnitId)?.[1] ?? [];
         }

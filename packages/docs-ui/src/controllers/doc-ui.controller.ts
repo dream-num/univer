@@ -17,7 +17,7 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, DesktopUIPart, IEditorService, ILayoutService, IMenuService, IUIController, IUIPartsService } from '@univerjs/ui';
+import { ComponentManager, DesktopUIPart, IEditorService, ILayoutService, IMenuService, IUIPartsService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { connectInjector } from '@wendellhu/redi/react-bindings';

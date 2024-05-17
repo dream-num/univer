@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { DesktopUIPart, IUIController, IUIPartsService } from '@univerjs/ui';
+import { DesktopUIPart, IUIPartsService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { SlideSideBar } from '../views/slide-bar/SlideBar';

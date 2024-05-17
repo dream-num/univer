@@ -57,4 +57,4 @@ export class ThreadCommentDataSourceService implements IThreadCommentDataSourceS
     }
 }
 
-export const IThreadCommentDataSourceService = createIdentifier<IThreadCommentDataSourceService>('thread-comment-data-source-service');
+export const IThreadCommentDataSourceService = createIdentifier<IThreadCommentDataSourceService>('univer.thread-comment.data-source-service');

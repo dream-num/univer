@@ -34,6 +34,7 @@ export function replaceInDocumentBody(body: IDocumentBody, query: string, target
     const queryLen = query.length;
     let index;
 
+    // eslint-disable-next-line no-cond-assign
     while ((index = documentDataModel.getBody()!.dataStream.indexOf(query)) >= 0) {
         const textX = new TextX();
 

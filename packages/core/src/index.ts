@@ -120,7 +120,7 @@ export { UserManagerService } from './services/user-manager/user-manager.service
 
 export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
 export { composeInterceptors, createInterceptorKey, InterceptorManager } from './common/interceptor';
-export { normalizeTextRuns } from './docs/data-model/apply-utils/common';
+export { normalizeTextRuns } from './docs/data-model/text-x/apply-utils/common';
 export type { PluginCtor } from './services/plugin/plugin';
 export { type DependencyOverride, mergeOverrideWithDependencies } from './services/plugin/plugin-override';
 export * from './types/const';

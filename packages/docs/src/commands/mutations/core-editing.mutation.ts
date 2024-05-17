@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, TextX } from '@univerjs/core';
 import type { IMutation, IMutationCommonParams, Nullable, TextXAction } from '@univerjs/core';
 
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
@@ -90,15 +90,17 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         }
 
         // Step 1: Update Doc Data Model.
-        const undoActions = documentDataModel.apply(actions);
+        const { segmentId } = actions[0];
+        const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
+        const invertibleActions = TextX.makeInvertible(actions, segmentDocumentDataModel.getBody()!);
+        const undoActions = TextX.invert(invertibleActions);
+        documentDataModel.apply(actions);
 
+        // console.log(actions);
         // console.log(undoActions);
 
         // Step 2: Update Doc View Model.
-        const { segmentId } = actions[0];
-        const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
         const segmentViewModel = documentViewModel.getSelfOrHeaderFooterViewModel(segmentId);
-
         segmentViewModel.reset(segmentDocumentDataModel);
 
         // Step 3: Update cursor & selection.

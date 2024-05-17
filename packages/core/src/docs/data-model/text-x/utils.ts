@@ -18,9 +18,15 @@ import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
 import type { IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
 import type { IRetainAction } from '../action-types';
-import { coverTextRuns } from '../apply-utils/update-apply';
+import { coverTextRuns } from './apply-utils/update-apply';
 
-export function getBodySlice(body: IDocumentBody, startOffset: number, endOffset: number): IDocumentBody {
+// TODO: Support other properties like custom ranges, tables, etc.
+export function getBodySlice(
+    body: IDocumentBody,
+    startOffset: number,
+    endOffset: number,
+    returnEmptyTextRun = false
+): IDocumentBody {
     const { dataStream, textRuns = [], paragraphs = [] } = body;
 
     const docBody: IDocumentBody = {
@@ -61,6 +67,14 @@ export function getBodySlice(body: IDocumentBody, startOffset: number, endOffset
                 ed: ed - startOffset,
             };
         });
+    } else if (returnEmptyTextRun) {
+        // In the case of no style before, add the style, removeTextRuns will be empty,
+        // in this case, you need to add an empty textRun for undo.
+        docBody.textRuns = [{
+            st: 0,
+            ed: endOffset - startOffset,
+            ts: {},
+        }];
     }
 
     const newParagraphs: IParagraph[] = [];

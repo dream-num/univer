@@ -17,8 +17,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { normalizeTextRuns } from '../apply-utils/common';
-import { BooleanNumber } from '../../../types/enum/text-style';
-import type { ITextRun } from '../../../types/interfaces/i-document-data';
+import { BooleanNumber } from '../../../../types/enum/text-style';
+import type { ITextRun } from '../../../../types/interfaces/i-document-data';
 
 describe('common utils test cases', () => {
     describe('normalizeTextRuns', () => {

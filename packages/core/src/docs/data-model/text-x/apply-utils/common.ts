@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../../../shared';
-import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../shared';
-import { isSameStyleTextRun } from '../../../shared/compare';
+import type { Nullable } from '../../../../shared';
+import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
+import { isSameStyleTextRun } from '../../../../shared/compare';
 import type {
     ICustomBlock,
     ICustomRange,
@@ -25,8 +25,8 @@ import type {
     ISectionBreak,
     ITable,
     ITextRun,
-} from '../../../types/interfaces';
-import { DataStreamTreeTokenType } from '../types';
+} from '../../../../types/interfaces';
+import { DataStreamTreeTokenType } from '../../types';
 
 export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];
@@ -77,6 +77,7 @@ export function normalizeTextRuns(textRuns: ITextRun[]) {
  * @param textLength The length of the inserted content text.
  * @param currentIndex Determining the index where the content will be inserted into the current content.
  */
+// eslint-disable-next-line max-lines-per-function
 export function insertTextRuns(
     body: IDocumentBody,
     insertBody: IDocumentBody,

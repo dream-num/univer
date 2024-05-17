@@ -30,6 +30,7 @@ export interface IRetainAction {
     t: TextXActionType.RETAIN;
     len: number;
     body?: IDocumentBody;
+    oldBody?: IDocumentBody;
     coverType?: UpdateDocsAttributeType;
     segmentId?: string;
 }

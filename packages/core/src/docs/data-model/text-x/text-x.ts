@@ -20,6 +20,7 @@ import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
 import { type IDeleteAction, type IInsertAction, type IRetainAction, type TextXAction, TextXActionType } from '../action-types';
 import { ActionIterator } from './action-iterator';
 import { composeBody, getBodySlice, isUselessRetainAction } from './utils';
+import { textXApply } from './apply';
 
 function onlyHasDataStream(body: IDocumentBody) {
     return Object.keys(body).length === 1;
@@ -31,8 +32,7 @@ export class TextX {
     static uri = 'https://github.com/dream-num/univer#text-x';
 
     static apply(doc: IDocumentBody, actions: TextXAction[]): IDocumentBody {
-        // TODO: implement apply
-        return doc;
+        return textXApply(doc, actions);
     }
 
     static compose(thisActions: TextXAction[], otherActions: TextXAction[]): TextXAction[] {
@@ -113,6 +113,7 @@ export class TextX {
                 if (action.body == null) {
                     throw new Error('Can not invert DELETE action without body property, makeInvertible must be called first.');
                 }
+
                 invertedActions.push({
                     t: TextXActionType.INSERT,
                     body: action.body,
@@ -121,7 +122,22 @@ export class TextX {
                     segmentId: action.segmentId,
                 });
             } else {
-                invertedActions.push(action);
+                if (action.body != null) {
+                    if (action.oldBody == null) {
+                        throw new Error('Can not invert RETAIN action without oldBody property, makeInvertible must be called first.');
+                    }
+
+                    invertedActions.push({
+                        t: TextXActionType.RETAIN,
+                        body: action.oldBody,
+                        oldBody: action.body,
+                        len: action.len,
+                        coverType: action.coverType,
+                        segmentId: action.segmentId,
+                    });
+                } else {
+                    invertedActions.push(action);
+                }
             }
         }
 
@@ -135,9 +151,18 @@ export class TextX {
 
         for (const action of actions) {
             if (action.t === TextXActionType.DELETE && action.body == null) {
-                const body = getBodySlice(doc, index, index + action.len);
+                const body = getBodySlice(doc, index, index + action.len, true);
 
                 action.body = body;
+            }
+
+            if (action.t === TextXActionType.RETAIN && action.body != null) {
+                const { textRuns } = getBodySlice(doc, index, index + action.len, true);
+
+                action.oldBody = {
+                    dataStream: '',
+                    textRuns,
+                };
             }
 
             invertibleActions.push(action);

@@ -17,9 +17,9 @@
 import type { Nullable } from 'vitest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { UpdateDocsAttributeType } from '../../../shared';
-import { BooleanNumber } from '../../../types/enum';
-import type { IDocumentBody, ITextRun } from '../../../types/interfaces';
+import { UpdateDocsAttributeType } from '../../../../shared';
+import { BooleanNumber } from '../../../../types/enum';
+import type { IDocumentBody, ITextRun } from '../../../../types/interfaces';
 import { deleteParagraphs, deleteTextRuns, insertTextRuns } from '../apply-utils/common';
 import { coverTextRuns } from '../apply-utils/update-apply';
 

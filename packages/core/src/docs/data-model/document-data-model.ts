@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import { MemoryCursor } from '../../common/memory-cursor';
 import type { Nullable } from '../../shared';
 import { getDocsUpdateBody } from '../../shared';
-import { UpdateDocsAttributeType } from '../../shared/command-enum';
 import { Tools } from '../../shared/tools';
 import type {
     IDocumentBody,
@@ -27,12 +25,10 @@ import type {
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
-import { updateAttributeByDelete } from './apply-utils/delete-apply';
-import { updateAttributeByInsert } from './apply-utils/insert-apply';
-import { updateAttribute } from './apply-utils/update-apply';
-import { type TextXAction, TextXActionType } from './action-types';
+import type { TextXAction } from './action-types';
 import { getBodySlice } from './text-x/utils';
 import { getEmptySnapshot } from './empty-snapshot';
+import { TextX } from './text-x/text-x';
 
 export const DEFAULT_DOC = {
     id: 'default_doc',
@@ -272,64 +268,20 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     }
 
     apply(actions: TextXAction[]) {
-        const undoMutations: TextXAction[] = [];
+        if (TextX.isNoop(actions)) {
+            return;
+        }
 
-        const memoryCursor = new MemoryCursor();
+        const doc = this.snapshot;
+        const segmentId = actions[0].segmentId ?? '';
 
-        memoryCursor.reset();
+        const body = getDocsUpdateBody(doc, segmentId);
 
-        actions.forEach((action) => {
-            // FIXME: @JOCS Since updateApply modifies the action(used in undo/redo),
-            // so make a deep copy here, does updateApply need to
-            // be modified to have no side effects in the future?
-            action = Tools.deepClone(action);
+        if (body == null) {
+            throw new Error('DocumentDataModel has no body');
+        }
 
-            if (action.t === TextXActionType.RETAIN) {
-                const { coverType, body, len, segmentId } = action;
-
-                if (body != null) {
-                    const documentBody = this._updateApply(body, len, memoryCursor.cursor, coverType, segmentId);
-
-                    undoMutations.push({
-                        ...action,
-                        t: TextXActionType.RETAIN,
-                        coverType: UpdateDocsAttributeType.REPLACE,
-                        body: documentBody,
-                    });
-                } else {
-                    undoMutations.push({
-                        ...action,
-                        t: TextXActionType.RETAIN,
-                    });
-                }
-
-                memoryCursor.moveCursor(len);
-            } else if (action.t === TextXActionType.INSERT) {
-                const { body, len, segmentId, line } = action;
-
-                this._insertApply(body!, len, memoryCursor.cursor, segmentId);
-                memoryCursor.moveCursor(len);
-                undoMutations.push({
-                    t: TextXActionType.DELETE,
-                    len,
-                    line,
-                    segmentId,
-                });
-            } else if (action.t === TextXActionType.DELETE) {
-                const { len, segmentId } = action;
-                const documentBody = this._deleteApply(len, memoryCursor.cursor, segmentId);
-
-                undoMutations.push({
-                    ...action,
-                    t: TextXActionType.INSERT,
-                    body: documentBody,
-                });
-            } else {
-                throw new Error(`Unknown action type for action: ${action}.`);
-            }
-        });
-
-        return undoMutations;
+        return TextX.apply(body, actions);
     }
 
     sliceBody(startOffset: number, endOffset: number): Nullable<IDocumentBody> {
@@ -340,60 +292,6 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         }
 
         return getBodySlice(body, startOffset, endOffset);
-    }
-
-    private _updateApply(
-        updateBody: Nullable<IDocumentBody>,
-        textLength: number,
-        currentIndex: number,
-        coverType = UpdateDocsAttributeType.COVER,
-        segmentId?: string
-    ): IDocumentBody {
-        if (updateBody == null) {
-            throw new Error('updateBody is none');
-        }
-
-        const doc = this.snapshot;
-
-        const body = getDocsUpdateBody(doc, segmentId);
-
-        if (body == null) {
-            throw new Error('no body has changed');
-        }
-
-        return updateAttribute(body, updateBody, textLength, currentIndex, coverType);
-    }
-
-    private _deleteApply(textLength: number, currentIndex: number, segmentId?: string): IDocumentBody {
-        const doc = this.snapshot;
-
-        const body = getDocsUpdateBody(doc, segmentId);
-
-        if (body == null) {
-            throw new Error('no body has changed');
-        }
-
-        if (textLength <= 0) {
-            return { dataStream: '' };
-        }
-
-        return updateAttributeByDelete(body, textLength, currentIndex);
-    }
-
-    private _insertApply(insertBody: IDocumentBody, textLength: number, currentIndex: number, segmentId?: string) {
-        const doc = this.snapshot;
-
-        const body = getDocsUpdateBody(doc, segmentId);
-
-        if (textLength === 0) {
-            return;
-        }
-
-        if (body == null) {
-            throw new Error('no body has changed');
-        }
-
-        updateAttributeByInsert(body, insertBody, textLength, currentIndex);
     }
 
     private _initializeHeaderFooterModel() {

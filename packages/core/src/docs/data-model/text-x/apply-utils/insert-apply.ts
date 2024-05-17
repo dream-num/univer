@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { insertTextToContent } from '../../../shared';
-import type { IDocumentBody } from '../../../types/interfaces';
+import { insertTextToContent } from '../../../../shared';
+import type { IDocumentBody } from '../../../../types/interfaces';
 import {
     insertCustomBlocks,
     insertCustomRanges,

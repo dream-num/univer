@@ -14,9 +14,50 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, LifecycleStages, LocaleType, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '../../../../data/sheets/demo/default-workbook-data-demo';
+const DEFAULT_WORKBOOK_DATA_DEMO = {
+    id: 'test',
+    appVersion: '3.0.0-alpha',
+    sheets: {
+        sheet1: {
+            id: 'sheet1',
+            name: 'sheet1',
+            cellData: {
+                0: {
+                    3: {
+                        f: '=SUM(A1)',
+                        si: '3e4r5t',
+                    },
+                },
+                1: {
+                    3: {
+                        f: '=SUM(A2)',
+                        si: 'OSPtzm',
+                    },
+                },
+                2: {
+                    3: {
+                        si: 'OSPtzm',
+                    },
+                },
+                3: {
+                    3: {
+                        si: 'OSPtzm',
+                    },
+                },
+            },
+            rowCount: 100,
+            columnCount: 100,
+        },
+    },
+    locale: LocaleType.ZH_CN,
+    name: '',
+    sheetOrder: [],
+    styles: {},
+    resources: [
+    ],
+};
 
 const AWAIT_LOADING_TIMEOUT = 5000;
 const AWAIT_DISPOSING_TIMEOUT = 5000;
@@ -45,12 +86,12 @@ export class E2EMemoryController {
 
     private _initPlugin(): void {
         window.E2EMemoryAPI = {
-            loadAndRelease: (id) => this._loadAndRelease(id),
+            loadAndRelease: (id) => this._releaseAndLoad(id),
         };
     }
 
-    private async _loadAndRelease(id: number): Promise<void> {
-        const unitId = `e2e${id}`;
+    private async _releaseAndLoad(releaseId: number): Promise<void> {
+        const unitId = `e2e${releaseId}`;
         this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, { ...DEFAULT_WORKBOOK_DATA_DEMO, id: unitId });
         await timer(AWAIT_LOADING_TIMEOUT);
         this._univerInstanceService.disposeUnit(unitId);

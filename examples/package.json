@@ -14,6 +14,7 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
+        "@univerjs/debugger": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { createDownloadElement } from '../util/index';
+import { createDownloadElement } from './util';
 
 export class ExportController {
     exportJson(data: string, fileName: string) {

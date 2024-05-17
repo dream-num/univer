@@ -24,7 +24,7 @@ import { E2EMemoryController } from './controllers/e2e/e2e-memory.controller';
 
 export interface IDebuggerPluginConfig { }
 
-export class DebuggerPlugin extends Plugin {
+export class UniverDebuggerPlugin extends Plugin {
     static override pluginName = 'debugger';
 
     private _debuggerController!: DebuggerController;

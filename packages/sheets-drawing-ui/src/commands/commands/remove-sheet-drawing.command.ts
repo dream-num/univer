@@ -27,7 +27,6 @@ import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import type { IDeleteDrawingCommandParams } from './interfaces';
 
-
 /**
  * The command to remove new sheet image
  */

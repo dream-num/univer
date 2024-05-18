@@ -537,7 +537,6 @@ export class Scene extends ThinScene {
         this._transformer?.attachTo(o);
     }
 
-
     override detachTransformerFrom(o: BaseObject) {
         this._transformer?.detachFrom(o);
     }

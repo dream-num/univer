@@ -32,7 +32,6 @@ import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arran
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 
-
 const SHEET_IMAGE_WIDTH_LIMIT = 500;
 const SHEET_IMAGE_HEIGHT_LIMIT = 500;
 
@@ -128,7 +127,6 @@ export class SheetDrawingUpdateController extends Disposable {
             scale = Math.max(scaleWidth, scaleHeight);
         }
 
-
         const sheetTransform = this._getImagePosition(width, height, scale);
 
         if (sheetTransform == null) {
@@ -199,7 +197,6 @@ export class SheetDrawingUpdateController extends Disposable {
             return;
         }
 
-
         const { startX: startSelectionX, startY: startSelectionY } = startSelectionCell;
 
         const { startX: endSelectionX, startY: endSelectionY } = endSelectionCell;
@@ -236,7 +233,6 @@ export class SheetDrawingUpdateController extends Disposable {
         }
 
         const { startColumn, startRow, startX, startY } = rangeWithCoord;
-
 
         const from = {
             column: startColumn,
@@ -299,7 +295,6 @@ export class SheetDrawingUpdateController extends Disposable {
                     return;
                 }
 
-
                 const sheetTransform = this._transformToImagePosition({ ...sheetDrawing.transform, ...transform });
 
                 if (sheetTransform == null) {
@@ -316,7 +311,6 @@ export class SheetDrawingUpdateController extends Disposable {
                     sheetTransform: { ...sheetTransform },
                 };
 
-
                 drawings.push(newDrawing);
             });
 
@@ -328,7 +322,6 @@ export class SheetDrawingUpdateController extends Disposable {
             }
         });
     }
-
 
     private _groupDrawingListener() {
         this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
@@ -375,9 +368,7 @@ export class SheetDrawingUpdateController extends Disposable {
             rowOffset: top - startSelectionCell.startY,
         };
 
-
         const endSelectionCell = this._selectionRenderService.getSelectionCellByPosition(left + width, top + height);
-
 
         if (endSelectionCell == null) {
             return;

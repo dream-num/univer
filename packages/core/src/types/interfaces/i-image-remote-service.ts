@@ -40,5 +40,4 @@ export interface IImageRemoteService {
     applyAI(imageId: string, operatorType: string): Promise<string>;
 }
 
-
 export const IImageRemoteService = createIdentifier<IImageRemoteService>('univer.plugin.image-remote.service');

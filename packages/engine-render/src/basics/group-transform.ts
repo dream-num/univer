@@ -18,7 +18,6 @@ import type { ITransformState } from '@univerjs/core';
 import { offsetRotationAxis } from './offset-rotation-axis';
 import { Vector2 } from './vector2';
 
-
 export function getGroupState(parentLeft: number, parentTop: number, objectStates: ITransformState[]) {
     let groupLeft = Number.MAX_SAFE_INTEGER;
     let groupTop = Number.MAX_SAFE_INTEGER;
@@ -47,14 +46,12 @@ export function getGroupState(parentLeft: number, parentTop: number, objectState
     };
 }
 
-
 export function transformObjectOutOfGroup(child: ITransformState, parent: ITransformState, groupOriginWidth: number, groupOriginHeight: number) {
     const { left = 0, top = 0, width = 0, height = 0, angle = 0 } = child;
     const { left: groupLeft = 0, top: groupTop = 0, angle: groupAngle = 0 } = parent;
 
     const groupCenterX = groupLeft + groupOriginWidth / 2;
     const groupCenterY = groupTop + groupOriginHeight / 2;
-
 
     const objectX = left + groupLeft;
     const objectY = top + groupTop;

@@ -21,7 +21,6 @@ export const ALLOW_IMAGE_LIST = ['image/png', 'image/jpeg', 'image/jpg', 'image/
 
 const ALLOW_IMAGE_SIZE = 5 * 1024 * 1024;
 
-
 export class ImageRemoteService implements IImageRemoteService {
     async getImage(imageId: string): Promise<string> {
         return Promise.resolve(imageId);

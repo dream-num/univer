@@ -23,7 +23,6 @@ import { SheetDrawingDataController } from './controllers/sheet-drawing-data.con
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 import { SheetDrawingUIController } from './controllers/sheet-drawing.controller';
 
-
 const PLUGIN_NAME = 'SHEETS_IMAGE_UI_PLUGIN';
 
 export class UniverSheetsDrawingUIPlugin extends Plugin {

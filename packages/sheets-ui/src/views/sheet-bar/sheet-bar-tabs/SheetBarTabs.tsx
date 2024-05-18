@@ -60,7 +60,6 @@ export function SheetBarTabs() {
     const confirmService = useDependency(IConfirmService);
     const selectionRenderService = useDependency(ISelectionRenderService);
     const editorBridgeService = useDependency(IEditorBridgeService);
-    const injector = useInjector();
 
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 

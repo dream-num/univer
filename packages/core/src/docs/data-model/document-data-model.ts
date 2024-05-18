@@ -15,7 +15,6 @@
  */
 
 import type { Nullable } from '../../shared';
-import { getDocsUpdateBody } from '../../shared';
 import { Tools } from '../../shared/tools';
 import type {
     IDocumentBody,
@@ -25,10 +24,10 @@ import type {
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
-import type { TextXAction } from './text-x/action-types';
 import { getBodySlice } from './text-x/utils';
 import { getEmptySnapshot } from './empty-snapshot';
-import { TextX } from './text-x/text-x';
+import type { JSONXActions } from './json-x/json-x';
+import { JSONX } from './json-x/json-x';
 
 export const DEFAULT_DOC = {
     id: 'default_doc',
@@ -260,21 +259,14 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         return this._unitId;
     }
 
-    apply(actions: TextXAction[]) {
-        if (TextX.isNoop(actions)) {
+    apply(actions: JSONXActions) {
+        if (JSONX.isNoop(actions)) {
             return;
         }
 
         const doc = this.snapshot;
-        const segmentId = actions[0].segmentId ?? '';
 
-        const body = getDocsUpdateBody(doc, segmentId);
-
-        if (body == null) {
-            throw new Error('DocumentDataModel has no body');
-        }
-
-        return TextX.apply(body, actions);
+        return JSONX.apply(doc, actions);
     }
 
     sliceBody(startOffset: number, endOffset: number): Nullable<IDocumentBody> {

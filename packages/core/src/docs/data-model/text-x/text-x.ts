@@ -89,7 +89,7 @@ export class TextX {
     }
 
     // `transform` is implemented in univer-pro in class TextXPro. do not use this method in TextX.
-    static transform(_thisActions: TextXAction[], _otherActions: TextXAction[], _priority = false): TextXAction[] {
+    static transform(_thisActions: TextXAction[], _otherActions: TextXAction[], _priority: 'left' | 'right'): TextXAction[] {
         throw new Error('transform is not implemented in TextX');
     }
 

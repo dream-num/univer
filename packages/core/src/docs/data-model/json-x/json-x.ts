@@ -14,14 +14,96 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '../../../types/interfaces';
+import type { Doc, JSONOp, Path } from 'ot-json1';
+import * as json1 from 'ot-json1';
+import type { IDocumentBody, IDocumentData } from '../../../types/interfaces';
+import { TextX } from '../text-x/text-x';
+import type { TextXAction } from '../text-x/action-types';
+import type { Nullable } from '../../../shared';
 
-export class JsonX {
+interface ISubType {
+    name: string;
+    uri?: string;
+    apply(doc: IDocumentBody, actions: TextXAction[]): IDocumentBody;
+    compose(thisActions: TextXAction[], otherActions: TextXAction[]): TextXAction[];
+    transform(thisActions: TextXAction[], otherActions: TextXAction[], priority: 'left' | 'right'): TextXAction[];
+    invert?: (actions: TextXAction[]) => TextXAction[];
+    isNoop?: (actions: TextXAction[]) => boolean;
+    makeInvertible?: (actions: TextXAction[], doc: IDocumentBody) => TextXAction[];
+
+    // eslint-disable-next-line ts/no-explicit-any
+    [k: string]: any;
+};
+
+json1.type.registerSubtype(TextX as ISubType);
+
+export { JSONOp as JSONXActions, Path as JSONXPath };
+
+export class JSONX {
     static name = 'json-x';
 
     static uri = 'https://github.com/dream-num/univer#json-x';
 
-    static apply(doc: IDocumentData): IDocumentData {
-        return doc;
+    static apply(doc: IDocumentData, actions: JSONOp) {
+        if (json1.type.isNoop(actions)) {
+            return;
+        }
+
+        return json1.type.apply(doc as unknown as Doc, actions);
+    }
+
+    static compose(thisActions: JSONOp, otherActions: JSONOp) {
+        return json1.type.compose(thisActions, otherActions);
+    }
+
+    // Do not use transform in JsonX, pls use transform in JsonXPro.
+    static transform(_thisActions: JSONOp, _otherActions: JSONOp, _priority: 'left' | 'right') {
+        throw new Error('transform is not implemented in JsonX');
+    }
+
+    static invertWithDoc(actions: JSONOp, doc: IDocumentData) {
+        // Why not use invert?
+        // Because invertWithDoc = invert(makeInvertible(op, doc));
+        // First we need to make all op invertible, then we can invert it.
+        // invertWithDoc is a helper function to make all op invertible and then invert it.
+        return json1.type.invertWithDoc(actions, doc as unknown as Doc);
+    }
+
+    static isNoop(actions: JSONOp) {
+        return json1.type.isNoop(actions);
+    }
+
+    private static _instance: Nullable<JSONX> = null;
+
+    static getInstance() {
+        if (this._instance == null) {
+            this._instance = new JSONX();
+        }
+
+        return this._instance;
+    }
+
+    // eslint-disable-next-line ts/no-explicit-any
+    removeOp(path: Path, value?: any) {
+        return json1.removeOp(path, value);
+    }
+
+    moveOp(from: Path, to: Path) {
+        return json1.moveOp(from, to);
+    }
+
+    // eslint-disable-next-line ts/no-explicit-any
+    insertOp(path: Path, value: any) {
+        return json1.insertOp(path, value);
+    }
+
+    // eslint-disable-next-line ts/no-explicit-any
+    replaceOp(path: Path, oldVal: any, newVal: any) {
+        return json1.replaceOp(path, oldVal, newVal);
+    }
+
+    editOp(subOp: TextXAction[]) {
+        // Hardcode the path to ['body'] for now. Because rich text is in the body property.
+        return json1.editOp(['body'], TextX.name, subOp);
     }
 }

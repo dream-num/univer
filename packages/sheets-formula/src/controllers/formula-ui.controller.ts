@@ -15,8 +15,7 @@
  */
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { IDesktopUIController } from '@univerjs/ui';
-import { ComponentManager, DesktopUIPart, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
+import { ComponentManager, DesktopUIPart, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
@@ -51,7 +50,7 @@ export class FormulaUIController extends Disposable {
         @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
-        @IUIController private readonly _uiController: IDesktopUIController,
+        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
@@ -105,7 +104,7 @@ export class FormulaUIController extends Disposable {
 
     private _registerComponents(): void {
         this.disposeWithMe(
-            this._uiController.registerComponent(DesktopUIPart.CONTENT, () => connectInjector(RenderFormulaPromptContent, this._injector))
+            this._uiPartsService.registerComponent(DesktopUIPart.CONTENT, () => connectInjector(RenderFormulaPromptContent, this._injector))
         );
 
         this._componentManager.register(MORE_FUNCTIONS_COMPONENT, MoreFunctions);

@@ -23,8 +23,8 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import type { IDesktopUIController, IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, DesktopUIPart, ILayoutService, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
+import type { IMenuItemFactory } from '@univerjs/ui';
+import { ComponentManager, DesktopUIPart, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
@@ -237,7 +237,7 @@ export class SheetUIController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IMenuService private readonly _menuService: IMenuService,
-        @IUIController private readonly _uiController: IDesktopUIController
+        @IUIPartsService private readonly _uiPartsService: IUIPartsService
     ) {
         super();
 
@@ -467,7 +467,7 @@ export class SheetUIController extends Disposable {
     }
 
     private _initWorkbenchParts(): void {
-        const uiController = this._uiController;
+        const uiController = this._uiPartsService;
         const injector = this._injector;
 
         this.disposeWithMe(uiController.registerComponent(DesktopUIPart.HEADER, () => connectInjector(RenderSheetHeader, injector)));

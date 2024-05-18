@@ -56,6 +56,7 @@ import { EditorService, IEditorService } from './services/editor/editor.service'
 import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 import { IProgressService, ProgressService } from './services/progress/progress.service';
 import { CanvasDomLayerService } from './services/dom/canvas-dom-layer.service';
+import { DesktopUIPartsService, IUIPartsService } from './services/parts/parts.service';
 
 const PLUGIN_NAME = 'ui';
 
@@ -102,6 +103,7 @@ export class UniverUIPlugin extends Plugin {
 
             // services
             [ShortcutPanelService],
+            [IUIPartsService, { useClass: DesktopUIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],

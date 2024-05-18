@@ -27,22 +27,36 @@ import { ComponentContainer } from './components/ComponentContainer';
 import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
-import { globalComponents } from './parts';
 import { CanvasPopup } from './components/popup';
 import { DomLayer } from './components/dom';
+import { builtInGlobalComponents } from './parts';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
+
+    globalComponents?: Set<() => ComponentType>;
     headerComponents?: Set<() => ComponentType>;
     contentComponents?: Set<() => ComponentType>;
     footerComponents?: Set<() => ComponentType>;
     headerMenuComponents?: Set<() => ComponentType>;
     leftSidebarComponents?: Set<() => ComponentType>;
+
     onRendered?: (container: HTMLElement) => void;
 }
 
 export function App(props: IUniverAppProps) {
-    const { header, footer, mountContainer, headerComponents, headerMenuComponents, contentComponents, footerComponents, leftSidebarComponents, onRendered } = props;
+    const {
+        header,
+        footer,
+        mountContainer,
+        headerComponents,
+        headerMenuComponents,
+        contentComponents,
+        footerComponents,
+        leftSidebarComponents,
+        globalComponents,
+        onRendered,
+    } = props;
 
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
@@ -144,6 +158,7 @@ export function App(props: IUniverAppProps) {
                 </section>
             </div>
             <ComponentContainer components={globalComponents} />
+            <ComponentContainer components={builtInGlobalComponents} />
         </ConfigProvider>
     );
 }

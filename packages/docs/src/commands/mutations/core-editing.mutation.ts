@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, IUniverInstanceService, TextX } from '@univerjs/core';
-import type { IMutation, IMutationCommonParams, Nullable, TextXAction } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, JSONX } from '@univerjs/core';
+import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { DocViewModelManagerService } from '../../services/doc-view-model-manager.service';
 import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
@@ -25,7 +25,8 @@ import { IMEInputManagerService } from '../../services/ime-input-manager.service
 
 export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     unitId: string;
-    actions: TextXAction[];
+    segmentId?: string;
+    actions: JSONXActions;
     textRanges: Nullable<ITextRangeWithStyle[]>;
     prevTextRanges?: Nullable<ITextRangeWithStyle[]>;
     noNeedSetTextRange?: boolean;
@@ -48,6 +49,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
     handler: (accessor, params) => {
         const {
             unitId,
+            segmentId = '',
             actions,
             textRanges,
             prevTextRanges,
@@ -78,7 +80,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         // TODO: `disabled` is only used for read only demo, and will be removed in the future.
         const disabled = !!documentDataModel.getSnapshot().disabled;
 
-        if (actions.length === 0 || disabled) {
+        if (JSONX.isNoop(actions) || (actions && actions.length === 0) || disabled) {
             // The actions' length maybe 0 when the mutation is from collaborative editing.
             // The return result will not be used.
             return {
@@ -89,16 +91,14 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         }
 
         // Step 1: Update Doc Data Model.
-        const { segmentId } = actions[0];
-        const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
-        const invertibleActions = TextX.makeInvertible(actions, segmentDocumentDataModel.getBody()!);
-        const undoActions = TextX.invert(invertibleActions);
+        const undoActions = JSONX.invertWithDoc(actions, documentDataModel.getSnapshot());
         documentDataModel.apply(actions);
 
         // console.log(actions);
         // console.log(undoActions);
 
         // Step 2: Update Doc View Model.
+        const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
         const segmentViewModel = documentViewModel.getSelfOrHeaderFooterViewModel(segmentId);
         segmentViewModel.reset(segmentDocumentDataModel);
 
@@ -114,6 +114,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         const changeState: IDocStateChangeParams = {
             commandId: RichTextEditingMutationId,
             unitId,
+            segmentId,
             trigger,
             noHistory,
             redoState: {

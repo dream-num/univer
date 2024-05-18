@@ -520,7 +520,7 @@ export class StartEditController extends Disposable {
                 eventType === DeviceInputEventType.Keyboard ||
                 (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
             ) {
-                const snapshot = Tools.deepClone(documentDataModel.snapshot) as IDocumentData;
+                const snapshot = Tools.deepClone(documentDataModel.getSnapshot()) as IDocumentData;
                 const documentViewModel = this._docViewModelManagerService.getViewModel(editorUnitId);
 
                 if (documentViewModel == null) {

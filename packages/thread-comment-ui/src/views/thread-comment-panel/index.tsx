@@ -36,10 +36,11 @@ export interface IThreadCommentPanelProps {
     onAdd: () => void;
     getSubUnitName: (subUnitId: string) => string;
     onResolve?: (id: string) => void;
+    sortComments?: (comments: IThreadComment[]) => IThreadComment[];
 }
 
 export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
-    const { unitId, subUnitId$, type, onAdd, getSubUnitName, onResolve } = props;
+    const { unitId, subUnitId$, type, onAdd, getSubUnitName, onResolve, sortComments } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
     const localeService = useDependency(LocaleService);
@@ -56,14 +57,12 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const prefix = 'panel';
     const comments = useMemo(() => {
         if (unit === 'all') {
-            return unitComments.map((i) => i[1]).flat().filter((i) => !i.parentId).map((i) => ({
-                ...i,
-                timestamp: dayjs(i.dT).unix(),
-            })).sort((pre, aft) => aft.timestamp - pre.timestamp);
+            const filteredComments = unitComments.map((i) => i[1]).flat().filter((i) => !i.parentId);
+            return sortComments ? sortComments(filteredComments) : filteredComments;
         } else {
             return unitComments.find((i) => i[0] === subUnitId)?.[1] ?? [];
         }
-    }, [unit, unitComments, subUnitId]);
+    }, [unit, unitComments, subUnitId, sortComments]);
 
     const statuedComments = useMemo(() => {
         if (status === 'resolved') {

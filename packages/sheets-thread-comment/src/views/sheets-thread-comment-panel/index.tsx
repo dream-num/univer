@@ -18,8 +18,10 @@ import type { Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ThreadCommentPanel } from '@univerjs/thread-comment-ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { map } from 'rxjs';
+import type { IThreadComment } from '@univerjs/thread-comment';
+import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { ShowAddSheetCommentModalOperation } from '../../commands/operations/comment.operation';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 
@@ -33,6 +35,29 @@ export const SheetsThreadCommentPanel = () => {
     const unitId = workbook.getUnitId();
     const commandService = useDependency(ICommandService);
     const subUnitId$ = useMemo(() => workbook.activeSheet$.pipe(map((i) => i?.getSheetId())), [workbook.activeSheet$]);
+
+    const sortComments = useCallback((comments: IThreadComment[]) => {
+        const worksheets = workbook.getSheets();
+        const sheetIndex: Record<string, number> = {};
+        worksheets.forEach((sheet, i) => {
+            sheetIndex[sheet.getSheetId()] = i;
+        });
+
+        return comments.map((comment) => {
+            const ref = singleReferenceToGrid(comment.ref);
+            const p = [sheetIndex[comment.subUnitId] ?? 0, ref.row, ref.column];
+            return { ...comment, p };
+        }).sort((pre, aft) => {
+            if (pre.p[0] === aft.p[0]) {
+                if (pre.p[1] === aft.p[1]) {
+                    return pre.p[2] - aft.p[2];
+                }
+                return pre.p[1] - aft.p[1];
+            }
+
+            return pre.p[0] - aft.p[0];
+        });
+    }, [workbook]);
 
     const getSubUnitName = (id: string) => {
         return workbook.getSheetBySheetId(id)?.getName() ?? '';
@@ -54,6 +79,7 @@ export const SheetsThreadCommentPanel = () => {
             onAdd={handleAdd}
             getSubUnitName={getSubUnitName}
             onResolve={handleResolve}
+            sortComments={sortComments}
         />
     );
 };

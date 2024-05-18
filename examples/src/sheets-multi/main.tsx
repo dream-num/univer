@@ -45,8 +45,6 @@ function factory(id: string) {
         univer.registerPlugin(UniverRenderEnginePlugin);
         univer.registerPlugin(UniverUIPlugin, {
             container: id,
-            header: true,
-            footer: true,
         });
         univer.registerPlugin(UniverDocsPlugin, {
             hasScroll: false,

@@ -29,6 +29,7 @@ import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
 import { CanvasPopup } from './components/popup';
 import { builtInGlobalComponents } from './parts';
+import { ContextMenu } from './components/context-menu/ContextMenu';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -38,8 +39,9 @@ export interface IUniverAppProps extends IWorkbenchOptions {
 
 export function App(props: IUniverAppProps) {
     const {
-        header,
-        footer,
+        header = true,
+        footer = true,
+        contextMenu = true,
         mountContainer,
         onRendered,
     } = props;
@@ -172,6 +174,7 @@ export function App(props: IUniverAppProps) {
 
             <ComponentContainer components={globalComponents} />
             <ComponentContainer components={builtInGlobalComponents} />
+            {contextMenu && <ContextMenu />}
         </ConfigProvider>
     );
 }

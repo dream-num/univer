@@ -16,10 +16,8 @@
 
 import type { ComponentType } from 'react';
 
-import { ContextMenu } from './components/context-menu/ContextMenu';
 import { GlobalZone } from './components/global-zone/GlobalZone';
 
 export const builtInGlobalComponents: Set<() => ComponentType> = new Set([
-    () => ContextMenu,
     () => GlobalZone,
 ]);

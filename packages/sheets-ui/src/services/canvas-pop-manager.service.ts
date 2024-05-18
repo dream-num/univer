@@ -41,6 +41,132 @@ export interface ICanvasPopup {
     extraProps?: Record<string, any>;
 }
 
+export function calcCellPosition(
+    row: number,
+    col: number,
+    currentRender: IRender,
+    skeleton: SpreadsheetSkeleton,
+    activeViewport: Viewport
+) {
+    const { scene } = currentRender;
+
+    const primaryWithCoord = skeleton.getCellByIndex(row, col);
+    const cellInfo = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
+
+    const { scaleX, scaleY } = scene.getAncestorScale();
+
+    const scrollXY = {
+        x: activeViewport.actualScrollX,
+        y: activeViewport.actualScrollY,
+    };
+
+    // const bounding = engine.getCanvasElement().getBoundingClientRect();
+
+    const position: IBoundRectNoAngle = {
+        left: ((cellInfo.startX - scrollXY.x) * scaleX),
+        right: (cellInfo.endX - scrollXY.x) * scaleX,
+        top: ((cellInfo.startY - scrollXY.y) * scaleY),
+        bottom: ((cellInfo.endY - scrollXY.y) * scaleY),
+    };
+
+    return position;
+}
+
+export function createCellPositionObserver(
+    initialRow: number,
+    initialCol: number,
+    currentRender: IRender,
+    skeleton: SpreadsheetSkeleton,
+    activeViewport: Viewport,
+    commandService: ICommandService
+) {
+    let row = initialRow;
+    let col = initialCol;
+
+    const position = calcCellPosition(row, col, currentRender, skeleton, activeViewport);
+    const position$ = new BehaviorSubject(position);
+    const updatePosition = () => position$.next(calcCellPosition(row, col, currentRender, skeleton, activeViewport));
+
+    const disposable = new DisposableCollection();
+    disposable.add(commandService.onCommandExecuted((commandInfo) => {
+        if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {
+            const params = commandInfo.params as ISetWorksheetRowAutoHeightMutationParams;
+            if (params.rowsAutoHeightInfo.findIndex((item) => item.row === row) > -1) {
+                updatePosition();
+                return;
+            }
+        }
+
+        if (
+            COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1 ||
+            commandInfo.id === SetScrollOperation.id ||
+            commandInfo.id === SetZoomRatioOperation.id
+        ) {
+            updatePosition();
+        }
+    }));
+
+    const updateRowCol = (newRow: number, newCol: number) => {
+        row = newRow;
+        col = newCol;
+
+        updatePosition();
+    };
+
+    return {
+        position$,
+        disposable,
+        position,
+        updateRowCol,
+    };
+}
+
+export function createObjectPositionObserver(
+    targetObject: BaseObject,
+    currentRender: IRender,
+    skeleton: SpreadsheetSkeleton,
+    worksheet: Worksheet,
+    commandService: ICommandService
+) {
+    const calc = () => {
+        const { scene } = currentRender;
+        const { left, top, width, height } = targetObject;
+
+        const bound: IBoundRectNoAngle = {
+            left,
+            right: left + width,
+            top,
+            bottom: top + height,
+        };
+
+        const offsetBound = transformBound2OffsetBound(bound, scene, skeleton, worksheet);
+
+        const position = {
+            left: offsetBound.left,
+            right: offsetBound.right,
+            top: offsetBound.top,
+            bottom: offsetBound.bottom,
+        };
+        return position;
+    };
+
+    const position = calc();
+    const position$ = new BehaviorSubject(position);
+    const disposable = new DisposableCollection();
+
+    disposable.add(commandService.onCommandExecuted((commandInfo) => {
+        if (commandInfo.id === SetScrollOperation.id || commandInfo.id === SetZoomRatioOperation.id) {
+            position$.next(calc());
+        }
+    }));
+
+    return {
+        position,
+        position$,
+        disposable,
+    };
+}
+
 export class SheetCanvasPopManagerService extends Disposable {
     constructor(
         @Inject(ICanvasPopupService) private readonly _globalPopupManagerService: ICanvasPopupService,
@@ -51,130 +177,6 @@ export class SheetCanvasPopManagerService extends Disposable {
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
-    }
-
-    private _calcCellPosition(
-        row: number,
-        col: number,
-        currentRender: IRender,
-        skeleton: SpreadsheetSkeleton,
-        activeViewport: Viewport
-    ) {
-        const { scene } = currentRender;
-
-        const primaryWithCoord = skeleton.getCellByIndex(row, col);
-        const cellInfo = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
-
-        const { scaleX, scaleY } = scene.getAncestorScale();
-
-        const scrollXY = {
-            x: activeViewport.actualScrollX,
-            y: activeViewport.actualScrollY,
-        };
-
-        // const bounding = engine.getCanvasElement().getBoundingClientRect();
-
-        const position: IBoundRectNoAngle = {
-            left: ((cellInfo.startX - scrollXY.x) * scaleX),
-            right: (cellInfo.endX - scrollXY.x) * scaleX,
-            top: ((cellInfo.startY - scrollXY.y) * scaleY),
-            bottom: ((cellInfo.endY - scrollXY.y) * scaleY),
-        };
-
-        return position;
-    }
-
-    private _createCellPositionObserver(
-        initialRow: number,
-        initialCol: number,
-        currentRender: IRender,
-        skeleton: SpreadsheetSkeleton,
-        activeViewport: Viewport
-    ) {
-        let row = initialRow;
-        let col = initialCol;
-
-        const position = this._calcCellPosition(row, col, currentRender, skeleton, activeViewport);
-        const position$ = new BehaviorSubject(position);
-        const updatePosition = () => position$.next(this._calcCellPosition(row, col, currentRender, skeleton, activeViewport));
-
-        const disposable = new DisposableCollection();
-        disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {
-                const params = commandInfo.params as ISetWorksheetRowAutoHeightMutationParams;
-                if (params.rowsAutoHeightInfo.findIndex((item) => item.row === row) > -1) {
-                    updatePosition();
-                    return;
-                }
-            }
-
-            if (
-                COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1 ||
-                commandInfo.id === SetScrollOperation.id ||
-                commandInfo.id === SetZoomRatioOperation.id
-            ) {
-                updatePosition();
-            }
-        }));
-
-        const updateRowCol = (newRow: number, newCol: number) => {
-            row = newRow;
-            col = newCol;
-
-            updatePosition();
-        };
-
-        return {
-            position$,
-            disposable,
-            position,
-            updateRowCol,
-        };
-    }
-
-    private _createObjectPositionObserver(
-        targetObject: BaseObject,
-        currentRender: IRender,
-        skeleton: SpreadsheetSkeleton,
-        worksheet: Worksheet
-    ) {
-        const calc = () => {
-            const { scene } = currentRender;
-            const { left, top, width, height } = targetObject;
-
-            const bound: IBoundRectNoAngle = {
-                left,
-                right: left + width,
-                top,
-                bottom: top + height,
-            };
-
-            const offsetBound = transformBound2OffsetBound(bound, scene, skeleton, worksheet);
-
-            const position = {
-                left: offsetBound.left,
-                right: offsetBound.right,
-                top: offsetBound.top,
-                bottom: offsetBound.bottom,
-            };
-            return position;
-        };
-
-        const position = calc();
-        const position$ = new BehaviorSubject(position);
-        const disposable = new DisposableCollection();
-
-        disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetScrollOperation.id || commandInfo.id === SetZoomRatioOperation.id) {
-                position$.next(calc());
-            }
-        }));
-
-        return {
-            position,
-            position$,
-            disposable,
-        };
     }
 
     /**
@@ -201,7 +203,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             };
         }
 
-        const { position, position$, disposable } = this._createObjectPositionObserver(targetObject, currentRender, skeleton, worksheet);
+        const { position, position$, disposable } = createObjectPositionObserver(targetObject, currentRender, skeleton, worksheet, this._commandService);
 
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
@@ -248,7 +250,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             return null;
         }
 
-        const { position, position$, disposable, updateRowCol } = this._createCellPositionObserver(row, col, currentRender, skeleton, activeViewport);
+        const { position, position$, disposable, updateRowCol } = createCellPositionObserver(row, col, currentRender, skeleton, activeViewport, this._commandService);
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { type IPosition, Tools } from '@univerjs/core';
+import type { IPosition } from '@univerjs/core';
 import { BehaviorSubject, type Observable } from 'rxjs';
 
 export interface IDomLayer {
-    position: IPosition;
-    position$: Observable<IPosition>;
+    position$: Observable<IPosition & { rotate: number }>;
+    id: string;
+    componentKey: string;
 }
 
 export class CanvasDomLayerService {
@@ -36,11 +37,9 @@ export class CanvasDomLayerService {
         this._domLayers$.next(Array.from(this._domLayerMap.entries()));
     }
 
-    addDomLayer(item: IDomLayer): string {
-        const id = Tools.generateRandomId();
-        this._domLayerMap.set(id, item);
+    addDomLayer(item: IDomLayer) {
+        this._domLayerMap.set(item.id, item);
         this._notice();
-        return id;
     }
 
     removeDomLayer(id: string): void {

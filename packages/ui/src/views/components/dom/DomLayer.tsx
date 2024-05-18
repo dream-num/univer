@@ -19,23 +19,32 @@ import React from 'react';
 import type { IDomLayer } from '../../../services/dom/canvas-dom-layer.service';
 import { CanvasDomLayerService } from '../../../services/dom/canvas-dom-layer.service';
 import { useObservable } from '../../../components/hooks/observable';
+import { ComponentManager } from '../../../common';
 
 const DomLayerSingle = (props: { layer: IDomLayer; id: string }) => {
     const { layer, id } = props;
-    const position = useObservable(layer.position$, layer.position);
+    const componentManager = useDependency(ComponentManager);
+    const position = useObservable(layer.position$);
+    const Component = componentManager.get(layer.componentKey);
 
-    return (
-        <div
-            id={id}
-            style={{
-                position: 'absolute',
-                top: position.startY,
-                left: position.startX,
-                width: position.endX - position.startX,
-                height: position.endY - position.startY,
-            }}
-        />
-    );
+    return position
+        ? (
+            <div
+                id={id}
+                style={{
+                    position: 'absolute',
+                    top: position.startY,
+                    left: position.startX,
+                    width: position.endX - position.startX,
+                    height: position.endY - position.startY,
+                    transform: `rotate(${position.rotate}deg)`,
+                    overflow: 'hidden',
+                }}
+            >
+                {Component ? <Component /> : null}
+            </div>
+        )
+        : null;
 };
 
 export const DomLayer = () => {

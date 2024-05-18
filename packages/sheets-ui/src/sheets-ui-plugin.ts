@@ -71,6 +71,7 @@ import { SheetContextMenuRenderController } from './controllers/render-controlle
 import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
+import { SheetCanvasDomLayerManagerService } from './services/canvas-dom-layer-manager.service';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';
@@ -111,6 +112,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [HoverManagerService],
                 [SheetCanvasPopManagerService],
                 [CellAlertManagerService],
+                [SheetCanvasDomLayerManagerService],
 
                 // controllers
                 [ActiveWorksheetController],
@@ -126,6 +128,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [EditingController],
                 [AutoFillController],
                 [FormatPainterController],
+
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }

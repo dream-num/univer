@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { UpdateDocsAttributeType } from '../../shared/command-enum';
-import type { IDocumentBody } from '../../types/interfaces/i-document-data';
+import type { UpdateDocsAttributeType } from '../../../shared/command-enum';
+import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
 
 export enum TextXActionType {
     RETAIN = 'r',

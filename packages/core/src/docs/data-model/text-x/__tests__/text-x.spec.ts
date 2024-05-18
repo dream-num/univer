@@ -19,7 +19,7 @@ import { TextX } from '../text-x';
 import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
 import { BooleanNumber } from '../../../../types/enum/text-style';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
-import { TextXActionType } from '../../action-types';
+import { TextXActionType } from '../action-types';
 
 describe('test TextX methods and branches', () => {
     describe('test TextX methods', () => {

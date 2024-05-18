@@ -17,7 +17,7 @@
 import { Tools } from '../../../shared/tools';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
-import { type IDeleteAction, type IInsertAction, type IRetainAction, type TextXAction, TextXActionType } from '../action-types';
+import { type IDeleteAction, type IInsertAction, type IRetainAction, type TextXAction, TextXActionType } from './action-types';
 import { ActionIterator } from './action-iterator';
 import { composeBody, getBodySlice, isUselessRetainAction } from './utils';
 import { textXApply } from './apply';

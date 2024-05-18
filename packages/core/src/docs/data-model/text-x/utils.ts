@@ -17,7 +17,7 @@
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
 import type { IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
-import type { IRetainAction } from '../action-types';
+import type { IRetainAction } from './action-types';
 import { coverTextRuns } from './apply-utils/update-apply';
 
 // TODO: Support other properties like custom ranges, tables, etc.

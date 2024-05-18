@@ -25,7 +25,7 @@ import type {
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
-import type { TextXAction } from './action-types';
+import type { TextXAction } from './text-x/action-types';
 import { getBodySlice } from './text-x/utils';
 import { getEmptySnapshot } from './empty-snapshot';
 import { TextX } from './text-x/text-x';

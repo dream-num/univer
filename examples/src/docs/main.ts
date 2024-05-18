@@ -21,7 +21,8 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { UniverImagePlugin } from '@univerjs/image';
+import { UniverDrawingPlugin } from '@univerjs/drawing';
+
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 
@@ -62,7 +63,7 @@ univer.registerPlugin(UniverDocsUIPlugin, {
     },
 });
 
-univer.registerPlugin(UniverImagePlugin);
+univer.registerPlugin(UniverDrawingPlugin);
 
 univer.createUniverDoc(DEFAULT_DOCUMENT_DATA_CN);
 

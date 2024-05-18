@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { PageElementType, PageType, ShapeType } from '@univerjs/core';
+import { BasicShapes, PageElementType, PageType } from '@univerjs/core';
 
 import { PAGE3_RICHTEXT_1 } from '../rich-text/page3-richtext1';
 import { PAGE3_RICHTEXT_2 } from '../rich-text/page3-richtext2';
@@ -41,7 +41,7 @@ export const DEFAULT_THIRD_PAGE = {
             description: '',
             type: PageElementType.SHAPE,
             shape: {
-                shapeType: ShapeType.RECTANGLE,
+                shapeType: BasicShapes.Rect,
                 text: '',
                 shapeProperties: {
                     shapeBackgroundFill: {
@@ -119,7 +119,7 @@ export const DEFAULT_THIRD_PAGE = {
             description: '',
             type: PageElementType.SHAPE,
             shape: {
-                shapeType: ShapeType.RECTANGLE,
+                shapeType: BasicShapes.Rect,
                 text: '',
                 shapeProperties: {
                     shapeBackgroundFill: {
@@ -175,7 +175,7 @@ export const DEFAULT_THIRD_PAGE = {
             description: '',
             type: PageElementType.SHAPE,
             shape: {
-                shapeType: ShapeType.RECTANGLE,
+                shapeType: BasicShapes.Rect,
                 text: '',
                 shapeProperties: {
                     shapeBackgroundFill: {
@@ -231,7 +231,7 @@ export const DEFAULT_THIRD_PAGE = {
             description: '',
             type: PageElementType.SHAPE,
             shape: {
-                shapeType: ShapeType.RECTANGLE,
+                shapeType: BasicShapes.Rect,
                 text: '',
                 shapeProperties: {
                     shapeBackgroundFill: {

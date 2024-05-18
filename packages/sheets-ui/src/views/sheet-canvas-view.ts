@@ -16,7 +16,7 @@
 
 import type { Workbook, Worksheet } from '@univerjs/core';
 import { ICommandService, RxDisposable, toDisposable } from '@univerjs/core';
-import type { IRenderContext, IRenderController, IWheelEvent } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderController, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
     Layer,
@@ -63,7 +63,6 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
     private _addNewRender(workbook: Workbook) {
         const { scene, engine } = this._context;
 
-        scene.openTransformer();
         scene.addLayer(new Layer(scene, [], 0), new Layer(scene, [], 2));
 
         this._addComponent(workbook);
@@ -115,6 +114,7 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
         scene.enableLayerCache(SHEET_COMPONENT_MAIN_LAYER_INDEX, SHEET_COMPONENT_HEADER_LAYER_INDEX);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _addViewport(worksheet: Worksheet) {
         const scene = this._context.scene;
 
@@ -128,12 +128,12 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
             isWheelPreventDefaultX: true,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
+        const VIEW_ROW_TOP = new Viewport(VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
             active: false,
             isWheelPreventDefaultX: true,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_ROW_BOTTOM, scene, {
+        const VIEW_ROW_BOTTOM = new Viewport(VIEWPORT_KEY.VIEW_ROW_BOTTOM, scene, {
             left: 0,
             top: columnHeader.height,
             bottom: 0,
@@ -141,12 +141,12 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
             isWheelPreventDefaultX: true,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
+        const VIEW_COLUMN_LEFT = new Viewport(VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
             active: false,
             isWheelPreventDefaultX: true,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
+        const VIEW_COLUMN_RIGHT = new Viewport(VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
             left: rowHeader.width,
             top: 0,
             height: columnHeader.height,
@@ -154,7 +154,7 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
             isWheelPreventDefaultX: true,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
+        const VIEW_LEFT_TOP = new Viewport(VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
             left: 0,
             top: 0,
             width: rowHeader.width,
@@ -162,17 +162,17 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
             isWheelPreventDefaultX: true,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
+        const VIEW_MAIN_LEFT_TOP = new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
+        const VIEW_MAIN_LEFT = new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
             isWheelPreventDefaultX: true,
             active: false,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
+        const VIEW_MAIN_TOP = new Viewport(VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
         });

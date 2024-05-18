@@ -25,16 +25,16 @@ import type { IObjectFullState, ISceneTransformState, ITransformChangeState } fr
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { precisionTo, requestNewFrame } from './basics/tools';
 import { Transform } from './basics/transform';
-import { Vector2 } from './basics/vector2';
+import type { Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import { Layer } from './layer';
-import type { ITransformerConfig } from './scene.transformer';
 import { Transformer } from './scene.transformer';
 import { InputManager } from './scene.input-manager';
 import type { SceneViewer } from './scene-viewer';
 import type { ThinEngine } from './thin-engine';
 import { ThinScene } from './thin-scene';
 import type { Viewport } from './viewport';
+import type { ITransformerConfig } from './basics/transformer-config';
 
 export class Scene extends ThinScene {
     private _layers: Layer[] = [];
@@ -55,8 +55,6 @@ export class Scene extends ThinScene {
      * when you resize them. Instead it changes `scaleX` and `scaleY` properties.
      */
     private _transformer: Nullable<Transformer>;
-
-    private _transformerOpenState = false;
 
     /** @hidden */
     private _inputManager: Nullable<InputManager>;
@@ -110,6 +108,24 @@ export class Scene extends ThinScene {
             pScale = (p as SceneViewer).ancestorScaleY;
         }
         return this.scaleY * pScale;
+    }
+
+    get ancestorLeft() {
+        const p = this.getParent();
+        let pOffsetX = 0;
+        if (p.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+            pOffsetX = (p as SceneViewer).ancestorLeft;
+        }
+        return pOffsetX;
+    }
+
+    get ancestorTop() {
+        const p = this.getParent();
+        let pOffsetY = 0;
+        if (p.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+            pOffsetY = (p as SceneViewer).ancestorTop;
+        }
+        return pOffsetY;
     }
 
     set cursor(val: CURSOR_TYPE) {
@@ -438,6 +454,17 @@ export class Scene extends ThinScene {
         }
     }
 
+    getObjectIncludeInGroup(oKey: string) {
+        for (const layer of this._layers) {
+            const objects = layer.getObjects();
+            for (const object of objects) {
+                if (object.oKey === oKey) {
+                    return object;
+                }
+            }
+        }
+    }
+
     fuzzyMathObjects(oKey: string) {
         const objects: BaseObject[] = [];
         for (const layer of this._layers) {
@@ -502,27 +529,33 @@ export class Scene extends ThinScene {
         });
     }
 
-    openTransformer(config?: ITransformerConfig) {
+    override attachTransformerTo(o: BaseObject) {
         if (!this._transformer) {
-            this._transformer = new Transformer(this, config);
-        }
-        this._transformerOpenState = true;
-    }
-
-    closeTransformer(isDestroyed = false) {
-        if (isDestroyed) {
-            this._transformer = null;
-        }
-
-        this._transformerOpenState = false;
-    }
-
-    override applyTransformer(o: BaseObject) {
-        if (!this._transformerOpenState) {
-            return;
+            this.initTransformer();
         }
 
         this._transformer?.attachTo(o);
+    }
+
+
+    override detachTransformerFrom(o: BaseObject) {
+        this._transformer?.detachFrom(o);
+    }
+
+    initTransformer(config?: ITransformerConfig) {
+        if (this._transformer) {
+            this._transformer.resetProps(config);
+            return;
+        }
+
+        this._transformer = new Transformer(this, config);
+    }
+
+    getTransformerByCreate() {
+        if (!this._transformer) {
+            this.initTransformer();
+        }
+        return this._transformer!;
     }
 
     getTransformer() {
@@ -715,11 +748,11 @@ export class Scene extends ThinScene {
             if (!o.visible || !o.evented || o.classType === RENDER_CLASS_TYPE.GROUP) {
                 continue;
             }
-            let svCoord = svCoordOrigin;
-            if (o.isInGroup && o.parent.classType === RENDER_CLASS_TYPE.GROUP) {
-                const { cumLeft, cumTop } = this._getGroupCumLeftRight(o);
-                svCoord = svCoord.clone().add(Vector2.FromArray([-cumLeft, -cumTop]));
-            }
+            const svCoord = svCoordOrigin;
+            // if (o.isInGroup && o.parent?.classType === RENDER_CLASS_TYPE.GROUP) {
+            //     const { cumLeft, cumTop } = this._getGroupCumLeftRight(o);
+            //     svCoord = svCoord.clone().add(Vector2.FromArray([-cumLeft, -cumTop]));
+            // }
 
             if (o.isHit(svCoord)) {
                 if (o.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {

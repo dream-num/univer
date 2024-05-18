@@ -88,7 +88,6 @@ export class SlideAdaptor extends ObjectAdaptor {
             skewY,
             flipX,
             flipY,
-            isTransformer: false,
             forceRender: true,
         });
 
@@ -138,11 +137,13 @@ export class SlideAdaptor extends ObjectAdaptor {
 
         const objects = this._ObjectProvider?.convertToRenderObjects(pageElements, mainScene);
 
-        scene.openTransformer();
-
         this._addBackgroundRect(scene, pageBackgroundFill, model);
 
         scene.addObjects(objects!);
+
+        objects?.forEach((object) => {
+            scene.attachTransformerTo(object);
+        });
 
         return scene;
     }

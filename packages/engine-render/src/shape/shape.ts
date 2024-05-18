@@ -272,23 +272,29 @@ export abstract class Shape<T> extends BaseObject {
         const { stroke, strokeWidth, strokeScaleEnabled } = props;
 
         // let { scaleX, scaleY } = props;
-        let { scaleX, scaleY } = ctx.getScale();
+        // const { scaleX = 1, scaleY = 1 } = ctx.getScale();
         if (!stroke || strokeWidth === 0) {
             return;
         }
 
         ctx.save();
-        if (strokeScaleEnabled === false) {
-            scaleX = scaleX ?? 1;
-            scaleY = scaleY ?? 1;
-            ctx.scale(1 / scaleX, 1 / scaleY);
-        }
-
+        // if (strokeScaleEnabled === false) {
+        //     scaleX = scaleX === 0 ? 1 : scaleX;
+        //     scaleY = scaleY === 0 ? 1 : scaleY;
+        //     ctx.scale(1 / scaleX, 1 / scaleY);
+        // }
+        // this._setLineDash(ctx);
         this._setStrokeStyles(ctx, props);
 
         ctx.stroke();
         ctx.restore();
     }
+
+    // private static _getObjectScaling() {
+    //     return { scaleX: 1, scaleY: 1 };
+    // }
+
+    private static _removeShadow(ctx: UniverRenderingContext) {}
 
     private static _setFillStyles(ctx: UniverRenderingContext, props: IShapeProps) {
         ctx.fillStyle = props.fill!;
@@ -326,7 +332,6 @@ export abstract class Shape<T> extends BaseObject {
 
         const m = this.transform.getMatrix();
         mainCtx.save();
-
         mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         this._draw(mainCtx);
         mainCtx.restore();

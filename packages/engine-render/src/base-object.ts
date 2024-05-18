@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
+import type { EventState, IKeyValue, ITransformState, Nullable, Observer } from '@univerjs/core';
 import { Disposable, Observable } from '@univerjs/core';
 
 import type { EVENT_TYPE } from './basics/const';
@@ -27,6 +27,7 @@ import { Transform } from './basics/transform';
 import type { IViewportBound, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { Layer } from './layer';
+import type { ITransformerConfig } from './basics/transformer-config';
 
 export const BASE_OBJECT_ARRAY = [
     'top',
@@ -45,35 +46,23 @@ export const BASE_OBJECT_ARRAY = [
 
 export abstract class BaseObject extends Disposable {
     groupKey?: string;
-
     isInGroup: boolean = false;
 
     onTransformChangeObservable = new Observable<ITransformChangeState>();
-
     onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onPointerMoveObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onPointerUpObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onDblclickObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onTripleClickObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onMouseWheelObserver = new Observable<IWheelEvent>();
     // onKeyDownObservable = new Observable<IKeyboardEvent>();
     // onKeyUpObservable = new Observable<IKeyboardEvent>();
 
     onPointerOutObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onPointerLeaveObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onPointerOverObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onPointerEnterObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onIsAddedToParentObserver = new Observable<any>();
-
     onDisposeObserver = new Observable<BaseObject>();
 
     protected _oKey: string;
@@ -81,33 +70,26 @@ export abstract class BaseObject extends Disposable {
     protected _dirty: boolean = true;
 
     private _top: number = 0;
-
     private _topOrigin: number | string = 0;
 
     private _left: number = 0;
-
     private _leftOrigin: number | string = 0;
 
     private _width: number = 0;
-
     private _widthOrigin: number | string = 0;
 
     private _height: number = 0;
-
     private _heightOrigin: number | string = 0;
 
     private _angle: number = 0;
 
     private _scaleX: number = 1;
-
     private _scaleY: number = 1;
 
     private _skewX: number = 0;
-
     private _skewY: number = 0;
 
     private _flipX: boolean = false;
-
     private _flipY: boolean = false;
 
     private _strokeWidth: number = 0;
@@ -126,7 +108,7 @@ export abstract class BaseObject extends Disposable {
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
 
-    private _isTransformer = false;
+    private _transformerConfig: ITransformerConfig;
 
     private _forceRender = false;
 
@@ -143,7 +125,24 @@ export abstract class BaseObject extends Disposable {
     }
 
     get transform() {
-        return this._transform;
+        const transform = this._transform.clone();
+        return this.transformForAngle(transform);
+    }
+
+    transformForAngle(transform: Transform) {
+        /**
+         * If the object is center rotated, the coordinate needs to be rotated back to the original position.
+         */
+        if (this._angle !== 0) {
+            const cx = (this.width + this.strokeWidth) / 2;
+            const cy = (this.height + this.strokeWidth) / 2;
+            transform.rotate(-this._angle);
+            transform.translate(cx, cy);
+            transform.rotate(this.angle);
+            transform.translate(-cx, -cy);
+        }
+
+        return transform;
     }
 
     get topOrigin() {
@@ -208,6 +207,35 @@ export abstract class BaseObject extends Disposable {
         return this.scaleY * pScale;
     }
 
+    get ancestorLeft() {
+        return this.left + (this.getParent()?.ancestorLeft || 0);
+    }
+
+    get ancestorTop() {
+        return this.top + (this.getParent()?.ancestorTop || 0);
+    }
+
+    get ancestorTransform() {
+        const parent = this.getParent();
+        if (this.isInGroup && parent?.classType === RENDER_CLASS_TYPE.GROUP) {
+            return parent?.ancestorTransform.multiply(this.transform);
+        }
+        return this.transform;
+    }
+
+    get ancestorGroup() {
+        let group: Nullable<BaseObject> = null;
+        let parent = this.getParent();
+        while (parent != null) {
+            if (parent.classType === RENDER_CLASS_TYPE.GROUP) {
+                group = parent;
+                break;
+            }
+            parent = parent.getParent();
+        }
+        return group;
+    }
+
     get skewX() {
         return this._skewX;
     }
@@ -248,10 +276,6 @@ export abstract class BaseObject extends Disposable {
         return this._debounceParentDirty;
     }
 
-    get isTransformer() {
-        return this._isTransformer;
-    }
-
     get cursor() {
         return this._cursor;
     }
@@ -278,10 +302,6 @@ export abstract class BaseObject extends Disposable {
 
     set debounceParentDirty(state: boolean) {
         this._debounceParentDirty = state;
-    }
-
-    set isTransformer(state: boolean) {
-        this._isTransformer = state;
     }
 
     set cursor(val: CURSOR_TYPE) {
@@ -342,6 +362,18 @@ export abstract class BaseObject extends Disposable {
 
     protected set skewY(skewY: number) {
         this._skewY = skewY;
+    }
+
+    get transformerConfig() {
+        return this._transformerConfig;
+    }
+
+    set transformerConfig(config: ITransformerConfig) {
+        this._transformerConfig = config;
+    }
+
+    get maxZIndex() {
+        return this._zIndex;
     }
 
     makeDirty(state: boolean = true) {
@@ -517,7 +549,7 @@ export abstract class BaseObject extends Disposable {
         return this._parent;
     }
 
-    getState() {
+    getState(): ITransformState {
         return {
             left: this.left,
             top: this.top,
@@ -548,7 +580,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     isHit(coord: Vector2) {
-        const oCoord = this._getInverseCoord(coord);
+        const oCoord = this.getInverseCoord(coord);
         if (
             oCoord.x >= -this.strokeWidth / 2 &&
             oCoord.x <= this.width + this.strokeWidth / 2 &&
@@ -753,8 +785,23 @@ export abstract class BaseObject extends Disposable {
         return [];
     }
 
-    protected _getInverseCoord(coord: Vector2) {
-        return this._transform.clone().invert().applyPoint(coord);
+    getLayerIndex() {
+        if (this._layer == null) {
+            return 1;
+        }
+        return this._layer.zIndex;
+    }
+
+    applyTransform() {
+        this.getScene()?.attachTransformerTo(this);
+    }
+
+    removeTransform() {
+        this.getScene()?.detachTransformerFrom(this);
+    }
+
+    getInverseCoord(coord: Vector2): Vector2 {
+        return this.ancestorTransform.invert().applyPoint(coord);
     }
 
     protected _setTransForm() {

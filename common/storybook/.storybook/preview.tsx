@@ -23,11 +23,10 @@ import {
     ContextService,
     DesktopLogService,
     ErrorService,
-    FloatingObjectManagerService,
     ICommandService,
     IConfigService,
     IContextService,
-    IFloatingObjectManagerService,
+    IDrawingManagerService,
     ILocalStorageService,
     ILogService,
     IPermissionService,
@@ -103,7 +102,6 @@ const preview: Preview = {
             [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
             [IConfigService, { useClass: ConfigService }],
             [IContextService, { useClass: ContextService }],
-            [IFloatingObjectManagerService, { useClass: FloatingObjectManagerService, lazy: true }],
             [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
 
             // services

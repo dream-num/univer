@@ -24,9 +24,11 @@ import { isString } from './basics/tools';
 import type { IViewportBound, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { ThinScene } from './thin-scene';
+import { getGroupState, transformObjectOutOfGroup } from './basics/group-transform';
 
 export class Group extends BaseObject {
     private _objects: BaseObject[] = [];
+    private _selfSizeMode = false;
 
     constructor(key?: string, ...objects: BaseObject[]) {
         super(key);
@@ -39,6 +41,102 @@ export class Group extends BaseObject {
 
     override set cursor(val: CURSOR_TYPE) {
         this.setCursor(val);
+    }
+
+    override getState() {
+        if (this._selfSizeMode) {
+            return super.getState();
+        }
+        // let groupLeft = Number.MAX_SAFE_INTEGER;
+        // let groupTop = Number.MAX_SAFE_INTEGER;
+        // let groupRight = Number.MIN_SAFE_INTEGER;
+        // let groupBottom = Number.MIN_SAFE_INTEGER;
+
+        // this._objects.forEach((o) => {
+        //     const { left, top, width, height } = o;
+        //     groupLeft = Math.min(groupLeft, left);
+        //     groupTop = Math.min(groupTop, top);
+        //     groupRight = Math.max(groupRight, left + width);
+        //     groupBottom = Math.max(groupBottom, top + height);
+        // });
+
+        // const groupWidth = groupRight - groupLeft;
+        // const groupHeight = groupBottom - groupTop;
+
+        return getGroupState(this.left, this.top, this._objects.map((o) => o.getState()));
+    }
+
+    override get width(): number {
+        if (this._selfSizeMode) {
+            return super.width;
+        }
+        return this.getState().width || 0;
+    }
+
+    override get height(): number {
+        if (this._selfSizeMode) {
+            return super.height;
+        }
+        return this.getState().height || 0;
+    }
+
+    override set width(val: number) {
+        if (this._selfSizeMode) {
+            super.width = val;
+            return;
+        }
+        const preWidth = this.width;
+        const numDelta = val - preWidth;
+        this._objects.forEach((o) => {
+            o.resize(o.width + numDelta);
+        });
+    }
+
+    override set height(val: number) {
+        if (this._selfSizeMode) {
+            super.height = val;
+            return;
+        }
+        const preHeight = this.height;
+        const numDelta = val - preHeight;
+        this._objects.forEach((o) => {
+            o.resize(undefined, o.height + numDelta);
+        });
+    }
+
+    override get maxZIndex() {
+        let maxZIndex = 0;
+        for (const object of this._objects) {
+            maxZIndex = Math.max(maxZIndex, object.zIndex);
+        }
+        return maxZIndex;
+    }
+
+    openSelfSizeMode() {
+        this._selfSizeMode = true;
+    }
+
+    closeSelfSizeMode() {
+        this._selfSizeMode = false;
+    }
+
+    reCalculateObjects() {
+        if (this._selfSizeMode) {
+            return;
+        }
+        const state = this.getState();
+        const { left = 0, top = 0 } = state;
+        for (const object of this._objects) {
+            object.transformByState({
+                left: object.left - left,
+                top: object.top - top,
+            });
+        }
+
+        this.transformByState({
+            left,
+            top,
+        });
     }
 
     addObjects(...objects: BaseObject[]) {
@@ -100,11 +198,43 @@ export class Group extends BaseObject {
         }
     }
 
+    removeSelfObjectAndTransform(oKey: string, width?: number, height?: number, isTransform = false) {
+        const objects = [...this.getObjects()];
+        const objectsLength = objects.length;
+
+        if (width == null) {
+            width = this.width;
+        }
+
+        if (height == null) {
+            height = this.height;
+        }
+
+        for (let i = 0; i < objectsLength; i++) {
+            const o = objects[i];
+            if (o.oKey === oKey) {
+                objects.splice(i, 1);
+                isTransform && this._transformObject(o, width, height);
+                o.parent = this.parent;
+                o.groupKey = undefined;
+                o.isInGroup = false;
+
+                this._objects = objects;
+                return;
+            }
+        }
+    }
+
+    private _transformObject(object: BaseObject, groupWidth: number, groupHeight: number) {
+        const transform = transformObjectOutOfGroup(object.getState(), this.getState(), groupWidth, groupHeight);
+        object.transformByState(transform);
+    }
+
     getObjectsByOrder() {
         const objects: BaseObject[] = [];
         this._objects.sort(sortRules);
         for (const o of this._objects) {
-            if (!o.isInGroup && o.visible) {
+            if (o.visible) {
                 objects.push(o);
             }
         }
@@ -119,8 +249,8 @@ export class Group extends BaseObject {
         ctx.save();
         const m = this.transform.getMatrix();
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        this._objects.sort(sortRules);
-        for (const object of this._objects) {
+        const objects = this.getObjectsByOrder();
+        for (const object of objects) {
             object.render(ctx, this._transformBounds(bounds));
         }
         ctx.restore();

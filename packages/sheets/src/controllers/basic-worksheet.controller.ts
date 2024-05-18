@@ -83,7 +83,6 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
-import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
@@ -113,9 +112,11 @@ import { InsertDefinedNameCommand } from '../commands/commands/insert-defined-na
 import { RemoveDefinedNameCommand } from '../commands/commands/remove-defined-name.command';
 import { SetDefinedNameCommand } from '../commands/commands/set-defined-name.command';
 import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
+import { SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 import { SetWorkbookNameCommand } from '../commands/commands/set-workbook-name.command';
 import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
+import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './config';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -135,7 +136,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
         super();
 
         [
-            AddWorksheetMergeMutation,
             ClearSelectionAllCommand,
             ClearSelectionContentCommand,
             ClearSelectionFormatCommand,
@@ -218,16 +218,25 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetRowHeightMutation,
             SetWorksheetRowIsAutoHeightCommand,
             SetWorksheetRowIsAutoHeightMutation,
-            SetWorksheetShowCommand,
             SetNumfmtMutation,
             SetSelectionsOperation,
             RemoveNumfmtMutation,
             EmptyMutation,
+            ScrollToCellOperation,
             InsertDefinedNameCommand,
             RemoveDefinedNameCommand,
             SetDefinedNameCommand,
-            ScrollToCellOperation,
+
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+
+        const onlyRegisterFormulaRelatedMutations = this._configService.getConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY) ?? false;
+        if (!onlyRegisterFormulaRelatedMutations) {
+            // TODO: more commands should be moved into this array
+            [
+                SetWorksheetShowCommand,
+                SetDrawingApplyMutation,
+            ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        }
 
         this._configService.setConfig(MAX_CELL_PER_SHEET_KEY, MAX_CELL_PER_SHEET_DEFAULT);
     }

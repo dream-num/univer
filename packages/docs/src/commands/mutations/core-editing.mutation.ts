@@ -16,7 +16,6 @@
 
 import { CommandType, IUniverInstanceService, TextX } from '@univerjs/core';
 import type { IMutation, IMutationCommonParams, Nullable, TextXAction } from '@univerjs/core';
-
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { DocViewModelManagerService } from '../../services/doc-view-model-manager.service';
 import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
@@ -30,8 +29,8 @@ export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     textRanges: Nullable<ITextRangeWithStyle[]>;
     prevTextRanges?: Nullable<ITextRangeWithStyle[]>;
     noNeedSetTextRange?: boolean;
-    noHistory?: boolean;
     isCompositionEnd?: boolean;
+    noHistory?: boolean;
 }
 
 const RichTextEditingMutationId = 'doc.mutation.rich-text-editing';
@@ -111,7 +110,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             });
         }
 
-        // Step 4: emit state change event.
+        // Step 4: Emit state change event.
         const changeState: IDocStateChangeParams = {
             commandId: RichTextEditingMutationId,
             unitId,

@@ -149,7 +149,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         }
 
         const documentModel = univerInstanceService.getUniverDocInstance(unitId);
-        const originBody = getDocsUpdateBody(documentModel!.snapshot, segmentId);
+        const originBody = getDocsUpdateBody(documentModel!.getSnapshot(), segmentId);
         if (originBody == null) {
             return false;
         }

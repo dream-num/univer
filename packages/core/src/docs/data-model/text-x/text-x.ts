@@ -88,12 +88,12 @@ export class TextX {
         return textX.serialize();
     }
 
-    // `transform` is implemented in univer-pro in class TextXPro. do not use the method in TextX.
+    // `transform` is implemented in univer-pro in class TextXPro. do not use this method in TextX.
     static transform(_thisActions: TextXAction[], _otherActions: TextXAction[], _priority = false): TextXAction[] {
         throw new Error('transform is not implemented in TextX');
     }
 
-    static isNoop(actions: TextXAction[]): boolean {
+    static isNoop(actions: TextXAction[]) {
         return actions.length === 0;
     }
 

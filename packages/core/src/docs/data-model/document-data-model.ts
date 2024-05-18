@@ -49,7 +49,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         throw new Error('Method not implemented.');
     }
 
-    snapshot: IDocumentData;
+    protected snapshot: IDocumentData;
 
     constructor(snapshot: Partial<IDocumentData>) {
         super();
@@ -67,13 +67,6 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
 
     get lists() {
         return this.snapshot.lists;
-    }
-
-    /**
-     * @deprecated use getBody to instead.
-     */
-    get body() {
-        return this.snapshot.body;
     }
 
     get zoomRatio() {
@@ -263,7 +256,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         return this as DocumentDataModel;
     }
 
-    override getUnitId(): string {
+    override getUnitId() {
         return this._unitId;
     }
 

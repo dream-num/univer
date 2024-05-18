@@ -57,6 +57,8 @@ export class DesktopUIPartsService implements IUIPartsService {
             if (components.size === 0) {
                 this._componentsByPart.delete(part);
             }
+
+            this._componentRegistered$.complete();
         });
     }
 

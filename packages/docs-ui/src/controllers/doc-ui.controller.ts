@@ -16,8 +16,8 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { IDesktopUIController, IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, DesktopUIPart, IEditorService, ILayoutService, IMenuService, IUIController } from '@univerjs/ui';
+import type { IMenuItemFactory } from '@univerjs/ui';
+import { ComponentManager, DesktopUIPart, IEditorService, ILayoutService, IMenuService, IUIPartsService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { connectInjector } from '@wendellhu/redi/react-bindings';
@@ -60,7 +60,7 @@ export class DocUIController extends Disposable {
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IEditorService private readonly _editorService: IEditorService,
         @IMenuService private readonly _menuService: IMenuService,
-        @IUIController private readonly _uiController: IDesktopUIController,
+        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
@@ -119,7 +119,7 @@ export class DocUIController extends Disposable {
         const embedded = this._editorService.isEditor(firstDocUnitId);
         if (!embedded) {
             this.disposeWithMe(
-                this._uiController.registerComponent(DesktopUIPart.CONTENT, () => connectInjector(DocBackground, this._injector))
+                this._uiPartsService.registerComponent(DesktopUIPart.CONTENT, () => connectInjector(DocBackground, this._injector))
             );
         }
     }

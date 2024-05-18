@@ -18,7 +18,7 @@ import { Disposable, toDisposable } from '@univerjs/core';
 import { type IDisposable, Inject, Injector } from '@wendellhu/redi';
 
 import { connectInjector } from '@wendellhu/redi/react-bindings';
-import type { INotificationMethodOptions } from '../../components/notification/Notification';
+import type { INotificationOptions } from '../../components/notification/Notification';
 import { notification, Notification } from '../../components/notification/Notification';
 import { DesktopUIPart, IUIPartsService } from '../parts/parts.service';
 import type { INotificationService } from './notification.service';
@@ -33,7 +33,7 @@ export class DesktopNotificationService extends Disposable implements INotificat
         this._initUIPart();
     }
 
-    show(params: INotificationMethodOptions): IDisposable {
+    show(params: INotificationOptions): IDisposable {
         notification.show(params);
 
         return toDisposable(() => { /* empty */ });

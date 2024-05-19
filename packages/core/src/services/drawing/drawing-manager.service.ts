@@ -66,8 +66,11 @@ export interface IDrawingSubunitMap<T extends IDrawingParam> {
     [subUnitId: string]: IDrawingMapItem<T>;
 }
 
+export interface IDrawingMapItemData<T> {
+    [drawingId: string]: T;
+}
 export interface IDrawingMapItem<T extends IDrawingParam> {
-    data: { [drawingId: string]: T };
+    data: IDrawingMapItemData<T>;
     order: string[];
 }
 
@@ -106,6 +109,8 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IDisposabl
     dispose(): void;
 
     refreshTransform(updateParams: IDrawingParam[]): void;
+
+    getDrawingData(unitId: string, subUnitId: string): IDrawingMapItemData<T>;
 
     getBatchAddOp(insertParams: T[]): unknown;
     getBatchRemoveOp(removeParams: IDrawingSearch[]): unknown;

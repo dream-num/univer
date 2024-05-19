@@ -133,6 +133,10 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         this.refreshTransformNotification(updateParams);
     }
 
+    getDrawingData(unitId: string, subUnitId: string) {
+        return this._getDrawingData(unitId, subUnitId);
+    }
+
     getBatchAddOp(insertParams: T[]): IDrawingJsonUndo1 {
         const objects: IDrawingSearch[] = [];
         const ops: JSONOp[] = [];

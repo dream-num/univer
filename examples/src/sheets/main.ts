@@ -60,7 +60,6 @@ univer.registerPlugin(UniverDocsPlugin, {
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
-    contextMenu: false,
 });
 
 univer.registerPlugin(UniverDocsUIPlugin);

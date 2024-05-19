@@ -31,7 +31,7 @@ import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-d
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
-
+import { transformImagePositionToTransform } from './utils';
 
 const SHEET_IMAGE_WIDTH_LIMIT = 500;
 const SHEET_IMAGE_HEIGHT_LIMIT = 500;
@@ -128,7 +128,6 @@ export class SheetDrawingUpdateController extends Disposable {
             scale = Math.max(scaleWidth, scaleHeight);
         }
 
-
         const sheetTransform = this._getImagePosition(width, height, scale);
 
         if (sheetTransform == null) {
@@ -142,7 +141,7 @@ export class SheetDrawingUpdateController extends Disposable {
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType,
             source,
-            transform: this._transformImagePositionToTransform(sheetTransform),
+            transform: transformImagePositionToTransform(sheetTransform, this._selectionRenderService),
             sheetTransform,
         };
 
@@ -172,52 +171,6 @@ export class SheetDrawingUpdateController extends Disposable {
         };
     }
 
-    private _transformImagePositionToTransform(position: ISheetDrawingPosition): Nullable<ITransformState> {
-        const { from, to } = position;
-        const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
-        const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
-
-        const startSelectionCell = this._selectionRenderService.attachRangeWithCoord({
-            startColumn: fromColumn,
-            endColumn: fromColumn,
-            startRow: fromRow,
-            endRow: fromRow,
-        });
-
-        if (startSelectionCell == null) {
-            return;
-        }
-
-        const endSelectionCell = this._selectionRenderService.attachRangeWithCoord({
-            startColumn: toColumn,
-            endColumn: toColumn,
-            startRow: toRow,
-            endRow: toRow,
-        });
-
-        if (endSelectionCell == null) {
-            return;
-        }
-
-
-        const { startX: startSelectionX, startY: startSelectionY } = startSelectionCell;
-
-        const { startX: endSelectionX, startY: endSelectionY } = endSelectionCell;
-
-        const left = startSelectionX + fromColumnOffset;
-        const top = startSelectionY + fromRowOffset;
-
-        const width = endSelectionX + toColumnOffset - left;
-        const height = endSelectionY + toRowOffset - top;
-
-        return {
-            left,
-            top,
-            width,
-            height,
-        };
-    }
-
     private _getImagePosition(imageWidth: number, imageHeight: number, scale: number): Nullable<ISheetDrawingPosition> {
         const selections = this._selectionManagerService.getSelections();
         let range: IRange = {
@@ -236,7 +189,6 @@ export class SheetDrawingUpdateController extends Disposable {
         }
 
         const { startColumn, startRow, startX, startY } = rangeWithCoord;
-
 
         const from = {
             column: startColumn,
@@ -299,7 +251,6 @@ export class SheetDrawingUpdateController extends Disposable {
                     return;
                 }
 
-
                 const sheetTransform = this._transformToImagePosition({ ...sheetDrawing.transform, ...transform });
 
                 if (sheetTransform == null) {
@@ -312,10 +263,9 @@ export class SheetDrawingUpdateController extends Disposable {
 
                 const newDrawing: Partial<ISheetDrawing> = {
                     unitId, subUnitId, drawingId, drawingType,
-                    transform: { ...transform, ...this._transformImagePositionToTransform(sheetTransform) },
+                    transform: { ...transform, ...transformImagePositionToTransform(sheetTransform, this._selectionRenderService) },
                     sheetTransform: { ...sheetTransform },
                 };
-
 
                 drawings.push(newDrawing);
             });
@@ -328,7 +278,6 @@ export class SheetDrawingUpdateController extends Disposable {
             }
         });
     }
-
 
     private _groupDrawingListener() {
         this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
@@ -375,9 +324,7 @@ export class SheetDrawingUpdateController extends Disposable {
             rowOffset: top - startSelectionCell.startY,
         };
 
-
         const endSelectionCell = this._selectionRenderService.getSelectionCellByPosition(left + width, top + height);
-
 
         if (endSelectionCell == null) {
             return;

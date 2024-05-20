@@ -22,7 +22,7 @@ export interface ILayout {
 }
 
 export interface IUniverDocsUIConfig {
-    menu: MenuConfig;
+    menu?: MenuConfig;
     container?: HTMLElement | string;
     layout?: ILayout;
 }

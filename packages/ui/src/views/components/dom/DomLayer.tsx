@@ -20,6 +20,7 @@ import type { IDomLayer } from '../../../services/dom/canvas-dom-layer.service';
 import { CanvasDomLayerService } from '../../../services/dom/canvas-dom-layer.service';
 import { useObservable } from '../../../components/hooks/observable';
 import { ComponentManager } from '../../../common';
+import styles from './index.module.less';
 
 const DomLayerSingle = (props: { layer: IDomLayer; id: string }) => {
     const { layer, id } = props;
@@ -30,13 +31,15 @@ const DomLayerSingle = (props: { layer: IDomLayer; id: string }) => {
     return position
         ? (
             <div
+                onClick={(e) => layer.onClick?.(e as any)}
+                className={styles.floatDom}
                 id={id}
                 style={{
                     position: 'absolute',
                     top: position.startY,
                     left: position.startX,
-                    width: position.endX - position.startX,
-                    height: position.endY - position.startY,
+                    width: position.endX - position.startX - 2,
+                    height: position.endY - position.startY - 2,
                     transform: `rotate(${position.rotate}deg)`,
                     overflow: 'hidden',
                 }}

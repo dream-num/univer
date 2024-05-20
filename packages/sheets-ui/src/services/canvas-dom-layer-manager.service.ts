@@ -15,13 +15,15 @@
  */
 
 import type { IPosition } from '@univerjs/core';
-import { Disposable, DisposableCollection, IUniverInstanceService, Tools } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, Tools } from '@univerjs/core';
 import { IRenderManagerService, Rect } from '@univerjs/engine-render';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { CanvasDomLayerService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
+import { createObjectPositionObserver } from './canvas-pop-manager.service';
+import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface ICanvasDomLayer {
     allowTransform: boolean;
@@ -37,7 +39,9 @@ export class SheetCanvasDomLayerManagerService extends Disposable {
     constructor(
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
-        @Inject(CanvasDomLayerService) private _canvasDomLayerService: CanvasDomLayerService
+        @Inject(CanvasDomLayerService) private _canvasDomLayerService: CanvasDomLayerService,
+        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();
     }
@@ -68,9 +72,10 @@ export class SheetCanvasDomLayerManagerService extends Disposable {
             throw new Error('cannot find current target!');
         }
 
-        const { unitId, subUnitId, workbook } = target;
+        const { unitId, subUnitId, workbook, worksheet } = target;
         const renderer = this._renderManagerService.getRenderById(unitId);
-        if (!renderer) {
+        const skeleton = this._sheetSkeletonManagerService.getUnitSkeleton(unitId, subUnitId);
+        if (!renderer || !skeleton) {
             throw new Error('cannot find current renderer!');
         }
 
@@ -83,14 +88,14 @@ export class SheetCanvasDomLayerManagerService extends Disposable {
             ...initPosition,
             rotate: 0,
         };
-        const transform$ = new BehaviorSubject(initialTransform);
+        const position$ = new BehaviorSubject(initialTransform);
 
         const createLayer = () => {
             const obj = new Rect(id, {
                 left: initPosition.startX,
                 top: initPosition.startY,
-                width: initPosition.endX - initPosition.startX,
-                height: initPosition.endY - initPosition.startY,
+                width: initPosition.endX - initPosition.startX + 2,
+                height: initPosition.endY - initPosition.startY + 2,
             });
             scene.addObject(obj);
 
@@ -99,27 +104,34 @@ export class SheetCanvasDomLayerManagerService extends Disposable {
             }
             scene.makeDirty();
 
-            const transformChange = obj.onTransformChangeObservable.add((evt) => {
-                transform$.next({
-                    ...initialTransform,
-                    startX: obj.left,
-                    startY: obj.top,
-                    endX: obj.left + obj.width,
-                    endY: obj.top + obj.height,
-                    rotate: obj.angle,
+            const observer = createObjectPositionObserver(obj, renderer, skeleton.skeleton, worksheet, this._commandService);
+
+            const disposePosition = observer.position$.subscribe((pos) => {
+                position$.next({
+                    startX: pos.left,
+                    startY: pos.top,
+                    endX: pos.right,
+                    endY: pos.bottom,
+                    rotate: pos.rotate,
                 });
             });
 
             this._canvasDomLayerService.addDomLayer({
-                position$: transform$,
+                position$,
                 id,
                 componentKey,
+                onClick: (evt) => {
+                    obj.triggerPointerDown(evt);
+                    obj.triggerPointerUp(evt);
+                },
             });
 
             return {
                 dispose: () => {
                     this._canvasDomLayerService.removeDomLayer(id);
-                    transformChange?.dispose();
+                    observer.disposable.dispose();
+                    observer.position$.complete();
+                    disposePosition.unsubscribe();
                     scene.removeObject(obj);
                     obj.dispose();
                 },

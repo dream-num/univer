@@ -130,7 +130,7 @@ export function createObjectPositionObserver(
 ) {
     const calc = () => {
         const { scene } = currentRender;
-        const { left, top, width, height } = targetObject;
+        const { left, top, width, height, angle } = targetObject;
 
         const bound: IBoundRectNoAngle = {
             left,
@@ -146,6 +146,7 @@ export function createObjectPositionObserver(
             right: offsetBound.right,
             top: offsetBound.top,
             bottom: offsetBound.bottom,
+            rotate: angle,
         };
         return position;
     };
@@ -159,6 +160,10 @@ export function createObjectPositionObserver(
             position$.next(calc());
         }
     }));
+
+    targetObject.onTransformChangeObservable.add(() => {
+        position$.next(calc());
+    });
 
     return {
         position,

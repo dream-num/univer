@@ -77,6 +77,7 @@ export class SheetDrawingUpdateController extends Disposable {
                         return;
                     }
 
+                    this._imageRemoteService.setWaitCount(params.files.length);
                     if (command.id === InsertCellImageOperation.id) {
                         params.files.forEach(async (file) => {
                             await this._insertCellImage(file);

@@ -15,7 +15,7 @@
  */
 
 import { type Observable, Subject } from 'rxjs';
-import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, ITransformState, IUnitDrawingService, Nullable } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, IDrawingSubunitMap, ITransformState, IUnitDrawingService, Nullable } from '@univerjs/core';
 import { sortRules, sortRulesByDesc } from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
 import * as json1 from 'ot-json1';
@@ -106,14 +106,8 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         this._featurePluginRemove$.complete();
         this._featurePluginOrderUpdate$.complete();
 
-        this.drawingManagerData = {
-            data: {},
-            order: {},
-        };
-        this._oldDrawingManagerData = {
-            data: {},
-            order: {},
-        };
+        this.drawingManagerData = {};
+        this._oldDrawingManagerData = {};
     }
 
     refreshTransform(updateParams: T[]) {
@@ -131,6 +125,46 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         });
 
         this.refreshTransformNotification(updateParams);
+    }
+
+    getDrawingDataForUnit(unitId: string) {
+        return this.drawingManagerData[unitId];
+    }
+
+    removeDrawingDataForUnit(unitId: string) {
+        const subUnits = this.drawingManagerData[unitId];
+        delete this.drawingManagerData[unitId];
+
+        const drawings: IDrawingSearch[] = [];
+
+        Object.keys(subUnits).forEach((subUnitId) => {
+            const subUnit = subUnits[subUnitId];
+            Object.keys(subUnit.data).forEach((drawingId) => {
+                drawings.push({ unitId, subUnitId, drawingId });
+            });
+        });
+        if (drawings.length > 0) {
+            this.removeNotification(drawings);
+        }
+    }
+
+    registerDrawingData(unitId: string, data: IDrawingSubunitMap<T>) {
+        this.drawingManagerData[unitId] = data;
+        const drawings: T[] = [];
+        Object.keys(data).forEach((subUnitId) => {
+            this._establishDrawingMap(unitId, subUnitId);
+
+            const subUnitData = data[subUnitId];
+
+            Object.keys(subUnitData.data).forEach((drawingId) => {
+                const drawing = subUnitData.data[drawingId];
+                drawings.push(drawing);
+            });
+        });
+
+        if (drawings.length > 0) {
+            this.addNotification(drawings);
+        }
     }
 
     getDrawingData(unitId: string, subUnitId: string) {

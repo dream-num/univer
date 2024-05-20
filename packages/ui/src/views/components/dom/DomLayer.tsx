@@ -16,13 +16,13 @@
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
-import type { IDomLayer } from '../../../services/dom/canvas-dom-layer.service';
-import { CanvasDomLayerService } from '../../../services/dom/canvas-dom-layer.service';
+import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
+import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
 import { useObservable } from '../../../components/hooks/observable';
 import { ComponentManager } from '../../../common';
 import styles from './index.module.less';
 
-const DomLayerSingle = (props: { layer: IDomLayer; id: string }) => {
+const FloatDomSingle = (props: { layer: IFloatDom; id: string }) => {
     const { layer, id } = props;
     const componentManager = useDependency(ComponentManager);
     const position = useObservable(layer.position$);
@@ -58,14 +58,14 @@ const DomLayerSingle = (props: { layer: IDomLayer; id: string }) => {
         : null;
 };
 
-export const DomLayer = () => {
-    const domLayerService = useDependency(CanvasDomLayerService);
+export const FloatDom = () => {
+    const domLayerService = useDependency(CanvasFloatDomService);
     const layers = useObservable(domLayerService.domLayers$);
 
     return (
         <>
             {layers?.map((layer) => (
-                <DomLayerSingle
+                <FloatDomSingle
                     id={layer[0]}
                     layer={layer[1]}
                     key={layer[0]}

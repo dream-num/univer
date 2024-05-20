@@ -55,7 +55,7 @@ import { IZenZoneService } from './services/zen-zone/zen-zone.service';
 import { EditorService, IEditorService } from './services/editor/editor.service';
 import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 import { IProgressService, ProgressService } from './services/progress/progress.service';
-import { CanvasDomLayerService } from './services/dom/canvas-dom-layer.service';
+import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 import { DesktopUIPartsService, IUIPartsService } from './services/parts/parts.service';
 
 const PLUGIN_NAME = 'ui';
@@ -123,7 +123,7 @@ export class UniverUIPlugin extends Plugin {
             [IRangeSelectorService, { useClass: RangeSelectorService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
             [IProgressService, { useClass: ProgressService }],
-            [CanvasDomLayerService],
+            [CanvasFloatDomService],
             // controllers
             [IUIController, { useClass: DesktopUIController }],
             [SharedController],

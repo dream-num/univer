@@ -18,14 +18,14 @@ import type { IPosition } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, Tools } from '@univerjs/core';
 import { IRenderManagerService, Rect } from '@univerjs/engine-render';
 import { getSheetCommandTarget } from '@univerjs/sheets';
-import { CanvasDomLayerService } from '@univerjs/ui';
+import { CanvasFloatDomService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import { createObjectPositionObserver } from './canvas-pop-manager.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
-export interface ICanvasDomLayer {
+export interface ICanvasFloatDom {
     allowTransform: boolean;
     initPosition: IPosition;
     componentKey: string;
@@ -33,13 +33,13 @@ export interface ICanvasDomLayer {
     subUnitId?: string;
 }
 
-export class SheetCanvasDomLayerManagerService extends Disposable {
+export class SheetCanvasFloatDomManagerService extends Disposable {
     private _domLayerMap: Map<string, Map<string, Map<string, IDisposable>>> = new Map();
 
     constructor(
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
-        @Inject(CanvasDomLayerService) private _canvasDomLayerService: CanvasDomLayerService,
+        @Inject(CanvasFloatDomService) private _canvasFloatDomService: CanvasFloatDomService,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(ICommandService) private _commandService: ICommandService
     ) {
@@ -63,7 +63,7 @@ export class SheetCanvasDomLayerManagerService extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    addDomLayerToPosition(layer: ICanvasDomLayer) {
+    addFloatDomToPosition(layer: ICanvasFloatDom) {
         const target = getSheetCommandTarget(this._univerInstanceService, {
             unitId: layer.unitId,
             subUnitId: layer.subUnitId,
@@ -116,7 +116,7 @@ export class SheetCanvasDomLayerManagerService extends Disposable {
                 });
             });
 
-            this._canvasDomLayerService.addDomLayer({
+            this._canvasFloatDomService.addFloatDom({
                 position$,
                 id,
                 componentKey,
@@ -133,7 +133,7 @@ export class SheetCanvasDomLayerManagerService extends Disposable {
 
             return {
                 dispose: () => {
-                    this._canvasDomLayerService.removeDomLayer(id);
+                    this._canvasFloatDomService.removeFloatDom(id);
                     observer.disposable.dispose();
                     observer.position$.complete();
                     disposePosition.unsubscribe();
@@ -177,7 +177,7 @@ export class SheetCanvasDomLayerManagerService extends Disposable {
         };
     }
 
-    removeDomLayer(unitId: string, subUnitId: string, id: string) {
+    removeFloatDom(unitId: string, subUnitId: string, id: string) {
         const map = this._ensureMap(unitId, subUnitId);
         const current = map.get(id);
         current?.dispose();

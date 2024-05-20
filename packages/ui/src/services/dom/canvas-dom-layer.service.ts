@@ -17,7 +17,7 @@
 import type { IPosition } from '@univerjs/core';
 import { BehaviorSubject, type Observable } from 'rxjs';
 
-export interface IDomLayer {
+export interface IFloatDom {
     position$: Observable<IPosition & { rotate: number }>;
     id: string;
     componentKey: string;
@@ -26,9 +26,9 @@ export interface IDomLayer {
     onPointerUp: (evt: PointerEvent | MouseEvent) => void;
 }
 
-export class CanvasDomLayerService {
-    private _domLayerMap = new Map<string, IDomLayer>();
-    private _domLayers$ = new BehaviorSubject<[string, IDomLayer][]>([]);
+export class CanvasFloatDomService {
+    private _domLayerMap = new Map<string, IFloatDom>();
+    private _domLayers$ = new BehaviorSubject<[string, IFloatDom][]>([]);
 
     domLayers$ = this._domLayers$.asObservable();
 
@@ -40,12 +40,12 @@ export class CanvasDomLayerService {
         this._domLayers$.next(Array.from(this._domLayerMap.entries()));
     }
 
-    addDomLayer(item: IDomLayer) {
+    addFloatDom(item: IFloatDom) {
         this._domLayerMap.set(item.id, item);
         this._notice();
     }
 
-    removeDomLayer(id: string): void {
+    removeFloatDom(id: string): void {
         if (this._domLayerMap.delete(id)) {
             this._notice();
         }

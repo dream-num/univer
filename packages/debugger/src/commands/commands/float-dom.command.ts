@@ -16,14 +16,14 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import { SheetCanvasDomLayerManagerService } from '@univerjs/sheets-ui';
+import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-ui';
 
 export const CreateFloatDomCommand: ICommand = {
     id: 'debugger.command.create-float-dom',
     type: CommandType.COMMAND,
     handler: (accessor) => {
-        const floatDomService = accessor.get(SheetCanvasDomLayerManagerService);
-        floatDomService.addDomLayerToPosition({
+        const floatDomService = accessor.get(SheetCanvasFloatDomManagerService);
+        floatDomService.addFloatDomToPosition({
             allowTransform: true,
             initPosition: {
                 startX: 200,

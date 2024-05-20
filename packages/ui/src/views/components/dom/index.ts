@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { DomLayer } from './DomLayer';
+export { FloatDom } from './FloatDom';

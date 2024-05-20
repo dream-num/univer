@@ -28,7 +28,7 @@ import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
 import { CanvasPopup } from './components/popup';
-import { DomLayer } from './components/dom';
+import { FloatDom } from './components/dom';
 import { builtInGlobalComponents } from './parts';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
@@ -137,7 +137,7 @@ export function App(props: IUniverAppProps) {
                                 onContextMenu={(e) => e.preventDefault()}
                             >
                                 <CanvasPopup />
-                                <DomLayer />
+                                <FloatDom />
                                 <ComponentContainer components={contentComponents} />
                             </section>
                         </section>

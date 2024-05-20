@@ -15,13 +15,13 @@
  */
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SheetCanvasDomLayerManagerService } from '@univerjs/sheets-ui';
+import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 
 export class FRender {
     constructor(
         @IRenderManagerService private _renderManagerService: IRenderManagerService,
-        @Inject(SheetCanvasDomLayerManagerService) private _sheetCanvasDomLayerManagerService: SheetCanvasDomLayerManagerService
+        @Inject(SheetCanvasFloatDomManagerService) private _sheetCanvasFloatDomManagerService: SheetCanvasFloatDomManagerService
     ) {
 
     }

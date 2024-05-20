@@ -29,7 +29,7 @@ import {
     SetWorksheetOrderMutation,
 } from '@univerjs/sheets';
 import { IConfirmService, Menu } from '@univerjs/ui';
-import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { SheetMenuPosition } from '../../../controllers/menu/menu';
@@ -60,7 +60,6 @@ export function SheetBarTabs() {
     const confirmService = useDependency(IConfirmService);
     const selectionRenderService = useDependency(ISelectionRenderService);
     const editorBridgeService = useDependency(IEditorBridgeService);
-    const injector = useInjector();
 
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 

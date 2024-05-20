@@ -171,6 +171,7 @@ export const ICommandService = createIdentifier<ICommandService>('anywhere.comma
  */
 export class CommandRegistry {
     private readonly _commands = new Map<string, ICommand>();
+    private readonly _commandTypes = new Map<string, CommandType>();
 
     registerCommand(command: ICommand): IDisposable {
         if (this._commands.has(command.id)) {
@@ -178,9 +179,11 @@ export class CommandRegistry {
         }
 
         this._commands.set(command.id, command);
+        this._commandTypes.set(command.id, command.type);
 
         return toDisposable(() => {
             this._commands.delete(command.id);
+            this._commandTypes.delete(command.id);
 
             command.onDispose?.();
         });
@@ -197,6 +200,10 @@ export class CommandRegistry {
 
         return [this._commands.get(id)!];
     }
+
+    getCommandType(id: string): CommandType | undefined {
+        return this._commandTypes.get(id);
+    }
 }
 
 interface ICommandExecutionStackItem extends ICommandInfo {}
@@ -208,7 +215,7 @@ export const NilCommand: ICommand = {
 };
 
 export class CommandService implements ICommandService {
-    private readonly _commandRegistry: CommandRegistry;
+    protected readonly _commandRegistry: CommandRegistry;
 
     private readonly _beforeCommandExecutionListeners: CommandListener[] = [];
     private readonly _commandExecutedListeners: CommandListener[] = [];

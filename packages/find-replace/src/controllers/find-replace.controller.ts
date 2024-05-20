@@ -16,8 +16,6 @@
 
 import {
     ICommandService,
-    IContextService,
-    ILogService,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
@@ -67,9 +65,7 @@ export class FindReplaceController extends RxDisposable {
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @ICommandService private readonly _commandService: ICommandService,
         @IFindReplaceService private readonly _findReplaceService: IFindReplaceService,
-        @ILogService private readonly _logService: ILogService,
         @IDialogService private readonly _dialogService: IDialogService,
-        @IContextService private readonly _contextService: IContextService,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,

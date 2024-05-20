@@ -21,6 +21,7 @@ export interface IWorkbenchOptions {
 
     header?: boolean;
     footer?: boolean;
+    contextMenu?: boolean;
 }
 
 export interface IUIController {

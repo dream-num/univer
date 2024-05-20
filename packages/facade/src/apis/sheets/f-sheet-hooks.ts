@@ -61,7 +61,7 @@ export class FSheetHooks {
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
-    onCellDrop(callback: (cellPos: Nullable<IDragCellPosition>) => void) {
+    onCellDrop(callback: (cellPos: Nullable<IDragCellPosition>) => void): IDisposable {
         return toDisposable(this._dragManagerService.endCell$.subscribe(callback));
     }
 }

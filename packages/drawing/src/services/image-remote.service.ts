@@ -16,13 +16,33 @@
 
 import type { IImageRemoteService, IImageRemoteServiceParam, Nullable } from '@univerjs/core';
 import { ImageSourceType, Tools } from '@univerjs/core';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 
 export const ALLOW_IMAGE_LIST = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp'];
 
 const ALLOW_IMAGE_SIZE = 5 * 1024 * 1024;
 
-
 export class ImageRemoteService implements IImageRemoteService {
+    private _waitCount = 0;
+
+    private _change$ = new Subject<number>();
+    change$ = this._change$ as Observable<number>;
+
+    setWaitCount(count: number) {
+        this._waitCount = count;
+        this._change$.next(count);
+    }
+
+    getWaitCount() {
+        return this._waitCount;
+    }
+
+    decreaseWaiting() {
+        this._waitCount -= 1;
+        this._change$.next(this._waitCount);
+    }
+
     async getImage(imageId: string): Promise<string> {
         return Promise.resolve(imageId);
     }
@@ -51,6 +71,8 @@ export class ImageRemoteService implements IImageRemoteService {
                     imageSourceType: ImageSourceType.BASE64,
                     source: replaceSrc,
                 });
+
+                this.decreaseWaiting();
             };
         });
     }

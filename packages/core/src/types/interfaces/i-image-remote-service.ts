@@ -15,6 +15,7 @@
  */
 
 import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
 import type { Nullable } from '../../shared';
 
 export enum ImageSourceType {
@@ -30,6 +31,10 @@ export interface IImageRemoteServiceParam {
 }
 
 export interface IImageRemoteService {
+    change$: Observable<number>;
+    setWaitCount(count: number): void;
+    getWaitCount(): number;
+    decreaseWaiting(): void;
 
     getImage(imageId: string): Promise<string>;
 
@@ -39,6 +44,5 @@ export interface IImageRemoteService {
 
     applyAI(imageId: string, operatorType: string): Promise<string>;
 }
-
 
 export const IImageRemoteService = createIdentifier<IImageRemoteService>('univer.plugin.image-remote.service');

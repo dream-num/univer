@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
-
-import { SelectionManagerService } from '@univerjs/sheets';
+import type { IDrawingSubunitMap } from '@univerjs/core';
+import { Disposable, IDrawingManagerService, IResourceManagerService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { ISheetDrawing } from '@univerjs/sheets';
+import { ISheetDrawingService } from '@univerjs/sheets';
+import { SHEET_DRAWING_PLUGIN } from '../basics/resource-name';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingDataController)
 export class SheetDrawingDataController extends Disposable {
     constructor(
-        @ICommandService private readonly _commandService: ICommandService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
+        @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
+        @IResourceManagerService private _resourceManagerService: IResourceManagerService
     ) {
         super();
 
@@ -32,6 +33,42 @@ export class SheetDrawingDataController extends Disposable {
     }
 
     private _init(): void {
+        this._initSnapshot();
+    }
 
+    private _initSnapshot() {
+        const toJson = (unitId: string) => {
+            const map = this._sheetDrawingService.getDrawingDataForUnit(unitId);
+            if (map) {
+                return JSON.stringify(map);
+            }
+            return '';
+        };
+        const parseJson = (json: string): IDrawingSubunitMap<ISheetDrawing> => {
+            if (!json) {
+                return {};
+            }
+            try {
+                return JSON.parse(json);
+            } catch (err) {
+                return {};
+            }
+        };
+        this.disposeWithMe(
+            this._resourceManagerService.registerPluginResource<IDrawingSubunitMap<ISheetDrawing>>({
+                pluginName: SHEET_DRAWING_PLUGIN,
+                businesses: [UniverInstanceType.UNIVER_SHEET],
+                toJson: (unitId) => toJson(unitId),
+                parseJson: (json) => parseJson(json),
+                onUnLoad: (unitId) => {
+                    this._sheetDrawingService.removeDrawingDataForUnit(unitId);
+                    this._drawingManagerService.removeDrawingDataForUnit(unitId);
+                },
+                onLoad: (unitId, value) => {
+                    this._sheetDrawingService.registerDrawingData(unitId, value);
+                    this._drawingManagerService.registerDrawingData(unitId, value);
+                },
+            })
+        );
     }
 }

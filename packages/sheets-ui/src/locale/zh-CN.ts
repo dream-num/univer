@@ -524,6 +524,10 @@ const locale = {
         nameInvalid: '名称不包含空格或不允许的字符',
         nameSheetConflict: '名称与工作表名称冲突',
     },
+    uploadLoading: {
+        loading: '正在上传，当前剩余',
+        error: '加载失败',
+    },
 };
 
 export default locale;

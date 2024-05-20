@@ -110,6 +110,10 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IDisposabl
 
     refreshTransform(updateParams: T[]): void;
 
+    getDrawingDataForUnit(unitId: string): IDrawingSubunitMap<T>;
+    removeDrawingDataForUnit(unitId: string): void;
+    registerDrawingData(unitId: string, data: IDrawingSubunitMap<T>): void;
+
     getDrawingData(unitId: string, subUnitId: string): IDrawingMapItemData<T>;
 
     getBatchAddOp(insertParams: T[]): unknown;

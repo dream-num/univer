@@ -529,6 +529,10 @@ const locale: typeof zhCN = {
         nameInvalid: 'Имя недействительно',
         nameSheetConflict: 'Имя конфликтует с именем листа',
     },
+    uploadLoading: {
+        loading: 'Загрузка...',
+        error: 'Ошибка',
+    },
 };
 
 export default locale;

@@ -30,7 +30,7 @@ export class FSheetHooks {
     }
 
     /**
-     * The onCellPointerMove event is fired when a pointing device is moved into a cell's hit test boundaries.
+     * The onCellPointerMove event is fired when a pointer changes coordinates.
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
@@ -39,7 +39,7 @@ export class FSheetHooks {
     }
 
     /**
-     * The onCellPointerOver event is fired when a pointing device is moved into a cell's hit test boundaries.
+     * The onCellPointerOver event is fired when a pointer is moved into a cell's hit test boundaries.
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
@@ -57,7 +57,7 @@ export class FSheetHooks {
     }
 
     /**
-     * The onCellDrop event is fired when an element or text selection is being dropped on the cell
+     * The onCellDrop event is fired when an element or text selection is being dropped on the cell.
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */

@@ -21,6 +21,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { SheetsSortController } from './controllers/sheets-sort.controller';
 import { ISheetsSortService, SheetsSortService } from './services/sheet-sort.service';
 import { enUS, zhCN } from './locale';
+import { ISheetsSortUIService, SheetsSortUIService } from './services/sheet-sort-ui.service';
 
 const NAME = 'UNIVER_SHEETS_SORT_PLUGIN';
 
@@ -40,6 +41,7 @@ export class UniverSheetsSortPlugin extends Plugin {
         ([
             [SheetsSortController],
             [ISheetsSortService, { useClass: SheetsSortService }],
+            [ISheetsSortUIService, { useClass: SheetsSortUIService }],
         ] as Dependency[]).forEach((d) => injector.add(d));
 
         this._localeService.load({

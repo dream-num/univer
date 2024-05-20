@@ -27,6 +27,18 @@ export interface IReorderRangeMutationParams extends ISheetCommandSharedParams {
     order: { [key: number]: number };
 }
 
+export const ReorderRangeUndoMutationFactory = (params: IReorderRangeMutationParams): IReorderRangeMutationParams => {
+    const { order } = params;
+    const newOrder = {} as { [key: number]: number };
+    Object.keys(order).forEach((key) => {
+        newOrder[order[Number(key)]] = Number(key);
+    });
+    return {
+        ...params,
+        order: newOrder,
+    };
+};
+
 export const ReorderRangeMutation: IMutation<IReorderRangeMutationParams> = {
     id: 'sheet.mutation.reorder-range',
     type: CommandType.MUTATION,

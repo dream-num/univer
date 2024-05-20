@@ -17,13 +17,14 @@
 // This file provides a ton of mutations to manipulate `FilterModel`.
 // These models would be held on `SheetsFilterService`.
 
-import { CellValueType, CommandType, ICommandService, IUniverInstanceService, Rectangle } from '@univerjs/core';
+import { CellValueType, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle, sequenceExecute } from '@univerjs/core';
 import type { ICellData, ICommand, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISheetCommandSharedParams } from '@univerjs/sheets';
+import { getPrimaryForRange, type ISheetCommandSharedParams, NORMAL_SELECTION_PLUGIN_NAME } from '@univerjs/sheets';
+import { SetSelectionsOperation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import { ISheetsSortService } from '../services/sheet-sort.service';
 import type { IReorderRangeMutationParams } from './sheets-reorder.mutation';
-import { ReorderRangeMutation } from './sheets-reorder.mutation';
+import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from './sheets-reorder.mutation';
 
 export enum SortType {
     DESC, // Z-A
@@ -115,6 +116,7 @@ export const SortRangeCustomInCtxMenuCommand: ICommand = {
 export const ReorderRangeCommand: ICommand = {
     id: 'sheet.command.reorder-range',
     type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params: IReorderRangeCommandParams) => {
         const { range, orderRules, hasTitle, unitId, subUnitId } = params;
         const sortService = accessor.get(ISheetsSortService);
@@ -161,13 +163,46 @@ export const ReorderRangeCommand: ICommand = {
             order[oldOrder[oldIndex]] = index;
         });
 
+        const reorderMutation = {
+            id: ReorderRangeMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                order,
+                range,
+            } as IReorderRangeMutationParams,
+        };
+
+        const undoReorderMutation = {
+            id: ReorderRangeMutation.id,
+            params: ReorderRangeUndoMutationFactory(reorderMutation.params),
+        };
+
+        const setSelectionsOperation = {
+            id: SetSelectionsOperation.id,
+            params: {
+                unitId,
+                subUnitId,
+                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                selections: [{ range, primary: getPrimaryForRange(range, worksheet), style: null }],
+            },
+        };
+        const redos = [setSelectionsOperation, reorderMutation];
+        const undos = [undoReorderMutation];
+
         const commandService = accessor.get(ICommandService);
-        return commandService.executeCommand(ReorderRangeMutation.id, {
-            unitId,
-            subUnitId,
-            order,
-            range,
-        } as IReorderRangeMutationParams);
+        const res = sequenceExecute(redos, commandService);
+
+        if (res) {
+            const undoRedoService = accessor.get(IUndoRedoService);
+            undoRedoService.pushUndoRedo({
+                unitID: unitId,
+                undoMutations: redos,
+                redoMutations: undos,
+            });
+            return true;
+        }
+        return false;
     },
 
 };

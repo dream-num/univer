@@ -80,9 +80,9 @@ export class SheetCanvasDomLayerManagerService extends Disposable {
         }
 
         const { allowTransform, initPosition, componentKey } = layer;
-        const { scene } = renderer;
+        const { scene, engine } = renderer;
         const id = Tools.generateRandomId();
-
+        const canvas = engine.getCanvasElement();
         const disposableCollection = new DisposableCollection();
         const initialTransform = {
             ...initPosition,
@@ -120,9 +120,14 @@ export class SheetCanvasDomLayerManagerService extends Disposable {
                 position$,
                 id,
                 componentKey,
-                onClick: (evt) => {
-                    obj.triggerPointerDown(evt);
-                    obj.triggerPointerUp(evt);
+                onPointerDown: (evt) => {
+                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                },
+                onPointerMove: (evt: PointerEvent | MouseEvent) => {
+                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
+                },
+                onPointerUp: (evt: PointerEvent | MouseEvent) => {
+                    canvas.dispatchEvent(new PointerEvent(evt.type, evt));
                 },
             });
 

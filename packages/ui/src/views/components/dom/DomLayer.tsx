@@ -31,7 +31,6 @@ const DomLayerSingle = (props: { layer: IDomLayer; id: string }) => {
     return position
         ? (
             <div
-                onClick={(e) => layer.onClick?.(e as any)}
                 className={styles.floatDom}
                 id={id}
                 style={{
@@ -42,6 +41,15 @@ const DomLayerSingle = (props: { layer: IDomLayer; id: string }) => {
                     height: position.endY - position.startY - 2,
                     transform: `rotate(${position.rotate}deg)`,
                     overflow: 'hidden',
+                }}
+                onPointerMove={(e) => {
+                    layer.onPointerMove(e.nativeEvent);
+                }}
+                onPointerDown={(e) => {
+                    layer.onPointerDown(e.nativeEvent);
+                }}
+                onPointerUp={(e) => {
+                    layer.onPointerUp(e.nativeEvent);
                 }}
             >
                 {Component ? <Component /> : null}

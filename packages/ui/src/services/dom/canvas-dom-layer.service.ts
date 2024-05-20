@@ -15,14 +15,15 @@
  */
 
 import type { IPosition } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { BehaviorSubject, type Observable } from 'rxjs';
 
 export interface IDomLayer {
     position$: Observable<IPosition & { rotate: number }>;
     id: string;
     componentKey: string;
-    onClick?: (evt: IPointerEvent | IMouseEvent) => void;
+    onPointerMove: (evt: PointerEvent | MouseEvent) => void;
+    onPointerDown: (evt: PointerEvent | MouseEvent) => void;
+    onPointerUp: (evt: PointerEvent | MouseEvent) => void;
 }
 
 export class CanvasDomLayerService {

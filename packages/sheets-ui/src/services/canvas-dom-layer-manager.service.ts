@@ -157,7 +157,7 @@ export class SheetCanvasDomLayerManagerService extends Disposable {
 
         disposableCollection.add({
             dispose: () => {
-                transform$.complete();
+                position$.complete();
                 layerDisposable?.dispose();
                 map.delete(id);
             },
@@ -168,7 +168,7 @@ export class SheetCanvasDomLayerManagerService extends Disposable {
         return {
             id,
             disposable: disposableCollection,
-            transform$,
+            position$,
         };
     }
 

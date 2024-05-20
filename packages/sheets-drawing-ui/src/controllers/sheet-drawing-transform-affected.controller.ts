@@ -22,7 +22,7 @@ import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthC
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
-import { transformDrawingPositionToTransform, transformToDrawingPosition } from './utils';
+import { transformDrawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
 
 enum RangeMoveUndoType {
     deleteLeft,

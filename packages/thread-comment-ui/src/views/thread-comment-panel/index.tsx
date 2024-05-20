@@ -22,7 +22,6 @@ import { ICommandService, LocaleService, type UniverInstanceType, UserManagerSer
 import { useObservable } from '@univerjs/ui';
 import { Button, Select } from '@univerjs/design';
 import { IncreaseSingle } from '@univerjs/icons';
-import dayjs from 'dayjs';
 import type { Observable } from 'rxjs';
 import { ThreadCommentTree } from '../thread-comment-tree';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';

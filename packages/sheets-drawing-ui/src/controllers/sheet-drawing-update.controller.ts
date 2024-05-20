@@ -31,7 +31,7 @@ import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-d
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
-import { transformImagePositionToTransform } from './utils';
+import { transformDrawingPositionToTransform, transformToDrawingPosition } from './utils';
 
 const SHEET_IMAGE_WIDTH_LIMIT = 500;
 const SHEET_IMAGE_HEIGHT_LIMIT = 500;
@@ -141,7 +141,7 @@ export class SheetDrawingUpdateController extends Disposable {
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType,
             source,
-            transform: transformImagePositionToTransform(sheetTransform, this._selectionRenderService),
+            transform: transformDrawingPositionToTransform(sheetTransform, this._selectionRenderService),
             sheetTransform,
         };
 
@@ -251,7 +251,7 @@ export class SheetDrawingUpdateController extends Disposable {
                     return;
                 }
 
-                const sheetTransform = this._transformToImagePosition({ ...sheetDrawing.transform, ...transform });
+                const sheetTransform = transformToDrawingPosition({ ...sheetDrawing.transform, ...transform }, this._selectionRenderService);
 
                 if (sheetTransform == null) {
                     return;
@@ -263,7 +263,7 @@ export class SheetDrawingUpdateController extends Disposable {
 
                 const newDrawing: Partial<ISheetDrawing> = {
                     unitId, subUnitId, drawingId, drawingType,
-                    transform: { ...transform, ...transformImagePositionToTransform(sheetTransform, this._selectionRenderService) },
+                    transform: { ...transform, ...transformDrawingPositionToTransform(sheetTransform, this._selectionRenderService) },
                     sheetTransform: { ...sheetTransform },
                 };
 
@@ -287,59 +287,5 @@ export class SheetDrawingUpdateController extends Disposable {
         this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {
             this._commandService.executeCommand(UngroupSheetDrawingCommand.id, params);
         });
-    }
-
-     // use transform and originSize convert to  ISheetDrawingPosition
-    private _transformToImagePosition(transform: ITransformState): Nullable<ISheetDrawingPosition> {
-        const { left = 0, top = 0, width = 0, height = 0 } = transform;
-
-        // const selections = this._selectionManagerService.getSelections();
-        // let range: IRange = {
-        //     startRow: 0,
-        //     endRow: 0,
-        //     startColumn: 0,
-        //     endColumn: 0,
-        // };
-        // if (selections && selections.length > 0) {
-        //     range = selections[selections.length - 1].range;
-        // }
-
-        // const rangeWithCoord = this._selectionRenderService.attachRangeWithCoord(range);
-        // if (rangeWithCoord == null) {
-        //     return;
-        // }
-
-        // const { startColumn, startRow, startX, startY } = rangeWithCoord;
-
-        const startSelectionCell = this._selectionRenderService.getSelectionCellByPosition(left, top);
-
-        if (startSelectionCell == null) {
-            return;
-        }
-
-        const from = {
-            column: startSelectionCell.actualColumn,
-            columnOffset: left - startSelectionCell.startX,
-            row: startSelectionCell.actualRow,
-            rowOffset: top - startSelectionCell.startY,
-        };
-
-        const endSelectionCell = this._selectionRenderService.getSelectionCellByPosition(left + width, top + height);
-
-        if (endSelectionCell == null) {
-            return;
-        }
-
-        const to = {
-            column: endSelectionCell.actualColumn,
-            columnOffset: left + width - endSelectionCell.startX,
-            row: endSelectionCell.actualRow,
-            rowOffset: top + height - endSelectionCell.startY,
-        };
-
-        return {
-            from,
-            to,
-        };
     }
 }

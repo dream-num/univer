@@ -22,7 +22,7 @@ import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.con
 import { SheetDrawingDataController } from './controllers/sheet-drawing-data.controller';
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 import { SheetDrawingUIController } from './controllers/sheet-drawing.controller';
-
+import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
 
 const PLUGIN_NAME = 'SHEETS_IMAGE_UI_PLUGIN';
 
@@ -56,6 +56,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingUpdateController],
             [SheetDrawingDataController],
             [DrawingPopupMenuController],
+            [SheetDrawingTransformAffectedController],
 
         ];
 

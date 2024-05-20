@@ -15,10 +15,11 @@
  */
 
 import type { ITransformState, Nullable } from '@univerjs/core';
+import { precisionTo } from '@univerjs/engine-render';
 import type { ISheetDrawingPosition } from '@univerjs/sheets';
 import type { ISelectionRenderService } from '@univerjs/sheets-ui';
 
-export function transformImagePositionToTransform(position: ISheetDrawingPosition, selectionRenderService: ISelectionRenderService): Nullable<ITransformState> {
+export function transformDrawingPositionToTransform(position: ISheetDrawingPosition, selectionRenderService: ISelectionRenderService): Nullable<ITransformState> {
     const { from, to } = position;
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
     const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
@@ -49,16 +50,52 @@ export function transformImagePositionToTransform(position: ISheetDrawingPositio
 
     const { startX: endSelectionX, startY: endSelectionY } = endSelectionCell;
 
-    const left = startSelectionX + fromColumnOffset;
-    const top = startSelectionY + fromRowOffset;
+    const left = precisionTo(startSelectionX + fromColumnOffset, 1);
+    const top = precisionTo(startSelectionY + fromRowOffset, 1);
 
-    const width = endSelectionX + toColumnOffset - left;
-    const height = endSelectionY + toRowOffset - top;
+    const width = precisionTo(endSelectionX + toColumnOffset - left, 1);
+    const height = precisionTo(endSelectionY + toRowOffset - top, 1);
 
     return {
         left,
         top,
         width,
         height,
+    };
+}
+
+     // use transform and originSize convert to  ISheetDrawingPosition
+export function transformToDrawingPosition(transform: ITransformState, selectionRenderService: ISelectionRenderService): Nullable<ISheetDrawingPosition> {
+    const { left = 0, top = 0, width = 0, height = 0 } = transform;
+
+    const startSelectionCell = selectionRenderService.getSelectionCellByPosition(left, top);
+
+    if (startSelectionCell == null) {
+        return;
+    }
+
+    const from = {
+        column: startSelectionCell.actualColumn,
+        columnOffset: precisionTo(left - startSelectionCell.startX, 1),
+        row: startSelectionCell.actualRow,
+        rowOffset: precisionTo(top - startSelectionCell.startY, 1),
+    };
+
+    const endSelectionCell = selectionRenderService.getSelectionCellByPosition(left + width, top + height);
+
+    if (endSelectionCell == null) {
+        return;
+    }
+
+    const to = {
+        column: endSelectionCell.actualColumn,
+        columnOffset: precisionTo(left + width - endSelectionCell.startX, 1),
+        row: endSelectionCell.actualRow,
+        rowOffset: precisionTo(top + height - endSelectionCell.startY, 1),
+    };
+
+    return {
+        from,
+        to,
     };
 }

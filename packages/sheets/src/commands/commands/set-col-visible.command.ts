@@ -36,6 +36,7 @@ import {
 } from '../mutations/set-col-visible.mutation';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { getPrimaryForRange } from './utils/selection-utils';
 
 export interface ISetSpecificColsVisibleCommandParams {
@@ -48,6 +49,7 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
     type: CommandType.COMMAND,
     id: 'sheet.command.set-col-visible-on-cols',
     handler: async (accessor, params: ISetSpecificColsVisibleCommandParams) => {
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const { unitId, subUnitId, ranges } = params;
 
         const worksheet = accessor
@@ -78,10 +80,16 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
             })),
         };
 
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: SetSpecificColsVisibleCommand.id,
+            params,
+        });
+
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(
             [
                 { id: SetColVisibleMutation.id, params: redoMutationParams },
+                ...intercepted.redos,
                 { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
             ],
             commandService
@@ -92,10 +100,12 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
+                    ...(intercepted.preUndos ?? []),
                     { id: SetColHiddenMutation.id, params: undoMutationParams },
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
                 ],
                 redoMutations: [
+                    ...(intercepted.preRedos ?? []),
                     { id: SetColVisibleMutation.id, params: redoMutationParams },
                     { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
                 ],
@@ -146,10 +156,9 @@ export const SetColHiddenCommand: ICommand = {
     id: 'sheet.command.set-col-hidden',
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const ranges = selectionManagerService
-            .getSelections()
-            ?.map((s) => s.range)
-            .filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+
+        const ranges = selectionManagerService.getSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
         if (!ranges?.length) {
             return false;
         }
@@ -163,14 +172,10 @@ export const SetColHiddenCommand: ICommand = {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const redoMutationParams: ISetColHiddenMutationParams = {
-            unitId,
-            subUnitId,
-            ranges,
+            unitId, subUnitId, ranges,
         };
         const setSelectionOperationParams: ISetSelectionsOperationParams = {
-            unitId,
-            subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            unitId, subUnitId, pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: getSelectionsAfterHiding(ranges).map((range) => ({
                 range,
                 primary: getPrimaryForRange(range, worksheet),
@@ -178,9 +183,7 @@ export const SetColHiddenCommand: ICommand = {
             })),
         };
         const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
-            unitId,
-            subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            unitId, subUnitId, pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: ranges.map((range) => ({
                 range,
                 primary: getPrimaryForRange(range, worksheet),
@@ -188,11 +191,17 @@ export const SetColHiddenCommand: ICommand = {
             })),
         };
 
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: SetColHiddenCommand.id,
+            params: redoMutationParams,
+        });
+
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(
             [
                 { id: SetColHiddenMutation.id, params: redoMutationParams },
                 { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+                ...intercepted.redos,
             ],
             commandService
         );
@@ -202,10 +211,12 @@ export const SetColHiddenCommand: ICommand = {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
+                    ...(intercepted.preUndos ?? []),
                     { id: SetColVisibleMutation.id, params: undoMutationParams },
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
                 ],
                 redoMutations: [
+                    ...(intercepted.preRedos ?? []),
                     { id: SetColHiddenMutation.id, params: redoMutationParams },
                     { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
                 ],
@@ -219,7 +230,6 @@ export const SetColHiddenCommand: ICommand = {
 
 /**
  * Get the selections after hiding cols.
- *
  * @param worksheet the worksheet the command invoked on
  * @param ranges cols to be hidden
  */

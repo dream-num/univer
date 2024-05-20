@@ -29,6 +29,9 @@ import { SetNumfmtCommand } from '../../commands/commands/set-numfmt.command';
 import { OpenNumfmtPanelOperator } from '../../commands/operations/open.numfmt.panel.operation';
 import { getPatternPreview, getPatternType } from '../../utils/pattern';
 
+export const MORE_NUMFMT_TYPE_KEY = 'sheet.numfmt.moreNumfmtType';
+export const OPTIONS_KEY = 'sheet.numfmt.moreNumfmtType.options';
+
 export const MoreNumfmtType = (props: { value?: string }) => {
     const localeService = useDependency(LocaleService);
     const value = props.value ?? localeService.t('sheet.numfmt.general');

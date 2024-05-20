@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IMenuItemFactory } from '@univerjs/ui';
+import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { IMenuService, IShortcutService, IZenZoneService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -25,9 +25,16 @@ import { ZenEditorMenuItemFactory } from '../views/menu';
 import { ZEN_EDITOR_COMPONENT, ZenEditor } from '../views/zen-editor';
 import { ZenEditorCancelShortcut, ZenEditorConfirmShortcut } from './shortcuts/zen-editor.shortcut';
 
+export interface IUniverSheetsZenEditorUIConfig {
+    menu: MenuConfig;
+}
+
+export const DefaultSheetZenEditorUiConfig = {};
+
 @OnLifecycle(LifecycleStages.Rendered, ZenEditorUIController)
 export class ZenEditorUIController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverSheetsZenEditorUIConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -42,6 +49,7 @@ export class ZenEditorUIController extends Disposable {
     private _initialize(): void {
         this._initCustomComponents();
         this._initCommands();
+        this._initMenuConfigs();
         this._initMenus();
         this._initShortcuts();
     }
@@ -53,6 +61,13 @@ export class ZenEditorUIController extends Disposable {
     private _initCommands(): void {
         [OpenZenEditorOperation, CancelZenEditCommand, ConfirmZenEditCommand].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
+        });
+    }
+
+    private _initMenuConfigs() {
+        const { menu = {} } = this._config;
+        Object.entries(menu).forEach(([id, config]) => {
+            this._menuService.setMenuConfigs(id, config);
         });
     }
 

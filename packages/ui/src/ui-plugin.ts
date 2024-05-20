@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { DependencyOverride } from '@univerjs/core';
-import { IContextService, ILocalStorageService, LocaleService, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { IContextService, ILocalStorageService, LocaleService, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -27,7 +26,7 @@ import { ZIndexManager } from './common/z-index-manager';
 import { ErrorController } from './controllers/error/error.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
-import type { IWorkbenchOptions } from './controllers/ui/ui.controller';
+import type { IUniverUIConfig } from './controllers/ui/ui.controller';
 import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 import { zhCN } from './locale';
@@ -59,12 +58,7 @@ import { DesktopUIPartsService, IUIPartsService } from './services/parts/parts.s
 
 const PLUGIN_NAME = 'ui';
 
-export interface IUniverUIConfig extends IWorkbenchOptions {
-    /** Disable auto focus when Univer bootstraps. */
-    disableAutoFocus?: true;
-
-    override?: DependencyOverride;
-}
+export const DefaultUiConfig = {};
 
 export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
 
@@ -83,6 +77,7 @@ export class UniverUIPlugin extends Plugin {
         super();
 
         this._localeService.load({ zhCN });
+        this._config = Tools.deepMerge({}, DefaultUiConfig, this._config);
 
         if (this._config.disableAutoFocus) {
             this._contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);
@@ -128,7 +123,12 @@ export class UniverUIPlugin extends Plugin {
 
             // controllers
             [IUIController, { useClass: DesktopUIController }],
-            [SharedController],
+            [
+                SharedController,
+                {
+                    useFactory: () => this._injector.createInstance(SharedController, this._config),
+                },
+            ],
             [ErrorController],
             [ShortcutPanelController],
         ], this._config.override);

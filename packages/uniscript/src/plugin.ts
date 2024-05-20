@@ -14,36 +14,36 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin } from '@univerjs/core';
+import { LocaleService, Plugin, Tools } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { UniscriptController } from './controllers/uniscript.controller';
+import type { IUniverUniscriptConfig } from './controllers/uniscript.controller';
+import { DefaultUniscriptConfig, UniscriptController } from './controllers/uniscript.controller';
 import { zhCN } from './locale';
-import type { IScriptEditorServiceConfig } from './services/script-editor.service';
 import { ScriptEditorService } from './services/script-editor.service';
 import { UniscriptExecutionService } from './services/script-execution.service';
 import { ScriptPanelService } from './services/script-panel.service';
 
 const PLUGIN_NAME = 'uniscript';
 
-export interface IUniscriptConfig extends IScriptEditorServiceConfig {}
-
 export class UniverUniscriptPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        private readonly _config: IUniscriptConfig,
+        private readonly _config: Partial<IUniverUniscriptConfig> = {},
         @Inject(Injector) protected override _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
+
+        this._config = Tools.deepMerge({}, DefaultUniscriptConfig, this._config);
     }
 
     override onStarting(injector: Injector): void {
         const dependencies: Dependency[] = [
             // controllers
-            [UniscriptController],
+            [UniscriptController, { useFactory: () => injector.createInstance(UniscriptController, this._config) }],
 
             // services
             [ScriptEditorService, { useFactory: () => injector.createInstance(ScriptEditorService, this._config) }],
@@ -53,8 +53,6 @@ export class UniverUniscriptPlugin extends Plugin {
 
         dependencies.forEach((d) => injector.add(d));
 
-        this._localeService.load({
-            zhCN,
-        });
+        this._localeService.load({ zhCN });
     }
 }

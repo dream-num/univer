@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, IUniverInstanceService } from '@univerjs/core';
-import type { IMenuItemFactory } from '@univerjs/ui';
+import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -52,8 +52,15 @@ import {
 import { RecordController } from './local-save/record.controller';
 import { ExportController } from './local-save/export.controller';
 
+export interface IUniverDebuggerConfig {
+    menu: MenuConfig;
+}
+
+export const DefaultDebuggerConfig = {};
+
 export class DebuggerController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverDebuggerConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -64,6 +71,7 @@ export class DebuggerController extends Disposable {
         this._initializeContextMenu();
 
         this._initCustomComponents();
+        this._initMenuConfigs();
 
         [
             LocaleOperation,
@@ -108,5 +116,12 @@ export class DebuggerController extends Disposable {
         this.disposeWithMe(componentManager.register('VueI18nIcon', VueI18nIcon, {
             framework: 'vue3',
         }));
+    }
+
+    private _initMenuConfigs() {
+        const { menu = {} } = this._config;
+        Object.entries(menu).forEach(([id, config]) => {
+            this._menuService.setMenuConfigs(id, config);
+        });
     }
 }

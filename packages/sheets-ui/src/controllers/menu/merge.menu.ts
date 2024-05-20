@@ -17,7 +17,7 @@
 import { UniverInstanceType } from '@univerjs/core';
 import { getCurrentSheetDisabled$, RemoveWorksheetMergeCommand } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, IMenuService, MenuGroup, MenuItemType, MenuPosition, mergeMenuConfigs } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { combineLatestWith, map } from 'rxjs';
@@ -32,8 +32,11 @@ import { getSheetSelectionsDisabled$ } from '../utils/selections-tools';
 export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const disabled$ = getCurrentSheetDisabled$(accessor);
     const selectionsHasCross$ = getSheetSelectionsDisabled$(accessor);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(AddWorksheetMergeCommand.id);
+
+    return mergeMenuConfigs({
         id: AddWorksheetMergeCommand.id,
         icon: 'MergeAllSingle',
         tooltip: 'toolbar.mergeCell.main',
@@ -46,41 +49,61 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
             combineLatestWith(selectionsHasCross$),
             map(([disable, hasCross]) => disable || hasCross)
         ),
-    };
+    }, menuItemConfig);
 }
+
 export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(AddWorksheetMergeAllCommand.id);
+
+    return mergeMenuConfigs({
         id: AddWorksheetMergeAllCommand.id,
         type: MenuItemType.BUTTON,
         title: 'merge.all',
         icon: 'MergeAllSingle',
         positions: [AddWorksheetMergeCommand.id],
-    };
+    }, menuItemConfig);
 }
+
 export function CellMergeVerticalMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(AddWorksheetMergeVerticalCommand.id);
+
+    return mergeMenuConfigs({
         id: AddWorksheetMergeVerticalCommand.id,
         type: MenuItemType.BUTTON,
         title: 'merge.vertical',
         icon: 'VerticalIntegrationSingle',
         positions: [AddWorksheetMergeCommand.id],
-    };
+    }, menuItemConfig);
 }
+
 export function CellMergeHorizontalMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(AddWorksheetMergeHorizontalCommand.id);
+
+    return mergeMenuConfigs({
         id: AddWorksheetMergeHorizontalCommand.id,
         type: MenuItemType.BUTTON,
         title: 'merge.horizontal',
         icon: 'HorizontalMergeSingle',
         positions: [AddWorksheetMergeCommand.id],
-    };
+    }, menuItemConfig);
 }
+
 export function CellMergeCancelMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(RemoveWorksheetMergeCommand.id);
+
+    return mergeMenuConfigs({
         id: RemoveWorksheetMergeCommand.id,
         type: MenuItemType.BUTTON,
         title: 'merge.cancel',
         icon: 'CancelMergeSingle',
         positions: [AddWorksheetMergeCommand.id],
-    };
+    }, menuItemConfig);
 }

@@ -23,7 +23,7 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import type { IMenuItemFactory } from '@univerjs/ui';
+import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { ComponentManager, DesktopUIPart, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
@@ -228,9 +228,16 @@ import {
     ZoomOutShortcutItem,
 } from './shortcuts/view.shortcut';
 
+export interface IUniverSheetsUIConfig {
+    menu: MenuConfig;
+}
+
+export const DefaultSheetUiConfig = {};
+
 @OnLifecycle(LifecycleStages.Ready, SheetUIController)
 export class SheetUIController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverSheetsUIConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ILayoutService private readonly _layoutService: ILayoutService,
@@ -247,6 +254,7 @@ export class SheetUIController extends Disposable {
     private _init(): void {
         this._initCustomComponents();
         this._initCommands();
+        this._initMenuConfigs();
         this._initMenus();
         this._initShortcuts();
         this._initWorkbenchParts();
@@ -325,6 +333,13 @@ export class SheetUIController extends Disposable {
             AutoClearContentCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
+        });
+    }
+
+    private _initMenuConfigs() {
+        const { menu = {} } = this._config;
+        Object.entries(menu).forEach(([id, config]) => {
+            this._menuService.setMenuConfigs(id, config);
         });
     }
 

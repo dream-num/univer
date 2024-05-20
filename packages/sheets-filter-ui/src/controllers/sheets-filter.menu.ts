@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, IMenuService, MenuGroup, MenuItemType, MenuPosition, mergeMenuConfigs } from '@univerjs/ui';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
@@ -25,8 +25,11 @@ import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SmartToggl
 
 export function SmartToggleFilterMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     const sheetsFilterService = accessor.get(SheetsFilterService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SmartToggleSheetsFilterCommand.id);
+
+    return mergeMenuConfigs({
         id: SmartToggleSheetsFilterCommand.id,
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         type: MenuItemType.BUTTON_SELECTOR,
@@ -35,13 +38,16 @@ export function SmartToggleFilterMenuItemFactory(accessor: IAccessor): IMenuSele
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         activated$: sheetsFilterService.activeFilterModel$.pipe(map((model) => !!model)),
-    };
+    }, menuItemConfig);
 }
 
 export function ClearFilterCriteriaMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const sheetsFilterService = accessor.get(SheetsFilterService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(ClearSheetsFilterCriteriaCommand.id);
+
+    return mergeMenuConfigs({
         id: ClearSheetsFilterCriteriaCommand.id,
         group: MenuGroup.TOOLBAR_OTHERS,
         type: MenuItemType.BUTTON,
@@ -49,13 +55,16 @@ export function ClearFilterCriteriaMenuItemFactory(accessor: IAccessor): IMenuBu
         positions: [SmartToggleSheetsFilterCommand.id],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: sheetsFilterService.activeFilterModel$.pipe(switchMap((model) => model?.hasCriteria$.pipe(map((m) => !m)) ?? of(true))),
-    };
+    }, menuItemConfig);
 }
 
 export function ReCalcFilterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const sheetsFilterService = accessor.get(SheetsFilterService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(ReCalcSheetsFilterCommand.id);
+
+    return mergeMenuConfigs({
         id: ReCalcSheetsFilterCommand.id,
         group: MenuGroup.TOOLBAR_OTHERS,
         type: MenuItemType.BUTTON,
@@ -63,5 +72,5 @@ export function ReCalcFilterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         positions: [SmartToggleSheetsFilterCommand.id],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: sheetsFilterService.activeFilterModel$.pipe(switchMap((model) => model?.hasCriteria$.pipe(map((m) => !m)) ?? of(true))),
-    };
+    }, menuItemConfig);
 }

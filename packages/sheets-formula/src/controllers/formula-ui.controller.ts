@@ -15,11 +15,14 @@
  */
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, DesktopUIPart, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import type { Ctor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionCommand } from '../commands/commands/insert-function.command';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
@@ -43,9 +46,18 @@ import {
 } from './shortcuts/prompt.shortcut';
 import { FormulaEditorShowController } from './formula-editor-show.controller';
 
+export interface IUniverSheetsFormulaConfig {
+    menu: MenuConfig;
+    description: IFunctionInfo[];
+    function: Array<[Ctor<BaseFunction>, IFunctionNames]>;
+}
+
+export const DefaultSheetFormulaConfig = {};
+
 @OnLifecycle(LifecycleStages.Ready, FormulaUIController)
 export class FormulaUIController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverSheetsFormulaConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -61,10 +73,18 @@ export class FormulaUIController extends Disposable {
 
     private _initialize(): void {
         this._registerCommands();
+        this._registerMenuConfigs();
         this._registerMenus();
         this._registerShortcuts();
         this._registerComponents();
         this._registerRenderControllers();
+    }
+
+    private _registerMenuConfigs() {
+        const { menu = {} } = this._config;
+        Object.entries(menu).forEach(([id, config]) => {
+            this._menuService.setMenuConfigs(id, config);
+        });
     }
 
     private _registerMenus(): void {

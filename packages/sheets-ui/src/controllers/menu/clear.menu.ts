@@ -16,13 +16,18 @@
 
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { IMenuService, MenuGroup, MenuItemType, MenuPosition, mergeMenuConfigs } from '@univerjs/ui';
 
+import type { IAccessor } from '@wendellhu/redi';
 import { SheetMenuPosition } from './menu';
 
 const CLEAR_SELECTION_MENU_ID = 'sheet.menu.clear-selection';
-export function ClearSelectionMenuItemFactory(): IMenuSelectorItem<string> {
-    return {
+export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(CLEAR_SELECTION_MENU_ID);
+
+    return mergeMenuConfigs({
         id: CLEAR_SELECTION_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.SUBITEMS,
@@ -33,30 +38,44 @@ export function ClearSelectionMenuItemFactory(): IMenuSelectorItem<string> {
             SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
             SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
         ],
-    };
+    }, menuItemConfig);
 }
 
-export function ClearSelectionContentMenuItemFactory(): IMenuButtonItem {
-    return {
+export function ClearSelectionContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(ClearSelectionContentCommand.id);
+
+    return mergeMenuConfigs({
         id: ClearSelectionContentCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearContent',
         positions: [CLEAR_SELECTION_MENU_ID],
-    };
+    }, menuItemConfig);
 }
-export function ClearSelectionFormatMenuItemFactory(): IMenuButtonItem {
-    return {
+
+export function ClearSelectionFormatMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(ClearSelectionFormatCommand.id);
+
+    return mergeMenuConfigs({
         id: ClearSelectionFormatCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearFormat',
         positions: [CLEAR_SELECTION_MENU_ID],
-    };
+    }, menuItemConfig);
 }
-export function ClearSelectionAllMenuItemFactory(): IMenuButtonItem {
-    return {
+
+export function ClearSelectionAllMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(ClearSelectionAllCommand.id);
+
+    return mergeMenuConfigs({
         id: ClearSelectionAllCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearAll',
         positions: [CLEAR_SELECTION_MENU_ID],
-    };
+    }, menuItemConfig);
 }

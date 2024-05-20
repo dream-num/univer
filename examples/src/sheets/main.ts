@@ -66,7 +66,30 @@ univer.registerPlugin(UniverUIPlugin, {
 univer.registerPlugin(UniverDocsUIPlugin);
 
 univer.registerPlugin(UniverSheetsPlugin);
-univer.registerPlugin(UniverSheetsUIPlugin);
+univer.registerPlugin(UniverSheetsUIPlugin, {
+    // menu: {
+    //     'sheet.command.set-range-bold': {
+    //         tooltip: 'aaaa',
+    //         // group: [],
+    //         // type: '',
+    //         // icon: '',
+    //         title: 'x',
+    //         // positions: '',
+    //         // disabled: '',
+    //         // value: '',
+    //         // activated: '',
+    //         hidden: true,
+    //         disabled: true,
+    //         activated: true,
+    //     },
+    //     'sheet.command.set-range-fontsize': {
+    //         defaultValue: 40,
+    //     },
+    //     'sheet.command.set-range-text-color': {
+    //         defaultValue: '#ee00bb',
+    //     },
+    // },
+});
 
 // sheet feature plugins
 

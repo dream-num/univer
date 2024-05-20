@@ -204,7 +204,6 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
     };
 }
 
-
 export function getHoverCellPosition(currentRender: IRender, workbook: Workbook, worksheet: Worksheet, skeletonParam: ISheetSkeletonManagerParam, offsetX: number, offsetY: number) {
     const { scene } = currentRender;
 

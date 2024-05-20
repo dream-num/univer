@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
+import { Disposable, DisposableCollection, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { DragManagerService } from '../services/drag-manager.service';
+import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
+import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DragRenderController)
 export class DragRenderController extends Disposable implements IRenderController {
@@ -27,7 +29,7 @@ export class DragRenderController extends Disposable implements IRenderControlle
         private readonly _context: IRenderContext<Workbook>,
         @IRenderManagerService private _renderManagerService: IRenderManagerService,
         @Inject(DragManagerService) private _dragManagerService: DragManagerService,
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
+        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
 
@@ -35,31 +37,39 @@ export class DragRenderController extends Disposable implements IRenderControlle
     }
 
     private _initDragEvent() {
-        const scene = this._getCurrentScene();
+        const disposeSet = new DisposableCollection();
+        const handleSkeletonChange = (skeletonParam: Nullable<ISheetSkeletonManagerParam>) => {
+            disposeSet.dispose();
+            if (!skeletonParam) {
+                return;
+            }
 
-        if (!scene) {
-            return;
-        }
+            const currentRender = this._renderManagerService.getRenderById(skeletonParam.unitId);
 
-        const dragOverObserver = scene.onDragOverObserver.add((evt) => {
-            this._dragManagerService.onDragOver(evt);
-        });
+            if (!currentRender) {
+                return;
+            }
 
-        const dropObserver = scene.onDropObserver.add((evt) => {
-            this._dragManagerService.onDrop(evt);
-        });
+            const { scene } = currentRender;
+            const dragOverObserver = scene.onDragOverObserver.add((evt) => {
+                this._dragManagerService.onDragOver(evt);
+            });
 
-        this.disposeWithMe({
-            dispose() {
-                scene.onDragOverObserver.remove(dragOverObserver);
-                scene.onDropObserver.remove(dropObserver);
-            },
-        });
-    }
+            const dropObserver = scene.onDropObserver.add((evt) => {
+                this._dragManagerService.onDrop(evt);
+            });
 
-    private _getCurrentScene() {
-        return this._renderManagerService.getRenderById(
-            this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
-        )?.scene;
+            disposeSet.add({
+                dispose() {
+                    scene.onDragOverObserver.remove(dragOverObserver);
+                    scene.onDropObserver.remove(dropObserver);
+                },
+            });
+        };
+
+        handleSkeletonChange(this._sheetSkeletonManagerService.getCurrent());
+        this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((skeletonParam) => {
+            handleSkeletonChange(skeletonParam);
+        }));
     }
 }

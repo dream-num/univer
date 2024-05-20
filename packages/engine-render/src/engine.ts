@@ -249,7 +249,6 @@ export class Engine extends ThinEngine<Scene> {
         canvasEle.removeEventListener('drop', this._dropEvent);
         canvasEle.removeEventListener(this._getWheelEventName(), this._pointerWheelEvent);
 
-
         this._activeRenderLoops = [];
         this.getCanvas().dispose();
         // this._canvas = null; // 不应该这么做, 上面已经调用了 _canvas 的 dispose 方法
@@ -765,7 +764,6 @@ export class Engine extends ThinEngine<Scene> {
             // Store previous values for event
             const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
-
 
             deviceEvent.currentState = 6;
 

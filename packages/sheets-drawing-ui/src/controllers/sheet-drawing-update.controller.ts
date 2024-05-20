@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, ITransformState, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DrawingTypeEnum, ICommandService, IDrawingManagerService, IImageRemoteService, ImageSourceType, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageRemoteService, ImageSourceType, ITransformState, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageData } from '@univerjs/drawing';
 import { getImageSize } from '@univerjs/drawing';
@@ -31,7 +31,7 @@ import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-d
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
-import { transformDrawingPositionToTransform, transformToDrawingPosition } from './utils';
+import { transformDrawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
 
 const SHEET_IMAGE_WIDTH_LIMIT = 500;
 const SHEET_IMAGE_HEIGHT_LIMIT = 500;
@@ -45,7 +45,8 @@ export class SheetDrawingUpdateController extends Disposable {
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
-        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 
@@ -60,6 +61,8 @@ export class SheetDrawingUpdateController extends Disposable {
         this._updateOrderListener();
 
         this._groupDrawingListener();
+
+        this._focusDrawingListener();
     }
 
     /**
@@ -287,5 +290,19 @@ export class SheetDrawingUpdateController extends Disposable {
         this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {
             this._commandService.executeCommand(UngroupSheetDrawingCommand.id, params);
         });
+    }
+
+    private _focusDrawingListener() {
+        this.disposeWithMe(
+            this._drawingManagerService.focus$.subscribe((params) => {
+                if (params == null || params.length === 0) {
+                    this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
+                    this._sheetDrawingService.focusDrawing([]);
+                } else {
+                    this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
+                    this._sheetDrawingService.focusDrawing(params);
+                }
+            })
+        );
     }
 }

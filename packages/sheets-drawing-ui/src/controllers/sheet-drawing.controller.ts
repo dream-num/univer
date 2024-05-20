@@ -16,7 +16,7 @@
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
+import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { AdditionAndSubtractionSingle } from '@univerjs/icons';
@@ -35,6 +35,9 @@ import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-dra
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { SidebarSheetDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
+import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command';
+import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
+import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingUIController)
 export class SheetDrawingUIController extends Disposable {
@@ -42,7 +45,8 @@ export class SheetDrawingUIController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IMenuService private readonly _menuService: IMenuService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
         super();
 
@@ -81,12 +85,28 @@ export class SheetDrawingUIController extends Disposable {
             EditSheetDrawingOperation,
             GroupSheetDrawingCommand,
             UngroupSheetDrawingCommand,
+            MoveDrawingsCommand,
+            DeleteDrawingsCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+    }
+
+    private _initShortcuts(): void {
+        [
+            // sheet drawing shortcuts
+            MoveDrawingDownShortcutItem,
+            MoveDrawingUpShortcutItem,
+            MoveDrawingLeftShortcutItem,
+            MoveDrawingRightShortcutItem,
+            DeleteDrawingsShortcutItem,
+        ].forEach((item) => {
+            this.disposeWithMe(this._shortcutService.registerShortcut(item));
+        });
     }
 
     private _init(): void {
         this._initCommands();
         this._initCustomComponents();
         this._initMenus();
+        this._initShortcuts();
     }
 }

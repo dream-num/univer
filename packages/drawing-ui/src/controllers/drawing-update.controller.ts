@@ -21,7 +21,6 @@ import {
     DrawingTypeEnum,
     ICommandService,
     IDrawingManagerService,
-    IImageRemoteService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -31,7 +30,6 @@ import type { BaseObject, Image, Scene } from '@univerjs/engine-render';
 import { DRAWING_OBJECT_LAYER_INDEX, Group, IRenderManagerService } from '@univerjs/engine-render';
 import type { IImageData } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
-import { IDialogService } from '@univerjs/ui';
 import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
 import { AlignType, SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';

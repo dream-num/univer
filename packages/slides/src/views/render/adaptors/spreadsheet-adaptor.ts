@@ -172,6 +172,8 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             top: columnHeaderHeightScale,
             bottom: 0,
             right: 0,
+            isRelativeX: true,
+            isRelativeY: true,
             isWheelPreventDefaultX: true,
         });
         const viewTop = new Viewport(SHEET_VIEW_KEY.VIEW_TOP + id, scene, {
@@ -179,6 +181,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             height: columnHeaderHeightScale,
             top: 0,
             right: 0,
+            isRelativeX: true,
             isWheelPreventDefaultX: true,
         });
         const viewLeft = new Viewport(SHEET_VIEW_KEY.VIEW_LEFT + id, scene, {

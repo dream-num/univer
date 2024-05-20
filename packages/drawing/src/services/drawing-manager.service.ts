@@ -68,7 +68,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     private _ungroup$ = new Subject<IDrawingGroupUpdateParam[]>();
     readonly ungroup$ = this._ungroup$.asObservable();
 
-    private _refreshTransform$ = new Subject<IDrawingParam[]>();
+    private _refreshTransform$ = new Subject<T[]>();
     readonly refreshTransform$ = this._refreshTransform$.asObservable();
 
     // private readonly _externalUpdate$ = new Subject<T[]>();
@@ -116,7 +116,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         };
     }
 
-    refreshTransform(updateParams: IDrawingParam[]) {
+    refreshTransform(updateParams: T[]) {
         updateParams.forEach((updateParam) => {
             const drawing = this.getDrawingByParam(updateParam);
             if (drawing == null) {
@@ -222,7 +222,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         this._ungroup$.next(groupParams);
     }
 
-    refreshTransformNotification(refreshParams: IDrawingParam[]) {
+    refreshTransformNotification(refreshParams: T[]) {
         this._refreshTransform$.next(refreshParams);
     }
 

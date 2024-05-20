@@ -538,6 +538,10 @@ const locale: typeof zhCN = {
         nameInvalid: 'The name is invalid',
         nameSheetConflict: 'The name conflicts with the sheet name',
     },
+    uploadLoading: {
+        loading: 'Loading..., remaining', // 正在上传，当前剩余
+        error: 'Error', // 加载失败
+    },
 };
 
 export default locale;

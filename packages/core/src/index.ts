@@ -89,6 +89,7 @@ export {
     type IDrawingOrderUpdateParam,
     type IUnitDrawingService,
     type IDrawingMap,
+    type IDrawingSubunitMap,
     type IDrawingOrderMapParam,
     type IDrawingGroupUpdateParam,
     ArrangeType,

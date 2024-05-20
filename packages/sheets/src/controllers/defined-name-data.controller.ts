@@ -46,8 +46,8 @@ export class DefinedNameDataController extends Disposable {
     }
 
     private _initSnapshot() {
-        const toJson = (unitID: string) => {
-            const map = this._definedNamesService.getDefinedNameMap(unitID);
+        const toJson = (unitId: string) => {
+            const map = this._definedNamesService.getDefinedNameMap(unitId);
             if (map) {
                 return JSON.stringify(map);
             }
@@ -67,13 +67,13 @@ export class DefinedNameDataController extends Disposable {
             this._resourceManagerService.registerPluginResource<IDefinedNameMapItem>({
                 pluginName: SHEET_DEFINED_NAME_PLUGIN,
                 businesses: [UniverInstanceType.UNIVER_SHEET],
-                toJson: (unitID) => toJson(unitID),
+                toJson: (unitId) => toJson(unitId),
                 parseJson: (json) => parseJson(json),
-                onUnLoad: (unitID) => {
-                    this._definedNamesService.removeUnitDefinedName(unitID);
+                onUnLoad: (unitId) => {
+                    this._definedNamesService.removeUnitDefinedName(unitId);
                 },
-                onLoad: (unitID, value) => {
-                    this._definedNamesService.registerDefinedNames(unitID, value);
+                onLoad: (unitId, value) => {
+                    this._definedNamesService.registerDefinedNames(unitId, value);
                 },
             })
         );

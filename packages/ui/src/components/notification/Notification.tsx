@@ -33,7 +33,7 @@ const iconMap = {
     error: <ErrorSingle className={styles.notificationIconError} />,
 };
 
-export interface INotificationMethodOptions {
+export interface INotificationOptions {
     /**
      * Component type, optional success, warning, error
      */
@@ -64,9 +64,9 @@ export interface INotificationMethodOptions {
     lines?: number;
 }
 
-export const notificationObserver = new Subject<INotificationMethodOptions>();
+export const notificationObserver = new Subject<INotificationOptions>();
 
-export const PureContent = (props: INotificationMethodOptions) => {
+export const PureContent = (props: INotificationOptions) => {
     const { type, content, title, lines = 0 } = props;
 
     const contentClassName = clsx(styles.notificationContent, {
@@ -132,7 +132,7 @@ export function Notification() {
 }
 
 export const notification = {
-    show: (options: INotificationMethodOptions) => {
+    show: (options: INotificationOptions) => {
         notificationObserver.next(options);
     },
 };

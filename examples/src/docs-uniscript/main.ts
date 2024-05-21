@@ -40,7 +40,7 @@ univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
-    header: true,
+    footer: false,
 });
 
 univer.registerPlugin(UniverDocsPlugin);

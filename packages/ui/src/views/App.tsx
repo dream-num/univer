@@ -18,10 +18,10 @@ import { LocaleService, ThemeService } from '@univerjs/core';
 import type { ILocale } from '@univerjs/design';
 import { ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import type { ComponentType } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';
+import { DesktopUIPart, IUIPartsService } from '../services/parts/parts.service';
 import styles from './app.module.less';
 import { ComponentContainer } from './components/ComponentContainer';
 import { Toolbar } from './components/doc-bars/Toolbar';
@@ -30,31 +30,20 @@ import { ZenZone } from './components/zen-zone/ZenZone';
 import { CanvasPopup } from './components/popup';
 import { FloatDom } from './components/dom';
 import { builtInGlobalComponents } from './parts';
+import { ContextMenu } from './components/context-menu/ContextMenu';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
-
-    globalComponents?: Set<() => ComponentType>;
-    headerComponents?: Set<() => ComponentType>;
-    contentComponents?: Set<() => ComponentType>;
-    footerComponents?: Set<() => ComponentType>;
-    headerMenuComponents?: Set<() => ComponentType>;
-    leftSidebarComponents?: Set<() => ComponentType>;
 
     onRendered?: (container: HTMLElement) => void;
 }
 
 export function App(props: IUniverAppProps) {
     const {
-        header,
-        footer,
+        header = true,
+        footer = true,
+        contextMenu = true,
         mountContainer,
-        headerComponents,
-        headerMenuComponents,
-        contentComponents,
-        footerComponents,
-        leftSidebarComponents,
-        globalComponents,
         onRendered,
     } = props;
 
@@ -63,10 +52,36 @@ export function App(props: IUniverAppProps) {
     const messageService = useDependency(IMessageService);
     const contentRef = useRef<HTMLDivElement>(null);
 
+    const uiPartsService = useDependency(IUIPartsService);
+
+    const [updateTrigger, setUpdateTrigger] = useState(false);
+
+    useEffect(() => {
+        const updateSubscription = uiPartsService.componentRegistered$.subscribe(() => {
+            setUpdateTrigger((prev) => !prev);
+        });
+
+        return () => {
+            updateSubscription.unsubscribe();
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const { headerComponents, contentComponents, footerComponents, headerMenuComponents, leftSidebarComponents, globalComponents } = useMemo(() => ({
+        headerComponents: uiPartsService.getComponents(DesktopUIPart.HEADER),
+        contentComponents: uiPartsService.getComponents(DesktopUIPart.CONTENT),
+        footerComponents: uiPartsService.getComponents(DesktopUIPart.FOOTER),
+        headerMenuComponents: uiPartsService.getComponents(DesktopUIPart.HEADER_MENU),
+        leftSidebarComponents: uiPartsService.getComponents(DesktopUIPart.LEFT_SIDEBAR),
+        globalComponents: uiPartsService.getComponents(DesktopUIPart.GLOBAL),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }), [updateTrigger]);
+
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
             themeService.setTheme(defaultTheme);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -159,6 +174,7 @@ export function App(props: IUniverAppProps) {
             </div>
             <ComponentContainer components={globalComponents} />
             <ComponentContainer components={builtInGlobalComponents} />
+            {contextMenu && <ContextMenu />}
         </ConfigProvider>
     );
 }

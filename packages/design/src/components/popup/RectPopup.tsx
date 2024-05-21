@@ -35,7 +35,7 @@ export interface IRectPopupProps {
      */
     anchorRect: IAbsolutePosition;
 
-    direction?: 'vertical' | 'horizontal' | 'left' | 'top' | 'left' | 'bottom';
+    direction?: 'vertical' | 'horizontal' | 'left' | 'top' | 'right' | 'left' | 'bottom';
 
     // #region closing behavior
 

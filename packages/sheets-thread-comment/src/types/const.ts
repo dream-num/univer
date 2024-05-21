@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export const SHEETS_THREAD_COMMENT_MODAL = 'SHEETS_THREAD_COMMENT_MODAL';
+export const SHEETS_THREAD_COMMENT_MODAL = 'univer.sheet.thread-comment-modal';
 export const COMMENT_SINGLE_ICON = 'comment-single';
-export const SHEETS_THREAD_COMMENT = 'SHEETS_THREAD_COMMENT';
+export const SHEETS_THREAD_COMMENT = 'univer.sheet.thread-comment';

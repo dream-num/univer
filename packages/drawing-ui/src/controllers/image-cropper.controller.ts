@@ -16,8 +16,6 @@
 
 import type { ICommandInfo, IDrawingSearch, ISrcRect, ITransformState, Nullable } from '@univerjs/core';
 import { checkIfMove, Disposable, ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
 import type { IImageData } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import type { BaseObject, Image, Scene } from '@univerjs/engine-render';

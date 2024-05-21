@@ -21,6 +21,10 @@ interface IFloatDomLayout extends IPosition {
     rotate: number;
     width: number;
     height: number;
+    absolute: {
+        left: boolean;
+        top: boolean;
+    };
 }
 
 export interface IFloatDom {

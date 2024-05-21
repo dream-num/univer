@@ -206,8 +206,16 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
 export function transformBound2DOMBound(originBound: IBoundRectNoAngle, scene: Scene, skeleton: SpreadsheetSkeleton, worksheet: Worksheet) {
     const { scaleX, scaleY } = scene.getAncestorScale();
     const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+    const absolute = {
+        left: true,
+        top: true,
+    };
+
     if (!viewMain) {
-        return originBound;
+        return {
+            ...originBound,
+            absolute,
+        };
     }
     const { left, right, top, bottom } = originBound;
     const freeze = worksheet.getFreeze();
@@ -223,8 +231,10 @@ export function transformBound2DOMBound(originBound: IBoundRectNoAngle, scene: S
     const { top: freezeTop, left: freezeLeft, actualScrollX, actualScrollY } = viewMain;
     let offsetLeft: number;
     let offsetRight: number;
+
     // viewMain or viewTop
     if (left < freezeLeft) {
+        absolute.left = true;
         offsetLeft = ((freezeWidth + rowHeaderWidth) + (left - freezeLeft)) * scaleX;
         offsetRight = Math.max(
             Math.min(
@@ -233,6 +243,7 @@ export function transformBound2DOMBound(originBound: IBoundRectNoAngle, scene: S
             ),
             (right - actualScrollX) * scaleX);
     } else {
+        absolute.left = false;
         offsetLeft = Math.max((left - actualScrollX) * scaleX, (freezeWidth + rowHeaderWidth) * scaleX);
         offsetRight = Math.max((right - actualScrollX) * scaleX, (freezeWidth + rowHeaderWidth) * scaleX);
     }
@@ -241,6 +252,7 @@ export function transformBound2DOMBound(originBound: IBoundRectNoAngle, scene: S
     let offsetBottom: number;
     // viewMain or viewTop
     if (top < freezeTop) {
+        absolute.top = true;
         offsetTop = ((freezeHeight + columnHeaderHeight) + (top - freezeTop)) * scaleY;
         offsetBottom = Math.max(
             Math.min(
@@ -250,6 +262,7 @@ export function transformBound2DOMBound(originBound: IBoundRectNoAngle, scene: S
             (bottom - actualScrollY) * scaleY
         );
     } else {
+        absolute.top = false;
         offsetTop = Math.max((top - actualScrollY) * scaleY, (freezeHeight + columnHeaderHeight) * scaleY);
         offsetBottom = Math.max((bottom - actualScrollY) * scaleY, (freezeHeight + columnHeaderHeight) * scaleY);
     }
@@ -259,5 +272,6 @@ export function transformBound2DOMBound(originBound: IBoundRectNoAngle, scene: S
         right: offsetRight,
         top: offsetTop,
         bottom: offsetBottom,
+        absolute,
     };
 }

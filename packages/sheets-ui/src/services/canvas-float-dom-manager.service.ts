@@ -64,6 +64,7 @@ export function createObjectDOMPositionObserver(
             rotate: angle,
             width,
             height,
+            absolute: offsetBound.absolute,
         };
         return position;
     };
@@ -146,6 +147,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             rotate: 0,
             width: initPosition.endX - initPosition.startX,
             height: initPosition.endY - initPosition.startY,
+            absolute: {
+                left: true,
+                top: true,
+            },
         };
         const position$ = new BehaviorSubject(initialTransform);
 
@@ -174,6 +179,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     rotate: pos.rotate,
                     width: pos.width,
                     height: pos.height,
+                    absolute: pos.absolute,
                 });
             });
 

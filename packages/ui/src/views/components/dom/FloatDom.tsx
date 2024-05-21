@@ -52,7 +52,16 @@ const FloatDomSingle = (props: { layer: IFloatDom; id: string }) => {
                     layer.onPointerUp(e.nativeEvent);
                 }}
             >
-                <div className={styles.floatDom} style={{ width: position.width, height: position.height }}>
+                <div
+                    className={styles.floatDom}
+                    style={{
+                        width: position.width,
+                        height: position.height,
+                        position: 'absolute',
+                        ...(position.absolute.left) ? { left: 0 } : { right: 0 },
+                        ...(position.absolute.top) ? { top: 0 } : { bottom: 0 },
+                    }}
+                >
                     {Component ? <Component /> : null}
                 </div>
             </div>

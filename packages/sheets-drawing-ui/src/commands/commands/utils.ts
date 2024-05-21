@@ -56,7 +56,6 @@ export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {
     return newGroupParams;
 }
 
-
 export function groupToUngroup(groupParams: IDrawingGroupUpdateParam[]) {
     const newGroupParams: IDrawingGroupUpdateParam[] = [];
 
@@ -87,7 +86,6 @@ export function groupToUngroup(groupParams: IDrawingGroupUpdateParam[]) {
                 top: 0,
             },
         } as IDrawingParam;
-
 
         newGroupParams.push({
             parent: ungroupParam,

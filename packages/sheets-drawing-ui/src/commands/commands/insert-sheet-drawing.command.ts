@@ -18,7 +18,6 @@ import type { ICommand } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
-    IDrawingManagerService,
     IUndoRedoService,
 } from '@univerjs/core';
 
@@ -27,7 +26,6 @@ import type { IAccessor } from '@wendellhu/redi';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import type { IInsertDrawingCommandParams } from './interfaces';
-
 
 /**
  * The command to insert new defined name

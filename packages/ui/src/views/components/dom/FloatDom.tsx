@@ -37,8 +37,8 @@ const FloatDomSingle = (props: { layer: IFloatDom; id: string }) => {
                     position: 'absolute',
                     top: position.startY,
                     left: position.startX,
-                    width: position.endX - position.startX - 2,
-                    height: position.endY - position.startY - 2,
+                    width: Math.max(position.endX - position.startX - 2, 0),
+                    height: Math.max(position.endY - position.startY - 2, 0),
                     transform: `rotate(${position.rotate}deg)`,
                     overflow: 'hidden',
                 }}

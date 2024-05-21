@@ -87,6 +87,7 @@ export abstract class BaseObject extends Disposable {
     protected _oKey: string;
 
     protected _dirty: boolean = true;
+    protected _forceDirty: boolean = true;
 
     private _top: number = 0;
 
@@ -365,6 +366,10 @@ export abstract class BaseObject extends Disposable {
         }
 
         return this;
+    }
+
+    makeForceDirty(state: boolean = true) {
+        this._forceDirty = state;
     }
 
     makeDirtyNoDebounce(state: boolean = true) {

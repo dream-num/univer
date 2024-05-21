@@ -23,9 +23,9 @@ import { CommandType,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    Rectangle,
     RxDisposable,
     toDisposable,
-    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import type { IViewportInfos, Rect, Scene, SpreadsheetColumnHeader, SpreadsheetRowHeader, Viewport } from '@univerjs/engine-render';
@@ -222,16 +222,16 @@ export class SheetRenderController extends RxDisposable {
         if (command.id === SetRangeValuesMutation.id && cmdParams.cellValue) {
             const dirtyRange: IRange = this._cellValueToRange(cmdParams.cellValue);
             const dirtyBounds = this._rangeToBounds([dirtyRange]);
-            this.markViewportDirty(viewports, dirtyBounds);
-            (spreadsheet as Spreadsheet).setDirtyArea(dirtyBounds);
+            this._markViewportDirty(viewports, dirtyBounds);
+            (spreadsheet as unknown as Spreadsheet).setDirtyArea(dirtyBounds);
         }
 
         if (command.id === MoveRangeMutation.id && cmdParams.from && cmdParams.to) {
             const fromRange = this._cellValueToRange(cmdParams.from.value);
             const toRange = this._cellValueToRange(cmdParams.to.value);
             const dirtyBounds = this._rangeToBounds([fromRange, toRange]);
-            this.markViewportDirty(viewports, dirtyBounds);
-            (spreadsheet as Spreadsheet).setDirtyArea(dirtyBounds);
+            this._markViewportDirty(viewports, dirtyBounds);
+            (spreadsheet as unknown as Spreadsheet).setDirtyArea(dirtyBounds);
         }
     }
 
@@ -281,11 +281,11 @@ export class SheetRenderController extends RxDisposable {
         return dirtyBounds;
     }
 
-    private markViewportDirty(viewports: Viewport[], dirtyBounds: IViewportInfos[]) {
+    private _markViewportDirty(viewports: Viewport[], dirtyBounds: IViewportInfos[]) {
         const activeViewports = viewports.filter((vp) => vp.isActive && vp.cacheBound);
         for (const vp of activeViewports) {
             for (const b of dirtyBounds) {
-                if (Tools.hasIntersectionBetweenTwoBounds(vp.cacheBound!, b)) {
+                if (Rectangle.hasIntersectionBetweenTwoBounds(vp.cacheBound!, b)) {
                     vp.markDirty(true);
                 }
             }

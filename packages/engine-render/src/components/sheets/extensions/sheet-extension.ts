@@ -145,7 +145,6 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
      * @param curStartRow
      * @param curEndRow
      * @param viewranges
-     * @returns
      */
     isRowInRanges(curStartRow: number, curEndRow: number, viewranges?: IRange[]) {
         if (viewranges == null || viewranges.length === 0) {
@@ -154,12 +153,12 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
 
         for (const range of viewranges) {
             const { startRow, endRow } = range;
-            // if (curStartRow >= startRow && curStartRow <= endRow) {
-            //     return true;
-            // }
-            // if (curEndRow >= startRow && curEndRow <= endRow) {
-            //     return true;
-            // }
+            if (curStartRow >= startRow && curStartRow <= endRow) {
+                return true;
+            }
+            if (curEndRow >= startRow && curEndRow <= endRow) {
+                return true;
+            }
 
             const isIntersect = Rectangle.intersects(
                 {

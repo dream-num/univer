@@ -45,10 +45,12 @@ export class Picture extends Shape<IPictureProps> {
         };
         if (config.image) {
             this._native = config.image;
+            this._native.crossOrigin = 'anonymous';
             this._init();
         } else if (config.url) {
             this._native = document.createElement('img');
             this._native.src = config.url;
+            this._native.crossOrigin = 'anonymous';
             this._native.onload = () => {
                 config.success?.();
                 this._init();

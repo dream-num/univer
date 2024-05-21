@@ -94,3 +94,4 @@ export { virtualizeDiscreteRanges, rangeToDiscreteRange } from './controllers/ut
 export { type IHoverCellPosition } from './services/hover-manager.service';
 export { AutoHeightController } from './controllers/auto-height.controller';
 export { type IDragCellPosition } from './services/drag-manager.service';
+export { SheetMenuPosition } from './controllers/menu/menu';

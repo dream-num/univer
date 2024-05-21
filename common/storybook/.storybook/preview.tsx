@@ -26,7 +26,6 @@ import {
     ICommandService,
     IConfigService,
     IContextService,
-    IDrawingManagerService,
     ILocalStorageService,
     ILogService,
     IPermissionService,

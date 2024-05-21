@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, IOperation, ISrcRect } from '@univerjs/core';
+import type { IDrawingSearch, IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
 export const OpenImageCropOperation: IOperation<IDrawingSearch> = {

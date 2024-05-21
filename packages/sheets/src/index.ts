@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 export { type IUniverSheetsConfig, UniverSheetsPlugin } from './sheets-plugin';
 
 // #region services

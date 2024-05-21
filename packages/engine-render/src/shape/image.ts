@@ -131,7 +131,6 @@ export class Image extends Shape<IImageProps> {
         this._renderByCropper = true;
         this._transformBySrcRect();
     }
-
     // override transformForAngle(transform: Transform) {
     //     if (this.angle === 0) {
     //         return transform;
@@ -152,7 +151,6 @@ export class Image extends Shape<IImageProps> {
 
     //     return transform;
     // }
-
     calculateTransformWithSrcRect() {
         const {
             left: imageLeft,
@@ -171,7 +169,6 @@ export class Image extends Shape<IImageProps> {
             };
         }
         const { left = 0, top = 0, right = 0, bottom = 0 } = this.srcRect;
-
 
         const newLeft = imageLeft - left;
         const newTop = imageTop - top;

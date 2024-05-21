@@ -629,9 +629,6 @@ importers:
 
   packages/drawing:
     dependencies:
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
       '@univerjs/icons':
         specifier: ^0.1.45
         version: 0.1.45(react-dom@18.2.0(react@18.2.0))(react@18.2.0)

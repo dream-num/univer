@@ -68,8 +68,6 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/drawing-ui": "workspace:*",
-        "@univerjs/drawing-ui/views/crop/image-cropper-object.js": "workspace:*",
-        "@univerjs/drawing-ui/views/panel/index.module.less": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

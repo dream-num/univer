@@ -69,7 +69,7 @@ export class SheetDrawingUIController extends Disposable {
                 UploadCellImageMenuFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), {}));
         });
     }
 

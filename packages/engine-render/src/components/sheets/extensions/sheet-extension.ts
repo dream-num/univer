@@ -144,15 +144,15 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
      * 传入的 row 范围和 diffRanges 有相交, 返回 true
      * @param curStartRow
      * @param curEndRow
-     * @param diffRanges
+     * @param viewranges
      * @returns
      */
-    isRowInDiffRanges(curStartRow: number, curEndRow: number, diffRanges?: IRange[]) {
-        if (diffRanges == null || diffRanges.length === 0) {
+    isRowInRanges(curStartRow: number, curEndRow: number, viewranges?: IRange[]) {
+        if (viewranges == null || viewranges.length === 0) {
             return true;
         }
 
-        for (const range of diffRanges) {
+        for (const range of viewranges) {
             const { startRow, endRow } = range;
             // if (curStartRow >= startRow && curStartRow <= endRow) {
             //     return true;

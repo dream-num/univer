@@ -129,11 +129,14 @@ export class Spreadsheet extends SheetComponent {
         this._drawAuxiliary(ctx);
         const parentScale = this.getParentScale();
 
-        const diffRanges = this._refreshIncrementalState && viewportInfo?.diffCacheBounds
+        const diffRanges = this._refreshIncrementalState && viewportInfo?.diffBounds
             ? viewportInfo?.diffBounds?.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
             : undefined;
+
         const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo?.cacheBound)];
         const extensions = this.getExtensionsByOrder();
+
+        // 此刻 ctx.transform is at topLeft of sheet content, cell(0, 0)
         for (const extension of extensions) {
             // const timeKey = `extension ${viewportInfo.viewPortKey}:${extension.constructor.name}`;
             // console.time(timeKey);
@@ -271,7 +274,7 @@ export class Spreadsheet extends SheetComponent {
         cacheCtx.restore();
     }
 
-    paintNewAreaOfCacheCanvas(viewportBoundsInfo: IViewportInfo, param: {
+    paintNewAreaOfCacheCanvas(viewportInfo: IViewportInfo, param: {
         cacheCanvas: Canvas; cacheCtx: UniverRenderingContext; mainCtx: UniverRenderingContext;
         topOrigin: number;
         leftOrigin: number;
@@ -283,7 +286,7 @@ export class Spreadsheet extends SheetComponent {
         scaleY: number;
     }) {
         const { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeight, rowHeaderWidth } = param;
-        const { shouldCacheUpdate, diffCacheBounds, diffX, diffY } = viewportBoundsInfo;
+        const { shouldCacheUpdate, diffCacheBounds, diffX, diffY } = viewportInfo;
         cacheCtx.save();
         cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
         cacheCtx.globalCompositeOperation = 'copy';
@@ -291,42 +294,35 @@ export class Spreadsheet extends SheetComponent {
         cacheCtx.restore();
 
         this._refreshIncrementalState = true;
-
         // 绘制之前重设画笔位置到 spreadsheet 原点, 当没有滚动时, 这个值是 (rowHeaderWidth, colHeaderHeight)
         const m = mainCtx.getTransform();
         cacheCtx.setTransform(m.a, m.b, m.c, m.d, 0, 0);
 
         // leftOrigin 是 viewport 相对 sheetcorner 的偏移(不考虑缩放)
-        // - (leftOrigin - bufferEdgeX)  ----> 简化
+        // - (leftOrigin - bufferEdgeX)  ----> 简化  - leftOrigin + bufferEdgeX
         cacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
         if (shouldCacheUpdate) {
             for (const diffBound of diffCacheBounds) {
-                cacheCtx.save();
-
                 const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
 
                 // this.draw 的时候 ctx.translate 单元格偏移是相对 spreadsheet content
-                // 但是 diffBounds 包括 rowHeader 信息, 因此绘制前需要减去行头列头的偏移
-                const onePixelFix = FIX_ONE_PIXEL_BLUR_OFFSET * 0;
-                const x = diffLeft - rowHeaderWidth - onePixelFix;
-                const y = diffTop - columnHeaderHeight - onePixelFix;
-                const w = diffRight - diffLeft + onePixelFix;
-                const h = diffBottom - diffTop + onePixelFix;
+                // 但是 diffBounds 包括 rowHeader columnWidth, 因此绘制前需要减去行头列头的偏移
+                const x = diffLeft - rowHeaderWidth;
+                const y = diffTop - columnHeaderHeight;
+                const w = diffRight - diffLeft;
+                const h = diffBottom - diffTop; // w h 必须精确和 diffarea 大小匹配, 否则会造成往回滚时, clear 的区域过大, 导致上一帧有效内容被擦除
+
+                cacheCtx.clearRectByPrecision(x, y, w, h);
+                // cacheCtx.fillStyle = this.getRandomLightColor();
+                // cacheCtx.fillRectByPrecision(x, y, w, h); // x, y is diffBounds, means it's relative to scrolling distance.
+
+                cacheCtx.save();
+                cacheCtx.beginPath();
                 cacheCtx.rectByPrecision(x, y, w, h);
-
-                // 使用 clearRect 后, 很浅很细的白色线(even not zoom has blank line)
-                const onePixelFix2 = FIX_ONE_PIXEL_BLUR_OFFSET;
-                cacheCtx.clearRect(x + onePixelFix2, y + onePixelFix2, w - onePixelFix2 * 2, h - onePixelFix2 * 2);
-                // cacheCtx.save();
-                // const m = cacheCtx.getTransform();
-                // cacheCtx.setTransform(1, 0, 0, 1, m.e, m.f);
-                // cacheCtx.clearRect(Math.ceil(x * m.a), y * m.a, Math.floor(w * m.a), h * m.a);
-                // cacheCtx.restore();
-
-                // 这里需要 clip 的原因是避免重复绘制 (否则文字有毛刺)
+                // 这里需要 clip 的原因是避免重复绘制 (否则文字有毛刺, especially on Windows)
                 cacheCtx.clip();
                 this.draw(cacheCtx, {
-                    ...viewportBoundsInfo,
+                    ...viewportInfo,
                     diffBounds: [diffBound],
                 });
                 cacheCtx.restore();
@@ -713,5 +709,23 @@ export class Spreadsheet extends SheetComponent {
 
             ctx.clearRectForTexture(startX, startY, endX - startX + 0.5, endY - startY + 0.5);
         });
+    }
+
+    getRandomLightColor(): string {
+        const letters = 'ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 6)];
+        }
+
+        // 确保生成的颜色足够亮
+        const r = Number.parseInt(color.substring(1, 3), 16);
+        const g = Number.parseInt(color.substring(3, 5), 16);
+        const b = Number.parseInt(color.substring(5, 7), 16);
+        if (r + g + b < 610) {
+            return this.getRandomLightColor(); // 递归调用直到生成足够亮的颜色
+        }
+
+        return color;
     }
 }

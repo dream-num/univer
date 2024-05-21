@@ -68,7 +68,6 @@ export class Background extends SheetExtension {
             return;
         }
         ctx.save();
-        // ctx.setGlobalCompositeOperation('destination-over');
         const { scaleX, scaleY } = ctx.getScale();
         background &&
             Object.keys(background).forEach((rgb: string) => {

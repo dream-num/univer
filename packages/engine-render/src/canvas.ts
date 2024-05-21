@@ -130,21 +130,18 @@ export class Canvas {
         // this.setWidth(width || 0);
         // this.setHeight(height || 0);
         this._pixelRatio = pixelRatioParam || getDevicePixelRatio();
+        const canvsElement = this.getCanvasEle();
 
-        if (width !== undefined) {
-            this.getCanvasEle().width = width * this._pixelRatio;
-
-            this._width = this.getCanvasEle().width / this._pixelRatio;
-
-            this.getCanvasEle().style.width = `${this._width}px`;
+        if (canvsElement && width !== undefined) {
+            canvsElement.width = width * this._pixelRatio;
+            this._width = canvsElement.width / this._pixelRatio;
+            canvsElement.style.width = `${this._width}px`;
         }
 
-        if (height !== undefined) {
-            this.getCanvasEle().height = height * this._pixelRatio;
-
-            this._height = this.getCanvasEle().height / this._pixelRatio;
-
-            this.getCanvasEle().style.height = `${this._height}px`;
+        if (canvsElement && height !== undefined) {
+            canvsElement.height = height * this._pixelRatio;
+            this._height = canvsElement.height / this._pixelRatio;
+            canvsElement.style.height = `${this._height}px`;
         }
 
         this.getContext().setTransform(this._pixelRatio, 0, 0, this._pixelRatio, 0, 0);

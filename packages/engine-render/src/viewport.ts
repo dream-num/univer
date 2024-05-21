@@ -264,12 +264,12 @@ export class Viewport {
         const showCache = (cacheCanvas: UniverCanvas) => {
             cacheCanvas.getCanvasEle().style.zIndex = '100';
             cacheCanvas.getCanvasEle().style.position = 'fixed';
-            cacheCanvas.getCanvasEle().style.background = '#fff';
+            cacheCanvas.getCanvasEle().style.background = 'blue';
             cacheCanvas.getCanvasEle().style.pointerEvents = 'none';
             cacheCanvas.getCanvasEle().style.border = '1px solid black';
             cacheCanvas.getCanvasEle().style.transformOrigin = '100% 100%';
             cacheCanvas.getCanvasEle().style.transform = 'scale(0.5)';
-            cacheCanvas.getCanvasEle().style.translate = '20% 0%';
+            cacheCanvas.getCanvasEle().style.translate = '-20% 0%';
             cacheCanvas.getCanvasEle().style.opacity = '1';
             document.body.appendChild(cacheCanvas.getCanvasEle());
         };
@@ -1294,8 +1294,8 @@ export class Viewport {
             ? 0b01
             : 0b00;
 
-        const edgeX = this.bufferEdgeX / 2;
-        const edgeY = this.bufferEdgeY / 2;
+        const edgeX = this.bufferEdgeX / 4;
+        const edgeY = this.bufferEdgeY / 4;
         const nearEdge = ((diffX < 0 && Math.abs(viewBound.right - cacheBounds.right) < edgeX) ||
             (diffX > 0 && Math.abs(viewBound.left - cacheBounds.left) < edgeX) ||
             // 滚动条向上, 向上往回滚

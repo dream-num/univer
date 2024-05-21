@@ -91,7 +91,10 @@ export class UniverUIPlugin extends Plugin {
 
     override onStarting(_injector: Injector): void {
         this._initDependencies(_injector);
+    }
 
+    override onReady(): void {
+        // TODO@Jocs: this has to be on Ready hook because of editor related modules' sequence problem.
         this._initUI();
     }
 
@@ -134,6 +137,7 @@ export class UniverUIPlugin extends Plugin {
     }
 
     private _initUI(): void {
+        // We need to run this async to let other modules do their `onReady` jobs first.
         Promise.resolve().then(() => this._injector.get(IUIController).bootstrapWorkbench(this._config));
     }
 }

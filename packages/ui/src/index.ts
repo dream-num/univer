@@ -85,6 +85,6 @@ export { SetEditorResizeOperation } from './commands/operations/editor/set-edito
 export { RangeSelector } from './components/range-selector/RangeSelector';
 export { IRangeSelectorService } from './services/range-selector/range-selector.service';
 export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
-export { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
+export { CanvasPopupService, ICanvasPopupService, type IPopup } from './services/popup/canvas-popup.service';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { IProgressService } from './services/progress/progress.service';

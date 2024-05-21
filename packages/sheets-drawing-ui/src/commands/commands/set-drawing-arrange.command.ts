@@ -18,7 +18,6 @@ import type { ICommand, IDrawingOrderMapParam, Nullable } from '@univerjs/core';
 import { ArrangeType,
     CommandType,
     ICommandService,
-    IDrawingManagerService,
     IUndoRedoService,
 } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';

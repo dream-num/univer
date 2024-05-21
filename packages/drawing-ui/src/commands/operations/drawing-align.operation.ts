@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawingSearch, IOperation } from '@univerjs/core';
+import type { IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
 export enum AlignType {

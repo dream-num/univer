@@ -16,7 +16,7 @@
 
 import type { Workbook, Worksheet } from '@univerjs/core';
 import { ICommandService, RxDisposable, toDisposable } from '@univerjs/core';
-import type { IRenderContext, IRenderController, IWheelEvent, Scene } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderController, IWheelEvent } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
     Layer,

@@ -24,7 +24,6 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 import { SidebarSheetDrawingOperation } from './open-drawing-panel.operation';
 
-
 export const EditSheetDrawingOperation: IOperation<IDrawingSearch> = {
     id: 'sheet.operation.edit-sheet-image',
     type: CommandType.OPERATION,

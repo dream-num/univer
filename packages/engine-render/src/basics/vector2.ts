@@ -15,6 +15,7 @@
  */
 
 import type { Canvas } from '../canvas';
+import type { SHEET_VIEWPORT_KEY } from '../components/sheets/interfaces';
 import type { DeepImmutable, FloatArray } from './i-events';
 import type { Transform } from './transform';
 
@@ -857,27 +858,26 @@ export interface IBoundRectNoAngle {
 }
 
 export interface IViewportInfo {
-    /**
-     * viewBound 的 left right 包括列头行头
-     */
     viewBound: IBoundRectNoAngle;
     diffBounds: IBoundRectNoAngle[];
 
     /**
-     * 让更多右侧内容呈现 diffX < 0
+     * scroll right further diffX < 0
      * previewBound.x - viewbound.x
      */
     diffX: number;
     diffY: number;
 
     /**
-     * 冻结行列在 canvas 上的物理位置, drawImage 用
-     * 例如冻结从第四列开始, left 就是 4 * column + rowHeaderWidth
+     * The physical position of the frozen rows and columns on the canvas, used for drawImage.
+     * For example, if the freezing starts from the fourth column, the left position would be 4 * column + rowHeaderWidth.
+     * The physical position means the top and left values have already considered the scaling factor.
      */
     viewPortPosition: IBoundRectNoAngle;
-    viewportKey: string;
+    viewportKey: string | SHEET_VIEWPORT_KEY;
     /**
-     * 后续会通过 number 来表示究竟是什么原因导致的标脏 这里采用二进制数值方便运算
+     * In the future, a number will be used to indicate the reason for the "dirty" status
+     * Here, a binary value is used to facilitate computation.
      */
     isDirty?: number;
     isForceDirty?: boolean;
@@ -887,7 +887,6 @@ export interface IViewportInfo {
     diffCacheBounds: IBoundRectNoAngle[];
     cacheViewPortPosition: IBoundRectNoAngle;
 
-    // vp?: Viewport;
     shouldCacheUpdate: number;
     sceneTrans: Transform;
     cacheCanvas?: Canvas;

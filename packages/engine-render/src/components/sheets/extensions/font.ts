@@ -20,9 +20,10 @@ import type { ICellData, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
 
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
-import { inCurrentAndAboveViewRanges, inRowViewRanges, inViewRanges, mergeRangeIfIntersects } from '../../../basics/tools';
+import { inRowViewRanges, inViewRanges, mergeRangeIfIntersects } from '../../../basics/tools';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
+import type { IDrawInfo } from '../../extension';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
@@ -57,7 +58,7 @@ export class Font extends SheetExtension {
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges: IRange[],
-        moreBoundsInfo: { viewRanges: IRange[]; checkOutOfViewBound?: boolean; viewportKey: string }
+        moreBoundsInfo: IDrawInfo
     ) {
         const { viewRanges = [], checkOutOfViewBound } = moreBoundsInfo;
         const { stylesCache, dataMergeCache, overflowCache, worksheet } = spreadsheetSkeleton;
@@ -84,22 +85,18 @@ export class Font extends SheetExtension {
             Object.keys(fontList).forEach((fontFormat: string) => {
                 const fontObjectArray = fontList[fontFormat];
 
-                // 提前退出渲染的条件
-                // viewMainTop 要考虑来自左右两边单元格的溢出
-                // viewLeft 要考虑来自上方合并单元格
-                // viewMain 要考虑左右溢出和上方合并的单元格的内容
-                // 因此, 在 viewBounds 中的下方的单元格 ---> 提前退出
-                // 而 viewMainLeftTop 不受 viewBounds 之外的影响, 因此视野外的单元格提前退出
-                // 此外, 不是溢出, 又不在视野内可以提前退出 (视野需要考虑合并单元格带来的影响)
+                // Since the overflow can spill out to both the left and right sides,
+                // we need to consider the content outside the viewBounds.
+                // At the same time, there are also merged cells, so we need to merge the current
+                // viewrange and a single merged area when calculating.
+
+                // Early exit from font condition
+                // If it's not an overflow and not within the field of view, we can exit early
+                // (the field of view needs to consider the impact of merged cells).
 
                 // eslint-disable-next-line complexity
                 fontObjectArray.forValue((rowIndex, columnIndex, docsConfig) => {
-                    if (checkOutOfViewBound) {
-                        // 下方单元格 提前退出
-                        if (!inCurrentAndAboveViewRanges(viewRanges!, rowIndex)) {
-                            return true;
-                        }
-                    } else {
+                    if (!checkOutOfViewBound) {
                         if (!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
                             return true;
                         }
@@ -118,10 +115,12 @@ export class Font extends SheetExtension {
                         return true;
                     }
 
-                    // 合并后单元格与当前 viewRange 有交叉, 则合并到当前 viewRange 中
-                    // 合并后 font extension 在当前 viewBounds 中也走一次绘制
-                    // 但是此刻还不能认为不在 viewRanges 内就退出
-                    // 横向还可能存在 overflow, 因此此刻只能排除不在当前 row 的单元格
+                    // If the merged cell area intersects with the current viewRange,
+                    // then merge it into the current viewRange.
+                    // After the merge, the font extension within the current viewBounds
+                    // also needs to be drawn once.
+                    // But at this moment, we cannot assume that it is not within the viewRanges and exit, because there may still be horizontal overflow.
+                    // At this moment, we can only exclude the cells that are not within the current row.
                     const mergeTo = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
                     const combineWithMergeRanges = mergeRangeIfIntersects(mergeTo, [mergeInfo]);
                     if (!inRowViewRanges(combineWithMergeRanges, rowIndex)) {
@@ -160,11 +159,14 @@ export class Font extends SheetExtension {
                         return true;
                     }
 
-                    // 单元格是否溢出 没有设置溢出 overflowRectangle 为 undefined
+                    // If the cell is overflowing, but the overflowRectangle has not been set,
+                    // then overflowRectangle is set to undefined.
                     const overflowRectangle = overflowCache.getValue(rowIndex, columnIndex);
                     const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = docsConfig;
 
-                    // 既不是溢出, 又不在当前 range 内, 那么提前退出(已考虑合并单元格带来的 range 扩展)
+                    // If it's neither an overflow nor within the current range,
+                    // then we can exit early (taking into account the range extension
+                    // caused by the merged cells).
                     if (!overflowRectangle && !inViewRanges(combineWithMergeRanges, rowIndex, columnIndex)) {
                         return true;
                     }
@@ -269,6 +271,7 @@ export class Font extends SheetExtension {
                     }
                     ctx.translate(startX + FIX_ONE_PIXEL_BLUR_OFFSET, startY + FIX_ONE_PIXEL_BLUR_OFFSET);
                     this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex, overflowCache);
+                    ctx.closePath();
                     ctx.restore();
                 });
             });

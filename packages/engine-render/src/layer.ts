@@ -258,7 +258,7 @@ export class Layer extends Disposable {
         }
         objects.forEach((o) => {
             o.makeDirty(false);
-            (o as unknown as { makeForceDirty?: (state: boolean) => void }).makeForceDirty?.(false);
+            o.makeForceDirty?.(false);
         });
     }
 

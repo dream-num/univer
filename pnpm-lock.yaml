@@ -1436,7 +1436,7 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.15.1
+        specifier: ^0.15.2
         version: 0.15.2
       clsx:
         specifier: ^2.1.1

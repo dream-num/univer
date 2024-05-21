@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/sheets-thread-comment",
-    "version": "0.0.1",
-    "private": true,
+    "version": "0.1.11",
+    "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -82,7 +82,7 @@
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "^0.15.2",
         "clsx": "^2.1.1",
         "react": "^18.2.0",
         "rxjs": "^7.8.1",

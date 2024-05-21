@@ -17,7 +17,7 @@
 import type { ICommandInfo, IMutationInfo, IObjectArrayPrimitiveType, Nullable } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, LifecycleStages, moveMatrixArray, OnLifecycle, Rectangle } from '@univerjs/core';
 import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import { EffectRefRangId, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
+import { EffectRefRangId, getSheetCommandTarget, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, MoveRowsCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { SheetsFilterService } from '../services/sheet-filter.service';
@@ -41,6 +41,7 @@ export class SheetsFilterController extends Disposable {
         this._initRowFilteredInterceptor();
         this._initInterceptors();
         this._commandExecutedListener();
+        this._initErrorHandling();
     }
 
     private _initCommands(): void {
@@ -389,6 +390,7 @@ export class SheetsFilterController extends Disposable {
         };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _handleMoveColsCommand(config: IMoveColsCommandParams, unitId: string, subUnitId: string) {
         const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
         const filterRange = filterModel?.getRange() ?? null;
@@ -413,24 +415,43 @@ export class SheetsFilterController extends Disposable {
         }
         moveMatrixArray(fromRange.startColumn, fromRange.endColumn - fromRange.startColumn + 1, toRange.startColumn, filterCol);
 
+        let startBorder = filterRange.startColumn;
+        let endBorder = filterRange.endColumn;
+
+        // border will change if first col or last col moves.
+        if (startColumn >= fromRange.startColumn && startColumn <= fromRange.endColumn
+            && endColumn > fromRange.endColumn
+            && toRange.startColumn > endColumn
+        ) {
+            startBorder = fromRange.endColumn + 1;
+        }
+        if (endColumn >= fromRange.startColumn && endColumn <= fromRange.endColumn
+            && startColumn < fromRange.startColumn
+            && toRange.startColumn <= startColumn) {
+            endBorder = fromRange.startColumn - 1;
+        }
+
         const numberCols = Object.keys(filterCol).map((col) => Number(col)) as number[];
 
-        const newEnd = Math.max(...numberCols);
-        const newStart = Math.min(...numberCols);
+        // find the start col & end col of new filter range by border.
+        const newEnd = numberCols.find((col) => filterCol[col].colIndex === endBorder) as number;
+        const newStart = numberCols.find((col) => filterCol[col].colIndex === startBorder) as number;
 
         numberCols.forEach((col) => {
             const { colIndex: oldColIndex, filter } = filterCol[col];
             const newColIndex = col;
-            if (filter) {
-                const setCriteriaMutationParams: ISetSheetsFilterCriteriaMutationParams = {
-                    unitId,
-                    subUnitId,
-                    col: newColIndex,
-                    criteria: { ...filter.serialize(), colId: newColIndex },
-                };
-                redos.push({ id: SetSheetsFilterCriteriaMutation.id, params: setCriteriaMutationParams });
-                undos.push({ id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId, col: newColIndex, criteria: { ...filterModel.getFilterColumn(newColIndex)?.serialize(), colId: newColIndex } } });
 
+            if (filter) {
+                if (newColIndex >= newStart && newColIndex <= newEnd) {
+                    const setCriteriaMutationParams: ISetSheetsFilterCriteriaMutationParams = {
+                        unitId,
+                        subUnitId,
+                        col: newColIndex,
+                        criteria: { ...filter.serialize(), colId: newColIndex },
+                    };
+                    redos.push({ id: SetSheetsFilterCriteriaMutation.id, params: setCriteriaMutationParams });
+                    undos.push({ id: RemoveSheetsFilterMutation.id, params: { unitId, subUnitId, col: newColIndex, criteria: { ...filterModel.getFilterColumn(newColIndex)?.serialize(), colId: newColIndex } } });
+                }
                 if (!filterCol[oldColIndex]?.filter) {
                     const setCriteriaMutationParams: ISetSheetsFilterCriteriaMutationParams = {
                         unitId,
@@ -479,18 +500,28 @@ export class SheetsFilterController extends Disposable {
         }
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
-        const filterRow: IObjectArrayPrimitiveType<{ offset: number }> = {};
+        const filterRow: IObjectArrayPrimitiveType<{ oldIndex: number }> = {};
         for (let row = startRow; row <= endRow; row++) {
             filterRow[row] = {
-                offset: row - startRow,
+                oldIndex: row,
             };
+        }
+        const startBorder = startRow;
+        let endBorder = endRow;
+
+        // only need to deal with endBorder, startRow will not be moved.
+        if (endRow >= fromRange.startRow && endRow <= fromRange.endRow
+            && startRow < fromRange.startRow
+            && toRange.startRow <= startRow) {
+            endBorder = fromRange.startRow - 1;
         }
 
         moveMatrixArray(fromRange.startRow, fromRange.endRow - fromRange.startRow + 1, toRange.startRow, filterRow);
         const numberRows = Object.keys(filterRow).map((row) => Number(row));
 
-        const newEnd = Math.max(...numberRows);
-        const newStart = Math.min(...numberRows);
+        const newEnd = numberRows.find((row) => filterRow[row].oldIndex === endBorder) as number;
+        const newStart = numberRows.find((row) => filterRow[row].oldIndex === startBorder) as number;
+
         if (startRow !== newStart || endRow !== newEnd) {
             const setFilterRangeMutationParams: ISetSheetsFilterRangeMutationParams = {
                 unitId,
@@ -754,6 +785,23 @@ export class SheetsFilterController extends Disposable {
             //     }
             //     filterModel.setRange({ startRow, endRow, startColumn, endColumn });
             // }
+        }));
+    }
+
+    private _initErrorHandling() {
+        this.disposeWithMe(this._commandService.beforeCommandExecuted((command) => {
+            const params = command.params as IMoveRowsCommandParams;
+            const target = getSheetCommandTarget(this._univerInstanceService);
+            if (!target) return;
+
+            const { subUnitId, unitId } = target;
+            const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
+            if (!filterModel) return;
+            const filterRange = filterModel.getRange();
+            if (command.id === MoveRowsCommand.id && params.fromRange.startRow <= filterRange.startRow && params.fromRange.endRow >= filterRange.startRow) {
+                this._sheetsFilterService.setFilterErrorMsg('sheets-filter.msg.filter-header-forbidden');
+                throw new Error('[SheetsFilterController]: Cannot move header row of filter');
+            }
         }));
     }
 }

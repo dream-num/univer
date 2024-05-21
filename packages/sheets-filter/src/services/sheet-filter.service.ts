@@ -59,6 +59,9 @@ export class SheetsFilterService extends Disposable {
     private readonly _loadedUnitId$ = new BehaviorSubject<Nullable<string>>(null);
     readonly loadedUnitId$ = this._loadedUnitId$.asObservable();
 
+    private readonly _errorMsg$ = new BehaviorSubject<Nullable<string>>(null);
+    readonly errorMsg$ = this._errorMsg$.asObservable();
+
     private readonly _activeFilterModel$ = new BehaviorSubject<Nullable<FilterModel>>(null);
     /** An observable value emitting the current Workbook's active Worksheet's filter model (if there is one). */
     readonly activeFilterModel$ = this._activeFilterModel$.asObservable();
@@ -114,6 +117,10 @@ export class SheetsFilterService extends Disposable {
         }
 
         return false;
+    }
+
+    setFilterErrorMsg(content: string) {
+        this._errorMsg$.next(content);
     }
 
     private _updateActiveFilterModel() {

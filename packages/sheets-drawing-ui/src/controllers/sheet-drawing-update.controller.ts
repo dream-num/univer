@@ -266,7 +266,7 @@ export class SheetDrawingUpdateController extends Disposable {
                 // };
 
                 const newDrawing: Partial<ISheetDrawing> = {
-                    unitId, subUnitId, drawingId, drawingType,
+                    ...param,
                     transform: { ...transform, ...transformDrawingPositionToTransform(sheetTransform, this._selectionRenderService) },
                     sheetTransform: { ...sheetTransform },
                 };

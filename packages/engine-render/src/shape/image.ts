@@ -44,7 +44,7 @@ export class Image extends Shape<IImageProps> {
 
     protected _native: Nullable<HTMLImageElement>;
 
-    private _renderByCropper: boolean = true;
+    private _renderByCropper: boolean = false;
 
     constructor(id: string, config: IImageProps) {
         super(id, config);
@@ -89,6 +89,16 @@ export class Image extends Shape<IImageProps> {
         return RENDER_CLASS_TYPE.IMAGE;
     }
 
+    changeSource(url: string) {
+        if (this._native == null) {
+            this._native = document.createElement('img');
+        }
+        this._native.src = url;
+        this._native.onload = () => {
+            this.makeDirty(true);
+        };
+    }
+
     resetSize() {
         if (this._native == null) {
             return;
@@ -98,6 +108,10 @@ export class Image extends Shape<IImageProps> {
             height: this._native.height,
         });
         this.setSrcRect(null);
+    }
+
+    setPrstGeom(prstGeom?: Nullable<PresetGeometryType>) {
+        this._props.prstGeom = prstGeom;
     }
 
     setSrcRect(srcRect?: Nullable<ISrcRect>) {

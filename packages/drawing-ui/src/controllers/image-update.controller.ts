@@ -56,6 +56,8 @@ export class ImageUpdateController extends Disposable {
         this._drawingAddListener();
 
         this._commandExecutedListener();
+
+        this._imageUpdateListener();
     }
 
     private _commandExecutedListener() {
@@ -206,6 +208,53 @@ export class ImageUpdateController extends Disposable {
 
                     this._addHoverForImage(image);
                     this._addDialogForImage(image);
+                });
+            })
+        );
+    }
+
+    private _imageUpdateListener() {
+        this.disposeWithMe(
+            this._drawingManagerService.update$.subscribe((params) => {
+                (params).forEach((param) => {
+                    const { unitId, subUnitId, drawingId } = param;
+
+                    const drawingParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
+
+                    if (drawingParam == null) {
+                        return;
+                    }
+
+                    const { transform, drawingType, srcRect, prstGeom, source, imageSourceType } = drawingParam;
+
+                    if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
+                        return;
+                    }
+
+                    const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
+
+                    if (renderObject == null) {
+                        return;
+                    }
+                    const { scene, transformer } = renderObject;
+
+                    if (transform == null) {
+                        return true;
+                    }
+
+                    const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+
+                    const imageShape = scene.getObject(drawingShapeKey) as Image;
+
+                    if (imageShape == null) {
+                        return true;
+                    }
+
+                    imageShape.setSrcRect(srcRect);
+                    imageShape.setPrstGeom(prstGeom);
+                    // if (source != null && source.length > 0 && (imageSourceType === ImageSourceType.BASE64 || imageSourceType === ImageSourceType.URL)) {
+                    //     imageShape.changeSource(source);
+                    // }
                 });
             })
         );

@@ -227,7 +227,14 @@ export class Group extends BaseObject {
 
     private _transformObject(object: BaseObject, groupWidth: number, groupHeight: number) {
         const transform = transformObjectOutOfGroup(object.getState(), this.getState(), groupWidth, groupHeight);
-        object.transformByState(transform);
+        if (object.classType === RENDER_CLASS_TYPE.GROUP) {
+            object.transformByState({
+                left: transform.left,
+                top: transform.top,
+            });
+        } else {
+            object.transformByState(transform);
+        }
     }
 
     getObjectsByOrder() {

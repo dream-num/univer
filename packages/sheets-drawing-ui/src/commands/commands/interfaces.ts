@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DrawingTypeEnum, IDrawingParam } from '@univerjs/core';
+import type { DrawingTypeEnum } from '@univerjs/core';
 import type { ISheetDrawing } from '@univerjs/sheets';
 
 export interface IInsertDrawingCommandParams {

@@ -18,7 +18,6 @@ import type { ICommand } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
-    IDrawingManagerService,
     IUndoRedoService,
 } from '@univerjs/core';
 

@@ -15,7 +15,7 @@
  */
 
 import { type Observable, Subject } from 'rxjs';
-import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, ITransformState, IUnitDrawingService, Nullable } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, IUnitDrawingService, Nullable } from '@univerjs/core';
 import { sortRules, sortRulesByDesc } from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
 import * as json1 from 'ot-json1';

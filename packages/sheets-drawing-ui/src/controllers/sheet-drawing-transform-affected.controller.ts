@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IGridRange, IRange, IUnitRange } from '@univerjs/core';
+import type { ICommandInfo, IUnitRange } from '@univerjs/core';
 import { Disposable, ICommandService, IDrawingManagerService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
-import { InsertColCommand, InsertRowCommand, ISheetDrawingService, RemoveColCommand, RemoveRowCommand, SetColHiddenMutation, SetColVisibleMutation, SetRowHiddenMutation, SetRowVisibleMutation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { ISheetDrawingService, SetColHiddenMutation, SetColVisibleMutation, SetRowHiddenMutation, SetRowVisibleMutation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingTransformAffectedController)
 export class SheetDrawingTransformAffectedController extends Disposable {

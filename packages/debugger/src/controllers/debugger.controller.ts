@@ -71,7 +71,6 @@ export class DebuggerController extends Disposable {
         this._initializeContextMenu();
 
         this._initCustomComponents();
-        this._initMenuConfigs();
 
         [
             LocaleOperation,
@@ -92,6 +91,8 @@ export class DebuggerController extends Disposable {
     }
 
     private _initializeContextMenu() {
+        const { menu = {} } = this._config;
+
         ([
             LocaleMenuItemFactory,
             ThemeMenuItemFactory,
@@ -106,7 +107,7 @@ export class DebuggerController extends Disposable {
             DisposeCurrentUnitMenuItemFactory,
             CreateEmptySheetMenuItemFactory,
         ] as IMenuItemFactory[]).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
         });
     }
 
@@ -116,12 +117,5 @@ export class DebuggerController extends Disposable {
         this.disposeWithMe(componentManager.register('VueI18nIcon', VueI18nIcon, {
             framework: 'vue3',
         }));
-    }
-
-    private _initMenuConfigs() {
-        const { menu = {} } = this._config;
-        Object.entries(menu).forEach(([id, config]) => {
-            this._menuService.setMenuConfigs(id, config);
-        });
     }
 }

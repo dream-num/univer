@@ -24,11 +24,8 @@ import { OpenFindDialogOperation } from '../commands/operations/find-replace.ope
 
 export function FindReplaceMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const contextService = accessor.get(IContextService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(OpenFindDialogOperation.id);
-
-    return mergeMenuConfigs({
+    return {
         id: OpenFindDialogOperation.id,
         icon: 'SearchIcon',
         tooltip: 'find-replace.toolbar',
@@ -40,5 +37,5 @@ export function FindReplaceMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             contextService.subscribeContextValue$(EDITOR_ACTIVATED),
             contextService.subscribeContextValue$(FOCUSING_SHEET),
         ]).pipe(map(([editorActivated, focusingSheet]) => editorActivated || !focusingSheet)),
-    }, menuItemConfig);
+    };
 }

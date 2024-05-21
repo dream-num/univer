@@ -45,7 +45,6 @@ export class ConditionalFormattingMenuController extends Disposable {
     ) {
         super();
 
-        this._initMenuConfigs();
         this._initMenu();
         this._initPanel();
 
@@ -69,15 +68,10 @@ export class ConditionalFormattingMenuController extends Disposable {
         this._sidebarDisposable = this._sidebarService.open(props);
     }
 
-    private _initMenuConfigs() {
-        const { menu = {} } = this._config;
-        Object.entries(menu).forEach(([id, config]) => {
-            this._menuService.setMenuConfigs(id, config);
-        });
-    }
-
     private _initMenu() {
-        this._menuService.addMenuItem(FactoryManageConditionalFormattingRule(this._injector));
+        const { menu = {} } = this._config;
+
+        this._menuService.addMenuItem(FactoryManageConditionalFormattingRule(this._injector), menu);
     }
 
     private _initPanel() {

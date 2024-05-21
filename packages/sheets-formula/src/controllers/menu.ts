@@ -27,11 +27,7 @@ import { InsertFunctionOperation } from '../commands/operations/insert-function.
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 
 export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(InsertFunctionOperation.id);
-
-    return mergeMenuConfigs({
+    return {
         id: InsertFunctionOperation.id,
         icon: 'FunctionSingle',
         tooltip: 'formula.insert.tooltip',
@@ -67,20 +63,16 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
         ],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    }, menuItemConfig);
+    };
 }
 
 export function MoreFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(MoreFunctionsOperation.id);
-
-    return mergeMenuConfigs({
+    return {
         id: MoreFunctionsOperation.id,
         title: 'formula.insert.more',
         positions: InsertFunctionOperation.id,
         type: MenuItemType.BUTTON,
-    }, menuItemConfig);
+    };
 }
 
 function menuClipboardDisabledObservable(injector: IAccessor): Observable<boolean> {
@@ -88,15 +80,11 @@ function menuClipboardDisabledObservable(injector: IAccessor): Observable<boolea
 }
 
 export function PasteFormulaMenuItemFactory(accessor: IAccessor): IMenuItem {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(SheetOnlyPasteFormulaCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: SheetOnlyPasteFormulaCommand.id,
         type: MenuItemType.BUTTON,
         title: 'formula.operation.pasteFormula',
         positions: [PASTE_SPECIAL_MENU_ID],
         disabled$: menuClipboardDisabledObservable(accessor),
-    }, menuItemConfig);
+    };
 }

@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 
-export { default as zhCN } from './zhCN';
-export { default as enUS } from './enUS';
+export { default as enUS } from './en-US';
+export { default as zhCN } from './zh-CN';
+export { default as ruRU } from './ru-RU';

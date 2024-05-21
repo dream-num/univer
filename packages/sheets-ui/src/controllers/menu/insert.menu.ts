@@ -32,59 +32,44 @@ import { SheetMenuPosition } from './menu';
 
 const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';
 export function ColInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(COL_INSERT_MENU_ID);
-
-    return mergeMenuConfigs({
+    return {
         id: COL_INSERT_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insert',
         icon: 'Insert',
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
-    }, menuItemConfig);
+    };
 }
 
 const ROW_INSERT_MENU_ID = 'sheet.menu.row-insert';
 export function RowInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(ROW_INSERT_MENU_ID);
-
-    return mergeMenuConfigs({
+    return {
         id: ROW_INSERT_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insert',
         icon: 'Insert',
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
-    }, menuItemConfig);
+    };
 }
 
 const CELL_INSERT_MENU_ID = 'sheet.menu.cell-insert';
 export function CellInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(CELL_INSERT_MENU_ID);
-
-    return mergeMenuConfigs({
+    return {
         id: CELL_INSERT_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insert',
         icon: 'Insert',
         positions: [MenuPosition.CONTEXT_MENU],
-    }, menuItemConfig);
+    };
 }
 
 export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const menuService = accessor.get(IMenuService);
     const selectionManager = accessor.get(SelectionManagerService);
 
-    const menuItemConfig = menuService.getMenuConfig(InsertRowBeforeCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: InsertRowBeforeCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertRowBefore',
@@ -95,16 +80,13 @@ export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
             const selections = selectionManager.getSelections();
             observer.next(selections?.length !== 1);
         }),
-    }, menuItemConfig);
+    };
 }
 
 export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const selectionManager = accessor.get(SelectionManagerService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(InsertRowAfterCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: InsertRowAfterCommand.id,
         type: MenuItemType.BUTTON,
         positions: [ROW_INSERT_MENU_ID],
@@ -115,16 +97,13 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
             const selections = selectionManager.getSelections();
             observer.next(selections?.length !== 1);
         }),
-    }, menuItemConfig);
+    };
 }
 
 export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const selectionManager = accessor.get(SelectionManagerService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(InsertColBeforeCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: InsertColBeforeCommand.id,
         type: MenuItemType.BUTTON,
         positions: [COL_INSERT_MENU_ID, CELL_INSERT_MENU_ID],
@@ -135,16 +114,13 @@ export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
             const selections = selectionManager.getSelections();
             observer.next(selections?.length !== 1);
         }),
-    }, menuItemConfig);
+    };
 }
 
 export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const selectionManager = accessor.get(SelectionManagerService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(InsertColAfterCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: InsertColAfterCommand.id,
         type: MenuItemType.BUTTON,
         positions: [COL_INSERT_MENU_ID],
@@ -155,33 +131,25 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
             const selections = selectionManager.getSelections();
             observer.next(selections?.length !== 1);
         }),
-    }, menuItemConfig);
+    };
 }
 
 export function InsertRangeMoveRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(InsertRangeMoveRightConfirmCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: InsertRangeMoveRightConfirmCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveRight',
         icon: 'InsertCellShiftRight',
         positions: [CELL_INSERT_MENU_ID],
-    }, menuItemConfig);
+    };
 }
 
 export function InsertRangeMoveDownMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(InsertRangeMoveDownConfirmCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: InsertRangeMoveDownConfirmCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveDown',
         icon: 'InsertCellDown',
         positions: [CELL_INSERT_MENU_ID],
-    }, menuItemConfig);
+    };
 }

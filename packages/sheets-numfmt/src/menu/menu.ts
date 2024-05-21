@@ -38,11 +38,7 @@ import { isPatternEqualWithoutDecimal } from '../utils/decimal';
 import { SetPercentCommand } from '../commands/commands/set-percent.command';
 
 export const CurrencyMenuItem = (accessor: IAccessor) => {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(SetCurrencyCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         icon: 'RmbSingle',
         id: SetCurrencyCommand.id,
         title: 'sheet.numfmt.currency',
@@ -52,15 +48,11 @@ export const CurrencyMenuItem = (accessor: IAccessor) => {
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    }, menuItemConfig);
+    };
 };
 
 export const AddDecimalMenuItem = (accessor: IAccessor) => {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(SetCurrencyCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         icon: 'AddDigitsSingle',
         id: AddDecimalCommand.id,
         title: 'sheet.numfmt.addDecimal',
@@ -70,15 +62,11 @@ export const AddDecimalMenuItem = (accessor: IAccessor) => {
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    }, menuItemConfig);
+    };
 };
 
 export const SubtractDecimalMenuItem = (accessor: IAccessor) => {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(SetCurrencyCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         icon: 'ReduceDigitsSingle',
         id: SubtractDecimalCommand.id,
         title: 'sheet.numfmt.subtractDecimal',
@@ -88,15 +76,11 @@ export const SubtractDecimalMenuItem = (accessor: IAccessor) => {
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    }, menuItemConfig);
+    };
 };
 
 export const PercentMenuItem = (accessor: IAccessor) => {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(SetCurrencyCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         icon: 'PercentSingle',
         id: SetPercentCommand.id,
         title: 'sheet.numfmt.percent',
@@ -106,18 +90,14 @@ export const PercentMenuItem = (accessor: IAccessor) => {
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    }, menuItemConfig);
+    };
 };
 
-export const FactoryOtherMenuItem = (accessor: IAccessor) => {
+export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => {
     const numfmtService = accessor.get(INumfmtService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
     const localeService = accessor.get(LocaleService);
-
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(SetCurrencyCommand.id);
 
     const selectionManagerService = accessor.get(SelectionManagerService);
     const value$ = deriveStateFromActiveSheet$(univerInstanceService, '', ({ workbook, worksheet }) => new Observable((subscribe) =>
@@ -160,7 +140,7 @@ export const FactoryOtherMenuItem = (accessor: IAccessor) => {
         })
     ));
 
-    return mergeMenuConfigs({
+    return {
         label: MORE_NUMFMT_TYPE_KEY,
         id: OpenNumfmtPanelOperator.id,
         tooltip: 'sheet.numfmt.title',
@@ -178,5 +158,5 @@ export const FactoryOtherMenuItem = (accessor: IAccessor) => {
         value$,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    }, menuItemConfig) as IMenuSelectorItem;
+    };
 };

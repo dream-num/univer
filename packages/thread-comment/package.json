@@ -65,20 +65,17 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "^0.1.20"
+        "@univerjs/protocol": "^0.1.32"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
-        "clsx": "^2.1.0",
-        "less": "^4.2.0",
-        "react": "^18.2.0",
+        "@wendellhu/redi": "^0.15.2",
         "rxjs": "^7.8.1",
-        "typescript": "^5.3.3",
-        "vite": "^5.1.4",
-        "vitest": "^1.3.1"
+        "typescript": "^5.4.5",
+        "vite": "^5.2.11",
+        "vitest": "^1.6.0"
     }
 }

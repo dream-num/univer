@@ -5,18 +5,18 @@
 ![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
 ![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
 
-## Introduction
+## 简介
 
 > TODO: Introduction
 
-## Usage
+## 使用指南
 
-### Installation
+### 安装
 
 ```shell
-# Using npm
+# 使用 npm
 npm install @univerjs/thread-comment-ui
 
-# Using pnpm
+# 使用 pnpm
 pnpm add @univerjs/thread-comment-ui
 ```

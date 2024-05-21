@@ -16,10 +16,11 @@
 
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ICommandService, IConfigService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, Tools, UniverInstanceType } from '@univerjs/core';
 import type { IThreadCommentUIConfig } from '@univerjs/thread-comment-ui';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-import { SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
+import type { IUniverSheetsThreadCommentConfig } from './controllers/sheets-thread-comment.controller';
+import { DefaultSheetsThreadCommentConfig, SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
 import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
 import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
 import { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
@@ -30,37 +31,31 @@ import { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thr
 import { SheetsThreadCommentHoverController } from './controllers/sheets-thread-comment-hover.controller';
 import { ThreadCommentRemoveSheetsController } from './controllers/sheets-thread-comment-remove.controller';
 
-const defaultConfig: IThreadCommentUIConfig = {
-    mentions: [{
-        trigger: '@',
-        async getMentions() {
-            return [{
-                id: 'mock',
-                label: 'MockUser',
-                type: 'user',
-            }];
-        },
-    }],
-};
-
 export class UniverSheetsThreadCommentPlugin extends UniverThreadCommentUIPlugin {
     static override pluginName = SHEETS_THREAD_COMMENT;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        _config: IThreadCommentUIConfig = defaultConfig,
+        private readonly _config: Partial<IUniverSheetsThreadCommentConfig> = {},
         @Inject(Injector) protected override _injector: Injector,
         @Inject(ICommandService) protected override _commandService: ICommandService,
         @Inject(IConfigService) protected override _configService: IConfigService
     ) {
         super(_config, _injector, _commandService, _configService);
+
+        this._config = Tools.deepMerge({}, DefaultSheetsThreadCommentConfig, this._config);
     }
 
     override onStarting(injector: Injector): void {
         super.onStarting(injector);
         ([
             [SheetsThreadCommentModel],
-            [SheetsThreadCommentController],
+            [
+                SheetsThreadCommentController,
+                {
+                    useFactory: () => this._injector.createInstance(SheetsThreadCommentController, this._config),
+                },
+            ],
             [SheetsThreadCommentRefRangeController],
             [SheetsThreadCommentRenderController],
             [SheetsThreadCommentCopyPasteController],

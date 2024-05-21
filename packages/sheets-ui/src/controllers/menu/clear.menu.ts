@@ -23,11 +23,7 @@ import { SheetMenuPosition } from './menu';
 
 const CLEAR_SELECTION_MENU_ID = 'sheet.menu.clear-selection';
 export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(CLEAR_SELECTION_MENU_ID);
-
-    return mergeMenuConfigs({
+    return {
         id: CLEAR_SELECTION_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.SUBITEMS,
@@ -38,44 +34,32 @@ export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuSelecto
             SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
             SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
         ],
-    }, menuItemConfig);
+    };
 }
 
 export function ClearSelectionContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(ClearSelectionContentCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: ClearSelectionContentCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearContent',
         positions: [CLEAR_SELECTION_MENU_ID],
-    }, menuItemConfig);
+    };
 }
 
 export function ClearSelectionFormatMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(ClearSelectionFormatCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: ClearSelectionFormatCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearFormat',
         positions: [CLEAR_SELECTION_MENU_ID],
-    }, menuItemConfig);
+    };
 }
 
 export function ClearSelectionAllMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(ClearSelectionAllCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: ClearSelectionAllCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearAll',
         positions: [CLEAR_SELECTION_MENU_ID],
-    }, menuItemConfig);
+    };
 }

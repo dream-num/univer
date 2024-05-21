@@ -63,7 +63,6 @@ export class SheetsFilterUIController extends RxDisposable {
 
         this._initCommands();
         this._initShortcuts();
-        this._initMenuConfigs();
         this._initMenuItems();
         this._initUI();
         this._initRenderControllers();
@@ -97,20 +96,15 @@ export class SheetsFilterUIController extends RxDisposable {
         });
     }
 
-    private _initMenuConfigs() {
-        const { menu = {} } = this._config;
-        Object.entries(menu).forEach(([id, config]) => {
-            this._menuService.setMenuConfigs(id, config);
-        });
-    }
-
     private _initMenuItems(): void {
+        const { menu = {} } = this._config;
+
         ([
             SmartToggleFilterMenuItemFactory,
             ClearFilterCriteriaMenuItemFactory,
             ReCalcFilterMenuItemFactory,
         ] as IMenuItemFactory[]).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
         });
     }
 

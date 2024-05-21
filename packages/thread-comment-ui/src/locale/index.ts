@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-import { type IMenuButtonItem, IMenuService, MenuGroup, MenuItemType, MenuPosition, mergeMenuConfigs } from '@univerjs/ui';
-
-import type { IAccessor } from '@wendellhu/redi';
-import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
-
-export function ZenEditorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    return {
-        id: OpenZenEditorOperation.id,
-        group: MenuGroup.CONTEXT_MENU_OTHERS,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.zenEditor',
-        icon: 'AmplifySingle',
-        positions: [MenuPosition.CONTEXT_MENU],
-    };
-}
+export { default as enUS } from './en-US';
+export { default as zhCN } from './zh-CN';
+export { default as ruRU } from './ru-RU';

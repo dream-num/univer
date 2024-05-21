@@ -78,14 +78,9 @@ export class DocUIController extends Disposable {
         this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
     }
 
-    private _initMenuConfigs() {
-        const { menu = {} } = this._config;
-        Object.entries(menu).forEach(([id, config]) => {
-            this._menuService.setMenuConfigs(id, config);
-        });
-    }
-
     private _initMenus(): void {
+        const { menu = {} } = this._config;
+
         // init menus
         (
             [
@@ -108,13 +103,12 @@ export class DocUIController extends Disposable {
                 BackgroundColorSelectorMenuItemFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
         });
     }
 
     private _init(): void {
         this._initCustomComponents();
-        this._initMenuConfigs();
         this._initMenus();
         this._initDocBackground();
         this._initFocusHandler();

@@ -41,17 +41,10 @@ export class UniscriptController extends Disposable {
     ) {
         super();
 
-        this._initMenuConfigs();
+        const { menu = {} } = this._config;
 
-        this.disposeWithMe(_menuService.addMenuItem(this._injector.invoke(UniscriptMenuItemFactory)));
+        this.disposeWithMe(_menuService.addMenuItem(this._injector.invoke(UniscriptMenuItemFactory), menu));
         this.disposeWithMe(componentManager.register(ScriptPanelComponentName, ScriptEditorPanel));
         this.disposeWithMe(commandService.registerCommand(ToggleScriptPanelOperation));
-    }
-
-    private _initMenuConfigs() {
-        const { menu = {} } = this._config;
-        Object.entries(menu).forEach(([id, config]) => {
-            this._menuService.setMenuConfigs(id, config);
-        });
     }
 }

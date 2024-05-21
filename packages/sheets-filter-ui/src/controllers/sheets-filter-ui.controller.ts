@@ -132,6 +132,7 @@ export class SheetsFilterUIController extends RxDisposable {
             direction: 'horizontal',
             closeOnSelfTarget: true,
             onClickOutside: () => this._commandService.syncExecuteCommand(CloseFilterPanelOperation.id),
+            offset: [5, 0],
         });
     }
 

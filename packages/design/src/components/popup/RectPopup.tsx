@@ -35,46 +35,58 @@ export interface IRectPopupProps {
      */
     anchorRect: IAbsolutePosition;
 
-    direction?: 'horizontal' | 'vertical';
+    direction?: 'vertical' | 'horizontal' | 'left' | 'top' | 'left' | 'bottom';
+
+    // #region closing behavior
 
     closeOnSelfTarget?: boolean;
     onClickOutside?: (e: MouseEvent) => void;
-
     excludeOutside?: HTMLElement[];
+
+    // #endregion
 }
 
-export interface IPopupLayoutInfo {
+export interface IPopupLayoutInfo extends Pick<IRectPopupProps, 'direction'> {
     position: IAbsolutePosition;
     width: number;
     height: number;
     containerWidth: number;
     containerHeight: number;
-    direction?: 'horizontal' | 'vertical';
 }
 
-const calcPopupPosition = (layout: IPopupLayoutInfo) => {
+/** The popup should have a minimum edge to the boundary. */
+const PUSHING_MINIMUM_GAP = 4;
+
+function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: number } {
     const { position, width, height, containerHeight, containerWidth, direction = 'vertical' } = layout;
-    if (direction === 'vertical') {
+
+    // In y-axis
+    if (direction === 'vertical' || direction === 'top' || direction === 'bottom') {
         const { left: startX, top: startY, right: endX, bottom: endY } = position;
+        const verticalStyle = ((endY + height) > containerHeight || direction === 'top')
+            ? { top: startY - height }
+            : { top: endY };
 
-        const verticalStyle = (endY + height) > containerHeight ? { top: startY - height } : { top: endY };
-        const horizontalStyle = (startX + width) > containerWidth ? { left: endX - width } : { left: startX };
+        // If the popup element exceed the visible area. We should "push" it back.
+        const horizontalStyle = (startX + width) > containerWidth
+            ? { left: Math.max(endX - width, PUSHING_MINIMUM_GAP) } // on left
+            : { left: Math.min(startX, containerWidth - width - PUSHING_MINIMUM_GAP) }; // on right
 
-        return {
-            ...verticalStyle,
-            ...horizontalStyle,
-        };
-    } else {
-        const { left: startX, top: startY, right: endX, bottom: endY } = position;
-
-        const verticalStyle = ((startY + height) > containerHeight) ? { top: endY - height } : { top: startY };
-        const horizontalStyle = ((endX + width) > containerWidth) ? { left: startX - width } : { left: endX };
-
-        return {
-            ...verticalStyle,
-            ...horizontalStyle,
-        };
+        return { ...verticalStyle, ...horizontalStyle };
     }
+
+    // In x-axis
+    const { left: startX, top: startY, right: endX, bottom: endY } = position;
+    const horizontalStyle = ((endX + width) > containerWidth || direction === 'left')
+        ? { left: startX - width }
+        : { left: endX };
+
+    // If the popup element exceed the visible area. We should "push" it back.
+    const verticalStyle = ((startY + height) > containerHeight)
+        ? { top: Math.max(endY - height, PUSHING_MINIMUM_GAP) } // on top
+        : { top: Math.min(startX, containerHeight - height - PUSHING_MINIMUM_GAP) }; // on bottom
+
+    return { ...verticalStyle, ...horizontalStyle };
 };
 
 function RectPopup(props: IRectPopupProps) {
@@ -87,21 +99,19 @@ function RectPopup(props: IRectPopupProps) {
         left: -9999,
     });
 
+    // TODO@weird94: push the content into the visible area.
+
     useEffect(() => {
         const { clientWidth, clientHeight } = nodeRef.current!;
         const { innerWidth, innerHeight } = window;
-        setPosition(
-            calcPopupPosition(
-                {
-                    position: anchorRect,
-                    width: clientWidth,
-                    height: clientHeight,
-                    containerWidth: innerWidth,
-                    containerHeight: innerHeight,
-                    direction,
-                }
-            )
-        );
+        setPosition(calcPopupPosition({
+            position: anchorRect,
+            width: clientWidth,
+            height: clientHeight,
+            containerWidth: innerWidth,
+            containerHeight: innerHeight,
+            direction,
+        }));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [

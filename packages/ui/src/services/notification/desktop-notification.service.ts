@@ -20,7 +20,7 @@ import { type IDisposable, Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import type { INotificationOptions } from '../../components/notification/Notification';
 import { notification, Notification } from '../../components/notification/Notification';
-import { DesktopUIPart, IUIPartsService } from '../parts/parts.service';
+import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 import type { INotificationService } from './notification.service';
 
 export class DesktopNotificationService extends Disposable implements INotificationService {
@@ -40,6 +40,6 @@ export class DesktopNotificationService extends Disposable implements INotificat
     }
 
     protected _initUIPart(): void {
-        this.disposeWithMe(this._uiPartsService.registerComponent(DesktopUIPart.GLOBAL, () => connectInjector(Notification, this._injector)));
+        this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(Notification, this._injector)));
     }
 }

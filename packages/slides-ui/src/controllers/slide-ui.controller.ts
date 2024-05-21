@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { DesktopUIPart, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { SlideSideBar } from '../views/slide-bar/SlideBar';
@@ -47,7 +47,7 @@ export class SlideUIController extends Disposable {
 
     private _initUIComponents(): void {
         this.disposeWithMe(
-            this._uiPartsService.registerComponent(DesktopUIPart.LEFT_SIDEBAR, () => connectInjector(SlideSideBar, this._injector))
+            this._uiPartsService.registerComponent(BuiltInUIPart.LEFT_SIDEBAR, () => connectInjector(SlideSideBar, this._injector))
         );
     }
 }

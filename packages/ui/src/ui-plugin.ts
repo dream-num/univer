@@ -54,7 +54,7 @@ import { IZenZoneService } from './services/zen-zone/zen-zone.service';
 import { EditorService, IEditorService } from './services/editor/editor.service';
 import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 import { IProgressService, ProgressService } from './services/progress/progress.service';
-import { DesktopUIPartsService, IUIPartsService } from './services/parts/parts.service';
+import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 
 const PLUGIN_NAME = 'ui';
 
@@ -100,7 +100,7 @@ export class UniverUIPlugin extends Plugin {
 
             // services
             [ShortcutPanelService],
-            [IUIPartsService, { useClass: DesktopUIPartsService }],
+            [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],

@@ -20,7 +20,7 @@ import { Subject } from 'rxjs';
 
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import type { IConfirmPartMethodOptions } from '../../views/components/confirm-part/interface';
-import { DesktopUIPart, IUIPartsService } from '../parts/parts.service';
+import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 import { ConfirmPart } from '../../views/components/confirm-part/ConfirmPart';
 import type { IConfirmService } from './confirm.service';
 
@@ -83,7 +83,7 @@ export class DesktopConfirmService extends Disposable implements IConfirmService
 
     protected _initUIPart(): void {
         this.disposeWithMe(
-            this._uiPartsService.registerComponent(DesktopUIPart.GLOBAL, () => connectInjector(ConfirmPart, this._injector))
+            this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(ConfirmPart, this._injector))
         );
     }
 }

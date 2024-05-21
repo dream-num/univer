@@ -1441,9 +1441,6 @@ importers:
       clsx:
         specifier: ^2.1.0
         version: 2.1.1
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1894,6 +1891,9 @@ importers:
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../sheets-numfmt
+      '@univerjs/sheets-thread-comment':
+        specifier: workspace:*
+        version: link:../sheets-thread-comment
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
@@ -1906,6 +1906,12 @@ importers:
       '@univerjs/slides-ui':
         specifier: workspace:*
         version: link:../slides-ui
+      '@univerjs/thread-comment':
+        specifier: workspace:*
+        version: link:../thread-comment
+      '@univerjs/thread-comment-ui':
+        specifier: workspace:*
+        version: link:../thread-comment-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui

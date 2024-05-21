@@ -26,7 +26,7 @@ import {
     SetWorksheetShowCommand,
 } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { MenuItemType } from '@univerjs/ui';
+import { IMenuService, MenuItemType, mergeMenuConfigs } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
@@ -39,7 +39,11 @@ import { SheetMenuPosition } from './menu';
 export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(RemoveSheetConfirmCommand.id);
+
+    return mergeMenuConfigs({
         id: RemoveSheetConfirmCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
@@ -64,29 +68,41 @@ export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             subscriber.next(false);
             return disposable.dispose;
         }),
-    };
+    }, menuItemConfig);
 }
 
-export function CopySheetMenuItemFactory(): IMenuButtonItem {
-    return {
+export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(CopySheetCommand.id);
+
+    return mergeMenuConfigs({
         id: CopySheetCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.copy',
-    };
+    }, menuItemConfig);
 }
 
-export function RenameSheetMenuItemFactory(): IMenuButtonItem {
-    return {
+export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(RenameSheetOperation.id);
+
+    return mergeMenuConfigs({
         id: RenameSheetOperation.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.rename',
-    };
+    }, menuItemConfig);
 }
 
-export function ChangeColorSheetMenuItemFactory(): IMenuSelectorItem<string> {
-    return {
+export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SetTabColorCommand.id);
+
+    return mergeMenuConfigs({
         id: SetTabColorCommand.id,
         title: 'sheetConfig.changeColor',
         positions: [SheetMenuPosition.SHEET_BAR],
@@ -99,13 +115,17 @@ export function ChangeColorSheetMenuItemFactory(): IMenuSelectorItem<string> {
                 },
             },
         ],
-    };
+    }, menuItemConfig);
 }
 
 export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SetWorksheetHideCommand.id);
+
+    return mergeMenuConfigs({
         id: SetWorksheetHideCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
@@ -130,19 +150,23 @@ export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             subscriber.next(false);
             return disposable.dispose;
         }),
-    };
+    }, menuItemConfig);
 }
 
 export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<any> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SetWorksheetShowCommand.id);
+
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const hiddenList = workbook.getHiddenWorksheets().map((s) => ({
         label: workbook.getSheetBySheetId(s)?.getName() || '',
         value: s,
     }));
 
-    return {
+    return mergeMenuConfigs({
         id: SetWorksheetShowCommand.id,
         type: MenuItemType.SELECTOR,
         positions: [SheetMenuPosition.SHEET_BAR],
@@ -172,13 +196,17 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
             subscriber.next(hiddenList);
             return disposable.dispose;
         }),
-    };
+    }, menuItemConfig);
 }
 
 export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(ShowMenuListCommand.id);
+
+    return mergeMenuConfigs({
         id: ShowMenuListCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
@@ -201,5 +229,5 @@ export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             subscriber.next(false);
             return disposable.dispose;
         }),
-    };
+    }, menuItemConfig);
 }

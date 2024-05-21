@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+import type { MenuConfig } from '@univerjs/ui';
+
 export interface ILayout {
     docContainerConfig?: DocContainerConfig;
     toolbarConfig?: DocToolbarConfig;
 }
 
 export interface IUniverDocsUIConfig {
+    menu?: MenuConfig;
     container?: HTMLElement | string;
     layout?: ILayout;
 }

@@ -58,9 +58,11 @@ export {
     type IMenuItemFactory,
     type IMenuSelectorItem,
     type IValueOption,
+    type MenuConfig,
     MenuGroup,
     MenuItemType,
     MenuPosition,
+    type MenuItemDefaultValueType,
 } from './services/menu/menu';
 export { DesktopMenuService, IMenuService } from './services/menu/menu.service';
 export { DesktopMessageService } from './services/message/desktop-message.service';
@@ -88,3 +90,4 @@ export { DesktopLocalStorageService } from './services/local-storage/local-stora
 export { CanvasPopupService, ICanvasPopupService, type IPopup } from './services/popup/canvas-popup.service';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { IProgressService } from './services/progress/progress.service';
+export { mergeMenuConfigs } from './common/menu-merge-configs';

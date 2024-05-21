@@ -15,6 +15,7 @@
  */
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -22,18 +23,35 @@ import { ScriptPanelComponentName, ToggleScriptPanelOperation } from '../command
 import { ScriptEditorPanel } from '../views/components/ScriptEditorPanel';
 import { UniscriptMenuItemFactory } from './menu';
 
+export interface IUniverUniscriptConfig {
+    getWorkerUrl(moduleID: string, label: string): string;
+    menu: MenuConfig;
+}
+
+export const DefaultUniscriptConfig = {};
+
 @OnLifecycle(LifecycleStages.Steady, UniscriptController)
 export class UniscriptController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverUniscriptConfig>,
         @Inject(Injector) private readonly _injector: Injector,
-        @IMenuService menuService: IMenuService,
+        @IMenuService private readonly _menuService: IMenuService,
         @ICommandService commandService: ICommandService,
         @Inject(ComponentManager) componentManager: ComponentManager
     ) {
         super();
 
-        this.disposeWithMe(menuService.addMenuItem(this._injector.invoke(UniscriptMenuItemFactory)));
+        this._initMenuConfigs();
+
+        this.disposeWithMe(_menuService.addMenuItem(this._injector.invoke(UniscriptMenuItemFactory)));
         this.disposeWithMe(componentManager.register(ScriptPanelComponentName, ScriptEditorPanel));
         this.disposeWithMe(commandService.registerCommand(ToggleScriptPanelOperation));
+    }
+
+    private _initMenuConfigs() {
+        const { menu = {} } = this._config;
+        Object.entries(menu).forEach(([id, config]) => {
+            this._menuService.setMenuConfigs(id, config);
+        });
     }
 }

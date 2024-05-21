@@ -68,9 +68,7 @@ export class UniverDocsUIPlugin extends Plugin {
     ) {
         super();
 
-        this._localeService.load({
-            zhCN,
-        });
+        this._localeService.load({ zhCN });
 
         this._config = Tools.deepMerge({}, DefaultDocUiConfig, this._config);
         this._initDependencies(_injector);
@@ -104,7 +102,12 @@ export class UniverDocsUIPlugin extends Plugin {
     private _initDependencies(injector: Injector) {
         const dependencies: Dependency[] = [
             // Controller
-            [DocUIController],
+            [
+                DocUIController,
+                {
+                    useFactory: () => this._injector.createInstance(DocUIController, this._config),
+                },
+            ],
             [DocClipboardController],
             [DocEditorBridgeController],
             [DocRenderController],

@@ -16,6 +16,7 @@
 
 import {
     BooleanNumber,
+    DEFAULT_STYLES,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
     FOCUSING_SHEET,
@@ -66,9 +67,11 @@ import {
     FONT_SIZE_LIST,
     getMenuHiddenObservable,
     IClipboardInterfaceService,
+    IMenuService,
     MenuGroup,
     MenuItemType,
     MenuPosition,
+    mergeMenuConfigs,
     PasteCommand,
 } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
@@ -115,8 +118,11 @@ export enum SheetMenuPosition {
 
 export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const formatPainterService = accessor.get(IFormatPainterService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetOnceFormatPainterCommand.id);
+
+    return mergeMenuConfigs({
         id: SetOnceFormatPainterCommand.id,
         subId: SetInfiniteFormatPainterCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
@@ -141,7 +147,7 @@ export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    };
+    }, menuItemConfig);
 }
 
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -149,8 +155,11 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const contextService = accessor.get(IContextService);
     const selectionManagerService = accessor.get(SelectionManagerService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetRangeBoldCommand.id);
+
+    return mergeMenuConfigs({
         id: SetRangeBoldCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
@@ -205,7 +214,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
+    }, menuItemConfig);
 }
 
 export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -213,8 +222,11 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const contextService = accessor.get(IContextService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetRangeItalicCommand.id);
+
+    return mergeMenuConfigs({
         id: SetRangeItalicCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
@@ -261,7 +273,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
+    }, menuItemConfig);
 }
 
 export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -269,8 +281,11 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const contextService = accessor.get(IContextService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetRangeUnderlineCommand.id);
+
+    return mergeMenuConfigs({
         id: SetRangeUnderlineCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
@@ -318,7 +333,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         })),
 
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
+    }, menuItemConfig);
 }
 
 export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -326,8 +341,11 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const contextService = accessor.get(IContextService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetRangeStrickThroughCommand.id);
+
+    return mergeMenuConfigs({
         id: SetRangeStrickThroughCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
@@ -378,16 +396,19 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
+    }, menuItemConfig);
 }
 
 export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
-    const defaultValue = FONT_FAMILY_LIST[0].value;
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetRangeFontFamilyCommand.id);
+    const defaultValue = menuItemConfig?.defaultValue ? String(menuItemConfig?.defaultValue) : DEFAULT_STYLES.ff;
+
+    return mergeMenuConfigs({
         id: SetRangeFontFamilyCommand.id,
         tooltip: 'toolbar.font',
         group: MenuGroup.TOOLBAR_FORMAT,
@@ -430,7 +451,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
+    }, menuItemConfig);
 }
 
 export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
@@ -439,9 +460,12 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     const selectionManagerService = accessor.get(SelectionManagerService);
     const contextService = accessor.get(IContextService);
     const disabled$ = getCurrentSheetDisabled$(accessor);
-    const DEFAULT_SIZE = 11;
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetRangeFontSizeCommand.id);
+    const defaultValue = menuItemConfig?.defaultValue ? Number(menuItemConfig?.defaultValue) : DEFAULT_STYLES.fs;
+
+    return mergeMenuConfigs({
         id: SetRangeFontSizeCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.SELECTOR,
@@ -457,7 +481,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_SIZE_LIST,
         disabled$,
-        value$: deriveStateFromActiveSheet$(univerInstanceService, DEFAULT_SIZE, ({ worksheet }) => new Observable((subscriber) => {
+        value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
@@ -467,7 +491,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                         const range = worksheet.getRange(primary.startRow, primary.startColumn);
                         fs = range?.getFontSize();
                     }
-                    subscriber.next(fs ?? DEFAULT_SIZE);
+                    subscriber.next(fs ?? defaultValue);
                 }
 
                 if (
@@ -482,7 +506,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                     }
 
                     const fs = textRun.ts?.fs;
-                    subscriber.next(fs ?? DEFAULT_SIZE);
+                    subscriber.next(fs ?? defaultValue);
                 }
             });
 
@@ -492,30 +516,37 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                 const range = worksheet.getRange(primary.startRow, primary.startColumn);
                 fs = range?.getFontSize();
             }
-            subscriber.next(fs ?? DEFAULT_SIZE);
+            subscriber.next(fs ?? defaultValue);
 
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    };
+    }, menuItemConfig);
 }
 
 export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(ResetTextColorCommand.id);
+
+    return mergeMenuConfigs({
         id: ResetTextColorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
         icon: 'NoColor',
         positions: SetRangeTextColorCommand.id,
         disabled$: getCurrentSheetDisabled$(accessor),
-    };
+    }, menuItemConfig);
 }
 
 export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetRangeTextColorCommand.id);
+
+    return mergeMenuConfigs({
         id: SetRangeTextColorCommand.id,
         icon: 'FontColor',
         tooltip: 'toolbar.textColor.main',
@@ -532,38 +563,45 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             },
         ],
         value$: new Observable<string>((subscriber) => {
-            const defaultColor = themeService.getCurrentTheme().textColor;
+            const defaultValue = menuItemConfig?.defaultValue ? String(menuItemConfig?.defaultValue) : themeService.getCurrentTheme().textColor;
             const disposable = commandService.onCommandExecuted((c) => {
                 if (c.id === SetRangeTextColorCommand.id) {
                     const color = (c.params as { value: string }).value;
-                    subscriber.next(color ?? defaultColor);
+                    subscriber.next(color ?? defaultValue);
                 }
             });
 
-            subscriber.next(defaultColor);
+            subscriber.next(defaultValue);
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    };
+    }, menuItemConfig);
 }
 
 export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(ResetBackgroundColorCommand.id);
+
+    return mergeMenuConfigs({
         id: ResetBackgroundColorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
         icon: 'NoColor',
         positions: SetBackgroundColorCommand.id,
         disabled$: getCurrentSheetDisabled$(accessor),
-    };
+    }, menuItemConfig);
 }
 
 export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetBackgroundColorCommand.id);
+
+    return mergeMenuConfigs({
         id: SetBackgroundColorCommand.id,
         tooltip: 'toolbar.fillColor.main',
         group: MenuGroup.TOOLBAR_FORMAT,
@@ -579,20 +617,20 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             },
         ],
         value$: new Observable<string>((subscriber) => {
-            const defaultColor = themeService.getCurrentTheme().primaryColor;
+            const defaultValue = menuItemConfig?.defaultValue ? String(menuItemConfig?.defaultValue) : themeService.getCurrentTheme().primaryColor;
             const disposable = commandService.onCommandExecuted((c) => {
                 if (c.id === SetBackgroundColorCommand.id) {
                     const color = (c.params as { value: string }).value;
-                    subscriber.next(color ?? defaultColor);
+                    subscriber.next(color ?? defaultValue);
                 }
             });
 
-            subscriber.next(defaultColor);
+            subscriber.next(defaultValue);
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    };
+    }, menuItemConfig);
 }
 
 export const HORIZONTAL_ALIGN_CHILDREN = [
@@ -616,8 +654,12 @@ export const HORIZONTAL_ALIGN_CHILDREN = [
 export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<HorizontalAlign> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetHorizontalTextAlignCommand.id);
+    const defaultValue = menuItemConfig?.defaultValue ? (menuItemConfig?.defaultValue as unknown as HorizontalAlign) : HorizontalAlign.LEFT;
+
+    return mergeMenuConfigs({
         id: SetHorizontalTextAlignCommand.id,
         icon: HORIZONTAL_ALIGN_CHILDREN[0].icon,
         positions: [MenuPosition.TOOLBAR_START],
@@ -625,7 +667,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.SELECTOR,
         selections: HORIZONTAL_ALIGN_CHILDREN,
-        value$: deriveStateFromActiveSheet$(univerInstanceService, HorizontalAlign.LEFT, ({ worksheet }) => new Observable<HorizontalAlign>((subscriber) => {
+        value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable<HorizontalAlign>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
                 if (id !== SetHorizontalTextAlignCommand.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
@@ -639,7 +681,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
                     ha = range?.getHorizontalAlignment();
                 }
 
-                subscriber.next(ha ?? HorizontalAlign.LEFT);
+                subscriber.next(ha ?? defaultValue);
             });
 
             const primary = selectionManagerService.getLast()?.primary;
@@ -649,13 +691,13 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
                 ha = range?.getHorizontalAlignment();
             }
 
-            subscriber.next(ha ?? HorizontalAlign.LEFT);
+            subscriber.next(ha ?? defaultValue);
 
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    };
+    }, menuItemConfig);
 }
 
 export const VERTICAL_ALIGN_CHILDREN = [
@@ -679,8 +721,12 @@ export const VERTICAL_ALIGN_CHILDREN = [
 export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<VerticalAlign> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetVerticalTextAlignCommand.id);
+    const defaultValue = menuItemConfig?.defaultValue ? (menuItemConfig?.defaultValue as unknown as VerticalAlign) : VerticalAlign.BOTTOM;
+
+    return mergeMenuConfigs({
         id: SetVerticalTextAlignCommand.id,
         icon: VERTICAL_ALIGN_CHILDREN[2].icon,
         tooltip: 'toolbar.verticalAlignMode.main',
@@ -688,7 +734,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         selections: VERTICAL_ALIGN_CHILDREN,
-        value$: deriveStateFromActiveSheet$(univerInstanceService, VerticalAlign.BOTTOM, ({ worksheet }) => new Observable<VerticalAlign>((subscriber) => {
+        value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable<VerticalAlign>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
                 if (id !== SetVerticalTextAlignCommand.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
@@ -702,7 +748,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
                     va = range?.getVerticalAlignment();
                 }
 
-                subscriber.next(va ?? VerticalAlign.BOTTOM);
+                subscriber.next(va ?? defaultValue);
             });
 
             const primary = selectionManagerService.getLast()?.primary;
@@ -712,13 +758,13 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
                 va = range?.getVerticalAlignment();
             }
 
-            subscriber.next(va ?? VerticalAlign.BOTTOM);
+            subscriber.next(va ?? defaultValue);
 
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    };
+    }, menuItemConfig);
 }
 
 export const TEXT_WRAP_CHILDREN = [
@@ -742,8 +788,12 @@ export const TEXT_WRAP_CHILDREN = [
 export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<WrapStrategy> {
     const selectionManagerService = accessor.get(SelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetTextWrapCommand.id);
+    const defaultValue = menuItemConfig?.defaultValue ? (menuItemConfig?.defaultValue as unknown as WrapStrategy) : WrapStrategy.OVERFLOW;
+
+    return mergeMenuConfigs({
         id: SetTextWrapCommand.id,
         tooltip: 'toolbar.textWrapMode.main',
         icon: TEXT_WRAP_CHILDREN[0].icon,
@@ -751,7 +801,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         selections: TEXT_WRAP_CHILDREN,
-        value$: deriveStateFromActiveSheet$<WrapStrategy>(univerInstanceService, WrapStrategy.OVERFLOW, ({ worksheet }) => new Observable((subscriber) => {
+        value$: deriveStateFromActiveSheet$<WrapStrategy>(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
                 if (id !== SetTextWrapCommand.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
@@ -765,7 +815,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
                     ws = range?.getWrapStrategy();
                 }
 
-                subscriber.next(ws ?? WrapStrategy.OVERFLOW);
+                subscriber.next(ws ?? defaultValue);
             });
 
             const primary = selectionManagerService.getLast()?.primary;
@@ -775,13 +825,13 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
                 ws = range?.getWrapStrategy();
             }
 
-            subscriber.next(ws ?? WrapStrategy.OVERFLOW);
+            subscriber.next(ws ?? defaultValue);
 
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    };
+    }, menuItemConfig);
 }
 
 export const TEXT_ROTATE_CHILDREN = [
@@ -820,8 +870,12 @@ export const TEXT_ROTATE_CHILDREN = [
 export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number | string> {
     const selectionManagerService = accessor.get(SelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetTextRotationCommand.id);
+    const defaultValue = menuItemConfig?.defaultValue ? Number(menuItemConfig?.defaultValue) : 0;
+
+    return mergeMenuConfigs({
         id: SetTextRotationCommand.id,
         tooltip: 'toolbar.textRotateMode.main',
         icon: TEXT_ROTATE_CHILDREN[0].icon,
@@ -829,7 +883,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         type: MenuItemType.SELECTOR,
         selections: TEXT_ROTATE_CHILDREN,
         positions: [MenuPosition.TOOLBAR_START],
-        value$: deriveStateFromActiveSheet$(univerInstanceService, 0, ({ worksheet }) => new Observable<number | string>((subscriber) => {
+        value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable<number | string>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
                 if (id !== SetTextRotationCommand.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
@@ -846,7 +900,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
                 if (tr?.v === BooleanNumber.TRUE) {
                     subscriber.next('v');
                 } else {
-                    subscriber.next((tr && tr.a) ?? 0);
+                    subscriber.next((tr && tr.a) ?? defaultValue);
                 }
             });
 
@@ -860,14 +914,14 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
             if (tr?.v === BooleanNumber.TRUE) {
                 subscriber.next('v');
             } else {
-                subscriber.next((tr && tr.a) ?? 0);
+                subscriber.next((tr && tr.a) ?? defaultValue);
             }
 
             return disposable.dispose;
         })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    };
+    }, menuItemConfig);
 }
 
 // #region - copy cut paste
@@ -877,8 +931,12 @@ function menuClipboardDisabledObservable(injector: IAccessor): Observable<boolea
     return new Observable((subscriber) => subscriber.next(!injector.get(IClipboardInterfaceService).supportClipboard));
 }
 
-export function CopyMenuItemFactory(): IMenuButtonItem {
-    return {
+export function CopyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(CopyCommand.id);
+
+    return mergeMenuConfigs({
         id: CopyCommand.id,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
@@ -889,11 +947,15 @@ export function CopyMenuItemFactory(): IMenuButtonItem {
             SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
             SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
         ],
-    };
+    }, menuItemConfig);
 }
 
-export function CutMenuItemFactory(): IMenuButtonItem {
-    return {
+export function CutMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(CutCommand.id);
+
+    return mergeMenuConfigs({
         id: CutCommand.id,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
@@ -903,11 +965,15 @@ export function CutMenuItemFactory(): IMenuButtonItem {
             SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
             SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
         ],
-    };
+    }, menuItemConfig);
 }
 
 export function PasteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(PasteCommand.id);
+
+    return mergeMenuConfigs({
         id: PasteCommand.id,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
@@ -919,12 +985,16 @@ export function PasteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
             SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
         ],
-    };
+    }, menuItemConfig);
 }
 
 export const PASTE_SPECIAL_MENU_ID = 'sheet.menu.paste-special';
 export function PasteSpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(PASTE_SPECIAL_MENU_ID);
+
+    return mergeMenuConfigs({
         id: PASTE_SPECIAL_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.SUBITEMS,
@@ -936,156 +1006,211 @@ export function PasteSpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorI
             SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
             SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
         ],
-    };
+    }, menuItemConfig);
 }
 
 export function PasteValueMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SheetPasteValueCommand.id);
+
+    return mergeMenuConfigs({
         id: SheetPasteValueCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteValue',
         positions: [PASTE_SPECIAL_MENU_ID],
         disabled$: menuClipboardDisabledObservable(accessor),
-    };
+    }, menuItemConfig);
 }
 
 export function PasteFormatMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SheetPasteFormatCommand.id);
+
+    return mergeMenuConfigs({
         id: SheetPasteFormatCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteFormat',
         positions: [PASTE_SPECIAL_MENU_ID],
         disabled$: menuClipboardDisabledObservable(accessor),
-    };
+    }, menuItemConfig);
 }
 
 export function PasteColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SheetPasteColWidthCommand.id);
+
+    return mergeMenuConfigs({
         id: SheetPasteColWidthCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteColWidth',
         positions: [PASTE_SPECIAL_MENU_ID],
         disabled$: menuClipboardDisabledObservable(accessor),
-    };
+    }, menuItemConfig);
 }
 
 export function PasteBesidesBorderMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SheetPasteBesidesBorderCommand.id);
+
+    return mergeMenuConfigs({
         id: SheetPasteBesidesBorderCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.pasteBesidesBorder',
         positions: [PASTE_SPECIAL_MENU_ID],
         disabled$: menuClipboardDisabledObservable(accessor),
-    };
+    }, menuItemConfig);
 }
 
-export function FitContentMenuItemFactory(): IMenuButtonItem {
-    return {
+export function FitContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SetWorksheetRowIsAutoHeightCommand.id);
+
+    return mergeMenuConfigs({
         id: SetWorksheetRowIsAutoHeightCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         icon: 'AutoHeight',
         title: 'rightClick.fitContent',
-    };
+    }, menuItemConfig);
 }
 
 export const SHEET_FROZEN_MENU_ID = 'sheet.menu.sheet-frozen';
 
-export function SheetFrozenMenuItemFactory(): IMenuSelectorItem<string> {
-    return {
+export function SheetFrozenMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SHEET_FROZEN_MENU_ID);
+
+    return mergeMenuConfigs({
         id: SHEET_FROZEN_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.freeze',
         icon: 'FreezeToSelectedSingle',
         positions: [MenuPosition.CONTEXT_MENU],
-    };
+    }, menuItemConfig);
 }
 
 export const SHEET_FROZEN_HEADER_MENU_ID = 'sheet.header-menu.sheet-frozen';
 
-export function SheetFrozenHeaderMenuItemFactory(): IMenuSelectorItem<string> {
-    return {
+export function SheetFrozenHeaderMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SHEET_FROZEN_HEADER_MENU_ID);
+
+    return mergeMenuConfigs({
         id: SHEET_FROZEN_HEADER_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.freeze',
         icon: 'FreezeToSelectedSingle',
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
-    };
+    }, menuItemConfig);
 }
 
-export function FrozenMenuItemFactory(): IMenuButtonItem {
-    return {
+export function FrozenMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SetSelectionFrozenCommand.id);
+
+    return mergeMenuConfigs({
         id: SetSelectionFrozenCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SHEET_FROZEN_MENU_ID, SHEET_FROZEN_HEADER_MENU_ID],
         title: 'rightClick.freeze',
         icon: 'FreezeToSelectedSingle',
-    };
+    }, menuItemConfig);
 }
 
-export function FrozenRowMenuItemFactory(): IMenuButtonItem {
-    return {
+export function FrozenRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SetRowFrozenCommand.id);
+
+    return mergeMenuConfigs({
         id: SetRowFrozenCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SHEET_FROZEN_MENU_ID],
         title: 'rightClick.freezeRow',
         icon: 'FreezeRowSingle',
-    };
+    }, menuItemConfig);
 }
 
-export function FrozenColMenuItemFactory(): IMenuButtonItem {
-    return {
+export function FrozenColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SetColumnFrozenCommand.id);
+
+    return mergeMenuConfigs({
         id: SetColumnFrozenCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SHEET_FROZEN_MENU_ID],
         title: 'rightClick.freezeCol',
         icon: 'FreezeColumnSingle',
-    };
+    }, menuItemConfig);
 }
 
-export function CancelFrozenMenuItemFactory(): IMenuButtonItem {
-    return {
+export function CancelFrozenMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(CancelFrozenCommand.id);
+
+    return mergeMenuConfigs({
         id: CancelFrozenCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SHEET_FROZEN_MENU_ID, SHEET_FROZEN_HEADER_MENU_ID],
         title: 'rightClick.cancelFreeze',
         icon: 'CancelFreezeSingle',
-    };
+    }, menuItemConfig);
 }
 
-export function HideRowMenuItemFactory(): IMenuButtonItem {
-    return {
+export function HideRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(HideRowConfirmCommand.id);
+
+    return mergeMenuConfigs({
         id: HideRowConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         icon: 'Hide',
         title: 'rightClick.hideSelectedRow',
-    };
+    }, menuItemConfig);
 }
 
-export function HideColMenuItemFactory(): IMenuButtonItem {
-    return {
+export function HideColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(HideColConfirmCommand.id);
+
+    return mergeMenuConfigs({
         id: HideColConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         icon: 'Hide',
         title: 'rightClick.hideSelectedColumn',
-    };
+    }, menuItemConfig);
 }
 
 export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
-
+    const menuService = accessor.get(IMenuService);
     const commandService = accessor.get(ICommandService);
+
     const affectedCommands = [SetSelectionsOperation, SetRowHiddenMutation, SetRowVisibleMutation].map((c) => c.id);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetSelectedRowsVisibleCommand.id);
+
+    return mergeMenuConfigs({
         id: SetSelectedRowsVisibleCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
@@ -1111,7 +1236,7 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             subscriber.next(!hasHiddenRowsInSelections());
             return () => disposable.dispose();
         })),
-    };
+    }, menuItemConfig);
 }
 
 export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -1119,8 +1244,11 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const selectionManagerService = accessor.get(SelectionManagerService);
     const commandService = accessor.get(ICommandService);
     const affectedCommands = [SetSelectionsOperation, SetColHiddenMutation, SetColVisibleMutation].map((c) => c.id);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetSelectedColsVisibleCommand.id);
+
+    return mergeMenuConfigs({
         id: SetSelectedColsVisibleCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
@@ -1147,15 +1275,19 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             subscriber.next(!hasHiddenColsInSelections());
             return () => disposable.dispose();
         })),
-    };
+    }, menuItemConfig);
 }
 
 export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetRowHeightCommand.id);
+    const defaultValue = menuItemConfig?.defaultValue ? Number(menuItemConfig?.defaultValue) : 0;
+
+    return mergeMenuConfigs({
         id: SetRowHeightCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
@@ -1170,10 +1302,10 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
                 max: 1000,
             },
         },
-        value$: deriveStateFromActiveSheet$(univerInstanceService, 0, ({ worksheet }) => new Observable((subscriber) => {
+        value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
             function update() {
                 const primary = selectionManagerService.getLast()?.primary;
-                const rowHeight = primary ? worksheet.getRowHeight(primary.startRow) : 0;
+                const rowHeight = primary ? worksheet.getRowHeight(primary.startRow) : defaultValue;
                 subscriber.next(rowHeight);
             }
 
@@ -1187,15 +1319,19 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
             update();
             return disposable.dispose;
         })),
-    };
+    }, menuItemConfig);
 }
 
 export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
+    const menuService = accessor.get(IMenuService);
 
-    return {
+    const menuItemConfig = menuService.getMenuConfig(SetColWidthCommand.id);
+    const defaultValue = menuItemConfig?.defaultValue ? Number(menuItemConfig?.defaultValue) : 0;
+
+    return mergeMenuConfigs({
         id: SetColWidthCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
@@ -1210,10 +1346,10 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
                 max: 1000,
             },
         },
-        value$: deriveStateFromActiveSheet$(univerInstanceService, 0, ({ worksheet }) => new Observable((subscriber) => {
+        value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
             function update() {
                 const primary = selectionManagerService.getLast()?.primary;
-                let colWidth: number = 0;
+                let colWidth: number = defaultValue;
                 if (primary != null) {
                     colWidth = worksheet.getColumnWidth(primary.startColumn);
                 }
@@ -1231,7 +1367,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             update();
             return disposable.dispose;
         })),
-    };
+    }, menuItemConfig);
 }
 
 function getFontStyleAtCursor(accessor: IAccessor) {

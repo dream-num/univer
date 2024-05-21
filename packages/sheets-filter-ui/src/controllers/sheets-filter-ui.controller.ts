@@ -16,7 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import { ICommandService, IContextService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import type { IMenuItemFactory } from '@univerjs/ui';
+import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -34,6 +34,12 @@ import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
 import { ClearFilterCriteriaMenuItemFactory, ReCalcFilterMenuItemFactory, SmartToggleFilterMenuItemFactory } from './sheets-filter.menu';
 import { SheetsFilterRenderController } from './sheets-filter-render.controller';
 
+export interface IUniverSheetsFilterUIConfig {
+    menu: MenuConfig;
+}
+
+export const DefaultSheetFilterUiConfig = {};
+
 export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 
 /**
@@ -42,6 +48,7 @@ export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 @OnLifecycle(LifecycleStages.Ready, SheetsFilterUIController)
 export class SheetsFilterUIController extends RxDisposable {
     constructor(
+        private readonly _config: Partial<IUniverSheetsFilterUIConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(SheetsFilterPanelService) private readonly _sheetsFilterPanelService: SheetsFilterPanelService,
@@ -56,6 +63,7 @@ export class SheetsFilterUIController extends RxDisposable {
 
         this._initCommands();
         this._initShortcuts();
+        this._initMenuConfigs();
         this._initMenuItems();
         this._initUI();
         this._initRenderControllers();
@@ -86,6 +94,13 @@ export class SheetsFilterUIController extends RxDisposable {
             CloseFilterPanelOperation,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
+        });
+    }
+
+    private _initMenuConfigs() {
+        const { menu = {} } = this._config;
+        Object.entries(menu).forEach(([id, config]) => {
+            this._menuService.setMenuConfigs(id, config);
         });
     }
 

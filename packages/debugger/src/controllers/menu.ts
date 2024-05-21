@@ -17,7 +17,7 @@
 import { LocaleType } from '@univerjs/core';
 import { defaultTheme, greenTheme } from '@univerjs/design';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { MenuItemType, MenuPosition } from '@univerjs/ui';
+import { IMenuService, MenuItemType, MenuPosition, mergeMenuConfigs } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { ConfirmOperation } from '../commands/operations/confirm.operation';
@@ -32,7 +32,11 @@ import { ThemeOperation } from '../commands/operations/theme.operation';
 import { CreateEmptySheetCommand, DisposeCurrentUnitCommand } from '../commands/commands/unit.command';
 
 export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(LocaleOperation.id);
+
+    return mergeMenuConfigs({
         id: LocaleOperation.id,
         icon: 'VueI18nIcon',
         tooltip: 'i18n',
@@ -52,11 +56,15 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
                 value: LocaleType.RU_RU,
             },
         ],
-    };
+    }, menuItemConfig);
 }
 
 export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(ThemeOperation.id);
+
+    return mergeMenuConfigs({
         id: ThemeOperation.id,
         title: 'Theme',
         tooltip: 'Theme',
@@ -72,11 +80,15 @@ export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
                 value: defaultTheme as any,
             },
         ],
-    };
+    }, menuItemConfig);
 }
 
 export function NotificationMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(NotificationOperation.id);
+
+    return mergeMenuConfigs({
         id: NotificationOperation.id,
         title: 'Notification',
         tooltip: 'Notification',
@@ -100,11 +112,15 @@ export function NotificationMenuItemFactory(accessor: IAccessor): IMenuSelectorI
                 value: 'Notification Error',
             },
         ],
-    };
+    }, menuItemConfig);
 }
 
 export function DialogMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(DialogOperation.id);
+
+    return mergeMenuConfigs({
         id: DialogOperation.id,
         title: 'Dialog',
         tooltip: 'Dialog',
@@ -120,11 +136,15 @@ export function DialogMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
                 value: 'draggable',
             },
         ],
-    };
+    }, menuItemConfig);
 }
 
 export function ConfirmMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(ConfirmOperation.id);
+
+    return mergeMenuConfigs({
         id: ConfirmOperation.id,
         title: 'Confirm',
         tooltip: 'Confirm',
@@ -136,11 +156,15 @@ export function ConfirmMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
                 value: 'confirm',
             },
         ],
-    };
+    }, menuItemConfig);
 }
 
 export function MessageMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(MessageOperation.id);
+
+    return mergeMenuConfigs({
         id: MessageOperation.id,
         title: 'Message',
         tooltip: 'Message',
@@ -152,11 +176,15 @@ export function MessageMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
                 value: '',
             },
         ],
-    };
+    }, menuItemConfig);
 }
 
 export function SidebarMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SidebarOperation.id);
+
+    return mergeMenuConfigs({
         id: SidebarOperation.id,
         title: 'Sidebar',
         tooltip: 'Sidebar',
@@ -172,11 +200,15 @@ export function SidebarMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
                 value: 'close',
             },
         ],
-    };
+    }, menuItemConfig);
 }
 
 export function SetEditableMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SetEditable.id);
+
+    return mergeMenuConfigs({
         id: SetEditable.id,
         title: 'Editable',
         tooltip: 'Editable',
@@ -192,11 +224,15 @@ export function SetEditableMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
                 value: 'sheet',
             },
         ],
-    };
+    }, menuItemConfig);
 }
 
 export function SaveSnapshotSetEditableMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
-    return {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(SaveSnapshotOptions.id);
+
+    return mergeMenuConfigs({
         id: SaveSnapshotOptions.id,
         type: MenuItemType.SELECTOR,
         title: 'Snapshot',
@@ -215,39 +251,51 @@ export function SaveSnapshotSetEditableMenuItemFactory(accessor: IAccessor): IMe
                 value: 'record',
             },
         ],
-    };
+    }, menuItemConfig);
 }
 
 const UNIT_ITEM_MENU_ID = 'debugger.unit-menu-item';
 
-export function UnitMenuItemFactory(): IMenuSelectorItem {
-    return {
+export function UnitMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(UNIT_ITEM_MENU_ID);
+
+    return mergeMenuConfigs({
         id: UNIT_ITEM_MENU_ID,
         title: 'Unit',
         tooltip: 'Unit Commands',
         type: MenuItemType.SUBITEMS,
         positions: [MenuPosition.TOOLBAR_OTHERS],
-    };
+    }, menuItemConfig);
 }
 
-export function DisposeCurrentUnitMenuItemFactory(): IMenuButtonItem {
-    return {
+export function DisposeCurrentUnitMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(DisposeCurrentUnitCommand.id);
+
+    return mergeMenuConfigs({
         id: DisposeCurrentUnitCommand.id,
         title: 'Dispose Current Unit',
         tooltip: 'Dispose Current Unit',
         icon: 'DS',
         type: MenuItemType.BUTTON,
         positions: [UNIT_ITEM_MENU_ID],
-    };
+    }, menuItemConfig);
 }
 
-export function CreateEmptySheetMenuItemFactory(): IMenuButtonItem {
-    return {
+export function CreateEmptySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(CreateEmptySheetCommand.id);
+
+    return mergeMenuConfigs({
         id: CreateEmptySheetCommand.id,
         title: 'Create Another Sheet',
         tooltip: 'Create Another Sheet',
         icon: 'CR',
         type: MenuItemType.BUTTON,
         positions: [UNIT_ITEM_MENU_ID],
-    };
+    }, menuItemConfig);
 }

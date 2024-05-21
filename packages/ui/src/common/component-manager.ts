@@ -16,6 +16,7 @@
 
 import { toDisposable } from '@univerjs/core';
 import {
+    AddDigitsSingle,
     AdjustHeight,
     AdjustWidth,
     AlignBottomSingle,
@@ -34,6 +35,7 @@ import {
     ClearFormat,
     CntSingle,
     CodeSingle,
+    Conditions,
     ContentSingle16,
     Copy,
     DeleteCellMoveDown,
@@ -75,6 +77,7 @@ import {
     MaxSingle,
     MergeAllSingle,
     MinSingle,
+    MoreDownSingle,
     NoBorderSingle,
     NoColor,
     NoRotationSingle,
@@ -83,15 +86,18 @@ import {
     OverflowSingle,
     PaintBucket,
     PasteSpecial,
+    PercentSingle,
     PipingSingle,
     RedoSingle,
     Reduce,
+    ReduceDigitsSingle,
     RightBorder,
     RightDoubleDiagonalSingle,
     RightInsertColumn,
     RightJustifyingSingle,
     RightRotationFortyFiveDegreesSingle,
     RightRotationNinetyDegreesSingle,
+    RmbSingle,
     SlashSingle,
     StrikethroughSingle,
     SubscriptSingle,
@@ -135,6 +141,7 @@ export type ComponentList = Map<string, IVue3Component | IReactComponent>;
 export class ComponentManager {
     private _components: ComponentList = new Map();
 
+    // eslint-disable-next-line max-lines-per-function
     constructor() {
         const iconList: Record<string, React.ForwardRefExoticComponent<any>> = {
             AlignBottomSingle,
@@ -227,6 +234,12 @@ export class ComponentManager {
             DirectExportSingle,
             FolderSingle,
             ExportSingle,
+            Conditions,
+            RmbSingle,
+            MoreDownSingle,
+            AddDigitsSingle,
+            ReduceDigitsSingle,
+            PercentSingle,
         };
 
         for (const k in iconList) {

@@ -15,8 +15,9 @@
  */
 
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { IMenuService, MenuGroup, MenuItemType, MenuPosition, mergeMenuConfigs } from '@univerjs/ui';
 
+import type { IAccessor } from '@wendellhu/redi';
 import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command ';
 import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-up-confirm.command';
 import {
@@ -26,57 +27,77 @@ import {
 import { SheetMenuPosition } from './menu';
 
 const DELETE_RANGE_MENU_ID = 'sheet.menu.delete';
-export function DeleteRangeMenuItemFactory(): IMenuSelectorItem<string> {
-    return {
+export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(DELETE_RANGE_MENU_ID);
+
+    return mergeMenuConfigs({
         id: DELETE_RANGE_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.delete',
         icon: 'Reduce',
         positions: [MenuPosition.CONTEXT_MENU],
-    };
+    }, menuItemConfig);
 }
 
-export function RemoveColMenuItemFactory(): IMenuButtonItem {
-    return {
+export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(RemoveColConfirmCommand.id);
+
+    return mergeMenuConfigs({
         id: RemoveColConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'DeleteColumn',
         positions: [DELETE_RANGE_MENU_ID, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         title: 'rightClick.deleteSelectedColumn',
-    };
+    }, menuItemConfig);
 }
 
-export function RemoveRowMenuItemFactory(): IMenuButtonItem {
-    return {
+export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(RemoveRowConfirmCommand.id);
+
+    return mergeMenuConfigs({
         id: RemoveRowConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'DeleteRow',
         positions: [DELETE_RANGE_MENU_ID, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.deleteSelectedRow',
-    };
+    }, menuItemConfig);
 }
 
-export function DeleteRangeMoveLeftMenuItemFactory(): IMenuButtonItem {
-    return {
+export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(DeleteRangeMoveLeftConfirmCommand.id);
+
+    return mergeMenuConfigs({
         id: DeleteRangeMoveLeftConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveLeft',
         icon: 'DeleteCellShiftLeft',
         positions: [DELETE_RANGE_MENU_ID],
-    };
+    }, menuItemConfig);
 }
 
-export function DeleteRangeMoveUpMenuItemFactory(): IMenuButtonItem {
-    return {
+export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const menuService = accessor.get(IMenuService);
+
+    const menuItemConfig = menuService.getMenuConfig(DeleteRangeMoveUpConfirmCommand.id);
+
+    return mergeMenuConfigs({
         id: DeleteRangeMoveUpConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveUp',
         icon: 'DeleteCellShiftUp',
         positions: [DELETE_RANGE_MENU_ID],
-    };
+    }, menuItemConfig);
 }

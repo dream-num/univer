@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import type { DependencyOverride } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
+import type { MenuConfig } from '../../services/menu/menu';
 
 export interface IWorkbenchOptions {
     container?: string | HTMLElement;
@@ -29,3 +31,12 @@ export interface IUIController {
 }
 
 export const IUIController = createIdentifier<IUIController>('univer.ui-controller');
+
+export interface IUniverUIConfig extends IWorkbenchOptions {
+    /** Disable auto focus when Univer bootstraps. */
+    disableAutoFocus?: true;
+
+    override?: DependencyOverride;
+
+    menu: MenuConfig;
+}

@@ -23,6 +23,8 @@ import {
     RxDisposable,
 } from '@univerjs/core';
 import { SearchSingle16 } from '@univerjs/icons';
+import type {
+    MenuConfig } from '@univerjs/ui';
 import {
     ComponentManager,
     IDialogService,
@@ -51,6 +53,12 @@ import {
 } from './find-replace.shortcut';
 import { FindReplaceMenuItemFactory } from './find-replace.menu';
 
+export interface IUniverFindReplaceConfig {
+    menu: MenuConfig;
+}
+
+export const DefaultFindReplaceConfig = {};
+
 const FIND_REPLACE_DIALOG_ID = 'DESKTOP_FIND_REPLACE_DIALOG';
 
 const FIND_REPLACE_PANEL_WIDTH = 350;
@@ -60,6 +68,7 @@ const FIND_REPLACE_PANEL_TOP_PADDING = -90;
 @OnLifecycle(LifecycleStages.Rendered, FindReplaceController)
 export class FindReplaceController extends RxDisposable {
     constructor(
+        private readonly _config: Partial<IUniverFindReplaceConfig>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IMenuService private readonly _menuService: IMenuService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
@@ -74,6 +83,7 @@ export class FindReplaceController extends RxDisposable {
         super();
 
         this._initCommands();
+        this._initMenuConfigs();
         this._initUI();
         this._initShortcuts();
     }
@@ -99,6 +109,13 @@ export class FindReplaceController extends RxDisposable {
             GoToPreviousFindMatchShortcutItem,
             GoToNextFindMatchShortcutItem,
         ].forEach((s) => this.disposeWithMe(this._shortcutService.registerShortcut(s)));
+    }
+
+    private _initMenuConfigs() {
+        const { menu = {} } = this._config;
+        Object.entries(menu).forEach(([id, config]) => {
+            this._menuService.setMenuConfigs(id, config);
+        });
     }
 
     private _initUI(): void {

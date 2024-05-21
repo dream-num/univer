@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Plugin, UniverInstanceType } from '@univerjs/core';
+import { Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SHEET_NUMFMT_PLUGIN } from './base/const/PLUGIN_NAME';
@@ -22,7 +22,8 @@ import { NumfmtCellContent } from './controllers/numfmt.cell-content.controller'
 import { NumfmtController } from './controllers/numfmt.controller';
 import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
 import { NumfmtI18nController } from './controllers/numfmt.i18n.controller';
-import { NumfmtMenuController } from './controllers/numfmt.menu.controller';
+import type { IUniverSheetsNumfmtConfig } from './controllers/numfmt.menu.controller';
+import { DefaultSheetNumfmtConfig, NumfmtMenuController } from './controllers/numfmt.menu.controller';
 import { INumfmtController } from './controllers/type';
 import { UserHabitController } from './controllers/user-habit.controller';
 
@@ -31,10 +32,11 @@ export class UniverSheetsNumfmtPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        _config: unknown,
+        private readonly _config: Partial<IUniverSheetsNumfmtConfig> = {},
         @Inject(Injector) override readonly _injector: Injector
     ) {
         super();
+        this._config = Tools.deepMerge({}, DefaultSheetNumfmtConfig, this._config);
     }
 
     override onStarting(): void {
@@ -43,6 +45,12 @@ export class UniverSheetsNumfmtPlugin extends Plugin {
         this._injector.add([UserHabitController]);
         this._injector.add([NumfmtCellContent]);
         this._injector.add([NumfmtI18nController]);
-        this._injector.add([NumfmtMenuController]);
+        this._injector.add(
+            [
+                NumfmtMenuController,
+                {
+                    useFactory: () => this._injector.createInstance(NumfmtMenuController, this._config),
+                },
+            ]);
     }
 }

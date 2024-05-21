@@ -31,6 +31,7 @@ import {
 } from '../components/font-family';
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { DocBackground } from '../views/doc-background/DocBackground';
+import type { IUniverDocsUIConfig } from '../basics';
 import {
     AlignCenterMenuItemFactory,
     AlignJustifyMenuItemFactory,
@@ -55,6 +56,7 @@ import {
 @OnLifecycle(LifecycleStages.Rendered, DocUIController)
 export class DocUIController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverDocsUIConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ILayoutService private readonly _layoutService: ILayoutService,
@@ -74,6 +76,13 @@ export class DocUIController extends Disposable {
         this.disposeWithMe(componentManager.register(FONT_FAMILY_COMPONENT, FontFamily));
         this.disposeWithMe(componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem));
         this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
+    }
+
+    private _initMenuConfigs() {
+        const { menu = {} } = this._config;
+        Object.entries(menu).forEach(([id, config]) => {
+            this._menuService.setMenuConfigs(id, config);
+        });
     }
 
     private _initMenus(): void {
@@ -105,6 +114,7 @@ export class DocUIController extends Disposable {
 
     private _init(): void {
         this._initCustomComponents();
+        this._initMenuConfigs();
         this._initMenus();
         this._initDocBackground();
         this._initFocusHandler();

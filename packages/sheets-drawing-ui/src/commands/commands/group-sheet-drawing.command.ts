@@ -27,7 +27,6 @@ import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import { groupToUngroup } from './utils';
 
-
 /**
  * The command to insert new defined name
  */

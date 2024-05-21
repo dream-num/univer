@@ -24,7 +24,6 @@ import {
 import { COMPONENT_UPLOAD_FILE_MENU, UploadFileType } from '../upload-component/component-name';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../../commands/operations/insert-image.operation';
 
-
 export const ImageUploadIcon = 'addition-and-subtraction-single';
 const IMAGE_MENU_ID = 'sheet.menu.image';
 
@@ -39,7 +38,6 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
-
 
 export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
     return {

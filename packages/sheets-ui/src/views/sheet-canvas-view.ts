@@ -127,7 +127,7 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
             isRelativeY: true,
             allowCache: true,
             bufferEdgeX: 100,
-            bufferEdgeY: 50,
+            bufferEdgeY: 100,
         });
 
         const viewRowTop = new Viewport(VIEWPORT_KEY.VIEW_ROW_TOP, scene, {

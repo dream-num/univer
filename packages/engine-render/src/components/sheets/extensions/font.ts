@@ -134,14 +134,15 @@ export class Font extends SheetExtension {
                         startX = mergeInfo.startX;
                         endX = mergeInfo.endX;
                     }
-
                     /**
                      * Incremental content rendering for texture mapping
                      * startRow endRow 和 diffRanges 在 row 上不相交, 那么返回不渲染
                      * PS 如果这个单元格并不在 merge 区域内, mergeInfo start 和 end 就是单元格本身
                      */
-                    if (!this.isRowInDiffRanges(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
-                        return true;
+                    if (diffRanges) {
+                        if (!this.isRowInRanges(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
+                            return true;
+                        }
                     }
 
                     /**
@@ -257,6 +258,7 @@ export class Font extends SheetExtension {
                         }
                     } else {
                         ctx.rectByPrecision(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
+                        // for normal cell, forbid text overflow cellarea
                         ctx.clip();
                         // ctx.clearRectForTexture(
                         //     startX + 1 / scale,

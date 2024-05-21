@@ -571,6 +571,16 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 state = this._updateCloseKeepRatioState(type, left, top, width, height, moveLeft, moveTop);
             }
 
+            const { width: newWidth = 0, height: newHeight = 0 } = state;
+
+            if (newWidth < 20) {
+                state.width = 20;
+            }
+
+            if (newHeight < 20) {
+                state.height = 10;
+            }
+
             moveObject.transformByState(this._applyRotationForResult(state, { left, top, width, height }, angle, isCropper));
         };
 

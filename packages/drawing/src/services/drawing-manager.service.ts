@@ -318,19 +318,29 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         ops.push(
             json1.insertOp([groupUnitId, groupSubUnitId, DrawingMapItemType.data, groupDrawingId], parent as unknown as json1.Doc)
         );
+        let maxChildIndex = Number.NEGATIVE_INFINITY;
         children.forEach((child) => {
             const { unitId, subUnitId, drawingId } = child;
+            const index = this._hasDrawingOrder({ unitId, subUnitId, drawingId });
+            maxChildIndex = Math.max(maxChildIndex, index);
             ops.push(
                 ...this._getUpdateParamCompareOp(child as T, this.getDrawingByParam({ unitId, subUnitId, drawingId }) as T)
             );
         });
+
+        if (maxChildIndex === Number.NEGATIVE_INFINITY) {
+            maxChildIndex = this._getDrawingOrder(groupUnitId, groupSubUnitId).length;
+        }
+
+        ops.push(
+            json1.insertOp([groupUnitId, groupSubUnitId, DrawingMapItemType.order, maxChildIndex], groupDrawingId)
+        );
 
         return ops.reduce(json1.type.compose, null);
     }
 
     private _getUngroupDrawingOp(groupParam: IDrawingGroupUpdateParam): JSONOp {
         const { parent, children } = groupParam;
-        const { unitId, subUnitId } = parent;
 
         const { unitId: groupUnitId, subUnitId: groupSubUnitId, drawingId: groupDrawingId } = parent;
 
@@ -344,16 +354,41 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         ops.push(
             json1.removeOp([groupUnitId, groupSubUnitId, DrawingMapItemType.data, groupDrawingId], true)
         );
+        ops.push(
+            json1.removeOp([groupUnitId, groupSubUnitId, DrawingMapItemType.order, this._getDrawingOrder(groupUnitId, groupSubUnitId).indexOf(groupDrawingId)], true)
+        );
 
         return ops.reduce(json1.type.compose, null);
     }
 
     applyJson1(unitId: string, subUnitId: string, jsonOp: JSONOp) {
         this._establishDrawingMap(unitId, subUnitId);
-
+        // this._fillMissingFields(jsonOp);
         this._oldDrawingManagerData = { ...this.drawingManagerData };
         this.drawingManagerData = json1.type.apply(this.drawingManagerData as unknown as json1.Doc, jsonOp) as unknown as IDrawingMap<T>;
     }
+
+    // private _fillMissingFields(jsonOp: JSONOp) {
+    //     if (jsonOp == null) {
+    //         return;
+    //     }
+
+    //     let object: { [key: string]: {} } = this.drawingManagerData;
+    //     for (let i = 0; i < jsonOp.length; i++) {
+    //         const op = jsonOp[i];
+    //         if (Array.isArray(op)) {
+    //             const opKey = op[0] as string;
+    //             if (!(opKey in object)) {
+    //                 object[opKey] = null as unknown as never;
+    //             }
+    //         } else if (typeof op === 'string') {
+    //             object = object[op];
+    //             if (object == null) {
+    //                 break;
+    //             }
+    //         }
+    //     }
+    // }
 
     featurePluginUpdateNotification(updateParams: T[]) {
         this._featurePluginUpdate$.next(updateParams);
@@ -623,6 +658,11 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             return { op: [], invertOp: [] };
         }
 
+        // const oldParam = this._getCurrentBySearch({ unitId, subUnitId, drawingId });
+        // if (oldParam) {
+        //     this._initializeDrawingData(updateParam, oldParam);
+        // }
+
         const ops: JSONOp[] = this._getUpdateParamCompareOp(updateParam, object as T);
 
         // this.drawingManagerInfo[unitId][subUnitId][drawingId] = newObject;
@@ -633,6 +673,14 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
         return { op, invertOp };
     }
+
+    // private _initializeDrawingData(updateParam: T, oldParam: T) {
+    //     Object.keys(updateParam).forEach((key) => {
+    //         if (!(key in oldParam)) {
+    //             oldParam[key as keyof IDrawingParam] = null as unknown as never;
+    //         }
+    //     });
+    // }
 
     private _getUpdateParamCompareOp(newParam: T, oldParam: T) {
         const { unitId, subUnitId, drawingId } = newParam;

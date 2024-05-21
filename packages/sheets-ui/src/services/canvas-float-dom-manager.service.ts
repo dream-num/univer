@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import type { IPosition } from '@univerjs/core';
+import type { IPosition, Worksheet } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, Tools } from '@univerjs/core';
+import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { IRenderManagerService, Rect } from '@univerjs/engine-render';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { CanvasFloatDomService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
-import { createObjectPositionObserver } from './canvas-pop-manager.service';
+import { SetScrollOperation } from '../commands/operations/scroll.operation';
+import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
+import { transformBound2DOMBound } from '../common/utils';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface ICanvasFloatDom {
@@ -31,6 +34,60 @@ export interface ICanvasFloatDom {
     componentKey: string;
     unitId?: string;
     subUnitId?: string;
+}
+
+export function createObjectDOMPositionObserver(
+    targetObject: BaseObject,
+    currentRender: IRender,
+    skeleton: SpreadsheetSkeleton,
+    worksheet: Worksheet,
+    commandService: ICommandService
+) {
+    const calc = () => {
+        const { scene } = currentRender;
+        const { left, top, width, height, angle } = targetObject;
+
+        const bound: IBoundRectNoAngle = {
+            left,
+            right: left + width,
+            top,
+            bottom: top + height,
+        };
+
+        const offsetBound = transformBound2DOMBound(bound, scene, skeleton, worksheet);
+
+        const position = {
+            left: offsetBound.left,
+            right: offsetBound.right,
+            top: offsetBound.top,
+            bottom: offsetBound.bottom,
+            rotate: angle,
+            width,
+            height,
+        };
+        return position;
+    };
+
+    const position = calc();
+
+    const position$ = new BehaviorSubject(position);
+    const disposable = new DisposableCollection();
+
+    disposable.add(commandService.onCommandExecuted((commandInfo) => {
+        if (commandInfo.id === SetScrollOperation.id || commandInfo.id === SetZoomRatioOperation.id) {
+            position$.next(calc());
+        }
+    }));
+
+    targetObject.onTransformChangeObservable.add(() => {
+        position$.next(calc());
+    });
+
+    return {
+        position,
+        position$,
+        disposable,
+    };
 }
 
 export class SheetCanvasFloatDomManagerService extends Disposable {
@@ -87,6 +144,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         const initialTransform = {
             ...initPosition,
             rotate: 0,
+            width: initPosition.endX - initPosition.startX,
+            height: initPosition.endY - initPosition.startY,
         };
         const position$ = new BehaviorSubject(initialTransform);
 
@@ -104,7 +163,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             }
             scene.makeDirty();
 
-            const observer = createObjectPositionObserver(obj, renderer, skeleton.skeleton, worksheet, this._commandService);
+            const observer = createObjectDOMPositionObserver(obj, renderer, skeleton.skeleton, worksheet, this._commandService);
 
             const disposePosition = observer.position$.subscribe((pos) => {
                 position$.next({
@@ -113,6 +172,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     endX: pos.right,
                     endY: pos.bottom,
                     rotate: pos.rotate,
+                    width: pos.width,
+                    height: pos.height,
                 });
             });
 

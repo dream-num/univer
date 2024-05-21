@@ -17,8 +17,14 @@
 import type { IPosition } from '@univerjs/core';
 import { BehaviorSubject, type Observable } from 'rxjs';
 
+interface IFloatDomLayout extends IPosition {
+    rotate: number;
+    width: number;
+    height: number;
+}
+
 export interface IFloatDom {
-    position$: Observable<IPosition & { rotate: number }>;
+    position$: Observable<IFloatDomLayout>;
     id: string;
     componentKey: string;
     onPointerMove: (evt: PointerEvent | MouseEvent) => void;

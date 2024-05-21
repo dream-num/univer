@@ -202,3 +202,62 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
         y: offsetY,
     };
 }
+
+export function transformBound2DOMBound(originBound: IBoundRectNoAngle, scene: Scene, skeleton: SpreadsheetSkeleton, worksheet: Worksheet) {
+    const { scaleX, scaleY } = scene.getAncestorScale();
+    const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+    if (!viewMain) {
+        return originBound;
+    }
+    const { left, right, top, bottom } = originBound;
+    const freeze = worksheet.getFreeze();
+    const { startColumn, startRow, xSplit, ySplit } = freeze;
+     // freeze start
+    const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(startRow - ySplit, startColumn - xSplit);
+    //  freeze end
+    const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(startRow, startColumn);
+    const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+    const freezeWidth = endSheetView.startX - startSheetView.startX;
+    const freezeHeight = endSheetView.startY - startSheetView.startY;
+
+    const { top: freezeTop, left: freezeLeft, actualScrollX, actualScrollY } = viewMain;
+    let offsetLeft: number;
+    let offsetRight: number;
+    // viewMain or viewTop
+    if (left < freezeLeft) {
+        offsetLeft = ((freezeWidth + rowHeaderWidth) + (left - freezeLeft)) * scaleX;
+        offsetRight = Math.max(
+            Math.min(
+                ((freezeWidth + rowHeaderWidth) + (right - freezeLeft)) * scaleX,
+                (freezeWidth + rowHeaderWidth) * scaleX
+            ),
+            (right - actualScrollX) * scaleX);
+    } else {
+        offsetLeft = Math.max((left - actualScrollX) * scaleX, (freezeWidth + rowHeaderWidth) * scaleX);
+        offsetRight = Math.max((right - actualScrollX) * scaleX, (freezeWidth + rowHeaderWidth) * scaleX);
+    }
+
+    let offsetTop: number;
+    let offsetBottom: number;
+    // viewMain or viewTop
+    if (top < freezeTop) {
+        offsetTop = ((freezeHeight + columnHeaderHeight) + (top - freezeTop)) * scaleY;
+        offsetBottom = Math.max(
+            Math.min(
+                ((freezeHeight + columnHeaderHeight) + (right - freezeTop)) * scaleY,
+                (freezeHeight + columnHeaderHeight) * scaleY
+            ),
+            (bottom - actualScrollY) * scaleY
+        );
+    } else {
+        offsetTop = Math.max((top - actualScrollY) * scaleY, (freezeHeight + columnHeaderHeight) * scaleY);
+        offsetBottom = Math.max((bottom - actualScrollY) * scaleY, (freezeHeight + columnHeaderHeight) * scaleY);
+    }
+
+    return {
+        left: offsetLeft,
+        right: offsetRight,
+        top: offsetTop,
+        bottom: offsetBottom,
+    };
+}

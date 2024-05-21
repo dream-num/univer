@@ -31,7 +31,7 @@ export const CreateFloatDomCommand: ICommand = {
                 startY: 200,
                 endY: 400,
             },
-            componentKey: '',
+            componentKey: 'ImageDemo',
         });
         return true;
     },

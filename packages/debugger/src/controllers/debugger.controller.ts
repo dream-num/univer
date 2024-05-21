@@ -36,6 +36,7 @@ import VueI18nIcon from '../components/VueI18nIcon.vue';
 
 import { CreateEmptySheetCommand, DisposeCurrentUnitCommand } from '../commands/commands/unit.command';
 import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
+import { ImageDemo } from '../components/Image';
 import {
     ConfirmMenuItemFactory,
     CreateEmptySheetMenuItemFactory,
@@ -114,5 +115,6 @@ export class DebuggerController extends Disposable {
         this.disposeWithMe(componentManager.register('VueI18nIcon', VueI18nIcon, {
             framework: 'vue3',
         }));
+        this.disposeWithMe(componentManager.register('ImageDemo', ImageDemo));
     }
 }

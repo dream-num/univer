@@ -68,6 +68,7 @@ export function createObjectPositionObserver(
     };
 
     const position = calc();
+
     const position$ = new BehaviorSubject(position);
     const disposable = new DisposableCollection();
 

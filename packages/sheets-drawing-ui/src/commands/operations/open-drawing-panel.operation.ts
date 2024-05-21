@@ -21,7 +21,6 @@ import type { IAccessor } from '@wendellhu/redi';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { COMPONENT_SHEET_DRAWING_PANEL } from '../../views/sheet-image-panel/component-name';
 
-
 export interface IUIComponentCommandParams {
     value: string;
 }

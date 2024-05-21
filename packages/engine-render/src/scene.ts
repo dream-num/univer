@@ -17,7 +17,6 @@
 import type { IKeyValue, Nullable } from '@univerjs/core';
 import { sortRules, sortRulesByDesc, toDisposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
-
 import type { BaseObject } from './base-object';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
 import type { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
@@ -48,7 +47,6 @@ export class Scene extends ThinScene {
     private _addObject$ = new BehaviorSubject<Scene>(this);
 
     readonly addObject$ = this._addObject$.asObservable();
-
     /**
      * Transformer constructor.  Transformer is a special type of group that allow you transform
      * primitives and shapes. Transforming tool is not changing `width` and `height` properties of nodes
@@ -518,7 +516,6 @@ export class Scene extends ThinScene {
         for (let i = 0, len = layers.length; i < len; i++) {
             layers[i].render(parentCtx, i === len - 1);
         }
-
         // this.getViewports()?.forEach((vp: Viewport) => vp.render(parentCtx));
     }
 
@@ -533,10 +530,8 @@ export class Scene extends ThinScene {
         if (!this._transformer) {
             this.initTransformer();
         }
-
         this._transformer?.attachTo(o);
     }
-
 
     override detachTransformerFrom(o: BaseObject) {
         this._transformer?.detachFrom(o);
@@ -547,7 +542,6 @@ export class Scene extends ThinScene {
             this._transformer.resetProps(config);
             return;
         }
-
         this._transformer = new Transformer(this, config);
     }
 
@@ -576,7 +570,6 @@ export class Scene extends ThinScene {
         //     }
         //     parent = parent?.getParent && parent?.getParent();
         // }
-
         coord = this.getRelativeCoord(coord);
         return this.getActiveViewportByRelativeCoord(coord);
     }

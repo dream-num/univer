@@ -28,7 +28,6 @@ export interface IUploadFileProps extends ICustomComponentProps<Nullable<File>> 
     type: UploadFileType;
 }
 
-
 export const UploadFileMenu = (props: IUploadFileProps) => {
     const { type } = props;
 

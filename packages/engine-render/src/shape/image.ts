@@ -77,7 +77,6 @@ export class Image extends Shape<IImageProps> {
         this._init();
     }
 
-
     get srcRect() {
         return this._props.srcRect;
     }
@@ -100,7 +99,6 @@ export class Image extends Shape<IImageProps> {
         });
         this.setSrcRect(null);
     }
-
 
     setSrcRect(srcRect?: Nullable<ISrcRect>) {
         this._props.srcRect = srcRect;
@@ -131,7 +129,6 @@ export class Image extends Shape<IImageProps> {
         this._renderByCropper = true;
         this._transformBySrcRect();
     }
-
     // override transformForAngle(transform: Transform) {
     //     if (this.angle === 0) {
     //         return transform;
@@ -150,10 +147,8 @@ export class Image extends Shape<IImageProps> {
     //     transform.rotate(this.angle);
     //     transform.translate(-cx, -cy);
 
-
     //     return transform;
     // }
-
     calculateTransformWithSrcRect() {
         const {
             left: imageLeft,
@@ -172,7 +167,6 @@ export class Image extends Shape<IImageProps> {
             };
         }
         const { left = 0, top = 0, right = 0, bottom = 0 } = this.srcRect;
-
 
         const newLeft = imageLeft - left;
         const newTop = imageTop - top;
@@ -230,7 +224,6 @@ export class Image extends Shape<IImageProps> {
             height,
         });
     }
-
 
     override render(mainCtx: UniverRenderingContext, bounds?: IViewportBound) {
         if (!this.visible) {
@@ -290,7 +283,6 @@ export class Image extends Shape<IImageProps> {
         const { width: preWidth = 0, height: preHeight = 0, left: preLeft = 0, top: preTop = 0, angle: preAngle } = state.preValue as IObjectFullState;
         const { left: srcLeft = 0, top: srcTop = 0, right: srcRight = 0, bottom: srcBottom = 0 } = this.srcRect;
 
-
         let newLeft = srcLeft;
         let newTop = srcTop;
         let newRight = srcRight;
@@ -307,7 +299,6 @@ export class Image extends Shape<IImageProps> {
 
             isChange = true;
         }
-
 
         if (preHeight !== 0 && preHeight !== height) {
             const preTopRatio = srcTop / preHeight;

@@ -83,7 +83,6 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         return false;
     }
 
-
     // 判断点是否在多边形内（包括处理洞）
     private _contains(point: Vector2): boolean {
         let inside = false;
@@ -122,7 +121,6 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         return point.x >= Math.min(v1.x, v2.x) && point.x <= Math.max(v1.x, v2.x) &&
                point.y >= Math.min(v1.y, v2.y) && point.y <= Math.max(v1.y, v2.y);
     }
-
 
     updatePointGroup(pointGroup: IPoint[][]) {
         this._pointsGroup = pointGroup;

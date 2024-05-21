@@ -24,7 +24,7 @@ import type {
     LocaleService,
     Nullable,
 } from '@univerjs/core';
-import { BaselineOffset, FontStyleType, Tools } from '@univerjs/core';
+import { BaselineOffset, DEFAULT_STYLES, FontStyleType, Tools } from '@univerjs/core';
 import * as cjk from 'cjk-regex';
 
 import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
@@ -245,18 +245,14 @@ export function fixLineWidthByScale(num: number, scale: number) {
     return Math.round(num * scale) / scale;
 }
 
-export const UNIVER_GLOBAL_DEFAULT_FONT_SIZE = 11;
-
-export const UNIVER_GLOBAL_DEFAULT_FONT_FAMILY = 'Arial';
-
 // eslint-disable-next-line max-lines-per-function
 export function getFontStyleString(
     textStyle?: IStyleBase,
     _localeService?: LocaleService
 ): IDocumentSkeletonFontStyle {
-    const defaultFont = UNIVER_GLOBAL_DEFAULT_FONT_FAMILY;
+    const defaultFont = DEFAULT_STYLES.ff;
 
-    const defaultFontSize = UNIVER_GLOBAL_DEFAULT_FONT_SIZE;
+    const defaultFontSize = DEFAULT_STYLES.fs;
 
     if (!textStyle) {
         const fontString = `${defaultFontSize}pt  ${defaultFont}`;

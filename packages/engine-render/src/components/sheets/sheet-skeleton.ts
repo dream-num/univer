@@ -20,6 +20,7 @@ import {
     BooleanNumber,
     CellValueType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
+    DEFAULT_STYLES,
     DocumentDataModel,
     extractPureTextFromCell,
     getColorStyle,
@@ -1081,10 +1082,10 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         let fontString = 'document';
 
-        const textRotation: ITextRotation = { a: 0, v: BooleanNumber.FALSE };
-        const horizontalAlign: HorizontalAlign = HorizontalAlign.UNSPECIFIED;
-        const verticalAlign: VerticalAlign = VerticalAlign.UNSPECIFIED;
-        const wrapStrategy: WrapStrategy = WrapStrategy.UNSPECIFIED;
+        const textRotation: ITextRotation = DEFAULT_STYLES.tr;
+        const horizontalAlign: HorizontalAlign = DEFAULT_STYLES.ht;
+        const verticalAlign: VerticalAlign = DEFAULT_STYLES.vt;
+        const wrapStrategy: WrapStrategy = DEFAULT_STYLES.tb;
         const paddingData: IPaddingData = DEFAULT_PADDING_DATA;
 
         fontString = getFontStyleString({}, this._localService).fontCache;
@@ -1131,17 +1132,17 @@ export class SpreadsheetSkeleton extends Skeleton {
         const cellOtherConfig = this._getOtherStyle(style) as ICellOtherConfig;
 
         const textRotation: ITextRotation = ignoreTextRotation
-            ? { a: 0, v: BooleanNumber.FALSE }
-            : cellOtherConfig.textRotation || { a: 0, v: BooleanNumber.FALSE };
-        let horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || HorizontalAlign.UNSPECIFIED;
-        const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || VerticalAlign.UNSPECIFIED;
-        const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || WrapStrategy.UNSPECIFIED;
+            ? DEFAULT_STYLES.tr
+            : cellOtherConfig.textRotation || DEFAULT_STYLES.tr;
+        let horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || DEFAULT_STYLES.ht;
+        const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || DEFAULT_STYLES.vt;
+        const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || DEFAULT_STYLES.tb;
         const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
 
         if (cell.f && displayRawFormula) {
             // The formula does not detect horizontal alignment and rotation.
             documentModel = this._getDocumentDataByStyle(cell.f.toString(), {}, { verticalAlign });
-            horizontalAlign = HorizontalAlign.UNSPECIFIED;
+            horizontalAlign = DEFAULT_STYLES.ht;
         } else if (cell.p) {
             const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
             documentModel = this._updateConfigAndGetDocumentModel(

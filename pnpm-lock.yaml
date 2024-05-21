@@ -1436,13 +1436,13 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.15.2
+        specifier: ^0.15.1
         version: 0.15.2
       clsx:
-        specifier: ^2.1.0
+        specifier: ^2.1.1
         version: 2.1.1
       react:
-        specifier: 18.2.0
+        specifier: ^18.2.0
         version: 18.2.0
       rxjs:
         specifier: ^7.8.1

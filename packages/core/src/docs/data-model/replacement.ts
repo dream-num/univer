@@ -16,6 +16,7 @@
 
 import type { IDocumentBody, IDocumentData } from '../../types/interfaces/i-document-data';
 import { DocumentDataModel } from './document-data-model';
+import { JSONX } from './json-x/json-x';
 import { TextX } from './text-x/text-x';
 
 export function replaceInDocumentBody(body: IDocumentBody, query: string, target: string): IDocumentBody {
@@ -37,6 +38,7 @@ export function replaceInDocumentBody(body: IDocumentBody, query: string, target
     // eslint-disable-next-line no-cond-assign
     while ((index = documentDataModel.getBody()!.dataStream.indexOf(query)) >= 0) {
         const textX = new TextX();
+        const jsonX = JSONX.getInstance();
 
         if (index > 0) {
             textX.retain(index);
@@ -63,7 +65,7 @@ export function replaceInDocumentBody(body: IDocumentBody, query: string, target
 
         const actions = textX.serialize();
 
-        documentDataModel.apply(actions);
+        documentDataModel.apply(jsonX.editOp(actions));
     }
 
     const newBody = documentDataModel.getBody()!;

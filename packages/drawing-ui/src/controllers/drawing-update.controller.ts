@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingGroupUpdateParam, IDrawingOrderMapParam, IDrawingParam, IDrawingSearch, ITransformState, Nullable } from '@univerjs/core';
+import type { DrawingTypeEnum, ICommandInfo, IDrawingGroupUpdateParam, IDrawingOrderMapParam, IDrawingParam, IDrawingSearch, ITransformState,
+    Nullable } from '@univerjs/core';
 import {
     checkIfMove,
     Disposable,
-    DrawingTypeEnum,
     ICommandService,
     IDrawingManagerService,
     IUniverInstanceService,
@@ -26,9 +26,8 @@ import {
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
-import type { BaseObject, Image, Scene } from '@univerjs/engine-render';
-import { DRAWING_OBJECT_LAYER_INDEX, Group, IRenderManagerService } from '@univerjs/engine-render';
-import type { IImageData } from '@univerjs/drawing';
+import type { BaseObject, IShapeProps, Scene, Shape } from '@univerjs/engine-render';
+import { DRAWING_OBJECT_LAYER_INDEX, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
 import { AlignType, SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
@@ -39,6 +38,7 @@ interface IDrawingTransformCache {
     unitId: string;
     subUnitId: string;
     drawingId: string;
+    drawingType: DrawingTypeEnum;
     transform: ITransformState;
 }
 
@@ -168,8 +168,8 @@ export class DrawingUpdateController extends Disposable {
         const objects: BaseObject[] = [];
 
         children.forEach((drawing) => {
-            const imageShapeKey = getDrawingShapeKeyByDrawingSearch(drawing);
-            const object = scene.getObjectIncludeInGroup(imageShapeKey);
+            const drawingShapeKey = getDrawingShapeKeyByDrawingSearch(drawing);
+            const object = scene.getObjectIncludeInGroup(drawingShapeKey);
 
             if (object == null || objects.includes(object)) {
                 return;
@@ -179,7 +179,15 @@ export class DrawingUpdateController extends Disposable {
 
             const { transform } = drawing;
 
-            transform && object.transformByState(transform);
+            if (transform == null) {
+                return;
+            }
+
+            if (object.classType === RENDER_CLASS_TYPE.GROUP) {
+                object.transformByState({ left: transform.left, top: transform.top });
+            } else {
+                object.transformByState(transform);
+            }
 
             // const group = object?.ancestorGroup;
             // if (group != null && objects.includes(group) === false) {
@@ -290,7 +298,17 @@ export class DrawingUpdateController extends Disposable {
 
             const { transform } = drawing;
 
-            transform && object.transformByState(transform);
+            if (transform == null) {
+                return;
+            }
+
+            if (object.classType === RENDER_CLASS_TYPE.GROUP) {
+                object.transformByState({ left: transform.left, top: transform.top });
+            } else {
+                object.transformByState(transform);
+            }
+
+            // transform && object.transformByState(transform);
 
             // const group = o.ancestorGroup as Nullable<Group>;
             // if (group != null && !objects.includes(group)) {
@@ -338,7 +356,7 @@ export class DrawingUpdateController extends Disposable {
         let maxBottom = Number.NEGATIVE_INFINITY;
         let drawingCount = 0;
         drawings.forEach((drawing) => {
-            const { unitId, subUnitId, drawingId } = drawing;
+            const { unitId, subUnitId, drawingId, drawingType } = drawing;
             const drawingParam = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
 
             if (drawingParam == null || drawingParam.transform == null) {
@@ -349,6 +367,7 @@ export class DrawingUpdateController extends Disposable {
                 unitId,
                 subUnitId,
                 drawingId,
+                drawingType,
                 transform: drawingParam.transform,
             });
 
@@ -383,7 +402,7 @@ export class DrawingUpdateController extends Disposable {
         const { scene, transformer } = renderObject;
 
         drawingTransformCaches.forEach((drawingTransformCache, index) => {
-            const { unitId, subUnitId, drawingId, transform } = drawingTransformCache;
+            const { unitId, subUnitId, drawingId, transform, drawingType } = drawingTransformCache;
 
             const { left = 0, top = 0, width = 0, height = 0 } = transform;
 
@@ -424,7 +443,7 @@ export class DrawingUpdateController extends Disposable {
                     unitId,
                     subUnitId,
                     drawingId,
-                    drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                    drawingType,
                     transform: {
                         left: newLeft,
                         top: newTop,
@@ -500,7 +519,7 @@ export class DrawingUpdateController extends Disposable {
 
         drawingIds.forEach((drawingId, index) => {
             const oKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-            const object = scene.getObject(oKey) as Image;
+            const object = scene.getObject(oKey) as Shape<IShapeProps>;
             if (object == null) {
                 return;
             }
@@ -509,7 +528,7 @@ export class DrawingUpdateController extends Disposable {
         });
     }
 
-    private _sceneListenerOnImageMap: WeakSet<Scene> = new WeakSet();
+    private _sceneListenerOnDrawingMap: WeakSet<Scene> = new WeakSet();
 
     private _drawingAddListener() {
         this.disposeWithMe(
@@ -518,13 +537,13 @@ export class DrawingUpdateController extends Disposable {
                 (params).forEach((param) => {
                     const { unitId, subUnitId, drawingId } = param;
 
-                    const imageParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
+                    const drawingParam = this._drawingManagerService.getDrawingByParam(param) as IDrawingParam;
 
-                    if (imageParam == null) {
+                    if (drawingParam == null) {
                         return;
                     }
 
-                    const { transform, drawingType } = imageParam;
+                    const { transform, drawingType } = drawingParam;
 
                     const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
 
@@ -539,11 +558,11 @@ export class DrawingUpdateController extends Disposable {
                 });
 
                 sceneList.forEach((scene) => {
-                    if (this._sceneListenerOnImageMap.has(scene)) {
+                    if (this._sceneListenerOnDrawingMap.has(scene)) {
                         return;
                     }
-                    this._addListenerOnImage(scene);
-                    this._sceneListenerOnImageMap.add(scene);
+                    this._addListenerOnDrawing(scene);
+                    this._sceneListenerOnDrawingMap.add(scene);
                 });
             })
         );
@@ -562,12 +581,12 @@ export class DrawingUpdateController extends Disposable {
                     }
                     const { scene, transformer } = renderObject;
 
-                    const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+                    const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
-                    const imageShape = scene.getObject(imageShapeKey);
+                    const drawingShape = scene.getObject(drawingShapeKey);
 
-                    if (imageShape != null) {
-                        imageShape.dispose();
+                    if (drawingShape != null) {
+                        drawingShape.dispose();
                         scene.getTransformer()?.clearSelectedObjects();
                     }
                 });
@@ -581,17 +600,13 @@ export class DrawingUpdateController extends Disposable {
                 (params).forEach((param) => {
                     const { unitId, subUnitId, drawingId } = param;
 
-                    const imageParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
+                    const drawingParam = this._drawingManagerService.getDrawingByParam(param) as IDrawingParam;
 
-                    if (imageParam == null) {
+                    if (drawingParam == null) {
                         return;
                     }
 
-                    const { transform, drawingType } = imageParam;
-
-                    if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
-                        return;
-                    }
+                    const { transform, drawingType } = drawingParam;
 
                     const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
 
@@ -606,15 +621,15 @@ export class DrawingUpdateController extends Disposable {
 
                     const { left = 0, top = 0, width = 0, height = 0, angle = 0, flipX = false, flipY = false, skewX = 0, skewY = 0 } = transform;
 
-                    const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+                    const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
-                    const imageShape = scene.getObject(imageShapeKey);
+                    const drawingShape = scene.getObject(drawingShapeKey);
 
-                    if (imageShape == null) {
+                    if (drawingShape == null) {
                         return true;
                     }
 
-                    imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                    drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                 });
             })
         );
@@ -632,10 +647,10 @@ export class DrawingUpdateController extends Disposable {
                     }
                     const { scene, transformer } = renderObject;
 
-                    const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-                    const imageShape = scene.getObject(imageShapeKey);
+                    const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+                    const drawingShape = scene.getObject(drawingShapeKey);
 
-                    const drawingParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
+                    const drawingParam = this._drawingManagerService.getDrawingByParam(param) as IDrawingParam;
                     if (drawingParam == null) {
                         return;
                     }
@@ -647,11 +662,11 @@ export class DrawingUpdateController extends Disposable {
 
                     const { left = 0, top = 0, width = 0, height = 0, angle = 0, flipX = false, flipY = false, skewX = 0, skewY = 0 } = transform;
 
-                    if (imageShape == null) {
+                    if (drawingShape == null) {
                         return true;
                     }
 
-                    imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                    drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                 });
             })
         );
@@ -674,7 +689,7 @@ export class DrawingUpdateController extends Disposable {
     //         drawings.push({ unitId, subUnitId, drawingId });
     //     }
     // });
-    private _addListenerOnImage(scene: Scene) {
+    private _addListenerOnDrawing(scene: Scene) {
         const transformer = scene.getTransformerByCreate();
 
         let startTransforms: Nullable<ITransformState[]> = null;
@@ -689,11 +704,13 @@ export class DrawingUpdateController extends Disposable {
                         const { left, top, height, width, angle, oKey, groupKey, isInGroup } = object;
                         const drawing = this._drawingManagerService.getDrawingOKey(oKey);
                         if (isInGroup || object instanceof Group) {
-                            let group: Group;
-                            if (object instanceof Group) {
+                            let group = object.ancestorGroup as Group;
+                            if (group == null && object instanceof Group) {
                                 group = object;
-                            } else {
-                                group = object.ancestorGroup as Group;
+                            }
+
+                            if (group == null) {
+                                return null;
                             }
 
                             const groupDrawing = this._drawingManagerService.getDrawingOKey(group.oKey);

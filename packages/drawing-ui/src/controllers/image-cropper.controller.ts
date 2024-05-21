@@ -31,9 +31,6 @@ export class ImageCropperController extends Disposable {
     private _sceneListenerOnImageMap: WeakSet<Scene> = new WeakSet();
 
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,

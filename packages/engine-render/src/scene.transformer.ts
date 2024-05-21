@@ -15,7 +15,7 @@
  */
 
 import type { IAbsoluteTransform, IKeyValue, Nullable, Observer } from '@univerjs/core';
-import { Disposable, MOVE_BUFFER_VALUE, Observable, toDisposable } from '@univerjs/core';
+import { Disposable, MOVE_BUFFER_VALUE, Observable, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
@@ -167,6 +167,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _moveBufferSkip = false;
 
+    private _debounceClearFunc: Nullable<() => void>;
+
     constructor(
         private _scene: Scene,
         config?: ITransformerConfig
@@ -195,6 +197,17 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._updateControl();
     }
 
+    debounceRefreshControls() {
+        if (this._debounceClearFunc) {
+            this._debounceClearFunc();
+        }
+
+        // To prevent multiple refreshes caused by setting values for multiple object instances at once.
+        this._debounceClearFunc = requestImmediateMacroTask(() => {
+            this.refreshControls();
+            this._debounceClearFunc = null;
+        });
+    }
 
     clearSelectedObjects() {
         this._selectedObjectMap.clear();
@@ -503,7 +516,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
             });
         }
 
-
         this._startOffsetX = x;
         this._startOffsetY = y;
     }
@@ -515,7 +527,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._moveBufferSkip = true;
         return false;
     }
-
 
     private _anchorMoving(
         type: TransformerManagerType,
@@ -562,7 +573,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
             moveObject.transformByState(this._applyRotationForResult(state, { left, top, width, height }, angle, isCropper));
         };
-
 
         if (!isCropper) {
             this._selectedObjectMap.forEach((moveObject) => {
@@ -745,11 +755,9 @@ export class Transformer extends Disposable implements ITransformerConfig {
         };
     }
 
-
     private _fixMoveLtRb(moveLeft: number, moveTop: number, originWidth: number, originHeight: number, aspectRatio: number) {
         let moveLeftFix = moveLeft;
         let moveTopFix = moveTop;
-
 
         if ((originWidth + moveLeftFix) / (originHeight + moveTopFix) > aspectRatio) {
             moveTopFix = moveLeftFix / aspectRatio;
@@ -766,7 +774,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _fixMoveLbRt(moveLeft: number, moveTop: number, originWidth: number, originHeight: number, aspectRatio: number) {
         let moveLeftFix = moveLeft;
         let moveTopFix = moveTop;
-
 
         if (Math.abs((originWidth - moveLeftFix) / (originHeight + moveTopFix)) > aspectRatio) {
             moveTopFix = -moveLeftFix / aspectRatio;
@@ -920,7 +927,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         type: MoveObserverType.MOVE_START,
                     });
 
-
                     this._moveBufferSkip = false;
                     const moveObserver = topScene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                         const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
@@ -963,7 +969,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
             (this._startOffsetY - centerY) / ancestorScaleY + this._viewportScrollY,
             (this._startOffsetX - centerX) / ancestorScaleX + this._viewportScrollX
         );
-
 
         let angle = agentOrigin + radToDeg(angle1 - angle2);
 
@@ -1232,7 +1237,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
             anchor = new RegularPolygon(oKey, config as IRegularPolygonProps);
         }
 
-
         this._attachHover(anchor!, cursor, CURSOR_TYPE.DEFAULT);
 
         return anchor!;
@@ -1468,7 +1472,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
         } else {
             this._copperControl = transformerControl;
         }
-
 
         return transformerControl;
     }

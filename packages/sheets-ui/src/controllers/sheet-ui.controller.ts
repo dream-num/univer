@@ -24,7 +24,7 @@ import {
     SetUnderlineCommand,
 } from '@univerjs/sheets';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
-import { ComponentManager, DesktopUIPart, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
@@ -485,9 +485,9 @@ export class SheetUIController extends Disposable {
         const uiController = this._uiPartsService;
         const injector = this._injector;
 
-        this.disposeWithMe(uiController.registerComponent(DesktopUIPart.HEADER, () => connectInjector(RenderSheetHeader, injector)));
-        this.disposeWithMe(uiController.registerComponent(DesktopUIPart.FOOTER, () => connectInjector(RenderSheetFooter, injector)));
-        this.disposeWithMe(uiController.registerComponent(DesktopUIPart.CONTENT, () => connectInjector(RenderSheetContent, injector)));
+        this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(RenderSheetHeader, injector)));
+        this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(RenderSheetFooter, injector)));
+        this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(RenderSheetContent, injector)));
     }
 
     private _initFocusHandler(): void {

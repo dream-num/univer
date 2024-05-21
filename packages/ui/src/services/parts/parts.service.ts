@@ -17,10 +17,14 @@
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import { type Observable, Subject } from 'rxjs';
-import { toDisposable } from '@univerjs/core';
+import { Disposable, toDisposable } from '@univerjs/core';
+
 import type { ComponentType } from '../../common/component-manager';
 
-export enum DesktopUIPart {
+type ComponentRenderer = () => ComponentType;
+type ComponentPartKey = BuiltInUIPart | string;
+
+export enum BuiltInUIPart {
     GLOBAL = 'global',
     HEADER = 'header',
     HEADER_MENU = 'header-menu',
@@ -30,39 +34,43 @@ export enum DesktopUIPart {
 }
 
 export interface IUIPartsService {
-    componentRegistered$: Observable<void>;
+    componentRegistered$: Observable<ComponentPartKey>;
 
-    registerComponent(part: DesktopUIPart, component: () => ComponentType): IDisposable;
-    getComponents(part: DesktopUIPart): Set<() => ComponentType>;
+    registerComponent(part: ComponentPartKey, component: () => ComponentType): IDisposable;
+    getComponents(part: ComponentPartKey): Set<ComponentRenderer>;
 }
 
 export const IUIPartsService = createIdentifier<IUIPartsService>('ui.parts.service');
 
-export class DesktopUIPartsService implements IUIPartsService {
-    private _componentsByPart: Map<DesktopUIPart, Set<() => ComponentType>> = new Map();
+export class UIPartsService extends Disposable implements IUIPartsService {
+    private _componentsByPart: Map<ComponentPartKey, Set<ComponentRenderer>> = new Map();
 
-    private readonly _componentRegistered$ = new Subject<void>();
+    private readonly _componentRegistered$ = new Subject<ComponentPartKey>();
     readonly componentRegistered$ = this._componentRegistered$.asObservable();
 
-    registerComponent(part: DesktopUIPart, component: () => React.ComponentType): IDisposable {
+    override dispose(): void {
+        super.dispose();
+
+        this._componentRegistered$.complete();
+    }
+
+    registerComponent(part: ComponentPartKey, component: () => React.ComponentType): IDisposable {
         const components = (
             this._componentsByPart.get(part)
             || this._componentsByPart.set(part, new Set()).get(part)!
         ).add(component);
 
-        this._componentRegistered$.next();
+        this._componentRegistered$.next(part);
 
         return toDisposable(() => {
             components.delete(component);
             if (components.size === 0) {
                 this._componentsByPart.delete(part);
             }
-
-            this._componentRegistered$.complete();
         });
     }
 
-    getComponents(part: DesktopUIPart): Set<() => ComponentType> {
+    getComponents(part: ComponentPartKey): Set<ComponentRenderer> {
         return new Set([...(this._componentsByPart.get(part) || new Set())]);
     }
 }

@@ -239,4 +239,17 @@ describe('test TextX methods and branches', () => {
             expect(actions[2].t).toBe(TextXActionType.DELETE);
         });
     });
+
+    describe('test TextX static methods', () => {
+        it('test TextX isNoop method', () => {
+            const textX = new TextX();
+
+            expect(TextX.isNoop(textX.serialize())).toBe(true);
+
+            textX.retain(4, '');
+            textX.delete(5, '');
+
+            expect(TextX.isNoop(textX.serialize())).toBe(false);
+        });
+    });
 });

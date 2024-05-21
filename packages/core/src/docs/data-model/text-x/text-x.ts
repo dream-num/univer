@@ -151,9 +151,13 @@ export class TextX {
 
         let index = 0;
 
+        // if (doc?.textRuns?.length === 0) {
+        //     console.log('doc', JSON.stringify(doc, null, 2));
+        // }
+
         for (const action of actions) {
             if (action.t === TextXActionType.DELETE && action.body == null) {
-                const body = getBodySlice(doc, index, index + action.len, true);
+                const body = getBodySlice(doc, index, index + action.len, false);
 
                 action.body = body;
             }
@@ -169,7 +173,9 @@ export class TextX {
 
             invertibleActions.push(action);
 
-            index += action.len;
+            if (action.t !== TextXActionType.INSERT) {
+                index += action.len;
+            }
         }
 
         return invertibleActions;

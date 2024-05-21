@@ -33,11 +33,11 @@ export const InsertDrawingMutation: IMutation<IInsertDrawingMutation> = {
             return false;
         }
 
-        let drawings = univerdoc.snapshot.drawings;
+        let drawings = univerdoc.getSnapshot().drawings;
 
         if (drawings == null) {
             drawings = {};
-            univerdoc.snapshot.drawings = drawings;
+            univerdoc.getSnapshot().drawings = drawings;
         }
 
         const { objectId, drawing } = params;

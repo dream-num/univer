@@ -48,6 +48,7 @@ export { DataValidationRenderMode } from './types/enum/data-validation-render-mo
 export { ActionIterator } from './docs/data-model/text-x/action-iterator';
 export { getBodySlice, composeBody } from './docs/data-model/text-x/utils';
 export { TextX } from './docs/data-model/text-x/text-x';
+export type { TPriority } from './docs/data-model/text-x/text-x';
 export { JSONX } from './docs/data-model/json-x/json-x';
 export type { JSONXActions, JSONXPath } from './docs/data-model/json-x/json-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';

@@ -37,21 +37,15 @@ export class NumfmtMenuController extends Disposable {
         @Inject(IMenuService) private _menuService: IMenuService
     ) {
         super();
-        this._initMenuConfigs();
         this._initMenu();
     }
 
-    private _initMenuConfigs() {
-        const { menu = {} } = this._config;
-        Object.entries(menu).forEach(([id, config]) => {
-            this._menuService.setMenuConfigs(id, config);
-        });
-    }
-
     private _initMenu() {
+        const { menu = {} } = this._config;
+
         [PercentMenuItem, AddDecimalMenuItem, SubtractDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem]
             .forEach((factory) => {
-                this.disposeWithMe(this._menuService.addMenuItem(factory(this._injector)));
+                this.disposeWithMe(this._menuService.addMenuItem(factory(this._injector), menu));
             });
 
         this.disposeWithMe((this._componentManager.register(MORE_NUMFMT_TYPE_KEY, MoreNumfmtType)));

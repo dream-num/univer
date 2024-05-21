@@ -3,18 +3,18 @@
 [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-thread-comment)](https://npmjs.org/packages/@univerjs/sheets-thread-comment)
 [![license](https://img.shields.io/npm/l/@univerjs/sheets-thread-comment)](https://img.shields.io/npm/l/@univerjs/sheets-thread-comment)
 
-## Introduction
+## 简介
 
 > TODO: Introduction
 
-## Usage
+## 使用指南
 
-### Installation
+### 安装
 
 ```shell
-# Using npm
+# 使用 npm
 npm install @univerjs/sheets-thread-comment
 
-# Using pnpm
+# 使用 pnpm
 pnpm add @univerjs/sheets-thread-comment
 ```

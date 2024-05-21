@@ -38,5 +38,5 @@ export interface IUniverUIConfig extends IWorkbenchOptions {
 
     override?: DependencyOverride;
 
-    menu: MenuConfig;
+    menu?: MenuConfig;
 }

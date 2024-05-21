@@ -16,9 +16,11 @@
 
 import type { Workbook } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { CommentSingle } from '@univerjs/icons';
+import type { IThreadCommentUIConfig } from '@univerjs/thread-comment-ui';
 import { SetActiveCommentOperation, THREAD_COMMENT_PANEL, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { SelectionMoveType, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
@@ -29,14 +31,32 @@ import { DeleteCommentMutation } from '@univerjs/thread-comment';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
-import { enUS, zhCN } from '../locales';
+import { zhCN } from '../locale';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
 import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
 import { AddCommentShortcut, threadCommentMenuFactory, threadPanelMenuFactory } from './menu';
 
+export interface IUniverSheetsThreadCommentConfig extends IThreadCommentUIConfig {
+    menu?: MenuConfig;
+}
+
+export const DefaultSheetsThreadCommentConfig: IUniverSheetsThreadCommentConfig = {
+    mentions: [{
+        trigger: '@',
+        async getMentions() {
+            return [{
+                id: 'mock',
+                label: 'MockUser',
+                type: 'user',
+            }];
+        },
+    }],
+};
+
 @OnLifecycle(LifecycleStages.Starting, SheetsThreadCommentController)
 export class SheetsThreadCommentController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverSheetsThreadCommentConfig>,
         @IMenuService private readonly _menuService: IMenuService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
@@ -102,11 +122,13 @@ export class SheetsThreadCommentController extends Disposable {
     }
 
     private _initMenu() {
+        const { menu = {} } = this._config;
+
         [
             threadCommentMenuFactory,
             threadPanelMenuFactory,
         ].forEach((menuFactory) => {
-            this._menuService.addMenuItem(menuFactory(this._injector));
+            this._menuService.addMenuItem(menuFactory(this._injector), menu);
         });
     }
 
@@ -121,10 +143,7 @@ export class SheetsThreadCommentController extends Disposable {
     }
 
     private _initLocale() {
-        this._localeService.load({
-            zhCN,
-            enUS,
-        });
+        this._localeService.load({ zhCN });
     }
 
     private _initPanelListener() {

@@ -130,7 +130,12 @@ export class UniverUIPlugin extends Plugin {
                 },
             ],
             [ErrorController],
-            [ShortcutPanelController],
+            [
+                ShortcutPanelController,
+                {
+                    useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config),
+                },
+            ],
         ], this._config.override);
 
         dependencies.forEach((dependency) => injector.add(dependency));

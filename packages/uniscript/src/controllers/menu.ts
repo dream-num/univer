@@ -15,18 +15,14 @@
  */
 
 import type { IMenuButtonItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, IMenuService, MenuItemType, MenuPosition, mergeMenuConfigs } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { UniverInstanceType } from '@univerjs/core';
 import { ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
 
 export function UniscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(ToggleScriptPanelOperation.id);
-
-    return mergeMenuConfigs({
+    return {
         id: ToggleScriptPanelOperation.id,
         title: 'toggle-script-panel',
         tooltip: 'script-panel.tooltip.menu-button',
@@ -36,5 +32,5 @@ export function UniscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         // FIXME hidden$ and disabled$ are not correctly in doc
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         // disabled$: getCurrentSheetDisabled$(accessor),
-    }, menuItemConfig);
+    };
 }

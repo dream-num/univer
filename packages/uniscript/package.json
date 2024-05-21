@@ -82,7 +82,7 @@
         "@univerjs/facade": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "^0.15.2",
         "less": "^4.2.0",
         "monaco-editor": "0.48.0",
         "rxjs": "^7.8.1",

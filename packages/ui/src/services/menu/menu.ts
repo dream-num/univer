@@ -145,7 +145,7 @@ export type IDisplayMenuItem<T extends IMenuItem> = T & {
 };
 
 export type MenuItemConfig<T extends MenuItemDefaultValueType = MenuItemDefaultValueType> = Partial<Omit<IMenuItem, 'id' | 'subId' | 'value$' | 'hidden$' | 'disabled$' | 'activated$' | 'icon$'> & {
-    defaultValue?: T;
+    // defaultValue?: T;
     hidden?: boolean;
     disabled?: boolean;
     activated?: boolean;

@@ -73,24 +73,18 @@ export class FormulaUIController extends Disposable {
 
     private _initialize(): void {
         this._registerCommands();
-        this._registerMenuConfigs();
         this._registerMenus();
         this._registerShortcuts();
         this._registerComponents();
         this._registerRenderControllers();
     }
 
-    private _registerMenuConfigs() {
-        const { menu = {} } = this._config;
-        Object.entries(menu).forEach(([id, config]) => {
-            this._menuService.setMenuConfigs(id, config);
-        });
-    }
-
     private _registerMenus(): void {
+        const { menu = {} } = this._config;
+
         [InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory, PasteFormulaMenuItemFactory].forEach(
             (factory) => {
-                this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+                this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
             }
         );
     }

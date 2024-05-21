@@ -83,7 +83,6 @@ export class FindReplaceController extends RxDisposable {
         super();
 
         this._initCommands();
-        this._initMenuConfigs();
         this._initUI();
         this._initShortcuts();
     }
@@ -111,15 +110,10 @@ export class FindReplaceController extends RxDisposable {
         ].forEach((s) => this.disposeWithMe(this._shortcutService.registerShortcut(s)));
     }
 
-    private _initMenuConfigs() {
-        const { menu = {} } = this._config;
-        Object.entries(menu).forEach(([id, config]) => {
-            this._menuService.setMenuConfigs(id, config);
-        });
-    }
-
     private _initUI(): void {
-        this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(FindReplaceMenuItemFactory)));
+        const { menu = {} } = this._config;
+
+        this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(FindReplaceMenuItemFactory), menu));
         this.disposeWithMe(this._componentManager.register('FindReplaceDialog', FindReplaceDialog));
         this.disposeWithMe(this._componentManager.register('SearchIcon', SearchSingle16));
 

@@ -51,11 +51,9 @@ import {
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
     getMenuHiddenObservable,
-    IMenuService,
     MenuGroup,
     MenuItemType,
     MenuPosition,
-    mergeMenuConfigs,
 } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
@@ -66,11 +64,8 @@ import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(SetInlineFormatBoldCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: SetInlineFormatBoldCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
@@ -100,16 +95,13 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(SetInlineFormatItalicCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: SetInlineFormatItalicCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
@@ -139,16 +131,13 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(SetInlineFormatUnderlineCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: SetInlineFormatUnderlineCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
@@ -178,16 +167,13 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(SetInlineFormatStrikethroughCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: SetInlineFormatStrikethroughCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
@@ -217,16 +203,13 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(SetInlineFormatSubscriptCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: SetInlineFormatSubscriptCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
@@ -255,16 +238,13 @@ export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(SetInlineFormatSuperscriptCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: SetInlineFormatSuperscriptCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
@@ -293,16 +273,13 @@ export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(SetInlineFormatFontFamilyCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: SetInlineFormatFontFamilyCommand.id,
         tooltip: 'toolbar.font',
         group: MenuGroup.TOOLBAR_FORMAT,
@@ -340,16 +317,13 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
     const commandService = accessor.get(ICommandService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(SetInlineFormatFontSizeCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: SetInlineFormatFontSizeCommand.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.SELECTOR,
@@ -388,17 +362,14 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(SetInlineFormatTextColorCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: SetInlineFormatTextColorCommand.id,
         icon: 'FontColor',
         tooltip: 'toolbar.textColor.main',
@@ -428,16 +399,13 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         // disabled$: getCurrentSheetDisabled$(accessor),
-    }, menuItemConfig);
+    };
 }
 
 export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(AlignLeftCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: AlignLeftCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
@@ -466,16 +434,13 @@ export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(AlignCenterCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: AlignCenterCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
@@ -504,16 +469,13 @@ export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(AlignRightCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: AlignRightCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
@@ -542,16 +504,13 @@ export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(AlignJustifyCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: AlignJustifyCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
@@ -580,15 +539,11 @@ export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonIte
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 export function OrderListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(OrderListCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: OrderListCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
@@ -596,15 +551,11 @@ export function OrderListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         tooltip: 'toolbar.order',
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 export function BulletListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(BulletListCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: BulletListCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
@@ -612,31 +563,24 @@ export function BulletListMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
         tooltip: 'toolbar.unorder',
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(ResetInlineFormatTextBackgroundColorCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: ResetInlineFormatTextBackgroundColorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
         icon: 'NoColor',
         positions: SetInlineFormatTextBackgroundColorCommand.id,
-    }, menuItemConfig);
+    };
 }
 
 export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const themeService = accessor.get(ThemeService);
-    const menuService = accessor.get(IMenuService);
 
-    const menuItemConfig = menuService.getMenuConfig(SetInlineFormatTextBackgroundColorCommand.id);
-
-    return mergeMenuConfigs({
+    return {
         id: SetInlineFormatTextBackgroundColorCommand.id,
         tooltip: 'toolbar.fillColor.main',
         group: MenuGroup.TOOLBAR_FORMAT,
@@ -664,7 +608,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
-    }, menuItemConfig);
+    };
 }
 
 function getFontStyleAtCursor(accessor: IAccessor) {

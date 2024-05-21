@@ -108,20 +108,14 @@ export class SharedController extends Disposable {
     initialize(): void {
         this._registerCommands();
         this._registerShortcuts();
-        this._registerMenuConfigs();
         this._registerMenus();
     }
 
-    private _registerMenuConfigs() {
-        const { menu = {} } = this._config;
-        Object.entries(menu).forEach(([id, config]) => {
-            this._menuService.setMenuConfigs(id, config);
-        });
-    }
-
     private _registerMenus(): void {
+        const { menu = {} } = this._config;
+
         [UndoMenuItemFactory, RedoMenuItemFactory].forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
         });
     }
 

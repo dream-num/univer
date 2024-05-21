@@ -70,8 +70,8 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.45",
-        "@univerjs/protocol": "^0.1.20",
+        "@univerjs/icons": "^0.1.46",
+        "@univerjs/protocol": "^0.1.32",
         "@univerjs/thread-comment": "workspace:*"
     },
     "devDependencies": {
@@ -79,14 +79,14 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "^0.15.2",
         "clsx": "^2.1.1",
-        "dayjs": "^1.11.10",
+        "dayjs": "^1.11.11",
         "less": "^4.2.0",
-        "react": "^18.2.0",
+        "react": "18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.10",
-        "vitest": "^1.5.0"
+        "vite": "^5.2.11",
+        "vitest": "^1.6.0"
     }
 }

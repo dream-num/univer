@@ -21,23 +21,21 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
 import { IShortcutService } from '../shortcut/shortcut.service';
-import type { IDisplayMenuItem, IMenuItem, MenuConfig, MenuItemConfig, MenuPosition } from './menu';
+import { mergeMenuConfigs } from '../../common/menu-merge-configs';
+import type { IDisplayMenuItem, IMenuItem, MenuConfig, MenuPosition } from './menu';
 
 export const IMenuService = createIdentifier<IMenuService>('univer.menu-service');
 
 export interface IMenuService {
     menuChanged$: Observable<void>;
 
-    addMenuItem(item: IMenuItem): IDisposable;
+    addMenuItem(item: IMenuItem, config: MenuConfig): IDisposable;
 
     setMenuItem(item: IMenuItem): void;
 
     /** Get menu items for display at a given position or a submenu. */
     getMenuItems(position: MenuPosition | string): Array<IDisplayMenuItem<IMenuItem>>;
     getMenuItem(id: string): IMenuItem | null;
-
-    setMenuConfigs(id: string, config: MenuItemConfig): void;
-    getMenuConfig(id: string): MenuConfig | null;
 }
 
 export class DesktopMenuService extends Disposable implements IMenuService {
@@ -60,12 +58,14 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         this._menuChanged$.complete();
     }
 
-    addMenuItem(item: IMenuItem): IDisposable {
+    addMenuItem(item: IMenuItem, config: MenuConfig): IDisposable {
         if (this._menuItemMap.has(item.id)) {
             throw new Error(`Menu item with the same id ${item.id} has already been added!`);
         }
 
-        this._menuItemMap.set(item.id, item);
+        const menuItemConfig = config?.[item.id];
+
+        this._menuItemMap.set(item.id, mergeMenuConfigs(item, menuItemConfig));
 
         if (Array.isArray(item.positions)) {
             item.positions.forEach((menu) => this._appendMenuToPosition(item, menu));

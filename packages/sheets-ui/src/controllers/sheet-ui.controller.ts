@@ -254,7 +254,6 @@ export class SheetUIController extends Disposable {
     private _init(): void {
         this._initCustomComponents();
         this._initCommands();
-        this._initMenuConfigs();
         this._initMenus();
         this._initShortcuts();
         this._initWorkbenchParts();
@@ -336,14 +335,9 @@ export class SheetUIController extends Disposable {
         });
     }
 
-    private _initMenuConfigs() {
-        const { menu = {} } = this._config;
-        Object.entries(menu).forEach(([id, config]) => {
-            this._menuService.setMenuConfigs(id, config);
-        });
-    }
-
     private _initMenus(): void {
+        const { menu = {} } = this._config;
+
         (
             [
                 // context menu
@@ -418,7 +412,7 @@ export class SheetUIController extends Disposable {
                 ShowMenuItemFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
         });
     }
 

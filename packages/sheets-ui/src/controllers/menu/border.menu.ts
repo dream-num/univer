@@ -18,7 +18,7 @@ import { ICommandService, UniverInstanceType } from '@univerjs/core';
 import type { IBorderInfo } from '@univerjs/sheets';
 import { BorderStyleManagerService, getCurrentSheetDisabled$, SetBorderBasicCommand } from '@univerjs/sheets';
 import type { IMenuSelectorItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, IMenuService, MenuGroup, MenuItemType, MenuPosition, mergeMenuConfigs } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
@@ -28,13 +28,10 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     // const permissionService = accessor.get(IPermissionService);
 
     const borderStyleManagerService = accessor.get(BorderStyleManagerService);
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(SetBorderBasicCommand.id);
 
     const disabled$ = getCurrentSheetDisabled$(accessor);
 
-    return mergeMenuConfigs({
+    return {
         id: SetBorderBasicCommand.id,
         icon: new Observable<string>((subscriber) => {
             const defaultIcon = 'AllBorderSingle';
@@ -75,5 +72,5 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         value$: borderStyleManagerService.borderInfo$,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$,
-    }, menuItemConfig);
+    };
 }

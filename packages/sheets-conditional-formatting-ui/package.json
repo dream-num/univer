@@ -81,7 +81,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.45",
+        "@univerjs/icons": "^0.1.46",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
         "lodash.get": "^4.4.2",
         "lodash.set": "^4.3.2",
@@ -101,7 +101,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "^0.15.2",
         "clsx": "^2.1.1",
         "less": "^4.2.0",
         "react": "18.2.0",

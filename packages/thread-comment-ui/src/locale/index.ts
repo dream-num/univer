@@ -14,21 +14,6 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
-import { zhCN } from '../locale';
-
-@OnLifecycle(LifecycleStages.Starting, ThreadCommentUIController)
-export class ThreadCommentUIController extends Disposable {
-    constructor(
-        @Inject(LocaleService) private readonly _localeService: LocaleService
-    ) {
-        super();
-
-        this._initLocales();
-    }
-
-    private _initLocales() {
-        this._localeService.load({ zhCN });
-    }
-}
+export { default as enUS } from './en-US';
+export { default as zhCN } from './zh-CN';
+export { default as ruRU } from './ru-RU';

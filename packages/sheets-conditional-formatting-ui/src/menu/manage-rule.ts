@@ -17,7 +17,7 @@
 import { merge, Observable } from 'rxjs';
 import type { IMenuSelectorItem } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
-import { getMenuHiddenObservable, IMenuService, MenuGroup, MenuItemType, MenuPosition, mergeMenuConfigs } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import { SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/sheets';
 
 import { debounceTime } from 'rxjs/operators';
@@ -71,14 +71,11 @@ const commonSelections = [
     },
 ];
 
-export const FactoryManageConditionalFormattingRule = (accessor: IAccessor) => {
+export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMenuSelectorItem => {
     const selectionManagerService = accessor.get(SelectionManagerService);
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
-    const menuService = accessor.get(IMenuService);
-
-    const menuItemConfig = menuService.getMenuConfig(OpenConditionalFormattingOperator.id);
 
     const clearRangeEnable$ = new Observable<boolean>((subscriber) => merge(
         selectionManagerService.selectionMoveEnd$,
@@ -138,7 +135,7 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor) => {
         subscriber.next(commonSelections);
     });
 
-    return mergeMenuConfigs({
+    return {
         id: OpenConditionalFormattingOperator.id,
         type: MenuItemType.SELECTOR,
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
@@ -147,5 +144,5 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor) => {
         tooltip: 'sheet.cf.title',
         selections: selections$,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-    }, menuItemConfig) as IMenuSelectorItem;
+    } as IMenuSelectorItem;
 };

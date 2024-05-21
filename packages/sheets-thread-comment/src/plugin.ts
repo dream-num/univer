@@ -17,7 +17,6 @@
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ICommandService, IConfigService, Tools, UniverInstanceType } from '@univerjs/core';
-import type { IThreadCommentUIConfig } from '@univerjs/thread-comment-ui';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import type { IUniverSheetsThreadCommentConfig } from './controllers/sheets-thread-comment.controller';
 import { DefaultSheetsThreadCommentConfig, SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';

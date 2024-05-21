@@ -67,11 +67,9 @@ import {
     FONT_SIZE_LIST,
     getMenuHiddenObservable,
     IClipboardInterfaceService,
-    IMenuService,
     MenuGroup,
     MenuItemType,
     MenuPosition,
-    mergeMenuConfigs,
     PasteCommand,
 } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';

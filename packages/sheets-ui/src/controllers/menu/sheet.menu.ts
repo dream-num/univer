@@ -26,7 +26,7 @@ import {
     SetWorksheetShowCommand,
 } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { IMenuService, MenuItemType, mergeMenuConfigs } from '@univerjs/ui';
+import { MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 

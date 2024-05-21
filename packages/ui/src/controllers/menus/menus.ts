@@ -20,8 +20,6 @@ import { map } from 'rxjs/operators';
 
 import type { IMenuButtonItem } from '../../services/menu/menu';
 import { MenuGroup, MenuItemType, MenuPosition } from '../../services/menu/menu';
-import { IMenuService } from '../../services/menu/menu.service';
-import { mergeMenuConfigs } from '../../common/menu-merge-configs';
 
 export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const undoRedoService = accessor.get(IUndoRedoService);

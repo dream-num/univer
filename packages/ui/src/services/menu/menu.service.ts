@@ -22,7 +22,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { IShortcutService } from '../shortcut/shortcut.service';
 import { mergeMenuConfigs } from '../../common/menu-merge-configs';
-import type { IDisplayMenuItem, IMenuItem, MenuConfig, MenuItemConfig, MenuPosition } from './menu';
+import type { IDisplayMenuItem, IMenuItem, MenuConfig, MenuPosition } from './menu';
 
 export const IMenuService = createIdentifier<IMenuService>('univer.menu-service');
 

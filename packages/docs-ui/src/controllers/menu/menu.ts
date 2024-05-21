@@ -51,11 +51,9 @@ import {
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
     getMenuHiddenObservable,
-    IMenuService,
     MenuGroup,
     MenuItemType,
     MenuPosition,
-    mergeMenuConfigs,
 } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';

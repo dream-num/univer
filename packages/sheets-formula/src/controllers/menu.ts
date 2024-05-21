@@ -18,7 +18,7 @@ import { UniverInstanceType } from '@univerjs/core';
 import { getCurrentSheetDisabled$ } from '@univerjs/sheets';
 import { PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
 import type { IMenuItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, IClipboardInterfaceService, IMenuService, MenuGroup, MenuItemType, MenuPosition, mergeMenuConfigs } from '@univerjs/ui';
+import { getMenuHiddenObservable, IClipboardInterfaceService, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 

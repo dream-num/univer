@@ -15,7 +15,7 @@
  */
 
 import type { IMenuButtonItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, IMenuService, MenuItemType, MenuPosition, mergeMenuConfigs } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { UniverInstanceType } from '@univerjs/core';

@@ -17,7 +17,7 @@
 import { LocaleType } from '@univerjs/core';
 import { defaultTheme, greenTheme } from '@univerjs/design';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { IMenuService, MenuItemType, MenuPosition, mergeMenuConfigs } from '@univerjs/ui';
+import { MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { ConfirmOperation } from '../commands/operations/confirm.operation';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type IMenuButtonItem, IMenuService, MenuGroup, MenuItemType, MenuPosition, mergeMenuConfigs } from '@univerjs/ui';
+import { type IMenuButtonItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 
 import type { IAccessor } from '@wendellhu/redi';
 import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';

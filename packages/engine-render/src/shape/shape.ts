@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IKeyValue, IScale, Nullable } from '@univerjs/core';
+import type { IKeyValue, IScale, ITransformState, Nullable } from '@univerjs/core';
 
 import { BASE_OBJECT_ARRAY, BaseObject } from '../base-object';
 import { SHAPE_TYPE } from '../basics/const';
@@ -84,7 +84,7 @@ export const SHAPE_OBJECT_ARRAY = [
     'strokeMiterLimit',
 ];
 
-export abstract class Shape<T> extends BaseObject {
+export abstract class Shape<T extends IShapeProps> extends BaseObject {
     private _hoverCursor: Nullable<string>;
 
     private _moveCursor: string | null = null;

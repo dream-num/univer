@@ -16,6 +16,7 @@
 
 import {
     BooleanNumber,
+    DEFAULT_STYLES,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
     FOCUSING_SHEET,
@@ -76,7 +77,6 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
-import { UNIVER_GLOBAL_DEFAULT_FONT_SIZE } from '@univerjs/engine-render';
 import {
     SheetPasteBesidesBorderCommand,
     SheetPasteColWidthCommand,
@@ -406,7 +406,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     const menuService = accessor.get(IMenuService);
 
     const menuItemConfig = menuService.getMenuConfig(SetRangeFontFamilyCommand.id);
-    const defaultValue = menuItemConfig?.defaultValue ? String(menuItemConfig?.defaultValue) : FONT_FAMILY_LIST[0].value;
+    const defaultValue = menuItemConfig?.defaultValue ? String(menuItemConfig?.defaultValue) : DEFAULT_STYLES.ff;
 
     return mergeMenuConfigs({
         id: SetRangeFontFamilyCommand.id,
@@ -463,7 +463,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     const menuService = accessor.get(IMenuService);
 
     const menuItemConfig = menuService.getMenuConfig(SetRangeFontSizeCommand.id);
-    const defaultValue = menuItemConfig?.defaultValue ? Number(menuItemConfig?.defaultValue) : UNIVER_GLOBAL_DEFAULT_FONT_SIZE;
+    const defaultValue = menuItemConfig?.defaultValue ? Number(menuItemConfig?.defaultValue) : DEFAULT_STYLES.fs;
 
     return mergeMenuConfigs({
         id: SetRangeFontSizeCommand.id,

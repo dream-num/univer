@@ -1315,7 +1315,7 @@ importers:
     dependencies:
       '@univerjs/icons':
         specifier: ^0.1.29
-        version: 0.1.44(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 0.1.45(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*

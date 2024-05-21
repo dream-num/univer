@@ -23560,6 +23560,10 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 },
             }),
         },
+        {
+            name: 'SHEET_THREAD_COMMENT_PLUGIN',
+            data: '{"sheet-0011":[{"text":{"textRuns":[],"paragraphs":[{"startIndex":3,"paragraphStyle":{}}],"sectionBreaks":[{"startIndex":4}],"dataStream":"123\\n\\r","customRanges":[]},"dT":"2024/05/17 21:16","id":"jwV0QtHwUbhG3o--iy1qa","ref":"H9","personId":"mockId","unitId":"workbook-01","subUnitId":"sheet-0011"}]}',
+        },
     ],
     // namedRanges: [
     //     {

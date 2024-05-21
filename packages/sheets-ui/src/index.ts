@@ -84,7 +84,7 @@ export { HoverManagerService } from './services/hover-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
 export { HoverRenderController } from './controllers/hover-render.controller';
 export { SHEET_VIEW_KEY } from './common/keys';
-export { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
+export { SheetCanvasPopManagerService, type ICanvasPopup } from './services/canvas-pop-manager.service';
 export { mergeSetRangeValues } from './services/clipboard/utils';
 export type { IAutoFillLocation } from './services/auto-fill/type';
 export type { IDiscreteRange } from './controllers/utils/range-tools';

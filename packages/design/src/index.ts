@@ -61,3 +61,5 @@ export { enUS, zhCN, ruRU } from './locale';
 export { type ILocale } from './locale/interface';
 export { defaultTheme, greenTheme, themeInstance } from './themes';
 export { DraggableList, type IDraggableListProps } from './components/draggable-list';
+export { Textarea, type ITextareaProps } from './components/textarea';
+export { Mentions, type IMentionsProps, Mention, type MentionProps } from './components/mentions';

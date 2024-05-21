@@ -150,6 +150,7 @@ export function App(props: IUniverAppProps) {
                                 data-range-selector
                                 onContextMenu={(e) => e.preventDefault()}
                             >
+                                <CanvasPopup />
                                 <ComponentContainer components={contentComponents} />
                             </section>
                         </section>
@@ -167,11 +168,8 @@ export function App(props: IUniverAppProps) {
                     )}
 
                     <ZenZone />
-
                 </section>
-                <CanvasPopup />
             </div>
-
             <ComponentContainer components={globalComponents} />
             <ComponentContainer components={builtInGlobalComponents} />
             {contextMenu && <ContextMenu />}

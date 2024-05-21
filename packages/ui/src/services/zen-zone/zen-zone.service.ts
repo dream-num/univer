@@ -24,6 +24,8 @@ export interface IZenZoneService {
     readonly visible$: Subject<boolean>;
     readonly componentKey$: Subject<string>;
 
+    readonly visible: boolean;
+
     set(key: string, component: any): IDisposable;
 
     open(): void;

@@ -69,13 +69,12 @@ export class SheetCanvasPopManagerService extends Disposable {
             };
 
             const offsetBound = transformBound2OffsetBound(bound, scene, skeleton, worksheet);
-            const bounding = currentRender.engine.getCanvasElement().getBoundingClientRect();
 
             const position = {
                 left: offsetBound.left,
                 right: offsetBound.right,
-                top: offsetBound.top + bounding.top,
-                bottom: offsetBound.bottom + bounding.top,
+                top: offsetBound.top,
+                bottom: offsetBound.bottom,
             };
             return position;
         };
@@ -256,7 +255,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         skeleton: SpreadsheetSkeleton,
         activeViewport: Viewport
     ): IBoundRectNoAngle {
-        const { scene, engine } = currentRender;
+        const { scene } = currentRender;
 
         const primaryWithCoord = skeleton.getCellByIndex(row, col);
         const cellInfo = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
@@ -267,12 +266,11 @@ export class SheetCanvasPopManagerService extends Disposable {
             y: activeViewport.actualScrollY,
         };
 
-        const bounding = engine.getCanvasElement().getBoundingClientRect();
         return {
-            left: ((cellInfo.startX - scrollXY.x) * scaleX) + bounding.left,
-            right: (cellInfo.endX - scrollXY.x) * scaleX + bounding.left,
-            top: ((cellInfo.startY - scrollXY.y) * scaleY) + bounding.top,
-            bottom: ((cellInfo.endY - scrollXY.y) * scaleY) + bounding.top,
+            left: ((cellInfo.startX - scrollXY.x) * scaleX),
+            right: (cellInfo.endX - scrollXY.x) * scaleX,
+            top: ((cellInfo.startY - scrollXY.y) * scaleY),
+            bottom: ((cellInfo.endY - scrollXY.y) * scaleY),
         };
     }
 

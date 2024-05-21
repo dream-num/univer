@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useEvent } from 'rc-util';
 import styles from './index.module.less';
 
@@ -93,27 +93,39 @@ function RectPopup(props: IRectPopupProps) {
     const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
-
     const [position, setPosition] = useState<Partial<IAbsolutePosition>>({
         top: -9999,
         left: -9999,
     });
 
-    // TODO@weird94: push the content into the visible area.
-
+    const style = useMemo(() => ({ ...position }), [position]);
     useEffect(() => {
-        const { clientWidth, clientHeight } = nodeRef.current!;
-        const { innerWidth, innerHeight } = window;
-        setPosition(calcPopupPosition({
-            position: anchorRect,
-            width: clientWidth,
-            height: clientHeight,
-            containerWidth: innerWidth,
-            containerHeight: innerHeight,
-            direction,
-        }));
+        requestAnimationFrame(() => {
+            if (!nodeRef.current) {
+                return;
+            }
+            const { clientWidth, clientHeight } = nodeRef.current;
+            const parent = nodeRef.current.parentElement;
+            if (!parent) {
+                return;
+            }
+            const { clientWidth: innerWidth, clientHeight: innerHeight } = parent;
+
+            setPosition(
+                calcPopupPosition(
+                    {
+                        position: anchorRect,
+                        width: clientWidth,
+                        height: clientHeight,
+                        containerWidth: innerWidth,
+                        containerHeight: innerHeight,
+                        direction,
+                    }
+                )
+            );
+        });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     [
         anchorRect.left,
         anchorRect.top,
@@ -124,12 +136,18 @@ function RectPopup(props: IRectPopupProps) {
 
     useEffect(() => {
         const handleClickOther = (e: MouseEvent) => {
-            if (excludeOutside && (excludeOutside.indexOf(e.target as any) > -1)) {
+            if (
+                excludeOutside &&
+                (
+                    (excludeOutside.indexOf(e.target as any) > -1) ||
+                    excludeOutside.some((item) => item.contains(e.target as any)
+                    )
+                )
+            ) {
                 return;
             }
-
-            const x = e.clientX;
-            const y = e.clientY;
+            const x = e.offsetX;
+            const y = e.offsetY;
             if (x <= anchorRect.right && x >= anchorRect.left && y <= anchorRect.bottom && y >= anchorRect.top) {
                 return;
             }
@@ -146,8 +164,8 @@ function RectPopup(props: IRectPopupProps) {
     return (
         <section
             ref={nodeRef}
-            className={styles.popup}
-            style={position}
+            style={style}
+            className={styles.popupAbsolute}
             onClick={(e) => {
                 e.stopPropagation();
             }}

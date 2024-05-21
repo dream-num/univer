@@ -74,6 +74,7 @@
     "dependencies": {
         "@rc-component/color-picker": "^1.5.3",
         "@rc-component/trigger": "^1.18.3",
+        "@types/react-mentions": "^4.1.13",
         "@univerjs/icons": "^0.1.45",
         "rc-dialog": "^9.4.0",
         "rc-dropdown": "^4.2.0",
@@ -88,6 +89,7 @@
         "rc-util": "^5.39.3",
         "react-draggable": "^4.4.6",
         "react-grid-layout": "^1.4.4",
+        "react-mentions": "^4.4.10",
         "react-transition-group": "^4.4.5"
     },
     "devDependencies": {

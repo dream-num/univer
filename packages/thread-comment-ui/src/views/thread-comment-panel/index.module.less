@@ -1,0 +1,40 @@
+.thread-comment-panel {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .thread-comment {
+        margin-top: 12px;
+    }
+
+    &-forms {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-top: 12px;
+
+        .select {
+            width: 120px;
+        }
+    }
+
+    &-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: rgb(var(--grey-600));
+        font-size: 13px;
+        flex: 1;
+    }
+
+    &-add {
+        margin-top: 8px;
+        display: flex;
+        flex-direction: row;
+
+        svg {
+            margin-right: 6px;
+        }
+    }
+}

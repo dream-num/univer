@@ -60,6 +60,8 @@ export interface IButtonProps {
 
     /** Set the handler to handle `click` event */
     onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+
+    id?: string;
 }
 
 export function Button(props: IButtonProps) {

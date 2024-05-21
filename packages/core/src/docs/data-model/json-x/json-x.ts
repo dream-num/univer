@@ -17,11 +17,12 @@
 import type { Doc, JSONOp, Path } from 'ot-json1';
 import * as json1 from 'ot-json1';
 import type { IDocumentBody, IDocumentData } from '../../../types/interfaces';
+import type { TPriority } from '../text-x/text-x';
 import { TextX } from '../text-x/text-x';
 import type { TextXAction } from '../text-x/action-types';
 import type { Nullable } from '../../../shared';
 
-interface ISubType {
+export interface ISubType {
     name: string;
     uri?: string;
     apply(doc: IDocumentBody, actions: TextXAction[]): IDocumentBody;
@@ -37,7 +38,7 @@ interface ISubType {
 
 json1.type.registerSubtype(TextX as ISubType);
 
-export { JSONOp as JSONXActions, Path as JSONXPath };
+export { JSONOp as JSONXActions, Path as JSONXPath, json1 as JSON1 };
 
 export class JSONX {
     static name = 'json-x';
@@ -57,7 +58,7 @@ export class JSONX {
     }
 
     // Do not use transform in JsonX, pls use transform in JsonXPro.
-    static transform(_thisActions: JSONOp, _otherActions: JSONOp, _priority: 'left' | 'right') {
+    static transform(_thisActions: JSONOp, _otherActions: JSONOp, _priority: TPriority) {
         throw new Error('transform is not implemented in JsonX');
     }
 

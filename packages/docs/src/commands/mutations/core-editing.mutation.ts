@@ -92,11 +92,6 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
         // Step 1: Update Doc Data Model.
         const undoActions = JSONX.invertWithDoc(actions, documentDataModel.getSnapshot());
-        // if (documentDataModel.getUnitId() === 'test-doc-1') {
-        //     console.log('body', documentDataModel.getBody());
-        //     console.log('action', JSON.stringify(actions, null, 2));
-        //     console.log('undoaction', JSON.stringify(undoActions, null, 2));
-        // }
         documentDataModel.apply(actions);
 
         // console.log(actions);

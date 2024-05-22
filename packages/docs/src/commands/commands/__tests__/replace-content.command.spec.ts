@@ -40,7 +40,7 @@ vi.mock('@univerjs/engine-render', async () => {
 
 function getDocumentData() {
     const TEST_DOCUMENT_DATA_EN: IDocumentData = {
-        id: 'test-doc-1',
+        id: 'test-doc',
         body: {
             dataStream: '=SUM(A2:B4)\r\n',
             textRuns: [],
@@ -67,7 +67,7 @@ describe('replace or cover content of document', () => {
 
     function getDataStream() {
         const univerInstanceService = get(IUniverInstanceService);
-        const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc-1', UniverInstanceType.UNIVER_DOC);
+        const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC);
         const dataStream = docsModel?.getBody()?.dataStream;
 
         return typeof dataStream === 'string' ? dataStream : '';
@@ -87,7 +87,7 @@ describe('replace or cover content of document', () => {
         const selectionManager = get(TextSelectionManagerService);
 
         selectionManager.setCurrentSelection({
-            unitId: 'test-doc-1',
+            unitId: 'test-doc',
             subUnitId: '',
         });
 
@@ -105,7 +105,7 @@ describe('replace or cover content of document', () => {
         it('Should pass the test case when replace content', async () => {
             expect(getDataStream().length).toBe(13);
             const commandParams = {
-                unitId: 'test-doc-1',
+                unitId: 'test-doc',
                 body: {
                     dataStream: '=AVERAGE(A4:B8)',
                 }, // Do not contain `\r\n` at the end.
@@ -116,7 +116,6 @@ describe('replace or cover content of document', () => {
             await commandService.executeCommand(ReplaceContentCommand.id, commandParams);
 
             expect(getDataStream().length).toBe(17);
-
             await commandService.executeCommand(UndoCommand.id);
 
             expect(getDataStream().length).toBe(13);
@@ -134,7 +133,7 @@ describe('replace or cover content of document', () => {
         it('Should pass the test case when cover content', async () => {
             expect(getDataStream()!.length).toBe(13);
             const commandParams = {
-                unitId: 'test-doc-1',
+                unitId: 'test-doc',
                 body: {
                     dataStream: '=AVERAGE(A4:B8)',
                 }, // Do not contain `\r\n` at the end.

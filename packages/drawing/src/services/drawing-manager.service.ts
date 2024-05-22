@@ -472,13 +472,18 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     getForwardDrawingsOp(orderParams: IDrawingOrderMapParam): IDrawingJsonUndo1 {
         const { unitId, subUnitId, drawingIds } = orderParams;
         const ops: JSONOp[] = [];
+        const orders = this.getDrawingOrder(unitId, subUnitId);
+        const newIds = [...drawingIds];
         drawingIds.forEach((drawingId) => {
             const index = this._hasDrawingOrder({ unitId, subUnitId, drawingId });
-            if (index === -1) {
+            if (index === -1 || index === orders.length - 1) {
                 return;
             }
             const op = json1.moveOp([unitId, subUnitId, DrawingMapItemType.order, index], [unitId, subUnitId, DrawingMapItemType.order, index + 1]);
             ops.push(op);
+            if (!newIds.includes(orders[index + 1])) {
+                newIds.push(orders[index + 1]);
+            }
             // this._moveDrawingOrder(unitId, subUnitId, drawingId, index + 1);
         });
 
@@ -487,20 +492,25 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
         // this._order$.next({ unitId, subUnitId, drawingIds: this.getDrawingOrder(unitId, subUnitId) });
 
-        return { undo: invertOp, redo: op, unitId, subUnitId, objects: orderParams };
+        return { undo: invertOp, redo: op, unitId, subUnitId, objects: { ...orderParams, drawingIds: newIds } };
     }
 
     getBackwardDrawingOp(orderParams: IDrawingOrderMapParam): IDrawingJsonUndo1 {
         const { unitId, subUnitId, drawingIds } = orderParams;
         const ops: JSONOp[] = [];
+        const orders = this.getDrawingOrder(unitId, subUnitId);
+        const newIds = [...drawingIds];
         drawingIds.forEach((drawingId) => {
             const index = this._hasDrawingOrder({ unitId, subUnitId, drawingId });
-            if (index === -1) {
+            if (index === -1 || index === 0) {
                 return;
             }
             // this._moveDrawingOrder(unitId, subUnitId, drawingId, index - 1);
             const op = json1.moveOp([unitId, subUnitId, DrawingMapItemType.order, index], [unitId, subUnitId, DrawingMapItemType.order, index - 1]);
             ops.push(op);
+            if (!newIds.includes(orders[index - 1])) {
+                newIds.push(orders[index - 1]);
+            }
         });
 
         const op = ops.reduce(json1.type.compose, null);
@@ -508,45 +518,54 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
         // this._order$.next({ unitId, subUnitId, drawingIds: this.getDrawingOrder(unitId, subUnitId) });
 
-        return { undo: invertOp, redo: op, unitId, subUnitId, objects: orderParams };
+        return { undo: invertOp, redo: op, unitId, subUnitId, objects: { ...orderParams, drawingIds: newIds } };
     }
 
     getFrontDrawingsOp(orderParams: IDrawingOrderMapParam): IDrawingJsonUndo1 {
         const { unitId, subUnitId, drawingIds } = orderParams;
         const orderDrawingIds = this._getOrderFromSearchParams(unitId, subUnitId, drawingIds);
-
+        const newIds = [...drawingIds];
+        const orders = this.getDrawingOrder(unitId, subUnitId);
         const ops: JSONOp[] = [];
         orderDrawingIds.forEach((orderDrawingId) => {
             const { drawingId } = orderDrawingId;
-            const index = this._getDrawingCount(unitId, subUnitId);
+            const index = this._getDrawingCount(unitId, subUnitId) - 1;
 
             const op = json1.moveOp([unitId, subUnitId, DrawingMapItemType.order, this._getDrawingOrder(unitId, subUnitId).indexOf(drawingId)], [unitId, subUnitId, DrawingMapItemType.order, index]);
             ops.push(op);
+            if (!newIds.includes(orders[index])) {
+                newIds.push(orders[index]);
+            }
             // this._moveDrawingOrder(unitId, subUnitId, drawingId, index + 1);
         });
 
         const op = ops.reduce(json1.type.compose, null);
         const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
 
-        return { undo: invertOp, redo: op, unitId, subUnitId, objects: orderParams };
+        return { undo: invertOp, redo: op, unitId, subUnitId, objects: { ...orderParams, drawingIds: newIds } };
     }
 
     getBackDrawingsOp(orderParams: IDrawingOrderMapParam): IDrawingJsonUndo1 {
         const { unitId, subUnitId, drawingIds } = orderParams;
         const orderSearchParams = this._getOrderFromSearchParams(unitId, subUnitId, drawingIds, true);
-
+        const newIds = [...drawingIds];
+        const orders = this.getDrawingOrder(unitId, subUnitId);
         const ops: JSONOp[] = [];
         orderSearchParams.forEach((orderSearchParam) => {
             const { drawingId } = orderSearchParam;
 
             const op = json1.moveOp([unitId, subUnitId, DrawingMapItemType.order, this._getDrawingOrder(unitId, subUnitId).indexOf(drawingId)], [unitId, subUnitId, DrawingMapItemType.order, 0]);
             ops.push(op);
+
+            if (!newIds.includes(orders[0])) {
+                newIds.push(orders[0]);
+            }
         });
 
         const op = ops.reduce(json1.type.compose, null);
         const invertOp = json1.type.invertWithDoc(op, this.drawingManagerData as unknown as json1.Doc);
 
-        return { undo: invertOp, redo: op, unitId, subUnitId, objects: orderParams };
+        return { undo: invertOp, redo: op, unitId, subUnitId, objects: { ...orderParams, drawingIds: newIds } };
     }
 
     private _getDrawingCount(unitId: string, subUnitId: string) {

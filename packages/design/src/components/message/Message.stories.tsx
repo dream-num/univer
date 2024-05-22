@@ -46,6 +46,9 @@ export const Playground = {
                 <Button type="primary" onClick={() => handleOpen(MessageType.Success)}>
                     Click Me
                 </Button>
+                <Button type="primary" onClick={() => handleOpen(MessageType.Info)}>
+                    Click Me
+                </Button>
                 <Button type="primary" onClick={() => handleOpen(MessageType.Warning)}>
                     Click Me
                 </Button>

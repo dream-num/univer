@@ -78,6 +78,7 @@ export { DesktopShortcutService, type IShortcutItem, IShortcutService } from './
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 export { ISidebarService } from './services/sidebar/sidebar.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';
+export { ZenZone } from './views/components/zen-zone/ZenZone';
 export { UniverUIPlugin, DISABLE_AUTO_FOCUS_KEY } from './ui-plugin';
 export * from './utils';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
@@ -88,6 +89,8 @@ export { RangeSelector } from './components/range-selector/RangeSelector';
 export { IRangeSelectorService } from './services/range-selector/range-selector.service';
 export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
 export { CanvasPopupService, ICanvasPopupService, type IPopup } from './services/popup/canvas-popup.service';
+export { ContextMenu } from './views/components/context-menu/ContextMenu';
+export { CanvasPopup } from './views/components/popup/CanvasPopup';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { mergeMenuConfigs } from './common/menu-merge-configs';
 export { IProgressService, ProgressService } from './services/progress/progress.service';

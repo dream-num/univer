@@ -42,7 +42,7 @@ interface IDrawingTransformCache {
     transform: ITransformState;
 }
 
-@OnLifecycle(LifecycleStages.Ready, DrawingUpdateController)
+@OnLifecycle(LifecycleStages.Starting, DrawingUpdateController)
 export class DrawingUpdateController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,

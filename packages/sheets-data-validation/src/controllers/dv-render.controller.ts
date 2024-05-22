@@ -344,6 +344,10 @@ export class DataValidationRenderController extends RxDisposable {
 
     private _initAutoHeight() {
         this._dataValidationModel.ruleChange$.subscribe((info) => {
+            if (info.type === 'remove') {
+                return;
+            }
+
             if (info.rule?.ranges) {
                 const mutations = this._autoHeightController.getUndoRedoParamsOfAutoHeight(info.rule.ranges);
                 sequenceExecute(mutations.redos, this._commandService);

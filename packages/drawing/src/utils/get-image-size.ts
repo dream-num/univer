@@ -16,7 +16,11 @@
 
 import type { ISize } from '@univerjs/core';
 
-export const getImageSize = async (src: string): Promise<Required<ISize>> => {
+interface IImageParam extends ISize {
+    image: HTMLImageElement;
+}
+
+export const getImageSize = async (src: string): Promise<Required<IImageParam>> => {
     return new Promise((resolve, reject) => {
         const image = new Image();
         image.src = src;
@@ -24,6 +28,7 @@ export const getImageSize = async (src: string): Promise<Required<ISize>> => {
             resolve({
                 width: image.width,
                 height: image.height,
+                image,
             });
         };
         image.onerror = (error) => {

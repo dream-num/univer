@@ -20,6 +20,7 @@ import {
     DrawingTypeEnum,
     ICommandService,
     IDrawingManagerService,
+    IImageRemoteService,
     ImageSourceType,
     LifecycleStages,
     OnLifecycle,
@@ -41,7 +42,8 @@ export class ImageUpdateController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IDialogService private readonly _dialogService: IDialogService
+        @IDialogService private readonly _dialogService: IDialogService,
+        @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService,
     ) {
         super();
 
@@ -155,7 +157,7 @@ export class ImageUpdateController extends Disposable {
     private _drawingAddListener() {
         this.disposeWithMe(
             this._drawingManagerService.add$.subscribe((params) => {
-                (params).forEach((param) => {
+                (params).forEach(async (param) => {
                     const { unitId, subUnitId, drawingId } = param;
 
                     const imageParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
@@ -164,7 +166,7 @@ export class ImageUpdateController extends Disposable {
                         return;
                     }
 
-                    const { transform, drawingType } = imageParam;
+                    const { transform, drawingType,source, imageSourceType } = imageParam;
 
                     if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
                         return;
@@ -194,15 +196,31 @@ export class ImageUpdateController extends Disposable {
 
                     const imageConfig: IImageProps = { left, top, width, height, zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1 };
 
-                    const imageNativeCache = this._getImageSourceCache(imageParam);
+                    const imageNativeCache = this._imageRemoteService.getImageSourceCache(source, imageSourceType);
+
+                    let shouldBeCache = false
                     if (imageNativeCache != null) {
                         imageConfig.image = imageNativeCache;
                     } else {
-                        imageConfig.url = imageParam.source;
+                        if (imageSourceType === ImageSourceType.UUID) {
+                            try {
+                                imageConfig.url = await this._imageRemoteService.getImage(source);
+                            } catch (error) {
+                                console.error(error);
+                                return;
+                            }
+                        } else {
+                            imageConfig.url = source;
+                        }
+
+                        shouldBeCache = true;
                     }
 
                     const image = new Image(imageShapeKey, imageConfig);
-                    this._addImageSourceCache(imageParam, image.getNative());
+
+                    if(shouldBeCache){
+                        this._imageRemoteService.addImageSourceCache(source, imageSourceType, image.getNative());
+                    }
 
                     scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(image);
 
@@ -334,26 +352,5 @@ export class ImageUpdateController extends Disposable {
             width: Math.floor(nativeWidth * scale),
             height: Math.floor(nativeHeight * scale),
         };
-    }
-
-    private _imageSourceCache: Map<string, HTMLImageElement> = new Map();
-
-    private _addImageSourceCache(imageData: IImageData, imageSource: Nullable<HTMLImageElement>) {
-        const { source, imageSourceType } = imageData;
-        if (imageSourceType === ImageSourceType.BASE64 || imageSource == null) {
-            return;
-        }
-
-        this._imageSourceCache.set(source, imageSource);
-    }
-
-    private _getImageSourceCache(imageData: IImageData): Nullable<HTMLImageElement> {
-        const { source, imageSourceType } = imageData;
-
-        if (imageSourceType === ImageSourceType.BASE64) {
-            return;
-        }
-
-        return this._imageSourceCache.get(source);
     }
 }

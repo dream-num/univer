@@ -28,6 +28,7 @@ export interface IImageRemoteServiceParam {
     imageId: string;
     imageSourceType: ImageSourceType;
     source: string;
+    base64Cache: string;
 }
 
 export interface IImageRemoteService {
@@ -39,6 +40,10 @@ export interface IImageRemoteService {
     getImage(imageId: string): Promise<string>;
 
     saveImage(imageFile: File): Promise<Nullable<IImageRemoteServiceParam>>;
+
+    imageSourceCache: Map<string, HTMLImageElement>;
+    getImageSourceCache(source:string, imageSourceType:ImageSourceType): Nullable<HTMLImageElement>;
+    addImageSourceCache(source:string, imageSourceType:ImageSourceType, imageSource: Nullable<HTMLImageElement>): void;
 
     applyFilter(imageId: string): Promise<string>;
 

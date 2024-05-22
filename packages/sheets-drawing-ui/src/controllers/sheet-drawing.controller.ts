@@ -37,6 +37,7 @@ import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-d
 import { SidebarSheetDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
 import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command';
 import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
+import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingUIController)
@@ -87,6 +88,7 @@ export class SheetDrawingUIController extends Disposable {
             UngroupSheetDrawingCommand,
             MoveDrawingsCommand,
             DeleteDrawingsCommand,
+            SetDrawingArrangeCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

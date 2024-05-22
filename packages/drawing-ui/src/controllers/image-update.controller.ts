@@ -192,7 +192,7 @@ export class ImageUpdateController extends Disposable {
                 return;
             }
 
-            const { transform, drawingType, source, imageSourceType } = imageParam;
+            const { transform, drawingType, source, imageSourceType, srcRect, prstGeom } = imageParam;
 
             if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
                 return;
@@ -220,7 +220,9 @@ export class ImageUpdateController extends Disposable {
                 return;
             }
 
-            const imageConfig: IImageProps = { left, top, width, height, zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1 };
+            const orders = this._drawingManagerService.getDrawingOrder(unitId, subUnitId);
+            const zIndex = orders.indexOf(drawingId);
+            const imageConfig: IImageProps = { ...transform, zIndex: zIndex === -1 ? (orders.length - 1) : zIndex };
 
             const imageNativeCache = this._imageRemoteService.getImageSourceCache(source, imageSourceType);
 
@@ -249,6 +251,14 @@ export class ImageUpdateController extends Disposable {
             }
 
             scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(image);
+
+            if (prstGeom != null) {
+                image.setPrstGeom(prstGeom);
+            }
+
+            if (srcRect != null) {
+                image.setSrcRect(srcRect);
+            }
 
             this._addHoverForImage(image);
             this._addDialogForImage(image);

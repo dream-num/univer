@@ -146,9 +146,9 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
                     <div>{localeService.t('drawing-anchor.title')}</div>
                 </div>
             </div>
-            <div className={clsx(styles.imageCommonPanelRow, styles.imageCommonPanelRowVertical)}>
+            <div className={clsx(styles.imageCommonPanelRow)}>
                 <div className={clsx(styles.imageCommonPanelColumn)}>
-                    <RadioGroup value={value} onChange={handleChange}>
+                    <RadioGroup value={value} onChange={handleChange} direction="vertical">
                         <Radio value={SheetDrawingAnchorType.Both}>{localeService.t('drawing-anchor.both')}</Radio>
                         <Radio value={SheetDrawingAnchorType.Position}>{localeService.t('drawing-anchor.position')}</Radio>
                         <Radio value={SheetDrawingAnchorType.None}>{localeService.t('drawing-anchor.none')}</Radio>

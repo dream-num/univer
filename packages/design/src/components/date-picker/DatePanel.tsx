@@ -32,7 +32,7 @@ export const DatePanel = (props: IDatePanelProps) => {
             {...props}
             generateConfig={generateConfig}
             prefixCls={styles.datePicker}
-            locale={locale.design.Picker}
+            locale={locale?.Picker!}
         />
     );
 };

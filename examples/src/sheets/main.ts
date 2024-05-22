@@ -75,7 +75,9 @@ univer.registerPlugin(UniverDrawingPlugin);
 
 univer.registerPlugin(UniverDocsUIPlugin);
 
-univer.registerPlugin(UniverSheetsPlugin);
+univer.registerPlugin(UniverSheetsPlugin, {
+    notExecuteFormula: true,
+});
 univer.registerPlugin(UniverSheetsUIPlugin);
 
 // sheet feature plugins

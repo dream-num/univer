@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IImageRemoteServiceParam, IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageRemoteService, ImageSourceType, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageData } from '@univerjs/drawing';
@@ -97,7 +97,13 @@ export class SheetDrawingUpdateController extends Disposable {
     }
 
     private async _insertFloatImage(file: File) {
-        const imageParam = await this._imageRemoteService.saveImage(file);
+        let imageParam: Nullable<IImageRemoteServiceParam>;
+        try {
+            imageParam = await this._imageRemoteService.saveImage(file);
+        } catch (error) {
+            console.error(error);
+        }
+
         if (imageParam == null) {
             return;
         }
@@ -120,7 +126,11 @@ export class SheetDrawingUpdateController extends Disposable {
         let { source } = imageParam;
 
         if (imageSourceType === ImageSourceType.UUID) {
-            source = await this._imageRemoteService.getImage(imageId);
+            try {
+                source = await this._imageRemoteService.getImage(imageId);
+            } catch (error) {
+                console.error(error);
+            }
         }
 
         const { width, height } = await getImageSize(source);

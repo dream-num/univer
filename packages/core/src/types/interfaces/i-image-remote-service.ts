@@ -42,8 +42,8 @@ export interface IImageRemoteService {
     saveImage(imageFile: File): Promise<Nullable<IImageRemoteServiceParam>>;
 
     imageSourceCache: Map<string, HTMLImageElement>;
-    getImageSourceCache(source:string, imageSourceType:ImageSourceType): Nullable<HTMLImageElement>;
-    addImageSourceCache(source:string, imageSourceType:ImageSourceType, imageSource: Nullable<HTMLImageElement>): void;
+    getImageSourceCache(source: string, imageSourceType: ImageSourceType): Nullable<HTMLImageElement>;
+    addImageSourceCache(source: string, imageSourceType: ImageSourceType, imageSource: Nullable<HTMLImageElement>): void;
 
     applyFilter(imageId: string): Promise<string>;
 

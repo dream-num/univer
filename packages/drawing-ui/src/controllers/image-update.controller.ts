@@ -36,7 +36,7 @@ import { ImageResetSizeOperation } from '../commands/operations/image-reset-size
 
 const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
-@OnLifecycle(LifecycleStages.Starting, ImageUpdateController)
+@OnLifecycle(LifecycleStages.Ready, ImageUpdateController)
 export class ImageUpdateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

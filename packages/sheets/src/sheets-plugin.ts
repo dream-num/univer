@@ -32,6 +32,7 @@ import { SheetInterceptorService } from './services/sheet-interceptor/sheet-inte
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 import { ISheetDrawingService, SheetDrawingService } from './services/sheet-drawing.service';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
+import { SheetDrawingDataController } from './controllers/sheet-drawing-data.controller';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 
@@ -89,6 +90,7 @@ export class UniverSheetsPlugin extends Plugin {
             [BasicWorksheetController],
             [MergeCellController],
             [DefinedNameDataController],
+            [SheetDrawingDataController],
         ];
 
         if (!this._config?.notExecuteFormula) {

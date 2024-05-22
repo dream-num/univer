@@ -72,6 +72,8 @@ univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
 });
 
+univer.registerPlugin(UniverDrawingPlugin);
+
 univer.registerPlugin(UniverDocsUIPlugin);
 
 univer.registerPlugin(UniverSheetsPlugin);
@@ -105,8 +107,7 @@ univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // sheet permission
 univer.registerPlugin(UniverSheetsPermissionUIPlugin);
-// image
-univer.registerPlugin(UniverDrawingPlugin);
+// drawing
 univer.registerPlugin(UniverDrawingUIPlugin);
 univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 

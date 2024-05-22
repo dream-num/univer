@@ -93,7 +93,6 @@ export class UniverSheetsPlugin extends Plugin {
             [WorkbookPermissionService],
             [INumfmtService, { useClass: NumfmtService }],
             [SheetInterceptorService],
-            [ISheetDrawingService, { useClass: SheetDrawingService }],
 
             // controllers
             [BasicWorksheetController],
@@ -117,6 +116,11 @@ export class UniverSheetsPlugin extends Plugin {
             dependencies.push(
                 [CalculateResultApplyController],
                 [FeatureCalculationController]
+            );
+        } else {
+            dependencies.push(
+                [ISheetDrawingService, { useClass: SheetDrawingService }],
+                [SheetDrawingDataController]
             );
         }
 

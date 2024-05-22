@@ -128,8 +128,6 @@ import { AddRangeProtectionMutation } from '../commands/mutations/add-range-prot
 import { DeleteRangeProtectionMutation } from '../commands/mutations/delete-range-protection.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
 import { SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
-import { SetWorkbookNameCommand } from '../commands/commands/set-workbook-name.command';
-import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './config';
 
@@ -255,10 +253,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             AddRangeProtectionMutation,
             DeleteRangeProtectionMutation,
             SetRangeProtectionMutation,
-            InsertDrawingMutation,
-            RemoveDrawingMutation,
-            SetDrawingMutation,
-            SetDrawingArrangeMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         const onlyRegisterFormulaRelatedMutations = this._configService.getConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY) ?? false;

@@ -19,7 +19,6 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { enUS, zhCN } from './locale';
 import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
-import { SheetDrawingDataController } from './controllers/sheet-drawing-data.controller';
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 import { SheetDrawingUIController } from './controllers/sheet-drawing.controller';
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
@@ -54,7 +53,6 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             // controllers
             [SheetDrawingUIController],
             [SheetDrawingUpdateController],
-            [SheetDrawingDataController],
             [DrawingPopupMenuController],
             [SheetDrawingTransformAffectedController],
 

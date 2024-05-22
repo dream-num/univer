@@ -73,7 +73,7 @@
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
-        "@wendellhu/redi": "^0.15.2",
+        "@wendellhu/redi": "0.15.2",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.11",
         "monaco-editor": "0.48.0",

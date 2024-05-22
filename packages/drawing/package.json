@@ -63,7 +63,7 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "0.15.2",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -74,7 +74,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.2",
+        "@wendellhu/redi": "0.15.2",
         "less": "^4.2.0",
         "ot-json1": "^1.0.2",
         "react": "18.2.0",

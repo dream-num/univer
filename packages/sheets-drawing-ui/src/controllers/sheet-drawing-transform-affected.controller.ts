@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IMutationInfo, IRange, ITransformState, Nullable } from '@univerjs/core';
+import type { IMutationInfo, IRange, ITransformState, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import type { IInsertColCommandParams, IInsertRowCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams, ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets';
-import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, DrawingApplyType, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, ISheetDrawingService, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetDrawingApplyMutation, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetDrawingAnchorType, SheetInterceptorService } from '@univerjs/sheets';
+import type { IInsertColCommandParams, IInsertRowCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetRowHiddenMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets';
+import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, DrawingApplyType, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, ISheetDrawingService, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetDrawingApplyMutation, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SheetDrawingAnchorType, SheetInterceptorService } from '@univerjs/sheets';
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
@@ -49,7 +49,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
     private _init(): void {
         this._sheetInterceptorListener();
 
-        this._sheetRefreshListener();
+        // this._sheetRefreshListener();
     }
 
     private _sheetInterceptorListener() {
@@ -742,7 +742,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return null;
     }
 
-    private _sheetRefreshListener() {
+    // private _sheetRefreshListener() {
         // const updateMutations = [
         //     SetRowVisibleMutation.id,
         //     SetRowHiddenMutation.id,
@@ -762,47 +762,47 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         //         this._refreshDrawingTransform(unitId, subUnitId, ranges);
         //     })
         // );
-    }
+    // }
 
-    private _refreshDrawingTransform(unitId: string, subUnitId: string, ranges: IRange[]) {
-        const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
+    // private _refreshDrawingTransform(unitId: string, subUnitId: string, ranges: IRange[]) {
+    //     const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
 
-        const updateDrawings: ISheetDrawing[] = [];
+    //     const updateDrawings: ISheetDrawing[] = [];
 
-        Object.keys(drawingData).forEach((drawingId) => {
-            const drawing = drawingData[drawingId] as ISheetDrawing;
-            const { sheetTransform, anchorType = SheetDrawingAnchorType.Position } = drawing;
-            if (anchorType === SheetDrawingAnchorType.None) {
-                return true;
-            }
+    //     Object.keys(drawingData).forEach((drawingId) => {
+    //         const drawing = drawingData[drawingId] as ISheetDrawing;
+    //         const { sheetTransform, anchorType = SheetDrawingAnchorType.Position } = drawing;
+    //         if (anchorType === SheetDrawingAnchorType.None) {
+    //             return true;
+    //         }
 
-            const { from, to } = sheetTransform;
-            const { row: fromRow, column: fromColumn } = from;
-            const { row: toRow, column: toColumn } = to;
-            for (let i = 0; i < ranges.length; i++) {
-                const range = ranges[i];
-                const { startRow, endRow, startColumn, endColumn } = range;
-                if (Rectangle.intersects(
-                    {
-                        startRow, endRow, startColumn, endColumn,
-                    },
-                    {
-                        startRow: fromRow, endRow: toRow, startColumn: fromColumn, endColumn: toColumn,
-                    }
-                ) || fromRow > endRow || fromColumn > endColumn) {
-                    updateDrawings.push({
-                        ...drawing,
-                        transform: transformDrawingPositionToTransform(sheetTransform, this._selectionRenderService),
-                    });
-                    break;
-                }
-            }
-        });
+    //         const { from, to } = sheetTransform;
+    //         const { row: fromRow, column: fromColumn } = from;
+    //         const { row: toRow, column: toColumn } = to;
+    //         for (let i = 0; i < ranges.length; i++) {
+    //             const range = ranges[i];
+    //             const { startRow, endRow, startColumn, endColumn } = range;
+    //             if (Rectangle.intersects(
+    //                 {
+    //                     startRow, endRow, startColumn, endColumn,
+    //                 },
+    //                 {
+    //                     startRow: fromRow, endRow: toRow, startColumn: fromColumn, endColumn: toColumn,
+    //                 }
+    //             ) || fromRow > endRow || fromColumn > endColumn) {
+    //                 updateDrawings.push({
+    //                     ...drawing,
+    //                     transform: transformDrawingPositionToTransform(sheetTransform, this._selectionRenderService),
+    //                 });
+    //                 break;
+    //             }
+    //         }
+    //     });
 
-        if (updateDrawings.length === 0) {
-            return;
-        }
+    //     if (updateDrawings.length === 0) {
+    //         return;
+    //     }
 
-        this._drawingManagerService.refreshTransform(updateDrawings);
-    }
+    //     this._drawingManagerService.refreshTransform(updateDrawings);
+    // }
 }

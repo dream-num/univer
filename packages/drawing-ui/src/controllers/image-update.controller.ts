@@ -43,7 +43,7 @@ export class ImageUpdateController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IDialogService private readonly _dialogService: IDialogService,
-        @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService,
+        @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService
     ) {
         super();
 
@@ -166,7 +166,7 @@ export class ImageUpdateController extends Disposable {
                         return;
                     }
 
-                    const { transform, drawingType,source, imageSourceType } = imageParam;
+                    const { transform, drawingType, source, imageSourceType } = imageParam;
 
                     if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
                         return;
@@ -198,7 +198,7 @@ export class ImageUpdateController extends Disposable {
 
                     const imageNativeCache = this._imageRemoteService.getImageSourceCache(source, imageSourceType);
 
-                    let shouldBeCache = false
+                    let shouldBeCache = false;
                     if (imageNativeCache != null) {
                         imageConfig.image = imageNativeCache;
                     } else {
@@ -218,7 +218,7 @@ export class ImageUpdateController extends Disposable {
 
                     const image = new Image(imageShapeKey, imageConfig);
 
-                    if(shouldBeCache){
+                    if (shouldBeCache) {
                         this._imageRemoteService.addImageSourceCache(source, imageSourceType, image.getNative());
                     }
 

@@ -39,6 +39,7 @@ export enum DrawingTypeEnum {
     DRAWING_VIDEO = 5,
     DRAWING_GROUP = 6,
     DRAWING_UNIT = 7,
+    DRAWING_DOM = 8,
 }
 
 export type DrawingType = DrawingTypeEnum | number;

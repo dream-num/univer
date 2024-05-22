@@ -71,7 +71,6 @@ import { SheetContextMenuRenderController } from './controllers/render-controlle
 import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
-import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';
@@ -112,7 +111,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [HoverManagerService],
                 [SheetCanvasPopManagerService],
                 [CellAlertManagerService],
-                [SheetCanvasFloatDomManagerService],
 
                 // controllers
                 [ActiveWorksheetController],

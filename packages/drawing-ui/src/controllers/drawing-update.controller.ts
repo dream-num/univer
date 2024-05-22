@@ -589,9 +589,9 @@ export class DrawingUpdateController extends Disposable {
 
                     const { transform, drawingType } = imageParam;
 
-                    if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
-                        return;
-                    }
+                    // if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
+                    //     return;
+                    // }
 
                     const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
 

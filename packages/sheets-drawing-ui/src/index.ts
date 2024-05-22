@@ -14,4 +14,7 @@
  * limitations under the License.
  */
 
+export { InsertSheetDrawingCommand } from './commands/commands/insert-sheet-drawing.command';
+export type { IInsertDrawingCommandParams } from './commands/commands/interfaces';
 export { UniverSheetsDrawingUIPlugin } from './plugin';
+export { SheetCanvasFloatDomManagerService, type ICanvasFloatDom } from './services/canvas-float-dom-manager.service';

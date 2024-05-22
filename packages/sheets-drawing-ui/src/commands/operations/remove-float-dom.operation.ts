@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
+import { CommandType, type ICommand } from '@univerjs/core';
+import { SheetCanvasFloatDomManagerService } from '../../services/canvas-float-dom-manager.service';
 
-export const CreateFloatDomCommand: ICommand = {
-    id: 'debugger.command.create-float-dom',
-    type: CommandType.COMMAND,
-    handler: (accessor) => {
+export const RemoveFloatDomOperation: ICommand<{ drawingId: string }> = {
+    type: CommandType.OPERATION,
+    id: 'sheet.operation.insert-float-dom',
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+
         const floatDomService = accessor.get(SheetCanvasFloatDomManagerService);
-        floatDomService.addFloatDomToPosition({
-            allowTransform: true,
-            initPosition: {
-                startX: 200,
-                endX: 400,
-                startY: 200,
-                endY: 400,
-            },
-            componentKey: 'ImageDemo',
-        });
+        floatDomService.removeFloatDom(params.drawingId);
         return true;
     },
 };

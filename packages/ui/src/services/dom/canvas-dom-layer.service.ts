@@ -17,7 +17,7 @@
 import type { IPosition } from '@univerjs/core';
 import { BehaviorSubject, type Observable } from 'rxjs';
 
-interface IFloatDomLayout extends IPosition {
+export interface IFloatDomLayout extends IPosition {
     rotate: number;
     width: number;
     height: number;

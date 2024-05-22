@@ -22,7 +22,7 @@ import type { IUniverUniscriptConfig } from './controllers/uniscript.controller'
 import { DefaultUniscriptConfig, UniscriptController } from './controllers/uniscript.controller';
 import { zhCN } from './locale';
 import { ScriptEditorService } from './services/script-editor.service';
-import { UniscriptExecutionService } from './services/script-execution.service';
+import { IUniscriptExecutionService, UniscriptExecutionService } from './services/script-execution.service';
 import { ScriptPanelService } from './services/script-panel.service';
 
 const PLUGIN_NAME = 'uniscript';
@@ -48,11 +48,19 @@ export class UniverUniscriptPlugin extends Plugin {
             // services
             [ScriptEditorService, { useFactory: () => injector.createInstance(ScriptEditorService, this._config) }],
             [ScriptPanelService],
-            [UniscriptExecutionService],
         ];
 
         dependencies.forEach((d) => injector.add(d));
 
+        this.registerExecution();
+
         this._localeService.load({ zhCN });
+    }
+
+    /**
+     * Allows being overridden, replacing with a new UniscriptExecutionService.
+     */
+    registerExecution(): void {
+        this._injector.add([IUniscriptExecutionService, { useClass: UniscriptExecutionService }]);
     }
 }

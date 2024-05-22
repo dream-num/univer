@@ -19,7 +19,7 @@ import type { IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { AdditionAndSubtractionSingle } from '@univerjs/icons';
+import { AddImageSingle } from '@univerjs/icons';
 import { UploadFileMenu } from '../views/upload-component/UploadFile';
 import { COMPONENT_UPLOAD_FILE_MENU } from '../views/upload-component/component-name';
 import { ImageMenuFactory, ImageUploadIcon, UploadCellImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
@@ -55,7 +55,7 @@ export class SheetDrawingUIController extends Disposable {
 
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(ImageUploadIcon, AdditionAndSubtractionSingle));
+        this.disposeWithMe(componentManager.register(ImageUploadIcon, AddImageSingle));
         this.disposeWithMe(componentManager.register(COMPONENT_UPLOAD_FILE_MENU, UploadFileMenu));
         this.disposeWithMe(componentManager.register(COMPONENT_SHEET_DRAWING_PANEL, SheetDrawingPanel));
     }

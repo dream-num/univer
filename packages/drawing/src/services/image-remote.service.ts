@@ -43,7 +43,7 @@ export class ImageRemoteService implements IImageRemoteService {
         this._change$.next(this._waitCount);
     }
 
-    imageSourceCache: Map<string, HTMLImageElement>;
+    imageSourceCache: Map<string, HTMLImageElement> = new Map();
     getImageSourceCache(source: string, imageSourceType: ImageSourceType) {
         if (imageSourceType === ImageSourceType.BASE64) {
             const image = new Image();

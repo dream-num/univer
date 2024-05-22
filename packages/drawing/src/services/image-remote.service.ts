@@ -43,6 +43,23 @@ export class ImageRemoteService implements IImageRemoteService {
         this._change$.next(this._waitCount);
     }
 
+    imageSourceCache: Map<string, HTMLImageElement>;
+    getImageSourceCache(source: string, imageSourceType: ImageSourceType) {
+        if (imageSourceType === ImageSourceType.BASE64) {
+            const image = new Image();
+            image.src = source;
+            return image;
+        }
+        return this.imageSourceCache.get(source);
+    }
+
+    addImageSourceCache(source: string, imageSourceType: ImageSourceType, imageSource: Nullable<HTMLImageElement>) {
+        if (imageSourceType === ImageSourceType.BASE64 || imageSource == null) {
+            return;
+        }
+        this.imageSourceCache.set(source, imageSource);
+    }
+
     async getImage(imageId: string): Promise<string> {
         return Promise.resolve(imageId);
     }
@@ -70,6 +87,7 @@ export class ImageRemoteService implements IImageRemoteService {
                     imageId,
                     imageSourceType: ImageSourceType.BASE64,
                     source: replaceSrc,
+                    base64Cache: replaceSrc,
                 });
 
                 this.decreaseWaiting();

@@ -470,7 +470,7 @@ importers:
         specifier: ^4.1.13
         version: 4.1.13
       '@univerjs/icons':
-        specifier: ^0.1.47
+        specifier: ^0.1.46
         version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-dialog:
         specifier: ^9.4.0
@@ -1463,7 +1463,7 @@ importers:
         specifier: workspace:*
         version: link:../docs-ui
       '@univerjs/icons':
-        specifier: ^0.1.47
+        specifier: ^0.1.46
         version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@types/react':

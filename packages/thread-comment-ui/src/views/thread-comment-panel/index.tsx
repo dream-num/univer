@@ -36,10 +36,12 @@ export interface IThreadCommentPanelProps {
     getSubUnitName: (subUnitId: string) => string;
     onResolve?: (id: string) => void;
     sortComments?: (comments: IThreadComment[]) => IThreadComment[];
+    onItemLeave?: (comment: IThreadComment) => void;
+    onItemEnter?: (comment: IThreadComment) => void;
 }
 
 export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
-    const { unitId, subUnitId$, type, onAdd, getSubUnitName, onResolve, sortComments } = props;
+    const { unitId, subUnitId$, type, onAdd, getSubUnitName, onResolve, sortComments, onItemLeave, onItemEnter } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
     const localeService = useDependency(LocaleService);
@@ -176,6 +178,8 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         });
                     }}
                     onClose={() => onResolve?.(comment.id)}
+                    onMouseEnter={() => onItemEnter?.(comment)}
+                    onMouseLeave={() => onItemLeave?.(comment)}
                 />
             ))}
             {statuedComments.length

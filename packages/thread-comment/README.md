@@ -5,16 +5,16 @@
 
 ## Introduction
 
-> TODO: Introduction
+> `@univerjs/thread-comment` core package for comment. For using, please refer to [@univerjs/sheets-thread-comment](../sheets-thread-comment/README.md)
 
 ## Usage
 
 ### Installation
 
 ```shell
-# Using npm
+# 使用 npm
 npm install @univerjs/thread-comment
 
-# Using pnpm
+# 使用 pnpm
 pnpm add @univerjs/thread-comment
 ```

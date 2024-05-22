@@ -2,7 +2,7 @@
     "name": "@univerjs/sheets-thread-comment",
     "version": "0.1.11",
     "private": false,
-    "description": "",
+    "description": "Univer thread comment plugin",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {

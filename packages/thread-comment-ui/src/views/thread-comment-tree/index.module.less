@@ -6,6 +6,9 @@
     border-radius: 8px;
     box-sizing: border-box;
     position: relative;
+}
+
+.thread-comment-active {
     box-shadow: var(--box-shadow-base);
 }
 
@@ -43,6 +46,7 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    font-size: 16px;
 }
 
 .thread-comment-icon:hover {
@@ -55,6 +59,22 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 16px;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.thread-comment-title-position {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.thread-comment-title-highlight {
+    width: 3px;
+    height: 14px;
+    border-radius: 1.5px;
+    background-color: rgba(var(--gold-400));
+    margin-right: 8px;
 }
 
 .thread-comment-username {

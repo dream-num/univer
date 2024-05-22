@@ -537,12 +537,13 @@ export class DrawingUpdateController extends Disposable {
         }
         const { scene, transformer } = renderObject;
 
-        drawingIds.forEach((drawingId, index) => {
+        drawingIds.forEach((drawingId) => {
             const oKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
             const object = scene.getObject(oKey) as Shape<IShapeProps>;
             if (object == null) {
                 return;
             }
+            const index = this._drawingManagerService.getDrawingOrder(unitId, subUnitId).indexOf(drawingId);
             object.setProps({ zIndex: index });
             object.makeDirty();
         });

@@ -163,6 +163,7 @@ export class ImageUpdateController extends Disposable {
                     angle: 0,
                 },
                 srcRect: null,
+                prstGeom: null,
             } as IImageData);
         });
 
@@ -185,34 +186,27 @@ export class ImageUpdateController extends Disposable {
     private _insertImages(params: IDrawingSearch[]) {
         (params).forEach(async (param) => {
             const { unitId, subUnitId, drawingId } = param;
-
             const imageParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
-
             if (imageParam == null) {
                 return;
             }
 
             const { transform, drawingType, source, imageSourceType, srcRect, prstGeom } = imageParam;
-
             if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
                 return;
             }
-
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
 
             if (renderObject == null) {
                 return;
             }
             const { scene, transformer } = renderObject;
-
             if (transform == null) {
                 return true;
             }
 
             const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
-
             const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-
             const imageShape = scene.getObject(imageShapeKey);
 
             if (imageShape != null) {
@@ -223,7 +217,6 @@ export class ImageUpdateController extends Disposable {
             const orders = this._drawingManagerService.getDrawingOrder(unitId, subUnitId);
             const zIndex = orders.indexOf(drawingId);
             const imageConfig: IImageProps = { ...transform, zIndex: zIndex === -1 ? (orders.length - 1) : zIndex };
-
             const imageNativeCache = this._imageRemoteService.getImageSourceCache(source, imageSourceType);
 
             let shouldBeCache = false;
@@ -240,12 +233,10 @@ export class ImageUpdateController extends Disposable {
                 } else {
                     imageConfig.url = source;
                 }
-
                 shouldBeCache = true;
             }
 
             const image = new Image(imageShapeKey, imageConfig);
-
             if (shouldBeCache) {
                 this._imageRemoteService.addImageSourceCache(source, imageSourceType, image.getNative());
             }
@@ -255,7 +246,6 @@ export class ImageUpdateController extends Disposable {
             if (prstGeom != null) {
                 image.setPrstGeom(prstGeom);
             }
-
             if (srcRect != null) {
                 image.setSrcRect(srcRect);
             }

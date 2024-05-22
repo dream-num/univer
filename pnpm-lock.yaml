@@ -237,9 +237,6 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.52
         version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@univerjs/image':
-        specifier: workspace:*
-        version: link:../packages/image-ui
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../packages/rpc
@@ -648,8 +645,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.46
-        version: 0.1.46(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.47
+        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       ot-json1:
         specifier: ^1.0.2
         version: 1.0.2
@@ -664,7 +661,7 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.15.2
+        specifier: 0.15.2
         version: 0.15.2
       less:
         specifier: ^4.2.0
@@ -689,7 +686,7 @@ importers:
     dependencies:
       '@univerjs/icons':
         specifier: ^0.1.29
-        version: 0.1.46(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -710,7 +707,7 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.15.1
+        specifier: 0.15.2
         version: 0.15.2
       clsx:
         specifier: ^2.1.0
@@ -1212,7 +1209,7 @@ importers:
     dependencies:
       '@univerjs/icons':
         specifier: ^0.1.29
-        version: 0.1.46(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1242,7 +1239,7 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.15.1
+        specifier: 0.15.2
         version: 0.15.2
       clsx:
         specifier: ^2.1.0

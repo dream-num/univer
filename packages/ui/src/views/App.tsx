@@ -127,7 +127,7 @@ export function App(props: IUniverAppProps) {
     }, [localeService, messageService, mountContainer, portalContainer, themeService.currentTheme$]);
 
     return (
-        <ConfigProvider locale={locale} mountContainer={portalContainer}>
+        <ConfigProvider locale={locale?.design} mountContainer={portalContainer}>
             {/**
               * IMPORTANT! This `tabIndex` should not be moved. This attribute allows the element to catch
               * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events

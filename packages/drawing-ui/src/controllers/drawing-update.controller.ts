@@ -42,7 +42,7 @@ interface IDrawingTransformCache {
     transform: ITransformState;
 }
 
-@OnLifecycle(LifecycleStages.Ready, DrawingUpdateController)
+@OnLifecycle(LifecycleStages.Rendered, DrawingUpdateController)
 export class DrawingUpdateController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -60,6 +60,8 @@ export class DrawingUpdateController extends Disposable {
     }
 
     private _initialize() {
+        this._recoveryImages();
+
         this._drawingAddListener();
 
         this._drawingRemoveListener();
@@ -73,6 +75,24 @@ export class DrawingUpdateController extends Disposable {
         this._drawingGroupListener();
 
         this._drawingRefreshListener();
+    }
+
+    private _recoveryImages() {
+        const drawingList = this._drawingManagerService.drawingManagerData;
+        Object.keys(drawingList).forEach((unitId) => {
+            Object.keys(drawingList[unitId]).forEach((subUnitId) => {
+                const drawingMap = drawingList[unitId][subUnitId].data;
+                if (drawingMap == null) {
+                    return;
+                }
+                Object.keys(drawingMap).forEach((drawingId) => {
+                    const drawing = drawingMap[drawingId];
+                    if (drawing) {
+                        this._insertDrawing([{ unitId, subUnitId, drawingId }]);
+                    }
+                });
+            });
+        });
     }
 
     private _commandExecutedListener() {
@@ -533,39 +553,43 @@ export class DrawingUpdateController extends Disposable {
     private _drawingAddListener() {
         this.disposeWithMe(
             this._drawingManagerService.add$.subscribe((params) => {
-                const sceneList: Scene[] = [];
-                (params).forEach((param) => {
-                    const { unitId, subUnitId, drawingId } = param;
-
-                    const drawingParam = this._drawingManagerService.getDrawingByParam(param) as IDrawingParam;
-
-                    if (drawingParam == null) {
-                        return;
-                    }
-
-                    const { transform, drawingType } = drawingParam;
-
-                    const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
-
-                    if (renderObject == null) {
-                        return;
-                    }
-                    const { scene, transformer } = renderObject;
-
-                    if (!sceneList.includes(scene)) {
-                        sceneList.push(scene);
-                    }
-                });
-
-                sceneList.forEach((scene) => {
-                    if (this._sceneListenerOnDrawingMap.has(scene)) {
-                        return;
-                    }
-                    this._addListenerOnDrawing(scene);
-                    this._sceneListenerOnDrawingMap.add(scene);
-                });
+                this._insertDrawing(params);
             })
         );
+    }
+
+    private _insertDrawing(params: IDrawingSearch[]) {
+        const sceneList: Scene[] = [];
+        (params).forEach((param) => {
+            const { unitId, subUnitId, drawingId } = param;
+
+            const drawingParam = this._drawingManagerService.getDrawingByParam(param) as IDrawingParam;
+
+            if (drawingParam == null) {
+                return;
+            }
+
+            const { transform, drawingType } = drawingParam;
+
+            const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
+
+            if (renderObject == null) {
+                return;
+            }
+            const { scene, transformer } = renderObject;
+
+            if (!sceneList.includes(scene)) {
+                sceneList.push(scene);
+            }
+        });
+
+        sceneList.forEach((scene) => {
+            if (this._sceneListenerOnDrawingMap.has(scene)) {
+                return;
+            }
+            this._addListenerOnDrawing(scene);
+            this._sceneListenerOnDrawingMap.add(scene);
+        });
     }
 
     private _drawingRemoveListener() {

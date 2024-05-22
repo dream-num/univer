@@ -36,7 +36,7 @@ import { ImageResetSizeOperation } from '../commands/operations/image-reset-size
 
 const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
-@OnLifecycle(LifecycleStages.Ready, ImageUpdateController)
+@OnLifecycle(LifecycleStages.Rendered, ImageUpdateController)
 export class ImageUpdateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -55,11 +55,31 @@ export class ImageUpdateController extends Disposable {
     }
 
     private _initialize() {
+        this._recoveryImages();
+
         this._drawingAddListener();
 
         this._commandExecutedListener();
 
         this._imageUpdateListener();
+    }
+
+    private _recoveryImages() {
+        const drawingList = this._drawingManagerService.drawingManagerData;
+        Object.keys(drawingList).forEach((unitId) => {
+            Object.keys(drawingList[unitId]).forEach((subUnitId) => {
+                const drawingMap = drawingList[unitId][subUnitId].data;
+                if (drawingMap == null) {
+                    return;
+                }
+                Object.keys(drawingMap).forEach((drawingId) => {
+                    const drawing = drawingMap[drawingId];
+                    if (drawing) {
+                        this._insertImages([{ unitId, subUnitId, drawingId }]);
+                    }
+                });
+            });
+        });
     }
 
     private _commandExecutedListener() {
@@ -157,78 +177,82 @@ export class ImageUpdateController extends Disposable {
     private _drawingAddListener() {
         this.disposeWithMe(
             this._drawingManagerService.add$.subscribe((params) => {
-                (params).forEach(async (param) => {
-                    const { unitId, subUnitId, drawingId } = param;
-
-                    const imageParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
-
-                    if (imageParam == null) {
-                        return;
-                    }
-
-                    const { transform, drawingType, source, imageSourceType } = imageParam;
-
-                    if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
-                        return;
-                    }
-
-                    const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
-
-                    if (renderObject == null) {
-                        return;
-                    }
-                    const { scene, transformer } = renderObject;
-
-                    if (transform == null) {
-                        return true;
-                    }
-
-                    const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
-
-                    const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-
-                    const imageShape = scene.getObject(imageShapeKey);
-
-                    if (imageShape != null) {
-                        imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
-                        return;
-                    }
-
-                    const imageConfig: IImageProps = { left, top, width, height, zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1 };
-
-                    const imageNativeCache = this._imageRemoteService.getImageSourceCache(source, imageSourceType);
-
-                    let shouldBeCache = false;
-                    if (imageNativeCache != null) {
-                        imageConfig.image = imageNativeCache;
-                    } else {
-                        if (imageSourceType === ImageSourceType.UUID) {
-                            try {
-                                imageConfig.url = await this._imageRemoteService.getImage(source);
-                            } catch (error) {
-                                console.error(error);
-                                return;
-                            }
-                        } else {
-                            imageConfig.url = source;
-                        }
-
-                        shouldBeCache = true;
-                    }
-
-                    const image = new Image(imageShapeKey, imageConfig);
-
-                    if (shouldBeCache) {
-                        this._imageRemoteService.addImageSourceCache(source, imageSourceType, image.getNative());
-                    }
-
-                    scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(image);
-
-                    this._addHoverForImage(image);
-                    this._addDialogForImage(image);
-                });
+                this._insertImages(params);
             })
         );
+    }
+
+    private _insertImages(params: IDrawingSearch[]) {
+        (params).forEach(async (param) => {
+            const { unitId, subUnitId, drawingId } = param;
+
+            const imageParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
+
+            if (imageParam == null) {
+                return;
+            }
+
+            const { transform, drawingType, source, imageSourceType } = imageParam;
+
+            if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
+                return;
+            }
+
+            const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
+
+            if (renderObject == null) {
+                return;
+            }
+            const { scene, transformer } = renderObject;
+
+            if (transform == null) {
+                return true;
+            }
+
+            const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
+
+            const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+
+            const imageShape = scene.getObject(imageShapeKey);
+
+            if (imageShape != null) {
+                imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                return;
+            }
+
+            const imageConfig: IImageProps = { left, top, width, height, zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1 };
+
+            const imageNativeCache = this._imageRemoteService.getImageSourceCache(source, imageSourceType);
+
+            let shouldBeCache = false;
+            if (imageNativeCache != null) {
+                imageConfig.image = imageNativeCache;
+            } else {
+                if (imageSourceType === ImageSourceType.UUID) {
+                    try {
+                        imageConfig.url = await this._imageRemoteService.getImage(source);
+                    } catch (error) {
+                        console.error(error);
+                        return;
+                    }
+                } else {
+                    imageConfig.url = source;
+                }
+
+                shouldBeCache = true;
+            }
+
+            const image = new Image(imageShapeKey, imageConfig);
+
+            if (shouldBeCache) {
+                this._imageRemoteService.addImageSourceCache(source, imageSourceType, image.getNative());
+            }
+
+            scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(image);
+
+            this._addHoverForImage(image);
+            this._addDialogForImage(image);
+        });
     }
 
     private _imageUpdateListener() {

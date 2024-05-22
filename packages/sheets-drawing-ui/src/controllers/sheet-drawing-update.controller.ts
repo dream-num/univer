@@ -121,19 +121,19 @@ export class SheetDrawingUpdateController extends Disposable {
         //     zIndex = drawingIds.length;
         // }
 
-        const { imageId, imageSourceType } = imageParam;
+        const { imageId, imageSourceType, source, base64Cache } = imageParam;
 
-        let { source } = imageParam;
+        // if (imageSourceType === ImageSourceType.UUID) {
+        //     try {
+        //         source = await this._imageRemoteService.getImage(imageId);
+        //     } catch (error) {
+        //         console.error(error);
+        //     }
+        // }
 
-        if (imageSourceType === ImageSourceType.UUID) {
-            try {
-                source = await this._imageRemoteService.getImage(imageId);
-            } catch (error) {
-                console.error(error);
-            }
-        }
+        const { width, height, image } = await getImageSize(base64Cache || "");
 
-        const { width, height } = await getImageSize(source);
+        this._imageRemoteService.addImageSourceCache(imageId, imageSourceType, image);
 
         let scale = 1;
         if (width > SHEET_IMAGE_WIDTH_LIMIT || height > SHEET_IMAGE_HEIGHT_LIMIT) {

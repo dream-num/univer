@@ -40,7 +40,7 @@ import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { FUniver } from '@univerjs/facade';
 import { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
-import { locales } from './locales';
+import { enUS, ruRU, zhCN } from '../locales';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -51,7 +51,11 @@ const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
 const univer = new Univer({
     theme: defaultTheme,
     locale: LocaleType.ZH_CN,
-    locales,
+    locales: {
+        [LocaleType.ZH_CN]: zhCN,
+        [LocaleType.EN_US]: enUS,
+        [LocaleType.RU_RU]: ruRU,
+    },
     logLevel: LogLevel.VERBOSE,
 });
 

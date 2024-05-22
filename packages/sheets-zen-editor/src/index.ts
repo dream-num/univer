@@ -15,4 +15,3 @@
  */
 
 export { UniverSheetsZenEditorPlugin } from './plugin';
-export { enUS, zhCN, ruRU } from './locale';

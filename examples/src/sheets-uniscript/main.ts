@@ -29,11 +29,17 @@ import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 
 import { UNISCRIT_WORKBOOK_DATA_DEMO } from '../data/sheets/uniscript-data';
+import { enUS, ruRU, zhCN } from '../locales';
 
 // univer
 const univer = new Univer({
     theme: defaultTheme,
     locale: LocaleType.ZH_CN,
+    locales: {
+        [LocaleType.ZH_CN]: zhCN,
+        [LocaleType.EN_US]: enUS,
+        [LocaleType.RU_RU]: ruRU,
+    },
     logLevel: LogLevel.VERBOSE,
 });
 

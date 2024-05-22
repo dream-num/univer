@@ -30,7 +30,6 @@ export {
 export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { IUIPartsService, BuiltInUIPart, UIPartsService } from './services/parts/parts.service';
-export { enUS, zhCN, ruRU } from './locale';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 export { CopyCommand, CutCommand, PasteCommand } from './services/clipboard/clipboard.command';
 export {

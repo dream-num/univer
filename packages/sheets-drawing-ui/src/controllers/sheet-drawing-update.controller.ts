@@ -15,13 +15,15 @@
  */
 
 import type { ICommandInfo, IImageRemoteServiceParam, IRange, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageRemoteService, ImageSourceType, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageRemoteService, ILocalStorageService, ImageSourceType, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageData } from '@univerjs/drawing';
 import { getImageSize } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets';
 import { ISheetDrawingService, SelectionManagerService } from '@univerjs/sheets';
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
+import { IMessageService } from '@univerjs/ui';
+import { MessageType } from '@univerjs/design';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
@@ -46,7 +48,9 @@ export class SheetDrawingUpdateController extends Disposable {
         @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @IMessageService private readonly _messageService: IMessageService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
 
@@ -97,15 +101,22 @@ export class SheetDrawingUpdateController extends Disposable {
     }
 
     private async _insertFloatImage(file: File) {
-        let imageParam: Nullable<IImageRemoteServiceParam>;
-        try {
-            imageParam = await this._imageRemoteService.saveImage(file);
-        } catch (error) {
-            console.error(error);
-        }
+        const imageParam = await this._imageRemoteService.saveImage(file);
 
         if (imageParam == null) {
             return;
+        }
+
+        if (imageParam.status === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
+            this._messageService.show({
+                type: MessageType.Error,
+                content: this._localeService.t('update-status.exceedMaxSize'),
+            });
+        } else if (imageParam.status === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
+            this._messageService.show({
+                type: MessageType.Error,
+                content: this._localeService.t('update-status.invalidImageType'),
+            });
         }
 
         const info = this._getUnitInfo();

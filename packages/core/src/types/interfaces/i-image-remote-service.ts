@@ -24,11 +24,18 @@ export enum ImageSourceType {
     BASE64 = 'BASE64',
 }
 
+export enum ImageUploadStatusType {
+    SUCCUSS,
+    ERROR_EXCEED_SIZE,
+    ERROR_IMAGE_TYPE,
+}
+
 export interface IImageRemoteServiceParam {
     imageId: string;
     imageSourceType: ImageSourceType;
     source: string;
     base64Cache: string;
+    status: ImageUploadStatusType;
 }
 
 export interface IImageRemoteService {

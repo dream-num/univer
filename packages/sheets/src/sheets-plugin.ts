@@ -94,12 +94,12 @@ export class UniverSheetsPlugin extends Plugin {
         if (!this._config?.notExecuteFormula) {
             dependencies.push(
                 [CalculateResultApplyController],
-                [FeatureCalculationController],
+                [FeatureCalculationController]
             );
         } else {
             dependencies.push(
                 [ISheetDrawingService, { useClass: SheetDrawingService }],
-                [SheetDrawingDataController],
+                [SheetDrawingDataController]
             );
         }
 

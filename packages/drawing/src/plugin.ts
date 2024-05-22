@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { IDrawingManagerService, IImageRemoteService, LocaleService, Plugin } from '@univerjs/core';
+import type { DependencyOverride } from '@univerjs/core';
+import { IDrawingManagerService, IImageRemoteService, LocaleService, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -27,7 +28,9 @@ export class UniverDrawingPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        config: undefined,
+        private _config: {
+            override?: DependencyOverride;
+        },
         @Inject(Injector) protected _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
@@ -120,6 +123,9 @@ export class UniverDrawingPlugin extends Plugin {
             // [ImageController],
         ];
 
-        dependencies.forEach((dependency) => injector.add(dependency));
+        const dependency = mergeOverrideWithDependencies(dependencies, this._config?.override);
+        dependency.forEach((d) => {
+            this._injector.add(d);
+        });
     }
 }

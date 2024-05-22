@@ -552,26 +552,6 @@ export class Scene extends ThinScene {
         return this._transformer!;
     }
 
-    override detachTransformerFrom(o: BaseObject) {
-        this._transformer?.detachFrom(o);
-    }
-
-    initTransformer(config?: ITransformerConfig) {
-        if (this._transformer) {
-            this._transformer.resetProps(config);
-            return;
-        }
-
-        this._transformer = new Transformer(this, config);
-    }
-
-    getTransformerByCreate() {
-        if (!this._transformer) {
-            this.initTransformer();
-        }
-        return this._transformer!;
-    }
-
     getTransformer() {
         return this._transformer;
     }

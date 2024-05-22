@@ -42,6 +42,10 @@ const locale: typeof enUS = {
         position: '移动但不调整大小与单元格',
         none: '不要移动或调整大小与单元格',
     },
+    'update-status': {
+        exceedMaxSize: '图片大小超过限制, 限制为5M',
+        invalidImageType: '图片类型错误',
+    },
 };
 
 export default locale;

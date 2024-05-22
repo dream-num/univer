@@ -16,7 +16,7 @@
 
 import { Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { enUS, ruRU, zhCN } from '../locale';
+import { zhCN } from '../locale';
 
 @OnLifecycle(LifecycleStages.Starting, ThreadCommentUIController)
 export class ThreadCommentUIController extends Disposable {
@@ -29,6 +29,6 @@ export class ThreadCommentUIController extends Disposable {
     }
 
     private _initLocales() {
-        this._localeService.load({ zhCN, enUS, ruRU });
+        this._localeService.load({ zhCN });
     }
 }

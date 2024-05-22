@@ -131,7 +131,7 @@ export class SheetDrawingUpdateController extends Disposable {
         //     }
         // }
 
-        const { width, height, image } = await getImageSize(base64Cache || "");
+        const { width, height, image } = await getImageSize(base64Cache || '');
 
         this._imageRemoteService.addImageSourceCache(imageId, imageSourceType, image);
 

@@ -67,13 +67,13 @@
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "0.15.2",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "react-dom": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.45",
+        "@univerjs/icons": "^0.1.46",
         "rc-virtual-list": "^3.11.5"
     },
     "devDependencies": {
@@ -85,7 +85,7 @@
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "0.15.2",
         "clsx": "^2.1.1",
         "less": "^4.2.0",
         "react": "18.2.0",

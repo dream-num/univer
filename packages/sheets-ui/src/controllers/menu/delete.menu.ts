@@ -17,6 +17,7 @@
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 
+import type { IAccessor } from '@wendellhu/redi';
 import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command ';
 import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-up-confirm.command';
 import {
@@ -26,7 +27,7 @@ import {
 import { SheetMenuPosition } from './menu';
 
 const DELETE_RANGE_MENU_ID = 'sheet.menu.delete';
-export function DeleteRangeMenuItemFactory(): IMenuSelectorItem<string> {
+export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: DELETE_RANGE_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
@@ -37,7 +38,7 @@ export function DeleteRangeMenuItemFactory(): IMenuSelectorItem<string> {
     };
 }
 
-export function RemoveColMenuItemFactory(): IMenuButtonItem {
+export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: RemoveColConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
@@ -48,7 +49,7 @@ export function RemoveColMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function RemoveRowMenuItemFactory(): IMenuButtonItem {
+export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: RemoveRowConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
@@ -59,7 +60,7 @@ export function RemoveRowMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function DeleteRangeMoveLeftMenuItemFactory(): IMenuButtonItem {
+export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: DeleteRangeMoveLeftConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
@@ -70,7 +71,7 @@ export function DeleteRangeMoveLeftMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function DeleteRangeMoveUpMenuItemFactory(): IMenuButtonItem {
+export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: DeleteRangeMoveUpConfirmCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,

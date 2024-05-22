@@ -26,6 +26,7 @@ import { FormulaBar } from '../formula-bar/FormulaBar';
 import { OperateContainer } from '../operate-container/OperateContainer';
 import { SheetBar } from '../sheet-bar/SheetBar';
 import { StatusBar } from '../status-bar/StatusBar';
+import { UploadLoading } from '../upload-loading/UploadLoading';
 import styles from './index.module.less';
 
 export function RenderSheetFooter() {
@@ -61,6 +62,7 @@ export function RenderSheetContent() {
         <>
             <EditorContainer />
             <OperateContainer />
+            <UploadLoading />
         </>
     );
 }

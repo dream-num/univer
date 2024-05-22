@@ -25,7 +25,7 @@ export const ClearSheetDrawingTransformerOperation: IMutation<string[]> = {
         const renderManagerService = accessor.get(IRenderManagerService);
 
         params.forEach((unitId) => {
-            renderManagerService.getRenderById(unitId)?.scene.getTransformer()?.clearSelectedObjects();
+            renderManagerService.getRenderById(unitId)?.scene.getTransformer()?.debounceRefreshControls();
         });
 
         return true;

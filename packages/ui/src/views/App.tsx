@@ -21,7 +21,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';
-import { DesktopUIPart, IUIPartsService } from '../services/parts/parts.service';
+import { BuiltInUIPart, IUIPartsService } from '../services/parts/parts.service';
 import styles from './app.module.less';
 import { ComponentContainer } from './components/ComponentContainer';
 import { Toolbar } from './components/doc-bars/Toolbar';
@@ -68,12 +68,12 @@ export function App(props: IUniverAppProps) {
     }, []);
 
     const { headerComponents, contentComponents, footerComponents, headerMenuComponents, leftSidebarComponents, globalComponents } = useMemo(() => ({
-        headerComponents: uiPartsService.getComponents(DesktopUIPart.HEADER),
-        contentComponents: uiPartsService.getComponents(DesktopUIPart.CONTENT),
-        footerComponents: uiPartsService.getComponents(DesktopUIPart.FOOTER),
-        headerMenuComponents: uiPartsService.getComponents(DesktopUIPart.HEADER_MENU),
-        leftSidebarComponents: uiPartsService.getComponents(DesktopUIPart.LEFT_SIDEBAR),
-        globalComponents: uiPartsService.getComponents(DesktopUIPart.GLOBAL),
+        headerComponents: uiPartsService.getComponents(BuiltInUIPart.HEADER),
+        contentComponents: uiPartsService.getComponents(BuiltInUIPart.CONTENT),
+        footerComponents: uiPartsService.getComponents(BuiltInUIPart.FOOTER),
+        headerMenuComponents: uiPartsService.getComponents(BuiltInUIPart.HEADER_MENU),
+        leftSidebarComponents: uiPartsService.getComponents(BuiltInUIPart.LEFT_SIDEBAR),
+        globalComponents: uiPartsService.getComponents(BuiltInUIPart.GLOBAL),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }), [updateTrigger]);
 

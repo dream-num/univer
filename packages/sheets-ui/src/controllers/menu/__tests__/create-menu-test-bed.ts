@@ -17,7 +17,7 @@
 import type { IWorkbookData } from '@univerjs/core';
 import { LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
-import { DesktopMenuService, DesktopShortcutService, IMenuService, IShortcutService } from '@univerjs/ui';
+import { DesktopMenuService, DesktopPlatformService, DesktopShortcutService, IMenuService, IPlatformService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
@@ -60,6 +60,7 @@ export function createMenuTestBed() {
         }
 
         override onStarting(injector: Injector): void {
+            injector.add([IPlatformService, { useClass: DesktopPlatformService }]);
             injector.add([SelectionManagerService]);
             injector.add([IShortcutService, { useClass: DesktopShortcutService }]);
             injector.add([IMenuService, { useClass: DesktopMenuService }]);

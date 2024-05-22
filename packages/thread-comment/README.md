@@ -12,5 +12,9 @@
 ### Installation
 
 ```shell
-npm i @univerjs/thread-comment
+# Using npm
+npm install @univerjs/thread-comment
+
+# Using pnpm
+pnpm add @univerjs/thread-comment
 ```

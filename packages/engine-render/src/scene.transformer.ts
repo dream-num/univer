@@ -15,7 +15,7 @@
  */
 
 import type { IAbsoluteTransform, IKeyValue, Nullable, Observer } from '@univerjs/core';
-import { Disposable, MOVE_BUFFER_VALUE, Observable, toDisposable } from '@univerjs/core';
+import { Disposable, MOVE_BUFFER_VALUE, Observable, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
@@ -167,6 +167,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _moveBufferSkip = false;
 
+    private _debounceClearFunc: Nullable<() => void>;
+
     constructor(
         private _scene: Scene,
         config?: ITransformerConfig
@@ -193,6 +195,18 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     updateControl() {
         this._updateControl();
+    }
+
+    debounceRefreshControls() {
+        if (this._debounceClearFunc) {
+            this._debounceClearFunc();
+        }
+
+        // To prevent multiple refreshes caused by setting values for multiple object instances at once.
+        this._debounceClearFunc = requestImmediateMacroTask(() => {
+            this.refreshControls();
+            this._debounceClearFunc = null;
+        });
     }
 
     clearSelectedObjects() {
@@ -555,6 +569,16 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 }
             } else {
                 state = this._updateCloseKeepRatioState(type, left, top, width, height, moveLeft, moveTop);
+            }
+
+            const { width: newWidth = 0, height: newHeight = 0 } = state;
+
+            if (newWidth < 20) {
+                state.width = 20;
+            }
+
+            if (newHeight < 20) {
+                state.height = 10;
             }
 
             moveObject.transformByState(this._applyRotationForResult(state, { left, top, width, height }, angle, isCropper));

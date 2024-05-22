@@ -23,8 +23,8 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import type { IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, DesktopUIPart, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
@@ -228,9 +228,16 @@ import {
     ZoomOutShortcutItem,
 } from './shortcuts/view.shortcut';
 
+export interface IUniverSheetsUIConfig {
+    menu: MenuConfig;
+}
+
+export const DefaultSheetUiConfig = {};
+
 @OnLifecycle(LifecycleStages.Ready, SheetUIController)
 export class SheetUIController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverSheetsUIConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ILayoutService private readonly _layoutService: ILayoutService,
@@ -329,6 +336,8 @@ export class SheetUIController extends Disposable {
     }
 
     private _initMenus(): void {
+        const { menu = {} } = this._config;
+
         (
             [
                 // context menu
@@ -403,7 +412,7 @@ export class SheetUIController extends Disposable {
                 ShowMenuItemFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
         });
     }
 
@@ -470,9 +479,9 @@ export class SheetUIController extends Disposable {
         const uiController = this._uiPartsService;
         const injector = this._injector;
 
-        this.disposeWithMe(uiController.registerComponent(DesktopUIPart.HEADER, () => connectInjector(RenderSheetHeader, injector)));
-        this.disposeWithMe(uiController.registerComponent(DesktopUIPart.FOOTER, () => connectInjector(RenderSheetFooter, injector)));
-        this.disposeWithMe(uiController.registerComponent(DesktopUIPart.CONTENT, () => connectInjector(RenderSheetContent, injector)));
+        this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(RenderSheetHeader, injector)));
+        this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(RenderSheetFooter, injector)));
+        this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(RenderSheetContent, injector)));
     }
 
     private _initFocusHandler(): void {

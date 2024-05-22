@@ -29,7 +29,7 @@ export {
 } from './controllers/shared-shortcut.controller';
 export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
-export { IUIPartsService, DesktopUIPart, DesktopUIPartsService } from './services/parts/parts.service';
+export { IUIPartsService, BuiltInUIPart, UIPartsService as BuiltInUIPartsService } from './services/parts/parts.service';
 export { enUS, zhCN, ruRU } from './locale';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 export { CopyCommand, CutCommand, PasteCommand } from './services/clipboard/clipboard.command';
@@ -58,9 +58,11 @@ export {
     type IMenuItemFactory,
     type IMenuSelectorItem,
     type IValueOption,
+    type MenuConfig,
     MenuGroup,
     MenuItemType,
     MenuPosition,
+    type MenuItemDefaultValueType,
 } from './services/menu/menu';
 export { DesktopMenuService, IMenuService } from './services/menu/menu.service';
 export { DesktopMessageService } from './services/message/desktop-message.service';
@@ -89,3 +91,4 @@ export { CanvasPopupService, ICanvasPopupService, type IPopup } from './services
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { IProgressService } from './services/progress/progress.service';
 export { CanvasFloatDomService, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
+export { mergeMenuConfigs } from './common/menu-merge-configs';

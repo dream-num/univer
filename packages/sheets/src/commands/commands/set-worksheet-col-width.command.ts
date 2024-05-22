@@ -43,9 +43,11 @@ export interface IDeltaColumnWidthCommandParams {
 export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.delta-column-width',
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IDeltaColumnWidthCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = selectionManagerService.getSelections();
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         if (!selections?.length) {
             return false;
@@ -128,13 +130,18 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
             params: redoMutationParams,
         });
 
-        const result = sequenceExecute([...redos], commandService);
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: DeltaColumnWidthCommand.id,
+            params: redoMutationParams,
+        });
+
+        const result = sequenceExecute([...redos, ...intercepted.redos], commandService);
 
         if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
-                redoMutations: [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
+                undoMutations: [...(intercepted.preUndos ?? []), { id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
+                redoMutations: [...(intercepted.preRedos ?? []), { id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
             });
 
             return true;
@@ -155,6 +162,7 @@ export const SetColWidthCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const selections = selectionManagerService.getSelectionRanges();
         if (!selections?.length) return false;
@@ -183,13 +191,18 @@ export const SetColWidthCommand: ICommand = {
             params: redoMutationParams,
         });
 
-        const result = sequenceExecute([...redos], commandService);
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: SetColWidthCommand.id,
+            params: redoMutationParams,
+        });
+
+        const result = sequenceExecute([...redos, ...intercepted.redos], commandService);
 
         if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
-                redoMutations: [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
+                undoMutations: [...(intercepted.preUndos ?? []), { id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
+                redoMutations: [...(intercepted.preRedos ?? []), { id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
             });
 
             return true;

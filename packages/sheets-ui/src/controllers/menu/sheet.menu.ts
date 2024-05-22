@@ -39,6 +39,7 @@ import { SheetMenuPosition } from './menu';
 export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
+
     return {
         id: RemoveSheetConfirmCommand.id,
         type: MenuItemType.BUTTON,
@@ -67,7 +68,7 @@ export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     };
 }
 
-export function CopySheetMenuItemFactory(): IMenuButtonItem {
+export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: CopySheetCommand.id,
         type: MenuItemType.BUTTON,
@@ -76,7 +77,7 @@ export function CopySheetMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function RenameSheetMenuItemFactory(): IMenuButtonItem {
+export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: RenameSheetOperation.id,
         type: MenuItemType.BUTTON,
@@ -85,7 +86,7 @@ export function RenameSheetMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function ChangeColorSheetMenuItemFactory(): IMenuSelectorItem<string> {
+export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: SetTabColorCommand.id,
         title: 'sheetConfig.changeColor',
@@ -105,6 +106,7 @@ export function ChangeColorSheetMenuItemFactory(): IMenuSelectorItem<string> {
 export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
+
     return {
         id: SetWorksheetHideCommand.id,
         type: MenuItemType.BUTTON,
@@ -136,6 +138,7 @@ export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<any> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
+
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const hiddenList = workbook.getHiddenWorksheets().map((s) => ({
         label: workbook.getSheetBySheetId(s)?.getName() || '',
@@ -178,6 +181,7 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
 export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
+
     return {
         id: ShowMenuListCommand.id,
         type: MenuItemType.BUTTON,

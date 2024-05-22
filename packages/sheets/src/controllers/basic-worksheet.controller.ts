@@ -226,7 +226,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             InsertDefinedNameCommand,
             RemoveDefinedNameCommand,
             SetDefinedNameCommand,
-
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         const onlyRegisterFormulaRelatedMutations = this._configService.getConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY) ?? false;

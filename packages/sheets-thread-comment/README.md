@@ -12,5 +12,9 @@
 ### Installation
 
 ```shell
-npm i @univerjs/sheets-thread-comment
+# Using npm
+npm install @univerjs/sheets-thread-comment
+
+# Using pnpm
+pnpm add @univerjs/sheets-thread-comment
 ```

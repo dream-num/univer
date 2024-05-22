@@ -70,7 +70,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/facade": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "0.15.2",
         "monaco-editor": ">=0.44.0",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
@@ -82,7 +82,7 @@
         "@univerjs/facade": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "0.15.2",
         "less": "^4.2.0",
         "monaco-editor": "0.48.0",
         "rxjs": "^7.8.1",

@@ -15,6 +15,7 @@
  */
 
 import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
 import type { Nullable } from '../../shared';
 
 export enum ImageSourceType {
@@ -23,17 +24,33 @@ export enum ImageSourceType {
     BASE64 = 'BASE64',
 }
 
+export enum ImageUploadStatusType {
+    SUCCUSS,
+    ERROR_EXCEED_SIZE,
+    ERROR_IMAGE_TYPE,
+}
+
 export interface IImageRemoteServiceParam {
     imageId: string;
     imageSourceType: ImageSourceType;
     source: string;
+    base64Cache: string;
+    status: ImageUploadStatusType;
 }
 
 export interface IImageRemoteService {
+    change$: Observable<number>;
+    setWaitCount(count: number): void;
+    getWaitCount(): number;
+    decreaseWaiting(): void;
 
     getImage(imageId: string): Promise<string>;
 
     saveImage(imageFile: File): Promise<Nullable<IImageRemoteServiceParam>>;
+
+    imageSourceCache: Map<string, HTMLImageElement>;
+    getImageSourceCache(source: string, imageSourceType: ImageSourceType): Nullable<HTMLImageElement>;
+    addImageSourceCache(source: string, imageSourceType: ImageSourceType, imageSource: Nullable<HTMLImageElement>): void;
 
     applyFilter(imageId: string): Promise<string>;
 

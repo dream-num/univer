@@ -17,10 +17,7 @@
 import { Disposable, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import type { editor } from 'monaco-editor';
-
-export interface IScriptEditorServiceConfig {
-    getWorkerUrl(moduleID: string, label: string): string;
-}
+import type { IUniverUniscriptConfig } from '../controllers/uniscript.controller';
 
 /**
  * This service is for loading monaco editor and its resources. It also holds the
@@ -29,7 +26,7 @@ export interface IScriptEditorServiceConfig {
 export class ScriptEditorService extends Disposable {
     private _editorInstance: editor.IStandaloneCodeEditor | null = null;
 
-    constructor(private readonly _config: IScriptEditorServiceConfig) {
+    constructor(private readonly _config: Partial<IUniverUniscriptConfig>) {
         super();
     }
 

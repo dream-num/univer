@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { ICommandService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import { type Dependency, Inject, Injector } from '@wendellhu/redi';
-import { DataValidationRenderController } from './controllers/dv-render.controller';
+import type { IUniverSheetsDataValidation } from './controllers/dv-render.controller';
+import { DataValidationRenderController, DefaultSheetsDataValidation } from './controllers/dv-render.controller';
 import { DataValidationController } from './controllers/dv.controller';
 import { SheetDataValidationService } from './services/dv.service';
 import { DataValidationAlertController } from './controllers/dv-alert.controller';
@@ -25,7 +26,7 @@ import { DataValidationCacheService } from './services/dv-cache.service';
 import { DataValidationFormulaService } from './services/dv-formula.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
-import { enUS, zhCN } from './locale';
+import { zhCN } from './locale';
 import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 import { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
 import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
@@ -40,12 +41,14 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        _config: unknown,
+        private _config: Partial<IUniverSheetsDataValidation> = {},
         @Inject(Injector) protected _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
+
+        this._config = Tools.deepMerge({}, DefaultSheetsDataValidation, this._config);
     }
 
     override onStarting(injector: Injector) {
@@ -60,7 +63,12 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             // controller
             [DataValidationModelController],
             [DataValidationController],
-            [DataValidationRenderController],
+            [
+                DataValidationRenderController,
+                {
+                    useFactory: () => this._injector.createInstance(DataValidationRenderController, this._config),
+                },
+            ],
             [DataValidationAlertController],
             [DataValidationRefRangeController],
             [DataValidationAutoFillController],
@@ -85,9 +93,6 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             this._commandService.registerCommand(command);
         });
 
-        this._localeService.load({
-            zhCN,
-            enUS,
-        });
+        this._localeService.load({ zhCN });
     }
 }

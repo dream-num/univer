@@ -39,7 +39,6 @@ export enum DrawingTypeEnum {
     DRAWING_VIDEO = 5,
     DRAWING_GROUP = 6,
     DRAWING_UNIT = 7,
-    DRAWING_DOM = 8,
 }
 
 export type DrawingType = DrawingTypeEnum | number;
@@ -67,8 +66,11 @@ export interface IDrawingSubunitMap<T extends IDrawingParam> {
     [subUnitId: string]: IDrawingMapItem<T>;
 }
 
+export interface IDrawingMapItemData<T> {
+    [drawingId: string]: T;
+}
 export interface IDrawingMapItem<T extends IDrawingParam> {
-    data: { [drawingId: string]: T };
+    data: IDrawingMapItemData<T>;
     order: string[];
 }
 
@@ -97,7 +99,7 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IDisposabl
     readonly focus$: Observable<IDrawingParam[]>;
     readonly group$: Observable<IDrawingGroupUpdateParam[]>;
     readonly ungroup$: Observable<IDrawingGroupUpdateParam[]>;
-    readonly refreshTransform$: Observable<IDrawingParam[]>;
+    readonly refreshTransform$: Observable<T[]>;
 
     readonly featurePluginUpdate$: Observable<T[]>;
     readonly featurePluginOrderUpdate$: Observable<IDrawingOrderUpdateParam>;
@@ -106,7 +108,13 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IDisposabl
 
     dispose(): void;
 
-    refreshTransform(updateParams: IDrawingParam[]): void;
+    refreshTransform(updateParams: T[]): void;
+
+    getDrawingDataForUnit(unitId: string): IDrawingSubunitMap<T>;
+    removeDrawingDataForUnit(unitId: string): void;
+    registerDrawingData(unitId: string, data: IDrawingSubunitMap<T>): void;
+
+    getDrawingData(unitId: string, subUnitId: string): IDrawingMapItemData<T>;
 
     getBatchAddOp(insertParams: T[]): unknown;
     getBatchRemoveOp(removeParams: IDrawingSearch[]): unknown;
@@ -115,7 +123,7 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IDisposabl
     addNotification(insertParams: IDrawingSearch[]): void;
     updateNotification(updateParams: IDrawingSearch[]): void;
     orderNotification(orderParams: IDrawingOrderMapParam): void;
-    refreshTransformNotification(refreshParams: IDrawingParam[]): void;
+    refreshTransformNotification(refreshParams: T[]): void;
 
     getDrawingByParam(param: Nullable<IDrawingSearch>): Nullable<T>;
     getOldDrawingByParam(param: Nullable<IDrawingSearch>): Nullable<T>;

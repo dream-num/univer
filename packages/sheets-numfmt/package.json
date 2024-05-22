@@ -73,12 +73,12 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "0.15.2",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.45"
+        "@univerjs/icons": "^0.1.46"
     },
     "devDependencies": {
         "@types/react": "^18.2.79",
@@ -91,7 +91,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "0.15.2",
         "less": "^4.2.0",
         "react": "18.2.0",
         "rxjs": "^7.8.1",

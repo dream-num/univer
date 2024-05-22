@@ -15,7 +15,7 @@
  */
 
 import { type Observable, Subject } from 'rxjs';
-import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, IUnitDrawingService, Nullable } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, IDrawingSubunitMap, IUnitDrawingService, Nullable } from '@univerjs/core';
 import { sortRules, sortRulesByDesc } from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
 import * as json1 from 'ot-json1';
@@ -68,7 +68,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     private _ungroup$ = new Subject<IDrawingGroupUpdateParam[]>();
     readonly ungroup$ = this._ungroup$.asObservable();
 
-    private _refreshTransform$ = new Subject<IDrawingParam[]>();
+    private _refreshTransform$ = new Subject<T[]>();
     readonly refreshTransform$ = this._refreshTransform$.asObservable();
 
     // private readonly _externalUpdate$ = new Subject<T[]>();
@@ -106,17 +106,11 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         this._featurePluginRemove$.complete();
         this._featurePluginOrderUpdate$.complete();
 
-        this.drawingManagerData = {
-            data: {},
-            order: {},
-        };
-        this._oldDrawingManagerData = {
-            data: {},
-            order: {},
-        };
+        this.drawingManagerData = {};
+        this._oldDrawingManagerData = {};
     }
 
-    refreshTransform(updateParams: IDrawingParam[]) {
+    refreshTransform(updateParams: T[]) {
         updateParams.forEach((updateParam) => {
             const drawing = this.getDrawingByParam(updateParam);
             if (drawing == null) {
@@ -131,6 +125,50 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         });
 
         this.refreshTransformNotification(updateParams);
+    }
+
+    getDrawingDataForUnit(unitId: string) {
+        return this.drawingManagerData[unitId];
+    }
+
+    removeDrawingDataForUnit(unitId: string) {
+        const subUnits = this.drawingManagerData[unitId];
+        delete this.drawingManagerData[unitId];
+
+        const drawings: IDrawingSearch[] = [];
+
+        Object.keys(subUnits).forEach((subUnitId) => {
+            const subUnit = subUnits[subUnitId];
+            Object.keys(subUnit.data).forEach((drawingId) => {
+                drawings.push({ unitId, subUnitId, drawingId });
+            });
+        });
+        if (drawings.length > 0) {
+            this.removeNotification(drawings);
+        }
+    }
+
+    registerDrawingData(unitId: string, data: IDrawingSubunitMap<T>) {
+        this.drawingManagerData[unitId] = data;
+        const drawings: T[] = [];
+        Object.keys(data).forEach((subUnitId) => {
+            this._establishDrawingMap(unitId, subUnitId);
+
+            const subUnitData = data[subUnitId];
+
+            Object.keys(subUnitData.data).forEach((drawingId) => {
+                const drawing = subUnitData.data[drawingId];
+                drawings.push(drawing);
+            });
+        });
+
+        if (drawings.length > 0) {
+            this.addNotification(drawings);
+        }
+    }
+
+    getDrawingData(unitId: string, subUnitId: string) {
+        return this._getDrawingData(unitId, subUnitId);
     }
 
     getBatchAddOp(insertParams: T[]): IDrawingJsonUndo1 {
@@ -218,7 +256,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         this._ungroup$.next(groupParams);
     }
 
-    refreshTransformNotification(refreshParams: IDrawingParam[]) {
+    refreshTransformNotification(refreshParams: T[]) {
         this._refreshTransform$.next(refreshParams);
     }
 
@@ -280,19 +318,29 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         ops.push(
             json1.insertOp([groupUnitId, groupSubUnitId, DrawingMapItemType.data, groupDrawingId], parent as unknown as json1.Doc)
         );
+        let maxChildIndex = Number.NEGATIVE_INFINITY;
         children.forEach((child) => {
             const { unitId, subUnitId, drawingId } = child;
+            const index = this._hasDrawingOrder({ unitId, subUnitId, drawingId });
+            maxChildIndex = Math.max(maxChildIndex, index);
             ops.push(
                 ...this._getUpdateParamCompareOp(child as T, this.getDrawingByParam({ unitId, subUnitId, drawingId }) as T)
             );
         });
+
+        if (maxChildIndex === Number.NEGATIVE_INFINITY) {
+            maxChildIndex = this._getDrawingOrder(groupUnitId, groupSubUnitId).length;
+        }
+
+        ops.push(
+            json1.insertOp([groupUnitId, groupSubUnitId, DrawingMapItemType.order, maxChildIndex], groupDrawingId)
+        );
 
         return ops.reduce(json1.type.compose, null);
     }
 
     private _getUngroupDrawingOp(groupParam: IDrawingGroupUpdateParam): JSONOp {
         const { parent, children } = groupParam;
-        const { unitId, subUnitId } = parent;
 
         const { unitId: groupUnitId, subUnitId: groupSubUnitId, drawingId: groupDrawingId } = parent;
 
@@ -306,16 +354,41 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         ops.push(
             json1.removeOp([groupUnitId, groupSubUnitId, DrawingMapItemType.data, groupDrawingId], true)
         );
+        ops.push(
+            json1.removeOp([groupUnitId, groupSubUnitId, DrawingMapItemType.order, this._getDrawingOrder(groupUnitId, groupSubUnitId).indexOf(groupDrawingId)], true)
+        );
 
         return ops.reduce(json1.type.compose, null);
     }
 
     applyJson1(unitId: string, subUnitId: string, jsonOp: JSONOp) {
         this._establishDrawingMap(unitId, subUnitId);
-
+        // this._fillMissingFields(jsonOp);
         this._oldDrawingManagerData = { ...this.drawingManagerData };
         this.drawingManagerData = json1.type.apply(this.drawingManagerData as unknown as json1.Doc, jsonOp) as unknown as IDrawingMap<T>;
     }
+
+    // private _fillMissingFields(jsonOp: JSONOp) {
+    //     if (jsonOp == null) {
+    //         return;
+    //     }
+
+    //     let object: { [key: string]: {} } = this.drawingManagerData;
+    //     for (let i = 0; i < jsonOp.length; i++) {
+    //         const op = jsonOp[i];
+    //         if (Array.isArray(op)) {
+    //             const opKey = op[0] as string;
+    //             if (!(opKey in object)) {
+    //                 object[opKey] = null as unknown as never;
+    //             }
+    //         } else if (typeof op === 'string') {
+    //             object = object[op];
+    //             if (object == null) {
+    //                 break;
+    //             }
+    //         }
+    //     }
+    // }
 
     featurePluginUpdateNotification(updateParams: T[]) {
         this._featurePluginUpdate$.next(updateParams);
@@ -585,6 +658,11 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
             return { op: [], invertOp: [] };
         }
 
+        // const oldParam = this._getCurrentBySearch({ unitId, subUnitId, drawingId });
+        // if (oldParam) {
+        //     this._initializeDrawingData(updateParam, oldParam);
+        // }
+
         const ops: JSONOp[] = this._getUpdateParamCompareOp(updateParam, object as T);
 
         // this.drawingManagerInfo[unitId][subUnitId][drawingId] = newObject;
@@ -595,6 +673,14 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
         return { op, invertOp };
     }
+
+    // private _initializeDrawingData(updateParam: T, oldParam: T) {
+    //     Object.keys(updateParam).forEach((key) => {
+    //         if (!(key in oldParam)) {
+    //             oldParam[key as keyof IDrawingParam] = null as unknown as never;
+    //         }
+    //     });
+    // }
 
     private _getUpdateParamCompareOp(newParam: T, oldParam: T) {
         const { unitId, subUnitId, drawingId } = newParam;

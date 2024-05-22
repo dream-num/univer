@@ -62,18 +62,19 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@univerjs/engine-render": "workspace:*",
+        "@wendellhu/redi": "0.15.2",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.45",
+        "@univerjs/icons": "^0.1.46",
         "ot-json1": "^1.0.2"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "0.15.2",
         "less": "^4.2.0",
         "ot-json1": "^1.0.2",
         "react": "18.2.0",

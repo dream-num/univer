@@ -138,10 +138,17 @@ export function isMenuSelectorItem<T extends MenuItemDefaultValueType>(v: IMenuI
 
 export type MenuItemDefaultValueType = string | number | undefined;
 
-export type IMenuItem = IMenuButtonItem | IMenuSelectorItem<MenuItemDefaultValueType>;
+export type IMenuItem = IMenuButtonItem<MenuItemDefaultValueType> | IMenuSelectorItem<MenuItemDefaultValueType>;
 
 export type IDisplayMenuItem<T extends IMenuItem> = T & {
     shortcut?: string;
 };
 
-export type IMenuItemFactory = (accessor: IAccessor) => IMenuItem;
+export type MenuItemConfig<T extends MenuItemDefaultValueType = MenuItemDefaultValueType> = Partial<Omit<IMenuItem, 'id' | 'subId' | 'value$' | 'hidden$' | 'disabled$' | 'activated$' | 'icon$'> & {
+    // defaultValue?: T;
+    hidden?: boolean;
+    disabled?: boolean;
+    activated?: boolean;
+}>;
+export type MenuConfig<T extends MenuItemDefaultValueType = MenuItemDefaultValueType> = Record<string, MenuItemConfig<T>>;
+export type IMenuItemFactory = (accessor: IAccessor, menuConfig?: MenuConfig<MenuItemDefaultValueType>) => IMenuItem;

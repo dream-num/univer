@@ -17,7 +17,7 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, DesktopUIPart, IEditorService, ILayoutService, IMenuService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, IEditorService, ILayoutService, IMenuService, IUIPartsService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { connectInjector } from '@wendellhu/redi/react-bindings';
@@ -31,6 +31,7 @@ import {
 } from '../components/font-family';
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { DocBackground } from '../views/doc-background/DocBackground';
+import type { IUniverDocsUIConfig } from '../basics';
 import {
     AlignCenterMenuItemFactory,
     AlignJustifyMenuItemFactory,
@@ -55,6 +56,7 @@ import {
 @OnLifecycle(LifecycleStages.Rendered, DocUIController)
 export class DocUIController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverDocsUIConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ILayoutService private readonly _layoutService: ILayoutService,
@@ -77,6 +79,8 @@ export class DocUIController extends Disposable {
     }
 
     private _initMenus(): void {
+        const { menu = {} } = this._config;
+
         // init menus
         (
             [
@@ -99,7 +103,7 @@ export class DocUIController extends Disposable {
                 BackgroundColorSelectorMenuItemFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
         });
     }
 
@@ -119,7 +123,7 @@ export class DocUIController extends Disposable {
         const embedded = this._editorService.isEditor(firstDocUnitId);
         if (!embedded) {
             this.disposeWithMe(
-                this._uiPartsService.registerComponent(DesktopUIPart.CONTENT, () => connectInjector(DocBackground, this._injector))
+                this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(DocBackground, this._injector))
             );
         }
     }

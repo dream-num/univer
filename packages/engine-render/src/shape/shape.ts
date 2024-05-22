@@ -84,7 +84,7 @@ export const SHAPE_OBJECT_ARRAY = [
     'strokeMiterLimit',
 ];
 
-export abstract class Shape<T> extends BaseObject {
+export abstract class Shape<T extends IShapeProps> extends BaseObject {
     private _hoverCursor: Nullable<string>;
 
     private _moveCursor: string | null = null;

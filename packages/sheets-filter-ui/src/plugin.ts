@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
+import { LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { zhCN } from './locale';
-import { SheetsFilterUIController } from './controllers/sheets-filter-ui.controller';
+import type { IUniverSheetsFilterUIConfig } from './controllers/sheets-filter-ui.controller';
+import { DefaultSheetFilterUiConfig, SheetsFilterUIController } from './controllers/sheets-filter-ui.controller';
 import { SheetsFilterPanelService } from './services/sheets-filter-panel.service';
 
 const NAME = 'SHEET_FILTER_UI_PLUGIN';
@@ -29,21 +30,25 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
     static override pluginName = NAME;
 
     constructor(
-        _config: unknown,
+        private readonly _config: Partial<IUniverSheetsFilterUIConfig> = {},
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
 
-        this._localeService.load({
-            zhCN,
-        });
+        this._localeService.load({ zhCN });
+        this._config = Tools.deepMerge({}, DefaultSheetFilterUiConfig, this._config);
     }
 
     override onStarting(injector: Injector): void {
         ([
             [SheetsFilterPanelService],
-            [SheetsFilterUIController],
+            [
+                SheetsFilterUIController,
+                {
+                    useFactory: () => this._injector.createInstance(SheetsFilterUIController, this._config),
+                },
+            ],
         ] as Dependency[]).forEach((d) => injector.add(d));
     }
 }

@@ -19,12 +19,10 @@ import type { IDrawingParam, ImageSourceType, ISrcRect, Nullable, PresetGeometry
 export interface IImageData extends IDrawingParam {
     imageSourceType: ImageSourceType;
     source: string;
-
     /**
      * 20.1.8.55 srcRect (Source Rectangle)
      */
     srcRect?: Nullable<ISrcRect>;
-
     /**
      * 20.1.9.18 prstGeom (Preset geometry)
      */

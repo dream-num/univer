@@ -16,8 +16,6 @@
 
 import type { ICommandInfo, IDrawingSearch, ISrcRect, ITransformState, Nullable } from '@univerjs/core';
 import { checkIfMove, Disposable, ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
 import type { IImageData } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import type { BaseObject, Image, Scene } from '@univerjs/engine-render';
@@ -31,9 +29,6 @@ export class ImageCropperController extends Disposable {
     private _sceneListenerOnImageMap: WeakSet<Scene> = new WeakSet();
 
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,

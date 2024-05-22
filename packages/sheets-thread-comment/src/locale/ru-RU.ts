@@ -14,5 +14,11 @@
  * limitations under the License.
  */
 
-export { default as zhCN } from './zhCN';
-export { default as enUS } from './enUS';
+export default {
+    sheetThreadComment: {
+        menu: {
+            addComment: 'Add Comment',
+            commentManagement: 'Comment Management',
+        },
+    },
+};

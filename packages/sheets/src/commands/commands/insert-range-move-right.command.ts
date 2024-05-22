@@ -53,6 +53,7 @@ export const InsertRangeMoveRightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: InsertRangeMoveRightCommandId,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params?: InsertRangeMoveRightCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

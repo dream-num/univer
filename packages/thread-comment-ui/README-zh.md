@@ -7,7 +7,7 @@
 
 ## 简介
 
-> TODO: Introduction
+> `@univerjs/thread-comment-ui` 评论/批注 通用UI包，如需使用请查看 [@univerjs/sheets-thread-comment](../sheets-thread-comment/README-zh.md)
 
 ## 使用指南
 

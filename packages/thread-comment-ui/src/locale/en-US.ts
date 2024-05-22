@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type zhCN from './zh-CN';
+
+const enUS: typeof zhCN = {
     threadCommentUI: {
         panel: {
             title: 'Comment Management',
@@ -47,3 +49,5 @@ export default {
         },
     },
 };
+
+export default enUS;

@@ -31,6 +31,8 @@ export type TPriority = 'left' | 'right';
 export class TextX {
     static name = 'text-x';
 
+    static id = 'text-x';
+
     static uri = 'https://github.com/dream-num/univer#text-x';
 
     static apply(doc: IDocumentBody, actions: TextXAction[]): IDocumentBody {

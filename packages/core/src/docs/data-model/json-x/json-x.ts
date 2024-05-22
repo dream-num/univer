@@ -24,6 +24,7 @@ import type { Nullable } from '../../../shared';
 
 export interface ISubType {
     name: string;
+    id?: string;
     uri?: string;
     apply(doc: IDocumentBody, actions: TextXAction[]): IDocumentBody;
     compose(thisActions: TextXAction[], otherActions: TextXAction[]): TextXAction[];
@@ -36,14 +37,23 @@ export interface ISubType {
     [k: string]: any;
 };
 
-json1.type.registerSubtype(TextX as ISubType);
-
 export { JSONOp as JSONXActions, Path as JSONXPath, json1 as JSON1 };
 
 export class JSONX {
     static name = 'json-x';
 
     static uri = 'https://github.com/dream-num/univer#json-x';
+
+    private static _subTypes: Map<string, ISubType> = new Map();
+
+    static registerSubtype(subType: ISubType) {
+        if (this._subTypes.has(subType.name) && this._subTypes.get(subType.name)?.id !== TextX.id) {
+            return;
+        }
+
+        this._subTypes.set(subType.name, subType);
+        json1.type.registerSubtype(subType);
+    }
 
     static apply(doc: IDocumentData, actions: JSONOp) {
         if (json1.type.isNoop(actions)) {
@@ -108,3 +118,5 @@ export class JSONX {
         return json1.editOp(['body'], TextX.name, subOp);
     }
 }
+
+JSONX.registerSubtype(TextX);

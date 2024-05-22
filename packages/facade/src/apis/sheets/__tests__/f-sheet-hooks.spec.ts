@@ -21,11 +21,34 @@ import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Subject } from 'rxjs';
 
-import type { IHoverCellPosition } from '@univerjs/sheets-ui';
-import { HoverManagerService } from '@univerjs/sheets-ui';
+import type { IDragCellPosition, IHoverCellPosition } from '@univerjs/sheets-ui';
+import { DragManagerService, HoverManagerService } from '@univerjs/sheets-ui';
 import type { FUniver } from '../../facade';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 import { FSheetHooks } from '../f-sheet-hooks';
+
+class MockDataTransfer implements DataTransfer {
+    effectAllowed: 'none' | 'copy' | 'link' | 'move' | 'all' | 'copyLink' | 'copyMove' | 'linkMove' | 'uninitialized';
+    files: FileList;
+    items: DataTransferItemList;
+    types: readonly string[];
+    clearData(format?: string | undefined): void {
+        throw new Error('Method not implemented.');
+    }
+
+    getData(format: string): string {
+        throw new Error('Method not implemented.');
+    }
+
+    setData(format: string, data: string): void {
+        throw new Error('Method not implemented.');
+    }
+
+    dropEffect: 'none' | 'copy' | 'link' | 'move' = 'none';
+    setDragImage(image: Element, x: number, y: number): void {
+        throw new Error('Method not implemented.');
+    }
+}
 
 describe('Test FSheetHooks', () => {
     let get: Injector['get'];
@@ -46,7 +69,11 @@ describe('Test FSheetHooks', () => {
         endColumn: number
     ) => Nullable<IStyleData>;
     let mockHoverManagerService: Partial<HoverManagerService>;
-    let currentCell$: Subject<Nullable<IHoverCellPosition>>;
+    let mockDragManagerService: Partial<DragManagerService>;
+    let hoverCurrentCell$: Subject<Nullable<IHoverCellPosition>>;
+    let hoverCurrentPosition$: Subject<Nullable<IHoverCellPosition>>;
+    let dragCurrentCell$: Subject<Nullable<IDragCellPosition>>;
+    let dragEndCell$: Subject<Nullable<IDragCellPosition>>;
     let sheetHooks: FSheetHooks;
     let workbook: Workbook;
 
@@ -56,15 +83,26 @@ describe('Test FSheetHooks', () => {
 
     beforeEach(() => {
         // Initialize the subject
-        currentCell$ = new Subject<Nullable<IHoverCellPosition>>();
+        hoverCurrentCell$ = new Subject<Nullable<IHoverCellPosition>>();
+        hoverCurrentPosition$ = new Subject<Nullable<IHoverCellPosition>>();
+        dragCurrentCell$ = new Subject<Nullable<IDragCellPosition>>();
+        dragEndCell$ = new Subject<Nullable<IDragCellPosition>>();
 
         // Create a mock HoverManagerService with currentCell$
         mockHoverManagerService = {
-            currentCell$: currentCell$.asObservable(),
+            currentCell$: hoverCurrentCell$.asObservable(),
+            currentPosition$: hoverCurrentPosition$.asObservable(),
+        };
+
+        // Create a mock DragManagerService with currentCell$
+        mockDragManagerService = {
+            currentCell$: dragCurrentCell$.asObservable(),
+            endCell$: dragEndCell$.asObservable(),
         };
 
         const testBed = createFacadeTestBed(undefined, [
             [HoverManagerService, { useValue: mockHoverManagerService }],
+            [DragManagerService, { useValue: mockDragManagerService }],
         ]);
         get = testBed.get;
         injector = testBed.injector;
@@ -117,6 +155,42 @@ describe('Test FSheetHooks', () => {
         const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        currentCell$.next({ location: { workbook, worksheet, unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
+        hoverCurrentPosition$.next({ location: { workbook, worksheet, unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
+    });
+
+    it('Test onCellPointerOver', () => {
+        sheetHooks.onCellPointerOver((cellPos) => {
+            expect(cellPos).toEqual({ location: { workbook, worksheet, unitId: workbook.getUnitId(), subUnitId: worksheet.getSheetId(), row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
+        });
+
+        // Trigger the Observable to emit a new value
+        const worksheet = workbook.getActiveSheet();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        hoverCurrentCell$.next({ location: { workbook, worksheet, unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
+    });
+
+    it('Test onCellDragOver', () => {
+        sheetHooks.onCellDragOver((cellPos) => {
+            expect(cellPos).toEqual({ location: { workbook, worksheet, unitId: workbook.getUnitId(), subUnitId: worksheet.getSheetId(), row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });
+        });
+
+        // Trigger the Observable to emit a new value
+        const worksheet = workbook.getActiveSheet();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        dragCurrentCell$.next({ location: { workbook, worksheet, unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });
+    });
+
+    it('Test onCellDrop', () => {
+        sheetHooks.onCellDrop((cellPos) => {
+            expect(cellPos).toEqual({ location: { workbook, worksheet, unitId: workbook.getUnitId(), subUnitId: worksheet.getSheetId(), row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });
+        });
+
+        // Trigger the Observable to emit a new value
+        const worksheet = workbook.getActiveSheet();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        dragEndCell$.next({ location: { workbook, worksheet, unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });
     });
 });

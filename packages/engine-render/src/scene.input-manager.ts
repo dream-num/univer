@@ -18,7 +18,7 @@ import { Disposable, type Nullable, type Observer, toDisposable } from '@univerj
 
 import type { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
-import type { IEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
+import type { IDragEvent, IEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import { DeviceType, PointerInput } from './basics/i-events';
 import { Vector2 } from './basics/vector2';
 import type { ThinScene } from './thin-scene';
@@ -65,6 +65,15 @@ export class InputManager extends Disposable {
 
     private _onKeyUp!: (evt: IKeyboardEvent) => void;
 
+    // Drag
+    private _onDragEnter!: (evt: IDragEvent) => void;
+
+    private _onDragLeave!: (evt: IDragEvent) => void;
+
+    private _onDragOver!: (evt: IDragEvent) => void;
+
+    private _onDrop!: (evt: IDragEvent) => void;
+
     private _scene!: ThinScene;
 
     private _currentMouseEnterPicked: Nullable<BaseObject | ThinScene>;
@@ -108,6 +117,10 @@ export class InputManager extends Disposable {
         this._onMouseWheel = null as unknown as (evt: IWheelEvent) => void;
         this._onKeyDown = null as unknown as (evt: IKeyboardEvent) => void;
         this._onKeyUp = null as unknown as (evt: IKeyboardEvent) => void;
+        this._onDragEnter = null as unknown as (evt: IDragEvent) => void;
+        this._onDragLeave = null as unknown as (evt: IDragEvent) => void;
+        this._onDragOver = null as unknown as (evt: IDragEvent) => void;
+        this._onDrop = null as unknown as (evt: IDragEvent) => void;
     }
 
     // Handle events such as triggering mouseleave and mouseenter.
@@ -121,6 +134,20 @@ export class InputManager extends Disposable {
             this._currentMouseEnterPicked = o;
             previousPicked?.triggerPointerLeave(evt);
             o?.triggerPointerEnter(evt);
+        }
+    }
+
+    // Handle events such as triggering dragleave and dragenter.
+    dragLeaveEnterHandler(evt: IMouseEvent) {
+        const o = this._currentObject;
+        if (o === null || o === undefined) {
+            this._currentMouseEnterPicked?.triggerDragLeave(evt);
+            this._currentMouseEnterPicked = null;
+        } else if (o !== this._currentMouseEnterPicked) {
+            const previousPicked = this._currentMouseEnterPicked;
+            this._currentMouseEnterPicked = o;
+            previousPicked?.triggerDragLeave(evt);
+            o?.triggerDragEnter(evt);
         }
     }
 
@@ -264,6 +291,44 @@ export class InputManager extends Disposable {
             }
         };
 
+        this._onDragEnter = (evt: IDragEvent) => {
+            this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            this._currentObject?.triggerDragOver(evt);
+
+            this.dragLeaveEnterHandler(evt);
+        };
+
+        this._onDragLeave = (evt: IDragEvent) => {
+            this._currentObject = null;
+
+            this.dragLeaveEnterHandler(evt);
+        };
+
+        this._onDragOver = (evt: IDragEvent) => {
+            this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            const isStop = this._currentObject?.triggerDragOver(evt);
+
+            this.dragLeaveEnterHandler(evt);
+
+            if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
+                if (this._scene.onDragOverObserver.hasObservers()) {
+                    this._scene.onDragOverObserver.notifyObservers(evt);
+                    this._scene.getEngine()?.setRemainCapture();
+                }
+            }
+        };
+
+        this._onDrop = (evt: IDragEvent) => {
+            const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            const isStop = currentObject?.triggerDrop(evt);
+
+            if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
+                if (this._scene.onDropObserver.hasObservers()) {
+                    this._scene.onDropObserver.notifyObservers(evt);
+                }
+            }
+        };
+
         // eslint-disable-next-line complexity
         this._onInputObserver = engine.onInputChangedObservable.add((eventData: IEvent) => {
             const evt: IEvent = eventData;
@@ -276,6 +341,25 @@ export class InputManager extends Disposable {
                 if (eventData.currentState === 0) {
                     this._onKeyUp(evt as IKeyboardEvent);
                 }
+            }
+
+            // Drag Events
+            if ((eventData as IDragEvent).dataTransfer) {
+                if (hasMove &&
+                    (eventData.inputIndex === PointerInput.Horizontal ||
+                        eventData.inputIndex === PointerInput.Vertical ||
+                        eventData.inputIndex === PointerInput.DeltaHorizontal ||
+                        eventData.inputIndex === PointerInput.DeltaVertical)) {
+                    this._onDragOver(evt as IDragEvent);
+                } else if (hasEnter && eventData.currentState === 4) {
+                    this._onDragEnter(evt as IDragEvent);
+                } else if (hasLeave && eventData.currentState === 5) {
+                    this._onDragLeave(evt as IDragEvent);
+                } else if (hasUp && eventData.currentState === 6) {
+                    this._onDrop(evt as IDragEvent);
+                }
+
+                return;
             }
 
             // Pointer Events

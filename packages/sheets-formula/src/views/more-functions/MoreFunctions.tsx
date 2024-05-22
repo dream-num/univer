@@ -29,7 +29,7 @@ export function MoreFunctions() {
     const workbook = useActiveWorkbook();
     const [selectFunction, setSelectFunction] = useState<boolean>(true);
     const [inputParams, setInputParams] = useState<boolean>(false);
-    const [params, setParams] = useState<string[]>([]);
+    // const [params, setParams] = useState<string[]>([]); // TODO@Dushusir: bind setParams to InputParams's onChange
     const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(null);
 
     const localeService = useDependency(LocaleService);
@@ -52,7 +52,7 @@ export function MoreFunctions() {
     return (
         <div className={styles.formulaMoreFunctions}>
             {selectFunction && <SelectFunction onChange={setFunctionInfo} />}
-            {inputParams && <InputParams functionInfo={functionInfo} onChange={setParams} />}
+            {inputParams && <InputParams functionInfo={functionInfo} onChange={() => {}} />}
             <div className={styles.formulaMoreFunctionsOperation}>
                 {/* TODO@Dushusir: open input params after range selector refactor */}
                 {inputParams && (

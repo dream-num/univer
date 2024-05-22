@@ -84,19 +84,22 @@ export class UniverSheetsPlugin extends Plugin {
             [SheetPermissionService],
             [INumfmtService, { useClass: NumfmtService }],
             [SheetInterceptorService],
-            [ISheetDrawingService, { useClass: SheetDrawingService }],
 
             // controllers
             [BasicWorksheetController],
             [MergeCellController],
             [DefinedNameDataController],
-            [SheetDrawingDataController],
         ];
 
         if (!this._config?.notExecuteFormula) {
             dependencies.push(
                 [CalculateResultApplyController],
-                [FeatureCalculationController]
+                [FeatureCalculationController],
+            );
+        } else {
+            dependencies.push(
+                [ISheetDrawingService, { useClass: SheetDrawingService }],
+                [SheetDrawingDataController],
             );
         }
 

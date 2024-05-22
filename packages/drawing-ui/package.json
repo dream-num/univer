@@ -63,7 +63,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "0.15.2",
         "clsx": ">=2.0.0",
         "react": ">=16.9.0",
         "rxjs": ">=7.0.0"
@@ -78,7 +78,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "0.15.2",
         "clsx": "^2.1.0",
         "less": "^4.2.0",
         "react": "^18.2.0",

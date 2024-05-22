@@ -40,6 +40,7 @@ import { RangeProtectionRefRangeService } from './services/permission/range-perm
 import { RangeProtectionService } from './services/permission/range-permission/range-protection.service';
 import { ISheetDrawingService, SheetDrawingService } from './services/sheet-drawing.service';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
+import { SheetDrawingDataController } from './controllers/sheet-drawing-data.controller';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 
@@ -109,6 +110,7 @@ export class UniverSheetsPlugin extends Plugin {
             [RangeProtectionRuleModel],
             [RangeProtectionRefRangeService],
             [RangeProtectionService],
+            [SheetDrawingDataController],
         ];
 
         if (!this._config?.notExecuteFormula) {

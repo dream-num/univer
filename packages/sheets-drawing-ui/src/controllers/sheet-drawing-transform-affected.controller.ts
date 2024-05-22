@@ -176,7 +176,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         const updateDrawings: Partial<ISheetDrawing>[] = [];
         const deleteDrawings: Partial<ISheetDrawing>[] = [];
 
-        const { sheetTransform, anchorType, transform, unitId, subUnitId, drawingId } = drawing;
+        const { sheetTransform, anchorType = SheetDrawingAnchorType.Position, transform, unitId, subUnitId, drawingId } = drawing;
         const { from, to } = sheetTransform;
         const { row: fromRow, column: fromColumn } = from;
         const { row: toRow, column: toColumn } = to;
@@ -230,6 +230,16 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return { updateDrawings, deleteDrawings };
     }
 
+    private _remainDrawingSize(transform: Nullable<ITransformState>, updateDrawings: ISheetDrawing[], drawing: ISheetDrawing) {
+        const newSheetTransform = transformToDrawingPosition({ ...transform }, this._selectionRenderService);
+        if (newSheetTransform != null) {
+            updateDrawings.push({
+                ...drawing,
+                sheetTransform: newSheetTransform,
+            });
+        }
+    }
+
     private _getDrawingUndoForRowAndColSize(unitId: string, subUnitId: string, ranges: IRange[]) {
         const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
 
@@ -237,15 +247,9 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         Object.keys(drawingData).forEach((drawingId) => {
             const drawing = drawingData[drawingId] as ISheetDrawing;
-            const { sheetTransform, transform, anchorType } = drawing;
+            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
             if (anchorType === SheetDrawingAnchorType.None) {
-                const newSheetTransform = transformToDrawingPosition({ ...transform }, this._selectionRenderService);
-                if (newSheetTransform != null) {
-                    updateDrawings.push({
-                        ...drawing,
-                        sheetTransform: newSheetTransform,
-                    });
-                }
+                this._remainDrawingSize(transform, updateDrawings, drawing);
             } else {
                 const { from, to } = sheetTransform;
                 const { row: fromRow, column: fromColumn } = from;
@@ -254,21 +258,22 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     const range = ranges[i];
                     const { startRow, endRow, startColumn, endColumn } = range;
 
-                    if (fromRow > endRow || fromColumn > endColumn) {
+                    if (toRow < startRow || toColumn < startColumn) {
                         continue;
                     }
 
                     if (anchorType === SheetDrawingAnchorType.Position) {
                         if ((fromRow <= startRow && toRow >= endRow) || (fromColumn <= startColumn && toColumn >= endColumn)) {
+                            this._remainDrawingSize(transform, updateDrawings, drawing);
                             continue;
                         }
                     }
 
-                    const newSheetTransform = transformToDrawingPosition({ ...transform }, this._selectionRenderService);
-                    if (newSheetTransform != null) {
+                    const newTransform = transformDrawingPositionToTransform({ ...sheetTransform }, this._selectionRenderService);
+                    if (newTransform != null) {
                         updateDrawings.push({
                             ...drawing,
-                            sheetTransform: newSheetTransform,
+                            transform: newTransform,
                         });
                         break;
                     }
@@ -335,7 +340,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         Object.keys(data).forEach((drawingId) => {
             const drawing = data[drawingId];
-            const { sheetTransform, transform, anchorType } = drawing;
+            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
 
             if (sheetTransform == null || transform == null) {
                 return;
@@ -415,7 +420,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         Object.keys(data).forEach((drawingId) => {
             const drawing = data[drawingId];
-            const { sheetTransform, transform, anchorType } = drawing;
+            const { sheetTransform, transform, anchorType = SheetDrawingAnchorType.Position } = drawing;
 
             if (sheetTransform == null || transform == null) {
                 return;
@@ -738,25 +743,25 @@ export class SheetDrawingTransformAffectedController extends Disposable {
     }
 
     private _sheetRefreshListener() {
-        const updateMutations = [
-            SetRowVisibleMutation.id,
-            SetRowHiddenMutation.id,
-            SetColVisibleMutation.id,
-            SetColHiddenMutation.id,
-            SetWorksheetRowHeightMutation.id,
-            SetWorksheetColWidthMutation.id,
-        ];
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (!updateMutations.includes(command.id)) {
-                    return;
-                }
+        // const updateMutations = [
+        //     SetRowVisibleMutation.id,
+        //     SetRowHiddenMutation.id,
+        //     SetColVisibleMutation.id,
+        //     SetColHiddenMutation.id,
+        //     SetWorksheetRowHeightMutation.id,
+        //     SetWorksheetColWidthMutation.id,
+        // ];
+        // this.disposeWithMe(
+        //     this._commandService.onCommandExecuted((command: ICommandInfo) => {
+        //         if (!updateMutations.includes(command.id)) {
+        //             return;
+        //         }
 
-                const params = command.params as ISetRowVisibleMutationParams | ISetColHiddenMutationParams | ISetWorksheetRowHeightMutationParams | ISetWorksheetColWidthMutationParams | ISetWorksheetRowIsAutoHeightMutationParams | ISetRowHiddenMutationParams | ISetColVisibleMutationParams | ISetWorksheetColWidthMutationParams;
-                const { unitId, subUnitId, ranges } = params;
-                this._refreshDrawingTransform(unitId, subUnitId, ranges);
-            })
-        );
+        //         const params = command.params as ISetRowVisibleMutationParams | ISetColHiddenMutationParams | ISetWorksheetRowHeightMutationParams | ISetWorksheetColWidthMutationParams | ISetWorksheetRowIsAutoHeightMutationParams | ISetRowHiddenMutationParams | ISetColVisibleMutationParams | ISetWorksheetColWidthMutationParams;
+        //         const { unitId, subUnitId, ranges } = params;
+        //         this._refreshDrawingTransform(unitId, subUnitId, ranges);
+        //     })
+        // );
     }
 
     private _refreshDrawingTransform(unitId: string, subUnitId: string, ranges: IRange[]) {
@@ -766,7 +771,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         Object.keys(drawingData).forEach((drawingId) => {
             const drawing = drawingData[drawingId] as ISheetDrawing;
-            const { sheetTransform, anchorType } = drawing;
+            const { sheetTransform, anchorType = SheetDrawingAnchorType.Position } = drawing;
             if (anchorType === SheetDrawingAnchorType.None) {
                 return true;
             }

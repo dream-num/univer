@@ -15,7 +15,7 @@
  */
 
 import type { IImageRemoteService, IImageRemoteServiceParam, Nullable } from '@univerjs/core';
-import { ImageSourceType, Tools } from '@univerjs/core';
+import { ImageSourceType, ImageUploadStatusType, Tools } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
@@ -67,10 +67,22 @@ export class ImageRemoteService implements IImageRemoteService {
     async saveImage(imageFile: File): Promise<Nullable<IImageRemoteServiceParam>> {
         return new Promise((resolve, reject) => {
             if (!ALLOW_IMAGE_LIST.includes(imageFile.type)) {
-                reject(new Error('Not support image type'));
+                resolve({
+                    imageId: '',
+                    imageSourceType: ImageSourceType.BASE64,
+                    source: '',
+                    base64Cache: '',
+                    status: ImageUploadStatusType.ERROR_IMAGE_TYPE,
+                });
             }
             if (imageFile.size > ALLOW_IMAGE_SIZE) {
-                reject(new Error('Image size is too large'));
+                resolve({
+                    imageId: '',
+                    imageSourceType: ImageSourceType.BASE64,
+                    source: '',
+                    base64Cache: '',
+                    status: ImageUploadStatusType.ERROR_EXCEED_SIZE,
+                });
             }
             // 获取上传的图片的宽高
             const reader = new FileReader();
@@ -88,6 +100,7 @@ export class ImageRemoteService implements IImageRemoteService {
                     imageSourceType: ImageSourceType.BASE64,
                     source: replaceSrc,
                     base64Cache: replaceSrc,
+                    status: ImageUploadStatusType.SUCCUSS,
                 });
 
                 this.decreaseWaiting();

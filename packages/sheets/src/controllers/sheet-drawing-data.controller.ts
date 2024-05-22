@@ -16,11 +16,9 @@
 
 import type { IDrawingSubunitMap } from '@univerjs/core';
 import { Disposable, IDrawingManagerService, IResourceManagerService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { ISheetDrawing } from '@univerjs/sheets';
-import { ISheetDrawingService } from '@univerjs/sheets';
+import { type ISheetDrawing, ISheetDrawingService } from '../services/sheet-drawing.service';
 
 export const SHEET_DRAWING_PLUGIN = 'SHEET_DRAWING_PLUGIN';
-
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingDataController)
 export class SheetDrawingDataController extends Disposable {
     constructor(

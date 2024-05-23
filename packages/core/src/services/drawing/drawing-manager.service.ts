@@ -129,7 +129,7 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IDisposabl
     updateNotification(updateParams: IDrawingSearch[]): void;
     orderNotification(orderParams: IDrawingOrderMapParam): void;
     refreshTransformNotification(refreshParams: T[]): void;
-    visibleNotification(visibleParams:IDrawingVisibleParam[]):void;
+    visibleNotification(visibleParams: IDrawingVisibleParam[]): void;
 
     getDrawingByParam(param: Nullable<IDrawingSearch>): Nullable<T>;
     getOldDrawingByParam(param: Nullable<IDrawingSearch>): Nullable<T>;

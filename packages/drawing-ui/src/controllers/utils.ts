@@ -43,5 +43,11 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
 
     group.addObject(object);
 
-    groupParam.transform && group.transformByState({ left: groupParam.transform.left, top: groupParam.transform.top });
+    groupParam.transform && group.transformByState(
+        {
+            left: groupParam.transform.left,
+            top: groupParam.transform.top,
+            angle: groupParam.transform.angle,
+        }
+    );
 }

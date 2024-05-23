@@ -43,6 +43,7 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
+            "./locale/*": "./lib/locale/*.json",
             "./lib/*": "./lib/*"
         }
     },

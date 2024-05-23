@@ -15,21 +15,51 @@
  */
 
 import { Tools } from '@univerjs/core';
-import { enUS as DesignEnUS, ruRU as DesignRuRU, zhCN as DesignZhCN } from '@univerjs/design/locale';
-import { enUS as DocsUIEnUS, ruRU as DocsUIRuRU, zhCN as DocsUIZhCN } from '@univerjs/docs-ui/locale';
-import { enUS as SheetsEnUS, ruRU as SheetsRuRU, zhCN as SheetsZhCN } from '@univerjs/sheets/locale';
-import { enUS as SheetsUIEnUS, ruRU as SheetsUIRuRU, zhCN as SheetsUIZhCN } from '@univerjs/sheets-ui/locale';
-import { enUS as FindReplaceEnUS, ruRU as FindReplaceRuRU, zhCN as FindReplaceZhCN } from '@univerjs/find-replace/locale';
-import { enUS as SheetsFormulaEnUS, ruRU as SheetsFormulaRuRU, zhCN as SheetsFormulaZhCN } from '@univerjs/sheets-formula/locale';
-import { enUS as SheetsDataValidationEnUS, ruRU as SheetsDataValidationRuRU, zhCN as SheetsDataValidationZhCN } from '@univerjs/sheets-data-validation/locale';
-import { enUS as SheetsConditionalFormattingUIEnUS, ruRU as SheetsConditionalFormattingUIRuRU, zhCN as SheetsConditionalFormattingUIZhCN } from '@univerjs/sheets-conditional-formatting-ui/locale';
-import { enUS as SheetsZenEditorEnUS, ruRU as SheetsZenEditorRuRU, zhCN as SheetsZenEditorZhCN } from '@univerjs/sheets-zen-editor/locale';
-import { enUS as UIEnUS, ruRU as UIRuRU, zhCN as UIZhCN } from '@univerjs/ui/locale';
-import { enUS as SheetsFilterUIEnUS, ruRU as SheetsFilterUIRuRU, zhCN as SheetsFilterUIZhCN } from '@univerjs/sheets-filter-ui/locale';
-import { enUS as SheetsThreadCommentEnUS, ruRU as SheetsThreadCommentRuRU, zhCN as SheetsThreadCommentZhCN } from '@univerjs/sheets-thread-comment/locale';
-import { enUS as ThreadCommentUIEnUS, ruRU as ThreadCommentUIRuRU, zhCN as ThreadCommentUIZhCN } from '@univerjs/thread-comment-ui/locale';
-import { enUS as SheetsNumfmtEnUS, ruRU as SheetsNumfmtRuRU, zhCN as SheetsNumfmtZhCN } from '@univerjs/sheets-numfmt/locale';
-import { enUS as UniscriptEnUS, ruRU as UniscriptRuRU, zhCN as UniscriptZhCN } from '@univerjs/uniscript/locale';
+import DesignEnUS from '@univerjs/design/locale/en-US';
+import DesignRuRU from '@univerjs/design/locale/ru-RU';
+import DesignZhCN from '@univerjs/design/locale/zh-CN';
+import DocsUIEnUS from '@univerjs/docs-ui/locale/en-US';
+import DocsUIRuRU from '@univerjs/docs-ui/locale/ru-RU';
+import DocsUIZhCN from '@univerjs/docs-ui/locale/zh-CN';
+import FindReplaceEnUS from '@univerjs/find-replace/locale/en-US';
+import FindReplaceRuRU from '@univerjs/find-replace/locale/ru-RU';
+import FindReplaceZhCN from '@univerjs/find-replace/locale/zh-CN';
+import SheetsEnUS from '@univerjs/sheets/locale/en-US';
+import SheetsRuRU from '@univerjs/sheets/locale/ru-RU';
+import SheetsZhCN from '@univerjs/sheets/locale/zh-CN';
+import SheetsUIEnUS from '@univerjs/sheets-ui/locale/en-US';
+import SheetsUIRuRU from '@univerjs/sheets-ui/locale/ru-RU';
+import SheetsUIZhCN from '@univerjs/sheets-ui/locale/zh-CN';
+import SheetsFormulaEnUS from '@univerjs/sheets-formula/locale/en-US';
+import SheetsFormulaRuRU from '@univerjs/sheets-formula/locale/ru-RU';
+import SheetsFormulaZhCN from '@univerjs/sheets-formula/locale/zh-CN';
+import SheetsDataValidationEnUS from '@univerjs/sheets-data-validation/locale/en-US';
+import SheetsDataValidationRuRU from '@univerjs/sheets-data-validation/locale/ru-RU';
+import SheetsDataValidationZhCN from '@univerjs/sheets-data-validation/locale/zh-CN';
+import SheetsConditionalFormattingUIEnUS from '@univerjs/sheets-conditional-formatting-ui/locale/en-US';
+import SheetsConditionalFormattingUIRuRU from '@univerjs/sheets-conditional-formatting-ui/locale/ru-RU';
+import SheetsConditionalFormattingUIZhCN from '@univerjs/sheets-conditional-formatting-ui/locale/zh-CN';
+import SheetsZenEditorEnUS from '@univerjs/sheets-zen-editor/locale/en-US';
+import SheetsZenEditorRuRU from '@univerjs/sheets-zen-editor/locale/ru-RU';
+import SheetsZenEditorZhCN from '@univerjs/sheets-zen-editor/locale/zh-CN';
+import UIEnUS from '@univerjs/ui/locale/en-US';
+import UIRuRU from '@univerjs/ui/locale/ru-RU';
+import UIZhCN from '@univerjs/ui/locale/zh-CN';
+import SheetsFilterUIEnUS from '@univerjs/sheets-filter-ui/locale/en-US';
+import SheetsFilterUIRuRU from '@univerjs/sheets-filter-ui/locale/ru-RU';
+import SheetsFilterUIZhCN from '@univerjs/sheets-filter-ui/locale/zh-CN';
+import SheetsThreadCommentEnUS from '@univerjs/sheets-thread-comment/locale/en-US';
+import SheetsThreadCommentRuRU from '@univerjs/sheets-thread-comment/locale/ru-RU';
+import SheetsThreadCommentZhCN from '@univerjs/sheets-thread-comment/locale/zh-CN';
+import ThreadCommentUIEnUS from '@univerjs/thread-comment-ui/locale/en-US';
+import ThreadCommentUIRuRU from '@univerjs/thread-comment-ui/locale/ru-RU';
+import ThreadCommentUIZhCN from '@univerjs/thread-comment-ui/locale/zh-CN';
+import SheetsNumfmtEnUS from '@univerjs/sheets-numfmt/locale/en-US';
+import SheetsNumfmtRuRU from '@univerjs/sheets-numfmt/locale/ru-RU';
+import SheetsNumfmtZhCN from '@univerjs/sheets-numfmt/locale/zh-CN';
+import UniscriptEnUS from '@univerjs/uniscript/locale/en-US';
+import UniscriptRuRU from '@univerjs/uniscript/locale/ru-RU';
+import UniscriptZhCN from '@univerjs/uniscript/locale/zh-CN';
 
 export const zhCN = Tools.deepMerge(
     SheetsZhCN,

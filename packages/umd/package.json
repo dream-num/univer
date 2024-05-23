@@ -76,6 +76,7 @@
         "@wendellhu/redi": "0.15.2",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.11",
+        "lodash": "^4.17.21",
         "monaco-editor": "0.48.0",
         "react": "18.2.0",
         "react-dom": "18.2.0",

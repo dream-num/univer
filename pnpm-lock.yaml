@@ -1918,6 +1918,9 @@ importers:
       dayjs:
         specifier: ^1.11.11
         version: 1.11.11
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       monaco-editor:
         specifier: 0.48.0
         version: 0.48.0

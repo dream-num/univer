@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IPosition, Nullable, Worksheet } from '@univerjs/core';
+import type { IPosition, ITransformState, Nullable, Worksheet } from '@univerjs/core';
 import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, IDrawingManagerService, IUniverInstanceService, Tools } from '@univerjs/core';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, Rect } from '@univerjs/engine-render';
@@ -24,7 +24,7 @@ import type { IFloatDomLayout } from '@univerjs/ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { ISelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -82,6 +82,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     private _domLayerMap: Map<string, Map<string, Map<string, ICanvasFloatDom>>> = new Map();
     private _domLayerInfoMap: Map<string, ICanvasFloatDomInfo> = new Map();
 
+    private _transformChange$ = new Subject<{ id: string; value: ITransformState }>();
+    transformChange$ = this._transformChange$.asObservable();
+
     constructor(
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
@@ -95,6 +98,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         super();
         this._drawingAddListener();
         this._scrollUpdateListener();
+        this._featureUpdateListener();
     }
 
     private _ensureMap(unitId: string, subUnitId: string) {
@@ -214,8 +218,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     });
 
                     const listener = rect.onTransformChangeObservable.add(() => {
+                        const newPosition = calcPosition(rect, renderObject.renderObject, skeleton.skeleton, target.worksheet);
                         position$.next(
-                            calcPosition(rect, renderObject.renderObject, skeleton.skeleton, target.worksheet)
+                            newPosition
                         );
                     });
 
@@ -295,6 +300,29 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             from,
             to,
         };
+    }
+
+    private _featureUpdateListener() {
+        this.disposeWithMe(
+            this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
+                (params as IFloatDomData[]).forEach((data) => {
+                    if (data.drawingType !== DrawingTypeEnum.DRAWING_DOM) {
+                        return;
+                    }
+
+                    const sheetDrawing = this._drawingManagerService.getDrawingByParam(data);
+                    if (!sheetDrawing) {
+                        return;
+                    }
+
+                    const newValue = {
+                        ...sheetDrawing.transform,
+                        ...data.transform,
+                    };
+                    this._transformChange$.next({ id: data.drawingId, value: newValue });
+                });
+            })
+        );
     }
 
     addFloatDomToPosition(layer: ICanvasFloatDom) {

@@ -22,7 +22,7 @@ pnpm add @univerjs/sheets-thread-comment
 
 ### use
 ```js
-import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
+import { UniverSheetsThreadCommentPlugin, IThreadCommentMentionDataService} from '@univerjs/sheets-thread-comment';
 
 const mockUser = {
     userID: 'mockId',

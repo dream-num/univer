@@ -18,7 +18,7 @@ import type { IDrawingGroupUpdateParam, IDrawingParam } from '@univerjs/core';
 import { DrawingTypeEnum, ICommandService, IDrawingManagerService, LocaleService, Tools } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
-import { CreateCopySingle } from '@univerjs/icons';
+import { GroupSingle, UngroupSingle } from '@univerjs/icons';
 import { Button } from '@univerjs/design';
 import clsx from 'clsx';
 import { getGroupState, IRenderManagerService, transformObjectOutOfGroup } from '@univerjs/engine-render';
@@ -181,7 +181,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
                     <Button size="small" onClick={() => { onGroupBtnClick(); }} style={{ display: gridDisplay(groupBtnShow) }}>
-                        <div className={clsx(styles.imageCommonPanelInline)}><CreateCopySingle /></div>
+                        <div className={clsx(styles.imageCommonPanelInline)}><GroupSingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.group')}</div>
                     </Button>
                 </div>
@@ -193,7 +193,7 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
                 </div> */}
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
                     <Button size="small" onClick={() => { onUngroupBtnClick(); }} style={{ display: gridDisplay(ungroupBtnShow) }}>
-                        <div className={clsx(styles.imageCommonPanelInline)}><CreateCopySingle /></div>
+                        <div className={clsx(styles.imageCommonPanelInline)}><UngroupSingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.unGroup')}</div>
                     </Button>
                 </div>

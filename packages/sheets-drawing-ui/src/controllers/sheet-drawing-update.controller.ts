@@ -33,7 +33,7 @@ import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-d
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
-import { transformDrawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
+import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
 
 const SHEET_IMAGE_WIDTH_LIMIT = 500;
 const SHEET_IMAGE_HEIGHT_LIMIT = 500;
@@ -166,7 +166,7 @@ export class SheetDrawingUpdateController extends Disposable {
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType,
             source,
-            transform: transformDrawingPositionToTransform(sheetTransform, this._selectionRenderService),
+            transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService),
             sheetTransform,
         };
 
@@ -288,7 +288,7 @@ export class SheetDrawingUpdateController extends Disposable {
 
                 const newDrawing: Partial<ISheetDrawing> = {
                     ...param,
-                    transform: { ...transform, ...transformDrawingPositionToTransform(sheetTransform, this._selectionRenderService) },
+                    transform: { ...transform, ...drawingPositionToTransform(sheetTransform, this._selectionRenderService) },
                     sheetTransform: { ...sheetTransform },
                 };
 

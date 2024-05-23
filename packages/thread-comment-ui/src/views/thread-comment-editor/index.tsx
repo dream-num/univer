@@ -20,9 +20,8 @@ import { Button, Mention, Mentions } from '@univerjs/design';
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IDocumentBody } from '@univerjs/core';
-import { IConfigService, LocaleService } from '@univerjs/core';
-import { PLUGIN_NAME } from '../../types/const';
-import type { IThreadCommentUIConfig } from '../../types/interfaces/i-thread-comment-mention';
+import { LocaleService } from '@univerjs/core';
+import { IThreadCommentMentionDataService } from '../../services/thread-comment-mention-data.service';
 import styles from './index.module.less';
 import { parseMentions, transformDocument2TextNodes, transformMention, transformTextNode2Text, transformTextNodes2Document } from './util';
 
@@ -52,11 +51,10 @@ const defaultRenderSuggestion: MentionProps['renderSuggestion'] = (mention, sear
 
 export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThreadCommentEditorProps>((props, ref) => {
     const { comment, onSave, id, onCancel, autoFocus } = props;
-    const configService = useDependency(IConfigService);
+    const mentionDataService = useDependency(IThreadCommentMentionDataService);
     const localeService = useDependency(LocaleService);
     const [localComment, setLocalComment] = useState({ ...comment });
     const [editing, setEditing] = useState(false);
-    const mentions = configService.getConfig<IThreadCommentUIConfig>(PLUGIN_NAME)?.mentions ?? [];
     const inputRef = useRef(null);
 
     useImperativeHandle(ref, () => ({
@@ -89,16 +87,14 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                     setEditing(true);
                 }}
             >
-                {mentions.map((mention) => (
-                    <Mention
-                        key={mention.trigger}
-                        trigger={mention.trigger}
-                        data={(query, callback) => mention.getMentions!(query)
-                            .then((res) => res.map(transformMention)).then(callback) as any}
-                        displayTransform={(id, label) => `@${label} `}
-                        renderSuggestion={mention.renderSuggestion ?? defaultRenderSuggestion}
-                    />
-                ))}
+                <Mention
+                    key={mentionDataService.trigger}
+                    trigger={mentionDataService.trigger}
+                    data={(query, callback) => mentionDataService.getMentions!(query)
+                        .then((res) => res.map(transformMention)).then(callback) as any}
+                    displayTransform={(id, label) => `@${label} `}
+                    renderSuggestion={mentionDataService.renderSuggestion ?? defaultRenderSuggestion}
+                />
             </Mentions>
             {editing
                 ? (

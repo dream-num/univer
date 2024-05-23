@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-import type { IThreadCommentMention } from '@univerjs/thread-comment';
 import type { MentionProps } from '@univerjs/design';
+import type { IThreadCommentMention } from '@univerjs/thread-comment';
+import { createIdentifier } from '@wendellhu/redi';
 
-export interface IThreadCommentMentionConfig {
+export interface IThreadCommentMentionDataService {
     getMentions: (search: string) => Promise<IThreadCommentMention[]>;
     trigger: string;
     renderSuggestion?: MentionProps['renderSuggestion'];
 }
 
-export interface IThreadCommentUIConfig {
-    mentions?: IThreadCommentMentionConfig[];
+export class ThreadCommentMentionDataService implements IThreadCommentMentionDataService {
+    async getMentions(search: string) {
+        return [];
+    }
+
+    trigger = '@';
 }
+
+export const IThreadCommentMentionDataService = createIdentifier<IThreadCommentMentionDataService>('thread-comment.mention-data.service');

@@ -38,6 +38,7 @@ import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 
 import { FUniver } from '@univerjs/facade';
+import { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { locales } from './locales';
 
@@ -107,26 +108,29 @@ const mockUser = {
     canBindAnonymous: false,
 };
 
+class CustomMentionDataService implements IThreadCommentMentionDataService {
+    trigger: string = '@';
+
+    async getMentions(search: string) {
+        return [
+            {
+                id: mockUser.userID,
+                label: mockUser.name,
+                type: 'user',
+                icon: mockUser.avatar,
+            },
+            {
+                id: '2',
+                label: 'User2',
+                type: 'user',
+                icon: mockUser.avatar,
+            },
+        ];
+    }
+}
+
 univer.registerPlugin(UniverSheetsThreadCommentPlugin, {
-    mentions: [{
-        trigger: '@',
-        getMentions: async () => {
-            return [
-                {
-                    id: mockUser.userID,
-                    label: mockUser.name,
-                    type: 'user',
-                    icon: mockUser.avatar,
-                },
-                {
-                    id: '2',
-                    label: 'User2',
-                    type: 'user',
-                    icon: mockUser.avatar,
-                },
-            ];
-        },
-    }],
+    overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
 });
 
 // debugger plugin

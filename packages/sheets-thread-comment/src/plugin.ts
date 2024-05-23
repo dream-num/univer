@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ICommandService, IConfigService, Tools, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, Tools, UniverInstanceType } from '@univerjs/core';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import type { IUniverSheetsThreadCommentConfig } from './controllers/sheets-thread-comment.controller';
 import { DefaultSheetsThreadCommentConfig, SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
@@ -34,15 +34,16 @@ export class UniverSheetsThreadCommentPlugin extends UniverThreadCommentUIPlugin
     static override pluginName = SHEETS_THREAD_COMMENT;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
-    constructor(
-        private readonly _config: Partial<IUniverSheetsThreadCommentConfig> = {},
-        @Inject(Injector) protected override _injector: Injector,
-        @Inject(ICommandService) protected override _commandService: ICommandService,
-        @Inject(IConfigService) protected override _configService: IConfigService
-    ) {
-        super(_config, _injector, _commandService, _configService);
+    private _pluginConfig: IUniverSheetsThreadCommentConfig;
 
-        this._config = Tools.deepMerge({}, DefaultSheetsThreadCommentConfig, this._config);
+    constructor(
+        config: Partial<IUniverSheetsThreadCommentConfig> = {},
+        @Inject(Injector) protected override _injector: Injector,
+        @Inject(ICommandService) protected override _commandService: ICommandService
+    ) {
+        super(config, _injector, _commandService);
+
+        this._pluginConfig = Tools.deepMerge({}, DefaultSheetsThreadCommentConfig, config);
     }
 
     override onStarting(injector: Injector): void {
@@ -52,7 +53,7 @@ export class UniverSheetsThreadCommentPlugin extends UniverThreadCommentUIPlugin
             [
                 SheetsThreadCommentController,
                 {
-                    useFactory: () => this._injector.createInstance(SheetsThreadCommentController, this._config),
+                    useFactory: () => this._injector.createInstance(SheetsThreadCommentController, this._pluginConfig),
                 },
             ],
             [SheetsThreadCommentRefRangeController],
@@ -60,7 +61,6 @@ export class UniverSheetsThreadCommentPlugin extends UniverThreadCommentUIPlugin
             [SheetsThreadCommentCopyPasteController],
             [SheetsThreadCommentHoverController],
             [ThreadCommentRemoveSheetsController],
-
             [SheetsThreadCommentPopupService],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);

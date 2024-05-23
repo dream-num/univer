@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDrawingManagerService, IDrawingSearch } from '@univerjs/core';
+import type { IDrawingManagerService, IDrawingSearch, IUniverInstanceService, Nullable, Workbook } from '@univerjs/core';
+import { UniverInstanceType } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { DRAWING_OBJECT_LAYER_INDEX, Group } from '@univerjs/engine-render';
@@ -50,4 +51,25 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
             angle: groupParam.transform.angle,
         }
     );
+}
+
+export function getCurrentUnitInfo(currentUniverService: IUniverInstanceService) {
+    const current = currentUniverService.getFocusedUnit();
+    if (current == null) {
+        return;
+    }
+    let unitId: Nullable<string>;
+    let subUnitId: Nullable<string>;
+    if (current.type === UniverInstanceType.UNIVER_SHEET) {
+        unitId = current.getUnitId();
+        subUnitId = (current as Workbook).getActiveSheet().getSheetId();
+    } else if (current.type === UniverInstanceType.UNIVER_DOC) {
+        unitId = current.getUnitId();
+        subUnitId = unitId;
+    } else if (current.type === UniverInstanceType.UNIVER_SLIDE) {
+        unitId = current.getUnitId();
+        subUnitId = unitId;
+    }
+
+    return { unitId, subUnitId };
 }

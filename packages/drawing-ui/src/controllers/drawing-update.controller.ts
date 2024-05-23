@@ -75,6 +75,8 @@ export class DrawingUpdateController extends Disposable {
         this._drawingGroupListener();
 
         this._drawingRefreshListener();
+
+        this._drawingVisibleListener();
     }
 
     private _recoveryImages() {
@@ -692,6 +694,35 @@ export class DrawingUpdateController extends Disposable {
                     }
 
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+                });
+            })
+        );
+    }
+
+    private _drawingVisibleListener() {
+        this.disposeWithMe(
+            this._drawingManagerService.visible$.subscribe((params) => {
+                (params).forEach((param) => {
+                    const { unitId, subUnitId, drawingId, visible } = param;
+
+                    const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
+                    if (renderObject == null) {
+                        return;
+                    }
+                    const { scene, transformer } = renderObject;
+
+                    const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
+                    const drawingShape = scene.getObject(drawingShapeKey);
+
+                    if (drawingShape == null) {
+                        return true;
+                    }
+
+                    if(visible){
+                        drawingShape.show();
+                    } else {
+                        drawingShape.hide();
+                    }
                 });
             })
         );

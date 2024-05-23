@@ -181,6 +181,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                 top: iconStartY,
                 height: FILTER_ICON_SIZE,
                 width: FILTER_ICON_SIZE,
+                zIndex: SHEETS_FILTER_BUTTON_Z_INDEX,
                 cellHeight,
                 cellWidth,
                 filterParams: { unitId, subUnitId: worksheetId, col, hasCriteria },
@@ -190,7 +191,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
             this._filterButtonShapes.push(buttonShape);
         }
 
-        scene.addObjects(this._filterButtonShapes, SHEETS_FILTER_BUTTON_Z_INDEX);
+        scene.addObjects(this._filterButtonShapes);
         scene.makeDirty();
     }
 

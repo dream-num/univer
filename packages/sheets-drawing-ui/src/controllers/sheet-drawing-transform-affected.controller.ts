@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange, ITransformState, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IDrawingVisibleParam, IMutationInfo, IRange, ITransformState, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import type { IInsertColCommandParams, IInsertRowCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetRowHiddenMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets';
-import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, DrawingApplyType, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, ISheetDrawingService, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetDrawingApplyMutation, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SheetDrawingAnchorType, SheetInterceptorService } from '@univerjs/sheets';
+import type { IInsertColCommandParams, IInsertRowCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetRowHiddenMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets';
+import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, DrawingApplyType, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, ISheetDrawingService, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetDrawingApplyMutation, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetActiveOperation, SheetDrawingAnchorType, SheetInterceptorService } from '@univerjs/sheets';
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
@@ -48,6 +48,8 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
     private _init(): void {
         this._sheetInterceptorListener();
+
+        this._commandListener();
 
         // this._sheetRefreshListener();
     }
@@ -740,6 +742,45 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         }
 
         return null;
+    }
+
+    private _commandListener(){
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id === SetWorksheetActiveOperation.id) {
+                    const params = command.params as ISetWorksheetActiveOperationParams;
+                    const { unitId: showUnitId, subUnitId:showSubunitId } = params;
+
+                    const drawingMap = this._drawingManagerService.drawingManagerData;
+
+                    const updateDrawings: IDrawingVisibleParam[] = [];
+
+                    Object.keys(drawingMap).forEach((unitId) => {
+                        const subUnitMap = drawingMap[unitId];
+                        Object.keys(subUnitMap).forEach((subUnitId) => {
+                            const drawingData = subUnitMap[subUnitId].data;
+                            if(drawingData==null){
+                                return;
+                            }
+                            Object.keys(drawingData).forEach((drawingId) => {
+                                let visible = false;
+                                if(unitId === showUnitId && subUnitId === showSubunitId){
+                                    visible = true;
+                                }
+                                updateDrawings.push({
+                                    unitId,
+                                    subUnitId,
+                                    drawingId,
+                                    visible,
+                                });
+                            });
+                        });
+                    });
+
+                    this._drawingManagerService.visibleNotification(updateDrawings);
+                }
+            })
+        );
     }
 
     // private _sheetRefreshListener() {

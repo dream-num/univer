@@ -89,6 +89,10 @@ export interface IDrawingGroupUpdateParam {
     children: IDrawingParam[];
 }
 
+export interface IDrawingVisibleParam extends IDrawingSearch {
+    visible: boolean;
+}
+
 export interface IUnitDrawingService<T extends IDrawingParam> extends IDisposable {
     drawingManagerData: IDrawingMap<T>;
 
@@ -100,6 +104,7 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IDisposabl
     readonly group$: Observable<IDrawingGroupUpdateParam[]>;
     readonly ungroup$: Observable<IDrawingGroupUpdateParam[]>;
     readonly refreshTransform$: Observable<T[]>;
+    readonly visible$: Observable<IDrawingVisibleParam[]>;
 
     readonly featurePluginUpdate$: Observable<T[]>;
     readonly featurePluginOrderUpdate$: Observable<IDrawingOrderUpdateParam>;
@@ -124,6 +129,7 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IDisposabl
     updateNotification(updateParams: IDrawingSearch[]): void;
     orderNotification(orderParams: IDrawingOrderMapParam): void;
     refreshTransformNotification(refreshParams: T[]): void;
+    visibleNotification(visibleParams:IDrawingVisibleParam[]):void;
 
     getDrawingByParam(param: Nullable<IDrawingSearch>): Nullable<T>;
     getOldDrawingByParam(param: Nullable<IDrawingSearch>): Nullable<T>;

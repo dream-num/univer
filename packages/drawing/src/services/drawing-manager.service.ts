@@ -15,7 +15,7 @@
  */
 
 import { type Observable, Subject } from 'rxjs';
-import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, IDrawingSubunitMap, IUnitDrawingService, Nullable } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService, Nullable } from '@univerjs/core';
 import { sortRules, sortRulesByDesc } from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
 import * as json1 from 'ot-json1';
@@ -71,6 +71,9 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     private _refreshTransform$ = new Subject<T[]>();
     readonly refreshTransform$ = this._refreshTransform$.asObservable();
 
+    private _visible$ = new Subject<IDrawingVisibleParam[]>();
+    readonly visible$ = this._visible$.asObservable();
+
     // private readonly _externalUpdate$ = new Subject<T[]>();
     // readonly externalUpdate$ = this._externalUpdate$.asObservable();
 
@@ -110,6 +113,10 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         this._oldDrawingManagerData = {};
     }
 
+    visibleNotification(visibleParams:IDrawingVisibleParam[]) {
+        this._visible$.next(visibleParams);
+    }
+
     refreshTransform(updateParams: T[]) {
         updateParams.forEach((updateParam) => {
             const drawing = this.getDrawingByParam(updateParam);
@@ -133,12 +140,20 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
     removeDrawingDataForUnit(unitId: string) {
         const subUnits = this.drawingManagerData[unitId];
+
+        if(subUnits== null){
+            return;
+        }
+
         delete this.drawingManagerData[unitId];
 
         const drawings: IDrawingSearch[] = [];
 
         Object.keys(subUnits).forEach((subUnitId) => {
             const subUnit = subUnits[subUnitId];
+            if(subUnit?.data == null){
+                return;
+            }
             Object.keys(subUnit.data).forEach((drawingId) => {
                 drawings.push({ unitId, subUnitId, drawingId });
             });

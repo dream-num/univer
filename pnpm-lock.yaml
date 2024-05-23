@@ -685,8 +685,8 @@ importers:
   packages/drawing-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.29
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -4670,6 +4670,12 @@ packages:
 
   '@univerjs/icons@0.1.47':
     resolution: {integrity: sha512-JluQi//M5lrVJtxVc6IaVmPXVw1FSryP4WQXUvjdZ7QoSLGdEihkNLKdl/em26MZQAH4R5hIuiATOxXiR3YJWw==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+
+  '@univerjs/icons@0.1.52':
+    resolution: {integrity: sha512-VDg4jc1yLgNCOCZGLwcmAo5lGy/Jp/2c34QO+fClQzx2Qih6EWqxHyJfdjFILfNwWdJvrlFEIG4zMYtNM1Z2TQ==}
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -13551,6 +13557,11 @@ snapshots:
   '@univerjs/icons-svg@0.1.45': {}
 
   '@univerjs/icons@0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
+  '@univerjs/icons@0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)

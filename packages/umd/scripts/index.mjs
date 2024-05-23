@@ -45,6 +45,7 @@ async function generateLocale() {
         '@univerjs/ui',
         '@univerjs/sheets-filter-ui',
         '@univerjs/sheets-thread-comment',
+        '@univerjs/slides-ui',
         '@univerjs/thread-comment-ui',
         '@univerjs/sheets-numfmt',
         '@univerjs/uniscript',

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { DependencyOverride, Workbook } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { CommentSingle } from '@univerjs/icons';
-import type { IThreadCommentUIConfig } from '@univerjs/thread-comment-ui';
 import { SetActiveCommentOperation, THREAD_COMMENT_PANEL, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { SelectionMoveType, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
@@ -36,21 +35,13 @@ import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comme
 import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
 import { AddCommentShortcut, threadCommentMenuFactory, threadPanelMenuFactory } from './menu';
 
-export interface IUniverSheetsThreadCommentConfig extends IThreadCommentUIConfig {
+export interface IUniverSheetsThreadCommentConfig {
     menu?: MenuConfig;
+    overrides?: DependencyOverride;
 }
 
 export const DefaultSheetsThreadCommentConfig: IUniverSheetsThreadCommentConfig = {
-    mentions: [{
-        trigger: '@',
-        async getMentions() {
-            return [{
-                id: 'mock',
-                label: 'MockUser',
-                type: 'user',
-            }];
-        },
-    }],
+
 };
 
 @OnLifecycle(LifecycleStages.Starting, SheetsThreadCommentController)

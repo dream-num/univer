@@ -22,4 +22,4 @@ export type { IThreadCommentPanelProps } from './views/thread-comment-panel';
 export { ThreadCommentTree } from './views/thread-comment-tree';
 export type { IThreadCommentTreeProps } from './views/thread-comment-tree';
 export { THREAD_COMMENT_PANEL } from './types/const';
-export type { IThreadCommentUIConfig } from './types/interfaces/i-thread-comment-mention';
+export { IThreadCommentMentionDataService } from './services/thread-comment-mention-data.service';

@@ -58,10 +58,16 @@ interface IViewProps extends IViewPosition {
 
 export interface IScrollObserverParam {
     viewport?: Viewport;
+    /**
+     * scrollX for scrollbar
+     */
     scrollX?: number;
     scrollY?: number;
     x?: number;
     y?: number;
+    /**
+     * scrollX for viewport
+     */
     actualScrollX?: number;
     actualScrollY?: number;
     limitX?: number;
@@ -90,15 +96,17 @@ export class Viewport {
     scrollY: number = 0;
     _preScrollX: number = 0;
     _preScrollY: number = 0;
-    _deltaScrollX: number = 0;
-    _deltaScrollY: number = 0;
 
     /**
      * The actual scroll offset equals the distance from the content area position to the top, and there is a conversion relationship with scrollX and scrollY
      * use getActualScroll to get scrolling value for spreadsheet.
      */
-    actualScrollX: number = 0;
-    actualScrollY: number = 0;
+    viewportScrollX: number = 0;
+    viewportScrollY: number = 0;
+    preViewportScrollX: number = 0;
+    preViewportScrollY: number = 0;
+    _deltaViewportScrollX: number = 0;
+    _deltaViewportScrollY: number = 0;
 
     onMouseWheelObserver = new Observable<IWheelEvent>();
 
@@ -168,13 +176,14 @@ export class Viewport {
 
     private _isRelativeY: boolean = false;
 
-    private _preViewportInfo: Nullable<IViewportInfo>;
+    // private _preViewportInfo: Nullable<IViewportInfo>;
 
     /**
      * viewbound of cache area, cache area is slightly bigger than viewbound.
      */
     private _cacheBound: IBoundRectNoAngle | null;
     private _preCacheBound: IBoundRectNoAngle | null;
+    private _preCacheVisibleBound: IBoundRectNoAngle | null;
 
     /**
      * bound of visible area
@@ -252,6 +261,7 @@ export class Viewport {
             this.bufferEdgeX = props?.bufferEdgeX || 0;
             this.bufferEdgeY = props?.bufferEdgeY || 0;
         }
+        // this._testDisplayCache();
     }
 
     /**
@@ -268,7 +278,7 @@ export class Viewport {
             cacheCanvas.getCanvasEle().classList.add('cache-canvas', this.viewportKey);
             cacheCanvas.getCanvasEle().style.zIndex = '100';
             cacheCanvas.getCanvasEle().style.position = 'fixed';
-            cacheCanvas.getCanvasEle().style.background = 'blue';
+            cacheCanvas.getCanvasEle().style.background = 'pink';
             cacheCanvas.getCanvasEle().style.pointerEvents = 'none';
             cacheCanvas.getCanvasEle().style.border = '1px solid black';
             cacheCanvas.getCanvasEle().style.transformOrigin = '100% 100%';
@@ -402,6 +412,7 @@ export class Viewport {
 
     set preCacheBound(val: IBoundRectNoAngle | null) {
         this._preCacheBound = val;
+        this._preCacheVisibleBound = Object.assign({}, val);
     }
 
     enable() {
@@ -506,8 +517,8 @@ export class Viewport {
             scrollY: this.scrollY,
             x,
             y,
-            actualScrollX: this.actualScrollX,
-            actualScrollY: this.actualScrollY,
+            actualScrollX: this.viewportScrollX,
+            actualScrollY: this.viewportScrollY,
             limitX: this._scrollBar?.limitX,
             limitY: this._scrollBar?.limitY,
             isTrigger,
@@ -566,8 +577,8 @@ export class Viewport {
             if (this._scrollBar.ratioScrollX !== 0) {
                 x /= this._scrollBar.ratioScrollX; // 转换为内容区实际滚动距离
                 x /= scaleX;
-            } else if (this.actualScrollX !== undefined) {
-                x = this.actualScrollX;
+            } else if (this.viewportScrollX !== undefined) {
+                x = this.viewportScrollX;
             } else {
                 x = 0;
             }
@@ -576,8 +587,8 @@ export class Viewport {
                 y /= this._scrollBar.ratioScrollY;
 
                 y /= scaleY;
-            } else if (this.actualScrollY !== undefined) {
-                y = this.actualScrollY;
+            } else if (this.viewportScrollY !== undefined) {
+                y = this.viewportScrollY;
             } else {
                 y = 0;
             }
@@ -586,14 +597,14 @@ export class Viewport {
             // x *= this._scrollBar.miniThumbRatioX;
             // y *= this._scrollBar.miniThumbRatioY;
         } else {
-            if (this.actualScrollX !== undefined) {
-                x = this.actualScrollX;
+            if (this.viewportScrollX !== undefined) {
+                x = this.viewportScrollX;
             } else {
                 x = 0;
             }
 
-            if (this.actualScrollY !== undefined) {
-                y = this.actualScrollY;
+            if (this.viewportScrollY !== undefined) {
+                y = this.viewportScrollY;
             } else {
                 y = 0;
             }
@@ -624,8 +635,9 @@ export class Viewport {
 
     // _scrollTo ---> _scroll ---> onScrollAfterObserver.notifyObservers ---> updateScroll
     updateScroll(param: IScrollObserverParam) {
-        this._deltaScrollX = this.scrollX - this._preScrollX;
-        this._deltaScrollY = this.scrollY - this._preScrollY;
+        // scrollvalue for scrollbar, when rows over 5000(big sheet), deltaScrollY always 0 when scrolling. Do not use this value to judge scrolling
+        // this._deltaScrollX = this.scrollX - this._preScrollX;
+        // this._deltaScrollY = this.scrollY - this._preScrollY;
         this._preScrollX = this.scrollX;
         this._preScrollY = this.scrollY;
         const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
@@ -638,11 +650,15 @@ export class Viewport {
         }
 
         if (actualScrollX !== undefined) {
-            this.actualScrollX = actualScrollX;
+            this.preViewportScrollX = this.viewportScrollX;
+            this.viewportScrollX = actualScrollX;
+            this._deltaViewportScrollX = actualScrollX - this.preViewportScrollX;
         }
 
         if (actualScrollY !== undefined) {
-            this.actualScrollY = actualScrollY;
+            this.preViewportScrollY = this.viewportScrollY;
+            this.viewportScrollY = actualScrollY;
+            this._deltaViewportScrollY = actualScrollY - this.preViewportScrollY;
         }
         return this;
     }
@@ -683,7 +699,7 @@ export class Viewport {
         const mainCtx = parentCtx || (this._scene.getEngine()?.getCanvas().getContext() as UniverRenderingContext);
 
         const sceneTrans = this._scene.transform.clone();
-        sceneTrans.multiply(Transform.create([1, 0, 0, 1, -this.actualScrollX || 0, -this.actualScrollY || 0]));
+        sceneTrans.multiply(Transform.create([1, 0, 0, 1, -this.viewportScrollX || 0, -this.viewportScrollY || 0]));
 
         // Logical translation & scaling, unrelated to dpr.
         const tm = sceneTrans.getMatrix();
@@ -710,10 +726,9 @@ export class Viewport {
         this.markDirty(false);
         this.markForceDirty(false);
 
-        this._preViewportInfo = viewPortInfo;
-        this._preViewBound = viewPortInfo.viewBound;
+        this._preViewBound = this._viewBound;
         if (viewPortInfo.shouldCacheUpdate) {
-            this._preCacheBound = viewPortInfo.cacheBound;
+            this.preCacheBound = this._cacheBound;
         }
         mainCtx.restore();
 
@@ -746,7 +761,7 @@ export class Viewport {
                 right: 0,
             },
             viewportKey: this.viewportKey,
-            // isDirty: this.isDirty,
+            isDirty: 0,
             isForceDirty: this.isForceDirty,
             allowCache: false,
             cacheBound: {
@@ -819,7 +834,7 @@ export class Viewport {
             bottom: bottomRight.y,
         };
         this._viewBound = viewBound;
-        const preViewBound = this._preViewportInfo?.viewBound;
+        const preViewBound = this._preViewBound;
         const diffBounds = this._diffViewBound(viewBound, preViewBound);
         const diffX = (preViewBound?.left || 0) - viewBound.left;
         const diffY = (preViewBound?.top || 0) - viewBound.top;
@@ -831,13 +846,25 @@ export class Viewport {
         };
         const cacheBound = this.expandBounds(viewBound);
         this.cacheBound = cacheBound;
-        if (!this._preCacheBound) {
-            this._preCacheBound = this.expandBounds(viewBound);
+        if (!this.preCacheBound) {
+            this.preCacheBound = this.expandBounds(viewBound);
         }
         let diffCacheBounds: IBoundRectNoAngle[] = [];// = this._diffViewBound(cacheBounds, prevCacheBounds);
-        const cacheViewPortPosition = this.expandBounds(viewPortPosition);
+        if (this._preCacheVisibleBound) {
+            if (diffX < 0) { // scrolling right (further)
+                this._preCacheVisibleBound.left -= diffX;
+            } else if (diffX > 0) {
+                this._preCacheVisibleBound.right -= diffX;
+            }
 
-        const shouldCacheUpdate = this._shouldCacheUpdate(viewBound, this._preCacheBound, diffX, diffY);
+            if (diffY < 0) { // scrolling down (further)
+                this._preCacheVisibleBound.top -= diffY;
+            } else if (diffY > 0) {
+                this._preCacheVisibleBound.bottom -= diffY;
+            }
+        }
+        const cacheViewPortPosition = this.expandBounds(viewPortPosition);
+        const shouldCacheUpdate = this._calcCacheUpdate(viewBound, this._preCacheVisibleBound, diffX, diffY);
         if (shouldCacheUpdate) {
             diffCacheBounds = this._calcDiffCacheBound(this._preCacheBound, cacheBound);
         }
@@ -852,7 +879,7 @@ export class Viewport {
             isDirty: this.isDirty ? 0b10 : 0b00,
             isForceDirty: this.isForceDirty,
             allowCache: this._allowCache,
-            cacheBound: this.cacheBound!,
+            cacheBound,
             diffCacheBounds,
             cacheViewPortPosition,
             shouldCacheUpdate,
@@ -862,6 +889,9 @@ export class Viewport {
             topOrigin: this._topOrigin,
             bufferEdgeX: this.bufferEdgeX,
             bufferEdgeY: this.bufferEdgeY,
+            updatePrevCacheBounds: (viewbound: IBoundRectNoAngle) => {
+                this.updatePrevCacheBounds(viewbound);
+            },
         } satisfies IViewportInfo;
     }
 
@@ -1085,8 +1115,8 @@ export class Viewport {
     }
 
     private _resizeCacheCanvas() {
-        const actualScrollX = this.actualScrollX;
-        const actualScrollY = this.actualScrollY;
+        const actualScrollX = this.viewportScrollX;
+        const actualScrollY = this.viewportScrollY;
         const { width, height } = this._getViewPortSize();
 
         const scaleX = this.scene.scaleX;
@@ -1207,7 +1237,6 @@ export class Viewport {
      * @param scrollType
      * @param pos viewMain 滚动条的位置
      * @param isTrigger
-     * @returns
      */
     private _scroll(scrollType: SCROLL_TYPE, pos: IScrollBarPosition, isTrigger = true) {
         const { x, y } = pos;
@@ -1256,8 +1285,8 @@ export class Viewport {
         }
 
         const scroll = this.getTransformedScroll();
-        this.actualScrollX = scroll.x;
-        this.actualScrollY = scroll.y;
+        this.viewportScrollX = scroll.x;
+        this.viewportScrollY = scroll.y;
 
         this.onScrollAfterObserver.notifyObservers({
             viewport: this,
@@ -1280,48 +1309,45 @@ export class Viewport {
     expandBounds(value: { top: number; left: number; bottom: number; right: number }) {
         const onePixelFix = FIX_ONE_PIXEL_BLUR_OFFSET * 2;
         return {
+            left: value.left - this.bufferEdgeX - onePixelFix,
             right: value.right + this.bufferEdgeX + onePixelFix,
             // left: Math.max(this.leftOrigin, value.left - this.bufferEdgeX) - onePixelFix,
             // top: Math.max(this.topOrigin, value.top - this.bufferEdgeY) - onePixelFix,
-            left: value.left - this.bufferEdgeX - onePixelFix,
             top: value.top - this.bufferEdgeY - onePixelFix,
             bottom: value.bottom + this.bufferEdgeY + onePixelFix,
         } as IBoundRectNoAngle;
     }
 
-    updateCacheBounds(viewBound?: IBoundRectNoAngle) {
+    updatePrevCacheBounds(viewBound?: IBoundRectNoAngle) {
         if (viewBound) {
-            this.cacheBound = this.expandBounds(viewBound);
-        } else if (this._preViewportInfo) {
-            this.cacheBound = this.expandBounds(this._preViewportInfo?.viewBound);
+            this.preCacheBound = this.cacheBound = this.expandBounds(viewBound);
         }
     }
 
-    private _shouldCacheUpdate(viewBound: IBoundRectNoAngle, cacheBounds:
-        IBoundRectNoAngle | null, diffX: number, diffY: number): number {
+    private _calcCacheUpdate(viewBound: IBoundRectNoAngle, preCacheVisibleBound:
+        IBoundRectNoAngle | null, _diffX: number, _diffY: number): number {
         if (!this._cacheCanvas) return 0b00;
-        if (!cacheBounds) return 0b01;
+        if (!preCacheVisibleBound) return 0b01;
+        const viewBoundOutCacheArea =
+            viewBound.right > preCacheVisibleBound.right ||
+            viewBound.top < preCacheVisibleBound.top ||
+            viewBound.left < preCacheVisibleBound.left ||
+            viewBound.bottom > preCacheVisibleBound.bottom
+                ? 0b01
+                : 0b00;
 
-        const onePixelFix = FIX_ONE_PIXEL_BLUR_OFFSET * 2;
-        const viewBoundOutCacheArea = !(
-            viewBound.right + onePixelFix <= cacheBounds.right &&
-            viewBound.top - onePixelFix >= cacheBounds.top &&
-            viewBound.left - onePixelFix >= cacheBounds.left &&
-            viewBound.bottom + onePixelFix <= cacheBounds.bottom)
-            ? 0b01
+        const edgeX = this.bufferEdgeX / 50;
+        const edgeY = this.bufferEdgeY / 50;
+
+        const nearEdge = (preCacheVisibleBound.right - viewBound.right < edgeX) ||
+            (viewBound.left - preCacheVisibleBound.left < edgeX) ||
+            (viewBound.top - preCacheVisibleBound.top < edgeY) ||
+            (preCacheVisibleBound.bottom - viewBound.bottom < edgeY)
+            ? 0b101
             : 0b00;
 
-        const edgeX = this.bufferEdgeX / 4;
-        const edgeY = this.bufferEdgeY / 4;
-        const nearEdge = ((diffX < 0 && Math.abs(viewBound.right - cacheBounds.right) < edgeX) ||
-            // Scrollbar goes left, scrolling back left.
-            (diffX > 0 && Math.abs(viewBound.left - cacheBounds.left) < edgeX) ||
-            // Scrollbar goes up, scrolling back up.
-            (diffY > 0 && Math.abs(viewBound.top - cacheBounds.top) < edgeY) ||
-            // Scrollbar goes down, scrolling furture down.
-            (diffY < 0 && Math.abs(viewBound.bottom - cacheBounds.bottom) < edgeY)) ? 0b10 : 0b00;
-
         const shouldCacheUpdate = nearEdge | viewBoundOutCacheArea;
+        // console.log(`shouldCacheUpdate${shouldCacheUpdate}`, `${this.viewportKey}:`, this.preCacheBound, this.cacheBound, this.viewBound, this._preCacheVisibleBound);
         return shouldCacheUpdate;
     }
 
@@ -1363,7 +1389,7 @@ export class Viewport {
         }
         const additionalAreas: IBoundRectNoAngle[] = [];
 
-        // 如果B在A的左侧有多余部分
+        // curr has an extra part on the left compared to prev.
         if (currBound.left < prevBound.left) {
             additionalAreas.push({
                 top: currBound.top,
@@ -1373,7 +1399,7 @@ export class Viewport {
             });
         }
 
-        // 如果B在A的右侧有多余部分
+        // curr has an extra part on the right compared to prev.
         if (currBound.right > prevBound.right) {
             additionalAreas.push({
                 top: currBound.top,
@@ -1383,7 +1409,6 @@ export class Viewport {
             });
         }
 
-        // 如果B在A的上方有多余部分
         if (currBound.top < prevBound.top) {
             additionalAreas.push({
                 top: currBound.top,
@@ -1393,7 +1418,6 @@ export class Viewport {
             });
         }
 
-        // 如果B在A的下方有多余部分
         if (currBound.bottom > prevBound.bottom) {
             additionalAreas.push({
                 top: prevBound.bottom,
@@ -1470,12 +1494,6 @@ export class Viewport {
      * called by this.scene.getEngine()?.onTransformChangeObservable.add
      */
     private _mainCanvasResizeHandler() {
-        // if (!this._cacheCanvas) return;
-        // const engine = this.scene.getEngine();
-        // if (!engine) return;
-        // const mainCanvas = engine.getCanvas();
-        // const width = mainCanvas.getWidth();
-        // const height = mainCanvas.getHeight();
         this.markForceDirty(true);
     }
 }

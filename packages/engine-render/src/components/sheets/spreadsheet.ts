@@ -192,8 +192,8 @@ export class Spreadsheet extends SheetComponent {
         let y = 0;
         const viewPort = scene.getActiveViewportByRelativeCoord(coord);
         if (viewPort) {
-            const actualX = viewPort.actualScrollX || 0;
-            const actualY = viewPort.actualScrollY || 0;
+            const actualX = viewPort.viewportScrollX || 0;
+            const actualY = viewPort.viewportScrollY || 0;
             x += actualX;
             y += actualY;
         }
@@ -289,6 +289,7 @@ export class Spreadsheet extends SheetComponent {
         // leftOrigin 是 viewport 相对 sheetcorner 的偏移(不考虑缩放)
         // - (leftOrigin - bufferEdgeX)  ----> 简化  - leftOrigin + bufferEdgeX
         cacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
+
         if (shouldCacheUpdate) {
             for (const diffBound of diffCacheBounds) {
                 const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
@@ -317,6 +318,8 @@ export class Spreadsheet extends SheetComponent {
                 cacheCtx.restore();
             }
         }
+
+        // this.testShowRuler(cacheCtx, viewportInfo);
         this._refreshIncrementalState = false;
     }
 
@@ -339,9 +342,9 @@ export class Spreadsheet extends SheetComponent {
         // The 'leftOrigin' is the offset of the viewport relative to the sheet corner, which is the position of cell(0, 0), and it does not consider scaling.
         // - (leftOrigin - bufferEdgeX)  ----> - leftOrigin + bufferEdgeX
         cacheCtx.translateWithPrecision(m.e / m.a - leftOrigin + bufferEdgeX, m.f / m.d - topOrigin + bufferEdgeY);
-
         // extension 绘制时按照内容的左上角计算, 不考虑 rowHeaderWidth
         this.draw(cacheCtx, viewportInfo);
+        // this.testShowRuler(cacheCtx, viewportInfo);
         cacheCtx.restore();
     }
 
@@ -696,6 +699,64 @@ export class Spreadsheet extends SheetComponent {
 
     sheetHeaderViewport() {
         return [SHEET_VIEWPORT_KEY.VIEW_ROW_TOP, SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM, SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT, SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT, SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP];
+    }
+
+    testShowRuler(cacheCtx: UniverRenderingContext, viewportInfo: IViewportInfo): void {
+        const { cacheBound } = viewportInfo;
+        const spreadsheetSkeleton = this.getSkeleton()!;
+        const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+        const { left, top, right, bottom } = cacheBound;
+        // left -= rowHeaderWidth;
+        // top -= columnHeaderHeight;
+        // right -= rowHeaderWidth;
+        // bottom -= columnHeaderHeight;
+        const findClosestHundred = (number: number) => {
+            const remainder = number % 100;
+            return number + (100 - remainder);
+        };
+        const startX = findClosestHundred(left);
+        const endX = findClosestHundred(right);
+        const startY = findClosestHundred(top);
+        const endY = findClosestHundred(bottom);
+        cacheCtx.save();
+        cacheCtx.beginPath();
+        cacheCtx.strokeStyle = '#000000';
+        cacheCtx.fillStyle = '#000000';
+        cacheCtx.font = '16px Arial';
+        cacheCtx.lineWidth = 1;
+        cacheCtx.textAlign = 'center';
+        cacheCtx.textBaseline = 'middle';
+
+        for (let i = startX; i <= endX; i += 50) {
+            cacheCtx.beginPath();
+            cacheCtx.strokeStyle = (i % 100 === 0) ? 'red' : '#aaa';
+            cacheCtx.moveTo(i - rowHeaderWidth, top - columnHeaderHeight);
+            cacheCtx.lineTo(i - rowHeaderWidth, bottom - columnHeaderHeight);
+            cacheCtx.stroke();
+            cacheCtx.closePath();
+        }
+        for (let j = startY; j <= endY; j += 50) {
+            cacheCtx.beginPath();
+            cacheCtx.strokeStyle = (j % 100 === 0) ? 'red' : '#aaa';
+            cacheCtx.moveTo(left - rowHeaderWidth, j - columnHeaderHeight);
+            cacheCtx.lineTo(right - rowHeaderWidth, j - columnHeaderHeight);
+            cacheCtx.stroke();
+            cacheCtx.closePath();
+        }
+        cacheCtx.fillStyle = '#666';
+        for (let i = startX; i <= endX; i += 100) {
+            for (let j = startY; j <= endY; j += 100) {
+                cacheCtx.fillText(`${i},${j}`, i - rowHeaderWidth, j - columnHeaderHeight);
+            }
+        }
+        // start
+        // cacheCtx.textAlign = 'left';
+        // for (let j = startY; j <= endY; j += 100) {
+        //     cacheCtx.clearRect(left - rowHeaderWidth, j - columnHeaderHeight - 15, 30, 30);
+        //     cacheCtx.fillText(`${left}`, left - rowHeaderWidth, j - columnHeaderHeight);
+        // }
+        cacheCtx.closePath();
+        cacheCtx.restore();
     }
 
     testGetRandomLightColor(): string {

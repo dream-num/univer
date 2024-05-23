@@ -896,6 +896,8 @@ export interface IViewportInfo {
 
     bufferEdgeX: number;
     bufferEdgeY: number;
+
+    updatePrevCacheBounds?: (viewbound: IBoundRectNoAngle) => void;
 }
 
 export interface IViewportInfos {

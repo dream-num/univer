@@ -304,20 +304,20 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
     private _featureUpdateListener() {
         this.disposeWithMe(
-            this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
-                (params as IFloatDomData[]).forEach((data) => {
-                    if (data.drawingType !== DrawingTypeEnum.DRAWING_DOM) {
+            this._drawingManagerService.update$.subscribe((params) => {
+                (params).forEach((data) => {
+                    const sheetDrawing = this._drawingManagerService.getDrawingByParam(data);
+
+                    if (!sheetDrawing) {
                         return;
                     }
 
-                    const sheetDrawing = this._drawingManagerService.getDrawingByParam(data);
-                    if (!sheetDrawing) {
+                    if (sheetDrawing.drawingType !== DrawingTypeEnum.DRAWING_DOM) {
                         return;
                     }
 
                     const newValue = {
                         ...sheetDrawing.transform,
-                        ...data.transform,
                     };
                     this._transformChange$.next({ id: data.drawingId, value: newValue });
                 });

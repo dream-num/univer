@@ -20,15 +20,15 @@ import { MoreFunctionSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import type { ComponentType } from 'react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
-import { MenuGroup, MenuPosition } from '../../../services/menu/menu';
+import { MenuPosition } from '../../../services/menu/menu';
 import { ComponentContainer } from '../ComponentContainer';
 import { ToolbarButton } from './Button/ToolbarButton';
 import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';
-import { useToolbarGroups } from './hook';
+import { useToolbarCollapseObserver, useToolbarGroups } from './hook';
 
 export interface IMenuGroup {
     name: MenuPosition;
@@ -56,61 +56,8 @@ export function Toolbar(props: IToolbarProps) {
     const { headerMenuComponents } = props;
     const localeService = useDependency(LocaleService);
 
-    const toolbarRef = useRef<HTMLDivElement>(null);
-    const toolbarItemRefs = useRef<Record<string, {
-        el: HTMLDivElement;
-        key: string;
-    }>>({});
-
-    const { setCategory, visibleItems, groups, category } = useToolbarGroups();
-    const [collapsedId, setCollapsedId] = useState<string[]>([]);
-
-    // Deal with toolbar collapsing.
-    useEffect(() => {
-        function resize() {
-            const wrapperWidth = toolbarRef.current?.clientWidth ?? 0;
-            const GAP = 8;
-            const itemWidths = Object.entries(toolbarItemRefs.current)
-                .filter(([_, ref]) => ref.el && ref.key && visibleItems.find((item) => item.id === ref.key))
-                .map(([_, ref]) => ({
-                    key: ref.key,
-                    width: ref.el?.clientWidth + GAP,
-                }));
-
-            const collapsedId: string[] = [];
-
-            let currentWidth = 182;
-            for (const item of itemWidths) {
-                currentWidth += item.width;
-
-                if (currentWidth > wrapperWidth) {
-                    collapsedId.push(item.key);
-                }
-            }
-
-            setCollapsedId(collapsedId);
-        }
-
-        resize();
-        const observer = new ResizeObserver(() => resize());
-        observer.observe(document.body);
-        return () => observer.unobserve(document.body);
-    }, [visibleItems, groups, category]);
-
-    const groupsByKey = useMemo(() => {
-        return groups.find((g) => g.name === category)?.menuItems.reduce(
-            (acc, item) => {
-                const key = item.group ?? MenuGroup.TOOLBAR_OTHERS;
-                if (!acc[key]) {
-                    acc[key] = [];
-                }
-
-                acc[key].push(item);
-                return acc;
-            },
-            {} as Record<MenuGroup, Array<IDisplayMenuItem<IMenuItem>>>
-        ) ?? ({} as Record<MenuGroup, Array<IDisplayMenuItem<IMenuItem>>>);
-    }, [groups, category]);
+    const { setCategory, visibleItems, groups, category, groupsByKey } = useToolbarGroups();
+    const { toolbarItemRefs, toolbarRef, collapsedId } = useToolbarCollapseObserver(visibleItems);
 
     // Should the header when there is at least one header menu components or menu groups.
     const hasHeaderMenu = useMemo(() => (headerMenuComponents && headerMenuComponents.size > 0) || groups.length > 1, [headerMenuComponents, groups]);
@@ -203,6 +150,7 @@ export function Toolbar(props: IToolbarProps) {
                 {Object.entries(groupsByKey).map(([key, item]) => (
                     <div key={key} className={styles.toolbarGroup}>
                         {item.map((subItem) => (
+                            // TODO@jikkai: use fake ToolbarItem (no business logic) to improve performance.
                             <ToolbarItem
                                 key={subItem.id}
                                 ref={(ref) => {

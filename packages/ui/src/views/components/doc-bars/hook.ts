@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { combineLatest, map, Observable } from 'rxjs';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { type IDisplayMenuItem, type IMenuItem, MenuPosition } from '../../../services/menu/menu';
+import { type IDisplayMenuItem, type IMenuItem, MenuGroup, MenuPosition } from '../../../services/menu/menu';
 import { IMenuService } from '../../../services/menu/menu.service';
 import type { IMenuGroup } from './Toolbar';
 import { MENU_POSITIONS } from './Toolbar';
@@ -36,6 +36,8 @@ export interface IToolbarRenderHookHandler {
 
     /** Menu grouped in this category. */
     groups: IMenuGroup[];
+
+    groupsByKey: Record<MenuGroup, Array<IDisplayMenuItem<IMenuItem>>>;
 }
 
 /**
@@ -77,11 +79,27 @@ export function useToolbarGroups(): IToolbarRenderHookHandler {
         return () => s.unsubscribe();
     }, [menuService, category]);
 
+    const groupsByKey = useMemo(() => {
+        return groups.find((g) => g.name === category)?.menuItems.reduce(
+            (acc, item) => {
+                const key = item.group ?? MenuGroup.TOOLBAR_OTHERS;
+                if (!acc[key]) {
+                    acc[key] = [];
+                }
+
+                acc[key].push(item);
+                return acc;
+            },
+            {} as Record<MenuGroup, Array<IDisplayMenuItem<IMenuItem>>>
+        ) ?? ({} as Record<MenuGroup, Array<IDisplayMenuItem<IMenuItem>>>);
+    }, [groups, category]);
+
     return {
         setCategory,
         category,
         visibleItems,
         groups,
+        groupsByKey,
     };
 }
 
@@ -121,4 +139,52 @@ export function useToolbarItemStatus(menuItem: IDisplayMenuItem<IMenuItem>): ITo
     }, [activated$, disabled$, hidden$, value$]);
 
     return { disabled, value, activated, hidden };
+}
+
+export function useToolbarCollapseObserver(visibleItems: IToolbarRenderHookHandler['visibleItems']) {
+    const toolbarItemRefs = useRef<Record<string, {
+        el: HTMLDivElement;
+        key: string;
+    }>>({});
+
+    const toolbarRef = useRef<HTMLDivElement>(null);
+    const [collapsedId, setCollapsedId] = useState<string[]>([]);
+
+    // Deal with toolbar collapsing.
+    useEffect(() => {
+        function resize() {
+            const wrapperWidth = toolbarRef.current?.clientWidth ?? 0;
+            const GAP = 8;
+            const itemWidths = Object.entries(toolbarItemRefs.current)
+                .filter(([_, ref]) => ref.el && ref.key && visibleItems.find((item) => item.id === ref.key))
+                .map(([_, ref]) => ({
+                    key: ref.key,
+                    width: ref.el?.clientWidth + GAP,
+                }));
+
+            const collapsedId: string[] = [];
+
+            let currentWidth = 182;
+            for (const item of itemWidths) {
+                currentWidth += item.width;
+
+                if (currentWidth > wrapperWidth) {
+                    collapsedId.push(item.key);
+                }
+            }
+
+            setCollapsedId(collapsedId);
+        }
+
+        resize();
+        const observer = new ResizeObserver(() => resize());
+        observer.observe(document.body);
+        return () => observer.unobserve(document.body);
+    }, [visibleItems]);
+
+    return {
+        toolbarRef,
+        toolbarItemRefs,
+        collapsedId,
+    };
 }

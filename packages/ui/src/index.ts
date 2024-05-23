@@ -93,7 +93,7 @@ export { ContextMenu } from './views/components/context-menu/ContextMenu';
 export { CanvasPopup } from './views/components/popup/CanvasPopup';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { type IMenuGroup } from './views/components/doc-bars/Toolbar';
-export { useToolbarGroups, useToolbarItemStatus } from './views/components/doc-bars/hook';
+export { useToolbarGroups, useToolbarItemStatus, useToolbarCollapseObserver } from './views/components/doc-bars/hook';
 export { mergeMenuConfigs } from './common/menu-merge-configs';
 export { IProgressService, ProgressService } from './services/progress/progress.service';
 export type { IProgressStep } from './services/progress/progress.service';

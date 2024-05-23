@@ -113,7 +113,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
         this._oldDrawingManagerData = {};
     }
 
-    visibleNotification(visibleParams:IDrawingVisibleParam[]) {
+    visibleNotification(visibleParams: IDrawingVisibleParam[]) {
         this._visible$.next(visibleParams);
     }
 
@@ -141,7 +141,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     removeDrawingDataForUnit(unitId: string) {
         const subUnits = this.drawingManagerData[unitId];
 
-        if(subUnits== null){
+        if (subUnits == null) {
             return;
         }
 
@@ -151,7 +151,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
         Object.keys(subUnits).forEach((subUnitId) => {
             const subUnit = subUnits[subUnitId];
-            if(subUnit?.data == null){
+            if (subUnit?.data == null) {
                 return;
             }
             Object.keys(subUnit.data).forEach((drawingId) => {

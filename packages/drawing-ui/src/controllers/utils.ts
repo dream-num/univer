@@ -28,17 +28,18 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
     const groupKey = getDrawingShapeKeyByDrawingSearch(objectParam);
     const groupObject = scene.getObject(groupKey);
 
-    if (!(groupObject instanceof Group)) {
+    if (groupObject && !(groupObject instanceof Group)) {
         return;
     }
 
     if (groupObject != null) {
         groupObject.addObject(object);
+        return;
     }
 
     const group = new Group(groupKey);
 
-    scene.addObject(group, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(groupObject);
+    scene.addObject(group, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(group);
 
     group.addObject(object);
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingVisibleParam, IMutationInfo, IRange, ITransformState, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IDrawingParam, IDrawingVisibleParam, IMutationInfo, IRange, ITransformState, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IInsertColCommandParams, IInsertRowCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetRowHiddenMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets';
@@ -744,40 +744,38 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         return null;
     }
 
-    private _commandListener(){
+    private _commandListener() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetWorksheetActiveOperation.id) {
                     const params = command.params as ISetWorksheetActiveOperationParams;
-                    const { unitId: showUnitId, subUnitId:showSubunitId } = params;
+                    const { unitId: showUnitId, subUnitId: showSubunitId } = params;
 
                     const drawingMap = this._drawingManagerService.drawingManagerData;
 
-                    const updateDrawings: IDrawingVisibleParam[] = [];
+                    const insertDrawings: IDrawingParam[] = [];
+
+                    const removeDrawings: IDrawingParam[] = [];
 
                     Object.keys(drawingMap).forEach((unitId) => {
                         const subUnitMap = drawingMap[unitId];
                         Object.keys(subUnitMap).forEach((subUnitId) => {
                             const drawingData = subUnitMap[subUnitId].data;
-                            if(drawingData==null){
+                            if (drawingData == null) {
                                 return;
                             }
                             Object.keys(drawingData).forEach((drawingId) => {
-                                let visible = false;
-                                if(unitId === showUnitId && subUnitId === showSubunitId){
-                                    visible = true;
+                                if (unitId === showUnitId && subUnitId === showSubunitId) {
+                                    insertDrawings.push(drawingData[drawingId]);
+                                } else {
+                                    removeDrawings.push(drawingData[drawingId]);
                                 }
-                                updateDrawings.push({
-                                    unitId,
-                                    subUnitId,
-                                    drawingId,
-                                    visible,
-                                });
                             });
                         });
                     });
 
-                    this._drawingManagerService.visibleNotification(updateDrawings);
+                    this._drawingManagerService.removeNotification(removeDrawings);
+                    this._drawingManagerService.addNotification(insertDrawings);
                 }
             })
         );

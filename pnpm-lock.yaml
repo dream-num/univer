@@ -695,8 +695,8 @@ importers:
   packages/drawing-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.29
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*

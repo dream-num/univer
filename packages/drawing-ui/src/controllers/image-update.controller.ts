@@ -15,13 +15,13 @@
  */
 
 import type { ICommandInfo, IDrawingSearch, Nullable } from '@univerjs/core';
-import {
-    Disposable,
+import { Disposable,
     DrawingTypeEnum,
     ICommandService,
     IDrawingManagerService,
     IImageRemoteService,
     ImageSourceType,
+    IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     toDisposable,
@@ -33,7 +33,7 @@ import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { IDialogService } from '@univerjs/ui';
 import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
-import { insertGroupObject } from './utils';
+import { getCurrentUnitInfo, insertGroupObject } from './utils';
 
 const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
@@ -44,7 +44,8 @@ export class ImageUpdateController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IDialogService private readonly _dialogService: IDialogService,
-        @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService
+        @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
         super();
 
@@ -67,10 +68,17 @@ export class ImageUpdateController extends Disposable {
 
     private _recoveryImages() {
         const drawingList = this._drawingManagerService.drawingManagerData;
+        const info = getCurrentUnitInfo(this._currentUniverService);
+        if (info == null) {
+            return;
+        }
+
+        const { unitId: currentUnitId, subUnitId: currentSubUnitId } = info;
+
         Object.keys(drawingList).forEach((unitId) => {
             Object.keys(drawingList[unitId]).forEach((subUnitId) => {
                 const drawingMap = drawingList[unitId][subUnitId].data;
-                if (drawingMap == null) {
+                if (drawingMap == null || unitId !== currentUnitId || subUnitId !== currentSubUnitId) {
                     return;
                 }
                 Object.keys(drawingMap).forEach((drawingId) => {

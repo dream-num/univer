@@ -33,6 +33,7 @@ import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
 import { IDialogService } from '@univerjs/ui';
 import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
+import { insertGroupObject } from './utils';
 
 const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
@@ -191,7 +192,7 @@ export class ImageUpdateController extends Disposable {
                 return;
             }
 
-            const { transform, drawingType, source, imageSourceType, srcRect, prstGeom } = imageParam;
+            const { transform, drawingType, source, imageSourceType, srcRect, prstGeom, groupId } = imageParam;
             if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
                 return;
             }
@@ -242,6 +243,8 @@ export class ImageUpdateController extends Disposable {
             }
 
             scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(image);
+
+            groupId && insertGroupObject({ drawingId: groupId, unitId, subUnitId }, image, scene, this._drawingManagerService);
 
             if (prstGeom != null) {
                 image.setPrstGeom(prstGeom);

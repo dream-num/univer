@@ -22,7 +22,6 @@ import clsx from 'clsx';
 import type { ComponentType } from 'react';
 import React, { useMemo } from 'react';
 
-import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
 import { MenuPosition } from '../../../services/menu/menu';
 import { ComponentContainer } from '../ComponentContainer';
 import { ToolbarButton } from './Button/ToolbarButton';
@@ -30,13 +29,7 @@ import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';
 import { useToolbarCollapseObserver, useToolbarGroups } from './hook';
 
-export interface IMenuGroup {
-    name: MenuPosition;
-    menuItems: Array<IDisplayMenuItem<IMenuItem>>;
-}
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const MENU_POSITIONS = [
+const MENU_POSITIONS = [
     MenuPosition.TOOLBAR_START,
     MenuPosition.TOOLBAR_INSERT,
     MenuPosition.TOOLBAR_FORMULAS,
@@ -56,7 +49,7 @@ export function Toolbar(props: IToolbarProps) {
     const { headerMenuComponents } = props;
     const localeService = useDependency(LocaleService);
 
-    const { setCategory, visibleItems, groups, category, groupsByKey } = useToolbarGroups();
+    const { setCategory, visibleItems, groups, category, groupsByKey } = useToolbarGroups(MENU_POSITIONS);
     const { toolbarItemRefs, toolbarRef, collapsedId } = useToolbarCollapseObserver(visibleItems);
 
     // Should the header when there is at least one header menu components or menu groups.

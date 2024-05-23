@@ -20,10 +20,13 @@ import { combineLatest, map, Observable } from 'rxjs';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { type IDisplayMenuItem, type IMenuItem, MenuGroup, MenuPosition } from '../../../services/menu/menu';
 import { IMenuService } from '../../../services/menu/menu.service';
-import type { IMenuGroup } from './Toolbar';
-import { MENU_POSITIONS } from './Toolbar';
 
 type MenuPositionWithCustom = MenuPosition | string;
+
+export interface IMenuGroup {
+    name: MenuPositionWithCustom;
+    menuItems: Array<IDisplayMenuItem<IMenuItem>>;
+}
 
 export interface IToolbarRenderHookHandler {
     /** The activated category. */
@@ -45,7 +48,7 @@ export interface IToolbarRenderHookHandler {
  * you can use this hook to get the toolbar status.
  * @returns toolbar status
  */
-export function useToolbarGroups(): IToolbarRenderHookHandler {
+export function useToolbarGroups(categories: MenuPositionWithCustom[]): IToolbarRenderHookHandler {
     const menuService = useDependency(IMenuService);
     const [category, setCategory] = useState<MenuPositionWithCustom>(MenuPosition.TOOLBAR_START);
     const [groups, setGroups] = useState<IMenuGroup[]>([]);
@@ -66,7 +69,7 @@ export function useToolbarGroups(): IToolbarRenderHookHandler {
     useEffect(() => {
         const s = menuService.menuChanged$.subscribe(() => {
             const group: IMenuGroup[] = [];
-            for (const position of MENU_POSITIONS) {
+            for (const position of categories) {
                 const menuItems = menuService.getMenuItems(position);
                 if (menuItems.length) {
                     group.push({ name: position, menuItems });
@@ -77,7 +80,7 @@ export function useToolbarGroups(): IToolbarRenderHookHandler {
         });
 
         return () => s.unsubscribe();
-    }, [menuService, category]);
+    }, [menuService, category, categories]);
 
     const groupsByKey = useMemo(() => {
         return groups.find((g) => g.name === category)?.menuItems.reduce(

@@ -16,12 +16,17 @@
 
 import { Disposable, ILogService } from '@univerjs/core';
 import { FUniver } from '@univerjs/facade';
-import { Inject, Injector } from '@wendellhu/redi';
+import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 
+export const IUniscriptExecutionService = createIdentifier<IUniscriptExecutionService>('univer.uniscript.execution-service');
+
+export interface IUniscriptExecutionService {
+    execute(code: string): Promise<boolean>;
+}
 /**
- * This service is to
+ * This service is to execute Uniscript code.
  */
-export class UniscriptExecutionService extends Disposable {
+export class UniscriptExecutionService extends Disposable implements IUniscriptExecutionService {
     constructor(
         @ILogService private readonly _logService: ILogService,
         @Inject(Injector) private readonly _injector: Injector

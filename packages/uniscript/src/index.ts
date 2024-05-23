@@ -17,3 +17,4 @@
 export { enUS, zhCN, ruRU } from './locale';
 export { UniverUniscriptPlugin } from './plugin';
 export { ScriptEditorService } from './services/script-editor.service';
+export { IUniscriptExecutionService } from './services/script-execution.service';

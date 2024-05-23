@@ -44,11 +44,13 @@ export function insertGroupObject(objectParam: IDrawingSearch, object: BaseObjec
 
     group.addObject(object);
 
-    groupParam.transform && group.transformByState(
+    const { transform } = groupParam;
+
+    transform && group.transformByState(
         {
-            left: groupParam.transform.left,
-            top: groupParam.transform.top,
-            angle: groupParam.transform.angle,
+            left: transform.left,
+            top: transform.top,
+            angle: transform.angle,
         }
     );
 }
@@ -58,16 +60,15 @@ export function getCurrentUnitInfo(currentUniverService: IUniverInstanceService)
     if (current == null) {
         return;
     }
-    let unitId: Nullable<string>;
+
+    const unitId = current.getUnitId();
     let subUnitId: Nullable<string>;
+
     if (current.type === UniverInstanceType.UNIVER_SHEET) {
-        unitId = current.getUnitId();
         subUnitId = (current as Workbook).getActiveSheet().getSheetId();
     } else if (current.type === UniverInstanceType.UNIVER_DOC) {
-        unitId = current.getUnitId();
         subUnitId = unitId;
     } else if (current.type === UniverInstanceType.UNIVER_SLIDE) {
-        unitId = current.getUnitId();
         subUnitId = unitId;
     }
 

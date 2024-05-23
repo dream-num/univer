@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { SortType } from '../commands/sheets-reorder.command';
+import { SortType } from '../services/interface';
 import type { ICommonComparableCellValue } from './sheets-sort.controller';
+
 
 export enum ORDER {
     POSITIVE = 1,

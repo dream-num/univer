@@ -23,6 +23,7 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
+import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
@@ -95,6 +96,7 @@ univer.registerPlugin(UniverSheetsFilterPlugin);
 
 // sort
 univer.registerPlugin(UniverSheetsSortPlugin);
+univer.registerPlugin(UniverSheetsSortUIPlugin);
 
 // sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);

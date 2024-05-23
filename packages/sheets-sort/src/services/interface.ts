@@ -15,15 +15,19 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import type { IOrderRule } from '../commands/sheets-reorder.command';
 
 export interface ISortOption {
     range: IRange;
     orderRules: IOrderRule[];
 }
 
-export enum EXTEND_TYPE {
-    KEEP = 'keep',
-    EXTEND = 'extend',
-    CANCEL = 'cancel',
+
+export enum SortType {
+    DESC, // Z-A
+    ASC, // A-Z
+}
+
+export interface IOrderRule {
+    type: SortType;
+    colIndex: number;
 }

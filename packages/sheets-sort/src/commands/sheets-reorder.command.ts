@@ -17,24 +17,16 @@
 // This file provides a ton of mutations to manipulate `FilterModel`.
 // These models would be held on `SheetsFilterService`.
 
-import { CellValueType, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle, sequenceExecute } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle, sequenceExecute } from '@univerjs/core';
 import type { ICellData, ICommand, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { getPrimaryForRange, type ISheetCommandSharedParams, NORMAL_SELECTION_PLUGIN_NAME } from '@univerjs/sheets';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-import { ISheetsSortService } from '../services/sheet-sort.service';
+import type { IOrderRule, SortType } from '../services/interface';
+import { SheetsSortService } from '../services/sheet-sort.service';
 import type { IReorderRangeMutationParams } from './sheets-reorder.mutation';
 import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from './sheets-reorder.mutation';
 
-export enum SortType {
-    DESC, // Z-A
-    ASC, // A-Z
-}
-
-export interface IOrderRule {
-    type: SortType;
-    colIndex: number;
-}
 
 export interface IReorderRangeCommandParams extends ISheetCommandSharedParams {
     range: IRange;
@@ -58,68 +50,13 @@ export type CellValue = number | string | null;
 export type ICellValueCompareFn = (type: SortType, a: Nullable<ICellData>, b: Nullable<ICellData>) => Nullable<number>;
 
 
-export const SortRangeAscCommand: ICommand = {
-    id: 'sheet.command.sort-range-asc',
-    type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor) => {
-        const sortService = accessor.get(ISheetsSortService);
-        return await sortService.triggerSortDirectly(true);
-    },
-};
-
-export const SortRangeDescCommand: ICommand = {
-    id: 'sheet.command.sort-range-desc',
-    type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor) => {
-        const sortService = accessor.get(ISheetsSortService);
-        return await sortService.triggerSortDirectly(false);
-    },
-};
-
-export const SortRangeCustomCommand: ICommand = {
-    id: 'sheet.command.sort-range-custom',
-    type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor) => {
-        const sortService = accessor.get(ISheetsSortService);
-        return await sortService.triggerSortCustomize();
-    },
-};
-
-export const SortRangeAscInCtxMenuCommand: ICommand = {
-    id: 'sheet.command.sort-range-asc-ctx',
-    type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor) => {
-        const sortService = accessor.get(ISheetsSortService);
-        return await sortService.triggerSortDirectly(true);
-    },
-};
-
-export const SortRangeDescInCtxMenuCommand: ICommand = {
-    id: 'sheet.command.sort-range-desc-ctx',
-    type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor) => {
-        const sortService = accessor.get(ISheetsSortService);
-        return await sortService.triggerSortDirectly(false);
-    },
-};
-
-export const SortRangeCustomInCtxMenuCommand: ICommand = {
-    id: 'sheet.command.sort-range-custom-ctx',
-    type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor) => {
-        const sortService = accessor.get(ISheetsSortService);
-        return await sortService.triggerSortCustomize();
-    },
-};
-
-
 export const ReorderRangeCommand: ICommand = {
     id: 'sheet.command.reorder-range',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params: IReorderRangeCommandParams) => {
         const { range, orderRules, hasTitle, unitId, subUnitId } = params;
-        const sortService = accessor.get(ISheetsSortService);
+        const sortService = accessor.get(SheetsSortService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getUnit(unitId) as Workbook;
         const worksheet = workbook.getSheetBySheetId(subUnitId);
@@ -220,27 +157,6 @@ function getRowCellData(
     return result;
 }
 
-export const sortValue: ICellValueCompareFn = (type: SortType, a: Nullable<ICellData>, b: Nullable<ICellData>): number => {
-    const valueA = getValueByType(a);
-    const valueB = getValueByType(b);
-    if (typeof valueA === 'number' && typeof valueB === 'number') {
-        return type === SortType.ASC ? valueA - valueB : valueB - valueA;
-    }
-    return 0;
-};
-
-export function getValueByType(cellData: Nullable<ICellData>): CellValue {
-    if (cellData === null) {
-        return null;
-    }
-    // TODO: @yuhongz support more type here.
-    switch (cellData?.t) {
-        case CellValueType.NUMBER:
-            return cellData.v as number;
-        default:
-            return 0;
-    }
-}
 
 function combineCompareFnsAsOne(compareFns: ICellValueCompareFn[]) {
     return (type: SortType, a: Nullable<ICellData>, b: Nullable<ICellData>) => {

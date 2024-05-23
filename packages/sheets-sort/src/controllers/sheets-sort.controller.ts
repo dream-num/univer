@@ -22,12 +22,10 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { SheetRenderController } from '@univerjs/sheets-ui';
 import { IMenuService } from '@univerjs/ui';
 import type { ICellValueCompareFn } from '../commands/sheets-reorder.command';
-import { ReorderRangeCommand, SortRangeAscCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescInCtxMenuCommand } from '../commands/sheets-reorder.command';
+import { ReorderRangeCommand } from '../commands/sheets-reorder.command';
 import { ReorderRangeMutation } from '../commands/sheets-reorder.mutation';
-import type { SheetsSortService } from '../services/sheet-sort.service';
-import { ISheetsSortService } from '../services/sheet-sort.service';
+import { SheetsSortService } from '../services/sheet-sort.service';
 import { compareNull, compareNumber, compareString } from './utils';
-import { sortRangeAscCtxMenuFactory, sortRangeAscMenuFactory, sortRangeCtxMenuFactory, sortRangeCustomCtxMenuFactory, sortRangeCustomMenuFactory, sortRangeDescCtxMenuFactory, sortRangeDescMenuFactory, sortRangeMenuFactory } from './sheets-sort.menu';
 
 
 export type ICommonComparableCellValue = number | string | null;
@@ -36,11 +34,11 @@ export type ICommonComparableCellValue = number | string | null;
 export class SheetsSortController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @ISheetsSortService private readonly _sortService: SheetsSortService,
         @IUniverInstanceService private readonly _instanceService: UniverInstanceService,
         @IMenuService private readonly _menuService: IMenuService,
         @Inject(SheetRenderController) private _sheetRenderController: SheetRenderController,
-        @Inject(Injector) private _injector: Injector
+        @Inject(Injector) private _injector: Injector,
+        @Inject(SheetsSortService) private readonly _sortService: SheetsSortService
     ) {
         super();
         [
@@ -48,48 +46,13 @@ export class SheetsSortController extends Disposable {
         ].forEach((m) => this.disposeWithMe(this._sheetRenderController.registerSkeletonChangingMutations(m.id)));
         this._initCommands();
         this._registerCompareFns();
-        this._initMenu();
-        // test code here
-        // window.zz = () => {
-        //     this._commandService.executeCommand(ReorderRangeCommand.id, {
-        //         range: { startRow: 0, endRow: 9, startColumn: 10, endColumn: 10 },
-        //         orderRules: [{ type: 0, colIndex: 10 }],
-        //         unitId: 'workbook-01',
-        //         subUnitId: 'sheet-0011',
-        //     } as IReorderRangeCommandParams);
-        // };
     }
 
-    private _initMenu() {
-        [
-            sortRangeMenuFactory,
-            sortRangeAscMenuFactory,
-            sortRangeDescMenuFactory,
-            sortRangeCustomMenuFactory,
-            sortRangeCtxMenuFactory,
-            sortRangeAscCtxMenuFactory,
-            sortRangeDescCtxMenuFactory,
-            sortRangeCustomCtxMenuFactory,
-        ].forEach((menu) => {
-            this.disposeWithMe(
-                this._menuService.addMenuItem(
-                    menu(this._injector)
-                )
-            );
-        });
-    }
 
     private _initCommands(): void {
         [
             ReorderRangeCommand,
             ReorderRangeMutation,
-            SortRangeAscCommand,
-            SortRangeDescCommand,
-            SortRangeCustomCommand,
-            SortRangeAscInCtxMenuCommand,
-            SortRangeDescInCtxMenuCommand,
-            SortRangeCustomInCtxMenuCommand,
-
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

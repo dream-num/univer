@@ -264,6 +264,9 @@ importers:
       '@univerjs/sheets-sort':
         specifier: workspace:*
         version: link:../packages/sheets-sort
+      '@univerjs/sheets-sort-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-sort-ui
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../packages/sheets-ui
@@ -1358,6 +1361,67 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.14.0
         version: 0.14.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
+      vite:
+        specifier: ^5.2.10
+        version: 5.2.10(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+      vitest:
+        specifier: ^1.5.2
+        version: 1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+
+  packages/sheets-sort-ui:
+    dependencies:
+      '@univerjs/icons':
+        specifier: ^0.1.44
+        version: 0.1.44(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-virtual-list:
+        specifier: ^3.11.5
+        version: 3.11.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react-dom:
+        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
+        version: 18.2.0(react@18.2.0)
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
+      '@univerjs/sheets-sort':
+        specifier: workspace:*
+        version: link:../sheets-sort
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../sheets-ui
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@wendellhu/redi':
+        specifier: ^0.14.0
+        version: 0.14.0
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -6716,11 +6780,6 @@ packages:
     version: 0.4.24
     engines: {node: '>=0.10.0'}
 
-  iconv-lite@https://r2.cnpmjs.org/iconv-lite/-/iconv-lite-0.6.3.tgz:
-    resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==, tarball: https://r2.cnpmjs.org/iconv-lite/-/iconv-lite-0.6.3.tgz}
-    version: 0.6.3
-    engines: {node: '>=0.10.0'}
-
   icss-utils@5.1.0:
     resolution: {integrity: sha512-soFhflCVWLfRNOPU3iv5Z9VUdT44xFRbzjLsEzSr5AQmgqPMTHdU3PMT1Cf1ssx8fLNJDA1juftYl+PUcv3MqA==}
     engines: {node: ^10 || ^12 || >= 14}
@@ -7168,9 +7227,8 @@ packages:
     resolution: {integrity: sha512-LvIm3/KWzS9oRFHugab7d+M/GcBXuXX5xZkzPmN+NxihdQlZUQ4dWuSV1xR/sq6upL1TJEDrfBgRepHFdBtSNQ==}
     engines: {node: '>= 0.4'}
 
-  is-what@https://r2.cnpmjs.org/is-what/-/is-what-3.14.1.tgz:
-    resolution: {integrity: sha512-sNxgpk9793nzSs7bA6JQJGeIuRBQhAaNGG77kzYQgMkrID+lS6SlK07K5LaptscDlSaIgH+GPFzf+d75FVxozA==, tarball: https://r2.cnpmjs.org/is-what/-/is-what-3.14.1.tgz}
-    version: 3.14.1
+  is-what@3.14.1:
+    resolution: {integrity: sha512-sNxgpk9793nzSs7bA6JQJGeIuRBQhAaNGG77kzYQgMkrID+lS6SlK07K5LaptscDlSaIgH+GPFzf+d75FVxozA==}
 
   is-wsl@2.2.0:
     resolution: {integrity: sha512-fKzAra0rGJUUBwGBgNkHZuToZcn+TtXHpeCgmkMJMMYx1sQDYaCSyjJBSCa2nH1DGm7s3n1oBnohoVTBaN7Lww==}
@@ -8250,9 +8308,8 @@ packages:
     version: 5.2.0
     engines: {node: '>=8'}
 
-  parse-node-version@https://r2.cnpmjs.org/parse-node-version/-/parse-node-version-1.0.1.tgz:
-    resolution: {integrity: sha512-3YHlOa/JgH6Mnpr05jP9eDG254US9ek25LyIxZlDItp2iJtwyaXQb57lBYLdT3MowkUFYEV2XXNAYIPlESvJlA==, tarball: https://r2.cnpmjs.org/parse-node-version/-/parse-node-version-1.0.1.tgz}
-    version: 1.0.1
+  parse-node-version@1.0.1:
+    resolution: {integrity: sha512-3YHlOa/JgH6Mnpr05jP9eDG254US9ek25LyIxZlDItp2iJtwyaXQb57lBYLdT3MowkUFYEV2XXNAYIPlESvJlA==}
     engines: {node: '>= 0.10'}
 
   parse-path@7.0.0:
@@ -8389,6 +8446,10 @@ packages:
     resolution: {integrity: sha512-eG2dWTVw5bzqGRztnHExczNxt5VGsE6OwTeCG3fdUf9KBsZzO3R5OIIIzWR+iZA0NtZ+RDVdaoE2dK1cn6jH4g==}
     engines: {node: '>=0.10'}
     hasBin: true
+
+  pify@4.0.1:
+    resolution: {integrity: sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==}
+    engines: {node: '>=6'}
 
   pify@https://r2.cnpmjs.org/pify/-/pify-4.0.1.tgz:
     resolution: {integrity: sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==, tarball: https://r2.cnpmjs.org/pify/-/pify-4.0.1.tgz}
@@ -8564,9 +8625,8 @@ packages:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==, tarball: https://r2.cnpmjs.org/proxy-from-env/-/proxy-from-env-1.1.0.tgz}
     version: 1.1.0
 
-  prr@https://r2.cnpmjs.org/prr/-/prr-1.0.1.tgz:
-    resolution: {integrity: sha512-yPw4Sng1gWghHQWj0B3ZggWUm4qVbPwPFcRG8KyxiU7J2OHFSoEHKS+EZ3fv5l1t9CyCiop6l/ZYeWbrgoQejw==, tarball: https://r2.cnpmjs.org/prr/-/prr-1.0.1.tgz}
-    version: 1.0.1
+  prr@1.0.1:
+    resolution: {integrity: sha512-yPw4Sng1gWghHQWj0B3ZggWUm4qVbPwPFcRG8KyxiU7J2OHFSoEHKS+EZ3fv5l1t9CyCiop6l/ZYeWbrgoQejw==}
 
   psl@1.9.0:
     resolution: {integrity: sha512-E/ZsdU4HLs/68gYzgGTkMicWTLPdAftJLfJFlLUAAKZGkStNU72sZjT66SnMDVOfOWY/YAoiD7Jxa9iHvngcag==}
@@ -14334,7 +14394,7 @@ snapshots:
 
   clean-css@5.3.3:
     dependencies:
-      source-map: https://r2.cnpmjs.org/source-map/-/source-map-0.6.1.tgz
+      source-map: 0.6.1
 
   clean-regexp@https://r2.cnpmjs.org/clean-regexp/-/clean-regexp-1.0.0.tgz:
     dependencies:
@@ -14595,7 +14655,7 @@ snapshots:
 
   copy-anything@2.0.6:
     dependencies:
-      is-what: https://r2.cnpmjs.org/is-what/-/is-what-3.14.1.tgz
+      is-what: 3.14.1
 
   core-js-compat@3.36.1:
     dependencies:
@@ -14982,7 +15042,7 @@ snapshots:
 
   errno@0.1.8:
     dependencies:
-      prr: https://r2.cnpmjs.org/prr/-/prr-1.0.1.tgz
+      prr: 1.0.1
     optional: true
 
   error-ex@1.3.2:
@@ -15874,7 +15934,7 @@ snapshots:
   find-cache-dir@https://r2.cnpmjs.org/find-cache-dir/-/find-cache-dir-2.1.0.tgz:
     dependencies:
       commondir: https://r2.cnpmjs.org/commondir/-/commondir-1.0.1.tgz
-      make-dir: https://r2.cnpmjs.org/make-dir/-/make-dir-2.1.0.tgz
+      make-dir: 2.1.0
       pkg-dir: https://r2.cnpmjs.org/pkg-dir/-/pkg-dir-3.0.0.tgz
 
   find-cache-dir@https://r2.cnpmjs.org/find-cache-dir/-/find-cache-dir-3.3.2.tgz:
@@ -16355,11 +16415,6 @@ snapshots:
     dependencies:
       safer-buffer: https://r2.cnpmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz
 
-  iconv-lite@https://r2.cnpmjs.org/iconv-lite/-/iconv-lite-0.6.3.tgz:
-    dependencies:
-      safer-buffer: https://r2.cnpmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz
-    optional: true
-
   icss-utils@5.1.0(postcss@8.4.38):
     dependencies:
       postcss: 8.4.38
@@ -16689,7 +16744,7 @@ snapshots:
       call-bind: 1.0.7
       get-intrinsic: 1.2.4
 
-  is-what@https://r2.cnpmjs.org/is-what/-/is-what-3.14.1.tgz: {}
+  is-what@3.14.1: {}
 
   is-wsl@2.2.0:
     dependencies:
@@ -16985,7 +17040,7 @@ snapshots:
   less@4.2.0:
     dependencies:
       copy-anything: 2.0.6
-      parse-node-version: https://r2.cnpmjs.org/parse-node-version/-/parse-node-version-1.0.1.tgz
+      parse-node-version: 1.0.1
       tslib: 2.6.2
     optionalDependencies:
       errno: 0.1.8
@@ -17190,9 +17245,8 @@ snapshots:
 
   make-dir@2.1.0:
     dependencies:
-      pify: https://r2.cnpmjs.org/pify/-/pify-4.0.1.tgz
+      pify: 4.0.1
       semver: 5.7.2
-    optional: true
 
   make-dir@4.0.0:
     dependencies:
@@ -17389,7 +17443,7 @@ snapshots:
 
   needle@3.3.1:
     dependencies:
-      iconv-lite: https://r2.cnpmjs.org/iconv-lite/-/iconv-lite-0.6.3.tgz
+      iconv-lite: 0.6.3
       sax: 1.3.0
     optional: true
 
@@ -17736,7 +17790,7 @@ snapshots:
       json-parse-even-better-errors: https://r2.cnpmjs.org/json-parse-even-better-errors/-/json-parse-even-better-errors-2.3.1.tgz
       lines-and-columns: https://r2.cnpmjs.org/lines-and-columns/-/lines-and-columns-1.2.4.tgz
 
-  parse-node-version@https://r2.cnpmjs.org/parse-node-version/-/parse-node-version-1.0.1.tgz: {}
+  parse-node-version@1.0.1: {}
 
   parse-path@7.0.0:
     dependencies:
@@ -17823,6 +17877,8 @@ snapshots:
   picomatch@4.0.2: {}
 
   pidtree@0.6.0: {}
+
+  pify@4.0.1: {}
 
   pify@https://r2.cnpmjs.org/pify/-/pify-4.0.1.tgz: {}
 
@@ -18002,7 +18058,7 @@ snapshots:
 
   proxy-from-env@https://r2.cnpmjs.org/proxy-from-env/-/proxy-from-env-1.1.0.tgz: {}
 
-  prr@https://r2.cnpmjs.org/prr/-/prr-1.0.1.tgz:
+  prr@1.0.1:
     optional: true
 
   psl@1.9.0: {}
@@ -18964,7 +19020,7 @@ snapshots:
   source-map-support@https://r2.cnpmjs.org/source-map-support/-/source-map-support-0.5.21.tgz:
     dependencies:
       buffer-from: https://r2.cnpmjs.org/buffer-from/-/buffer-from-1.1.2.tgz
-      source-map: https://r2.cnpmjs.org/source-map/-/source-map-0.6.1.tgz
+      source-map: 0.6.1
 
   source-map@0.6.1: {}
 

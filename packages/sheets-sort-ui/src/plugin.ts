@@ -18,13 +18,13 @@ import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { SheetsSortController } from './controllers/sheets-sort.controller';
-import { SheetsSortService } from './services/sheet-sort.service';
-import { enUS, zhCN } from './locale';
+import { zhCN } from './locale';
+import { SheetsSortUIService } from './services/sheets-sort-ui.service';
+import { SheetsSortUIController } from './controllers/sheets-sort-ui.controller';
 
-const NAME = 'UNIVER_SHEETS_SORT_PLUGIN';
+const NAME = 'UNIVER_SHEETS_SORT_UI_PLUGIN';
 
-export class UniverSheetsSortPlugin extends Plugin {
+export class UniverSheetsSortUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = NAME;
 
@@ -34,17 +34,16 @@ export class UniverSheetsSortPlugin extends Plugin {
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
+
+        this._localeService.load({
+            zhCN,
+        });
     }
 
     override onStarting(injector: Injector): void {
         ([
-            [SheetsSortController],
-            [SheetsSortService],
+            [SheetsSortUIService],
+            [SheetsSortUIController],
         ] as Dependency[]).forEach((d) => injector.add(d));
-
-        this._localeService.load({
-            zhCN,
-            enUS,
-        });
     }
 }

@@ -14,16 +14,5 @@
  * limitations under the License.
  */
 
-export { UniverSheetsSortPlugin } from './plugin';
-export {
-    type IReorderRangeMutationParams,
-    ReorderRangeMutation,
-} from './commands/sheets-reorder.mutation';
 
-export {
-    type IReorderRangeCommandParams,
-    ReorderRangeCommand,
-} from './commands/sheets-reorder.command';
-
-export { SheetsSortService } from './services/sheet-sort.service';
-export { type ISortOption, SortType, type IOrderRule } from './services/interface';
+// TODO:@yuhongz maybe we should add shortcut for sorting

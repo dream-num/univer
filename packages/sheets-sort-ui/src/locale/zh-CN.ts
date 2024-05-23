@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-export { UniverSheetsSortPlugin } from './plugin';
-export {
-    type IReorderRangeMutationParams,
-    ReorderRangeMutation,
-} from './commands/sheets-reorder.mutation';
+import type enUS from './en-US';
 
-export {
-    type IReorderRangeCommandParams,
-    ReorderRangeCommand,
-} from './commands/sheets-reorder.command';
+const zLocale: typeof enUS = {
+    'sheets-sort': {
+    },
+};
 
-export { SheetsSortService } from './services/sheet-sort.service';
-export { type ISortOption, SortType, type IOrderRule } from './services/interface';
+export default zLocale;

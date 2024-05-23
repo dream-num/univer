@@ -19,7 +19,7 @@ import { precisionTo } from '@univerjs/engine-render';
 import type { ISheetDrawingPosition } from '@univerjs/sheets';
 import type { ISelectionRenderService } from '@univerjs/sheets-ui';
 
-export function transformDrawingPositionToTransform(position: ISheetDrawingPosition, selectionRenderService: ISelectionRenderService): Nullable<ITransformState> {
+export function drawingPositionToTransform(position: ISheetDrawingPosition, selectionRenderService: ISelectionRenderService): Nullable<ITransformState> {
     const { from, to } = position;
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
     const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
@@ -64,7 +64,7 @@ export function transformDrawingPositionToTransform(position: ISheetDrawingPosit
     };
 }
 
-     // use transform and originSize convert to  ISheetDrawingPosition
+// use transform and originSize convert to  ISheetDrawingPosition
 export function transformToDrawingPosition(transform: ITransformState, selectionRenderService: ISelectionRenderService): Nullable<ISheetDrawingPosition> {
     const { left = 0, top = 0, width = 0, height = 0 } = transform;
 

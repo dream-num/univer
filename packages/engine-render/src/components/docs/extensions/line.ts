@@ -103,52 +103,62 @@ export class Line extends docExtension {
     ) {
         const { s: show, cl: colorStyle, t: lineType, c = BooleanNumber.TRUE } = line;
 
-        if (show === BooleanNumber.TRUE) {
-            const {
-                originTranslate = Vector2.create(0, 0),
-                alignOffset = Vector2.create(0, 0),
-                renderConfig = {},
-            } = this.extensionOffset;
-
-            const { left, width } = span;
-
-            const { centerAngle: centerAngleDeg = 0, vertexAngle: vertexAngleDeg = 0 } = renderConfig;
-
-            const centerAngle = degToRad(centerAngleDeg);
-            const vertexAngle = degToRad(vertexAngleDeg);
-
-            ctx.save();
-
-            ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
-
-            ctx.beginPath();
-            const color =
-                (c === BooleanNumber.TRUE ? getColorStyle(span.ts?.cl) : getColorStyle(colorStyle)) || COLOR_BLACK_RGB;
-            ctx.strokeStyle = color;
-
-            this._setLineType(ctx, lineType || TextDecoration.SINGLE);
-
-            const start = calculateRectRotate(
-                originTranslate.addByPoint(left, startY),
-                Vector2.create(0, 0),
-                centerAngle,
-                vertexAngle,
-                alignOffset
-            );
-            const end = calculateRectRotate(
-                originTranslate.addByPoint(left + width, startY),
-                Vector2.create(0, 0),
-                centerAngle,
-                vertexAngle,
-                alignOffset
-            );
-
-            ctx.moveToByPrecision(start.x, start.y);
-            ctx.lineToByPrecision(end.x, end.y);
-            ctx.stroke();
-
-            ctx.restore();
+        if (show !== BooleanNumber.TRUE) {
+            return;
         }
+
+        const {
+            originTranslate = Vector2.create(0, 0),
+            alignOffset = Vector2.create(0, 0),
+            renderConfig = {},
+            spanPointWithFont = Vector2.create(0, 0),
+        } = this.extensionOffset;
+
+        const { left, width } = span;
+
+        const { centerAngle: centerAngleDeg = 0, vertexAngle: vertexAngleDeg = 0 } = renderConfig;
+
+        const centerAngle = degToRad(centerAngleDeg);
+        const vertexAngle = degToRad(vertexAngleDeg);
+
+        // console.log(centerAngleDeg, vertexAngleDeg);
+
+        // console.log(left, width, startY);
+
+        ctx.save();
+
+        ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
+
+        const color =
+            (c === BooleanNumber.TRUE ? getColorStyle(span.ts?.cl) : getColorStyle(colorStyle)) || COLOR_BLACK_RGB;
+        ctx.strokeStyle = color;
+
+        this._setLineType(ctx, lineType || TextDecoration.SINGLE);
+
+        const start = calculateRectRotate(
+            originTranslate.addByPoint(left, startY),
+            Vector2.create(0, 0),
+            centerAngle,
+            vertexAngle,
+            alignOffset
+        );
+        const end = calculateRectRotate(
+            originTranslate.addByPoint(left + width, startY),
+            Vector2.create(0, 0),
+            centerAngle,
+            vertexAngle,
+            alignOffset
+        );
+
+        // console.log(start, end, spanPointWithFont);
+        // ctx.fillText('X', spanPointWithFont.x, spanPointWithFont.y);
+
+        ctx.beginPath();
+        ctx.moveToByPrecision(start.x, start.y);
+        ctx.lineToByPrecision(end.x, end.y);
+        ctx.stroke();
+
+        ctx.restore();
     }
 
     private _setLineType(ctx: UniverRenderingContext, style: TextDecoration) {

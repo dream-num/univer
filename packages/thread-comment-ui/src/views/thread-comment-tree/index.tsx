@@ -110,8 +110,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                             <Dropdown
                                 overlay={(
                                     <Menu>
-                                        <MenuItem onClick={() => onEditingChange?.(true)}>{localeService.t('threadCommentUI.item.edit')}</MenuItem>
-                                        <MenuItem onClick={handleDeleteItem}>{localeService.t('threadCommentUI.item.delete')}</MenuItem>
+                                        <MenuItem key="edit" onClick={() => onEditingChange?.(true)}>{localeService.t('threadCommentUI.item.edit')}</MenuItem>
+                                        <MenuItem key="delete" onClick={handleDeleteItem}>{localeService.t('threadCommentUI.item.delete')}</MenuItem>
                                     </Menu>
                                 )}
                             >

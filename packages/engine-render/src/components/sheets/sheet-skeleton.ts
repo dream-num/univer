@@ -219,6 +219,9 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _rowHeaderWidth = 0;
     private _columnHeaderHeight = 0;
 
+    /**
+     * skeletonData(row col range) of visible area
+     */
     private _rowColumnSegment: IRowColumnSegment = {
         startRow: -1,
         endRow: -1,

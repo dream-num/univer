@@ -563,8 +563,8 @@ export class Scene extends ThinScene {
         let x = 0;
         let y = 0;
         if (viewPort) {
-            const actualX = viewPort.actualScrollX || 0;
-            const actualY = viewPort.actualScrollY || 0;
+            const actualX = viewPort.viewportScrollX || 0;
+            const actualY = viewPort.viewportScrollY || 0;
             x += actualX;
             y += actualY;
         }
@@ -598,8 +598,8 @@ export class Scene extends ThinScene {
                 const scene = parent as Scene;
                 const viewPort = scene.getActiveViewportByCoord(coord);
                 if (viewPort) {
-                    const actualX = viewPort.actualScrollX || 0;
-                    const actualY = viewPort.actualScrollY || 0;
+                    const actualX = viewPort.viewportScrollX || 0;
+                    const actualY = viewPort.viewportScrollY || 0;
                     coord = coord.addByPoint(actualX, actualY);
                 }
             } else if (parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {

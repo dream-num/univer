@@ -837,7 +837,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                 .updateScroll({
                     actualScrollY: startSheetView.startY,
                     x: viewMain.scrollX,
-                    actualScrollX: viewMain.actualScrollX,
+                    actualScrollX: viewMain.viewportScrollX,
                 });
             viewRowTop.resize({
                 left: 0,
@@ -892,7 +892,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                 .updateScroll({
                     actualScrollX: startSheetView.startX,
                     y: viewMain.scrollY,
-                    actualScrollY: viewMain.actualScrollY,
+                    actualScrollY: viewMain.viewportScrollY,
                 });
             viewColumnLeft.resize({
                 left: rowHeaderWidthAndMarginLeft,
@@ -956,7 +956,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                 .updateScroll({
                     actualScrollX: startSheetView.startX,
                     y: viewMain.scrollY,
-                    actualScrollY: viewMain.actualScrollY,
+                    actualScrollY: viewMain.viewportScrollY,
                 });
             viewMainTop.resize({
                 left: rowHeaderWidthAndMarginLeft + leftGap,
@@ -968,7 +968,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                 .updateScroll({
                     actualScrollY: startSheetView.startY,
                     x: viewMain.scrollX,
-                    actualScrollX: viewMain.actualScrollX,
+                    actualScrollX: viewMain.viewportScrollX,
                 });
             viewMainLeftTop.resize({
                 left: rowHeaderWidthAndMarginLeft,

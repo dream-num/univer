@@ -132,6 +132,35 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
             bufferEdgeX,
             bufferEdgeY,
         });
+        const viewMainLeftTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
+            isWheelPreventDefaultX: true,
+            active: false,
+            isRelativeX: false,
+            isRelativeY: false,
+            allowCache: true,
+            bufferEdgeX: 0,
+            bufferEdgeY: 0,
+        });
+
+        const viewMainLeft = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
+            isWheelPreventDefaultX: true,
+            active: false,
+            isRelativeX: false,
+            isRelativeY: true,
+            allowCache: true,
+            bufferEdgeX: 0,
+            bufferEdgeY,
+        });
+
+        const viewMainTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
+            isWheelPreventDefaultX: true,
+            active: false,
+            isRelativeX: true,
+            isRelativeY: false,
+            allowCache: true,
+            bufferEdgeX,
+            bufferEdgeY: 0,
+        });
 
         const viewRowTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
             active: false,
@@ -177,35 +206,6 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
             isRelativeY: false,
         });
 
-        const viewMainLeftTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
-            isWheelPreventDefaultX: true,
-            active: false,
-            isRelativeX: false,
-            isRelativeY: false,
-            allowCache: true,
-            bufferEdgeX: 0,
-            bufferEdgeY: 0,
-        });
-
-        const viewMainLeft = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
-            isWheelPreventDefaultX: true,
-            active: false,
-            isRelativeX: false,
-            isRelativeY: true,
-            allowCache: true,
-            bufferEdgeX: 0,
-            bufferEdgeY,
-        });
-
-        const viewMainTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
-            isWheelPreventDefaultX: true,
-            active: false,
-            isRelativeX: true,
-            isRelativeY: false,
-            allowCache: true,
-            bufferEdgeX,
-            bufferEdgeY: 0,
-        });
         return {
             viewMain,
             viewLeftTop,

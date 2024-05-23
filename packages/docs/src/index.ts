@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+export {
+    IDocDrawingService,
+    DocDrawingService,
+    type IDocUpdateDrawing,
+    type IDocDrawing,
+} from './services/doc-drawing.service';
+
 export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObject, getDocObjectById } from './basics/component-tools';
 export * from './basics/docs-view-key';

@@ -718,7 +718,7 @@ export class DrawingUpdateController extends Disposable {
                         return true;
                     }
 
-                    if(visible){
+                    if (visible) {
                         drawingShape.show();
                     } else {
                         drawingShape.hide();

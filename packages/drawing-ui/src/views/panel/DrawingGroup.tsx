@@ -103,7 +103,10 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             const newTransform = transformObjectOutOfGroup(transform || {}, groupTransform, groupTransform.width || 0, groupTransform.height || 0);
             return {
                 unitId, subUnitId, drawingId,
-                transform: newTransform,
+                transform: {
+                    ...transform,
+                    ...newTransform,
+                },
                 groupId: undefined,
             };
         });

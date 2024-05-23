@@ -99,6 +99,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         this._drawingAddListener();
         this._scrollUpdateListener();
         this._featureUpdateListener();
+        this._deleteListener();
     }
 
     private _ensureMap(unitId: string, subUnitId: string) {
@@ -325,6 +326,16 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         );
     }
 
+    private _deleteListener() {
+        this.disposeWithMe(
+            this._drawingManagerService.remove$.subscribe((params) => {
+                params.forEach((param) => {
+                    this.removeFloatDom(param.drawingId);
+                });
+            })
+        );
+    }
+
     addFloatDomToPosition(layer: ICanvasFloatDom) {
         const target = getSheetCommandTarget(this._univerInstanceService, {
             unitId: layer.unitId,
@@ -339,7 +350,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         const id = Tools.generateRandomId();
 
         const sheetTransform = this._getPosition(initPosition);
-
         if (sheetTransform == null) {
             return;
         }
@@ -378,6 +388,11 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         this._domLayerInfoMap.delete(id);
         map.delete(id);
         info.dispose.dispose();
+        const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
+        if (renderObject) {
+            renderObject.scene.removeObject(info.rect);
+        }
+
         const param = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId: id });
         if (!param) {
             return;
@@ -385,7 +400,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         const jsonOp = this._sheetDrawingService.getBatchRemoveOp([param]) as IDrawingJsonUndo1;
 
         const { redo, objects } = jsonOp;
-
         this._commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.REMOVE });
     }
 }

@@ -20,8 +20,7 @@ import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { MoreDownSingle } from '@univerjs/icons';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import type { Ref } from 'react';
-import React, { forwardRef, useEffect, useMemo, useState } from 'react';
-import type { Subscription } from 'rxjs';
+import React, { forwardRef, useMemo, useState } from 'react';
 import { isObservable, Observable } from 'rxjs';
 
 import clsx from 'clsx';
@@ -33,18 +32,16 @@ import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } fro
 import { MenuItemType } from '../../../services/menu/menu';
 import { ToolbarButton } from './Button/ToolbarButton';
 import styles from './index.module.less';
+import { useToolbarItemStatus } from './hook';
 
 export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: Ref<any>) => {
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const injector = useInjector();
-    const [value, setValue] = useState<any>();
-    const [disabled, setDisabled] = useState(false);
-    const [activated, setActivated] = useState(false);
-    const [hidden, setHidden] = useState(false);
-
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const [dropdownVisible, setDropdownVisible] = useState(false);
+
+    const { value, hidden, disabled, activated } = useToolbarItemStatus(props);
 
     const handleCommandExecuted = (commandId: string, params?: Record<string, any>) => {
         commandService.executeCommand(commandId, params);
@@ -63,44 +60,6 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
             setTooltipVisible(false);
         }
     }
-
-    useEffect(() => {
-        const subscriptions: Subscription[] = [];
-
-        props.disabled$ &&
-        subscriptions.push(
-            props.disabled$.subscribe((disabled) => {
-                setDisabled(disabled);
-            })
-        );
-
-        props.hidden$ &&
-        subscriptions.push(
-            props.hidden$.subscribe((hidden) => {
-                setHidden(hidden);
-            })
-        );
-
-        props.activated$ &&
-        subscriptions.push(
-            props.activated$.subscribe((activated) => {
-                setActivated(activated);
-            })
-        );
-
-        props.value$ &&
-        subscriptions.push(
-            props.value$.subscribe((value) => {
-                setValue(value);
-            })
-        );
-
-        return () => {
-            subscriptions.forEach((subscription) => {
-                subscription.unsubscribe();
-            });
-        };
-    }, []);
 
     const { tooltip, shortcut, icon, title, label, id } = props;
 

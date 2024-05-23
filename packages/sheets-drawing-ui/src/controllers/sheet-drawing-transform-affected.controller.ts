@@ -22,7 +22,7 @@ import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthC
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
-import { transformDrawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
+import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
 
 enum RangeMoveUndoType {
     deleteLeft,
@@ -225,7 +225,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         }
 
         if (newSheetTransform != null && newTransform != null) {
-            const newTransform = transformDrawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            const newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
             updateDrawings.push({ ...drawing, sheetTransform: newSheetTransform, transform: newTransform });
         }
 
@@ -271,7 +271,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         }
                     }
 
-                    const newTransform = transformDrawingPositionToTransform({ ...sheetTransform }, this._selectionRenderService);
+                    const newTransform = drawingPositionToTransform({ ...sheetTransform }, this._selectionRenderService);
                     if (newTransform != null) {
                         updateDrawings.push({
                             ...drawing,
@@ -505,7 +505,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from, column: fromColumn + colCount },
                 to: { ...to, column: toColumn + colCount },
             };
-            newTransform = transformDrawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
         } else if (toColumn >= colEndIndex) {
             // move end right only
             if (anchorType === SheetDrawingAnchorType.Both) {
@@ -513,7 +513,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     from: { ...from },
                     to: { ...to, column: toColumn + colCount },
                 };
-                newTransform = transformDrawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -552,7 +552,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from, column: fromColumn - colCount },
                 to: { ...to, column: toColumn - colCount },
             };
-            newTransform = transformDrawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
         } else if (fromColumn <= colStartIndex && toColumn <= colEndIndex) {
             // delete drawing
             return null;
@@ -563,7 +563,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     from: { ...from },
                     to: { ...to, column: toColumn - colCount },
                 };
-                newTransform = transformDrawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -576,7 +576,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from, column: colStartIndex, columnOffset: 0 },
                 to: { ...to, column: toColumn - colEndIndex },
             };
-            newTransform = transformDrawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
         } else if (toColumn >= colStartIndex && toColumn <= colEndIndex) {
             // shrink end col left, then set toColOffset to full cell width
             const selectionCell = this._selectionRenderService.attachRangeWithCoord({
@@ -593,7 +593,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from },
                 to: { ...to, column: colStartIndex - 1, columnOffset: selectionCell.endX - selectionCell.startX },
             };
-            newTransform = transformDrawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
         }
 
         if (newSheetTransform != null && newTransform != null) {
@@ -636,7 +636,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     row: toRow + rowCount,
                 },
             };
-            newTransform = transformDrawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
         } else if (toRow >= rowEndIndex) {
             // move end down only
             if (anchorType === SheetDrawingAnchorType.Both) {
@@ -647,7 +647,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         row: toRow + rowCount,
                     },
                 };
-                newTransform = transformDrawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -690,7 +690,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from, row: fromRow - rowCount },
                 to: { ...to, row: toRow - rowCount },
             };
-            newTransform = transformDrawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
         } else if (fromRow <= rowStartIndex && toRow <= rowEndIndex) {
             // delete drawing
             return null;
@@ -701,7 +701,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     from: { ...from },
                     to: { ...to, row: toRow - rowCount },
                 };
-                newTransform = transformDrawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -714,7 +714,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from, row: rowStartIndex, rowOffset: 0 },
                 to: { ...to, row: toRow - rowEndIndex },
             };
-            newTransform = transformDrawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
         } else if (toRow >= rowStartIndex && toRow <= rowEndIndex) {
             // shrink end row up, then set toRowOffset to full cell height
             const selectionCell = this._selectionRenderService.attachRangeWithCoord({
@@ -731,7 +731,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from },
                 to: { ...to, row: rowStartIndex - 1, rowOffset: selectionCell.endY - selectionCell.startY },
             };
-            newTransform = transformDrawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
         }
 
         if (newSheetTransform != null && newTransform != null) {
@@ -831,7 +831,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
     //             ) || fromRow > endRow || fromColumn > endColumn) {
     //                 updateDrawings.push({
     //                     ...drawing,
-    //                     transform: transformDrawingPositionToTransform(sheetTransform, this._selectionRenderService),
+    //                     transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService),
     //                 });
     //                 break;
     //             }

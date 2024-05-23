@@ -50,14 +50,14 @@ export class HoverRenderController extends Disposable implements IRenderControll
                 return;
             }
 
-            const { scene } = currentRender;
-            const observer = scene.onPointerMoveObserver.add((evt) => {
+            const { mainComponent } = currentRender;
+            const observer = mainComponent?.onPointerMoveObserver.add((evt) => {
                 this._hoverManagerService.onMouseMove(evt.offsetX, evt.offsetY);
             });
 
             disposeSet.add({
                 dispose() {
-                    scene.onPointerMoveObserver.remove(observer);
+                    observer?.dispose();
                 },
             });
         };

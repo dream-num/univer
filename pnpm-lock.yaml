@@ -832,6 +832,30 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
+  packages/hyper-link:
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@wendellhu/redi':
+        specifier: ^0.15.2
+        version: 0.15.2
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
+      vite:
+        specifier: ^5.2.11
+        version: 5.2.11(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+
   packages/image:
     dependencies:
       '@univerjs/icons':
@@ -1328,6 +1352,30 @@ importers:
       react:
         specifier: 18.2.0
         version: 18.2.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
+      vite:
+        specifier: ^5.2.11
+        version: 5.2.11(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+
+  packages/sheets-hyper-link:
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@wendellhu/redi':
+        specifier: ^0.15.2
+        version: 0.15.2
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1

@@ -33,6 +33,7 @@ import type { ISetDrawingAlignOperationParams } from '../commands/operations/dra
 import { AlignType, SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';
 import { getUpdateParams } from '../utils/get-update-params';
+import { getCurrentUnitInfo } from './utils';
 
 interface IDrawingTransformCache {
     unitId: string;
@@ -81,10 +82,18 @@ export class DrawingUpdateController extends Disposable {
 
     private _recoveryImages() {
         const drawingList = this._drawingManagerService.drawingManagerData;
+
+        const info = getCurrentUnitInfo(this._currentUniverService);
+        if (info == null) {
+            return;
+        }
+
+        const { unitId: currentUnitId, subUnitId: currentSubUnitId } = info;
+
         Object.keys(drawingList).forEach((unitId) => {
             Object.keys(drawingList[unitId]).forEach((subUnitId) => {
                 const drawingMap = drawingList[unitId][subUnitId].data;
-                if (drawingMap == null) {
+                if (drawingMap == null || unitId !== currentUnitId || subUnitId !== currentSubUnitId) {
                     return;
                 }
                 Object.keys(drawingMap).forEach((drawingId) => {

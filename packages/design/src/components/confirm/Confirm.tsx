@@ -19,7 +19,7 @@ import React, { useContext } from 'react';
 import { Button } from '../button/Button';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Dialog } from '../dialog/Dialog';
-import type { ILocale } from '../../locale';
+import type { ILocale } from '../../locale/interface';
 import styles from './index.module.less';
 
 export interface IConfirmProps {

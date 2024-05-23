@@ -18,8 +18,8 @@ import { render } from '@testing-library/react';
 import React, { useContext } from 'react';
 import { describe, expect, it } from 'vitest';
 
-import type { ILocale } from '../../../locale';
-import { zhCN } from '../../../locale';
+import zhCN from '../../../locale/zh-CN';
+import type { ILocale } from '../../../locale/interface';
 import { ConfigContext, ConfigProvider } from '../ConfigProvider';
 
 describe('ConfigProvider', () => {

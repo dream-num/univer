@@ -17,7 +17,7 @@
 import React, { createContext, useMemo } from 'react';
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
 
-import type { ILocale } from '../../locale';
+import type { ILocale } from '../../locale/interface';
 
 export interface IConfigProviderProps {
     children: React.ReactNode;

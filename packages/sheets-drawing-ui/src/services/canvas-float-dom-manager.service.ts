@@ -85,6 +85,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     private _transformChange$ = new Subject<{ id: string; value: ITransformState }>();
     transformChange$ = this._transformChange$.asObservable();
 
+    private _remove$ = new Subject<{ unitId: string; subUnitId: string; id: string }>();
+    remove$ = this._remove$.asObservable();
+
     constructor(
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
@@ -392,6 +395,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (renderObject) {
             renderObject.scene.removeObject(info.rect);
         }
+        this._remove$.next({ unitId, subUnitId, id });
 
         const param = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId: id });
         if (!param) {

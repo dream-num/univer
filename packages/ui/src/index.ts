@@ -97,6 +97,8 @@ export type { IProgressStep } from './services/progress/progress.service';
 
 // #region - workbench components
 
+export { GlobalZone } from './views/components/global-zone/GlobalZone';
+export { builtInGlobalComponents } from './views/parts';
 export { ContextMenu } from './views/components/context-menu/ContextMenu';
 export { Sidebar } from './views/components/sidebar/Sidebar';
 export { ZenZone } from './views/components/zen-zone/ZenZone';

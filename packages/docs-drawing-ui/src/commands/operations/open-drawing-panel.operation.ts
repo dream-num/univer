@@ -15,33 +15,28 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, IDrawingManagerService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { CommandType, IDrawingManagerService, LocaleService } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
-import { getSheetCommandTarget } from '@univerjs/sheets';
-import { COMPONENT_SHEET_DRAWING_PANEL } from '../../views/sheet-image-panel/component-name';
+import { COMPONENT_DOC_DRAWING_PANEL } from '../../views/doc-image-panel/component-name';
 
 export interface IUIComponentCommandParams {
     value: string;
 }
 
-export const SidebarSheetDrawingOperation: ICommand = {
-    id: 'sidebar.operation.sheet-image',
+export const SidebarDocDrawingOperation: ICommand = {
+    id: 'sidebar.operation.doc-image',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IUIComponentCommandParams) => {
         const sidebarService = accessor.get(ISidebarService);
         const localeService = accessor.get(LocaleService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
         const drawingManagerService = accessor.get(IDrawingManagerService);
-
-        const target = getSheetCommandTarget(univerInstanceService);
-        if (!target) return false;
 
         switch (params.value) {
             case 'open':
                 sidebarService.open({
-                    header: { title: localeService.t('sheetImage.panel.title') },
-                    children: { label: COMPONENT_SHEET_DRAWING_PANEL },
+                    header: { title: localeService.t('docImage.panel.title') },
+                    children: { label: COMPONENT_DOC_DRAWING_PANEL },
                     onClose: () => {
                         drawingManagerService.focusDrawing(null);
                     },

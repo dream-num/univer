@@ -213,6 +213,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../packages/docs
+      '@univerjs/docs-drawing-ui':
+        specifier: workspace:*
+        version: link:../packages/docs-drawing-ui
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../packages/docs-ui
@@ -619,6 +622,12 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing
@@ -631,12 +640,6 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui

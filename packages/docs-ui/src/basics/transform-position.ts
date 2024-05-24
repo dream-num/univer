@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { ITransformState, Nullable } from '@univerjs/core';
+import type { IDocDrawingPosition, ITransformState, Nullable } from '@univerjs/core';
+import type { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { precisionTo } from '@univerjs/engine-render';
-import type { ISheetDrawingPosition } from '@univerjs/sheets';
-import type { ISelectionRenderService } from '@univerjs/sheets-ui';
 
-export function drawingPositionToTransform(position: ISheetDrawingPosition, selectionRenderService: ISelectionRenderService): Nullable<ITransformState> {
+export function drawingPositionToTransform(position: IDocDrawingPosition, textSelectionRenderService: ITextSelectionRenderManager): Nullable<ITransformState> {
     // const { from, to } = position;
     // const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
     // const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
@@ -62,10 +61,17 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, sele
     //     width,
     //     height,
     // };
+
+    return {
+        left: 100,
+        top: 100,
+        width: position.size.width,
+        height: position.size.height,
+    };
 }
 
 // use transform and originSize convert to  ISheetDrawingPosition
-export function transformToDrawingPosition(transform: ITransformState, selectionRenderService: ISelectionRenderService): Nullable<ISheetDrawingPosition> {
+export function transformToDrawingPosition(transform: ITransformState, textSelectionRenderService: ITextSelectionRenderManager): Nullable<IDocDrawingPosition> {
     // const { left = 0, top = 0, width = 0, height = 0 } = transform;
 
     // const startSelectionCell = selectionRenderService.getSelectionCellByPosition(left, top);

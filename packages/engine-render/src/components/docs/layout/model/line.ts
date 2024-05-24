@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawing, Nullable } from '@univerjs/core';
+import type { IDocDrawingBase, Nullable } from '@univerjs/core';
 import { PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 
 import type {
@@ -367,7 +367,7 @@ function __getSplitWidthNoAngle(
     lineTop: number,
     lineHeight: number,
     columnWidth: number,
-    drawingOrigin: IDrawing
+    drawingOrigin: IDocDrawingBase
 ) {
     const {
         layoutType,

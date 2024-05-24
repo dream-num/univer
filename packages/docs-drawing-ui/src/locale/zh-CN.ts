@@ -21,7 +21,7 @@ const locale: typeof enUS = {
         title: '图片',
 
         upload: {
-            float: '浮动图片',
+            float: '插入图片',
         },
 
         panel: {

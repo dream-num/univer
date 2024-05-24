@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, IStyleData, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { ICellData, IDocDrawingBase, IDocumentData, IStyleData, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     CellValueType,
@@ -158,7 +158,7 @@ describe('Test set range values commands', () => {
         describe('correct situations', () => {
             it('will set range values when there is a selected range', async () => {
                 function getParams() {
-                    const richTextDemo: IDocumentData = {
+                    const richTextDemo: IDocumentData<IDocDrawingBase> = {
                         id: 'd',
                         body: {
                             dataStream: 'Instructions: ①Project division - Fill in the specific division of labor after the project is disassembled: ②Responsible Person - Enter the responsible person\'s name here: ③Date-The specific execution time of the project (detailed to the date of a certain month), and the gray color block marks the planned real-time time of the division of labor of the project (for example, the specific execution time of [regional scene model arrangement and construction] is the 2 days marked in gray. \r\n',

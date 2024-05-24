@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, IUnitDrawingService } from '@univerjs/core';
+import type { IDocDrawingBase, IDrawingParam, IUnitDrawingService } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import { type IImageData, UnitDrawingService } from '@univerjs/drawing';
-
-export enum DocDrawingAnchorType {
-    Position = '0',
-    Both = '1',
-    None = '2',
-}
-
-export interface IDocDrawingBase {
-    anchorType?: DocDrawingAnchorType;
-}
 
 export interface IDocImage extends IImageData, IDocDrawingBase {
 
@@ -42,7 +32,7 @@ export interface IDocShape extends IDrawingParam, IDocDrawingBase {
 export type IDocDrawing = IDocImage | IDocShape;
 
 type OptionalField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-export type IDocUpdateDrawing = OptionalField<IDocDrawing, 'anchorType'>;
+export type IDocUpdateDrawing = OptionalField<IDocDrawing, 'drawingType' | 'layoutType' | 'docTransform' | 'description' | 'title'>;
 
 export class DocDrawingService extends UnitDrawingService<IDocDrawing> {}
 

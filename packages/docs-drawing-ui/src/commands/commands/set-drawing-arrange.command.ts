@@ -20,8 +20,8 @@ import { ArrangeType,
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
+import { DocDrawingApplyType, IDocDrawingService, SetDocDrawingApplyMutation } from '@univerjs/docs';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetDrawingArrangeCommandParams extends IDrawingOrderMapParam {
@@ -31,8 +31,8 @@ export interface ISetDrawingArrangeCommandParams extends IDrawingOrderMapParam {
 /**
  * The command to insert new defined name
  */
-export const SetDrawingArrangeCommand: ICommand = {
-    id: 'sheet.command.set-drawing-arrange',
+export const SetDocDrawingArrangeCommand: ICommand = {
+    id: 'doc.command.set-drawing-arrange',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params?: ISetDrawingArrangeCommandParams) => {
         const commandService = accessor.get(ICommandService);
@@ -40,7 +40,7 @@ export const SetDrawingArrangeCommand: ICommand = {
 
         if (!params) return false;
 
-        const sheetDrawingService = accessor.get(ISheetDrawingService);
+        const docDrawingService = accessor.get(IDocDrawingService);
 
         const { unitId, subUnitId, drawingIds, arrangeType } = params;
 
@@ -48,13 +48,13 @@ export const SetDrawingArrangeCommand: ICommand = {
 
         let jsonOp: Nullable<IDrawingJsonUndo1>;
         if (arrangeType === ArrangeType.forward) {
-            jsonOp = sheetDrawingService.getForwardDrawingsOp(drawingOrderMapParam) as IDrawingJsonUndo1;
+            jsonOp = docDrawingService.getForwardDrawingsOp(drawingOrderMapParam) as IDrawingJsonUndo1;
         } else if (arrangeType === ArrangeType.backward) {
-            jsonOp = sheetDrawingService.getBackwardDrawingOp(drawingOrderMapParam) as IDrawingJsonUndo1;
+            jsonOp = docDrawingService.getBackwardDrawingOp(drawingOrderMapParam) as IDrawingJsonUndo1;
         } else if (arrangeType === ArrangeType.front) {
-            jsonOp = sheetDrawingService.getFrontDrawingsOp(drawingOrderMapParam) as IDrawingJsonUndo1;
+            jsonOp = docDrawingService.getFrontDrawingsOp(drawingOrderMapParam) as IDrawingJsonUndo1;
         } else if (arrangeType === ArrangeType.back) {
-            jsonOp = sheetDrawingService.getBackDrawingsOp(drawingOrderMapParam) as IDrawingJsonUndo1;
+            jsonOp = docDrawingService.getBackDrawingsOp(drawingOrderMapParam) as IDrawingJsonUndo1;
         }
 
         if (jsonOp == null) {
@@ -63,16 +63,16 @@ export const SetDrawingArrangeCommand: ICommand = {
 
         const { objects, redo, undo } = jsonOp;
 
-        const result = commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type: DrawingApplyType.ARRANGE });
+        const result = commandService.syncExecuteCommand(SetDocDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type: DocDrawingApplyType.ARRANGE });
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    { id: SetDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects, type: DrawingApplyType.ARRANGE } },
+                    { id: SetDocDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects, type: DocDrawingApplyType.ARRANGE } },
                 ],
                 redoMutations: [
-                    { id: SetDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type: DrawingApplyType.ARRANGE } },
+                    { id: SetDocDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type: DocDrawingApplyType.ARRANGE } },
                 ],
             });
 

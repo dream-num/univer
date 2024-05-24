@@ -105,7 +105,7 @@ export function createHyphenDashGlyph(config: IFontCreateConfig) {
 }
 
 // It is used to create inline custom blocks, such as inline images, to occupy placeholders in the layout.
-export function createSkeletonCustomBlockGlyph(config: IFontCreateConfig, glyphWidth = 0, glyphHeight = 0, objectId = ''): IDocumentSkeletonGlyph {
+export function createSkeletonCustomBlockGlyph(config: IFontCreateConfig, glyphWidth = 0, glyphHeight = 0, drawingId = ''): IDocumentSkeletonGlyph {
     const { fontStyle, textStyle } = config;
     const content = DT.CUSTOM_BLOCK;
 
@@ -133,7 +133,7 @@ export function createSkeletonCustomBlockGlyph(config: IFontCreateConfig, glyphW
         glyphType: GlyphType.PLACEHOLDER,
         streamType: content as DT,
         count: 1,
-        objectId,
+        drawingId,
     };
 }
 

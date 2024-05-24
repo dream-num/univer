@@ -24,7 +24,7 @@ import {
 } from '../types/enum';
 import { type IRange, RANGE_TYPE } from '../types/interfaces';
 import type { ICellData } from '../types/interfaces/i-cell-data';
-import type { IDocumentData } from '../types/interfaces/i-document-data';
+import type { IDocDrawingBase, IDocumentData } from '../types/interfaces/i-document-data';
 import type { IRangeWithCoord, ISelectionCell, ISelectionCellWithCoord } from '../types/interfaces/i-selection-data';
 import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
 import { ColorBuilder } from './color/color';
@@ -168,7 +168,7 @@ export function isFormulaId(value: any): boolean {
  * Convert rich text json to DOM
  * @param p
  */
-export function handleJsonToDom(p: IDocumentData): string {
+export function handleJsonToDom(p: IDocumentData<IDocDrawingBase>): string {
     // let span = '';
     // // let span = `<span id="${p.id}">`;
     // if (p.body?.blockElements) {
@@ -515,7 +515,7 @@ export function getBorderStyleType(type: string) {
     return str;
 }
 
-export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
+export function getDocsUpdateBody(model: IDocumentData<IDocDrawingBase>, segmentId?: string) {
     let body = model.body;
 
     if (segmentId) {

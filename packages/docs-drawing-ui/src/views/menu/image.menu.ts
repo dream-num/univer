@@ -17,58 +17,34 @@
 import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { UniverInstanceType } from '@univerjs/core';
-import {
-    getCurrentSheetDisabled$,
-} from '@univerjs/sheets';
 
-import { COMPONENT_UPLOAD_FILE_MENU, UploadFileType } from '../upload-component/component-name';
-import { InsertCellImageOperation, InsertFloatImageOperation } from '../../commands/operations/insert-image.operation';
+import { COMPONENT_DOC_UPLOAD_FILE_MENU } from '../upload-component/component-name';
+import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';
 
 export const ImageUploadIcon = 'addition-and-subtraction-single';
-const IMAGE_MENU_ID = 'sheet.menu.image';
+const IMAGE_MENU_ID = 'doc.menu.image';
 
 export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
         positions: [MenuPosition.TOOLBAR_START],
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
+        group: MenuGroup.TOOLBAR_LAYOUT,
         icon: ImageUploadIcon,
-        tooltip: 'sheetImage.title',
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        tooltip: 'docImage.title',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
 
 export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
-        id: InsertFloatImageOperation.id,
-        title: 'sheetImage.upload.float',
+        id: InsertDocImageOperation.id,
+        title: 'docImage.upload.float',
         type: MenuItemType.SELECTOR,
         label: {
-            name: COMPONENT_UPLOAD_FILE_MENU,
-            props: {
-                type: UploadFileType.floatImage,
-            },
+            name: COMPONENT_DOC_UPLOAD_FILE_MENU,
         },
         positions: [IMAGE_MENU_ID],
-        disabled$: getCurrentSheetDisabled$(_accessor),
-        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
-    };
-}
-
-export function UploadCellImageMenuFactory(_accessor: IAccessor): IMenuItem {
-    return {
-        id: InsertCellImageOperation.id,
-        title: 'sheetImage.upload.cell',
-        type: MenuItemType.SELECTOR,
-        label: {
-            name: COMPONENT_UPLOAD_FILE_MENU,
-            props: {
-                type: UploadFileType.cellImage,
-            },
-        },
-        positions: [IMAGE_MENU_ID],
-        disabled$: getCurrentSheetDisabled$(_accessor),
-        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

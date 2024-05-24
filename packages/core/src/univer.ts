@@ -39,7 +39,7 @@ import { IUndoRedoService, LocalUndoRedoService } from './services/undoredo/undo
 import { Workbook } from './sheets/workbook';
 import { SlideDataModel } from './slides/slide-model';
 import type { LocaleType } from './types/enum/locale-type';
-import type { IDocumentData, ISlideData, IUniverData, IWorkbookData } from './types/interfaces';
+import type { IDocDrawingBase, IDocumentData, ISlideData, IUniverData, IWorkbookData } from './types/interfaces';
 import type { UnitModel, UnitType } from './common/unit';
 import { UniverInstanceType } from './common/unit';
 import { PluginService } from './services/plugin/plugin.service';
@@ -109,8 +109,8 @@ export class Univer {
     /**
      * @deprecated use `createUnit` instead
      */
-    createUniverDoc(data: Partial<IDocumentData>): DocumentDataModel {
-        return this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
+    createUniverDoc(data: Partial<IDocumentData<IDocDrawingBase>>): DocumentDataModel {
+        return this._univerInstanceService.createUnit<IDocumentData<IDocDrawingBase>, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
     }
 
     /**

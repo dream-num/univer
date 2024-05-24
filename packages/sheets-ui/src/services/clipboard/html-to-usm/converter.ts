@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
+import type { IDocDrawingBase, IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 import { ObjectMatrix } from '@univerjs/core';
 import { handleStringToStyle } from '@univerjs/ui';
 
@@ -269,7 +269,7 @@ export class HtmlToUSMService {
         };
     }
 
-    private _generateDocumentDataModelSnapshot(snapshot: Partial<IDocumentData>) {
+    private _generateDocumentDataModelSnapshot(snapshot: Partial<IDocumentData<IDocDrawingBase>>) {
         const currentSkeleton = this.getCurrentSkeleton();
         if (currentSkeleton == null) {
             return null;
@@ -662,7 +662,7 @@ function setMergedCellStyle(
         content: string;
         style: string;
         richTextParma: {
-            p?: IDocumentData;
+            p?: IDocumentData<IDocDrawingBase>;
             v: string;
         };
         rowSpan?: number;

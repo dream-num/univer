@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { ICommandService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useRef } from 'react';
-import type { ICustomComponentProps } from '@univerjs/ui';
 import { ALLOW_IMAGE_LIST } from '@univerjs/drawing';
-import { InsertCellImageOperation, InsertFloatImageOperation } from '../../commands/operations/insert-image.operation';
+import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';
 import styles from './index.module.less';
-import { UploadFileType } from './component-name';
 
-export interface IUploadFileProps extends ICustomComponentProps<Nullable<File>> {
-    type: UploadFileType;
-}
-
-export const UploadFileMenu = (props: IUploadFileProps) => {
-    const { type } = props;
-
+export const UploadFileMenu = () => {
     const commandService = useDependency(ICommandService);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,11 +41,7 @@ export const UploadFileMenu = (props: IUploadFileProps) => {
 
         const files: File[] = Array.from(fileList);
 
-        if (type === UploadFileType.floatImage) {
-            commandService.executeCommand(InsertFloatImageOperation.id, { files });
-        } else if (type === UploadFileType.cellImage) {
-            commandService.executeCommand(InsertCellImageOperation.id, { files });
-        }
+        commandService.executeCommand(InsertDocImageOperation.id, { files });
 
         if (fileInputRef.current) {
             fileInputRef.current.value = '';

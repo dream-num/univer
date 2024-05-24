@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { IBullet, IDrawing, IDrawings, Nullable } from '@univerjs/core';
+import type { IBullet, IDocDrawingBase, IDrawings, Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
+import { I } from 'vitest/dist/reporters-yx5ZTtEV.js';
 import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
 import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import { createSkeletonPage } from '../../model/page';
@@ -80,21 +81,21 @@ function _updateListLevelAncestors(
 
 function _changeDrawingToSkeletonFormat(
     drawingIds: string[],
-    drawings: IDrawings
+    drawings: IDrawings<IDocDrawingBase>
 ): Map<string, IDocumentSkeletonDrawing> {
     const skeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
-    drawingIds.forEach((objectId) => {
-        const drawingOrigin = drawings[objectId];
-        drawingOrigin && skeDrawings.set(objectId, _getDrawingSkeletonFormat(drawingOrigin));
+    drawingIds.forEach((drawingId) => {
+        const drawingOrigin = drawings[drawingId];
+        drawingOrigin && skeDrawings.set(drawingId, _getDrawingSkeletonFormat(drawingOrigin));
     });
     return skeDrawings;
 }
 
-function _getDrawingSkeletonFormat(drawingOrigin: IDrawing) {
-    const objectId = drawingOrigin.objectId;
+function _getDrawingSkeletonFormat(drawingOrigin: IDocDrawingBase) {
+    const drawingId = drawingOrigin.drawingId;
 
     return {
-        objectId,
+        drawingId,
         aLeft: 0,
         aTop: 0,
         width: 0,

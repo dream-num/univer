@@ -16,14 +16,14 @@
 
 import { Tools } from '../../shared/tools';
 import { LocaleType } from '../../types/enum/locale-type';
-import type { IDocumentData } from '../../types/interfaces';
+import type { IDocDrawingBase, IDocumentData } from '../../types/interfaces';
 
 export function getEmptySnapshot(
     unitID = Tools.generateRandomId(6),
     locale = LocaleType.EN_US,
     title = ''
-): IDocumentData {
-    const EMPTY_DOCUMENT_DATA: IDocumentData = {
+): IDocumentData<IDocDrawingBase> {
+    const EMPTY_DOCUMENT_DATA: IDocumentData<IDocDrawingBase> = {
         id: unitID,
         locale,
         title, // title should get from request.

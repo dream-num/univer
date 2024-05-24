@@ -19,9 +19,8 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { enUS, zhCN } from './locale';
 import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
-import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
-import { SheetDrawingUIController } from './controllers/sheet-drawing.controller';
-import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
+import { DocDrawingUIController } from './controllers/doc-drawing.controller';
+import { DocDrawingUpdateController } from './controllers/doc-drawing-update.controller';
 
 const PLUGIN_NAME = 'Docs_Drawing_UI_PLUGIN';
 
@@ -51,11 +50,9 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
             // services
 
             // controllers
-            [SheetDrawingUIController],
-            [SheetDrawingUpdateController],
+            [DocDrawingUIController],
+            [DocDrawingUpdateController],
             [DrawingPopupMenuController],
-            [SheetDrawingTransformAffectedController],
-
         ];
 
         dependencies.forEach((dependency) => injector.add(dependency));

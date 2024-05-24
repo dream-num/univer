@@ -212,13 +212,13 @@ export class DocFloatingObjectController extends Disposable {
             this._liquid.translatePagePadding(page);
 
             skeDrawings.forEach((drawing) => {
-                const { aLeft, aTop, height, width, objectId, drawingOrigin } = drawing;
+                const { aLeft, aTop, height, width, drawingId, drawingOrigin } = drawing;
                 const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;
 
                 floatObjects.push({
                     unitId,
                     subUnitId: DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
-                    floatingObjectId: objectId,
+                    floatingObjectId: drawingId,
                     behindText,
                     floatingObject: {
                         left: aLeft + docsLeft + this._liquid.x,
@@ -228,7 +228,7 @@ export class DocFloatingObjectController extends Disposable {
                     },
                 });
 
-                this._pageMarginCache.set(objectId, {
+                this._pageMarginCache.set(drawingId, {
                     marginLeft: this._liquid.x,
                     marginTop: this._liquid.y,
                 });

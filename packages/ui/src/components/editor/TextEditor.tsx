@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { debounce, type IDocumentData, isInternalEditorID, LocaleService, type Nullable } from '@univerjs/core';
+import type { IDocDrawingBase, IDocumentData, Nullable } from '@univerjs/core';
+import { debounce, isInternalEditorID, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 import { Popup } from '@univerjs/design';
@@ -49,7 +50,7 @@ export interface ITextEditorProps {
     id: string; // unitId
     className?: string; // Parent class name.
 
-    snapshot?: IDocumentData; // The default initialization snapshot for the editor can be simply replaced with the value attribute, for cellEditor and formulaBar
+    snapshot?: IDocumentData<IDocDrawingBase>; // The default initialization snapshot for the editor can be simply replaced with the value attribute, for cellEditor and formulaBar
 
     resizeCallBack?: (editor: Nullable<HTMLDivElement>) => void; // Container scale callback.
 

@@ -14,39 +14,37 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageRemoteService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IRange, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageRemoteService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageData } from '@univerjs/drawing';
 import { getImageSize } from '@univerjs/drawing';
-import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets';
-import { ISheetDrawingService, SelectionManagerService } from '@univerjs/sheets';
-import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
+import type { IDocDrawing } from '@univerjs/Docs';
+import { IDocDrawingService, TextSelectionManagerService } from '@univerjs/Docs';
+import { drawingPositionToTransform, transformToDrawingPosition } from '@univerjs/docs-ui';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
-import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
-import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
+import { InsertDocImageOperation } from '../commands/operations/insert-image.operation';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
-import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
-import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
-import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
-import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
-import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
-import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
+import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
+import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
+import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.command';
+import { UngroupDocDrawingCommand } from '../commands/commands/ungroup-doc-drawing.command';
 
 const SHEET_IMAGE_WIDTH_LIMIT = 500;
 const SHEET_IMAGE_HEIGHT_LIMIT = 500;
 
-@OnLifecycle(LifecycleStages.Rendered, SheetDrawingUpdateController)
-export class SheetDrawingUpdateController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, DocDrawingUpdateController)
+export class DocDrawingUpdateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService,
-        @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
+        @IDocDrawingService private readonly _sheetDrawingService: IDocDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
@@ -75,29 +73,20 @@ export class SheetDrawingUpdateController extends Disposable {
     private _initCommandListeners() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted(async (command: ICommandInfo) => {
-                if (command.id === InsertCellImageOperation.id || command.id === InsertFloatImageOperation.id) {
+                if (command.id === InsertDocImageOperation.id) {
                     const params = command.params as IInsertImageOperationParams;
                     if (params.files == null) {
                         return;
                     }
 
                     this._imageRemoteService.setWaitCount(params.files.length);
-                    if (command.id === InsertCellImageOperation.id) {
-                        params.files.forEach(async (file) => {
-                            await this._insertCellImage(file);
-                        });
-                    } else {
-                        params.files.forEach(async (file) => {
-                            await this._insertFloatImage(file);
-                        });
-                    }
+
+                    params.files.forEach(async (file) => {
+                        await this._insertFloatImage(file);
+                    });
                 }
             })
         );
-    }
-
-    private async _insertCellImage(file: File) {
-
     }
 
     private async _insertFloatImage(file: File) {
@@ -153,42 +142,38 @@ export class SheetDrawingUpdateController extends Disposable {
             scale = Math.max(scaleWidth, scaleHeight);
         }
 
-        const sheetTransform = this._getImagePosition(width, height, scale);
+        const docTransform = this._getImagePosition(width, height, scale);
 
-        if (sheetTransform == null) {
+        if (docTransform == null) {
             return;
         }
 
-        const sheetDrawingParam: ISheetDrawing = {
+        const docDrawingParam: IDocDrawing = {
             unitId,
             subUnitId,
             drawingId: imageId,
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType,
             source,
-            transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService),
-            sheetTransform,
+            transform: drawingPositionToTransform(docTransform, this._textSelectionRenderManager),
+            docTransform,
+            title: '', description: '', layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
         };
 
-        this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
+        this._commandService.executeCommand(InsertDocDrawingCommand.id, {
             unitId,
-            drawings: [sheetDrawingParam],
+            drawings: [docDrawingParam],
         } as IInsertDrawingCommandParams);
     }
 
     private _getUnitInfo() {
-        const universheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (universheet == null) {
+        const documentDataModel = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (documentDataModel == null) {
             return;
         }
 
-        const worksheet = universheet.getActiveSheet();
-        if (worksheet == null) {
-            return;
-        }
-
-        const unitId = universheet.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const unitId = documentDataModel.getUnitId();
+        const subUnitId = unitId;
 
         return {
             unitId,
@@ -196,48 +181,24 @@ export class SheetDrawingUpdateController extends Disposable {
         };
     }
 
-    private _getImagePosition(imageWidth: number, imageHeight: number, scale: number): Nullable<ISheetDrawingPosition> {
-        const selections = this._selectionManagerService.getSelections();
-        let range: IRange = {
-            startRow: 0,
-            endRow: 0,
-            startColumn: 0,
-            endColumn: 0,
-        };
-        if (selections && selections.length > 0) {
-            range = selections[selections.length - 1].range;
-        }
-
-        const rangeWithCoord = this._selectionRenderService.attachRangeWithCoord(range);
-        if (rangeWithCoord == null) {
-            return;
-        }
-
-        const { startColumn, startRow, startX, startY } = rangeWithCoord;
-
-        const from = {
-            column: startColumn,
-            columnOffset: 0,
-            row: startRow,
-            rowOffset: 0,
-        };
-
-        const endSelectionCell = this._selectionRenderService.getSelectionCellByPosition(startX + imageWidth * scale, startY + imageHeight * scale);
-
-        if (endSelectionCell == null) {
-            return;
-        }
-
-        const to = {
-            column: endSelectionCell.actualColumn,
-            columnOffset: startX + imageWidth * scale - endSelectionCell.startX,
-            row: endSelectionCell.actualRow,
-            rowOffset: startY + imageHeight * scale - endSelectionCell.startY,
-        };
+    private _getImagePosition(imageWidth: number, imageHeight: number, scale: number): Nullable<IDocDrawingPosition> {
+        const activeTextRange = this._textSelectionManagerService.getActiveRange();
+        // TODO:RANSIX calculate the position of the image in doc
 
         return {
-            from,
-            to,
+            size: {
+                width: imageWidth * scale,
+                height: imageHeight * scale,
+            },
+            positionH: {
+                relativeFrom: ObjectRelativeFromH.MARGIN,
+                posOffset: 100,
+            },
+            positionV: {
+                relativeFrom: ObjectRelativeFromV.PAGE,
+                posOffset: 230,
+            },
+            angle: 0,
         };
     }
 
@@ -245,7 +206,7 @@ export class SheetDrawingUpdateController extends Disposable {
         this._drawingManagerService.featurePluginOrderUpdate$.subscribe((params) => {
             const { unitId, subUnitId, drawingIds, arrangeType } = params;
 
-            this._commandService.executeCommand(SetDrawingArrangeCommand.id, {
+            this._commandService.executeCommand(SetDocDrawingArrangeCommand.id, {
                 unitId,
                 subUnitId,
                 drawingIds,
@@ -256,7 +217,7 @@ export class SheetDrawingUpdateController extends Disposable {
 
     private _updateImageListener() {
         this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
-            const drawings: Partial<ISheetDrawing>[] = [];
+            const drawings: Partial<IDocDrawing>[] = [];
 
             if (params.length === 0) {
                 return;
@@ -270,33 +231,27 @@ export class SheetDrawingUpdateController extends Disposable {
 
                 const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
 
-                // const imageDrawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId });
-
                 if (sheetDrawing == null) {
                     return;
                 }
 
-                const sheetTransform = transformToDrawingPosition({ ...sheetDrawing.transform, ...transform }, this._selectionRenderService);
+                const sheetTransform = transformToDrawingPosition({ ...sheetDrawing.transform, ...transform }, this._textSelectionRenderManager);
 
                 if (sheetTransform == null) {
                     return;
                 }
 
-                // const oldDrawing: Partial<ISheetDrawing> = {
-                //     ...sheetDrawing,
-                // };
-
-                const newDrawing: Partial<ISheetDrawing> = {
+                const newDrawing: Partial<IDocDrawing> = {
                     ...param,
-                    transform: { ...transform, ...drawingPositionToTransform(sheetTransform, this._selectionRenderService) },
-                    sheetTransform: { ...sheetTransform },
+                    transform: { ...transform, ...drawingPositionToTransform(sheetTransform, this._textSelectionRenderManager) },
+                    docTransform: { ...sheetTransform },
                 };
 
                 drawings.push(newDrawing);
             });
 
             if (drawings.length > 0) {
-                this._commandService.executeCommand(SetSheetDrawingCommand.id, {
+                this._commandService.executeCommand(InsertDocDrawingCommand.id, {
                     unitId: params[0].unitId,
                     drawings,
                 } as ISetDrawingCommandParams);
@@ -306,11 +261,11 @@ export class SheetDrawingUpdateController extends Disposable {
 
     private _groupDrawingListener() {
         this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
-            this._commandService.executeCommand(GroupSheetDrawingCommand.id, params);
+            this._commandService.executeCommand(GroupDocDrawingCommand.id, params);
         });
 
         this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {
-            this._commandService.executeCommand(UngroupSheetDrawingCommand.id, params);
+            this._commandService.executeCommand(UngroupDocDrawingCommand.id, params);
         });
     }
 

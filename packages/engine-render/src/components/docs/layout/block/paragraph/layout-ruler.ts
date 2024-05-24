@@ -510,7 +510,7 @@ function _lineOperator(
         if (drawingsInLine.length > 0) {
             const affectDrawings = ctx.paragraphConfigCache.get(line.paragraphIndex)?.paragraphAffectSkeDrawings;
             const relativeLineDrawings = ([...(affectDrawings?.values() ?? [])])
-                .filter((drawing) => drawing.drawingOrigin.objectTransform.positionV.relativeFrom === ObjectRelativeFromV.LINE);
+                .filter((drawing) => drawing.drawingOrigin.docTransform.positionV.relativeFrom === ObjectRelativeFromV.LINE);
 
             __updateAndPositionDrawings(ctx, line.top, line.lineHeight, column, relativeLineDrawings, line.paragraphIndex);
         }
@@ -524,7 +524,7 @@ function _lineOperator(
 
     if (paragraphAffectSkeDrawings != null && paragraphAffectSkeDrawings.size > 0) {
         const targetDrawings = [...paragraphAffectSkeDrawings.values()]
-            .filter((drawing) => drawing.drawingOrigin.objectTransform.positionV.relativeFrom !== ObjectRelativeFromV.LINE);
+            .filter((drawing) => drawing.drawingOrigin.docTransform.positionV.relativeFrom !== ObjectRelativeFromV.LINE);
         __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, drawingAnchor?.get(paragraphIndex)?.top);
     }
 
@@ -624,7 +624,7 @@ function _getCustomBlockIdsInLine(line: IDocumentSkeletonLine) {
     for (const divide of line.divides) {
         for (const glyph of divide.glyphGroup) {
             if (glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK) {
-                customBlockIds.push(glyph.objectId!);
+                customBlockIds.push(glyph.drawingId!);
             }
         }
     }
@@ -649,7 +649,7 @@ function _reLayoutCheck(
 
     // Handle situations where an image anchor paragraph is squeezed to the next page.
     for (const drawing of drawings.values()) {
-        const drawingCache = ctx.drawingsCache.get(drawing.objectId);
+        const drawingCache = ctx.drawingsCache.get(drawing.drawingId);
         if (drawingCache == null) {
             continue;
         }
@@ -657,7 +657,7 @@ function _reLayoutCheck(
         const cachePageStartParagraphIndex = drawingCache.page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
         const startIndex = page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
         if (drawingCache.page && cachePageStartParagraphIndex && startIndex && cachePageStartParagraphIndex !== startIndex) {
-            drawingCache.page.skeDrawings.delete(drawing.objectId);
+            drawingCache.page.skeDrawings.delete(drawing.drawingId);
 
             lineIterator([drawingCache.page], (line) => {
                 const { lineHeight, top } = line;
@@ -692,11 +692,11 @@ function _reLayoutCheck(
         for (const drawing of drawings.values()) {
             let targetDrawing = drawing;
 
-            if (ctx.drawingsCache.has(drawing.objectId)) {
+            if (ctx.drawingsCache.has(drawing.drawingId)) {
                 const needRePosition = checkRelativeDrawingNeedRePosition(ctx, drawing);
 
                 if (needRePosition) {
-                    targetDrawing = ctx.drawingsCache.get(drawing.objectId)?.drawing ?? drawing;
+                    targetDrawing = ctx.drawingsCache.get(drawing.drawingId)?.drawing ?? drawing;
                 } else {
                     continue;
                 }
@@ -711,7 +711,7 @@ function _reLayoutCheck(
                 ctx.isDirty = true;
                 ctx.layoutStartPointer.paragraphIndex = Math.min(line.paragraphIndex, ctx.layoutStartPointer.paragraphIndex ?? Number.POSITIVE_INFINITY);
 
-                let drawingCache = ctx.drawingsCache.get(drawing.objectId);
+                let drawingCache = ctx.drawingsCache.get(drawing.drawingId);
                 if (drawingCache == null) {
                     drawingCache = {
                         count: 0,
@@ -719,7 +719,7 @@ function _reLayoutCheck(
                         page,
                     };
 
-                    ctx.drawingsCache.set(drawing.objectId, drawingCache);
+                    ctx.drawingsCache.set(drawing.drawingId, drawingCache);
                 }
 
                 drawingCache.count++;
@@ -734,8 +734,8 @@ function _reLayoutCheck(
 
 // Detect the relative positioning of the image, whether the position needs to be repositioned.
 function checkRelativeDrawingNeedRePosition(ctx: ILayoutContext, drawing: IDocumentSkeletonDrawing) {
-    const { relativeFrom } = drawing.drawingOrigin.objectTransform.positionV;
-    const drawingCache = ctx.drawingsCache.get(drawing.objectId);
+    const { relativeFrom } = drawing.drawingOrigin.docTransform.positionV;
+    const drawingCache = ctx.drawingsCache.get(drawing.drawingId);
 
     if (drawingCache == null) {
         return false;
@@ -939,13 +939,13 @@ function __updatePreLineDrawingPosition(
     for (const divide of line.divides) {
         for (const glyph of divide.glyphGroup) {
             if (glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0) {
-                const { objectId } = glyph;
+                const { drawingId } = glyph;
 
-                if (objectId == null) {
+                if (drawingId == null) {
                     continue;
                 }
 
-                const drawing = paragraphInlineSkeDrawings?.get(objectId);
+                const drawing = paragraphInlineSkeDrawings?.get(drawingId);
 
                 const drawingOrigin = drawing?.drawingOrigin;
 
@@ -953,9 +953,9 @@ function __updatePreLineDrawingPosition(
                     continue;
                 }
 
-                const { objectTransform } = drawingOrigin;
+                const { docTransform } = drawingOrigin;
 
-                const { size, angle } = objectTransform;
+                const { size, angle } = docTransform;
                 const { width = 0, height = 0 } = size;
 
                 drawing.aLeft = glyph.left || 0;
@@ -964,7 +964,7 @@ function __updatePreLineDrawingPosition(
                 drawing.height = height;
                 drawing.angle = angle;
 
-                drawings.set(drawing.objectId, drawing);
+                drawings.set(drawing.drawingId, drawing);
             }
         }
     }
@@ -997,8 +997,8 @@ function __getDrawingPosition(
             continue;
         }
 
-        const { objectTransform } = drawingOrigin;
-        const { positionH, positionV, size, angle } = objectTransform;
+        const { docTransform } = drawingOrigin;
+        const { positionH, positionV, size, angle } = docTransform;
         const { width = 0, height = 0 } = size;
 
         drawing.aLeft = getPositionHorizon(positionH, column, page, width, isPageBreak) ?? 0;
@@ -1010,7 +1010,7 @@ function __getDrawingPosition(
         drawing.angle = angle;
         drawing.initialState = true;
 
-        drawings.set(drawing.objectId, drawing);
+        drawings.set(drawing.drawingId, drawing);
     }
 
     // if (drawings.size) {
@@ -1028,19 +1028,19 @@ function __updateDrawingPosition(
     const page = column.parent?.parent;
     if (drawings != null && drawings.size !== 0 && page != null) {
         for (const drawing of drawings.values()) {
-            const originDrawing = page.skeDrawings.get(drawing.objectId);
+            const originDrawing = page.skeDrawings.get(drawing.drawingId);
 
             if (originDrawing) {
                 // If it's a layout that splits the text up and down,
                 // choose an image that is closer to the bottom for the layout
                 if (originDrawing.drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM) {
                     const lowerDrawing = originDrawing.aTop > drawing.aTop ? originDrawing : drawing;
-                    page.skeDrawings.set(drawing.objectId, lowerDrawing);
+                    page.skeDrawings.set(drawing.drawingId, lowerDrawing);
                 } else {
-                    page.skeDrawings.set(drawing.objectId, drawing);
+                    page.skeDrawings.set(drawing.drawingId, drawing);
                 }
             } else {
-                page.skeDrawings.set(drawing.objectId, drawing);
+                page.skeDrawings.set(drawing.drawingId, drawing);
             }
         }
     }

@@ -32,7 +32,6 @@ const FloatDomSingle = (props: { layer: IFloatDom; id: string }) => {
         ? (
             <div
                 className={styles.floatDomWrapper}
-                id={id}
                 style={{
                     position: 'absolute',
                     top: position.startY,
@@ -51,8 +50,12 @@ const FloatDomSingle = (props: { layer: IFloatDom; id: string }) => {
                 onPointerUp={(e) => {
                     layer.onPointerUp(e.nativeEvent);
                 }}
+                onWheel={(e) => {
+                    layer.onWheel(e.nativeEvent);
+                }}
             >
                 <div
+                    id={id}
                     className={styles.floatDom}
                     style={{
                         width: position.width,

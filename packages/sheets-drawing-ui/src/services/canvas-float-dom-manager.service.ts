@@ -219,6 +219,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         onPointerUp: (evt: PointerEvent | MouseEvent) => {
                             canvas.dispatchEvent(new PointerEvent(evt.type, evt));
                         },
+                        onWheel: (evt: WheelEvent) => {
+                            canvas.dispatchEvent(new WheelEvent(evt.type, evt));
+                        },
                     });
 
                     const listener = rect.onTransformChangeObservable.add(() => {

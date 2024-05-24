@@ -16,14 +16,7 @@
 
 import type { HyperLinkType } from '../enums/hyper-link-type';
 
-export interface IHyperLink {
-    id: string;
-    /**
-     * for sheet: A1
-     * for doc: ___
-     */
-    ref: string;
-    display: string;
+export interface ICellLinkContent {
     type: HyperLinkType;
     /**
      * range: sheet1:A1, sheet1:A1:B2
@@ -33,4 +26,11 @@ export interface IHyperLink {
      * file: file://a.xlsx
      */
     payload: string;
+    display: string;
+}
+
+export interface ICellHyperLink extends ICellLinkContent {
+    id: string;
+    row: number;
+    column: number;
 }

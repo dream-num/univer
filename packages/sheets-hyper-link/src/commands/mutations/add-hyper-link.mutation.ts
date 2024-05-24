@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
-import type { ICommand, IHyperlink } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
+import { HyperLinkModel } from '../../models/hyper-link.model';
+import type { ICellHyperLink } from '../../types/interfaces/i-hyper-link';
 
 export interface IAddHyperLinkMutationParams {
     unitId: string;
     subUnitId: string;
-    link: IHyperlink;
+    link: ICellHyperLink;
 }
 
 export const AddHyperLinkMutation: ICommand<IAddHyperLinkMutationParams> = {
     type: CommandType.MUTATION,
-    id: 'hyper-link.mutation.add',
+    id: 'sheets.mutation.add-hyper-link',
     handler(accessor, params) {
-        return true;
+        if (!params) {
+            return false;
+        }
+
+        const model = accessor.get(HyperLinkModel);
+        const { unitId, subUnitId, link } = params;
+        return model.addHyperLink(unitId, subUnitId, link);
     },
 };

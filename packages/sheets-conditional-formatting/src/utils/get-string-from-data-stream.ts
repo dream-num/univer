@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
+import type { IDocDrawingBase, IDocumentData } from '@univerjs/core';
 
-export const getStringFromDataStream = (data: IDocumentData) => {
+export const getStringFromDataStream = (data: IDocumentData<IDocDrawingBase>) => {
     const dataStream = data.body?.dataStream.replace(/\r\n$/, '') || '';
     return dataStream;
 };

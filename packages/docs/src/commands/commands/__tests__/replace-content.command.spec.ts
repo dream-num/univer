@@ -23,6 +23,7 @@ import { TextSelectionManagerService } from '../../../services/text-selection-ma
 import { RichTextEditingMutation } from '../../mutations/core-editing.mutation';
 import { SetTextSelectionsOperation } from '../../operations/text-selection.operation';
 import { CoverContentCommand, ReplaceContentCommand } from '../replace-content.command';
+import type { IDocDrawing } from '../../../services/doc-drawing.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 vi.mock('@univerjs/engine-render', async () => {
@@ -38,7 +39,7 @@ vi.mock('@univerjs/engine-render', async () => {
     };
 });
 
-const TEST_DOCUMENT_DATA_EN: IDocumentData = {
+const TEST_DOCUMENT_DATA_EN: IDocumentData<IDocDrawing> = {
     id: 'test-doc',
     body: {
         dataStream: '=SUM(A2:B4)\r\n',

@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export const COMPONENT_SHEET_DRAWING_PANEL = 'COMPONENT_SHEET_DRAWING_PANEL';
+export { UniverDocsDrawingUIPlugin } from './plugin';

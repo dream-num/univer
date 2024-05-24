@@ -72,3 +72,4 @@ export { SelectAllOperation } from './commands/operations/select-all.operation';
 export { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 export { SetDocZoomRatioOperation, type ISetDocZoomRatioOperationParams } from './commands/operations/set-doc-zoom-ratio.operation';
 export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
+export { SetDocDrawingApplyMutation, DocDrawingApplyType } from './commands/mutations/set-drawing-apply.mutation';

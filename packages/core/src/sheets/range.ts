@@ -22,6 +22,7 @@ import { BooleanNumber, FontItalic, FontWeight } from '../types/enum';
 import type {
     IBorderData,
     ICellData,
+    IDocDrawingBase,
     IDocumentBody,
     IDocumentData,
     IRange,
@@ -427,7 +428,7 @@ export class Range {
      * Returns the font size in point size of the cell in the top-left corner of the range.
      */
     getFontSize(): number {
-        const { p } = this.getValue() ?? {};
+        const p = (this.getValue()?.p || {}) as IDocumentData<IDocDrawingBase>;
 
         if (p && Array.isArray(p.body?.textRuns) && p.body.textRuns.length > 0) {
             if (p.body.textRuns.some((textRun) => textRun?.ts?.fs != null)) {
@@ -574,14 +575,14 @@ export class Range {
     /**
      * Returns the Rich Text value for the top left cell of the range, or null if the cell value is not text.
      */
-    getRichTextValue(): Nullable<IDocumentData | ''> {
+    getRichTextValue(): Nullable<IDocumentData<IDocDrawingBase> | ''> {
         return this.getRichTextValues()[0][0];
     }
 
     /**
      * Returns the Rich Text values for the cells in the range.
      */
-    getRichTextValues(): Array<Array<Nullable<IDocumentData | ''>>> {
+    getRichTextValues(): Array<Array<Nullable<IDocumentData<IDocDrawingBase> | ''>>> {
         return this.getValues().map((row) => row.map((cell: Nullable<ICellData>) => cell?.p || ''));
     }
 

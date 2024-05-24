@@ -16,8 +16,9 @@
 
 import type { IDocumentData, IWorkbookData } from '@univerjs/core';
 import { BooleanNumber, BorderStyleTypes, LocaleType } from '@univerjs/core';
+import type { IDocDrawing } from '@univerjs/docs';
 
-const richTextDemo1: IDocumentData = {
+const richTextDemo1: IDocumentData<IDocDrawing> = {
     id: 'd',
     body: {
         dataStream: 'No.2824163\r\n',

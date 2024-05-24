@@ -212,11 +212,11 @@ export function shaping(
                         const { blockId } = customBlock;
                         const drawingOrigin = drawings[blockId];
                         if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
-                            const { width, height } = drawingOrigin.objectTransform.size;
-                            const { objectId } = drawingOrigin;
-                            newGlyph = createSkeletonCustomBlockGlyph(config, width, height, objectId);
+                            const { width, height } = drawingOrigin.docTransform.size;
+                            const { drawingId } = drawingOrigin;
+                            newGlyph = createSkeletonCustomBlockGlyph(config, width, height, drawingId);
                         } else {
-                            newGlyph = createSkeletonCustomBlockGlyph(config, 0, 0, drawingOrigin.objectId);
+                            newGlyph = createSkeletonCustomBlockGlyph(config, 0, 0, drawingOrigin.drawingId);
                         }
                     }
 

@@ -90,6 +90,7 @@ export {
     type IDrawingOrderMapParam,
     type IDrawingGroupUpdateParam,
     type IDrawingVisibleParam,
+    type IDrawingMapItemData,
     ArrangeType,
 } from './services/drawing/drawing-manager.service';
 export { IUniverInstanceService } from './services/instance/instance.service';

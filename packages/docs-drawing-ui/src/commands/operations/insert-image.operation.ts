@@ -21,16 +21,8 @@ export interface IInsertImageOperationParams {
     files: Nullable<File[]>;
 };
 
-export const InsertFloatImageOperation: IOperation<IInsertImageOperationParams> = {
-    id: 'sheet.operation.insert-float-image',
-    type: CommandType.OPERATION,
-    handler: (accessor, params) => {
-        return true;
-    },
-};
-
-export const InsertCellImageOperation: IOperation<IInsertImageOperationParams> = {
-    id: 'sheet.operation.insert-cell-image',
+export const InsertDocImageOperation: IOperation<IInsertImageOperationParams> = {
+    id: 'doc.operation.insert-float-image',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         return true;

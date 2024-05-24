@@ -204,10 +204,10 @@ export class DocsAdaptor extends ObjectAdaptor {
             skeDrawings.forEach((drawing: IDocumentSkeletonDrawing) => {
                 const { aLeft, aTop, height, width, drawingOrigin } = drawing;
 
-                const { objectTransform } = drawingOrigin;
+                const { docTransform } = drawingOrigin;
 
-                const rect = new Image(drawing.objectId, {
-                    // url: objectTransform.imageProperties?.contentUrl || '',
+                const rect = new Image(drawing.drawingId, {
+                    // url: docTransform.imageProperties?.contentUrl || '',
                     left: aLeft + docsLeft + this._liquid.x,
                     top: aTop + docsTop + this._liquid.y,
                     width,
@@ -215,7 +215,7 @@ export class DocsAdaptor extends ObjectAdaptor {
                     zIndex: 11,
                 });
 
-                pageMarginCache.set(drawing.objectId, {
+                pageMarginCache.set(drawing.drawingId, {
                     marginLeft: this._liquid.x,
                     marginTop: this._liquid.y,
                 });

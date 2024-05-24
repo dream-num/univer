@@ -18,6 +18,7 @@ import type { IDocumentData } from '@univerjs/core';
 import {
     BooleanNumber,
     ColumnSeparatorType,
+    DrawingTypeEnum,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
@@ -25,16 +26,20 @@ import {
     SectionType,
     WrapTextType,
 } from '@univerjs/core';
+import type { IDocDrawing } from '@univerjs/docs';
 import { ptToPixel } from '@univerjs/engine-render';
 
-export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
+export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData<IDocDrawing> = {
     id: 'd',
     drawings: {
         shapeTest1: {
-            objectId: 'shapeTest1',
+            unitId: 'd',
+            subUnitId: 'd',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            drawingId: 'shapeTest1',
             title: 'test shape',
             description: 'test shape',
-            objectTransform: {
+            docTransform: {
                 size: {
                     width: 1484 * 0.15,
                     height: 864 * 0.15,
@@ -58,10 +63,13 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             wrapText: WrapTextType.BOTH_SIDES,
         },
         shapeTest2: {
-            objectId: 'shapeTest2',
+            unitId: 'd',
+            subUnitId: 'd',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            drawingId: 'shapeTest2',
             title: 'test shape',
             description: 'test shape',
-            objectTransform: {
+            docTransform: {
                 size: {
                     width: 2548 * 0.1,
                     height: 2343 * 0.1,

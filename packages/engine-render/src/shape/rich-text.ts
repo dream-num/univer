@@ -17,6 +17,7 @@
 import type {
     IBorderData,
     IColorStyle,
+    IDocDrawingBase,
     IDocumentData,
     IKeyValue,
     IStyleBase,
@@ -37,7 +38,7 @@ import type { UniverRenderingContext } from '../context';
 
 export interface IRichTextProps extends ITransformState, IStyleBase {
     text?: string;
-    richText?: IDocumentData;
+    richText?: IDocumentData<IDocDrawingBase>;
     zIndex: number;
     forceRender?: boolean;
 }
@@ -45,7 +46,7 @@ export interface IRichTextProps extends ITransformState, IStyleBase {
 export const RICHTEXT_OBJECT_ARRAY = ['text', 'richText'];
 
 export class RichText extends BaseObject {
-    private _documentData!: IDocumentData;
+    private _documentData!: IDocumentData<IDocDrawingBase>;
 
     private _documentSkeleton!: DocumentSkeleton;
 
@@ -217,7 +218,7 @@ export class RichText extends BaseObject {
 
     private _convertToDocumentData(text: string) {
         const contentLength = text.length;
-        const documentData: IDocumentData = {
+        const documentData: IDocumentData<IDocDrawingBase> = {
             id: 'd',
             body: {
                 dataStream: `${text}${DEFAULT_EMPTY_DOCUMENT_VALUE}`,

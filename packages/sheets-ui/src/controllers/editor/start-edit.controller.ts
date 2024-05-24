@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDocumentBody, IDocumentData, IPosition, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IDocDrawingBase, IDocumentBody, IDocumentData, IPosition, Nullable } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
@@ -520,7 +520,7 @@ export class StartEditController extends Disposable {
                 eventType === DeviceInputEventType.Keyboard ||
                 (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
             ) {
-                const snapshot = Tools.deepClone(documentDataModel.snapshot) as IDocumentData;
+                const snapshot = Tools.deepClone(documentDataModel.snapshot) as IDocumentData<IDocDrawingBase>;
                 const documentViewModel = this._docViewModelManagerService.getViewModel(editorUnitId);
 
                 if (documentViewModel == null) {

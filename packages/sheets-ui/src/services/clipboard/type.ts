@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, IMutationInfo, IRange, ObjectMatrix } from '@univerjs/core';
+import type { ICellData, IDocDrawingBase, IDocumentData, IMutationInfo, IRange, ObjectMatrix } from '@univerjs/core';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 
 export enum COPY_TYPE {
@@ -41,7 +41,7 @@ export interface IParsedCellValueByClipboard {
     style?: string;
     content?: string;
     richTextParma?: {
-        p?: IDocumentData;
+        p?: IDocumentData<IDocDrawingBase>;
         v?: string;
     };
 

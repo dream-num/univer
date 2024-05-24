@@ -21,27 +21,27 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { AddImageSingle } from '@univerjs/icons';
 import { UploadFileMenu } from '../views/upload-component/UploadFile';
-import { COMPONENT_UPLOAD_FILE_MENU } from '../views/upload-component/component-name';
-import { ImageMenuFactory, ImageUploadIcon, UploadCellImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
-import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
-import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
-import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
-import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
-import { COMPONENT_SHEET_DRAWING_PANEL } from '../views/sheet-image-panel/component-name';
-import { SheetDrawingPanel } from '../views/sheet-image-panel/SheetDrawingPanel';
+import { COMPONENT_DOC_UPLOAD_FILE_MENU } from '../views/upload-component/component-name';
+import { ImageMenuFactory, ImageUploadIcon, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
+import { InsertDocImageOperation } from '../commands/operations/insert-image.operation';
+import { COMPONENT_DOC_DRAWING_PANEL } from '../views/doc-image-panel/component-name';
+import { DocDrawingPanel } from '../views/doc-image-panel/DocDrawingPanel';
 
-import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
-import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
-import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
-import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
-import { SidebarSheetDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
-import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command';
-import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
-import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
+import { ClearDocDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
+import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
+import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
+import { MoveDocDrawingsCommand } from '../commands/commands/move-drawings.command';
+import { DeleteDocDrawingsCommand } from '../commands/commands/delete-drawings.command';
+import { SetDocDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
+import { SetDocDrawingCommand } from '../commands/commands/set-doc-drawing.command';
+import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
+import { UngroupDocDrawingCommand } from '../commands/commands/ungroup-doc-drawing.command';
+import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.command';
+import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
 import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetDrawingUIController)
-export class SheetDrawingUIController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, DocDrawingUIController)
+export class DocDrawingUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
@@ -57,8 +57,8 @@ export class SheetDrawingUIController extends Disposable {
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(ImageUploadIcon, AddImageSingle));
-        this.disposeWithMe(componentManager.register(COMPONENT_UPLOAD_FILE_MENU, UploadFileMenu));
-        this.disposeWithMe(componentManager.register(COMPONENT_SHEET_DRAWING_PANEL, SheetDrawingPanel));
+        this.disposeWithMe(componentManager.register(COMPONENT_DOC_UPLOAD_FILE_MENU, UploadFileMenu));
+        this.disposeWithMe(componentManager.register(COMPONENT_DOC_DRAWING_PANEL, DocDrawingPanel));
     }
 
     private _initMenus(): void {
@@ -67,7 +67,6 @@ export class SheetDrawingUIController extends Disposable {
             [
                 ImageMenuFactory,
                 UploadFloatImageMenuFactory,
-                UploadCellImageMenuFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), {}));
@@ -76,19 +75,18 @@ export class SheetDrawingUIController extends Disposable {
 
     private _initCommands() {
         [
-            InsertFloatImageOperation,
-            InsertCellImageOperation,
-            InsertSheetDrawingCommand,
-            RemoveSheetDrawingCommand,
-            SetSheetDrawingCommand,
-            SidebarSheetDrawingOperation,
-            ClearSheetDrawingTransformerOperation,
-            EditSheetDrawingOperation,
-            GroupSheetDrawingCommand,
-            UngroupSheetDrawingCommand,
-            MoveDrawingsCommand,
-            DeleteDrawingsCommand,
-            SetDrawingArrangeCommand,
+            InsertDocImageOperation,
+            InsertDocDrawingCommand,
+            RemoveDocDrawingCommand,
+            SetDocDrawingCommand,
+            SidebarDocDrawingOperation,
+            ClearDocDrawingTransformerOperation,
+            EditDocDrawingOperation,
+            GroupDocDrawingCommand,
+            UngroupDocDrawingCommand,
+            MoveDocDrawingsCommand,
+            DeleteDocDrawingsCommand,
+            SetDocDrawingArrangeCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

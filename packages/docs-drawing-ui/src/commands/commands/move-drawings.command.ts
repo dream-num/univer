@@ -16,31 +16,31 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, Direction, ICommandService } from '@univerjs/core';
-import type { ISheetDrawing } from '@univerjs/sheets';
-import { ISheetDrawingService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-import { ISelectionRenderService } from '@univerjs/sheets-ui';
 
-import { transformToDrawingPosition } from '../../basics/transform-position';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
+import type { IDocDrawing } from '@univerjs/docs';
+import { IDocDrawingService } from '@univerjs/docs';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { transformToDrawingPosition } from '@univerjs/docs-ui';
+import { ClearDocDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import type { ISetDrawingCommandParams } from './interfaces';
-import { SetSheetDrawingCommand } from './set-sheet-drawing.command';
+import { SetDocDrawingCommand } from './set-doc-drawing.command';
 
 export interface IMoveDrawingsCommandParams {
     direction: Direction ;
 }
 
-export const MoveDrawingsCommand: ICommand = {
-    id: 'sheet.command.move-drawing',
+export const MoveDocDrawingsCommand: ICommand = {
+    id: 'doc.command.move-drawing',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params: IMoveDrawingsCommandParams) => {
         const commandService = accessor.get(ICommandService);
-        const drawingManagerService = accessor.get(ISheetDrawingService);
-        const selectionRenderService = accessor.get(ISelectionRenderService);
+        const docDrawingService = accessor.get(IDocDrawingService);
+        const textSelectionRenderService = accessor.get(ITextSelectionRenderManager);
 
         const { direction } = params;
 
-        const drawings = drawingManagerService.getFocusDrawings();
+        const drawings = docDrawingService.getFocusDrawings();
 
         if (drawings.length === 0) {
             return false;
@@ -49,7 +49,7 @@ export const MoveDrawingsCommand: ICommand = {
         const unitId = drawings[0].unitId;
 
         const newDrawings = drawings.map((drawing) => {
-            const { transform } = drawing as ISheetDrawing;
+            const { transform } = drawing as IDocDrawing;
             if (transform == null) {
                 return null;
             }
@@ -70,17 +70,17 @@ export const MoveDrawingsCommand: ICommand = {
             return {
                 ...drawing,
                 transform: newTransform,
-                sheetTransform: transformToDrawingPosition(newTransform, selectionRenderService),
-            } as ISheetDrawing;
-        }).filter((drawing) => drawing != null) as ISheetDrawing[];
+                docTransform: transformToDrawingPosition(newTransform, textSelectionRenderService),
+            } as IDocDrawing;
+        }).filter((drawing) => drawing != null) as IDocDrawing[];
 
-        const result = commandService.syncExecuteCommand<ISetDrawingCommandParams>(SetSheetDrawingCommand.id, {
+        const result = commandService.syncExecuteCommand<ISetDrawingCommandParams>(SetDocDrawingCommand.id, {
             unitId,
             drawings: newDrawings,
         });
 
         if (result) {
-            commandService.syncExecuteCommand(ClearSheetDrawingTransformerOperation.id, [unitId]);
+            commandService.syncExecuteCommand(ClearDocDrawingTransformerOperation.id, [unitId]);
             return true;
         }
 

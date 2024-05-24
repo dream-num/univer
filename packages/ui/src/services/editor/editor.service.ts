@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, IDocDrawingBase, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable, Workbook } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, IContextService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
@@ -35,7 +35,7 @@ export interface IEditorCanvasStyle {
 export interface IEditorConfigParam {
     editorUnitId: string;
 
-    initialSnapshot?: IDocumentData;
+    initialSnapshot?: IDocumentData<IDocDrawingBase>;
     cancelDefaultResizeListener?: boolean;
     canvasStyle?: IEditorCanvasStyle;
     isSheetEditor: boolean;
@@ -617,7 +617,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     register(config: IEditorConfigParam, container: HTMLDivElement): IDisposable {
         const { initialSnapshot, editorUnitId, canvasStyle = {} } = config;
 
-        const documentDataModel = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, initialSnapshot || this._getBlank(editorUnitId));
+        const documentDataModel = this._univerInstanceService.createUnit<IDocumentData<IDocDrawingBase>, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, initialSnapshot || this._getBlank(editorUnitId));
 
         let render = this._renderManagerService.getRenderById(editorUnitId);
 
@@ -750,7 +750,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
                 marginTop: 2,
                 marginRight: 6,
             },
-        } as IDocumentData;
+        } as IDocumentData<IDocDrawingBase>;
     }
 }
 

@@ -24,8 +24,6 @@ import React, { useEffect, useState } from 'react';
 import { Menu } from '../../../components/menu/Menu';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 
-export interface IProps {}
-
 export function ContextMenu() {
     const [visible, setVisible] = useState(false);
     const [menuType, setMenuType] = useState('');

@@ -18,4 +18,4 @@ export * from './basics';
 export * from './docs-ui-plugin';
 export { DocCanvasView } from './views/doc-canvas-view';
 export * from './services';
-export { drawingPositionToTransform, transformToDrawingPosition } from './basics/transform-position';
+export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';

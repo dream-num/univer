@@ -15,6 +15,7 @@
  */
 
 import type { ISize } from '../../services/drawing/drawing-interfaces';
+import type { IDrawingParam } from '../../services/drawing/drawing-manager.service';
 import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
 import type { IExtraModelData } from './i-extra-model-data';
 import type { IColorStyle, IStyleBase } from './i-style-data';
@@ -508,7 +509,7 @@ export interface IBullet {
  * 20.4.2.19 wrapTight (Tight Wrapping)
  * 20.4.2.20 wrapTopAndBottom (Top and Bottom Wrapping)
  */
-export interface IDocDrawingBase {
+export interface IDocDrawingBase extends IDrawingParam {
     drawingId: string;
 
     title: string;

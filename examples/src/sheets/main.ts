@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -36,11 +36,13 @@ import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
+import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
+import { UniverDebuggerPlugin } from '@univerjs/debugger';
 
 import { FUniver } from '@univerjs/facade';
-import { DebuggerPlugin } from '../plugins/debugger';
+import { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
-import { locales } from './locales';
+import { enUS, ruRU, zhCN } from '../locales';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -51,7 +53,11 @@ const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
 const univer = new Univer({
     theme: defaultTheme,
     locale: LocaleType.ZH_CN,
-    locales,
+    locales: {
+        [LocaleType.ZH_CN]: zhCN,
+        [LocaleType.EN_US]: enUS,
+        [LocaleType.RU_RU]: ruRU,
+    },
     logLevel: LogLevel.VERBOSE,
 });
 
@@ -62,8 +68,6 @@ univer.registerPlugin(UniverDocsPlugin, {
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
-    header: true,
-    footer: true,
 });
 
 univer.registerPlugin(UniverDocsUIPlugin);
@@ -106,17 +110,45 @@ if (!IS_E2E) {
     univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 }
 
-// Uncomment the following lines to test if the document is disposed correctly without memory leaks.
-// setTimeout(() => {
-//     univer.__getInjector().get(IUniverInstanceService).disposeUnit(DEFAULT_WORKBOOK_DATA_DEMO.id);
-// }, 5000);
-// setTimeout(() => {
-//     univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
-// }, 7000);
+const mockUser = {
+    userID: 'mockId',
+    name: 'MockUser',
+    avatar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAInSURBVHgBtZU9TxtBEIbfWRzFSIdkikhBSqRQkJqkCKTCFkqVInSUSaT0wC8w/gXxD4gU2nRJkXQWhAZowDUUWKIwEgWWbEEB3mVmx3dn4DA2nB/ppNuPeWd29mMIPXDr+RxwtgRHeW6+guNPRxogqnL7Dwz9psJ27S4NShaeZTH3kwXy6I81dlRKcmRui88swdq9AcSFL7Buz1Vmlns64MiLsCjzwnIYHLH57tbfFbs7KRaXyEU8FVZofqccOfA5l7Q8LPIkGrwnb2RPNEXWFVMUF3L+kDCk0btDDAMzOm5YfAHDwp4tG74wnzAsiOYMnJ3GoDybA7IT98/jm5+JNnfiIzAS6LlqHQBN/i6b2t/cV1Hh6BfwYlHnHP4AXi5q/8kmMMpOs8+BixZw/Fd6xUEHEbnkgclvQP2fGp7uShRKnQ3G32rkjV1th8JhIGG7tR/JyjGteSOZELwGMmNqIIigRCLRh2OZIE6BjItdd7pCW6Uhm1zzkUtungSxwEUzNpQ+GQumtH1ej1MqgmNT6vwmhCq5yuwq56EYTbgeQUz3yvrpV1b4ok3nYJ+eYhgYmjRUqErx2EDq0Fr8FhG++iqVGqxlUJI/70Ar0UgJaWHj6hYVHJrfKssAHot1JfqwE9WVWzXZVd5z2Ws/4PnmtEjkXeKJDvxUecLbWOXH/DP6QQ4J72NS0adedp1aseBfXP8odlZFfPvBF7SN/8hky1TYuPOAXAEipMx15u5ToAAAAABJRU5ErkJggg==',
+    anonymous: false,
+    canBindAnonymous: false,
+};
 
+class CustomMentionDataService implements IThreadCommentMentionDataService {
+    trigger: string = '@';
+
+    async getMentions(search: string) {
+        return [
+            {
+                id: mockUser.userID,
+                label: mockUser.name,
+                type: 'user',
+                icon: mockUser.avatar,
+            },
+            {
+                id: '2',
+                label: 'User2',
+                type: 'user',
+                icon: mockUser.avatar,
+            },
+        ];
+    }
+}
+
+univer.registerPlugin(UniverSheetsThreadCommentPlugin, {
+    overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
+});
 
 // debugger plugin
-univer.registerPlugin(DebuggerPlugin);
+univer.registerPlugin(UniverDebuggerPlugin);
+
+const injector = univer.__getInjector();
+const userManagerService = injector.get(UserManagerService);
+userManagerService.setCurrentUser(mockUser);
 
 declare global {
     interface Window {

@@ -1885,7 +1885,6 @@ export class PromptController extends Disposable {
         );
     }
 
-
     private _moveInEditor(keycode: Nullable<KeyCode>) {
         if (keycode == null) {
             return;

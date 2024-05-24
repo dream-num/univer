@@ -20,6 +20,7 @@ import {
     BooleanNumber,
     CellValueType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
+    DEFAULT_STYLES,
     DocumentDataModel,
     extractPureTextFromCell,
     getColorStyle,
@@ -828,11 +829,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         offsetY: number,
         scaleX: number,
         scaleY: number,
-        scrollXY: { x: number; y: number }
+        scrollXY: { x: number; y: number },
+        closeFirst?: boolean
     ) {
-        const row = this.getRowPositionByOffsetY(offsetY, scaleY, scrollXY);
+        const row = this.getRowPositionByOffsetY(offsetY, scaleY, scrollXY, closeFirst);
 
-        const column = this.getColumnPositionByOffsetX(offsetX, scaleX, scrollXY);
+        const column = this.getColumnPositionByOffsetX(offsetX, scaleX, scrollXY, closeFirst);
 
         return {
             row,
@@ -848,7 +850,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @returns
      */
 
-    getColumnPositionByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }) {
+    getColumnPositionByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }, closeFirst?: boolean) {
         offsetX = this.getTransformOffsetX(offsetX, scaleX, scrollXY);
 
         const { columnWidthAccumulation } = this;
@@ -859,6 +861,13 @@ export class SpreadsheetSkeleton extends Skeleton {
             column = columnWidthAccumulation.length - 1;
         } else if (column === -1) {
             column = 0;
+        }
+
+        if (closeFirst) {
+            // check if upper column was closer than current
+            if (Math.abs(columnWidthAccumulation[column] - offsetX) < Math.abs(offsetX - (columnWidthAccumulation[column - 1] ?? 0))) {
+                column = column + 1;
+            }
         }
 
         // if (column === -1) {
@@ -882,7 +891,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param scrollXY.x
      * @param scrollXY.y
      */
-    getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }) {
+    getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }, closeFirst?: boolean) {
         const { rowHeightAccumulation } = this;
 
         offsetY = this.getTransformOffsetY(offsetY, scaleY, scrollXY);
@@ -895,6 +904,12 @@ export class SpreadsheetSkeleton extends Skeleton {
             row = 0;
         }
 
+        if (closeFirst) {
+             // check if upper row was closer than current
+            if (Math.abs(rowHeightAccumulation[row] - offsetY) < Math.abs(offsetY - (rowHeightAccumulation[row - 1] ?? 0))) {
+                row = row + 1;
+            }
+        }
         // if (row === -1) {
         //     const rowLength = rowHeightAccumulation.length - 1;
         //     const lastRowValue = rowHeightAccumulation[rowLength];
@@ -1067,10 +1082,10 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         let fontString = 'document';
 
-        const textRotation: ITextRotation = { a: 0, v: BooleanNumber.FALSE };
-        const horizontalAlign: HorizontalAlign = HorizontalAlign.UNSPECIFIED;
-        const verticalAlign: VerticalAlign = VerticalAlign.UNSPECIFIED;
-        const wrapStrategy: WrapStrategy = WrapStrategy.UNSPECIFIED;
+        const textRotation: ITextRotation = DEFAULT_STYLES.tr;
+        const horizontalAlign: HorizontalAlign = DEFAULT_STYLES.ht;
+        const verticalAlign: VerticalAlign = DEFAULT_STYLES.vt;
+        const wrapStrategy: WrapStrategy = DEFAULT_STYLES.tb;
         const paddingData: IPaddingData = DEFAULT_PADDING_DATA;
 
         fontString = getFontStyleString({}, this._localService).fontCache;
@@ -1117,17 +1132,17 @@ export class SpreadsheetSkeleton extends Skeleton {
         const cellOtherConfig = this._getOtherStyle(style) as ICellOtherConfig;
 
         const textRotation: ITextRotation = ignoreTextRotation
-            ? { a: 0, v: BooleanNumber.FALSE }
-            : cellOtherConfig.textRotation || { a: 0, v: BooleanNumber.FALSE };
-        let horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || HorizontalAlign.UNSPECIFIED;
-        const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || VerticalAlign.UNSPECIFIED;
-        const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || WrapStrategy.UNSPECIFIED;
+            ? DEFAULT_STYLES.tr
+            : cellOtherConfig.textRotation || DEFAULT_STYLES.tr;
+        let horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || DEFAULT_STYLES.ht;
+        const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || DEFAULT_STYLES.vt;
+        const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || DEFAULT_STYLES.tb;
         const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
 
         if (cell.f && displayRawFormula) {
             // The formula does not detect horizontal alignment and rotation.
             documentModel = this._getDocumentDataByStyle(cell.f.toString(), {}, { verticalAlign });
-            horizontalAlign = HorizontalAlign.UNSPECIFIED;
+            horizontalAlign = DEFAULT_STYLES.ht;
         } else if (cell.p) {
             const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
             documentModel = this._updateConfigAndGetDocumentModel(

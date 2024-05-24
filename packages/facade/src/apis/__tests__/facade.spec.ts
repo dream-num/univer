@@ -49,6 +49,10 @@ describe('Test FUniver', () => {
     let getSheetRenderComponent: (unitId: string, viewKey: SHEET_VIEW_KEY) => Nullable<RenderComponentType>;
 
     beforeEach(() => {
+        vi.stubGlobal('jest', vi);
+    });
+
+    beforeEach(() => {
         const testBed = createFacadeTestBed();
         get = testBed.get;
         univerAPI = testBed.univerAPI;

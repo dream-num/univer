@@ -1,0 +1,140 @@
+.thread-comment {
+    padding: 16px;
+    background: rgba(var(--color-white));
+    border: 1px solid rgba(var(--grey-200));
+    width: 279px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.thread-comment-active {
+    box-shadow: var(--box-shadow-base);
+}
+
+.thread-comment-content {
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-color: rgba(var(--scrollbar-color), 0.7) transparent;
+    scrollbar-gutter: auto;
+    scrollbar-width: thin;
+}
+
+.thread-comment-highlight {
+    background-color: rgb(var(--gold-400));
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.thread-comment-icon-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.thread-comment-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+    margin-left: 4px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.thread-comment-icon:hover {
+    background-color: rgba(var(--grey-50));
+}
+
+.thread-comment-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.thread-comment-title-position {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.thread-comment-title-highlight {
+    width: 3px;
+    height: 14px;
+    border-radius: 1.5px;
+    background-color: rgba(var(--gold-400));
+    margin-right: 8px;
+}
+
+.thread-comment-username {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+}
+
+.thread-comment-item {
+    margin-bottom: 12px;
+    padding-left: 30px;
+    position: relative;
+}
+
+.thread-comment-item-head {
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.thread-comment-item-title {
+    display: flex;
+    justify-content: space-between;
+    height: 24px;
+    align-items: center;
+    margin-bottom: 4px;
+
+    &-position {
+        color: rgba(var(--color-black));
+        font-size: 14px;
+        line-height: 20px;
+    }
+
+    &-highlight {
+        width: 3px;
+        height: 14px;
+        border-radius: 2px;
+        margin-right: 8px;
+        margin-top: 3px;
+        background-color: rgba(var(--gold-400));
+    }
+}
+
+.thread-comment-item-time {
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 4px;
+    color: rgba(var(--grey-600));
+}
+
+.thread-comment-item-content {
+    font-size: 13px;
+    line-height: 20px;
+    word-break: break-all;
+    color: rgba(var(--color-black));
+}
+
+.thread-comment-item-at {
+    color: rgba(var(--blue-400));
+}

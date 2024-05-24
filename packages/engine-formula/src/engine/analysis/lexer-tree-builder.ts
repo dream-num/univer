@@ -460,7 +460,6 @@ export class LexerTreeBuilder extends Disposable {
         );
     }
 
-
     private _getCurrentParamIndex(formulaString: string, index: number) {
         return this._nodeMaker(formulaString, undefined, index);
     }

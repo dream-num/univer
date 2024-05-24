@@ -22,7 +22,6 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { Isodd } from '../isodd';
 
-
 describe('Test isodd function', () => {
     const testFunction = new Isodd(FUNCTION_NAMES_INFORMATION.ISODD);
 

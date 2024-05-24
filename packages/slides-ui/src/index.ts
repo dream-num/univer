@@ -15,4 +15,3 @@
  */
 
 export * from './slides-ui-plugin';
-export { enUS, zhCN } from './locale';

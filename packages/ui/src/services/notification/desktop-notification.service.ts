@@ -14,17 +14,32 @@
  * limitations under the License.
  */
 
-import { toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
+import { Disposable, toDisposable } from '@univerjs/core';
+import { type IDisposable, Inject, Injector } from '@wendellhu/redi';
 
-import type { INotificationMethodOptions } from '../../components/notification/Notification';
-import { notification } from '../../components/notification/Notification';
+import { connectInjector } from '@wendellhu/redi/react-bindings';
+import type { INotificationOptions } from '../../components/notification/Notification';
+import { notification, Notification } from '../../components/notification/Notification';
+import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 import type { INotificationService } from './notification.service';
 
-export class DesktopNotificationService implements INotificationService {
-    show(params: INotificationMethodOptions): IDisposable {
+export class DesktopNotificationService extends Disposable implements INotificationService {
+    constructor(
+        @Inject(Injector) private readonly _injector: Injector,
+        @IUIPartsService private readonly _uiPartsService: IUIPartsService
+    ) {
+        super();
+
+        this._initUIPart();
+    }
+
+    show(params: INotificationOptions): IDisposable {
         notification.show(params);
 
         return toDisposable(() => { /* empty */ });
+    }
+
+    protected _initUIPart(): void {
+        this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(Notification, this._injector)));
     }
 }

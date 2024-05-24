@@ -155,7 +155,6 @@ export class Univer {
         }
     }
 
-
     /** Register a plugin into univer. */
     registerPlugin<T extends PluginCtor<Plugin>>(plugin: T, config?: ConstructorParameters<T>[0]): void {
         this._pluginService.registerPlugin(plugin, config);

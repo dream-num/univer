@@ -28,8 +28,8 @@ export {
     UndoShortcutItem,
 } from './controllers/shared-shortcut.controller';
 export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
-export { DesktopUIController, DesktopUIPart, type IDesktopUIController } from './controllers/ui/ui-desktop.controller';
-export { enUS, zhCN } from './locale';
+export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
+export { IUIPartsService, BuiltInUIPart, UIPartsService } from './services/parts/parts.service';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 export { CopyCommand, CutCommand, PasteCommand } from './services/clipboard/clipboard.command';
 export {
@@ -57,14 +57,17 @@ export {
     type IMenuItemFactory,
     type IMenuSelectorItem,
     type IValueOption,
+    type MenuConfig,
     MenuGroup,
     MenuItemType,
     MenuPosition,
+    type MenuItemDefaultValueType,
 } from './services/menu/menu';
 export { DesktopMenuService, IMenuService } from './services/menu/menu.service';
 export { DesktopMessageService } from './services/message/desktop-message.service';
 export { IMessageService } from './services/message/message.service';
 export { DesktopNotificationService } from './services/notification/desktop-notification.service';
+export { type NotificationType, type INotificationOptions } from './components/notification/Notification';
 export { INotificationService } from './services/notification/notification.service';
 export { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
 export { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
@@ -77,12 +80,27 @@ export { IZenZoneService } from './services/zen-zone/zen-zone.service';
 export { UniverUIPlugin, DISABLE_AUTO_FOCUS_KEY } from './ui-plugin';
 export * from './utils';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
+export { ComponentContainer } from './views/components/ComponentContainer';
 export { IEditorService, EditorService } from './services/editor/editor.service';
 export { TextEditor } from './components/editor/TextEditor';
 export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';
 export { RangeSelector } from './components/range-selector/RangeSelector';
 export { IRangeSelectorService } from './services/range-selector/range-selector.service';
 export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
-export { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
+export { CanvasPopupService, ICanvasPopupService, type IPopup } from './services/popup/canvas-popup.service';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
-export { IProgressService } from './services/progress/progress.service';
+export { type IMenuGroup, useToolbarGroups, useToolbarItemStatus, useToolbarCollapseObserver } from './views/components/doc-bars/hook';
+export { mergeMenuConfigs } from './common/menu-merge-configs';
+export { IProgressService, ProgressService } from './services/progress/progress.service';
+export type { IProgressStep } from './services/progress/progress.service';
+
+// #region - workbench components
+
+export { GlobalZone } from './views/components/global-zone/GlobalZone';
+export { builtInGlobalComponents } from './views/parts';
+export { ContextMenu } from './views/components/context-menu/ContextMenu';
+export { Sidebar } from './views/components/sidebar/Sidebar';
+export { ZenZone } from './views/components/zen-zone/ZenZone';
+export { CanvasPopup } from './views/components/popup/CanvasPopup';
+
+// #endregion

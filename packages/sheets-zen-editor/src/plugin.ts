@@ -14,40 +14,38 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
+import { LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { ZenEditorController } from './controllers/zen-editor.controller';
-import { ZenEditorUIController } from './controllers/zen-editor-ui.controller';
+import type { IUniverSheetsZenEditorUIConfig } from './controllers/zen-editor-ui.controller';
+import { DefaultSheetZenEditorUiConfig, ZenEditorUIController } from './controllers/zen-editor-ui.controller';
 import { IZenEditorManagerService, ZenEditorManagerService } from './services/zen-editor.service';
-import { zhCN } from './locale';
 
-export interface IUniverSheetsZenEditorPluginConfig {}
 export class UniverSheetsZenEditorPlugin extends Plugin {
     static override pluginName = 'zen-editor';
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
-        _config: IUniverSheetsZenEditorPluginConfig,
+        private readonly _config: Partial<IUniverSheetsZenEditorUIConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
 
-        this._initialize();
         this._initializeDependencies(this._injector);
-    }
-
-    private _initialize(): void {
-        this._localeService.load({
-            zhCN,
-        });
+        this._config = Tools.deepMerge({}, DefaultSheetZenEditorUiConfig, this._config);
     }
 
     private _initializeDependencies(injector: Injector) {
         const dependencies: Dependency[] = [
-            [ZenEditorUIController],
+            [
+                ZenEditorUIController,
+                {
+                    useFactory: () => this._injector.createInstance(ZenEditorUIController, this._config),
+                },
+            ],
             [ZenEditorController],
             [IZenEditorManagerService, { useClass: ZenEditorManagerService }],
         ];

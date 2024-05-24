@@ -103,7 +103,6 @@ export class DataValidationManager<T extends IDataValidationRule> extends Dispos
 
         const rule = { ...oldRule };
 
-
         switch (payload.type) {
             case UpdateRuleType.RANGE: {
                 rule.ranges = payload.payload;

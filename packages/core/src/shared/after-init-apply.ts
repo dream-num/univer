@@ -20,7 +20,6 @@ import type { ICommandService } from '../services/command/command.service';
 import { CommandType } from '../services/command/command.service';
 import { fromCallback } from './rxjs';
 
-
 export const afterInitApply = (commandService: ICommandService) => {
     return new Promise<void>((res) => {
         merge(

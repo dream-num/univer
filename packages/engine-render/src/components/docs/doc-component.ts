@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import { RENDER_CLASS_TYPE } from '../../basics/const';
 import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
 import { PageLayoutType } from '../../basics/i-document-skeleton-cached';

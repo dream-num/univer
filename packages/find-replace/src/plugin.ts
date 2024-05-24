@@ -14,31 +14,38 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin } from '@univerjs/core';
-import { type Dependency, Inject, type Injector } from '@wendellhu/redi';
+import { LocaleService, Plugin, Tools } from '@univerjs/core';
+import { type Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { FindReplaceController } from './controllers/find-replace.controller';
-import { zhCN } from './locale';
+import type { IUniverFindReplaceConfig } from './controllers/find-replace.controller';
+import { DefaultFindReplaceConfig, FindReplaceController } from './controllers/find-replace.controller';
 import { FindReplaceService, IFindReplaceService } from './services/find-replace.service';
 
-const PLUGIN_NAME = 'FIND_REPLACE';
+const PLUGIN_NAME = 'FIND_REPLACE_PLUGIN';
 
 export class UniverFindReplacePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        protected readonly _injector: Injector,
+        private readonly _config: Partial<IUniverFindReplaceConfig> = {},
+        @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
 
-        this._localeService.load({
-            zhCN,
-        });
+        this._config = Tools.deepMerge({}, DefaultFindReplaceConfig, this._config);
     }
 
     override onStarting(injector: Injector): void {
-        ([[FindReplaceController], [IFindReplaceService, { useClass: FindReplaceService }]] as Dependency[]).forEach(
+        ([
+            [
+                FindReplaceController,
+                {
+                    useFactory: () => this._injector.createInstance(FindReplaceController, this._config),
+                },
+            ],
+            [IFindReplaceService, { useClass: FindReplaceService }],
+        ] as Dependency[]).forEach(
             (d) => {
                 injector.add(d);
             }

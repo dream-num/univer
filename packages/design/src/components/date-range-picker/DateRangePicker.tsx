@@ -51,7 +51,7 @@ export function DateRangePicker(props: IDateRangePickerProps) {
             value={value}
             prefixCls={styles.dateRangePicker}
             generateConfig={generateConfig}
-            locale={locale.design.Picker}
+            locale={locale?.Picker!}
             separator={<GuideSingle />}
             suffixIcon={<CalendarSingle className={styles.dateRangePickerSuffixIcon} />}
             onChange={handleChange}

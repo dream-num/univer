@@ -16,7 +16,7 @@
 
 import { BooleanNumber, type IDocumentBody, type IStyleBase } from '@univerjs/core';
 // @ts-ignore
-import opentype from 'opentype.js/dist/opentype.module';
+import { parse } from 'opentype.js/dist/opentype.module';
 import type Opentype from 'opentype.js';
 import type { Nullable } from 'vitest';
 import { DEFAULT_FONTFACE_PLANE } from '../../../../basics/const';
@@ -44,7 +44,6 @@ export interface IOpenTypeGlyphInfo {
 
 const fontCache = new Map<string, Opentype.Font>();
 const glyphCache: Map<string, IOpenTypeGlyphInfo[]> = new Map();
-
 
 function shapeChunk(
     content: string,
@@ -83,7 +82,7 @@ function shapeChunk(
 
     let font = fontCache.get(fontInfo.fullName);
     if (!font) {
-        font = opentype.parse(fontBuffer) as Opentype.Font;
+        font = parse(fontBuffer) as Opentype.Font;
         fontCache.set(fontInfo.fullName, font);
     }
 

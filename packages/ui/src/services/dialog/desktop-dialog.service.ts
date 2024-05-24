@@ -15,15 +15,27 @@
  */
 
 import { Disposable, toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
+import { type IDisposable, Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
+import { connectInjector } from '@wendellhu/redi/react-bindings';
 import type { IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
+import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
+import { DialogPart } from '../../views/components/dialog-part/DialogPart';
 import type { IDialogService } from './dialog.service';
 
 export class DesktopDialogService extends Disposable implements IDialogService {
     protected _dialogOptions: IDialogPartMethodOptions[] = [];
     protected readonly _dialogOptions$ = new Subject<IDialogPartMethodOptions[]>();
+
+    constructor(
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService
+    ) {
+        super();
+
+        this._initUIPart();
+    }
 
     override dispose(): void {
         super.dispose();
@@ -63,5 +75,11 @@ export class DesktopDialogService extends Disposable implements IDialogService {
 
     getDialogs$() {
         return this._dialogOptions$.asObservable();
+    }
+
+    protected _initUIPart(): void {
+        this.disposeWithMe(
+            this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(DialogPart, this._injector))
+        );
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Univer, UniverInstanceType } from '@univerjs/core';
+import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSlidesPlugin } from '@univerjs/slides';
@@ -23,10 +23,17 @@ import { UniverUIPlugin } from '@univerjs/ui';
 
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { DEFAULT_SLIDE_DATA } from '../data';
+import { enUS, ruRU, zhCN } from '../locales';
 
 // univer
 const univer = new Univer({
     theme: greenTheme,
+    locale: LocaleType.ZH_CN,
+    locales: {
+        [LocaleType.ZH_CN]: zhCN,
+        [LocaleType.EN_US]: enUS,
+        [LocaleType.RU_RU]: ruRU,
+    },
 });
 
 // base-render
@@ -34,8 +41,6 @@ univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'univer-container',
-    header: true,
-    footer: true,
 });
 univer.registerPlugin(UniverSlidesPlugin);
 univer.registerPlugin(UniverSlidesUIPlugin);

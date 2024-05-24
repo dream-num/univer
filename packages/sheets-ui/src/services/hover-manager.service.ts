@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { IPosition, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IPosition, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { distinctUntilChanged, Subject } from 'rxjs';
-import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
-import { getCellIndexByOffsetWithMerge } from '../common/utils';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { getHoverCellPosition } from '../common/utils';
 import { ScrollManagerService } from './scroll-manager.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
@@ -31,6 +31,8 @@ export interface IHoverCellPosition {
 
 export class HoverManagerService extends Disposable {
     private _currentCell$ = new Subject<Nullable<IHoverCellPosition>>();
+
+    // Notify when hovering over different cells
     currentCell$ = this._currentCell$.asObservable().pipe(distinctUntilChanged((
         (pre, aft) => (
             pre?.location?.unitId === aft?.location?.unitId
@@ -39,6 +41,9 @@ export class HoverManagerService extends Disposable {
             && pre?.location?.col === aft?.location?.col
         )
     )));
+
+    // Notify when mouse position changes
+    currentPosition$ = this._currentCell$.asObservable();
 
     private _lastPosition: Nullable<{ offsetX: number; offsetY: number }> = null;
 
@@ -52,6 +57,11 @@ export class HoverManagerService extends Disposable {
 
         // TODO@weird94: any better solution here?
         this._initCellDisposableListener();
+    }
+
+    override dispose(): void {
+        super.dispose();
+        this._currentCell$.complete();
     }
 
     private _initCellDisposableListener(): void {
@@ -78,64 +88,17 @@ export class HoverManagerService extends Disposable {
 
         if (!skeletonParam || !scrollInfo || !currentRender) return;
 
-        const { scene } = currentRender;
+        const hoverPosition = getHoverCellPosition(currentRender, workbook, worksheet, skeletonParam, offsetX, offsetY);
 
-        const { skeleton, sheetId, unitId } = skeletonParam;
-
-        const cellIndex = getCellIndexByOffsetWithMerge(offsetX, offsetY, scene, skeleton);
-
-        if (!cellIndex) {
+        if (!hoverPosition) {
             this._currentCell$.next(null);
             return;
         }
-        const { row, col, mergeCell, actualCol, actualRow } = cellIndex;
 
-        const params: ISheetLocation = {
-            unitId,
-            subUnitId: sheetId,
-            workbook,
-            worksheet,
-            row: actualRow,
-            col: actualCol,
-        };
-
-        let anchorCell: IRange;
-
-        if (mergeCell) {
-            anchorCell = mergeCell;
-        } else {
-            anchorCell = {
-                startRow: row,
-                endRow: row,
-                startColumn: col,
-                endColumn: col,
-            };
-        }
-
-        const activeViewport = scene.getActiveViewportByCoord(
-            Vector2.FromArray([offsetX, offsetY])
-        );
-
-        if (!activeViewport) {
-            return;
-        }
-
-        const { scaleX, scaleY } = scene.getAncestorScale();
-
-        const scrollXY = {
-            x: activeViewport.actualScrollX,
-            y: activeViewport.actualScrollY,
-        };
-
-        const position: IPosition = {
-            startX: (skeleton.getOffsetByPositionX(anchorCell.startColumn - 1) - scrollXY.x) * scaleX,
-            endX: (skeleton.getOffsetByPositionX(anchorCell.endColumn) - scrollXY.x) * scaleX,
-            startY: (skeleton.getOffsetByPositionY(anchorCell.startRow - 1) - scrollXY.y) * scaleY,
-            endY: (skeleton.getOffsetByPositionY(anchorCell.endRow) - scrollXY.y) * scaleY,
-        };
+        const { location, position } = hoverPosition;
 
         this._currentCell$.next({
-            location: params,
+            location,
             position,
         });
     }

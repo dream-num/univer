@@ -176,7 +176,6 @@ export class ActiveDirtyController extends Disposable {
         });
     }
 
-
     private _initialSheet() {
         this._activeDirtyManagerService.register(RemoveSheetMutation.id, {
             commandId: RemoveSheetMutation.id,

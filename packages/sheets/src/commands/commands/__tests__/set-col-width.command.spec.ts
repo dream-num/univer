@@ -82,45 +82,45 @@ describe('Test set col width commands', () => {
 
     describe('Delta col widths by dragging', () => {
         it('Should expand all col selections when anchor col is selected', async () => {
-            expect(getColumnWidth(1)).toBe(73);
+            expect(getColumnWidth(1)).toBe(88);
 
             await commandService.executeCommand<IDeltaColumnWidthCommandParams>(DeltaColumnWidthCommand.id, {
                 deltaX: -23,
                 anchorCol: 5,
             });
-            expect(getColumnWidth(1)).toBe(50);
-            expect(getColumnWidth(2)).toBe(50);
-            expect(getColumnWidth(5)).toBe(50);
+            expect(getColumnWidth(1)).toBe(65);
+            expect(getColumnWidth(2)).toBe(65);
+            expect(getColumnWidth(5)).toBe(65);
 
             await commandService.executeCommand(UndoCommand.id);
-            expect(getColumnWidth(1)).toBe(73);
-            expect(getColumnWidth(2)).toBe(73);
-            expect(getColumnWidth(5)).toBe(73);
+            expect(getColumnWidth(1)).toBe(88);
+            expect(getColumnWidth(2)).toBe(88);
+            expect(getColumnWidth(5)).toBe(88);
 
             await commandService.executeCommand(RedoCommand.id);
-            expect(getColumnWidth(1)).toBe(50);
-            expect(getColumnWidth(2)).toBe(50);
-            expect(getColumnWidth(5)).toBe(50);
+            expect(getColumnWidth(1)).toBe(65);
+            expect(getColumnWidth(2)).toBe(65);
+            expect(getColumnWidth(5)).toBe(65);
         });
 
         it('Should expand only the anchor col in other situations', () => {
-            expect(getColumnWidth(1)).toBe(73);
-            expect(getColumnWidth(7)).toBe(73);
+            expect(getColumnWidth(1)).toBe(88);
+            expect(getColumnWidth(7)).toBe(88);
 
             commandService.executeCommand<IDeltaColumnWidthCommandParams>(DeltaColumnWidthCommand.id, {
                 deltaX: -23,
                 anchorCol: 7,
             });
 
-            expect(getColumnWidth(1)).toBe(73);
-            expect(getColumnWidth(2)).toBe(73);
-            expect(getColumnWidth(5)).toBe(73);
-            expect(getColumnWidth(7)).toBe(50);
+            expect(getColumnWidth(1)).toBe(88);
+            expect(getColumnWidth(2)).toBe(88);
+            expect(getColumnWidth(5)).toBe(88);
+            expect(getColumnWidth(7)).toBe(65);
         });
     });
 
     it('Direct change col widths', async () => {
-        expect(getColumnWidth(1)).toBe(73);
+        expect(getColumnWidth(1)).toBe(88);
 
         await commandService.executeCommand<ISetColWidthCommandParams>(SetColWidthCommand.id, {
             value: 40,
@@ -130,9 +130,9 @@ describe('Test set col width commands', () => {
         expect(getColumnWidth(5)).toBe(40);
 
         await commandService.executeCommand(UndoCommand.id);
-        expect(getColumnWidth(1)).toBe(73);
-        expect(getColumnWidth(2)).toBe(73);
-        expect(getColumnWidth(5)).toBe(73);
+        expect(getColumnWidth(1)).toBe(88);
+        expect(getColumnWidth(2)).toBe(88);
+        expect(getColumnWidth(5)).toBe(88);
 
         await commandService.executeCommand(RedoCommand.id);
         expect(getColumnWidth(1)).toBe(40);

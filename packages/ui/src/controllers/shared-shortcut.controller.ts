@@ -25,6 +25,7 @@ import type { IShortcutItem } from '../services/shortcut/shortcut.service';
 import { IShortcutService } from '../services/shortcut/shortcut.service';
 import { SetEditorResizeOperation } from '../commands/operations/editor/set-editor-resize.operation';
 import { RedoMenuItemFactory, UndoMenuItemFactory } from './menus/menus';
+import type { IUniverUIConfig } from './ui/ui.controller';
 
 // Not that the clipboard shortcut items would only be invoked when the browser fully supports clipboard API.
 // If not, the corresponding shortcut would not be triggered and we will perform clipboard operations
@@ -93,6 +94,7 @@ export const RedoShortcutItem: IShortcutItem = {
 @OnLifecycle(LifecycleStages.Ready, SharedController)
 export class SharedController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverUIConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @IMenuService private readonly _menuService: IMenuService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
@@ -110,8 +112,10 @@ export class SharedController extends Disposable {
     }
 
     private _registerMenus(): void {
+        const { menu = {} } = this._config;
+
         [UndoMenuItemFactory, RedoMenuItemFactory].forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
         });
     }
 

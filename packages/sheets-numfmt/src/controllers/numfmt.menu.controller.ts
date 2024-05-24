@@ -15,14 +15,23 @@
  */
 
 import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, PercentMenuItem, SubtractDecimalMenuItem } from '../menu/menu';
+import { MORE_NUMFMT_TYPE_KEY, MoreNumfmtType, Options, OPTIONS_KEY } from '../components/more-numfmt-type/MoreNumfmtType';
+
+export interface IUniverSheetsNumfmtConfig {
+    menu: MenuConfig;
+}
+
+export const DefaultSheetNumfmtConfig = {};
 
 @OnLifecycle(LifecycleStages.Rendered, NumfmtMenuController)
 export class NumfmtMenuController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverSheetsNumfmtConfig>,
         @Inject(Injector) private _injector: Injector,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @Inject(IMenuService) private _menuService: IMenuService
@@ -32,10 +41,14 @@ export class NumfmtMenuController extends Disposable {
     }
 
     private _initMenu() {
+        const { menu = {} } = this._config;
+
         [PercentMenuItem, AddDecimalMenuItem, SubtractDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem]
-            .map((factory) => factory(this._componentManager))
-            .forEach((configFactory) => {
-                this.disposeWithMe(this._menuService.addMenuItem(configFactory(this._injector)));
+            .forEach((factory) => {
+                this.disposeWithMe(this._menuService.addMenuItem(factory(this._injector), menu));
             });
+
+        this.disposeWithMe((this._componentManager.register(MORE_NUMFMT_TYPE_KEY, MoreNumfmtType)));
+        this.disposeWithMe((this._componentManager.register(OPTIONS_KEY, Options)));
     }
 }

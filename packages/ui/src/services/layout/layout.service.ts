@@ -35,6 +35,7 @@ const givingBackFocusElements = [
 export interface ILayoutService {
     readonly isFocused: boolean;
 
+    get rootContainerElement(): Nullable<HTMLElement>;
     /** Re-focus the currently focused Univer business instance. */
     focus(): void;
 
@@ -80,6 +81,10 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
 
         this._initUniverFocusListener();
         this._initEditorStatus();
+    }
+
+    get rootContainerElement() {
+        return this._rootContainerElement;
     }
 
     focus(): void {

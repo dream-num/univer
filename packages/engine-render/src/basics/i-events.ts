@@ -301,6 +301,17 @@ export interface IPointerEvent extends IMouseEvent {
 }
 
 /**
+ * Native friendly interface for DragEvent Object
+ */
+export interface IDragEvent extends IMouseEvent {
+    // Properties
+    /**
+     * Holds the drag operation's data
+     */
+    dataTransfer: DataTransfer;
+}
+
+/**
  * Native friendly interface for WheelEvent Object
  */
 export interface IWheelEvent extends IMouseEvent {

@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { IUniverInstanceService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
@@ -37,9 +37,9 @@ import { HeaderUnhideRenderController } from './controllers/render-controllers/h
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
 import { SelectionRenderController } from './controllers/render-controllers/selection.render-controller';
 import { SheetRenderController } from './controllers/sheet-render.controller';
-import { SheetUIController } from './controllers/sheet-ui.controller';
+import type { IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
+import { DefaultSheetUiConfig, SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
-import { zhCN } from './locale';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
@@ -71,13 +71,15 @@ import { SheetContextMenuRenderController } from './controllers/render-controlle
 import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
+import { DragRenderController } from './controllers/drag-render.controller';
+import { DragManagerService } from './services/drag-manager.service';
 
 export class UniverSheetsUIPlugin extends Plugin {
-    static override pluginName = 'SHEET_UI_PLUGIN_NAME';
+    static override pluginName = 'SHEET_UI_PLUGIN';
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        _config: undefined,
+        private readonly _config: Partial<IUniverSheetsUIConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -85,9 +87,7 @@ export class UniverSheetsUIPlugin extends Plugin {
     ) {
         super();
 
-        this._localeService.load({
-            zhCN,
-        });
+        this._config = Tools.deepMerge({}, DefaultSheetUiConfig, this._config);
     }
 
     override onStarting(injector: Injector): void {
@@ -109,6 +109,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
                 [HoverManagerService],
+                [DragManagerService],
                 [SheetCanvasPopManagerService],
                 [CellAlertManagerService],
 
@@ -120,7 +121,12 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [HeaderFreezeRenderController],
                 [SheetClipboardController],
                 [SheetRenderController],
-                [SheetUIController],
+                [
+                    SheetUIController,
+                    {
+                        useFactory: () => this._injector.createInstance(SheetUIController, this._config),
+                    },
+                ],
                 [StartEditController],
                 [StatusBarController],
                 [EditingController],
@@ -155,6 +161,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             ForceStringAlertRenderController,
             MarkSelectionRenderController,
             HoverRenderController,
+            DragRenderController,
             ForceStringRenderController,
             CellCustomRenderController,
             SheetContextMenuRenderController,

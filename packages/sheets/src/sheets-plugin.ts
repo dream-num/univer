@@ -22,7 +22,6 @@ import { BasicWorksheetController } from './controllers/basic-worksheet.controll
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
 import { FeatureCalculationController } from './controllers/feature-calculation.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
-import { zhCN } from './locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { NumfmtService } from './services/numfmt/numfmt.service';
 import { INumfmtService } from './services/numfmt/type';
@@ -32,7 +31,7 @@ import { SelectionManagerService } from './services/selection-manager.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 
-const PLUGIN_NAME = 'sheets';
+const PLUGIN_NAME = 'SHEET_PLUGIN';
 
 export interface IUniverSheetsConfig {
     notExecuteFormula?: boolean;
@@ -57,9 +56,6 @@ export class UniverSheetsPlugin extends Plugin {
     }
 
     override onRendered(): void {
-        this._localeService.load({
-            zhCN,
-        });
     }
 
     private _initializeDependencies(sheetInjector: Injector) {

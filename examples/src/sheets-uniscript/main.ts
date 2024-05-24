@@ -26,14 +26,20 @@ import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
+import { UniverDebuggerPlugin } from '@univerjs/debugger';
 
 import { UNISCRIT_WORKBOOK_DATA_DEMO } from '../data/sheets/uniscript-data';
-import { DebuggerPlugin } from '../plugins/debugger';
+import { enUS, ruRU, zhCN } from '../locales';
 
 // univer
 const univer = new Univer({
     theme: defaultTheme,
     locale: LocaleType.ZH_CN,
+    locales: {
+        [LocaleType.ZH_CN]: zhCN,
+        [LocaleType.EN_US]: enUS,
+        [LocaleType.RU_RU]: ruRU,
+    },
     logLevel: LogLevel.VERBOSE,
 });
 
@@ -42,8 +48,6 @@ const univer = new Univer({
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
-    header: true,
-    footer: true,
 });
 
 univer.registerPlugin(UniverDocsPlugin, {
@@ -56,7 +60,7 @@ univer.registerPlugin(UniverSheetsUIPlugin);
 
 // sheet feature plugins
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
-univer.registerPlugin(DebuggerPlugin);
+univer.registerPlugin(UniverDebuggerPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverSheetsFormulaPlugin);
 univer.registerPlugin(UniverUniscriptPlugin, {

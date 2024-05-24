@@ -15,7 +15,6 @@
  */
 
 export { UniverSheetsFormulaPlugin } from './formula-ui-plugin';
-export { enUS, zhCN } from './locale';
 export { IDescriptionService } from './services/description.service';
 export { DescriptionService } from './services/description.service';
 export {

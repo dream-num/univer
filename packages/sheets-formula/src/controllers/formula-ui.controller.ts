@@ -15,12 +15,14 @@
  */
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { IDesktopUIController } from '@univerjs/ui';
-import { ComponentManager, DesktopUIPart, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
+import type { MenuConfig } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import type { Ctor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionCommand } from '../commands/commands/insert-function.command';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
@@ -44,14 +46,23 @@ import {
 } from './shortcuts/prompt.shortcut';
 import { FormulaEditorShowController } from './formula-editor-show.controller';
 
+export interface IUniverSheetsFormulaConfig {
+    menu: MenuConfig;
+    description: IFunctionInfo[];
+    function: Array<[Ctor<BaseFunction>, IFunctionNames]>;
+}
+
+export const DefaultSheetFormulaConfig = {};
+
 @OnLifecycle(LifecycleStages.Ready, FormulaUIController)
 export class FormulaUIController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverSheetsFormulaConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
-        @IUIController private readonly _uiController: IDesktopUIController,
+        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
@@ -69,9 +80,11 @@ export class FormulaUIController extends Disposable {
     }
 
     private _registerMenus(): void {
+        const { menu = {} } = this._config;
+
         [InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory, PasteFormulaMenuItemFactory].forEach(
             (factory) => {
-                this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+                this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
             }
         );
     }
@@ -105,7 +118,7 @@ export class FormulaUIController extends Disposable {
 
     private _registerComponents(): void {
         this.disposeWithMe(
-            this._uiController.registerComponent(DesktopUIPart.CONTENT, () => connectInjector(RenderFormulaPromptContent, this._injector))
+            this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(RenderFormulaPromptContent, this._injector))
         );
 
         this._componentManager.register(MORE_FUNCTIONS_COMPONENT, MoreFunctions);

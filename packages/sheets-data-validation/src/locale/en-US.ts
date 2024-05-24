@@ -27,6 +27,7 @@ const locale: typeof zhCN = {
             date: 'Please input date or formula',
             list: 'Please input options',
             listInvalid: 'The list source must be a delimited list or a reference to a single row or column',
+            checkboxEqual: 'Enter different values for ticked and unticked cell contents.',
         },
         panel: {
             title: 'Data validation management',

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/image",
-    "version": "0.1.10",
+    "version": "0.1.12",
     "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -63,11 +63,11 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@wendellhu/redi": "^0.14.0",
+        "@wendellhu/redi": "0.15.2",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.44"
+        "@univerjs/icons": "^0.1.52"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
@@ -76,12 +76,12 @@
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.14.0",
+        "@wendellhu/redi": "0.15.2",
         "less": "^4.2.0",
         "react": "18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.10",
-        "vitest": "^1.5.0"
+        "vite": "^5.2.11",
+        "vitest": "^1.6.0"
     }
 }

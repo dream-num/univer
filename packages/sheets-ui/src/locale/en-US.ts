@@ -494,6 +494,7 @@ const locale: typeof zhCN = {
             'abort-editing': 'Abort editing',
             'break-line': 'Break line',
             'set-bold': 'Toggle bold',
+            'start-editing': 'Start Editing (Selection into the Editor)',
             'set-italic': 'Toggle italic',
             'set-underline': 'Toggle underline',
             'set-strike-through': 'Toggle strike through',

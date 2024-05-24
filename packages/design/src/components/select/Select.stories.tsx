@@ -48,6 +48,24 @@ export const SelectBasic = {
     },
 };
 
+export const SelectBorderless = {
+    render() {
+        const [value, setValue] = useState('');
+
+        const options = [
+            { label: 'Option 1', value: 'option1' },
+            { label: 'Option 2', value: 'option2' },
+            { label: 'Option 3', value: 'option3' },
+        ];
+
+        function handleChange(value: string | number | boolean) {
+            setValue(value as string);
+        }
+
+        return <Select value={value} options={options} onChange={handleChange} borderless />;
+    },
+};
+
 export const SelectGroup = {
     render() {
         const [value, setValue] = useState('');

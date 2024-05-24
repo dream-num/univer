@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, Plugin, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, SheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
@@ -37,7 +37,8 @@ import { AddCfCommand } from './commands/commands/add-cf.command';
 import { RenderController } from './controllers/cf.render.controller';
 import { ConditionalFormattingCopyPasteController } from './controllers/cf.copy-paste.controller';
 import { ConditionalFormattingAutoFillController } from './controllers/cf.auto-fill.controller';
-import { ConditionalFormattingMenuController } from './controllers/cf.menu.controller';
+import type { IUniverSheetsConditionalFormattingUIConfig } from './controllers/cf.menu.controller';
+import { ConditionalFormattingMenuController, DefaultSheetConditionalFormattingUiConfig } from './controllers/cf.menu.controller';
 import { ConditionalFormattingI18nController } from './controllers/cf.i18n.controller';
 import { RefRangeController } from './controllers/cf.ref-range.controller';
 import { ConditionalFormattingEditorController } from './controllers/cf.editor.controller';
@@ -67,11 +68,13 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
     ];
 
     constructor(
-        _config: unknown,
+        private readonly _config: Partial<IUniverSheetsConditionalFormattingUIConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();
+        this._config = Tools.deepMerge({}, DefaultSheetConditionalFormattingUiConfig, this._config);
+
         this._initCommand();
         SheetsConditionalFormattingPlugin.dependencyList.forEach((dependency) => {
             this._injector.add(dependency);
@@ -80,7 +83,12 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
         this._injector.add([RefRangeController]);
         this._injector.add([ConditionalFormattingCopyPasteController]);
         this._injector.add([ConditionalFormattingAutoFillController]);
-        this._injector.add([ConditionalFormattingMenuController]);
+        this._injector.add([
+            ConditionalFormattingMenuController,
+            {
+                useFactory: () => this._injector.createInstance(ConditionalFormattingMenuController, this._config),
+            },
+        ]);
         this._injector.add([ConditionalFormattingI18nController]);
         this._injector.add([ConditionalFormattingEditorController]);
         this._injector.add([ConditionalFormattingClearController]);

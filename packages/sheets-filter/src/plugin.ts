@@ -18,14 +18,12 @@ import { Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { SheetsFilterService } from './services/sheet-filter.service';
-import { SheetsFilterController } from './controllers/sheets-fiter.controller';
-
-const NAME = 'UNIVER_SHEETS_FILTER_PLUGIN';
+import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from './services/sheet-filter.service';
+import { SheetsFilterController } from './controllers/sheets-filter.controller';
 
 export class UniverSheetsFilterPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
-    static override pluginName = NAME;
+    static override pluginName = SHEET_FILTER_SNAPSHOT_ID;
 
     constructor(_config: unknown, @Inject(Injector) protected readonly _injector: Injector) {
         super();

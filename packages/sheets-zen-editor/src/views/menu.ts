@@ -16,9 +16,10 @@
 
 import { type IMenuButtonItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 
+import type { IAccessor } from '@wendellhu/redi';
 import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
 
-export function ZenEditorMenuItemFactory(): IMenuButtonItem {
+export function ZenEditorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: OpenZenEditorOperation.id,
         group: MenuGroup.CONTEXT_MENU_OTHERS,

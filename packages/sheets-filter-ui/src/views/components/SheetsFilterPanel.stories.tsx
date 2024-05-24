@@ -27,8 +27,9 @@ import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.ser
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../../commands/sheets-filter.command';
 import type { IOpenFilterPanelOperationParams } from '../../commands/sheets-filter.operation';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/sheets-filter.operation';
-import zhCN from '../../locale/zh-CN';
 import enUS from '../../locale/en-US';
+import zhCN from '../../locale/zh-CN';
+import ruRU from '../../locale/ru-RU';
 import { WithCustomFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
 import { FilterPanel } from './SheetsFilterPanel';
 
@@ -80,8 +81,7 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
     univer.registerPlugin(UniverSheetsFilterPlugin);
 
     injector.get(LocaleService).setLocale(locale);
-    injector.get(LocaleService).load({ enUS, zhCN });
-    injector.get(ILogService).setLogLevel(LogLevel.VERBOSE);
+    injector.get(LocaleService).load({ enUS, zhCN, ruRU });
     injector.get(ILogService).setLogLevel(LogLevel.VERBOSE);
 
     const sheet = univer.createUniverSheet(workbookData);

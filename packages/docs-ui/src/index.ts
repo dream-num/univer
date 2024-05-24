@@ -16,6 +16,5 @@
 
 export * from './basics';
 export * from './docs-ui-plugin';
-export { enUS, zhCN } from './locale';
 export { DocCanvasView } from './views/doc-canvas-view';
 export * from './services';

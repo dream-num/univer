@@ -23,10 +23,8 @@ import {
     Plugin,
     Univer,
 } from '@univerjs/core';
-import {
-    enUS,
-    zhCN,
-} from '@univerjs/sheets-formula';
+import enUS from '@univerjs/sheets-formula/locale/en-US';
+import zhCN from '@univerjs/sheets-formula/locale/zh-CN';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 

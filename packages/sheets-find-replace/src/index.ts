@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-export { enUS, zhCN } from './locale';
 export { UniverSheetsFindReplacePlugin } from './plugin';

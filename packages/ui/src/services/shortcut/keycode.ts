@@ -145,6 +145,19 @@ export const KeyCodeToChar: { [key: number]: string } = {
     [KeyCode.Y]: 'Y',
     [KeyCode.Z]: 'Z',
 
+    [KeyCode.F1]: 'F1',
+    [KeyCode.F2]: 'F2',
+    [KeyCode.F3]: 'F3',
+    [KeyCode.F4]: 'F4',
+    [KeyCode.F5]: 'F5',
+    [KeyCode.F6]: 'F6',
+    [KeyCode.F7]: 'F7',
+    [KeyCode.F8]: 'F8',
+    [KeyCode.F9]: 'F9',
+    [KeyCode.F10]: 'F10',
+    [KeyCode.F11]: 'F11',
+    [KeyCode.F12]: 'F12',
+
     [KeyCode.MINUS]: '-',
     [KeyCode.EQUAL]: '=',
 

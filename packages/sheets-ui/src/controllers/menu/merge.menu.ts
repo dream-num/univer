@@ -48,6 +48,7 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         ),
     };
 }
+
 export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
     return {
         id: AddWorksheetMergeAllCommand.id,
@@ -57,6 +58,7 @@ export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         positions: [AddWorksheetMergeCommand.id],
     };
 }
+
 export function CellMergeVerticalMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
     return {
         id: AddWorksheetMergeVerticalCommand.id,
@@ -66,6 +68,7 @@ export function CellMergeVerticalMenuItemFactory(accessor: IAccessor): IMenuButt
         positions: [AddWorksheetMergeCommand.id],
     };
 }
+
 export function CellMergeHorizontalMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
     return {
         id: AddWorksheetMergeHorizontalCommand.id,
@@ -75,6 +78,7 @@ export function CellMergeHorizontalMenuItemFactory(accessor: IAccessor): IMenuBu
         positions: [AddWorksheetMergeCommand.id],
     };
 }
+
 export function CellMergeCancelMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
     return {
         id: RemoveWorksheetMergeCommand.id,

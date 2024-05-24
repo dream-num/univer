@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { DependencyOverride } from '@univerjs/core';
-import { IContextService, ILocalStorageService, LocaleService, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { IContextService, ILocalStorageService, LocaleService, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -27,10 +26,9 @@ import { ZIndexManager } from './common/z-index-manager';
 import { ErrorController } from './controllers/error/error.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
-import type { IWorkbenchOptions } from './controllers/ui/ui.controller';
+import type { IUniverUIConfig } from './controllers/ui/ui.controller';
 import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
-import { zhCN } from './locale';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { IConfirmService } from './services/confirm/confirm.service';
@@ -55,15 +53,11 @@ import { IZenZoneService } from './services/zen-zone/zen-zone.service';
 import { EditorService, IEditorService } from './services/editor/editor.service';
 import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 import { IProgressService, ProgressService } from './services/progress/progress.service';
+import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 
 const PLUGIN_NAME = 'ui';
 
-export interface IUniverUIConfig extends IWorkbenchOptions {
-    /** Disable auto focus when Univer bootstraps. */
-    disableAutoFocus?: true;
-
-    override?: DependencyOverride;
-}
+export const DefaultUiConfig = {};
 
 export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
 
@@ -81,7 +75,7 @@ export class UniverUIPlugin extends Plugin {
     ) {
         super();
 
-        this._localeService.load({ zhCN });
+        this._config = Tools.deepMerge({}, DefaultUiConfig, this._config);
 
         if (this._config.disableAutoFocus) {
             this._contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);
@@ -90,7 +84,10 @@ export class UniverUIPlugin extends Plugin {
 
     override onStarting(_injector: Injector): void {
         this._initDependencies(_injector);
+    }
 
+    override onReady(): void {
+        // TODO@Jocs: this has to be on Ready hook because of editor related modules' sequence problem.
         this._initUI();
     }
 
@@ -101,6 +98,7 @@ export class UniverUIPlugin extends Plugin {
 
             // services
             [ShortcutPanelService],
+            [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
@@ -123,15 +121,26 @@ export class UniverUIPlugin extends Plugin {
 
             // controllers
             [IUIController, { useClass: DesktopUIController }],
-            [SharedController],
+            [
+                SharedController,
+                {
+                    useFactory: () => this._injector.createInstance(SharedController, this._config),
+                },
+            ],
             [ErrorController],
-            [ShortcutPanelController],
+            [
+                ShortcutPanelController,
+                {
+                    useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config),
+                },
+            ],
         ], this._config.override);
 
         dependencies.forEach((dependency) => injector.add(dependency));
     }
 
     private _initUI(): void {
+        // We need to run this async to let other modules do their `onReady` jobs first.
         Promise.resolve().then(() => this._injector.get(IUIController).bootstrapWorkbench(this._config));
     }
 }

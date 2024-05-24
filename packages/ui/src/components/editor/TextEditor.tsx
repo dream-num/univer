@@ -183,7 +183,6 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             const unitId = editor.editorUnitId;
             const isLegality = editorService.checkValueLegality(unitId);
 
-
             setTimeout(() => {
                 const rect = editor.getBoundingClientRect();
                 setValidationOffset([rect.left, rect.top - 16]);
@@ -197,7 +196,6 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
                     setValidationContent(localeService.t('textEditor.rangeError'));
                 }
             }, 100);
-
 
             const currentValue = editorService.getValue(unitId);
 

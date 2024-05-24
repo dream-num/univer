@@ -25,6 +25,7 @@ import type {
     ITextStyle,
     PageOrientType,
 } from '@univerjs/core';
+import type { BreakPointType } from '../components/docs/layout/line-breaker/break';
 
 export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
     pages: IDocumentSkeletonPage[];
@@ -157,6 +158,7 @@ export interface IDocumentSkeletonDivide {
     isFull: boolean; // isFull， // 内容是否装满
     st: number; // startIndex
     ed: number; // endIndex
+    breakType?: BreakPointType;
     parent?: IDocumentSkeletonLine;
 }
 

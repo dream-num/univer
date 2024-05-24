@@ -19,7 +19,7 @@ import { Disposable, Observable } from '@univerjs/core';
 
 import type { EVENT_TYPE } from './basics/const';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
-import type { IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
+import type { IDragEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { IObjectFullState, ITransformChangeState } from './basics/interfaces';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { generateRandomKey, toPx } from './basics/tools';
@@ -71,6 +71,14 @@ export abstract class BaseObject extends Disposable {
     onPointerOverObserver = new Observable<IPointerEvent | IMouseEvent>();
 
     onPointerEnterObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onDragLeaveObserver = new Observable<IDragEvent | IMouseEvent>();
+
+    onDragOverObserver = new Observable<IDragEvent | IMouseEvent>();
+
+    onDragEnterObserver = new Observable<IDragEvent | IMouseEvent>();
+
+    onDropObserver = new Observable<IDragEvent | IMouseEvent>();
 
     onIsAddedToParentObserver = new Observable<any>();
 
@@ -670,9 +678,40 @@ export abstract class BaseObject extends Disposable {
         return true;
     }
 
+    triggerDragLeave(evt: IDragEvent | IMouseEvent) {
+        if (!this.onDragLeaveObserver.notifyObservers(evt)?.stopPropagation) {
+            this._parent?.triggerDragLeave(evt);
+            return false;
+        }
+        return true;
+    }
+
+    triggerDragOver(evt: IDragEvent | IMouseEvent) {
+        if (!this.onDragOverObserver.notifyObservers(evt)?.stopPropagation) {
+            this._parent?.triggerDragOver(evt);
+            return false;
+        }
+        return true;
+    }
+
+    triggerDragEnter(evt: IDragEvent | IMouseEvent) {
+        if (!this.onDragEnterObserver.notifyObservers(evt)?.stopPropagation) {
+            this._parent?.triggerDragEnter(evt);
+            return false;
+        }
+        return true;
+    }
+
+    triggerDrop(evt: IDragEvent | IMouseEvent) {
+        if (!this.onDropObserver.notifyObservers(evt)?.stopPropagation) {
+            this._parent?.triggerDrop(evt);
+            return false;
+        }
+        return true;
+    }
+
     override dispose() {
         super.dispose();
-
         this.onTransformChangeObservable.clear();
         this.onPointerDownObserver.clear();
         this.onPointerMoveObserver.clear();
@@ -682,6 +721,10 @@ export abstract class BaseObject extends Disposable {
         this.onPointerLeaveObserver.clear();
         this.onPointerOverObserver.clear();
         this.onPointerEnterObserver.clear();
+        this.onDragLeaveObserver.clear();
+        this.onDragOverObserver.clear();
+        this.onDragEnterObserver.clear();
+        this.onDropObserver.clear();
         this.onDblclickObserver.clear();
         this.onTripleClickObserver.clear();
         this.onIsAddedToParentObserver.clear();

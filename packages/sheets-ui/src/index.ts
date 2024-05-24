@@ -50,7 +50,6 @@ export {
 export { useActiveWorkbook, useActiveWorksheet } from './components/hook';
 export { whenSheetEditorFocused } from './controllers/shortcuts/utils';
 export type { IEditorBridgeServiceParam } from './services/editor-bridge.service';
-export { enUS, zhCN } from './locale';
 export { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 export { getAutoFillRepeatRange } from './services/auto-fill/tools';
 export type { ICopyDataPiece, ISheetAutoFillHook } from './services/auto-fill/type';
@@ -81,13 +80,17 @@ export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.s
 export { UniverSheetsUIPlugin } from './sheets-ui-plugin';
 export { SheetCanvasView } from './views/sheet-canvas-view';
 export { HoverManagerService } from './services/hover-manager.service';
+export { DragManagerService } from './services/drag-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
 export { HoverRenderController } from './controllers/hover-render.controller';
+export { DragRenderController } from './controllers/drag-render.controller';
 export { SHEET_VIEW_KEY } from './common/keys';
-export { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
+export { SheetCanvasPopManagerService, type ICanvasPopup } from './services/canvas-pop-manager.service';
 export { mergeSetRangeValues } from './services/clipboard/utils';
 export type { IAutoFillLocation } from './services/auto-fill/type';
 export type { IDiscreteRange } from './controllers/utils/range-tools';
 export { virtualizeDiscreteRanges, rangeToDiscreteRange } from './controllers/utils/range-tools';
 export { type IHoverCellPosition } from './services/hover-manager.service';
+export { AutoHeightController } from './controllers/auto-height.controller';
+export { type IDragCellPosition } from './services/drag-manager.service';
 export { SheetMenuPosition } from './controllers/menu/menu';

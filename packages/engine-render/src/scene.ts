@@ -20,7 +20,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import type { BaseObject } from './base-object';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
-import type { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
+import type { IDragEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { IObjectFullState, ISceneTransformState, ITransformChangeState } from './basics/interfaces';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { precisionTo, requestNewFrame } from './basics/tools';
@@ -870,6 +870,50 @@ export class Scene extends ThinScene {
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerPointerEnter(evt);
+            return false;
+        }
+        return true;
+    }
+
+    override triggerDragLeave(evt: IDragEvent) {
+        if (
+            !this.onDragLeaveObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
+            (this._parent as SceneViewer)?.triggerDragLeave(evt);
+            return false;
+        }
+        return true;
+    }
+
+    override triggerDragOver(evt: IDragEvent) {
+        if (
+            !this.onDragOverObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
+            (this._parent as SceneViewer)?.triggerDragOver(evt);
+            return false;
+        }
+        return true;
+    }
+
+    override triggerDragEnter(evt: IDragEvent) {
+        if (
+            !this.onDragEnterObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
+            (this._parent as SceneViewer)?.triggerDragEnter(evt);
+            return false;
+        }
+        return true;
+    }
+
+    override triggerDrop(evt: IDragEvent) {
+        if (
+            !this.onDropObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
+            (this._parent as SceneViewer)?.triggerDrop(evt);
             return false;
         }
         return true;

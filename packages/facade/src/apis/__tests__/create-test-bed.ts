@@ -31,14 +31,14 @@ import { ISocketService, WebSocketService } from '@univerjs/network';
 import { SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
 import {
     DescriptionService,
-    enUS,
     FormulaCustomFunctionService,
     IDescriptionService,
     IFormulaCustomFunctionService,
     IRegisterFunctionService,
     RegisterFunctionService,
-    zhCN,
 } from '@univerjs/sheets-formula';
+import enUS from '@univerjs/sheets-formula/locale/en-US';
+import zhCN from '@univerjs/sheets-formula/locale/zh-CN';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -104,7 +104,6 @@ export interface ITestBed {
     univerAPI: FUniver;
     injector: Injector;
 }
-
 
 export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();

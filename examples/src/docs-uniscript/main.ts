@@ -26,11 +26,17 @@ import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
+import { enUS, ruRU, zhCN } from '../locales';
 
 // univer
 const univer = new Univer({
     theme: defaultTheme,
     locale: LocaleType.ZH_CN,
+    locales: {
+        [LocaleType.ZH_CN]: zhCN,
+        [LocaleType.EN_US]: enUS,
+        [LocaleType.RU_RU]: ruRU,
+    },
     logLevel: LogLevel.VERBOSE,
 });
 
@@ -40,7 +46,7 @@ univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
-    header: true,
+    footer: false,
 });
 
 univer.registerPlugin(UniverDocsPlugin);

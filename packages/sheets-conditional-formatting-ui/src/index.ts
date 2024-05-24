@@ -15,4 +15,3 @@
  */
 
 export { UniverSheetsConditionalFormattingUIPlugin } from './plugin';
-export { enUS, zhCN } from './locale';

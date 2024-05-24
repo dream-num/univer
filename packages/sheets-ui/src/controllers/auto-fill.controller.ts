@@ -169,7 +169,6 @@ export class AutoFillController extends Disposable {
         this._autoFillService.setShowMenu(false);
     }
 
-
     private _onSelectionControlFillChanged() {
         const disposableCollection = new DisposableCollection();
         const addListener = (disposableCollection: DisposableCollection) => {

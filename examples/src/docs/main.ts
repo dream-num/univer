@@ -15,21 +15,18 @@
  */
 
 /* eslint-disable node/prefer-global/process */
-import { LocaleType, Univer } from '@univerjs/core';
+import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverImagePlugin } from '@univerjs/image';
-
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { UniverDebuggerPlugin } from '@univerjs/debugger';
 
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
-
-import { DebuggerPlugin } from '../plugins/debugger';
-
-import { locales } from './locales';
+import { enUS, ruRU, zhCN } from '../locales';
 
 // package info
 // eslint-disable-next-line no-console
@@ -44,16 +41,20 @@ console.table({
 const univer = new Univer({
     theme: defaultTheme,
     locale: LocaleType.ZH_CN,
-    locales,
+    locales: {
+        [LocaleType.ZH_CN]: zhCN,
+        [LocaleType.EN_US]: enUS,
+        [LocaleType.RU_RU]: ruRU,
+    },
 });
 
 // core plugins
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin);
-univer.registerPlugin(DebuggerPlugin);
+univer.registerPlugin(UniverDebuggerPlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
-    header: true,
+    footer: false,
 });
 univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverDocsUIPlugin, {
@@ -67,7 +68,7 @@ univer.registerPlugin(UniverDocsUIPlugin, {
 
 univer.registerPlugin(UniverImagePlugin);
 
-univer.createUniverDoc(DEFAULT_DOCUMENT_DATA_CN);
+univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
 
 // use for console test
 declare global {

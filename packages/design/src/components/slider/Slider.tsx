@@ -157,7 +157,7 @@ export function Slider(props: ISliderProps) {
 
             <div className={styles.sliderRail}>
                 <div ref={sliderInnerRailRef} role="track" className={styles.sliderInnerRail}>
-                    <Tooltip title={`${locale.design.Slider.resetTo} ${resetPoint}%`}>
+                    <Tooltip title={`${locale?.Slider.resetTo} ${resetPoint}%`}>
                         <a className={styles.sliderResetPoint} role="reset button" onClick={handleReset} />
                     </Tooltip>
 

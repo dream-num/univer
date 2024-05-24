@@ -18,10 +18,11 @@ import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionF
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 
+import type { IAccessor } from '@wendellhu/redi';
 import { SheetMenuPosition } from './menu';
 
 const CLEAR_SELECTION_MENU_ID = 'sheet.menu.clear-selection';
-export function ClearSelectionMenuItemFactory(): IMenuSelectorItem<string> {
+export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: CLEAR_SELECTION_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_FORMAT,
@@ -36,7 +37,7 @@ export function ClearSelectionMenuItemFactory(): IMenuSelectorItem<string> {
     };
 }
 
-export function ClearSelectionContentMenuItemFactory(): IMenuButtonItem {
+export function ClearSelectionContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ClearSelectionContentCommand.id,
         type: MenuItemType.BUTTON,
@@ -44,7 +45,8 @@ export function ClearSelectionContentMenuItemFactory(): IMenuButtonItem {
         positions: [CLEAR_SELECTION_MENU_ID],
     };
 }
-export function ClearSelectionFormatMenuItemFactory(): IMenuButtonItem {
+
+export function ClearSelectionFormatMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ClearSelectionFormatCommand.id,
         type: MenuItemType.BUTTON,
@@ -52,7 +54,8 @@ export function ClearSelectionFormatMenuItemFactory(): IMenuButtonItem {
         positions: [CLEAR_SELECTION_MENU_ID],
     };
 }
-export function ClearSelectionAllMenuItemFactory(): IMenuButtonItem {
+
+export function ClearSelectionAllMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ClearSelectionAllCommand.id,
         type: MenuItemType.BUTTON,

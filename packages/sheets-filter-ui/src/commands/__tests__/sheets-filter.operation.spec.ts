@@ -34,7 +34,6 @@ const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> 
     },
 };
 
-
 function testWorkbookDataFactory(): IWorkbookData {
     return {
         id: 'test',

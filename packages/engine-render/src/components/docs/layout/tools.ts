@@ -59,6 +59,8 @@ import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '../../.
 import { getFontStyleString, isFunction } from '../../../basics/tools';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
+import type { Hyphen } from './hyphenation/hyphen';
+import type { LanguageDetector } from './hyphenation/language-detector';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages[pages.length - 1];
@@ -497,7 +499,6 @@ export function columnIterator(
     }
 }
 
-
 export function getPositionHorizon(
     positionH: IObjectPositionH,
     column: IDocumentSkeletonColumn,
@@ -591,7 +592,6 @@ export function getPositionHorizon(
         }
     }
 }
-
 
 export function getPositionVertical(
     positionV: IObjectPositionV,
@@ -698,6 +698,37 @@ const fontCreateConfigCache = new ObjectMatrix<IFontCreateConfig>();
 
 export function clearFontCreateConfigCache() {
     fontCreateConfigCache.reset();
+}
+
+export function getFontConfigFromLastGlyph(
+    glyph: IDocumentSkeletonGlyph,
+    sectionBreakConfig: ISectionBreakConfig,
+    paragraphStyle: IParagraphStyle
+) {
+    const { ts, fontStyle } = glyph;
+    const {
+        gridType = GridType.LINES,
+        charSpace = 0,
+        pageSize = {
+            width: Number.POSITIVE_INFINITY,
+            height: Number.POSITIVE_INFINITY,
+        },
+        marginRight = 0,
+        marginLeft = 0,
+    } = sectionBreakConfig;
+    const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+    const pageWidth = pageSize.width || Number.POSITIVE_INFINITY - marginLeft - marginRight;
+
+    const result = {
+        fontStyle: fontStyle!,
+        textStyle: ts!,
+        charSpace,
+        gridType,
+        snapToGrid,
+        pageWidth,
+    };
+
+    return result;
 }
 
 export function getFontCreateConfig(
@@ -810,6 +841,10 @@ export interface ILayoutContext {
     paragraphConfigCache: Map<number, IParagraphConfig>;
     sectionBreakConfigCache: Map<number, ISectionBreakConfig>;
     paragraphsOpenNewPage: Set<number>;
+    // Use for hyphenation.
+    hyphen: Hyphen;
+    // Use for detect language for paragraph content.
+    languageDetector: LanguageDetector;
 }
 
 const DEFAULT_SECTION_BREAK: ISectionBreak = {
@@ -845,6 +880,11 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         marginLeft: global_marginLeft = 0,
         marginHeader: global_marginHeader = 0,
         marginFooter: global_marginFooter = 0,
+
+        autoHyphenation = BooleanNumber.FALSE,
+        doNotHyphenateCaps = BooleanNumber.FALSE,
+        consecutiveHyphenLimit = Number.POSITIVE_INFINITY,
+        hyphenationZone,
 
         renderConfig: global_renderConfig = {
             horizontalAlign: HorizontalAlign.LEFT,
@@ -920,6 +960,11 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         sectionTypeNext,
         textDirection,
         renderConfig,
+
+        autoHyphenation,
+        doNotHyphenateCaps,
+        consecutiveHyphenLimit,
+        hyphenationZone,
 
         ...docsConfig,
     };

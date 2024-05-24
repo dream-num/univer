@@ -26,6 +26,7 @@ import styles from './index.module.less';
 
 export enum MessageType {
     Success = 'success',
+    Info = 'info',
     Warning = 'warning',
     Error = 'error',
 }
@@ -43,6 +44,7 @@ export interface IMessageMethodOptions {
 
 const iconMap = {
     [MessageType.Success]: <SuccessSingle className={styles.messageIconSuccess} />,
+    [MessageType.Info]: <WarningSingle className={styles.messageIconInfo} />,
     [MessageType.Warning]: <WarningSingle className={styles.messageIconWarning} />,
     [MessageType.Error]: <ErrorSingle className={styles.messageIconError} />,
 };
@@ -125,6 +127,10 @@ export class Message {
 
     success(options: IMessageMethodOptions): IDisposable {
         return this.append(MessageType.Success, options);
+    }
+
+    info(options: IMessageMethodOptions): IDisposable {
+        return this.append(MessageType.Info, options);
     }
 
     warning(options: IMessageMethodOptions): IDisposable {

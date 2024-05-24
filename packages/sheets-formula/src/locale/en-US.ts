@@ -97,6 +97,7 @@ export default {
             array: 'Array',
             univer: 'Univer',
             user: 'User Defined',
+            definedname: 'Defined Name',
         },
         moreFunctions: {
             confirm: 'Confirm',

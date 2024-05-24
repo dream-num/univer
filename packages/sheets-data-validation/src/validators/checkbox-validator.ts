@@ -46,14 +46,23 @@ export class CheckboxValidator extends BaseDataValidator {
     }
 
     override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
-        const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
+        const { formula1, formula2 } = rule;
         const formula1Success = !Tools.isBlank(formula1);
         const formula2Success = !Tools.isBlank(formula2);
+        const isEqual = formula1 === formula2;
 
         return {
-            success: formula1Success && formula2Success,
-            formula1: !formula1Success ? this.localeService.t('dataValidation.validFail.common') : '',
-            formula2: !formula2Success ? this.localeService.t('dataValidation.validFail.common') : '',
+            success: (formula1Success && formula2Success && !isEqual) || (!formula1Success && !formula2Success),
+            formula1: !formula1Success ?
+                this.localeService.t('dataValidation.validFail.common')
+                : isEqual ?
+                    this.localeService.t('dataValidation.validFail.checkboxEqual')
+                    : '',
+            formula2: !formula2Success ?
+                this.localeService.t('dataValidation.validFail.common')
+                : isEqual ?
+                    this.localeService.t('dataValidation.validFail.checkboxEqual')
+                    : '',
         };
     }
 

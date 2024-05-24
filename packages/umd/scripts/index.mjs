@@ -31,6 +31,22 @@ const __dirname = path.dirname(__filename);
 
 const nodeModulesPath = path.resolve(__dirname, '../node_modules');
 
+function generateUMDTemplate(code) {
+    return `(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof module === 'object' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.UniverUMD = root.UniverUMD || {};
+    Object.assign(root.UniverUMD, factory());
+  }
+}(typeof self !== 'undefined' ? self : this, function () {
+  var exports = ${code};
+  return exports;
+}));`;
+}
+
 async function generateLocale() {
     const libs = [
         '@univerjs/design',
@@ -69,8 +85,11 @@ async function generateLocale() {
             const data = fs.readFileSync(file, 'utf-8');
             output = lodash.merge(JSON.parse(data), output);
         }
+        const result = generateUMDTemplate(`{
+            "${lang}": ${JSON.stringify(output)}
+        }`);
 
-        fs.writeFileSync(path.resolve(outputDir, `${lang}.json`), JSON.stringify(output, null, 2), 'utf-8');
+        fs.writeFileSync(path.resolve(outputDir, `${lang}.js`), result, 'utf-8');
     }
 };
 

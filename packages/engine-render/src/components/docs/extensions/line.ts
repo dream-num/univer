@@ -145,9 +145,6 @@ export class Line extends docExtension {
             alignOffset
         );
 
-        // console.log(start, end, spanPointWithFont);
-        // ctx.fillText('X', spanPointWithFont.x, spanPointWithFont.y);
-
         ctx.beginPath();
         ctx.moveToByPrecision(start.x, start.y);
         ctx.lineToByPrecision(end.x, end.y);

@@ -34,6 +34,20 @@ type LinkUpdate = {
     subUnitId: string;
     payload: ICellLinkContent;
     id: string;
+} | {
+    type: 'updateRef';
+    unitId: string;
+    subUnitId: string;
+    id: string;
+    payload: { row: number; column: number };
+} | {
+    type: 'unload';
+    unitId: string;
+    unitLinks: {
+        unitId: string;
+        subUnitId: string;
+        links: ICellHyperLink[];
+    }[];
 };
 
 export class HyperLinkModel {
@@ -41,7 +55,7 @@ export class HyperLinkModel {
     linkUpdate$ = this._linkUpdate$.asObservable();
 
     private _linkMap: Map<string, Map<string, ObjectMatrix<ICellHyperLink>>> = new Map();
-    private _linkPositionMap: Map<string, Map<string, Map<string, { row: number;column: number }>>> = new Map();
+    private _linkPositionMap: Map<string, Map<string, Map<string, { row: number; column: number }>>> = new Map();
 
     private _ensureMap(unitId: string, subUnitId: string) {
         let unitMap = this._linkMap.get(unitId);
@@ -108,6 +122,31 @@ export class HyperLinkModel {
         return true;
     }
 
+    updateHyperLinkRef(unitId: string, subUnitId: string, id: string, payload: { row: number; column: number }) {
+        const { matrix, positionMap } = this._ensureMap(unitId, subUnitId);
+        // const current = matrix.getValue();
+        const position = positionMap.get(id);
+        if (!position) {
+            return false;
+        }
+        const link = matrix.getValue(position.row, position.column);
+        if (!link) {
+            return false;
+        }
+        positionMap.set(id, payload);
+        matrix.realDeleteValue(position.row, position.column);
+        matrix.setValue(payload.row, payload.column, link);
+        Object.assign(link, payload);
+        this._linkUpdate$.next({
+            unitId,
+            subUnitId,
+            payload,
+            id,
+            type: 'updateRef',
+        });
+        return true;
+    }
+
     removeHyperLink(unitId: string, subUnitId: string, id: string) {
         const { matrix, positionMap } = this._ensureMap(unitId, subUnitId);
         const position = positionMap.get(id);
@@ -116,11 +155,10 @@ export class HyperLinkModel {
         }
         positionMap.delete(id);
         const link = matrix.getValue(position.row, position.column);
-        if (!link) {
-            return false;
+        if (link && link.id === id) {
+            matrix.realDeleteValue(position.row, position.column);
         }
 
-        matrix.realDeleteValue(position.row, position.column);
         this._linkUpdate$.next({
             unitId,
             subUnitId,
@@ -138,5 +176,57 @@ export class HyperLinkModel {
         }
         positionMap.delete(id);
         return matrix.getValue(position.row, position.column);
+    }
+
+    getHyperLinkByLocation(unitId: string, subUnitId: string, row: number, column: number): ICellHyperLink | undefined {
+        const { matrix } = this._ensureMap(unitId, subUnitId);
+
+        return matrix.getValue(row, column);
+    }
+
+    getSubUnit(unitId: string, subUnitId: string) {
+        const { matrix } = this._ensureMap(unitId, subUnitId);
+
+        const links: ICellHyperLink[] = [];
+        matrix.forValue((row, col, value) => {
+            if (value) {
+                links.push(value);
+            }
+        });
+
+        return links;
+    }
+
+    getUnit(unitId: string) {
+        const unitMap = this._linkMap.get(unitId);
+        if (!unitMap) {
+            return [];
+        }
+
+        return Array.from(unitMap.keys()).map((subUnitId) => {
+            const links = this.getSubUnit(unitId, subUnitId);
+            return {
+                unitId,
+                subUnitId,
+                links,
+            };
+        });
+    }
+
+    deleteUnit(unitId: string) {
+        const links = this.getUnit(unitId);
+        this._linkMap.delete(unitId);
+        this._linkPositionMap.delete(unitId);
+
+        this._linkUpdate$.next({
+            type: 'unload',
+            unitId,
+            unitLinks: links,
+        });
+    }
+
+    getAll() {
+        const unitIds = Array.from(this._linkMap.keys());
+        return unitIds.map((unitId) => this.getUnit(unitId));
     }
 }

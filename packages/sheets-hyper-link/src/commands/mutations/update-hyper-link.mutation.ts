@@ -39,3 +39,25 @@ export const UpdateHyperLinkMutation: ICommand<IUpdateHyperLinkMutationParams> =
         return model.updateHyperLink(unitId, subUnitId, id, payload);
     },
 };
+
+export interface IUpdateHyperLinkRefMutationParams {
+    unitId: string;
+    subUnitId: string;
+    id: string;
+    row: number;
+    column: number;
+}
+
+export const UpdateHyperLinkRefMutation: ICommand<IUpdateHyperLinkRefMutationParams> = {
+    type: CommandType.MUTATION,
+    id: 'sheets.mutation.update-hyper-link-ref',
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+
+        const model = accessor.get(HyperLinkModel);
+        const { unitId, subUnitId, id, row, column } = params;
+        return model.updateHyperLinkRef(unitId, subUnitId, id, { row, column });
+    },
+};

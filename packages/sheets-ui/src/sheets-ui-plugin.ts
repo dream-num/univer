@@ -40,7 +40,6 @@ import { SheetRenderController } from './controllers/sheet-render.controller';
 import type { IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
 import { DefaultSheetUiConfig, SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
-import { zhCN } from './locale';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
@@ -88,7 +87,6 @@ export class UniverSheetsUIPlugin extends Plugin {
     ) {
         super();
 
-        this._localeService.load({ zhCN });
         this._config = Tools.deepMerge({}, DefaultSheetUiConfig, this._config);
     }
 

@@ -29,7 +29,6 @@ import { ShortcutPanelController } from './controllers/shortcut-display/shortcut
 import type { IUniverUIConfig } from './controllers/ui/ui.controller';
 import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
-import { zhCN } from './locale';
 import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { IConfirmService } from './services/confirm/confirm.service';
@@ -76,7 +75,6 @@ export class UniverUIPlugin extends Plugin {
     ) {
         super();
 
-        this._localeService.load({ zhCN });
         this._config = Tools.deepMerge({}, DefaultUiConfig, this._config);
 
         if (this._config.disableAutoFocus) {

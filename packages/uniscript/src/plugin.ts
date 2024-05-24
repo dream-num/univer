@@ -20,7 +20,6 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import type { IUniverUniscriptConfig } from './controllers/uniscript.controller';
 import { DefaultUniscriptConfig, UniscriptController } from './controllers/uniscript.controller';
-import { zhCN } from './locale';
 import { ScriptEditorService } from './services/script-editor.service';
 import { IUniscriptExecutionService, UniscriptExecutionService } from './services/script-execution.service';
 import { ScriptPanelService } from './services/script-panel.service';
@@ -53,8 +52,6 @@ export class UniverUniscriptPlugin extends Plugin {
         dependencies.forEach((d) => injector.add(d));
 
         this.registerExecution();
-
-        this._localeService.load({ zhCN });
     }
 
     /**

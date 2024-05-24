@@ -30,7 +30,6 @@ import { DeleteCommentMutation } from '@univerjs/thread-comment';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
-import { zhCN } from '../locale';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
 import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
 import { AddCommentShortcut, threadCommentMenuFactory, threadPanelMenuFactory } from './menu';
@@ -63,7 +62,6 @@ export class SheetsThreadCommentController extends Disposable {
         this._initMenu();
         this._initShortcut();
         this._initComponent();
-        this._initLocale();
         this._initCommandListener();
         this._initPanelListener();
     }
@@ -131,10 +129,6 @@ export class SheetsThreadCommentController extends Disposable {
         ] as const).forEach(([key, comp]) => {
             this._componentManager.register(key, comp);
         });
-    }
-
-    private _initLocale() {
-        this._localeService.load({ zhCN });
     }
 
     private _initPanelListener() {

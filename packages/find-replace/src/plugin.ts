@@ -19,7 +19,6 @@ import { type Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import type { IUniverFindReplaceConfig } from './controllers/find-replace.controller';
 import { DefaultFindReplaceConfig, FindReplaceController } from './controllers/find-replace.controller';
-import { zhCN } from './locale';
 import { FindReplaceService, IFindReplaceService } from './services/find-replace.service';
 
 const PLUGIN_NAME = 'FIND_REPLACE_PLUGIN';
@@ -34,7 +33,6 @@ export class UniverFindReplacePlugin extends Plugin {
     ) {
         super();
 
-        this._localeService.load({ zhCN });
         this._config = Tools.deepMerge({}, DefaultFindReplaceConfig, this._config);
     }
 

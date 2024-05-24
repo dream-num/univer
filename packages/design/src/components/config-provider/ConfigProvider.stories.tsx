@@ -17,7 +17,9 @@
 import type { Meta } from '@storybook/react';
 import React, { useState } from 'react';
 
-import { enUS, type ILocale, zhCN } from '../../locale';
+import enUS from '../../locale/en-US';
+import zhCN from '../../locale/zh-CN';
+import type { ILocale } from '../../locale/interface';
 import { Button } from '../button/Button';
 import { Confirm } from '../confirm/Confirm';
 import { ConfigProvider } from './ConfigProvider';
@@ -47,7 +49,7 @@ export const Playground = {
             <>
                 <Button onClick={() => handleChangeLocale(enUS)}>enUS</Button>
                 <Button onClick={() => handleChangeLocale(zhCN)}>zhCN</Button>
-                <ConfigProvider locale={locale} mountContainer={document.body}>
+                <ConfigProvider locale={locale?.design} mountContainer={document.body}>
                     <Confirm visible={visible} onClose={() => setVisible(false)}>
                         xx
                     </Confirm>

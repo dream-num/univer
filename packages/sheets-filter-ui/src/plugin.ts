@@ -18,7 +18,6 @@ import { LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { zhCN } from './locale';
 import type { IUniverSheetsFilterUIConfig } from './controllers/sheets-filter-ui.controller';
 import { DefaultSheetFilterUiConfig, SheetsFilterUIController } from './controllers/sheets-filter-ui.controller';
 import { SheetsFilterPanelService } from './services/sheets-filter-panel.service';
@@ -36,7 +35,6 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
     ) {
         super();
 
-        this._localeService.load({ zhCN });
         this._config = Tools.deepMerge({}, DefaultSheetFilterUiConfig, this._config);
     }
 

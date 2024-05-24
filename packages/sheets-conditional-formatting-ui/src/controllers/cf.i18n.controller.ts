@@ -18,7 +18,6 @@ import { Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univer
 import { Inject } from '@wendellhu/redi';
 
 import type { ReactNode } from 'react';
-import { zhCN } from '../locale';
 
 @OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingI18nController)
 export class ConditionalFormattingI18nController extends Disposable {
@@ -28,7 +27,6 @@ export class ConditionalFormattingI18nController extends Disposable {
     }
 
     private _initLocal = () => {
-        this._localeService.load({ zhCN });
     };
 
     public tWithReactNode(key: string, ...args: (ReactNode | string)[]) {

@@ -26,7 +26,7 @@ import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
-import { locales } from './locales';
+import { enUS, ruRU, zhCN } from '../locales';
 
 // package info
 // eslint-disable-next-line no-console
@@ -41,7 +41,11 @@ console.table({
 const univer = new Univer({
     theme: defaultTheme,
     locale: LocaleType.ZH_CN,
-    locales,
+    locales: {
+        [LocaleType.ZH_CN]: zhCN,
+        [LocaleType.EN_US]: enUS,
+        [LocaleType.RU_RU]: ruRU,
+    },
 });
 
 // core plugins

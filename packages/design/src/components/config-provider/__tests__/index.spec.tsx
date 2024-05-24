@@ -18,14 +18,14 @@ import { render } from '@testing-library/react';
 import React, { useContext } from 'react';
 import { describe, expect, it } from 'vitest';
 
-import type { ILocale } from '../../../locale';
-import { zhCN } from '../../../locale';
+import zhCN from '../../../locale/zh-CN';
+import type { ILocale } from '../../../locale/interface';
 import { ConfigContext, ConfigProvider } from '../ConfigProvider';
 
 describe('ConfigProvider', () => {
     it('should render correctly', () => {
         let _mountContainer: HTMLElement | null = null;
-        let _locale: ILocale | null = null;
+        let _locale: ILocale['design'] | undefined;
 
         function Empty() {
             const { locale, mountContainer } = useContext(ConfigContext);
@@ -33,16 +33,16 @@ describe('ConfigProvider', () => {
             _locale = locale;
             _mountContainer = mountContainer;
 
-            return <></>;
+            return null;
         }
 
         const root = render(
-            <ConfigProvider locale={zhCN} mountContainer={document.body}>
+            <ConfigProvider locale={zhCN?.design} mountContainer={document.body}>
                 <Empty />
             </ConfigProvider>
         );
 
-        expect(_locale).equals(zhCN);
+        expect(_locale).equals(zhCN.design);
         expect(_mountContainer).equals(document.body);
 
         root.unmount();
@@ -59,41 +59,16 @@ describe('ConfigProvider', () => {
 
             _mountContainer = mountContainer;
 
-            return <></>;
+            return null;
         }
 
         const root = render(
-            <ConfigProvider locale={zhCN} mountContainer={mountContainer}>
+            <ConfigProvider locale={zhCN?.design} mountContainer={mountContainer}>
                 <Empty />
             </ConfigProvider>
         );
 
         expect(_mountContainer).equals(mountContainer);
-
-        root.unmount();
-    });
-
-    it('should render correctly when locale is invalid', () => {
-        const mountContainer = document.createElement('div');
-        document.body.appendChild(mountContainer);
-
-        let _locale: ILocale | null = null;
-
-        function Empty() {
-            const { locale } = useContext(ConfigContext);
-
-            _locale = locale;
-
-            return <></>;
-        }
-
-        const root = render(
-            <ConfigProvider locale={{} as any} mountContainer={mountContainer}>
-                <Empty />
-            </ConfigProvider>
-        );
-
-        expect(_locale).equals(zhCN);
 
         root.unmount();
     });

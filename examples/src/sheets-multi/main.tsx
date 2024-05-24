@@ -33,12 +33,18 @@ import { createRoot } from 'react-dom/client';
 import { Mosaic, MosaicWindow } from 'react-mosaic-component';
 
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
+import { enUS, ruRU, zhCN } from '../locales';
 
 function factory(id: string) {
     return function createUniverOnContainer() {
         const univer = new Univer({
             theme: defaultTheme,
             locale: LocaleType.ZH_CN,
+            locales: {
+                [LocaleType.ZH_CN]: zhCN,
+                [LocaleType.EN_US]: enUS,
+                [LocaleType.RU_RU]: ruRU,
+            },
             logLevel: LogLevel.VERBOSE,
         });
 

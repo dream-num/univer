@@ -182,7 +182,7 @@ describe('Test move rows cols', () => {
             expect(getCellInfo(3, 1)?.v).toEqual('B2');
             expect(getMergedInfo(3, 1)).toEqual({ startRow: 3, endRow: 3, startColumn: 1, endColumn: 2 });
             expect(getMergedInfo(4, 1)).toEqual({ startRow: 4, endRow: 5, startColumn: 1, endColumn: 1 });
-            expect(getRowHeight(1)).toBe(19);
+            expect(getRowHeight(1)).toBe(24);
             expect(getRowHeight(3)).toBe(30);
             expect(getCurrentSelection()).toEqual({
                 startRow: 1,
@@ -213,7 +213,7 @@ describe('Test move rows cols', () => {
             expect(getCellInfo(3, 1)?.v).toEqual('B2');
             expect(getMergedInfo(3, 1)).toEqual({ startRow: 3, endRow: 3, startColumn: 1, endColumn: 2 });
             expect(getMergedInfo(4, 1)).toEqual({ startRow: 4, endRow: 5, startColumn: 1, endColumn: 1 });
-            expect(getRowHeight(1)).toBe(19);
+            expect(getRowHeight(1)).toBe(24);
             expect(getRowHeight(3)).toBe(30);
             expect(getCurrentSelection()).toEqual({
                 startRow: 1,
@@ -264,7 +264,7 @@ describe('Test move rows cols', () => {
             expect(getCellInfo(1, 3)?.v).toEqual('B2');
             expect(getMergedInfo(1, 3)).toEqual({ startRow: 1, endRow: 1, startColumn: 3, endColumn: 4 });
             expect(getMergedInfo(2, 3)).toEqual({ startRow: 2, endRow: 3, startColumn: 3, endColumn: 3 });
-            expect(getColWidth(1)).toBe(73);
+            expect(getColWidth(1)).toBe(88);
             expect(getColWidth(3)).toBe(30);
             expect(getCurrentSelection()).toEqual({
                 startRow: 0,
@@ -295,7 +295,7 @@ describe('Test move rows cols', () => {
             expect(getCellInfo(1, 3)?.v).toEqual('B2');
             expect(getMergedInfo(1, 3)).toEqual({ startRow: 1, endRow: 1, startColumn: 3, endColumn: 4 });
             expect(getMergedInfo(2, 3)).toEqual({ startRow: 2, endRow: 3, startColumn: 3, endColumn: 3 });
-            expect(getColWidth(1)).toBe(73);
+            expect(getColWidth(1)).toBe(88);
             expect(getColWidth(3)).toBe(30);
             expect(getCurrentSelection()).toEqual({
                 startRow: 0,

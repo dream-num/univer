@@ -114,48 +114,48 @@ describe('Test set row height commands', () => {
 
     describe('Delta row heights by dragging', () => {
         it('Should change all row selections when anchor row is selected', async () => {
-            expect(getRowHeight(1)).toBe(19);
+            expect(getRowHeight(1)).toBe(24);
 
             await commandService.executeCommand<IDeltaRowHeightCommand>(DeltaRowHeightCommand.id, {
                 deltaY: -5,
                 anchorRow: 5,
             });
-            expect(getRowHeight(1)).toBe(14);
+            expect(getRowHeight(1)).toBe(19);
             expect(getRowIsAutoHeight(1)).toBe(BooleanNumber.FALSE);
-            expect(getRowHeight(2)).toBe(14);
+            expect(getRowHeight(2)).toBe(19);
             expect(getRowIsAutoHeight(2)).toBe(BooleanNumber.FALSE);
-            expect(getRowHeight(5)).toBe(14);
+            expect(getRowHeight(5)).toBe(19);
             expect(getRowIsAutoHeight(5)).toBe(BooleanNumber.FALSE);
 
             await commandService.executeCommand(UndoCommand.id);
+            expect(getRowHeight(1)).toBe(24);
+            expect(getRowHeight(2)).toBe(24);
+            expect(getRowHeight(5)).toBe(24);
+
+            await commandService.executeCommand(RedoCommand.id);
             expect(getRowHeight(1)).toBe(19);
             expect(getRowHeight(2)).toBe(19);
             expect(getRowHeight(5)).toBe(19);
-
-            await commandService.executeCommand(RedoCommand.id);
-            expect(getRowHeight(1)).toBe(14);
-            expect(getRowHeight(2)).toBe(14);
-            expect(getRowHeight(5)).toBe(14);
         });
 
         it('Should expand only the anchor row in other situations', async () => {
-            expect(getRowHeight(1)).toBe(19);
-            expect(getRowHeight(7)).toBe(19);
+            expect(getRowHeight(1)).toBe(24);
+            expect(getRowHeight(7)).toBe(24);
 
             await commandService.executeCommand<IDeltaRowHeightCommand>(DeltaRowHeightCommand.id, {
                 deltaY: -5,
                 anchorRow: 7,
             });
 
-            expect(getRowHeight(1)).toBe(19);
-            expect(getRowHeight(2)).toBe(19);
-            expect(getRowHeight(5)).toBe(19);
-            expect(getRowHeight(7)).toBe(14);
+            expect(getRowHeight(1)).toBe(24);
+            expect(getRowHeight(2)).toBe(24);
+            expect(getRowHeight(5)).toBe(24);
+            expect(getRowHeight(7)).toBe(19);
         });
     });
 
     it('Direct change row heights', async () => {
-        expect(getRowHeight(1)).toBe(19);
+        expect(getRowHeight(1)).toBe(24);
 
         await commandService.executeCommand<ISetRowHeightCommandParams>(SetRowHeightCommand.id, {
             value: 77,
@@ -168,9 +168,9 @@ describe('Test set row height commands', () => {
         expect(getRowIsAutoHeight(5)).toBe(BooleanNumber.FALSE);
 
         await commandService.executeCommand(UndoCommand.id);
-        expect(getRowHeight(1)).toBe(19);
-        expect(getRowHeight(2)).toBe(19);
-        expect(getRowHeight(5)).toBe(19);
+        expect(getRowHeight(1)).toBe(24);
+        expect(getRowHeight(2)).toBe(24);
+        expect(getRowHeight(5)).toBe(24);
 
         await commandService.executeCommand(RedoCommand.id);
         expect(getRowHeight(1)).toBe(77);

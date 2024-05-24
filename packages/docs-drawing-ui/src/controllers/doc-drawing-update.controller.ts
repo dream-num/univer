@@ -22,9 +22,10 @@ import { getImageSize } from '@univerjs/drawing';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
 import type { IDocDrawing } from '@univerjs/Docs';
-import { IDocDrawingService, TextSelectionManagerService } from '@univerjs/Docs';
-import { drawingPositionToTransform, transformToDrawingPosition } from '@univerjs/docs-ui';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { DocSkeletonManagerService, IDocDrawingService, TextSelectionManagerService } from '@univerjs/Docs';
+import { docDrawingPositionToTransform, transformToDocDrawingPosition } from '@univerjs/docs-ui';
+import type { Documents } from '@univerjs/engine-render';
+import { IRenderManagerService, ITextSelectionRenderManager, Liquid } from '@univerjs/engine-render';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertDocImageOperation } from '../commands/operations/insert-image.operation';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
@@ -32,6 +33,7 @@ import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } fro
 import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
 import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.command';
 import { UngroupDocDrawingCommand } from '../commands/commands/ungroup-doc-drawing.command';
+import { SetDocDrawingCommand } from '../commands/commands/set-doc-drawing.command';
 
 const SHEET_IMAGE_WIDTH_LIMIT = 500;
 const SHEET_IMAGE_HEIGHT_LIMIT = 500;
@@ -48,7 +50,9 @@ export class DocDrawingUpdateController extends Disposable {
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -58,7 +62,7 @@ export class DocDrawingUpdateController extends Disposable {
     private _init(): void {
         this._initCommandListeners();
 
-        this._updateImageListener();
+        this._updateDrawingListener();
 
         this._updateOrderListener();
 
@@ -155,7 +159,7 @@ export class DocDrawingUpdateController extends Disposable {
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType,
             source,
-            transform: drawingPositionToTransform(docTransform, this._textSelectionRenderManager),
+            transform: docDrawingPositionToTransform(docTransform, this._textSelectionRenderManager),
             docTransform,
             title: '', description: '', layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
         };
@@ -164,6 +168,8 @@ export class DocDrawingUpdateController extends Disposable {
             unitId,
             drawings: [docDrawingParam],
         } as IInsertDrawingCommandParams);
+
+        this._docSkeletonManagerService.getCurrent()?.skeleton.calculate();
     }
 
     private _getUnitInfo() {
@@ -182,9 +188,13 @@ export class DocDrawingUpdateController extends Disposable {
     }
 
     private _getImagePosition(imageWidth: number, imageHeight: number, scale: number): Nullable<IDocDrawingPosition> {
-        const activeTextRange = this._textSelectionManagerService.getActiveRange();
-        // TODO:RANSIX calculate the position of the image in doc
+        const activeTextRange = this._textSelectionManagerService.getActiveTextRange();
+        const position = activeTextRange?.getAbsolutePosition() || {
+            left: 0,
+            top: 0,
+        };
 
+        // TODO:@Jocs calculate the position of the image in doc
         return {
             size: {
                 width: imageWidth * scale,
@@ -192,11 +202,11 @@ export class DocDrawingUpdateController extends Disposable {
             },
             positionH: {
                 relativeFrom: ObjectRelativeFromH.MARGIN,
-                posOffset: 100,
+                posOffset: position.left,
             },
             positionV: {
                 relativeFrom: ObjectRelativeFromV.PAGE,
-                posOffset: 230,
+                posOffset: position.top,
             },
             angle: 0,
         };
@@ -215,7 +225,7 @@ export class DocDrawingUpdateController extends Disposable {
         });
     }
 
-    private _updateImageListener() {
+    private _updateDrawingListener() {
         this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
             const drawings: Partial<IDocDrawing>[] = [];
 
@@ -223,7 +233,11 @@ export class DocDrawingUpdateController extends Disposable {
                 return;
             }
 
-            (params as IImageData[]).forEach((param) => {
+            // const offsetInfo = this._getDocsOffsetInfo();
+
+            // const { pageMarginCache, docsLeft, docsTop } = offsetInfo;
+
+            (params as IDocDrawing[]).forEach((param) => {
                 const { unitId, subUnitId, drawingId, drawingType, transform } = param;
                 if (transform == null) {
                     return;
@@ -235,28 +249,126 @@ export class DocDrawingUpdateController extends Disposable {
                     return;
                 }
 
-                const sheetTransform = transformToDrawingPosition({ ...sheetDrawing.transform, ...transform }, this._textSelectionRenderManager);
+                // const { marginLeft, marginTop } = pageMarginCache.get(drawingId) || { marginLeft: 0, marginTop: 0 };
 
-                if (sheetTransform == null) {
+                const docTransform = transformToDocDrawingPosition({ ...sheetDrawing.transform, ...transform });
+
+                if (docTransform == null) {
                     return;
                 }
 
                 const newDrawing: Partial<IDocDrawing> = {
                     ...param,
-                    transform: { ...transform, ...drawingPositionToTransform(sheetTransform, this._textSelectionRenderManager) },
-                    docTransform: { ...sheetTransform },
+                    transform: { ...transform, ...docDrawingPositionToTransform(docTransform, this._textSelectionRenderManager) },
+                    docTransform: { ...docTransform },
                 };
 
                 drawings.push(newDrawing);
             });
 
             if (drawings.length > 0) {
-                this._commandService.executeCommand(InsertDocDrawingCommand.id, {
+                this._commandService.syncExecuteCommand(SetDocDrawingCommand.id, {
                     unitId: params[0].unitId,
                     drawings,
                 } as ISetDrawingCommandParams);
+
+                this._refreshDocSkeleton();
             }
         });
+    }
+
+    private _getDocsOffsetInfo() {
+        const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
+        if (docsSkeletonObject == null) {
+            return {
+                pageMarginCache: new Map<string, { marginLeft: number; marginTop: number }>(),
+                docsLeft: 0,
+                docsTop: 0,
+            };
+        }
+
+        const { unitId, skeleton } = docsSkeletonObject;
+
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+
+        const skeletonData = skeleton?.getSkeletonData();
+
+        if (currentRender == null || !skeletonData) {
+            return {
+                pageMarginCache: new Map<string, { marginLeft: number; marginTop: number }>(),
+                docsLeft: 0,
+                docsTop: 0,
+            };
+        }
+
+        const { mainComponent } = currentRender;
+
+        const documentComponent = mainComponent as Documents;
+
+        const { left: docsLeft, top: docsTop, pageLayoutType, pageMarginLeft, pageMarginTop } = documentComponent;
+
+        const { pages } = skeletonData;
+
+        const liquid = new Liquid();
+
+        const pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
+
+        for (let i = 0, len = pages.length; i < len; i++) {
+            const page = pages[i];
+            const { skeDrawings, marginLeft, marginTop } = page;
+            // cumPageLeft + = pageWidth + documents.pageMarginLeft;
+
+            liquid.translatePagePadding(page);
+
+            skeDrawings.forEach((drawing) => {
+                const { aLeft, aTop, height, width, drawingId, drawingOrigin } = drawing;
+                // const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;
+                // floatObjects.push({
+                //     unitId,
+                //     subUnitId: DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
+                //     floatingObjectId: drawingId,
+                //     behindText,
+                //     floatingObject: {
+                //         left: aLeft + docsLeft + liquid.x,
+                //         top: aTop + docsTop + liquid.y,
+                //         width,
+                //         height,
+                //     },
+                // });
+
+                pageMarginCache.set(drawingId, {
+                    marginLeft: liquid.x,
+                    marginTop: liquid.y,
+                });
+            });
+
+            liquid.restorePagePadding(page);
+
+            liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+        }
+
+        return { pageMarginCache, docsLeft, docsTop };
+    }
+
+    private _refreshDocSkeleton() {
+        const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
+        if (docsSkeletonObject == null) {
+            return;
+        }
+
+        const { unitId, skeleton } = docsSkeletonObject;
+
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+
+        if (currentRender == null) {
+            return;
+        }
+
+        const { mainComponent } = currentRender;
+
+        skeleton?.calculate();
+
+        mainComponent?.makeDirty();
     }
 
     private _groupDrawingListener() {

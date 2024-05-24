@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDocDrawingPosition, ITransformState, Nullable } from '@univerjs/core';
+import { type IDocDrawingPosition, type ITransformState, type Nullable, ObjectRelativeFromH, ObjectRelativeFromV } from '@univerjs/core';
 import type { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { precisionTo } from '@univerjs/engine-render';
 
-export function drawingPositionToTransform(position: IDocDrawingPosition, textSelectionRenderService: ITextSelectionRenderManager): Nullable<ITransformState> {
+export function docDrawingPositionToTransform(position: IDocDrawingPosition, textSelectionRenderService: ITextSelectionRenderManager): Nullable<ITransformState> {
     // const { from, to } = position;
     // const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
     // const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
@@ -63,15 +63,15 @@ export function drawingPositionToTransform(position: IDocDrawingPosition, textSe
     // };
 
     return {
-        left: 100,
-        top: 100,
+        left: position.positionH.posOffset,
+        top: position.positionV.posOffset,
         width: position.size.width,
         height: position.size.height,
     };
 }
 
 // use transform and originSize convert to  ISheetDrawingPosition
-export function transformToDrawingPosition(transform: ITransformState, textSelectionRenderService: ITextSelectionRenderManager): Nullable<IDocDrawingPosition> {
+export function transformToDocDrawingPosition(transform: ITransformState, marginLeft: number = 0, marginTop: number = 0): Nullable<IDocDrawingPosition> {
     // const { left = 0, top = 0, width = 0, height = 0 } = transform;
 
     // const startSelectionCell = selectionRenderService.getSelectionCellByPosition(left, top);
@@ -100,8 +100,19 @@ export function transformToDrawingPosition(transform: ITransformState, textSelec
     //     rowOffset: precisionTo(top + height - endSelectionCell.startY, 1),
     // };
 
-    // return {
-    //     from,
-    //     to,
-    // };
+    return {
+        size: {
+            width: transform.width,
+            height: transform.height,
+        },
+        positionH: {
+            relativeFrom: ObjectRelativeFromH.MARGIN,
+            posOffset: (transform.left || 0) - marginLeft,
+        },
+        positionV: {
+            relativeFrom: ObjectRelativeFromV.PAGE,
+            posOffset: (transform.top || 0) - marginTop,
+        },
+        angle: transform.angle || 0,
+    };
 }

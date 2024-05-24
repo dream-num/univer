@@ -201,6 +201,53 @@ export class TextRange {
         return compare ? RANGE_DIRECTION.FORWARD : RANGE_DIRECTION.BACKWARD;
     }
 
+    getAbsolutePosition() {
+        const anchor = this.anchorNodePosition;
+        const focus = this.focusNodePosition;
+        if (this._isEmpty()) {
+            return;
+        }
+
+        const documentOffsetConfig = this._document.getOffsetConfig();
+
+        const { docsLeft, docsTop } = documentOffsetConfig;
+
+        const convertor = new NodePositionConvertToCursor(documentOffsetConfig, this._docSkeleton);
+
+        if (this._isCollapsed()) {
+            const { contentBoxPointGroup, cursorList } = convertor.getRangePointData(anchor, anchor);
+
+            this._setCursorList(cursorList);
+            if (contentBoxPointGroup.length === 0) {
+                return;
+            }
+
+            const pos = getAnchorBounding(contentBoxPointGroup);
+
+            return {
+                ...pos,
+                left: pos.left + docsLeft,
+                top: pos.top + docsTop,
+            };
+        }
+
+        const { borderBoxPointGroup, cursorList } = convertor.getRangePointData(anchor, focus);
+
+        this._setCursorList(cursorList);
+
+        if (borderBoxPointGroup.length === 0) {
+            return;
+        }
+
+        const pos = getAnchorBounding(borderBoxPointGroup);
+
+        return {
+            ...pos,
+            left: pos.left + docsLeft,
+            top: pos.top + docsTop,
+        };
+    }
+
     getAnchor() {
         return this._anchorShape;
     }

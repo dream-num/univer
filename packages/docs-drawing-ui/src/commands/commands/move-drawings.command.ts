@@ -21,7 +21,7 @@ import type { IAccessor } from '@wendellhu/redi';
 import type { IDocDrawing } from '@univerjs/docs';
 import { IDocDrawingService } from '@univerjs/docs';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
-import { transformToDrawingPosition } from '@univerjs/docs-ui';
+import { transformToDocDrawingPosition } from '@univerjs/docs-ui';
 import { ClearDocDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import type { ISetDrawingCommandParams } from './interfaces';
 import { SetDocDrawingCommand } from './set-doc-drawing.command';
@@ -70,7 +70,7 @@ export const MoveDocDrawingsCommand: ICommand = {
             return {
                 ...drawing,
                 transform: newTransform,
-                docTransform: transformToDrawingPosition(newTransform, textSelectionRenderService),
+                docTransform: transformToDocDrawingPosition(newTransform),
             } as IDocDrawing;
         }).filter((drawing) => drawing != null) as IDocDrawing[];
 

@@ -33,7 +33,7 @@ import {
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { DocBackground } from '../views/doc-background/DocBackground';
 import type { IUniverDocsUIConfig } from '../basics';
-import { drawingPositionToTransform } from '../basics/transform-position';
+import { docDrawingPositionToTransform } from '../basics/transform-position';
 import {
     AlignCenterMenuItemFactory,
     AlignJustifyMenuItemFactory,
@@ -159,20 +159,19 @@ export class DocUIController extends Disposable {
             return false;
         }
 
-        const data = {} as IDrawingMapItemData<IDocDrawing>;
         Object.keys(drawingDataModels).forEach((drawingId) => {
             const drawingDataModel = drawingDataModels[drawingId];
             const docTransform = drawingDataModel.docTransform;
-            const transform = drawingPositionToTransform(docTransform, this._textSelectionRenderManager);
+            const transform = docDrawingPositionToTransform(docTransform, this._textSelectionRenderManager);
 
-            data[drawingId] = { ...drawingDataModel, transform } as IDocDrawing;
+            drawingDataModels[drawingId] = { ...drawingDataModel, transform } as IDocDrawing;
         });
 
         const subDrawings = {
             [subUnitId]: {
                 unitId,
                 subUnitId,
-                data,
+                data: drawingDataModels as IDrawingMapItemData<IDocDrawing>,
                 order: drawingOrderModel,
             },
         };

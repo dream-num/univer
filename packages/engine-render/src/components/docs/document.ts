@@ -319,7 +319,12 @@ export class Documents extends DocComponent {
                         this._drawLiquid.translate(0, -rotateTranslateY);
 
                         rotateTranslateXListApply = rotateTranslateXList;
-                    } else if (wrapStrategy === WrapStrategy.WRAP) {
+                    } else if (
+                        wrapStrategy === WrapStrategy.WRAP
+                        // Use fix: https://github.com/dream-num/univer-pro/issues/734
+                        && (horizontalAlign !== HorizontalAlign.UNSPECIFIED || cellValueType !== CellValueType.NUMBER)
+                    ) {
+                        // @Jocs, Why reset alignOffset.x? When you know the reason, add a description
                         alignOffset.x = pagePaddingLeft;
                     }
 

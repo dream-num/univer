@@ -260,7 +260,7 @@ export class ZenEditorController extends RxDisposable {
     }
 
     private _calculatePagePosition(currentRender: IDocObjectParam) {
-        const { document: docsComponent, scene } = currentRender;
+        const { document: docsComponent, scene, docBackground } = currentRender;
 
         const parent = scene?.getParent();
 
@@ -305,6 +305,7 @@ export class ZenEditorController extends RxDisposable {
         scene.resize(sceneWidth, sceneHeight + 200);
 
         docsComponent.translate(docsLeft, docsTop);
+        docBackground.translate(docsLeft, docsTop);
 
         const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         if (scrollToX !== Number.POSITIVE_INFINITY && viewport != null) {

@@ -496,7 +496,8 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.setLineWidthByPrecision(1);
 
-        ctx.strokeStyle = getColor([212, 212, 212]);
+        // TODO@jikkai: these should be configurable
+        ctx.strokeStyle = getColor([235, 236, 239]);
 
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;

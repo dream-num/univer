@@ -128,7 +128,8 @@ export class SheetsFilterService extends Disposable {
             return;
         }
 
-        const activeSheet = workbook.getActiveSheet();
+        // Use getRawActiveSheet to avoid automatically activating the next sheet when deleting the sheet, causing the sheet switching in ActiveWorksheetController to be invalid.
+        const activeSheet = workbook.getRawActiveSheet();
         if (!activeSheet) {
             this._activeFilterModel$.next(null);
             return;

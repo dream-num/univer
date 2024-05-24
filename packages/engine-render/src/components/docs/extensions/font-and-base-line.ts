@@ -105,7 +105,6 @@ export class FontAndBaseLine extends docExtension {
             ctx.fillText(content, 0, 0);
             ctx.restore();
         } else {
-            // console.log(content, spanPointWithFont);
             ctx.fillText(content, spanPointWithFont.x, spanPointWithFont.y);
         }
     }

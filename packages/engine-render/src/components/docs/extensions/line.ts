@@ -111,7 +111,6 @@ export class Line extends docExtension {
             originTranslate = Vector2.create(0, 0),
             alignOffset = Vector2.create(0, 0),
             renderConfig = {},
-            spanPointWithFont = Vector2.create(0, 0),
         } = this.extensionOffset;
 
         const { left, width } = span;
@@ -120,10 +119,6 @@ export class Line extends docExtension {
 
         const centerAngle = degToRad(centerAngleDeg);
         const vertexAngle = degToRad(vertexAngleDeg);
-
-        // console.log(centerAngleDeg, vertexAngleDeg);
-
-        // console.log(left, width, startY);
 
         ctx.save();
 

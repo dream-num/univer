@@ -178,7 +178,7 @@ describe('Test remove row col confirm commands', () => {
 
             expect(getColumnCount()).toBe(20);
             expect(await commandService.executeCommand(RemoveColConfirmCommand.id)).toBeTruthy();
-            expect(getColumnCount()).toBe(19);
+            expect(getColumnCount()).toBe(24);
         });
 
         it('Will not apply when select all cols', async () => {

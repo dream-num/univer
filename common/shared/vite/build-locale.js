@@ -61,6 +61,24 @@ exports.buildLocale = function buildLocale({ entryRoot, outDir }) {
                 // eslint-disable-next-line no-console
                     console.log(`[vite:build-locale] ${outputPath} generated`);
                 });
+
+            // generate peerDependencies
+            const pkg = require(`${process.cwd()}/package.json`);
+            pkg.exports = {
+                ...pkg.exports,
+                './locale/*': './src/locale/*.ts',
+            };
+            pkg.publishConfig = {
+                ...pkg.publishConfig,
+                exports: {
+                    ...pkg.publishConfig.exports,
+                    './locale/*': './lib/locale/*.json',
+                },
+            };
+            fs.writeFileSync(
+                `${process.cwd()}/package.json`,
+                `${JSON.stringify(pkg, null, 4)}\n`
+            );
         },
     };
 };

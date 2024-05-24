@@ -83,7 +83,7 @@ describe('Test FRange', () => {
     it('Range setValue', () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
 
-        // A1 sets the number
+        // // A1 sets the number
         const range1 = activeSheet?.getRange(0, 0, 1, 1);
         range1?.setValue(1);
 
@@ -190,7 +190,6 @@ describe('Test FRange', () => {
         activeSheet?.getRange(0, 0)?.setBackgroundColor('red');
         const range = activeSheet?.getRange(0, 0);
         expect(range?.getCellStyleData()?.bg?.rgb).toBe('red');
-
         activeSheet?.getRange(0, 0, 2, 2)?.setFontWeight('bold');
         expect(range?.getCellStyleData()?.bl).toBe(1);
     });

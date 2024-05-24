@@ -114,7 +114,7 @@ export class SelectionShapeExtension {
             ySplit: 0,
         };
 
-        switch (viewport.viewPortKey) {
+        switch (viewport.viewportKey) {
             case VIEWPORT_KEY.VIEW_MAIN:
                 return selection.endRow >= freeze.startRow && selection.endColumn >= freeze.startColumn;
 
@@ -789,7 +789,7 @@ export class SelectionShapeExtension {
 
         const scrollTimer = ScrollTimer.create(
             scene,
-            this._activeViewport.viewPortKey === VIEWPORT_KEY.VIEW_MAIN ? ScrollTimerType.ALL : ScrollTimerType.NONE
+            this._activeViewport.viewportKey === VIEWPORT_KEY.VIEW_MAIN ? ScrollTimerType.ALL : ScrollTimerType.NONE
         );
 
         scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewportMain);
@@ -816,7 +816,7 @@ export class SelectionShapeExtension {
 
             const newSelection = this._targetSelection;
 
-            if (viewportMain && currentViewport && this._activeViewport?.viewPortKey !== currentViewport?.viewPortKey) {
+            if (viewportMain && currentViewport && this._activeViewport?.viewportKey !== currentViewport?.viewportKey) {
                 let movingRange: IRangeWithCoord;
                 if (newSelection.startRow !== originStartRow) {
                     scrollTimer.scrollTimerType = ScrollTimerType.Y;

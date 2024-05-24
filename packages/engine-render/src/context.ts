@@ -358,7 +358,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterClockwise?: boolean) {
-        this._context.arc(x, y, radius, startAngle, endAngle, counterClockwise);
+        this._context.arc(x, y, Math.max(0, radius), startAngle, endAngle, counterClockwise);
     }
 
     /**

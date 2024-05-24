@@ -111,6 +111,8 @@ export class Transform {
         this._m[1] *= sx;
         this._m[2] *= sy;
         this._m[3] *= sy;
+        this._m[4] *= sx;
+        this._m[5] *= sy;
         return this;
     }
 
@@ -385,6 +387,18 @@ export class Transform {
             scaleMatrix.multiply(new Transform([1, Math.tan(degToRad(options.skewY)), 0, 1, 0, 0]));
         }
         return scaleMatrix;
+    }
+
+    convert2DOMMatrix2D() {
+        const m = this.getMatrix();
+        return {
+            a: m[0],
+            b: m[1],
+            c: m[2],
+            d: m[3],
+            e: m[4],
+            f: m[5],
+        };
     }
 
     // static createTransformByState(state: positionState) {

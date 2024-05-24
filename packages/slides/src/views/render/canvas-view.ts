@@ -137,6 +137,7 @@ export class CanvasView extends RxDisposable {
         return this._renderManagerService.getRenderById(slideDataModel.getUnitId());
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _addNewRender(unitId: string) {
         const slideDataModel = this._univerInstanceService.getUnit<SlideDataModel>(unitId, UniverInstanceType.UNIVER_SLIDE);
 
@@ -175,6 +176,8 @@ export class CanvasView extends RxDisposable {
             top: 0,
             bottom: 0,
             right: 0,
+            isRelativeX: true,
+            isRelativeY: true,
             isWheelPreventDefaultX: true,
         });
 
@@ -412,6 +415,8 @@ export class CanvasView extends RxDisposable {
             top: 0,
             bottom: 0,
             right: 0,
+            isRelativeX: true,
+            isRelativeY: true,
         });
 
         viewMain.closeClip();

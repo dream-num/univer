@@ -88,11 +88,11 @@
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.15.2",
+        "jest-canvas-mock": "^2.5.2",
         "jsdom": "^24.0.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
         "vite": "^5.2.11",
-        "vitest": "^1.6.0",
-        "vitest-canvas-mock": "^0.3.3"
+        "vitest": "^1.6.0"
     }
 }

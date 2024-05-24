@@ -24,7 +24,7 @@ import type { IObjectFullState, ITransformChangeState } from './basics/interface
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { generateRandomKey, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
-import type { IViewportBound, Vector2 } from './basics/vector2';
+import type { IViewportInfo, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { Layer } from './layer';
 
@@ -87,6 +87,7 @@ export abstract class BaseObject extends Disposable {
     protected _oKey: string;
 
     protected _dirty: boolean = true;
+    protected _forceDirty: boolean = true;
 
     private _top: number = 0;
 
@@ -367,6 +368,10 @@ export abstract class BaseObject extends Disposable {
         return this;
     }
 
+    makeForceDirty(state: boolean = true) {
+        this._forceDirty = state;
+    }
+
     makeDirtyNoDebounce(state: boolean = true) {
         this._dirty = state;
         if (state) {
@@ -514,7 +519,7 @@ export abstract class BaseObject extends Disposable {
         return this;
     }
 
-    isRender(bounds?: IViewportBound) {
+    isRender(bounds?: IViewportInfo) {
         if (this._forceRender) {
             return false;
         }
@@ -551,7 +556,7 @@ export abstract class BaseObject extends Disposable {
         this._makeDirtyMix();
     }
 
-    render(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    render(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         /* abstract */
     }
 

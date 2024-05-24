@@ -18,7 +18,7 @@ import type { ICellData, IStyleData, Nullable, UnitModel, Workbook } from '@univ
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { Subject } from 'rxjs';
 
 import type { IDragCellPosition, IHoverCellPosition } from '@univerjs/sheets-ui';
@@ -76,10 +76,6 @@ describe('Test FSheetHooks', () => {
     let dragEndCell$: Subject<Nullable<IDragCellPosition>>;
     let sheetHooks: FSheetHooks;
     let workbook: Workbook;
-
-    beforeEach(() => {
-        vi.stubGlobal('jest', vi);
-    });
 
     beforeEach(() => {
         // Initialize the subject

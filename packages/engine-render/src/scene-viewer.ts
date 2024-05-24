@@ -19,7 +19,7 @@ import type { IKeyValue, Nullable } from '@univerjs/core';
 import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import type { IObjectFullState } from './basics/interfaces';
-import type { IViewportBound, Vector2 } from './basics/vector2';
+import type { IViewportInfo, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { ThinScene } from './thin-scene';
 
@@ -40,14 +40,14 @@ export class SceneViewer extends BaseObject {
         return RENDER_CLASS_TYPE.SCENE_VIEWER;
     }
 
-    override render(mainCtx: UniverRenderingContext, bounds?: IViewportBound) {
+    override render(mainCtx: UniverRenderingContext, bounds?: IViewportInfo) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
         }
 
         if (bounds) {
-            const { left, top, right, bottom } = bounds.viewBound;
+            const { left, top, right, bottom } = bounds.cacheBound || bounds.viewBound;
 
             if (
                 this.width + this.strokeWidth + this.left < left ||

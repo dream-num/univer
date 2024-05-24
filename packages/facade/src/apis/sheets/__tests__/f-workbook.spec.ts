@@ -18,7 +18,7 @@ import type { ICellData, IStyleData, Nullable } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { InsertSheetCommand, InsertSheetMutation, RemoveSheetCommand, RemoveSheetMutation, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { FUniver } from '../../facade';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
@@ -39,10 +39,6 @@ describe('Test FWorkbook', () => {
         endRow: number,
         endColumn: number
     ) => Nullable<IStyleData>;
-
-    beforeEach(() => {
-        vi.stubGlobal('jest', vi);
-    });
 
     beforeEach(() => {
         const testBed = createFacadeTestBed();

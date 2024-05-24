@@ -72,8 +72,8 @@ export class CellCustomRenderController extends Disposable implements IRenderCon
                     const { scaleX, scaleY } = scene.getAncestorScale();
 
                     const scrollXY = {
-                        x: activeViewport.actualScrollX,
-                        y: activeViewport.actualScrollY,
+                        x: activeViewport.viewportScrollX,
+                        y: activeViewport.viewportScrollY,
                     };
 
                     const cellPos = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);

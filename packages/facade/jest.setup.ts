@@ -14,23 +14,6 @@
  * limitations under the License.
  */
 
-import getCanvasWindow from 'jest-canvas-mock/lib/window';
 import { vi } from 'vitest';
 
-const apis = [
-    'Path2D',
-    'CanvasGradient',
-    'CanvasPattern',
-    'CanvasRenderingContext2D',
-    'DOMMatrix',
-    'ImageData',
-    'TextMetrics',
-    'ImageBitmap',
-    'createImageBitmap',
-] as const;
-
-const canvasWindow = getCanvasWindow({ document: window.document });
-
-apis.forEach((api) => {
-    vi.stubGlobal(api, canvasWindow[api]);
-});
+vi.stubGlobal('jest', vi);

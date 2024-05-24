@@ -107,6 +107,8 @@ export class DocCanvasView extends RxDisposable {
             top: 0,
             bottom: 0,
             right: 0,
+            isRelativeX: true,
+            isRelativeY: true,
             isWheelPreventDefaultX: true,
         });
 

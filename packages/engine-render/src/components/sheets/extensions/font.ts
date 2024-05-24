@@ -19,19 +19,21 @@
 import type { ICellData, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
 
+import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
+import { inRowViewRanges, inViewRanges, mergeRangeIfIntersects } from '../../../basics/tools';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
+import type { IDrawInfo } from '../../extension';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
-import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
 
-const EXTENSION_Z_INDEX = 30;
+const EXTENSION_Z_INDEX = 45;
 export interface ISheetFontRenderExtension {
     fontRenderExtension?: {
         leftOffset?: number;
@@ -55,8 +57,10 @@ export class Font extends SheetExtension {
         ctx: UniverRenderingContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
-        diffRanges?: IRange[]
+        diffRanges: IRange[],
+        moreBoundsInfo: IDrawInfo
     ) {
+        const { viewRanges = [], checkOutOfViewBound } = moreBoundsInfo;
         const { stylesCache, dataMergeCache, overflowCache, worksheet } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         if (!spreadsheetSkeleton || !worksheet) {
@@ -76,15 +80,27 @@ export class Font extends SheetExtension {
             return;
         }
         ctx.save();
-
         const scale = this._getScale(parentScale);
-
         fontList &&
             Object.keys(fontList).forEach((fontFormat: string) => {
                 const fontObjectArray = fontList[fontFormat];
 
+                // Since the overflow can spill out to both the left and right sides,
+                // we need to consider the content outside the viewBounds.
+                // At the same time, there are also merged cells, so we need to merge the current
+                // viewrange and a single merged area when calculating.
+
+                // Early exit from font condition
+                // If it's not an overflow and not within the field of view, we can exit early
+                // (the field of view needs to consider the impact of merged cells).
+
                 // eslint-disable-next-line complexity
                 fontObjectArray.forValue((rowIndex, columnIndex, docsConfig) => {
+                    if (!checkOutOfViewBound) {
+                        if (!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
+                            return true;
+                        }
+                    }
                     const cellInfo = this.getCellIndex(
                         rowIndex,
                         columnIndex,
@@ -99,18 +115,33 @@ export class Font extends SheetExtension {
                         return true;
                     }
 
+                    // If the merged cell area intersects with the current viewRange,
+                    // then merge it into the current viewRange.
+                    // After the merge, the font extension within the current viewBounds
+                    // also needs to be drawn once.
+                    // But at this moment, we cannot assume that it is not within the viewRanges and exit, because there may still be horizontal overflow.
+                    // At this moment, we can only exclude the cells that are not within the current row.
+                    const mergeTo = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
+                    const combineWithMergeRanges = mergeRangeIfIntersects(mergeTo, [mergeInfo]);
+                    if (!inRowViewRanges(combineWithMergeRanges, rowIndex)) {
+                        return true;
+                    }
+
                     if (isMergedMainCell) {
                         startY = mergeInfo.startY;
                         endY = mergeInfo.endY;
                         startX = mergeInfo.startX;
                         endX = mergeInfo.endX;
                     }
-
                     /**
                      * Incremental content rendering for texture mapping
+                     * startRow endRow 和 diffRanges 在 row 上不相交, 那么返回不渲染
+                     * PS 如果这个单元格并不在 merge 区域内, mergeInfo start 和 end 就是单元格本身
                      */
-                    if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
-                        return true;
+                    if (diffRanges) {
+                        if (!this.isRowInRanges(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
+                            return true;
+                        }
                     }
 
                     /**
@@ -128,8 +159,17 @@ export class Font extends SheetExtension {
                         return true;
                     }
 
+                    // If the cell is overflowing, but the overflowRectangle has not been set,
+                    // then overflowRectangle is set to undefined.
                     const overflowRectangle = overflowCache.getValue(rowIndex, columnIndex);
                     const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = docsConfig;
+
+                    // If it's neither an overflow nor within the current range,
+                    // then we can exit early (taking into account the range extension
+                    // caused by the merged cells).
+                    if (!overflowRectangle && !inViewRanges(combineWithMergeRanges, rowIndex, columnIndex)) {
+                        return true;
+                    }
 
                     /**
                      * https://github.com/dream-num/univer-pro/issues/334
@@ -176,15 +216,15 @@ export class Font extends SheetExtension {
                                 cellHeight - 2 / scale
                             );
                             ctx.clip();
-                            ctx.clearRectForTexture(
-                                startX + 1 / scale,
-                                startY + 1 / scale,
-                                cellWidth - 2 / scale,
-                                cellHeight - 2 / scale
-                            );
+                            // ctx.clearRectForTexture(
+                            //     startX + 1 / scale,
+                            //     startY + 1 / scale,
+                            //     cellWidth - 2 / scale,
+                            //     cellHeight - 2 / scale
+                            // );
                         } else {
                             if (horizontalAlignOverFlow === HorizontalAlign.CENTER) {
-                                this._clipRectangle(
+                                this._clipRectangleForOverflow(
                                     ctx,
                                     startRow,
                                     endRow,
@@ -195,7 +235,7 @@ export class Font extends SheetExtension {
                                     columnWidthAccumulation
                                 );
                             } else if (horizontalAlignOverFlow === HorizontalAlign.RIGHT) {
-                                this._clipRectangle(
+                                this._clipRectangleForOverflow(
                                     ctx,
                                     startRow,
                                     rowIndex,
@@ -206,7 +246,7 @@ export class Font extends SheetExtension {
                                     columnWidthAccumulation
                                 );
                             } else {
-                                this._clipRectangle(
+                                this._clipRectangleForOverflow(
                                     ctx,
                                     rowIndex,
                                     endRow,
@@ -220,17 +260,18 @@ export class Font extends SheetExtension {
                         }
                     } else {
                         ctx.rectByPrecision(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
+                        // for normal cell, forbid text overflow cellarea
                         ctx.clip();
-                        ctx.clearRectForTexture(
-                            startX + 1 / scale,
-                            startY + 1 / scale,
-                            cellWidth - 2 / scale,
-                            cellHeight - 2 / scale
-                        );
+                        // ctx.clearRectForTexture(
+                        //     startX + 1 / scale,
+                        //     startY + 1 / scale,
+                        //     cellWidth - 2 / scale,
+                        //     cellHeight - 2 / scale
+                        // );
                     }
-
                     ctx.translate(startX + FIX_ONE_PIXEL_BLUR_OFFSET, startY + FIX_ONE_PIXEL_BLUR_OFFSET);
                     this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex, overflowCache);
+                    ctx.closePath();
                     ctx.restore();
                 });
             });
@@ -291,7 +332,7 @@ export class Font extends SheetExtension {
         documents.changeSkeleton(documentSkeleton).render(ctx);
     }
 
-    private _clipRectangle(
+    private _clipRectangleForOverflow(
         ctx: UniverRenderingContext,
         startRow: number,
         endRow: number,
@@ -309,7 +350,7 @@ export class Font extends SheetExtension {
 
         ctx.rectByPrecision(startX, startY, endX - startX, endY - startY);
         ctx.clip();
-        ctx.clearRectForTexture(startX, startY, endX - startX, endY - startY);
+        // ctx.clearRectForTexture(startX, startY, endX - startX, endY - startY);
     }
 }
 

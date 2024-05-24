@@ -34,6 +34,7 @@ export class Border extends SheetExtension {
 
     override Z_INDEX = BORDER_Z_INDEX;
 
+    // eslint-disable-next-line max-lines-per-function
     override draw(
         ctx: UniverRenderingContext,
         parentScale: IScale,
@@ -66,6 +67,7 @@ export class Border extends SheetExtension {
 
         const precisionScale = this._getScale(ctx.getScale());
 
+        // eslint-disable-next-line max-lines-per-function
         border?.forValue((rowIndex, columnIndex, borderCaches) => {
             if (!borderCaches) {
                 return true;

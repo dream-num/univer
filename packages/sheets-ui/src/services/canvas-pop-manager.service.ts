@@ -262,8 +262,8 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         const { scaleX, scaleY } = scene.getAncestorScale();
         const scrollXY = {
-            x: activeViewport.actualScrollX,
-            y: activeViewport.actualScrollY,
+            x: activeViewport.viewportScrollX,
+            y: activeViewport.viewportScrollY,
         };
 
         return {

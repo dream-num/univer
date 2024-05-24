@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { IViewportBound, Vector2 } from '../../basics/vector2';
+import type { IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import { SheetRowHeaderExtensionRegistry } from '../extension';
 import type { RowHeaderLayout } from './extensions/row-header-layout';
@@ -50,7 +50,7 @@ export class SpreadsheetRowHeader extends SpreadsheetHeader {
         return this._rowHeaderLayoutExtension;
     }
 
-    override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    override draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;

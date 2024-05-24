@@ -62,7 +62,7 @@ exports.buildLocale = function buildLocale({ entryRoot, outDir }) {
                     console.log(`[vite:build-locale] ${outputPath} generated`);
                 });
 
-            // generate peerDependencies
+            // generate exports
             const pkg = require(`${process.cwd()}/package.json`);
             pkg.exports = {
                 ...pkg.exports,

@@ -21,22 +21,22 @@ import {
     IUndoRedoService,
 } from '@univerjs/core';
 
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
+import { DocDrawingApplyType, IDocDrawingService, SetDocDrawingApplyMutation } from '@univerjs/docs';
+import { ClearDocDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import { groupToUngroup } from './utils';
 
 /**
  * The command to insert new defined name
  */
-export const GroupSheetDrawingCommand: ICommand = {
-    id: 'sheet.command.group-sheet-image',
+export const GroupDocDrawingCommand: ICommand = {
+    id: 'doc.command.group-doc-image',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params?: IDrawingGroupUpdateParam[]) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const sheetDrawingService = accessor.get(ISheetDrawingService);
+        const docDrawingService = accessor.get(IDocDrawingService);
 
         if (!params) return false;
 
@@ -49,22 +49,22 @@ export const GroupSheetDrawingCommand: ICommand = {
         });
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const jsonOp = sheetDrawingService.getGroupDrawingOp(params) as IDrawingJsonUndo1;
+        const jsonOp = docDrawingService.getGroupDrawingOp(params) as IDrawingJsonUndo1;
 
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
-        const result = commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type: DrawingApplyType.GROUP });
+        const result = commandService.syncExecuteCommand(SetDocDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type: DocDrawingApplyType.GROUP });
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    { id: SetDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects: groupToUngroup(objects as IDrawingGroupUpdateParam[]), type: DrawingApplyType.UNGROUP } },
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
+                    { id: SetDocDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects: groupToUngroup(objects as IDrawingGroupUpdateParam[]), type: DocDrawingApplyType.UNGROUP } },
+                    { id: ClearDocDrawingTransformerOperation.id, params: unitIds },
                 ],
                 redoMutations: [
-                    { id: SetDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type: DrawingApplyType.GROUP } },
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
+                    { id: SetDocDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type: DocDrawingApplyType.GROUP } },
+                    { id: ClearDocDrawingTransformerOperation.id, params: unitIds },
                 ],
             });
 

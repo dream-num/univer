@@ -21,17 +21,16 @@ import React, { useEffect, useState } from 'react';
 import { Radio, RadioGroup } from '@univerjs/design';
 import clsx from 'clsx';
 import styles from '@univerjs/drawing-ui/views/panel/index.module.less';
-import type { ISheetDrawing } from '@univerjs/sheets';
-import { SheetDrawingAnchorType } from '@univerjs/sheets';
 import type { BaseObject } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetSheetDrawingCommand } from '../../commands/commands/set-sheet-drawing.command';
+import type { IDocDrawing } from '@univerjs/docs';
+import { SetDocDrawingCommand } from '../../commands/commands/set-doc-drawing.command';
 
-export interface ISheetDrawingAnchorProps {
+export interface IDocDrawingAnchorProps {
     drawings: IDrawingParam[];
 }
 
-export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
+export const DocDrawingAnchor = (props: IDocDrawingAnchorProps) => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
@@ -39,7 +38,7 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
 
     const { drawings } = props;
 
-    const drawingParam = drawings[0] as ISheetDrawing;
+    const drawingParam = drawings[0] as IDocDrawing;
 
     if (drawingParam == null) {
         return;
@@ -56,11 +55,11 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
 
     const [anchorShow, setAnchorShow] = useState(true);
 
-    const type = drawingParam.anchorType ?? SheetDrawingAnchorType.Position;
-    const [value, setValue] = useState(type);
+    // const type = drawingParam.anchorType ?? SheetDrawingAnchorType.Position;
+    const [value, setValue] = useState('');
 
-    function getUpdateParams(objects: Map<string, BaseObject>, drawingManagerService: IDrawingManagerService): Nullable<ISheetDrawing>[] {
-        const params: Nullable<ISheetDrawing>[] = [];
+    function getUpdateParams(objects: Map<string, BaseObject>, drawingManagerService: IDrawingManagerService): Nullable<IDocDrawing>[] {
+        const params: Nullable<IDocDrawing>[] = [];
         objects.forEach((object) => {
             const { oKey } = object;
 
@@ -71,16 +70,16 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
                 return true;
             }
 
-            const { unitId, subUnitId, drawingId, drawingType, anchorType, sheetTransform } = searchParam as ISheetDrawing;
+            // const { unitId, subUnitId, drawingId, drawingType, anchorType, docTransform } = searchParam as IDocDrawing;
 
-            params.push({
-                unitId,
-                subUnitId,
-                drawingId,
-                anchorType,
-                sheetTransform,
-                drawingType,
-            });
+            // params.push({
+            //     unitId,
+            //     subUnitId,
+            //     drawingId,
+            //     anchorType,
+            //     sheetTransform,
+            //     drawingType,
+            // });
         });
 
         return params;
@@ -97,13 +96,13 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
             const { objects } = state;
             const params = getUpdateParams(objects, drawingManagerService);
 
-            if (params.length === 0) {
-                setAnchorShow(false);
-            } else if (params.length >= 1) {
-                setAnchorShow(true);
-                const anchorType = params[0]?.anchorType || SheetDrawingAnchorType.Position;
-                setValue(anchorType);
-            }
+            // if (params.length === 0) {
+            //     setAnchorShow(false);
+            // } else if (params.length >= 1) {
+            //     setAnchorShow(true);
+            //     const anchorType = params[0]?.anchorType || SheetDrawingAnchorType.Position;
+            //     setValue(anchorType);
+            // }
         });
 
         return () => {
@@ -113,7 +112,7 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
     }, []);
 
     function handleChange(value: string | number | boolean) {
-        setValue((value as SheetDrawingAnchorType));
+        setValue((value as string));
 
         const focusDrawings = drawingManagerService.getFocusDrawings();
         if (focusDrawings.length === 0) {
@@ -129,7 +128,7 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
             };
         });
 
-        commandService.executeCommand(SetSheetDrawingCommand.id, {
+        commandService.executeCommand(SetDocDrawingCommand.id, {
             unitId: focusDrawings[0].unitId,
             drawings: updateParams,
         });
@@ -148,11 +147,13 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
             </div>
             <div className={clsx(styles.imageCommonPanelRow)}>
                 <div className={clsx(styles.imageCommonPanelColumn)}>
-                    <RadioGroup value={value} onChange={handleChange} direction="vertical">
-                        <Radio value={SheetDrawingAnchorType.Both}>{localeService.t('drawing-anchor.both')}</Radio>
-                        <Radio value={SheetDrawingAnchorType.Position}>{localeService.t('drawing-anchor.position')}</Radio>
-                        <Radio value={SheetDrawingAnchorType.None}>{localeService.t('drawing-anchor.none')}</Radio>
-                    </RadioGroup>
+                    {
+    // <RadioGroup value={value} onChange={handleChange} direction="vertical">
+    //                     <Radio value={SheetDrawingAnchorType.Both}>{localeService.t('drawing-anchor.both')}</Radio>
+    //                     <Radio value={SheetDrawingAnchorType.Position}>{localeService.t('drawing-anchor.position')}</Radio>
+    //                     <Radio value={SheetDrawingAnchorType.None}>{localeService.t('drawing-anchor.none')}</Radio>
+    //                 </RadioGroup>
+                    }
                 </div>
             </div>
         </div>

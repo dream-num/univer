@@ -17,7 +17,7 @@
 import type { Nullable } from '../../shared/types';
 import { CellValueType } from '../enum/text-style';
 import type { ICellCustomRender } from './i-cell-custom-render';
-import type { IDocumentData } from './i-document-data';
+import type { IDocDrawingBase, IDocumentData } from './i-document-data';
 import type { IStyleData } from './i-style-data';
 import type { ICellValidationData } from './i-cell-validation-data';
 
@@ -34,7 +34,7 @@ export interface ICellData {
      * The unique key, a random string, is used for the plug-in to associate the cell. When the cell information changes,
      * the plug-in does not need to change the data, reducing the pressure on the back-end interface id?: string.
      */
-    p?: Nullable<IDocumentData>; // univer docs, set null for cell clear all
+    p?: Nullable<IDocumentData<IDocDrawingBase>>; // univer docs, set null for cell clear all
 
     /** style id */
     s?: Nullable<IStyleData | string>;

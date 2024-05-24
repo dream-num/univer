@@ -19,7 +19,7 @@ const locale = {
         title: 'Image',
 
         upload: {
-            float: 'Float Image',
+            float: 'Insert Image',
         },
 
         panel: {

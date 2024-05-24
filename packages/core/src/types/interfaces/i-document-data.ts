@@ -23,7 +23,7 @@ import type { IColorStyle, IStyleBase } from './i-style-data';
 /**
  * Properties of document
  */
-export interface IDocumentData extends IReferenceSource, IExtraModelData {
+export interface IDocumentData<T extends IDocDrawingBase> extends IReferenceSource<T>, IExtraModelData {
     /** unit ID */
     id: string;
     /** Revision of this document. Would be used in collaborated editing. Starts with zero. */
@@ -38,11 +38,12 @@ export interface IDocumentData extends IReferenceSource, IExtraModelData {
     disabled?: boolean;
 }
 
-export interface IReferenceSource {
+export interface IReferenceSource<T extends IDocDrawingBase> {
     footers?: IFooters;
     headers?: IHeaders;
     lists?: ILists;
-    drawings?: IDrawings;
+    drawings?: IDrawings<T>;
+    drawingsOrder?: string[];
 }
 
 export interface IDocumentSettings {
@@ -73,8 +74,8 @@ export interface ILists {
 /**
  * Set of Drawings
  */
-export interface IDrawings {
-    [objectId: string]: IDrawing;
+export interface IDrawings<T extends IDocDrawingBase> {
+    [drawingId: string]: T;
 }
 
 /**
@@ -436,7 +437,7 @@ export interface IParagraph {
     startIndex: number;
     paragraphStyle?: IParagraphStyle; // paragraphStyle
     bullet?: IBullet; // bullet
-    // dIds?: string[]; // drawingIds objectId
+    // dIds?: string[]; // drawingIds drawingId
 }
 
 // export interface IElementsOrder {
@@ -507,8 +508,8 @@ export interface IBullet {
  * 20.4.2.19 wrapTight (Tight Wrapping)
  * 20.4.2.20 wrapTopAndBottom (Top and Bottom Wrapping)
  */
-export interface IDrawing {
-    objectId: string;
+export interface IDocDrawingBase {
+    drawingId: string;
 
     title: string;
 
@@ -516,7 +517,7 @@ export interface IDrawing {
 
     // embeddedObjectBorder?: IDocsBorder;
 
-    objectTransform: IObjectTransform;
+    docTransform: IDocDrawingPosition;
 
     layoutType: PositionedObjectLayoutType;
 
@@ -556,7 +557,7 @@ export enum PositionedObjectLayoutType {
 /**
  * Properties of a draw object
  */
-export interface IObjectTransform {
+export interface IDocDrawingPosition {
     size: ISize;
     positionH: IObjectPositionH;
     positionV: IObjectPositionV;

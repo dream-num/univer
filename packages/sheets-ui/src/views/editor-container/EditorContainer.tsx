@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
+import type { IDocDrawingBase, IDocumentData } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IContextService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
@@ -56,7 +56,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         [contextService, DISABLE_AUTO_FOCUS_KEY]
     );
 
-    const snapshot: IDocumentData = {
+    const snapshot: IDocumentData<IDocDrawingBase> = {
         id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
         body: {
             dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,

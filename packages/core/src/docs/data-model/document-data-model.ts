@@ -20,6 +20,7 @@ import { getDocsUpdateBody } from '../../shared';
 import { UpdateDocsAttributeType } from '../../shared/command-enum';
 import { Tools } from '../../shared/tools';
 import type {
+    IDocDrawingBase,
     IDocumentBody,
     IDocumentData,
     IDocumentRenderConfig,
@@ -46,16 +47,16 @@ interface IDrawingUpdateConfig {
     width: number;
 }
 
-class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceType.UNIVER_DOC> {
+class DocumentDataModelSimple extends UnitModel<IDocumentData<IDocDrawingBase>, UniverInstanceType.UNIVER_DOC> {
     override type: UniverInstanceType.UNIVER_DOC = UniverInstanceType.UNIVER_DOC;
 
     override getUnitId(): string {
         throw new Error('Method not implemented.');
     }
 
-    snapshot: IDocumentData;
+    snapshot: IDocumentData<IDocDrawingBase>;
 
-    constructor(snapshot: Partial<IDocumentData>) {
+    constructor(snapshot: Partial<IDocumentData<IDocDrawingBase>>) {
         super();
 
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
@@ -184,7 +185,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
             return;
         }
 
-        const objectTransform = drawing.objectTransform;
+        const objectTransform = drawing.docTransform;
 
         objectTransform.size.width = width;
         objectTransform.size.height = height;
@@ -211,7 +212,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
 
     footerModelMap: Map<string, DocumentDataModel> = new Map();
 
-    constructor(snapshot: Partial<IDocumentData>) {
+    constructor(snapshot: Partial<IDocumentData<IDocDrawingBase>>) {
         super(Tools.isEmptyObject(snapshot) ? getEmptySnapshot() : snapshot);
 
         const UNIT_ID_LENGTH = 6;
@@ -231,6 +232,14 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         });
     }
 
+    getDrawings() {
+        return this.snapshot.drawings;
+    }
+
+    getDrawingsOder() {
+        return this.snapshot.drawingsOrder;
+    }
+
     getRev(): number {
         return this.snapshot.rev ?? 1;
     }
@@ -244,7 +253,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     }
 
     // TODO: @JOCS do not use reset, please use apply to modify the snapshot.
-    reset(snapshot: Partial<IDocumentData>) {
+    reset(snapshot: Partial<IDocumentData<IDocDrawingBase>>) {
         if (snapshot.id && snapshot.id !== this._unitId) {
             throw new Error('Cannot reset a document model with a different unit id!');
         }

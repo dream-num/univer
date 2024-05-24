@@ -20,9 +20,9 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { DrawingCommonPanel } from '@univerjs/drawing-ui';
 import styles from '@univerjs/drawing-ui/views/panel/index.module.less';
-import { SheetDrawingAnchor } from './SheetDrawingAnchor';
+import { DocDrawingAnchor } from './DocDrawingAnchor';
 
-export const SheetDrawingPanel = () => {
+export const DocDrawingPanel = () => {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const focusDrawings = drawingManagerService.getFocusDrawings();
 
@@ -45,7 +45,7 @@ export const SheetDrawingPanel = () => {
     return (
         <div className={styles.imageCommonPanel}>
             <DrawingCommonPanel drawings={drawings} />
-            <SheetDrawingAnchor drawings={drawings} />
+            <DocDrawingAnchor drawings={drawings} />
         </div>
     );
 };

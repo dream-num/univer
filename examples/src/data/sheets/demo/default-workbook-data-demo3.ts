@@ -16,8 +16,9 @@
 
 import type { IDocumentData, IWorkbookData } from '@univerjs/core';
 import { BooleanNumber, BorderStyleTypes, LocaleType } from '@univerjs/core';
+import type { IDocDrawing } from '@univerjs/docs';
 
-const richTextDemo: IDocumentData = {
+const richTextDemo: IDocumentData<IDocDrawing> = {
     id: 'd',
     body: {
         dataStream: 'Instructions: ①Project division - Fill in the specific division of labor after the project is disassembled: ②Responsible Person - Enter the responsible person\'s name here: ③Date-The specific execution time of the project (detailed to the date of a certain month), and the gray color block marks the planned real-time time of the division of labor of the project (for example, the specific execution time of [regional scene model arrangement and construction] is the 2 days marked in gray. \r\n',

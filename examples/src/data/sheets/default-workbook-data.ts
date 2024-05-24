@@ -20,6 +20,7 @@ import {
     BooleanNumber,
     BorderStyleTypes,
     ColumnSeparatorType,
+    DrawingTypeEnum,
     HorizontalAlign,
     LocaleType,
     ObjectRelativeFromH,
@@ -32,15 +33,19 @@ import {
     WrapStrategy,
     WrapTextType,
 } from '@univerjs/core';
+import type { IDocDrawing } from '@univerjs/docs';
 
-const richTextTestFloat: IDocumentData = {
+const richTextTestFloat: IDocumentData<IDocDrawing> = {
     id: 'd',
     drawings: {
         shapeTest1: {
-            objectId: 'shapeTest1',
+            unitId: 'd',
+            subUnitId: 'd',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            drawingId: 'shapeTest1',
             title: 'test shape',
             description: 'test shape',
-            objectTransform: {
+            docTransform: {
                 size: {
                     width: 100,
                     height: 400,
@@ -148,7 +153,7 @@ const richTextTestFloat: IDocumentData = {
     },
 };
 
-const richTextTest: IDocumentData = {
+const richTextTest: IDocumentData<IDocDrawing> = {
     id: 'd',
     body: {
         dataStream: '在“第1题”工作表中完成以下操作\b上标日期列单元格数据验证，限制只能输入日期（介于1949年1月1日至2099年1月1日）\r\n',

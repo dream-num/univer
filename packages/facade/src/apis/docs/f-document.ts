@@ -21,6 +21,7 @@ import {
     RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
+import type { IDocDrawing } from '@univerjs/docs';
 import { InsertCommand } from '@univerjs/docs';
 
 export class FDocument {
@@ -42,8 +43,8 @@ export class FDocument {
         return this.getSnapshot().title || '';
     }
 
-    getSnapshot(): IDocumentData {
-        return this._documentDataModel.getSnapshot();
+    getSnapshot(): IDocumentData<IDocDrawing> {
+        return this._documentDataModel.getSnapshot() as IDocumentData<IDocDrawing>;
     }
 
     undo(): Promise<boolean> {

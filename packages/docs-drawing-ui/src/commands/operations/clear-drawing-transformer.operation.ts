@@ -18,7 +18,7 @@ import type { IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
-export const ClearSheetDrawingTransformerOperation: IMutation<string[]> = {
+export const ClearDocDrawingTransformerOperation: IMutation<string[]> = {
     id: 'sheet.operation.clear-drawing-transformer',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {

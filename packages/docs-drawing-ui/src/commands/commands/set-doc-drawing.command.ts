@@ -20,52 +20,49 @@ import {
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets';
+
 import type { IAccessor } from '@wendellhu/redi';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
-import type { IDeleteDrawingCommandParams } from './interfaces';
+import type { IDocDrawing } from '@univerjs/docs';
+import { DocDrawingApplyType, IDocDrawingService, SetDocDrawingApplyMutation } from '@univerjs/docs';
+import { ClearDocDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
+import type { ISetDrawingCommandParams } from './interfaces';
 
 /**
- * The command to remove new sheet image
+ * The command to update defined name
  */
-export const RemoveSheetDrawingCommand: ICommand = {
-    id: 'sheet.command.remove-sheet-image',
+export const SetDocDrawingCommand: ICommand = {
+    id: 'doc.command.set-doc-image',
     type: CommandType.COMMAND,
-    handler: (accessor: IAccessor, params?: IDeleteDrawingCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetDrawingCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-
-        const sheetDrawingService = accessor.get(ISheetDrawingService);
+        const docDrawingService = accessor.get(IDocDrawingService);
 
         if (!params) return false;
 
         const { drawings } = params;
 
-        const unitIds: string[] = [];
+        // const newSheetDrawingParams = drawings.map((param) => param.newDrawing);
+        // const oldSheetDrawingParams = drawings.map((param) => param.oldDrawing);
 
-        drawings.forEach((param) => {
-            const { unitId } = param;
-            unitIds.push(unitId);
-        });
-
-        const jsonOp = sheetDrawingService.getBatchRemoveOp(drawings) as IDrawingJsonUndo1;
+        const jsonOp = docDrawingService.getBatchUpdateOp(drawings as IDocDrawing[]) as IDrawingJsonUndo1;
 
         const { unitId, subUnitId, undo, redo, objects } = jsonOp;
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.REMOVE });
+        const result = commandService.syncExecuteCommand(SetDocDrawingApplyMutation.id, { unitId, subUnitId, op: redo, objects, type: DocDrawingApplyType.UPDATE });
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DrawingApplyType.INSERT } },
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
+                    { id: SetDocDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DocDrawingApplyType.UPDATE } },
+                    { id: ClearDocDrawingTransformerOperation.id, params: [unitId] },
                 ],
                 redoMutations: [
-                    { id: SetDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.REMOVE } },
-                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
+                    { id: SetDocDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DocDrawingApplyType.UPDATE } },
+                    { id: ClearDocDrawingTransformerOperation.id, params: [unitId] },
                 ],
             });
 

@@ -15,20 +15,20 @@
  */
 
 import { CommandType, type ICommand, ICommandService } from '@univerjs/core';
-import type { ISheetDrawing } from '@univerjs/sheets';
-import { ISheetDrawingService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-import { RemoveSheetDrawingCommand } from './remove-sheet-drawing.command';
+import type { IDocDrawing } from '@univerjs/Docs';
+import { IDocDrawingService } from '@univerjs/Docs';
+import { RemoveDocDrawingCommand } from './remove-doc-drawing.command';
 import type { IDeleteDrawingCommandParams } from './interfaces';
 
-export const DeleteDrawingsCommand: ICommand = {
-    id: 'sheet.command.delete-drawing',
+export const DeleteDocDrawingsCommand: ICommand = {
+    id: 'doc.command.delete-drawing',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
-        const drawingManagerService = accessor.get(ISheetDrawingService);
+        const docDrawingService = accessor.get(IDocDrawingService);
 
-        const drawings = drawingManagerService.getFocusDrawings();
+        const drawings = docDrawingService.getFocusDrawings();
 
         if (drawings.length === 0) {
             return false;
@@ -37,7 +37,7 @@ export const DeleteDrawingsCommand: ICommand = {
         const unitId = drawings[0].unitId;
 
         const newDrawings = drawings.map((drawing) => {
-            const { unitId, subUnitId, drawingId, drawingType } = drawing as ISheetDrawing;
+            const { unitId, subUnitId, drawingId, drawingType } = drawing as IDocDrawing;
 
             return {
                 unitId,
@@ -46,7 +46,7 @@ export const DeleteDrawingsCommand: ICommand = {
                 drawingType,
             };
         });
-        return commandService.executeCommand<IDeleteDrawingCommandParams>(RemoveSheetDrawingCommand.id, {
+        return commandService.executeCommand<IDeleteDrawingCommandParams>(RemoveDocDrawingCommand.id, {
             unitId,
             drawings: newDrawings,
         });

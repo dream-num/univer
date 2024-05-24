@@ -16,6 +16,7 @@
 
 import type {
     ICellData,
+    IDocDrawingBase,
     IDocumentData,
     IMutationInfo,
     IObjectArrayPrimitiveType,
@@ -520,7 +521,7 @@ export class SheetClipboardController extends RxDisposable {
         };
     }
 
-    private _generateDocumentDataModelSnapshot(snapshot: Partial<IDocumentData>) {
+    private _generateDocumentDataModelSnapshot(snapshot: Partial<IDocumentData<IDocDrawingBase>>) {
         const currentSkeleton = this._sheetSkeletonManagerService.getCurrent();
         if (currentSkeleton == null) {
             return null;

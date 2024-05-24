@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/* eslint-disable complexity */
+/* eslint-disable max-lines-per-function */
+
 import type {
     IInterceptor,
     IRange,
@@ -307,7 +310,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         const skeleton = this._skeleton;
 
-        let style = data.style;
+        let { style } = data;
 
         if (style == null) {
             style = getNormalSelectionStyle(this._themeService);
@@ -321,6 +324,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         const control = new SelectionShape(scene, currentControls.length, this._isHeaderHighlight, this._themeService);
 
+        // eslint-disable-next-line no-new
         new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
@@ -336,12 +340,6 @@ export class SelectionRenderService implements ISelectionRenderService {
         currentControls.push(control);
     }
 
-    /**
-     * update selection
-     * @param selectionRange
-     * @param curCellRange
-     * @returns
-     */
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]) {
         const currentControls = this.getCurrentControls();
         if (!currentControls) {

@@ -107,11 +107,20 @@ export class SelectionManagerService implements IDisposable {
         if (this._currentSelection == null) {
             return;
         }
+
+        // Fetch the old selections.
+        const selections = this.getSelectionDatasByParam(this._currentSelection);
+
         this._currentSelection = {
             pluginName,
             unitId: this._currentSelection?.unitId,
             sheetId: this._currentSelection?.sheetId,
         };
+
+        // Store the selection with the new pluginName.
+        if (selections != null) {
+            this.add([...selections]);
+        }
     }
 
     reset() {

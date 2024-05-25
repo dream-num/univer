@@ -24,7 +24,6 @@ import { RichTextEditingMutation } from '../../mutations/core-editing.mutation';
 import { SetTextSelectionsOperation } from '../../operations/text-selection.operation';
 import type { IInnerCutCommandParams, IInnerPasteCommandParams } from '../clipboard.inner.command';
 import { CutContentCommand, InnerPasteCommand } from '../clipboard.inner.command';
-import type { IDocDrawing } from '../../../services/doc-drawing.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 vi.mock('@univerjs/engine-render', async () => {

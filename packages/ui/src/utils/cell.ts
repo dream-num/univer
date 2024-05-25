@@ -17,7 +17,6 @@
 import type {
     IBorderData,
     ICellData,
-    IDocDrawingBase,
     IDocumentData,
     IKeyValue,
     IRange,
@@ -42,7 +41,7 @@ export const DEFAULT_BACKGROUND_COLOR_RGB = 'rgb(0,0,0)';
  * @param $dom
  * @returns
  */
-export function handleDomToJson($dom: HTMLElement): IDocumentData<IDocDrawingBase> | string {
+export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
     let nodeList = $dom.childNodes; // skip container itself
 
     // no node list
@@ -122,7 +121,7 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData<IDocDrawingBas
     }
 
     const blockId = Tools.generateRandomId(6);
-    const p: IDocumentData<IDocDrawingBase> = {
+    const p: IDocumentData = {
         id: Tools.generateRandomId(6),
         body: {
             dataStream,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocDrawingBase, IDocumentBody, IDocumentData } from '../../types/interfaces/i-document-data';
+import type { IDocumentBody, IDocumentData } from '../../types/interfaces/i-document-data';
 import { DocumentDataModel } from './document-data-model';
 import { JSONX } from './json-x/json-x';
 import { TextX } from './text-x/text-x';
@@ -24,7 +24,7 @@ export function replaceInDocumentBody(body: IDocumentBody, query: string, target
         return body;
     }
 
-    const mockDocumentData: IDocumentData<IDocDrawingBase> = {
+    const mockDocumentData: IDocumentData = {
         id: 'mock-id',
         body,
         documentStyle: {},

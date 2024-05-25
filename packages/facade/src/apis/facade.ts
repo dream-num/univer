@@ -38,7 +38,6 @@ import type { RenderComponentType, SheetComponent, SheetExtension } from '@unive
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
-import type { IDocDrawing } from '@univerjs/docs';
 import { FDocument } from './docs/f-document';
 import { FWorkbook } from './sheets/f-workbook';
 import { FSheetHooks } from './sheets/f-sheet-hooks';
@@ -109,8 +108,8 @@ export class FUniver {
      * @param data The snapshot of the document.
      * @returns Document API instance.
      */
-    createUniverDoc(data: Partial<IDocumentData<IDocDrawing>>): FDocument {
-        const document = this._univerInstanceService.createUnit<IDocumentData<IDocDrawing>, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
+    createUniverDoc(data: Partial<IDocumentData>): FDocument {
+        const document = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
         return this._injector.createInstance(FDocument, document);
     }
 

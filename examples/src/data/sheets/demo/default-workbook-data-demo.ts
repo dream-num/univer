@@ -18,10 +18,9 @@ import type { IDocumentData, IWorkbookData } from '@univerjs/core';
 import { BooleanNumber, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
 
 import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
-import type { IDocDrawing } from '@univerjs/docs';
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
-const richTextDemo: IDocumentData<IDocDrawing> = {
+const richTextDemo: IDocumentData = {
     id: 'd',
     body: {
         dataStream: 'Instructions: ①Project division - Fill in the specific division of labor after the project is disassembled: ②Responsible Person - Enter the responsible person\'s name here: ③Date-The specific execution time of the project (detailed to the date of a certain month), and the gray color block marks the planned real-time time of the division of labor of the project (for example, the specific execution time of [regional scene model arrangement and construction] is the 2 days marked in gray. \r\n',
@@ -58,7 +57,7 @@ const richTextDemo: IDocumentData<IDocDrawing> = {
     },
 };
 
-const richTextDemo1: IDocumentData<IDocDrawing> = {
+const richTextDemo1: IDocumentData = {
     id: 'd',
     body: {
         dataStream: 'No.2824163\r\n',

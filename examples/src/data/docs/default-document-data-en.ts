@@ -26,10 +26,9 @@ import {
     SectionType,
     WrapTextType,
 } from '@univerjs/core';
-import type { IDocDrawing } from '@univerjs/docs';
 import { ptToPixel } from '@univerjs/engine-render';
 
-export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData<IDocDrawing> = {
+export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
     id: 'd',
     drawings: {
         shapeTest1: {

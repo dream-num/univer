@@ -23,7 +23,7 @@ import { SheetTypes } from '../../types/enum/sheet-types';
 import type { IWorksheetData } from '../../types/interfaces/i-worksheet-data';
 import type { ICellData } from '../../types/interfaces/i-cell-data';
 import { LocaleType } from '../../types/enum/locale-type';
-import type { IDocDrawingBase, IDocumentData } from '../../types/interfaces/i-document-data';
+import type { IDocumentData } from '../../types/interfaces/i-document-data';
 import {
     decodeDocOriginalMeta,
     decodePartOfCellData,
@@ -294,7 +294,7 @@ export function transformSnapshotToWorkbookData(
     return workbookData;
 }
 
-export function transformSnapshotToDocumentData(snapshot: ISnapshot): IDocumentData<IDocDrawingBase> {
+export function transformSnapshotToDocumentData(snapshot: ISnapshot): IDocumentData {
     const documentMeta = snapshot.doc;
     if (documentMeta == null) {
         throw new Error('transformSnapshotToDocumentData(): snapshot.doc is undefined.');
@@ -304,7 +304,7 @@ export function transformSnapshotToDocumentData(snapshot: ISnapshot): IDocumentD
 
     const { body, documentStyle = {}, settings = {} } = decodeDocOriginalMeta(originalMeta);
 
-    const documentData: IDocumentData<IDocDrawingBase> = {
+    const documentData: IDocumentData = {
         id: unitID,
         rev,
         locale: LocaleType.EN_US,
@@ -318,7 +318,7 @@ export function transformSnapshotToDocumentData(snapshot: ISnapshot): IDocumentD
 }
 export async function transformDocumentDataToSnapshot(
     context: ILogContext,
-    document: IDocumentData<IDocDrawingBase>,
+    document: IDocumentData,
     unitID: string,
     rev: number,
     snapshotService: ISnapshotServerService

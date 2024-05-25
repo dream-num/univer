@@ -20,7 +20,7 @@ import { b64DecodeUnicode } from '../../shared/coder';
 import type { IWorksheetData } from '../../types/interfaces/i-worksheet-data';
 import { Tools } from '../../shared/tools';
 import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
-import type { IDocDrawingBase, IDocumentData } from '../../types/interfaces/i-document-data';
+import type { IDocumentData } from '../../types/interfaces/i-document-data';
 import type { ICellData } from '../../types/interfaces/i-cell-data';
 import type { IObjectMatrixPrimitiveType } from '../../shared/object-matrix';
 import { ObjectMatrix } from '../../shared/object-matrix';
@@ -60,8 +60,8 @@ export function encodeWorkbookOtherMetas(workbook: IWorkbookData): Uint8Array {
     return meta;
 }
 
-export function encodeDocOriginalMeta(document: IDocumentData<IDocDrawingBase>): Uint8Array {
-    const cloned: Partial<IDocumentData<IDocDrawingBase>> = Tools.deepClone(document);
+export function encodeDocOriginalMeta(document: IDocumentData): Uint8Array {
+    const cloned: Partial<IDocumentData> = Tools.deepClone(document);
     // Some properties are stored in the meta fields are in sheet blocks
     // so we need to delete them before serializing remaining properties.
     delete cloned.id;
@@ -88,7 +88,7 @@ export function decodePartOfCellData(buffer: Uint8Array | string): IObjectMatrix
     return JSON.parse(textDecoder.decode(buffer));
 }
 
-export function decodeDocOriginalMeta(buffer: Uint8Array | string): Partial<IDocumentData<IDocDrawingBase>> {
+export function decodeDocOriginalMeta(buffer: Uint8Array | string): Partial<IDocumentData> {
     if (typeof buffer === 'string') {
         return JSON.parse(b64DecodeUnicode(buffer));
     }

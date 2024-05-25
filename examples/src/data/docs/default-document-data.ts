@@ -27,9 +27,8 @@ import {
     SectionType,
     WrapTextType,
 } from '@univerjs/core';
-import type { IDocDrawing } from '@univerjs/docs';
 
-export const DEFAULT_DOCUMENT_DATA: IDocumentData<IDocDrawing> = {
+export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
     id: 'd',
     drawings: {
         shapeTest1: {

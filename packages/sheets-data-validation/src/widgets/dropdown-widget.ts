@@ -15,7 +15,7 @@
  */
 
 import { BooleanNumber, DataValidationRenderMode, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, HorizontalAlign, ICommandService, LocaleService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import type { ICellRenderContext, IDocDrawingBase, IDocumentData, IPaddingData, IStyleData, Nullable } from '@univerjs/core';
+import type { ICellRenderContext, IDocumentData, IPaddingData, IStyleData, Nullable } from '@univerjs/core';
 import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, type IMouseEvent, type IPointerEvent, type ISheetFontRenderExtension, Rect, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
@@ -35,7 +35,7 @@ const downPath = new Path2D('M3.32201 4.84556C3.14417 5.05148 2.85583 5.05148 2.
 
 function convertToDocumentData(text: string, style?: Nullable<IStyleData>) {
     const contentLength = text.length;
-    const documentData: IDocumentData<IDocDrawingBase> = {
+    const documentData: IDocumentData = {
         id: 'd',
         body: {
             dataStream: `${text}${DEFAULT_EMPTY_DOCUMENT_VALUE}`,

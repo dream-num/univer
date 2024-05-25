@@ -41,7 +41,6 @@ import type {
     IBorderStyleData,
     ICellData,
     IColumnData,
-    IDocDrawingBase,
     IDocumentData,
     IDocumentRenderConfig,
     IObjectArrayPrimitiveType,
@@ -1828,7 +1827,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     private _updateConfigAndGetDocumentModel(
-        documentData: IDocumentData<IDocDrawingBase>,
+        documentData: IDocumentData,
         horizontalAlign: HorizontalAlign,
         renderConfig?: IDocumentRenderConfig
     ) {
@@ -1885,7 +1884,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
 
-        const documentData: IDocumentData<IDocDrawingBase> = {
+        const documentData: IDocumentData = {
             id: 'd',
             body: {
                 dataStream: `${content}${DEFAULT_EMPTY_DOCUMENT_VALUE}`,

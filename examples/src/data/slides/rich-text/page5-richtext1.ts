@@ -16,9 +16,8 @@
 
 import type { IDocumentData } from '@univerjs/core';
 import { BooleanNumber, ColumnSeparatorType, PresetListType, SectionType } from '@univerjs/core';
-import type { IDocDrawing } from '@univerjs/docs';
 
-export const PAGE5_RICHTEXT_1: IDocumentData<IDocDrawing> = {
+export const PAGE5_RICHTEXT_1: IDocumentData = {
     id: 'd',
     body: {
         dataStream:

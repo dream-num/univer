@@ -16,7 +16,7 @@
 
 import type { Workbook, Worksheet } from '@univerjs/core';
 import { ICommandService, RxDisposable, toDisposable } from '@univerjs/core';
-import type { IRenderContext, IRenderController, IWheelEvent } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderController, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
     Layer,
@@ -238,7 +238,7 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
         const { rowHeader, columnHeader } = worksheet.getConfig();
         const { viewMain } = this._initViewports(scene, rowHeader, columnHeader);
 
-        this._initMouseWheel(viewMain);
+        this._initMouseWheel(scene, viewMain);
 
         // create a scroll bar
         const scrollBar = new ScrollBar(viewMain);
@@ -249,7 +249,7 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
     }
 
     // mouse scroll
-    private _initMouseWheel(viewMain: Viewport) {
+    private _initMouseWheel(scene: Scene, viewMain: Viewport) {
         this.disposeWithMe(
             toDisposable(
                 scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
@@ -333,10 +333,5 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
                 })
             )
         );
-
-        // create a scroll bar
-        new ScrollBar(viewMain);
-        scene.attachControl();
-        return viewMain;
     }
 }

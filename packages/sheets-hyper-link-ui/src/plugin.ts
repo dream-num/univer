@@ -23,13 +23,14 @@ import { SheetsHyperLinkRenderController } from './controllers/render-controller
 import { SheetsHyperLinkPopupService } from './services/popup.service';
 import { SheetsHyperLinkResolverService } from './services/resolver.service';
 
-const SHEETS_HYPER_LINK_UI_PLUGIN = 'univer.sheets.hyper-link-ui';
+const SHEETS_HYPER_LINK_UI_PLUGIN = 'SHEETS_HYPER_LINK_UI_PLUGIN';
 
-export class UniverSheetsHyperLinkPlugin extends Plugin {
+export class UniverSheetsHyperLinkUIPlugin extends Plugin {
     static override pluginName: string = SHEETS_HYPER_LINK_UI_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
+        config: unknown,
         @Inject(Injector) protected _injector: Injector
     ) {
         super();

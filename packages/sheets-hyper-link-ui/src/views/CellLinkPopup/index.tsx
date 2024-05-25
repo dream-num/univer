@@ -14,10 +14,3 @@
  * limitations under the License.
  */
 
-export { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
-export { SheetsHyperLinkRenderController } from './controllers/render-controllers/render.controller';
-export { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
-export { SheetsHyperLinkPopupService } from './services/popup.service';
-export { SheetsHyperLinkResolverService } from './services/resolver.service';
-
-export { UniverSheetsHyperLinkUIPlugin } from './plugin';

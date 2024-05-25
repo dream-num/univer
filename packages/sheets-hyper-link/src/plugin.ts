@@ -19,13 +19,15 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SheetsHyperLinkController } from './controllers/sheet-hyper-link.controller';
 import { HyperLinkModel } from './models/hyper-link.model';
-import { SHEETS_HYPER_LINK_PLUGIN } from './types/const';
+import { SHEET_HYPER_LINK_PLUGIN } from './types/const';
+import { SheetsHyperLinkResourceController } from './controllers/sheet-hyper-link-resource.controller';
 
 export class UniverSheetsHyperLinkPlugin extends Plugin {
-    static override pluginName = SHEETS_HYPER_LINK_PLUGIN;
+    static override pluginName = SHEET_HYPER_LINK_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
+        config: unknown,
         @Inject(Injector) protected _injector: Injector
     ) {
         super();
@@ -33,6 +35,7 @@ export class UniverSheetsHyperLinkPlugin extends Plugin {
 
     override onStarting(_injector: Injector): void {
         ([
+            [SheetsHyperLinkResourceController],
             [SheetsHyperLinkController],
             [HyperLinkModel],
         ] as Dependency[]).forEach((dep) => {

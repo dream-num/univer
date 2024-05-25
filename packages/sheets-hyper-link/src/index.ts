@@ -24,3 +24,5 @@ export { RemoveHyperLinkCommand } from './commands/commands/remove-hyper-link.co
 
 export { HyperLinkModel } from './models/hyper-link.model';
 export { SheetsHyperLinkController } from './controllers/sheet-hyper-link.controller';
+
+export { UniverSheetsHyperLinkPlugin } from './plugin';

@@ -36,7 +36,8 @@ import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validati
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
-
+import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
+import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
 import { FUniver } from '@univerjs/facade';
 import { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
@@ -84,6 +85,9 @@ univer.registerPlugin(UniverSheetsFormulaPlugin);
 univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',
 } as IUniverRPCMainThreadConfig);
+
+univer.registerPlugin(UniverSheetsHyperLinkPlugin);
+univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
 
 // find replace
 univer.registerPlugin(UniverFindReplacePlugin);

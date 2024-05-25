@@ -26,7 +26,7 @@ export interface IRemoveHyperLinkMutationParams {
 
 export const RemoveHyperLinkMutation: ICommand<IRemoveHyperLinkMutationParams> = {
     type: CommandType.MUTATION,
-    id: 'sheets.mutation.update-hyper-link',
+    id: 'sheets.mutation.remove-hyper-link',
     handler(accessor, params) {
         if (!params) {
             return false;

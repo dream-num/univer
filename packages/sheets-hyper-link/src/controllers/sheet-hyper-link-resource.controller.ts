@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import { Disposable, IResourceManagerService } from '@univerjs/core';
+import { Disposable, IResourceManagerService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { UniverType } from '@univerjs/protocol';
 import { HyperLinkModel } from '../models/hyper-link.model';
 import type { ICellHyperLink } from '../types/interfaces/i-hyper-link';
-import { SHEETS_HYPER_LINK_PLUGIN } from '../types/const';
+import { SHEET_HYPER_LINK_PLUGIN } from '../types/const';
 
 type UnitHyperLinkJSON = Record<string, ICellHyperLink[]>;
 
+@OnLifecycle(LifecycleStages.Starting, SheetsHyperLinkResourceController)
 export class SheetsHyperLinkResourceController extends Disposable {
     constructor(
         @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,
@@ -58,7 +59,7 @@ export class SheetsHyperLinkResourceController extends Disposable {
 
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource({
-                pluginName: SHEETS_HYPER_LINK_PLUGIN,
+                pluginName: SHEET_HYPER_LINK_PLUGIN,
                 businesses: [UniverType.UNIVER_SHEET],
                 toJson: (unitID) => toJson(unitID),
                 parseJson: (json) => parseJson(json),
@@ -67,9 +68,9 @@ export class SheetsHyperLinkResourceController extends Disposable {
                 },
                 onLoad: async (unitID, value) => {
                     Object.keys(value).forEach((subunitId) => {
-                        const commentList = value[subunitId];
-                        commentList.forEach((comment) => {
-                            this._hyperLinkModel.addHyperLink(unitID, subunitId, comment);
+                        const linkList = value[subunitId];
+                        linkList.forEach((link) => {
+                            this._hyperLinkModel.addHyperLink(unitID, subunitId, link);
                         });
                     });
                 },

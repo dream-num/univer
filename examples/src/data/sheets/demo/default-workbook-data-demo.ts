@@ -18,6 +18,8 @@ import type { IDocumentData, IWorkbookData } from '@univerjs/core';
 import { BooleanNumber, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
 
 import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
+import type { ICellHyperLink } from '@univerjs/sheets-hyper-link/types/interfaces/i-hyper-link.js';
+import { HyperLinkType } from '@univerjs/sheets-hyper-link/types/enums/hyper-link-type.js';
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
 const richTextDemo: IDocumentData = {
@@ -173,6 +175,15 @@ const dataValidation = [
         formula1: '1,2,3,4,5,哈哈哈哈',
     },
 ];
+
+const hyperLink = [{
+    row: 20,
+    column: 12,
+    id: '123',
+    display: 'linkTest哈哈哈哈',
+    type: HyperLinkType.link,
+    payload: 'https://baidu.com',
+}] as ICellHyperLink[];
 
 export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'workbook-01',
@@ -23541,6 +23552,12 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
         // },
     },
     resources: [
+        {
+            name: 'SHEET_HYPER_LINK_PLUGIN',
+            data: JSON.stringify({
+                'sheet-0011': hyperLink,
+            }),
+        },
         {
             name: DATA_VALIDATION_PLUGIN_NAME,
             data: JSON.stringify({

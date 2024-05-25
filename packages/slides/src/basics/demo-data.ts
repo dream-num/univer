@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocDrawingBase, IDocumentData } from '@univerjs/core';
+import type { IDocumentData } from '@univerjs/core';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -28,7 +28,7 @@ import {
     WrapTextType,
 } from '@univerjs/core';
 
-export const docsDemoData: IDocumentData<IDocDrawingBase> = {
+export const docsDemoData: IDocumentData = {
     id: 'd',
     drawings: {
         shapeTest1: {

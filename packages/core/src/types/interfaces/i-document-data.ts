@@ -24,7 +24,7 @@ import type { IColorStyle, IStyleBase } from './i-style-data';
 /**
  * Properties of document
  */
-export interface IDocumentData<T extends IDocDrawingBase> extends IReferenceSource<T>, IExtraModelData {
+export interface IDocumentData extends IReferenceSource, IExtraModelData {
     /** unit ID */
     id: string;
     /** Revision of this document. Would be used in collaborated editing. Starts with zero. */
@@ -39,11 +39,11 @@ export interface IDocumentData<T extends IDocDrawingBase> extends IReferenceSour
     disabled?: boolean;
 }
 
-export interface IReferenceSource<T extends IDocDrawingBase> {
+export interface IReferenceSource {
     footers?: IFooters;
     headers?: IHeaders;
     lists?: ILists;
-    drawings?: IDrawings<T>;
+    drawings?: IDrawings;
     drawingsOrder?: string[];
 }
 
@@ -75,8 +75,8 @@ export interface ILists {
 /**
  * Set of Drawings
  */
-export interface IDrawings<T extends IDocDrawingBase> {
-    [drawingId: string]: T;
+export interface IDrawings {
+    [drawingId: string]: IDocDrawingBase;
 }
 
 /**

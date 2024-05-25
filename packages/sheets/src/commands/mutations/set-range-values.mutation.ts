@@ -19,7 +19,6 @@ import type {
     IBorderData,
     ICellData,
     ICopyToOptionsData,
-    IDocDrawingBase,
     IDocumentData,
     IKeyValue,
     IMutation,
@@ -465,7 +464,7 @@ function skipParagraphs(paragraphs: IParagraph[], offset: number): number {
  * @param p
  * @param newStyle
  */
-export function mergeRichTextStyle(p: IDocumentData<IDocDrawingBase>, newStyle: Nullable<IStyleData>) {
+export function mergeRichTextStyle(p: IDocumentData, newStyle: Nullable<IStyleData>) {
     if (p.body == null) {
         return;
     }

@@ -30,10 +30,9 @@ import { DocViewModelManagerService } from '../../../services/doc-view-model-man
 import { TextSelectionManagerService } from '../../../services/text-selection-manager.service';
 import { DocStateChangeManagerService } from '../../../services/doc-state-change-manager.service';
 import { IMEInputManagerService } from '../../../services/ime-input-manager.service';
-import type { IDocDrawing } from '../../../services/doc-drawing.service';
 import { ITextSelectionRenderManager, TextSelectionRenderManager } from './mock-text-selection-render-manager';
 
-const TEST_DOCUMENT_DATA_EN: IDocumentData<IDocDrawing> = {
+const TEST_DOCUMENT_DATA_EN: IDocumentData = {
     id: 'test-doc',
     body: {
         dataStream: 'What’s New in the 2022\r Gartner Hype Cycle for Emerging Technologies\r\n',
@@ -88,7 +87,7 @@ const TEST_DOCUMENT_DATA_EN: IDocumentData<IDocDrawing> = {
     },
 };
 
-export function createCommandTestBed(workbookData?: IDocumentData<IDocDrawing>, dependencies?: Dependency[]) {
+export function createCommandTestBed(workbookData?: IDocumentData, dependencies?: Dependency[]) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);

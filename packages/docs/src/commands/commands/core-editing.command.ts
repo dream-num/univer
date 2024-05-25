@@ -28,7 +28,6 @@ import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import type { IDocDrawing } from '../../services/doc-drawing.service';
 
 export interface IInsertCommandParams {
     unitId: string;
@@ -222,6 +221,6 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
 export interface ICoverCommandParams {
     unitId: string;
 
-    snapshot?: IDocumentData<IDocDrawing>;
+    snapshot?: IDocumentData;
     clearUndoRedoStack?: boolean;
 }

@@ -18,7 +18,7 @@ import type { ISize, ITransformState } from '../../services/drawing/drawing-inte
 import type { IKeyType, Nullable } from '../../shared/types';
 import type { LocaleType, ThemeColorType } from '../enum';
 import type { ShapeType } from '../enum/prst-geom-type';
-import type { ICustomBlock, IDocDrawingBase, IDocumentData, ILists } from './i-document-data';
+import type { ICustomBlock, IDocumentData, ILists } from './i-document-data';
 import type { IExtraModelData } from './i-extra-model-data';
 import type { IImageProperties } from './i-image-properties';
 import type { IPlaceholder } from './i-placeholder';
@@ -89,7 +89,7 @@ interface IMasterProperties {
 
 export interface IRichTextProps extends ITransformState, IStyleBase {
     text?: string;
-    rich?: IDocumentData<IDocDrawingBase>;
+    rich?: IDocumentData;
 }
 
 export interface IPageElement {
@@ -121,7 +121,7 @@ export interface IPageElement {
         worksheet: IWorksheetData;
         styles: IKeyType<Nullable<IStyleData>>;
     };
-    document?: IDocumentData<IDocDrawingBase>;
+    document?: IDocumentData;
     slide?: ISlideData;
     // video: IVideo;
     // line: ILine;

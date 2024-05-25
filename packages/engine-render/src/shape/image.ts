@@ -17,7 +17,7 @@
 import type { ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
 
 import type { UniverRenderingContext } from '../context';
-import type { IObjectFullState, ITransformChangeState, IViewportBound } from '../basics';
+import type { IObjectFullState, ITransformChangeState, IViewportInfo } from '../basics';
 import { RENDER_CLASS_TYPE, Vector2 } from '../basics';
 import { offsetRotationAxis } from '../basics/offset-rotation-axis';
 import type { IShapeProps } from './shape';
@@ -241,7 +241,7 @@ export class Image extends Shape<IImageProps> {
         });
     }
 
-    override render(mainCtx: UniverRenderingContext, bounds?: IViewportBound) {
+    override render(mainCtx: UniverRenderingContext, bounds?: IViewportInfo) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;

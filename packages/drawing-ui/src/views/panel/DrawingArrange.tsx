@@ -15,7 +15,7 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { ArrangeType, ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
+import { ArrangeTypeEnum, ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
@@ -51,7 +51,7 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
         };
     }, []);
 
-    const onArrangeBtnClick = (arrangeType: ArrangeType) => {
+    const onArrangeBtnClick = (arrangeType: ArrangeTypeEnum) => {
         // commandService.executeCommand(SetDrawingArrangeCommand.id, {
         //     unitId: drawings[0].unitId,
         //     subUnitId: drawings[0].subUnitId,
@@ -85,13 +85,13 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
             </div>
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
-                    <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeType.forward); }}>
+                    <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
                         <div className={clsx(styles.imageCommonPanelInline)}><MoveUpSingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.arrange.forward')}</div>
                     </Button>
                 </div>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
-                    <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeType.backward); }}>
+                    <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
                         <div className={clsx(styles.imageCommonPanelInline)}><MoveDownSingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.arrange.backward')}</div>
                     </Button>
@@ -99,13 +99,13 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
             </div>
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
-                    <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeType.front); }}>
+                    <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
                         <div className={clsx(styles.imageCommonPanelInline)}><TopmostSingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.arrange.front')}</div>
                     </Button>
                 </div>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
-                    <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeType.back); }}>
+                    <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
                         <div className={clsx(styles.imageCommonPanelInline)}><BottomSingle /></div>
                         <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.arrange.back')}</div>
                     </Button>

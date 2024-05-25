@@ -153,7 +153,7 @@ export class DocUIController extends Disposable {
         const subUnitId = unitId;
 
         const drawingDataModels = dataModel.getDrawings();
-        const drawingOrderModel = dataModel.getDrawingsOder();
+        const drawingOrderModel = dataModel.getDrawingsOrder();
 
         if (!drawingDataModels || !drawingOrderModel) {
             return false;

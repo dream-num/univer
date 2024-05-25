@@ -107,13 +107,5 @@ export class ImageRemoteService implements IImageRemoteService {
             };
         });
     }
-
-    async applyFilter(imageId: string): Promise<string> {
-        return Promise.resolve(imageId);
-    }
-
-    async applyAI(imageId: string, operatorType: string): Promise<string> {
-        return Promise.resolve(imageId);
-    }
 }
 

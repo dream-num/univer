@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, Nullable, Workbook } from '@univerjs/core';
 import { ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
+import { COMPONENT_IMAGE_POPUP_MENU, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { takeUntil } from 'rxjs';
 import { ImageCropperObject } from '@univerjs/drawing-ui/views/crop/image-cropper-object.js';
+import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 
-@OnLifecycle(LifecycleStages.Rendered, DrawingPopupMenuController)
-export class DrawingPopupMenuController extends RxDisposable {
+@OnLifecycle(LifecycleStages.Rendered, DocDrawingPopupMenuController)
+export class DocDrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        // @Inject(DocCanvasPopManagerService) private readonly _canvasPopManagerService: DocCanvasPopManagerService,
+        @Inject(DocCanvasPopManagerService) private readonly _canvasPopManagerService: DocCanvasPopManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
@@ -46,22 +47,22 @@ export class DrawingPopupMenuController extends RxDisposable {
     }
 
     private _init(): void {
-        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._create(workbook));
-        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._dispose(workbook));
-        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => this._create(workbook));
+        this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentDataModel) => this._create(documentDataModel));
+        this._univerInstanceService.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentDataModel) => this._dispose(documentDataModel));
+        this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).forEach((documentDataModel) => this._create(documentDataModel));
     }
 
-    private _dispose(workbook: Workbook) {
-        const unitId = workbook.getUnitId();
+    private _dispose(documentDataModel: DocumentDataModel) {
+        const unitId = documentDataModel.getUnitId();
         this._renderManagerService.removeRender(unitId);
     }
 
-    private _create(workbook: Nullable<Workbook>) {
-        if (!workbook) {
+    private _create(documentDataModel: Nullable<DocumentDataModel>) {
+        if (!documentDataModel) {
             return;
         }
 
-        const unitId = workbook.getUnitId();
+        const unitId = documentDataModel.getUnitId();
         if (this._renderManagerService.has(unitId) && !this._initImagePopupMenu.has(unitId)) {
             this._popupMenuListener(unitId);
             this._initImagePopupMenu.add(unitId);
@@ -118,14 +119,14 @@ export class DrawingPopupMenuController extends RxDisposable {
 
                     const { unitId, subUnitId, drawingId } = drawingParam;
 
-                    // disposePopups.push(this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
-                    //     componentKey: COMPONENT_IMAGE_POPUP_MENU,
-                    //     direction: 'horizontal',
-                    //     offset: [2, 0],
-                    //     extraProps: {
-                    //         menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId),
-                    //     },
-                    // })));
+                    disposePopups.push(this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
+                        componentKey: COMPONENT_IMAGE_POPUP_MENU,
+                        direction: 'horizontal',
+                        offset: [2, 0],
+                        extraProps: {
+                            menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId),
+                        },
+                    })));
                 })
             )
         );

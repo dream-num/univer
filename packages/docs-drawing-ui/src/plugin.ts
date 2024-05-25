@@ -18,7 +18,7 @@ import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { enUS, zhCN } from './locale';
-import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
+import { DocDrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { DocDrawingUIController } from './controllers/doc-drawing.controller';
 import { DocDrawingUpdateController } from './controllers/doc-drawing-update.controller';
 
@@ -52,7 +52,7 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
             // controllers
             [DocDrawingUIController],
             [DocDrawingUpdateController],
-            [DrawingPopupMenuController],
+            [DocDrawingPopupMenuController],
         ];
 
         dependencies.forEach((dependency) => injector.add(dependency));

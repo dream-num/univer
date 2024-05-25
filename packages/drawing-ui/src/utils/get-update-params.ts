@@ -16,7 +16,7 @@
 
 import { DrawingTypeEnum, type IDrawingManagerService, type IDrawingParam, type Nullable } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
-import type { type BaseObject, Drawing, Image } from '@univerjs/engine-render';
+import type { BaseObject, Image } from '@univerjs/engine-render';
 
 export function getUpdateParams(objects: Map<string, BaseObject>, drawingManagerService: IDrawingManagerService): Nullable<IDrawingParam>[] {
     const params: Nullable<IDrawingParam>[] = [];

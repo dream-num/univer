@@ -17,7 +17,7 @@
 import { DisposableCollection, sortRules, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { BaseObject } from '../base-object';
-import type { IViewportBound } from '../basics/vector2';
+import type { IViewportInfo } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 import type { ComponentExtension } from './extension';
 
@@ -58,7 +58,7 @@ export class RenderComponent<T, U, V> extends BaseObject {
         return this._extensions.get(uKey);
     }
 
-    draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         /* abstract */
     }
 

@@ -106,8 +106,8 @@ export function getCellIndexByOffsetWithMerge(offsetX: number, offsetY: number, 
     const { scaleX, scaleY } = scene.getAncestorScale();
 
     const scrollXY = {
-        x: activeViewport.actualScrollX,
-        y: activeViewport.actualScrollY,
+        x: activeViewport.viewportScrollX,
+        y: activeViewport.viewportScrollY,
     };
 
     const cellPos = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
@@ -182,7 +182,7 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
     const freezeWidth = endSheetView.startX - startSheetView.startX;
     const freezeHeight = endSheetView.startY - startSheetView.startY;
 
-    const { top, left, actualScrollX, actualScrollY } = viewMain;
+    const { top, left, viewportScrollX: actualScrollX, viewportScrollY: actualScrollY } = viewMain;
     let offsetX: number;
     // viewMain or viewTop
     if (x > left) {
@@ -250,8 +250,8 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
     const { scaleX, scaleY } = scene.getAncestorScale();
 
     const scrollXY = {
-        x: activeViewport.actualScrollX,
-        y: activeViewport.actualScrollY,
+        x: activeViewport.viewportScrollX,
+        y: activeViewport.viewportScrollY,
     };
 
     const position: IPosition = {

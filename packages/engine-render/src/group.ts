@@ -21,7 +21,7 @@ import { BaseObject } from './base-object';
 import type { CURSOR_TYPE } from './basics/const';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { isString } from './basics/tools';
-import type { IViewportBound, Vector2 } from './basics/vector2';
+import type { IViewportInfo, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { ThinScene } from './thin-scene';
 
@@ -115,7 +115,7 @@ export class Group extends BaseObject {
         return this._objects;
     }
 
-    override render(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    override render(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         ctx.save();
         const m = this.transform.getMatrix();
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
@@ -160,7 +160,7 @@ export class Group extends BaseObject {
         super.dispose();
     }
 
-    private _transformBounds(bounds?: IViewportBound) {
+    private _transformBounds(bounds?: IViewportInfo) {
         return bounds;
     }
 }

@@ -18,8 +18,8 @@ import type { DocumentDataModel, IDrawingMapItem, IDrawingSubunitMap } from '@un
 import { Disposable, IDrawingManagerService, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { type IDocDrawing, IDocDrawingService } from '../services/doc-drawing.service';
 
-export const SHEET_DRAWING_PLUGIN = 'SHEET_DRAWING_PLUGIN';
-@OnLifecycle(LifecycleStages.Ready, DocDrawingDataController)
+export const DOC_DRAWING_PLUGIN = 'DOC_DRAWING_PLUGIN';
+@OnLifecycle(LifecycleStages.Rendered, DocDrawingDataController)
 export class DocDrawingDataController extends Disposable {
     constructor(
         @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
@@ -56,8 +56,8 @@ export class DocDrawingDataController extends Disposable {
         };
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource<IDrawingSubunitMap<IDocDrawing>>({
-                pluginName: SHEET_DRAWING_PLUGIN,
-                businesses: [UniverInstanceType.UNIVER_SHEET],
+                pluginName: DOC_DRAWING_PLUGIN,
+                businesses: [UniverInstanceType.UNIVER_DOC],
                 toJson: (unitId) => toJson(unitId),
                 parseJson: (json) => parseJson(json),
                 onUnLoad: (unitId) => {

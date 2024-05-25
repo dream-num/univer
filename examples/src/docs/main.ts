@@ -57,6 +57,7 @@ univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
     footer: false,
 });
+univer.registerPlugin(UniverDrawingPlugin);
 univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverDocsUIPlugin, {
     container: 'univerdoc',
@@ -67,7 +68,6 @@ univer.registerPlugin(UniverDocsUIPlugin, {
     },
 });
 
-univer.registerPlugin(UniverDrawingPlugin);
 univer.registerPlugin(UniverDrawingUIPlugin);
 univer.registerPlugin(UniverDocsDrawingUIPlugin);
 

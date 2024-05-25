@@ -287,11 +287,11 @@ export class Image extends Shape<IImageProps> {
 
     private _init(): void {
         this.onTransformChangeObservable.add((state) => {
-            this._updateSrcRectByTranform(state);
+            this._updateSrcRectByTransform(state);
         });
     }
 
-    private _updateSrcRectByTranform(state: ITransformChangeState) {
+    private _updateSrcRectByTransform(state: ITransformChangeState) {
         if (this.srcRect == null) {
             return;
         }

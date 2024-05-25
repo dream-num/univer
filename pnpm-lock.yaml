@@ -709,8 +709,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.47
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       ot-json1:
         specifier: ^1.0.2
         version: 1.0.2

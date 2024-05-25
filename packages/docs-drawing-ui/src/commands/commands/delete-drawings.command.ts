@@ -16,8 +16,8 @@
 
 import { CommandType, type ICommand, ICommandService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
-import type { IDocDrawing } from '@univerjs/Docs';
-import { IDocDrawingService } from '@univerjs/Docs';
+import type { IDocDrawing } from '@univerjs/docs';
+import { IDocDrawingService } from '@univerjs/docs';
 import { RemoveDocDrawingCommand } from './remove-doc-drawing.command';
 import type { IDeleteDrawingCommandParams } from './interfaces';
 

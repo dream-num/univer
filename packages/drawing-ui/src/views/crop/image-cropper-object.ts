@@ -15,7 +15,7 @@
  */
 
 import type { ISrcRect, ITransformState, Nullable, PresetGeometryType } from '@univerjs/core';
-import type { Engine, IShapeProps, IViewportBound, Scene, UniverRenderingContext, Vector2 } from '@univerjs/engine-render';
+import type { Engine, IShapeProps, IViewportInfo, Scene, UniverRenderingContext, Vector2 } from '@univerjs/engine-render';
 import { Canvas, Rect, Shape } from '@univerjs/engine-render';
 
 export interface IImageCropperObjectProps extends IShapeProps {
@@ -123,7 +123,7 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
         return false;
     }
 
-    override render(mainCtx: UniverRenderingContext, bounds?: IViewportBound) {
+    override render(mainCtx: UniverRenderingContext, bounds?: IViewportInfo) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;

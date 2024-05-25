@@ -19,6 +19,7 @@ import {
     BaselineOffset,
     BooleanNumber,
     ColumnSeparatorType,
+    DrawingTypeEnum,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
@@ -31,6 +32,9 @@ export const docsDemoData: IDocumentData<IDocDrawingBase> = {
     id: 'd',
     drawings: {
         shapeTest1: {
+            unitId: 'd',
+            subUnitId: 'd',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
             drawingId: 'shapeTest1',
             title: 'test shape',
             description: 'test shape',

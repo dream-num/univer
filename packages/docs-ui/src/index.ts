@@ -18,3 +18,4 @@ export * from './basics';
 export * from './docs-ui-plugin';
 export { DocCanvasView } from './views/doc-canvas-view';
 export * from './services';
+export { DocCanvasPopManagerService } from './services/doc-popup-manager.service';

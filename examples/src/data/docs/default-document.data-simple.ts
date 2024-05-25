@@ -16,8 +16,9 @@
 
 import type { IDocumentData } from '@univerjs/core';
 import { BooleanNumber } from '@univerjs/core';
+import type { IDocDrawing } from '@univerjs/docs';
 
-export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
+export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData<IDocDrawing> = {
     id: 'default-document-id',
     body: {
         dataStream: '荷塘𠮷\r作者：朱自清 👨‍👩‍👧‍👦 Today Office\r\n',

@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, Univer, Workbook } from '@univerjs/core';
+import type { ICellData, IDocDrawingBase, IDocumentData, Univer, Workbook } from '@univerjs/core';
 import { CellValueType, IContextService, LocaleService } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { getCellDataByInput } from '../end-edit.controller';
 import { createTestBed } from './create-test-bed';
 
-const richTextDemo: IDocumentData = {
+const richTextDemo: IDocumentData<IDocDrawingBase> = {
     id: 'd',
     body: {
         dataStream: 'Instructions: ①Project division - Fill in the specific division of labor after the project is disassembled: ②Responsible Person - Enter the responsible person\'s name here: ③Date-The specific execution time of the project (detailed to the date of a certain month), and the gray color block marks the planned real-time time of the division of labor of the project (for example, the specific execution time of [regional scene model arrangement and construction] is the 2 days marked in gray. \r\n',

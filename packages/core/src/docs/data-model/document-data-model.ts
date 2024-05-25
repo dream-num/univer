@@ -24,6 +24,7 @@ import type {
     IDocumentData,
     IDocumentRenderConfig,
     IDocumentStyle,
+    IDrawings,
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
@@ -82,6 +83,11 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
 
     get zoomRatio() {
         return this.snapshot.settings?.zoomRatio || 1;
+    }
+
+    resetDrawing(drawings: IDrawings, drawingsOrder: string[]) {
+        this.snapshot.drawings = drawings;
+        this.snapshot.drawingsOrder = drawingsOrder;
     }
 
     getBody() {

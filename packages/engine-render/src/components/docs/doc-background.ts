@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IViewportBound } from '../../basics/vector2';
+import type { IViewportInfo } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import { Rect } from '../../shape';
 import { Liquid } from './liquid';
@@ -40,7 +40,7 @@ export class DocBackground extends DocComponent {
         return new DocBackground(oKey, documentSkeleton, config);
     }
 
-    override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    override draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         const skeletonData = this.getSkeleton()?.getSkeletonData();
 
         if (skeletonData == null) {
@@ -103,7 +103,7 @@ export class DocBackground extends DocComponent {
         return this;
     }
 
-    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         this.draw(ctx, bounds);
     }
 }

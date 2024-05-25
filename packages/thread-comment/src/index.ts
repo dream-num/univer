@@ -50,3 +50,4 @@ export type {
     IUpdateCommentRefPayload,
 } from './commands/commands/comment.command';
 export { UniverThreadCommentPlugin } from './plugin';
+export { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';

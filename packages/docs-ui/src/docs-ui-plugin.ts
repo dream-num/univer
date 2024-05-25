@@ -43,7 +43,6 @@ import { DefaultDocUiConfig } from './basics';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AppUIController } from './controllers';
 import { DocUIController } from './controllers/doc-ui.controller';
-import { zhCN } from './locale';
 
 import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
@@ -67,8 +66,6 @@ export class UniverDocsUIPlugin extends Plugin {
         @ILogService private _logService: ILogService
     ) {
         super();
-
-        this._localeService.load({ zhCN });
 
         this._config = Tools.deepMerge({}, DefaultDocUiConfig, this._config);
         this._initDependencies(_injector);

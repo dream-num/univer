@@ -20,7 +20,6 @@ import { IRenderingEngine } from '@univerjs/engine-render';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { zhCN } from './locale';
 import { CanvasView } from './views/render';
 
 export interface IUniverSlidesConfig {}
@@ -52,9 +51,6 @@ export class UniverSlidesPlugin extends Plugin {
     }
 
     initialize(): void {
-        this._localeService.load({
-            zhCN,
-        });
         this.initCanvasEngine();
     }
 

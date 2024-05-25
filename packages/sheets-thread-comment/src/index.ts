@@ -27,3 +27,5 @@ export { SHEETS_THREAD_COMMENT } from './types/const';
 export { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thread-comment-copy-paste.controller';
 export { SheetsThreadCommentHoverController } from './controllers/sheets-thread-comment-hover.controller';
 export { ThreadCommentRemoveSheetsController } from './controllers/sheets-thread-comment-remove.controller';
+export { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
+export { IThreadCommentDataSourceService } from '@univerjs/thread-comment';

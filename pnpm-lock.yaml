@@ -229,8 +229,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/find-replace
       '@univerjs/icons':
-        specifier: ^0.1.47
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@univerjs/image':
         specifier: workspace:*
         version: link:../packages/image
@@ -470,8 +470,8 @@ importers:
         specifier: ^4.1.13
         version: 4.1.13
       '@univerjs/icons':
-        specifier: ^0.1.46
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-dialog:
         specifier: ^9.4.0
         version: 9.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -764,6 +764,9 @@ importers:
       '@wendellhu/redi':
         specifier: 0.15.2
         version: 0.15.2
+      jest-canvas-mock:
+        specifier: ^2.5.2
+        version: 2.5.2
       jsdom:
         specifier: ^24.0.0
         version: 24.0.0
@@ -779,15 +782,12 @@ importers:
       vitest:
         specifier: ^1.6.0
         version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
-      vitest-canvas-mock:
-        specifier: ^0.3.3
-        version: 0.3.3(vitest@1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))
 
   packages/find-replace:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.47
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@types/react':
         specifier: ^18.2.79
@@ -835,8 +835,8 @@ importers:
   packages/image:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.47
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1004,8 +1004,8 @@ importers:
   packages/sheets-conditional-formatting-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.47
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../sheets-conditional-formatting
@@ -1089,8 +1089,8 @@ importers:
   packages/sheets-data-validation:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.47
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1180,8 +1180,8 @@ importers:
   packages/sheets-filter-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.47
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-virtual-list:
         specifier: ^3.11.5
         version: 3.11.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -1280,8 +1280,8 @@ importers:
   packages/sheets-formula:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.47
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@types/react':
         specifier: ^18.2.79
@@ -1407,8 +1407,8 @@ importers:
   packages/sheets-numfmt:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.47
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@types/react':
         specifier: ^18.2.79
@@ -1468,8 +1468,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.47
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1587,8 +1587,8 @@ importers:
   packages/sheets-zen-editor:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.47
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1748,8 +1748,8 @@ importers:
   packages/thread-comment-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.47
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@univerjs/protocol':
         specifier: ^0.1.32
         version: 0.1.32(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
@@ -1800,8 +1800,8 @@ importers:
   packages/ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.47
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       localforage:
         specifier: ^1.10.0
         version: 1.10.0
@@ -1981,6 +1981,9 @@ importers:
       dayjs:
         specifier: ^1.11.11
         version: 1.11.11
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       monaco-editor:
         specifier: 0.48.0
         version: 0.48.0
@@ -4620,6 +4623,12 @@ packages:
 
   '@univerjs/icons@0.1.47':
     resolution: {integrity: sha512-JluQi//M5lrVJtxVc6IaVmPXVw1FSryP4WQXUvjdZ7QoSLGdEihkNLKdl/em26MZQAH4R5hIuiATOxXiR3YJWw==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+
+  '@univerjs/icons@0.1.52':
+    resolution: {integrity: sha512-VDg4jc1yLgNCOCZGLwcmAo5lGy/Jp/2c34QO+fClQzx2Qih6EWqxHyJfdjFILfNwWdJvrlFEIG4zMYtNM1Z2TQ==}
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -9976,11 +9985,6 @@ packages:
       terser:
         optional: true
 
-  vitest-canvas-mock@0.3.3:
-    resolution: {integrity: sha512-3P968tYBpqYyzzOaVtqnmYjqbe13576/fkjbDEJSfQAkHtC5/UjuRHOhFEN/ZV5HVZIkaROBUWgazDKJ+Ibw+Q==}
-    peerDependencies:
-      vitest: '*'
-
   vitest@1.6.0:
     resolution: {integrity: sha512-H5r/dN06swuFnzNFhq/dnz37bPXnq8xB2xB5JOVk8K09rUtoeNN+LHWkoQ0A/i3hvbUKKcCei9KpbxqHMLhLLA==}
     engines: {node: ^18.0.0 || >=20.0.0}
@@ -13492,6 +13496,11 @@ snapshots:
   '@univerjs/icons-svg@0.1.45': {}
 
   '@univerjs/icons@0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
+  '@univerjs/icons@0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -19537,11 +19546,6 @@ snapshots:
       less: 4.2.0
       sass: 1.72.0
       terser: 5.30.0
-
-  vitest-canvas-mock@0.3.3(vitest@1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)):
-    dependencies:
-      jest-canvas-mock: 2.5.2
-      vitest: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
   vitest@1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0):
     dependencies:

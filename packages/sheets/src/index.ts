@@ -256,7 +256,6 @@ export { getInsertRangeMutations, getRemoveRangeMutations } from './commands/uti
 export { handleInsertRangeMutation } from './commands/utils/handle-range-mutation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
-export { enUS, zhCN, ruRU } from './locale';
 export { NumfmtService } from './services/numfmt/numfmt.service';
 export type { INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
 export { INumfmtService } from './services/numfmt/type';

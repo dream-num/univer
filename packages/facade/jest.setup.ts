@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
-export { CanvasPopup } from './CanvasPopup';
+import { vi } from 'vitest';
+
+vi.stubGlobal('jest', vi);

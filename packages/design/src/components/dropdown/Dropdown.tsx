@@ -74,19 +74,25 @@ export interface IDropdownProps {
      * @param visible
      */
     onVisibleChange?: (visible: boolean) => void;
+
+    /** Disable dropdown from showing up. */
+    disabled?: boolean;
 }
 
 export function Dropdown(props: IDropdownProps) {
     const {
         className,
-        trigger = ['click'],
         placement,
         children,
         overlay,
         alignPoint = false,
         align,
+        disabled,
         onVisibleChange,
     } = props;
+
+    // eslint-disable-next-line react/prefer-destructuring-assignment
+    const trigger = disabled ? [] : (props.trigger || ['click']);
 
     const { mountContainer } = useContext(ConfigContext);
 

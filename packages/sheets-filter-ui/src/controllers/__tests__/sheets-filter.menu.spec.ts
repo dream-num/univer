@@ -16,7 +16,7 @@
 
 import type { IRange, IWorkbookData } from '@univerjs/core';
 import { DisposableCollection, ICommandService, LocaleType, Plugin, RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
-import { NORMAL_SELECTION_PLUGIN_NAME, RefRangeService, SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
+import { NORMAL_SELECTION_PLUGIN_NAME, RefRangeService, SelectionManagerService, SetWorksheetActiveOperation, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { DesktopMenuService, DesktopPlatformService, DesktopShortcutService, IMenuService, IPlatformService, IShortcutService } from '@univerjs/ui';
@@ -105,6 +105,10 @@ describe('test sheet filter menu items', () => {
         disposableCollection = new DisposableCollection();
 
         commandService = get(ICommandService);
+        commandService.registerCommand(SetWorksheetActiveOperation);
+
+        // Active sheet, prevent activeSheet from being initialized to null, causing activeFilterModel$ to also transmit null.
+        expect(commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, { unitId: 'test', subUnitId: 'sheet1' })).toBeTruthy();
     });
 
     afterEach(() => {

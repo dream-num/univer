@@ -1,5 +1,48 @@
 
 
+## [0.1.12](https://github.com/dream-num/univer/compare/v0.1.11...v0.1.12) (2024-05-24)
+
+
+### Bug Fixes
+
+* **engine-render:** fix "require("fs")" issue ([#2278](https://github.com/dream-num/univer/issues/2278)) ([0e25997](https://github.com/dream-num/univer/commit/0e259973b50cfa8c261dbdc8db7425854e3aa98f))
+* export necessary types from ui package ([c648310](https://github.com/dream-num/univer/commit/c64831091a758eedb88baad8a4bb8e4488cfc697))
+* fix identifier name ([c1b4e8b](https://github.com/dream-num/univer/commit/c1b4e8b51d6f10bede03248723e4b1c75de4c3d7))
+* fix shortcut panel content not correct ([#2267](https://github.com/dream-num/univer/issues/2267)) ([bf5880a](https://github.com/dream-num/univer/commit/bf5880a8b2dabad6621ad80cb68e3ed7f79657bb))
+* resolve warning about nested component updates from render methods ([#2274](https://github.com/dream-num/univer/issues/2274)) ([4e7b4c5](https://github.com/dream-num/univer/commit/4e7b4c5c0b55382b3933d6e1b3f0a1b50e94508c))
+* **sheet:** add info type for Message component, use barColor in ProgressBar ([#2277](https://github.com/dream-num/univer/issues/2277)) ([7b411b3](https://github.com/dream-num/univer/commit/7b411b398d5a3dd18aeff871abc847a770eb57f3))
+* **sheets-thread-comment:** fix some ui issues & update readme.md ([#2294](https://github.com/dream-num/univer/issues/2294)) ([b230655](https://github.com/dream-num/univer/commit/b230655dfca8f8949269944b183417759ac71367))
+* **sheets-ui:** fix doc plugins not loaded before sheet editor ([#2279](https://github.com/dream-num/univer/issues/2279)) ([e467c1e](https://github.com/dream-num/univer/commit/e467c1efbd3849278c44c73e7fa8b33025fa7c19))
+* **ui:** fix canvas popup direction definition error ([0690697](https://github.com/dream-num/univer/commit/069069759cebc8818f99732e743e2df4e24d8377))
+* **ui:** fix position error ([57d4e8a](https://github.com/dream-num/univer/commit/57d4e8a980acb10ac446de66f2ca50f4f0c49e84))
+* **uniscript:** export module for pro ([#2293](https://github.com/dream-num/univer/issues/2293)) ([e7ad8d5](https://github.com/dream-num/univer/commit/e7ad8d5c3e1ddb7bf6071ebd18209ddfba27ac58))
+
+
+* feat(ui)!: add support for hiding context menu (#2275) ([3f12ad8](https://github.com/dream-num/univer/commit/3f12ad80188a83283bcd95c65e6c5dcc2d23ad72)), closes [#2275](https://github.com/dream-num/univer/issues/2275)
+
+
+### Features
+
+* add support for customizable context menu & toolbar ([#2273](https://github.com/dream-num/univer/issues/2273)) ([b253997](https://github.com/dream-num/univer/commit/b253997ce3126fc99f2829a76a3b7cc5b1476a95))
+* **core:** command service support get command type ([6775a73](https://github.com/dream-num/univer/commit/6775a7310decfdad122b48344a6ff93d47651ea5))
+* extract debugger plugin to standalone package ([#2269](https://github.com/dream-num/univer/issues/2269)) ([f89e3bd](https://github.com/dream-num/univer/commit/f89e3bd2af1860a5081bdafae2b686c7fb5d04b0))
+* extract hooks for better customization ([#2301](https://github.com/dream-num/univer/issues/2301)) ([2b75400](https://github.com/dream-num/univer/commit/2b75400dd788b84b6b15872c5aea7b95b236aaeb))
+* **render-engine:** facade adds onCellPointerOver,onCellDragOver,onCellDrop ([#2240](https://github.com/dream-num/univer/issues/2240)) ([874fa27](https://github.com/dream-num/univer/commit/874fa271dae7d25acd6ef6c8e564da8b70d58aaa))
+* **sheets-conditional-formatting-ui:** refactor manage rule selection options ([ba56b60](https://github.com/dream-num/univer/commit/ba56b60960d1e0555484f115b190c7d9a836ff7e))
+* **sheets-thread-comment:** comment support for sheets ([#2228](https://github.com/dream-num/univer/issues/2228)) ([313ab79](https://github.com/dream-num/univer/commit/313ab796d7d951838d593d3801a1771d39e13153)), closes [#2121](https://github.com/dream-num/univer/issues/2121) [#2120](https://github.com/dream-num/univer/issues/2120) [#2114](https://github.com/dream-num/univer/issues/2114) [#2112](https://github.com/dream-num/univer/issues/2112) [#684](https://github.com/dream-num/univer/issues/684) [#2174](https://github.com/dream-num/univer/issues/2174) [#2162](https://github.com/dream-num/univer/issues/2162) [#715](https://github.com/dream-num/univer/issues/715)
+* **sheets-thread-comment:** optimize comment mention source injector method ([#2303](https://github.com/dream-num/univer/issues/2303)) ([a5a7b33](https://github.com/dream-num/univer/commit/a5a7b33f37e413cf6f28d4a5c9c4428c9b53be3b))
+* **thread-comment:** add data-source-service export ([#2296](https://github.com/dream-num/univer/issues/2296)) ([41d0639](https://github.com/dream-num/univer/commit/41d0639e9a4393bfa7e727699e23712b0e070298))
+* **ui:** popup enhance direction ([#2281](https://github.com/dream-num/univer/issues/2281)) ([e9c27b7](https://github.com/dream-num/univer/commit/e9c27b70c66008f34ff7f27d3913cc3f866199bd))
+* **ui:** ui parts service support more generic situations ([#2286](https://github.com/dream-num/univer/issues/2286)) ([415d5b8](https://github.com/dream-num/univer/commit/415d5b83b246b51ec09ee0f76d6e74daf447df85))
+* **umd:** add thread comment support to the UMD bundle ([#2288](https://github.com/dream-num/univer/issues/2288)) ([d909b5f](https://github.com/dream-num/univer/commit/d909b5f01b0f285f31c5ecc2526231a20dc376bc))
+
+
+### BREAKING CHANGES
+
+* The default values for `header` and `footer` are now set to true.
+
+* feat: update examples
+
 ## [0.1.11](https://github.com/dream-num/univer/compare/v0.1.10...v0.1.11) (2024-05-17)
 
 

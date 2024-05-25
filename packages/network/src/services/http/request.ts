@@ -47,9 +47,7 @@ export class HTTPRequest {
         readonly method: HTTPRequestMethod,
         readonly url: string,
         readonly requestParams?: IHTTPRequestParams
-    ) {
-        // TODO@wzhudev: deal with `requestParams` is empty.
-    }
+    ) {}
 
     getUrlWithParams(): string {
         const params = this.requestParams?.params?.toString();

@@ -17,7 +17,6 @@
 import type {
     BooleanNumber,
     GridType,
-    IDocDrawingBase,
     IDocStyleBase,
     IDocumentLayout,
     IOffset,
@@ -80,7 +79,7 @@ export interface IFontLocale {
     defaultFontSize: number;
 }
 
-export interface IDocsConfig extends IReferenceSource<IDocDrawingBase>, IDocumentLayout {
+export interface IDocsConfig extends IReferenceSource, IDocumentLayout {
     localeService: LocaleService;
     documentTextStyle?: ITextStyle;
     headerTreeMap: Map<string, DocumentViewModel>;

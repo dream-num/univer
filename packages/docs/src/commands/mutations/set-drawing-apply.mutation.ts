@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocDrawingBase, IDrawingGroupUpdateParam, IDrawingOrderMapParam, IDrawings, IDrawingSearch, IMutation } from '@univerjs/core';
+import type { DocumentDataModel, IDrawingGroupUpdateParam, IDrawingOrderMapParam, IDrawings, IDrawingSearch, IMutation } from '@univerjs/core';
 import { CommandType, IDrawingManagerService, IUniverInstanceService } from '@univerjs/core';
 import type { IDrawingJson1Type } from '@univerjs/drawing';
 import { IDocDrawingService } from '../../services/doc-drawing.service';
@@ -72,7 +72,7 @@ export const SetDocDrawingApplyMutation: IMutation<ISetDrawingApplyMutationParam
 
         // TODO: @Jocs Update the document snapshot
         const documentDataModel = univerInstanceService.getUnit(unitId) as DocumentDataModel;
-        documentDataModel.snapshot.drawings = drawingManagerService.getDrawingData(unitId, subUnitId) as IDrawings<IDocDrawingBase>;
+        documentDataModel.snapshot.drawings = drawingManagerService.getDrawingData(unitId, subUnitId) as IDrawings;
         documentDataModel.snapshot.drawingsOrder = drawingManagerService.getDrawingOrder(unitId, subUnitId);
 
         return true;

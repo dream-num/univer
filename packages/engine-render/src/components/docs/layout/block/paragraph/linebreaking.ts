@@ -80,7 +80,7 @@ function _updateListLevelAncestors(
 
 function _changeDrawingToSkeletonFormat(
     drawingIds: string[],
-    drawings: IDrawings<IDocDrawingBase>
+    drawings: IDrawings
 ): Map<string, IDocumentSkeletonDrawing> {
     const skeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     drawingIds.forEach((drawingId) => {

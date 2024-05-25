@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
 import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageRemoteService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import type { IImageData } from '@univerjs/drawing';
 import { getImageSize } from '@univerjs/drawing';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';

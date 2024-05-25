@@ -16,7 +16,6 @@
 
 import type { IBullet, IDocDrawingBase, IDrawings, Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
-import { I } from 'vitest/dist/reporters-yx5ZTtEV.js';
 import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
 import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import { createSkeletonPage } from '../../model/page';

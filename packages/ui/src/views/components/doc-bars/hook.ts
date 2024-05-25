@@ -181,8 +181,13 @@ export function useToolbarCollapseObserver(visibleItems: IToolbarRenderHookHandl
 
         resize();
         const observer = new ResizeObserver(() => resize());
-        observer.observe(document.body);
-        return () => observer.unobserve(document.body);
+
+        const toolbarDom = toolbarRef.current!;
+        observer.observe(toolbarDom);
+
+        return () => {
+            observer.unobserve(toolbarDom);
+        };
     }, [visibleItems]);
 
     return {

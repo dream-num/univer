@@ -21,10 +21,9 @@ export interface ISortOption {
     orderRules: IOrderRule[];
 }
 
-
 export enum SortType {
-    DESC, // Z-A
-    ASC, // A-Z
+    DESC = 'desc', // Z-A
+    ASC = 'asc', // A-Z
 }
 
 export interface IOrderRule {

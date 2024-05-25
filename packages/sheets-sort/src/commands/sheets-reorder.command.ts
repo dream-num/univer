@@ -27,7 +27,6 @@ import { SheetsSortService } from '../services/sheet-sort.service';
 import type { IReorderRangeMutationParams } from './sheets-reorder.mutation';
 import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from './sheets-reorder.mutation';
 
-
 export interface IReorderRangeCommandParams extends ISheetCommandSharedParams {
     range: IRange;
     orderRules: IOrderRule[];
@@ -48,7 +47,6 @@ export enum ORDER {
 export type CellValue = number | string | null;
 
 export type ICellValueCompareFn = (type: SortType, a: Nullable<ICellData>, b: Nullable<ICellData>) => Nullable<number>;
-
 
 export const ReorderRangeCommand: ICommand = {
     id: 'sheet.command.reorder-range',
@@ -144,7 +142,6 @@ export const ReorderRangeCommand: ICommand = {
 
 };
 
-
 function getRowCellData(
     worksheet: Worksheet,
     rowIndex: number,
@@ -156,7 +153,6 @@ function getRowCellData(
     });
     return result;
 }
-
 
 function combineCompareFnsAsOne(compareFns: ICellValueCompareFn[]) {
     return (type: SortType, a: Nullable<ICellData>, b: Nullable<ICellData>) => {
@@ -181,7 +177,7 @@ function reorderFnGenerator(orderRules: IOrderRule[], valueCompare: ICellValueCo
             const bCellData = b.value[index];
             ret = valueCompare(orderRules[index].type, aCellData, bCellData);
 
-            if (ret !== 0 || ret !== null || ret !== undefined) {
+            if (ret !== 0 && ret !== null && ret !== undefined) {
                 return ret as number;
             }
         }

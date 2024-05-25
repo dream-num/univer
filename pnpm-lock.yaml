@@ -1424,8 +1424,8 @@ importers:
         specifier: workspace:*
         version: link:../sheets
       '@wendellhu/redi':
-        specifier: ^0.14.0
-        version: 0.14.0
+        specifier: ^0.15.2
+        version: 0.15.2
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1441,6 +1441,9 @@ importers:
 
   packages/sheets-sort-ui:
     dependencies:
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../engine-formula
       '@univerjs/icons':
         specifier: ^0.1.44
         version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -1476,8 +1479,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.14.0
-        version: 0.14.0
+        specifier: ^0.15.2
+        version: 0.15.2
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -4839,9 +4842,6 @@ packages:
 
   '@webassemblyjs/wast-printer@1.12.1':
     resolution: {integrity: sha512-+X4WAlOisVWQMikjbcvY2e0rwPsKQ9F688lksZhBcPycBBuii3O7m8FACbDMWDojpAqvjIncrG8J0XHKyQfVeA==}
-
-  '@wendellhu/redi@0.14.0':
-    resolution: {integrity: sha512-UzK+Jd51u3c85Qxu+aUkQzTtDGjz4w8FsTjHyAMpkXC8n1bV3aFYpRjorADEWlbeQPC+kRBBiWjaraEZG61uYg==}
 
   '@wendellhu/redi@0.15.2':
     resolution: {integrity: sha512-a74HbcIU58K9knNEE3BRTMV9Be1PAHcdZphWoxbXJwJgK+OYa4eiG7nkP1SZqNeKgVj6nT885ShigEuTbmVBkg==}
@@ -13847,8 +13847,6 @@ snapshots:
     dependencies:
       '@webassemblyjs/ast': 1.12.1
       '@xtuc/long': 4.2.2
-
-  '@wendellhu/redi@0.14.0': {}
 
   '@wendellhu/redi@0.15.2': {}
 

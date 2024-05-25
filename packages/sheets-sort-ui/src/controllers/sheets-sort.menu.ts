@@ -36,7 +36,6 @@ export function sortRangeMenuFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-
 export function sortRangeAscMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeAscCommand.id,
@@ -45,7 +44,6 @@ export function sortRangeAscMenuFactory(_accessor: IAccessor): IMenuItem {
         positions: [SHEETS_SORT_MENU_ID],
     };
 }
-
 
 export function sortRangeDescMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
@@ -56,7 +54,6 @@ export function sortRangeDescMenuFactory(_accessor: IAccessor): IMenuItem {
     };
 }
 
-
 export function sortRangeCustomMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeCustomCommand.id,
@@ -65,7 +62,6 @@ export function sortRangeCustomMenuFactory(_accessor: IAccessor): IMenuItem {
         positions: [SHEETS_SORT_MENU_ID],
     };
 }
-
 
 export function sortRangeCtxMenuFactory(accessor: IAccessor): IMenuItem {
     return {

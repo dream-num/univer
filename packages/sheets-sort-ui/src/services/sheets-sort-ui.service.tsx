@@ -23,23 +23,23 @@ import { Disposable, ICommandService,
     UniverInstanceType,
 } from '@univerjs/core';
 
-import { isSingleCellSelection, SelectionManagerService } from '@univerjs/sheets';
+import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import type { ISheetRangeLocation } from '@univerjs/sheets-ui';
 import { expandToContinuousRange } from '@univerjs/sheets-ui';
 
-import type { ISortOption } from '@univerjs/sheets-sort';
+import type { IOrderRule, ISortOption } from '@univerjs/sheets-sort';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import React from 'react';
 import { IConfirmService } from '@univerjs/ui';
 import { ExtendConfirm } from '../views/ExtendConfirm';
+import { CustomSortPanel } from '../views/CustomSortPanel';
 
 export enum EXTEND_TYPE {
     KEEP = 'keep',
     EXTEND = 'extend',
     CANCEL = 'cancel',
 }
-
 
 @OnLifecycle(LifecycleStages.Ready, SheetsSortService)
 export class SheetsSortUIService extends Disposable {
@@ -53,8 +53,8 @@ export class SheetsSortUIService extends Disposable {
         super();
     }
 
-    async triggerSortDirectly(asc: boolean) {
-        const location = await this._detectSortRange();
+    async triggerSortDirectly(asc: boolean, extend?: boolean): Promise<boolean> {
+        const location = await this._detectSortLocation(extend);
         if (!location) {
             return false;
         }
@@ -80,7 +80,7 @@ export class SheetsSortUIService extends Disposable {
     }
 
     async triggerSortCustomize() {
-        const location = await this._detectSortRange();
+        const location = await this._detectSortLocation();
         if (!location) {
             return false;
         }
@@ -91,27 +91,28 @@ export class SheetsSortUIService extends Disposable {
             return false;
         }
         // open customize dialog
-        const sortOption: ISortOption = await this.showCustomSortPanel(location);
+        const sortOption: ISortOption | null = await this.showCustomSortPanel(location);
+        if (!sortOption) {
+            return false;
+        }
         this._sheetsSortService.applySort(sortOption, location.unitId, location.subUnitId);
         return true;
     }
 
-
-    private async _detectSortRange(): Promise<Nullable<ISheetRangeLocation >> {
+    private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetRangeLocation >> {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET) as Workbook;
         const worksheet = workbook.getActiveSheet();
         const matrix = worksheet.getCellMatrix();
-        // 1. get current selection
         const selection = this._selectionManagerService.getLast();
         if (!selection) {
             return null;
         }
         let range;
-        // 2. single cell selection -> detect max range
-        if (isSingleCellSelection(selection)) {
+        if (extend === true) {
             range = expandToContinuousRange(selection.range, { up: true, down: true, left: true, right: true }, worksheet);
+        } else if (extend === false) {
+            range = selection.range;
         } else {
-        // 3. multi-cell selection -> dialog
             const confirmRes = await this.showExtendConfirm();
             if (confirmRes === EXTEND_TYPE.CANCEL) {
                 return null;
@@ -152,10 +153,13 @@ export class SheetsSortUIService extends Disposable {
                 title: 'Extend or not',
             },
             children: {
-                title: <ExtendConfirm
-                    onChange={(value: string) => {
-                        shouldExtend = value === '1';
-                    }} />,
+                title: (
+                    <ExtendConfirm
+                        onChange={(value: string) => {
+                            shouldExtend = value === '1';
+                        }}
+                    />
+                ),
             },
             confirmText: 'Confirm',
             cancelText: 'Cancel',
@@ -166,11 +170,32 @@ export class SheetsSortUIService extends Disposable {
         return EXTEND_TYPE.CANCEL;
     }
 
-    async showCustomSortPanel(location: ISheetRangeLocation): Promise<ISortOption> {
-        return {
-            range: location.range,
-            //  mock temporary.
-            orderRules: [{ type: SortType.ASC, colIndex: location.range.startColumn }, { type: SortType.DESC, colIndex: location.range.endColumn }],
-        };
+    async showCustomSortPanel(location: ISheetRangeLocation): Promise<ISortOption | null> {
+        let list: IOrderRule[] = [];
+        const confirm = await this._confirmService.confirm({
+            id: 'custom-sort-panel',
+            title: {
+                title: 'Custom Sort',
+            },
+            children: {
+                title: (
+                    <CustomSortPanel
+                        range={location.range}
+                        onListChange={(value) => {
+                            list = value;
+                        }}
+                    />
+                ),
+            },
+            confirmText: 'Sort',
+            cancelText: 'Cancel',
+        });
+        if (confirm) {
+            return {
+                range: location.range,
+                orderRules: list,
+            };
+        }
+        return null;
     }
 }

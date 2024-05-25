@@ -23,7 +23,16 @@ export const SortRangeAscCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const sortService = accessor.get(SheetsSortUIService);
-        return await sortService.triggerSortDirectly(true);
+        return await sortService.triggerSortDirectly(true, false);
+    },
+};
+
+export const SortRangeAscExtCommand: ICommand = {
+    id: 'sheet.command.sort-range-asc-ext',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const sortService = accessor.get(SheetsSortUIService);
+        return await sortService.triggerSortDirectly(true, true);
     },
 };
 
@@ -32,7 +41,16 @@ export const SortRangeDescCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const sortService = accessor.get(SheetsSortUIService);
-        return await sortService.triggerSortDirectly(false);
+        return await sortService.triggerSortDirectly(false, false);
+    },
+};
+
+export const SortRangeDescExtCommand: ICommand = {
+    id: 'sheet.command.sort-range-desc-ext',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const sortService = accessor.get(SheetsSortUIService);
+        return await sortService.triggerSortDirectly(false, true);
     },
 };
 
@@ -50,7 +68,16 @@ export const SortRangeAscInCtxMenuCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const sortService = accessor.get(SheetsSortUIService);
-        return await sortService.triggerSortDirectly(true);
+        return await sortService.triggerSortDirectly(true, false);
+    },
+};
+
+export const SortRangeAscExtInCtxMenuCommand: ICommand = {
+    id: 'sheet.command.sort-range-asc-ext-ctx',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const sortService = accessor.get(SheetsSortUIService);
+        return await sortService.triggerSortDirectly(true, true);
     },
 };
 
@@ -59,7 +86,16 @@ export const SortRangeDescInCtxMenuCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const sortService = accessor.get(SheetsSortUIService);
-        return await sortService.triggerSortDirectly(false);
+        return await sortService.triggerSortDirectly(false, false);
+    },
+};
+
+export const SortRangeDescExtInCtxMenuCommand: ICommand = {
+    id: 'sheet.command.sort-range-desc-ext-ctx',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor) => {
+        const sortService = accessor.get(SheetsSortUIService);
+        return await sortService.triggerSortDirectly(false, true);
     },
 };
 

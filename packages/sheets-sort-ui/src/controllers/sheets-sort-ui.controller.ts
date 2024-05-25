@@ -17,16 +17,23 @@
 import type { UniverInstanceService } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 
-
 import { Inject, Injector } from '@wendellhu/redi';
+import type { MenuConfig } from '@univerjs/ui';
 import { IMenuService } from '@univerjs/ui';
-import { SortRangeAscCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescInCtxMenuCommand } from '../commands/sheets-sort.command';
-import { sortRangeAscCtxMenuFactory, sortRangeAscMenuFactory, sortRangeCtxMenuFactory, sortRangeCustomCtxMenuFactory, sortRangeCustomMenuFactory, sortRangeDescCtxMenuFactory, sortRangeDescMenuFactory, sortRangeMenuFactory } from './sheets-sort.menu';
+import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/sheets-sort.command';
+import { sortRangeAscCtxMenuFactory, sortRangeAscExtCtxMenuFactory, sortRangeAscExtMenuFactory, sortRangeAscMenuFactory, sortRangeCtxMenuFactory, sortRangeCustomCtxMenuFactory, sortRangeCustomMenuFactory, sortRangeDescCtxMenuFactory, sortRangeDescExtCtxMenuFactory, sortRangeDescExtMenuFactory, sortRangeDescMenuFactory, sortRangeMenuFactory } from './sheets-sort.menu';
 
+export interface IUniverSheetsSortUIConfig {
+    menu: MenuConfig;
+}
+export const DefaultSheetsSortUIConfig = {
+    menu: {},
+};
 
 @OnLifecycle(LifecycleStages.Ready, SheetsSortUIController)
 export class SheetsSortUIController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverSheetsSortUIConfig>,
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _instanceService: UniverInstanceService,
         @IMenuService private readonly _menuService: IMenuService,
@@ -38,19 +45,24 @@ export class SheetsSortUIController extends Disposable {
     }
 
     private _initMenu() {
+        const { menu = {} } = this._config;
         [
             sortRangeMenuFactory,
             sortRangeAscMenuFactory,
+            sortRangeAscExtMenuFactory,
             sortRangeDescMenuFactory,
+            sortRangeDescExtMenuFactory,
             sortRangeCustomMenuFactory,
             sortRangeCtxMenuFactory,
             sortRangeAscCtxMenuFactory,
+            sortRangeAscExtCtxMenuFactory,
             sortRangeDescCtxMenuFactory,
+            sortRangeDescExtCtxMenuFactory,
             sortRangeCustomCtxMenuFactory,
-        ].forEach((menu) => {
+        ].forEach((factory) => {
             this.disposeWithMe(
                 this._menuService.addMenuItem(
-                    menu(this._injector)
+                    this._injector.invoke(factory), menu
                 )
             );
         });
@@ -59,10 +71,14 @@ export class SheetsSortUIController extends Disposable {
     private _initCommands(): void {
         [
             SortRangeAscCommand,
+            SortRangeAscExtCommand,
             SortRangeDescCommand,
+            SortRangeDescExtCommand,
             SortRangeCustomCommand,
             SortRangeAscInCtxMenuCommand,
+            SortRangeAscExtInCtxMenuCommand,
             SortRangeDescInCtxMenuCommand,
+            SortRangeDescExtInCtxMenuCommand,
             SortRangeCustomInCtxMenuCommand,
 
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));

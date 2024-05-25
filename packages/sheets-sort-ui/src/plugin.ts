@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
+import { LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { zhCN } from './locale';
 import { SheetsSortUIService } from './services/sheets-sort-ui.service';
-import { SheetsSortUIController } from './controllers/sheets-sort-ui.controller';
+import type { IUniverSheetsSortUIConfig } from './controllers/sheets-sort-ui.controller';
+import { DefaultSheetsSortUIConfig, SheetsSortUIController } from './controllers/sheets-sort-ui.controller';
 
 const NAME = 'UNIVER_SHEETS_SORT_UI_PLUGIN';
 
@@ -29,7 +30,7 @@ export class UniverSheetsSortUIPlugin extends Plugin {
     static override pluginName = NAME;
 
     constructor(
-        _config: unknown,
+        private readonly _config: Partial<IUniverSheetsSortUIConfig> = {},
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
@@ -38,12 +39,15 @@ export class UniverSheetsSortUIPlugin extends Plugin {
         this._localeService.load({
             zhCN,
         });
+        this._config = Tools.deepMerge({}, DefaultSheetsSortUIConfig, this._config);
     }
 
     override onStarting(injector: Injector): void {
         ([
             [SheetsSortUIService],
-            [SheetsSortUIController],
+            [SheetsSortUIController, {
+                useFactory: () => this._injector.createInstance(SheetsSortUIController, this._config),
+            }],
         ] as Dependency[]).forEach((d) => injector.add(d));
     }
 }

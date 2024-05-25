@@ -51,10 +51,6 @@ export interface IImageRemoteService {
     imageSourceCache: Map<string, HTMLImageElement>;
     getImageSourceCache(source: string, imageSourceType: ImageSourceType): Nullable<HTMLImageElement>;
     addImageSourceCache(source: string, imageSourceType: ImageSourceType, imageSource: Nullable<HTMLImageElement>): void;
-
-    applyFilter(imageId: string): Promise<string>;
-
-    applyAI(imageId: string, operatorType: string): Promise<string>;
 }
 
 export const IImageRemoteService = createIdentifier<IImageRemoteService>('univer.plugin.image-remote.service');

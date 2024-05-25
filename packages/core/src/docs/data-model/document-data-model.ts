@@ -229,7 +229,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         return this.snapshot.drawings;
     }
 
-    getDrawingsOder() {
+    getDrawingsOrder() {
         return this.snapshot.drawingsOrder;
     }
 

@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, IDrawingOrderMapParam, Nullable } from '@univerjs/core';
-import { ArrangeType,
+import { ArrangeTypeEnum,
     CommandType,
     ICommandService,
     IUndoRedoService,
@@ -25,7 +25,7 @@ import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetDrawingArrangeCommandParams extends IDrawingOrderMapParam {
-    arrangeType: ArrangeType;
+    arrangeType: ArrangeTypeEnum;
 }
 
 /**
@@ -47,13 +47,13 @@ export const SetDocDrawingArrangeCommand: ICommand = {
         const drawingOrderMapParam = { unitId, subUnitId, drawingIds } as IDrawingOrderMapParam;
 
         let jsonOp: Nullable<IDrawingJsonUndo1>;
-        if (arrangeType === ArrangeType.forward) {
+        if (arrangeType === ArrangeTypeEnum.forward) {
             jsonOp = docDrawingService.getForwardDrawingsOp(drawingOrderMapParam) as IDrawingJsonUndo1;
-        } else if (arrangeType === ArrangeType.backward) {
+        } else if (arrangeType === ArrangeTypeEnum.backward) {
             jsonOp = docDrawingService.getBackwardDrawingOp(drawingOrderMapParam) as IDrawingJsonUndo1;
-        } else if (arrangeType === ArrangeType.front) {
+        } else if (arrangeType === ArrangeTypeEnum.front) {
             jsonOp = docDrawingService.getFrontDrawingsOp(drawingOrderMapParam) as IDrawingJsonUndo1;
-        } else if (arrangeType === ArrangeType.back) {
+        } else if (arrangeType === ArrangeTypeEnum.back) {
             jsonOp = docDrawingService.getBackDrawingsOp(drawingOrderMapParam) as IDrawingJsonUndo1;
         }
 

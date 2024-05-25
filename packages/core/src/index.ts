@@ -95,7 +95,7 @@ export {
     type IDrawingVisibleParam,
     type IDrawingMapItemData,
     type IDrawingMapItem,
-    ArrangeType,
+    ArrangeTypeEnum,
 } from './services/drawing/drawing-manager.service';
 export { IUniverInstanceService } from './services/instance/instance.service';
 export { LifecycleStages, OnLifecycle, runOnLifecycle } from './services/lifecycle/lifecycle';

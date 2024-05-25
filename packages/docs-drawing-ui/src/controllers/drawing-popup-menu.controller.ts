@@ -20,7 +20,7 @@ import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { COMPONENT_IMAGE_POPUP_MENU, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
+import { ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { takeUntil } from 'rxjs';
 import { ImageCropperObject } from '@univerjs/drawing-ui/views/crop/image-cropper-object.js';
 import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';

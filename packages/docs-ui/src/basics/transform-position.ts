@@ -16,7 +16,6 @@
 
 import { type IDocDrawingPosition, type ITransformState, type Nullable, ObjectRelativeFromH, ObjectRelativeFromV } from '@univerjs/core';
 import type { ITextSelectionRenderManager } from '@univerjs/engine-render';
-import { precisionTo } from '@univerjs/engine-render';
 
 export function docDrawingPositionToTransform(position: IDocDrawingPosition, textSelectionRenderService: ITextSelectionRenderManager): Nullable<ITransformState> {
     // const { from, to } = position;

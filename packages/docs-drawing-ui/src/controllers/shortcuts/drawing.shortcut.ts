@@ -15,7 +15,7 @@
  */
 
 import type { IContextService } from '@univerjs/core';
-import { Direction, EDITOR_ACTIVATED, FOCUSING_COMMON_DRAWINGS, FOCUSING_FORMULA_EDITOR, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
+import { Direction, FOCUSING_COMMON_DRAWINGS, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode } from '@univerjs/ui';
 import { type IMoveDrawingsCommandParams, MoveDocDrawingsCommand } from '../../commands/commands/move-drawings.command';

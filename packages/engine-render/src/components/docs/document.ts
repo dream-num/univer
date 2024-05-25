@@ -57,9 +57,9 @@ export class Documents extends DocComponent {
 
     docsTop: number = 0;
 
-    private _drawLiquid: Liquid;
+    private _drawLiquid: Nullable<Liquid> = new Liquid();
 
-    private _findLiquid: Liquid;
+    // private _findLiquid: Nullable<Liquid> = new Liquid();
 
     // private _hasEditor = false;
 
@@ -71,10 +71,6 @@ export class Documents extends DocComponent {
 
     constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         super(oKey, documentSkeleton, config);
-
-        this._drawLiquid = new Liquid();
-
-        this._findLiquid = new Liquid();
 
         this._initialDefaultExtension();
 
@@ -93,8 +89,8 @@ export class Documents extends DocComponent {
         this._skeletonObserver?.dispose();
         this._skeletonObserver = null;
         this.onPageRenderObservable.clear();
-        this._drawLiquid = null as unknown as Liquid;
-        this._findLiquid = null as unknown as Liquid;
+        this._drawLiquid = null;
+        // this._findLiquid = null;
     }
 
     getOffsetConfig(): IDocumentOffsetConfig {
@@ -167,7 +163,7 @@ export class Documents extends DocComponent {
     override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         const skeletonData = this.getSkeleton()?.getSkeletonData();
 
-        if (skeletonData == null) {
+        if (skeletonData == null || this._drawLiquid == null) {
             return;
         }
 

@@ -18,7 +18,7 @@ import type { IPosition, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-import { distinctUntilChanged, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getHoverCellPosition } from '../common/utils';
 import { ScrollManagerService } from './scroll-manager.service';
@@ -41,6 +41,8 @@ export class HoverManagerService extends Disposable {
             && pre?.location?.col === aft?.location?.col
         )
     )));
+
+    currentCellDebounce$ = this.currentCell$.pipe(debounceTime(300));
 
     // Notify when mouse position changes
     currentPosition$ = this._currentCell$.asObservable();

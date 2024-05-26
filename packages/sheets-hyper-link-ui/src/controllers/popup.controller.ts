@@ -14,14 +14,30 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
+import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { HoverManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
+import { SheetsHyperLinkPopupService } from '../services/popup.service';
 
+@OnLifecycle(LifecycleStages.Rendered, SheetsHyperLinkPopupController)
 export class SheetsHyperLinkPopupController extends Disposable {
     constructor(
-        @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService
+        @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
+        @Inject(SheetsHyperLinkPopupService) private readonly _sheetsHyperLinkPopupService: SheetsHyperLinkPopupService
     ) {
         super();
+
+        this._initHoverListener();
+    }
+
+    private _initHoverListener() {
+        this.disposeWithMe(this._hoverManagerService.currentCell$.subscribe((currentCell) => {
+            if (!currentCell) {
+                this._sheetsHyperLinkPopupService.hideCurrentPopup();
+                return;
+            }
+
+            this._sheetsHyperLinkPopupService.showPopup(currentCell.location);
+        }));
     }
 }

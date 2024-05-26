@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { BooleanNumber, CellValueType, Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, ThemeService, UniverInstanceType } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -51,9 +51,9 @@ export class SheetsHyperLinkRenderController extends Disposable {
                         if (link) {
                             return next({
                                 ...cell,
-                                v: link.display,
-                                t: CellValueType.STRING,
-                                p: null,
+                                // v: link.display,
+                                // t: CellValueType.STRING,
+                                // p: null,
                                 s: {
                                     ul: {
                                         s: BooleanNumber.TRUE,

@@ -22,6 +22,8 @@ import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.contr
 import { SheetsHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 import { SheetsHyperLinkPopupService } from './services/popup.service';
 import { SheetsHyperLinkResolverService } from './services/resolver.service';
+import { SheetHyperLinkSetRangeController } from './controllers/set-range.controller';
+import { SheetsHyperLinkPopupController } from './controllers/popup.controller';
 
 const SHEETS_HYPER_LINK_UI_PLUGIN = 'SHEETS_HYPER_LINK_UI_PLUGIN';
 
@@ -44,6 +46,8 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
             [SheetsHyperLinkRemoveSheetController],
             [SheetsHyperLinkRefRangeController],
             [SheetsHyperLinkRenderController],
+            [SheetHyperLinkSetRangeController],
+            [SheetsHyperLinkPopupController],
         ];
 
         dependencies.forEach((dep) => {

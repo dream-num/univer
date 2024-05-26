@@ -14,6 +14,45 @@
  * limitations under the License.
  */
 
+import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
+import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
+import React from 'react';
+import { CreateCopySingle, EditRegionSingle, LinkSingle } from '@univerjs/icons';
+import { SheetsHyperLinkPopupService } from '../../services/popup.service';
+import styles from './index.module.less';
+
 export const CellLinkPopup = () => {
-    // const
+    const popupService = useDependency(SheetsHyperLinkPopupService);
+    const hyperLinkModel = useDependency(HyperLinkModel);
+    const currentPopup = useObservable(popupService.currentPopup$, popupService.currentPopup);
+    if (!currentPopup) {
+        return null;
+    }
+    const { unitId, subUnitId, id } = currentPopup;
+    const link = hyperLinkModel.getHyperLink(unitId, subUnitId, id);
+
+    if (!link) {
+        return null;
+    }
+
+    return (
+        <div className={styles.cellLink}>
+            <div className={styles.cellLinkContent}>
+                {link.payload}
+            </div>
+            <div className={styles.cellLinkOperations}>
+                <div className={styles.cellLinkOperation}>
+                    <CreateCopySingle />
+                </div>
+                <div className={styles.cellLinkOperation}>
+                    <EditRegionSingle />
+                </div>
+                <div className={styles.cellLinkOperation}>
+                    <LinkSingle />
+                </div>
+            </div>
+        </div>
+    );
 };
+
+CellLinkPopup.componentKey = 'univer.sheet.cell-link-popup';

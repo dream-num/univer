@@ -14084,6 +14084,10 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         v: 345,
                         t: 2,
                     },
+                    12: {
+                        v: 'linkTest哈哈哈哈',
+                        t: 1,
+                    },
                 },
                 21: {
                     4: {

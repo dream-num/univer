@@ -15,7 +15,8 @@
  */
 
 import type { ICommand, IMutationInfo } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, sequenceExecuteAsync } from '@univerjs/core';
+import { SheetInterceptorService } from '@univerjs/sheets';
 import type { ICellHyperLink } from '../../types/interfaces/i-hyper-link';
 import { AddHyperLinkMutation } from '../mutations/add-hyper-link.mutation';
 import { RemoveHyperLinkMutation } from '../mutations/remove-hyper-link.mutation';
@@ -33,9 +34,14 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
         if (!params) {
             return false;
         }
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const { unitId, subUnitId, link } = params;
+        const { redos, undos } = sheetInterceptorService.onCommandExecute({
+            id: AddHyperLinkCommand.id,
+            params,
+        });
         const redo: IMutationInfo = {
             id: AddHyperLinkMutation.id,
             params,
@@ -48,11 +54,11 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
                 id: link.id,
             },
         };
-
-        if (await commandService.executeCommand(redo.id, redo.params)) {
+        const res = await sequenceExecuteAsync([redo, ...redos], commandService);
+        if (res.result) {
             undoRedoService.pushUndoRedo({
-                redoMutations: [redo],
-                undoMutations: [undo],
+                redoMutations: [redo, ...redos],
+                undoMutations: [undo, ...undos],
                 unitID: unitId,
             });
             return true;

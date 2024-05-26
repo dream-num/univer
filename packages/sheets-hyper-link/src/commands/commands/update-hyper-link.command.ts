@@ -15,8 +15,8 @@
  */
 
 import type { ICommand, IMutationInfo } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
-import type { IAddHyperLinkMutationParams } from '../mutations/add-hyper-link.mutation';
+import { CommandType, ICommandService, IUndoRedoService, sequenceExecuteAsync } from '@univerjs/core';
+import { SheetInterceptorService } from '@univerjs/sheets';
 import { HyperLinkModel } from '../../models/hyper-link.model';
 import { UpdateHyperLinkMutation } from '../mutations/update-hyper-link.mutation';
 import type { ICellHyperLink, ICellLinkContent } from '../../types/interfaces/i-hyper-link';
@@ -40,6 +40,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
         if (!params) {
             return false;
         }
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const model = accessor.get(HyperLinkModel);
@@ -48,7 +49,10 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
         if (!link) {
             return false;
         }
-
+        const { redos, undos } = sheetInterceptorService.onCommandExecute({
+            id: UpdateHyperLinkCommand.id,
+            params,
+        });
         const redo: IMutationInfo = {
             id: UpdateHyperLinkMutation.id,
             params,
@@ -63,10 +67,11 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
             },
         };
 
-        if (await commandService.executeCommand(redo.id, redo.params)) {
+        const res = await sequenceExecuteAsync([redo, ...redos], commandService);
+        if (res.result) {
             undoRedoService.pushUndoRedo({
-                redoMutations: [redo],
-                undoMutations: [undo],
+                redoMutations: [redo, ...redos],
+                undoMutations: [undo, ...undos],
                 unitID: unitId,
             });
             return true;

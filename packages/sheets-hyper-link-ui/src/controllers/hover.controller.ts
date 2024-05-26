@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
-export const CellLinkPopup = () => {
-    // const
-};
+import { Disposable } from '@univerjs/core';
+
+export class SheetsHyperLinkHoverController extends Disposable {
+
+}

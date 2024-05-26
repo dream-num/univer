@@ -20,7 +20,7 @@ import { Subject } from 'rxjs';
 
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import type { IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
-import { DesktopUIPart, IUIPartsService } from '../parts/parts.service';
+import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 import { DialogPart } from '../../views/components/dialog-part/DialogPart';
 import type { IDialogService } from './dialog.service';
 
@@ -79,7 +79,7 @@ export class DesktopDialogService extends Disposable implements IDialogService {
 
     protected _initUIPart(): void {
         this.disposeWithMe(
-            this._uiPartsService.registerComponent(DesktopUIPart.GLOBAL, () => connectInjector(DialogPart, this._injector))
+            this._uiPartsService.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(DialogPart, this._injector))
         );
     }
 }

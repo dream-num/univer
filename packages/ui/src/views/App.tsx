@@ -21,13 +21,13 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';
-import { DesktopUIPart, IUIPartsService } from '../services/parts/parts.service';
+import { BuiltInUIPart, IUIPartsService } from '../services/parts/parts.service';
 import styles from './app.module.less';
 import { ComponentContainer } from './components/ComponentContainer';
 import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
-import { CanvasPopup } from './components/popup';
+import { CanvasPopup } from './components/popup/CanvasPopup';
 import { builtInGlobalComponents } from './parts';
 import { ContextMenu } from './components/context-menu/ContextMenu';
 
@@ -56,6 +56,15 @@ export function App(props: IUniverAppProps) {
     const [updateTrigger, setUpdateTrigger] = useState(false);
 
     useEffect(() => {
+        console.warn(
+            '\x1B[33m%s\x1B[0m',
+            '[Univer Warning]',
+            'We will remove the built-in language support in the next version (v0.1.13), please add the language support manually.',
+            'Please refer to the release notes for more information: https://github.com/dream-num/univer/releases/tag/v0.1.12'
+        );
+    }, []);
+
+    useEffect(() => {
         const updateSubscription = uiPartsService.componentRegistered$.subscribe(() => {
             setUpdateTrigger((prev) => !prev);
         });
@@ -67,12 +76,12 @@ export function App(props: IUniverAppProps) {
     }, []);
 
     const { headerComponents, contentComponents, footerComponents, headerMenuComponents, leftSidebarComponents, globalComponents } = useMemo(() => ({
-        headerComponents: uiPartsService.getComponents(DesktopUIPart.HEADER),
-        contentComponents: uiPartsService.getComponents(DesktopUIPart.CONTENT),
-        footerComponents: uiPartsService.getComponents(DesktopUIPart.FOOTER),
-        headerMenuComponents: uiPartsService.getComponents(DesktopUIPart.HEADER_MENU),
-        leftSidebarComponents: uiPartsService.getComponents(DesktopUIPart.LEFT_SIDEBAR),
-        globalComponents: uiPartsService.getComponents(DesktopUIPart.GLOBAL),
+        headerComponents: uiPartsService.getComponents(BuiltInUIPart.HEADER),
+        contentComponents: uiPartsService.getComponents(BuiltInUIPart.CONTENT),
+        footerComponents: uiPartsService.getComponents(BuiltInUIPart.FOOTER),
+        headerMenuComponents: uiPartsService.getComponents(BuiltInUIPart.HEADER_MENU),
+        leftSidebarComponents: uiPartsService.getComponents(BuiltInUIPart.LEFT_SIDEBAR),
+        globalComponents: uiPartsService.getComponents(BuiltInUIPart.GLOBAL),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }), [updateTrigger]);
 
@@ -118,7 +127,7 @@ export function App(props: IUniverAppProps) {
     }, [localeService, messageService, mountContainer, portalContainer, themeService.currentTheme$]);
 
     return (
-        <ConfigProvider locale={locale} mountContainer={portalContainer}>
+        <ConfigProvider locale={locale?.design} mountContainer={portalContainer}>
             {/**
               * IMPORTANT! This `tabIndex` should not be moved. This attribute allows the element to catch
               * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
@@ -150,6 +159,7 @@ export function App(props: IUniverAppProps) {
                                 data-range-selector
                                 onContextMenu={(e) => e.preventDefault()}
                             >
+                                <CanvasPopup />
                                 <ComponentContainer components={contentComponents} />
                             </section>
                         </section>
@@ -167,11 +177,8 @@ export function App(props: IUniverAppProps) {
                     )}
 
                     <ZenZone />
-
                 </section>
-                <CanvasPopup />
             </div>
-
             <ComponentContainer components={globalComponents} />
             <ComponentContainer components={builtInGlobalComponents} />
             {contextMenu && <ContextMenu />}

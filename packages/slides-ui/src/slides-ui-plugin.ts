@@ -20,7 +20,6 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SlideUIController } from './controllers/slide-ui.controller';
-import { zhCN } from './locale';
 
 export const SLIDE_UI_PLUGIN_NAME = 'slides-ui';
 
@@ -38,10 +37,6 @@ export class UniverSlidesUIPlugin extends Plugin {
     }
 
     override onStarting(injector: Injector): void {
-        this._localeService.load({
-            zhCN,
-        });
-
         ([[SlideUIController]] as Dependency[]).forEach((d) => injector.add(d));
     }
 

@@ -15,7 +15,6 @@
  */
 
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { AddDigitsSingle, MoreDownSingle, PercentSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
 import {
     getCurrentSheetDisabled$,
     INumfmtService,
@@ -23,7 +22,7 @@ import {
     SelectionManagerService,
     SetNumfmtMutation,
 } from '@univerjs/sheets';
-import type { ComponentManager, IMenuSelectorItem } from '@univerjs/ui';
+import type { IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { merge, Observable } from 'rxjs';
@@ -34,35 +33,27 @@ import { AddDecimalCommand } from '../commands/commands/add-decimal.command';
 import { SetCurrencyCommand } from '../commands/commands/set-currency.command';
 import { SubtractDecimalCommand } from '../commands/commands/subtract-decimal.command';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
-import { MoreNumfmtType, Options } from '../components/more-numfmt-type/MoreNumfmtType';
+import { MORE_NUMFMT_TYPE_KEY, OPTIONS_KEY } from '../components/more-numfmt-type/MoreNumfmtType';
 import { isPatternEqualWithoutDecimal } from '../utils/decimal';
 import { SetPercentCommand } from '../commands/commands/set-percent.command';
 
-export const CurrencyMenuItem = (componentManager: ComponentManager) => {
-    const iconKey = 'icon-rmbSingle';
-    componentManager.register(iconKey, RmbSingle);
-    componentManager.register('MoreDownSingle', MoreDownSingle);
-
-    return (accessor: IAccessor) => {
-        return {
-            icon: iconKey,
-            id: SetCurrencyCommand.id,
-            title: 'sheet.numfmt.currency',
-            tooltip: 'sheet.numfmt.currency',
-            type: MenuItemType.BUTTON,
-            group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
-            positions: [MenuPosition.TOOLBAR_START],
-            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-            disabled$: getCurrentSheetDisabled$(accessor),
-        };
+export const CurrencyMenuItem = (accessor: IAccessor) => {
+    return {
+        icon: 'RmbSingle',
+        id: SetCurrencyCommand.id,
+        title: 'sheet.numfmt.currency',
+        tooltip: 'sheet.numfmt.currency',
+        type: MenuItemType.BUTTON,
+        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
+        positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getCurrentSheetDisabled$(accessor),
     };
 };
 
-export const AddDecimalMenuItem = (componentManager: ComponentManager) => {
-    const iconKey = 'icon-addDigitsSingle';
-    componentManager.register(iconKey, AddDigitsSingle);
-    return (accessor: IAccessor) => ({
-        icon: iconKey,
+export const AddDecimalMenuItem = (accessor: IAccessor) => {
+    return {
+        icon: 'AddDigitsSingle',
         id: AddDecimalCommand.id,
         title: 'sheet.numfmt.addDecimal',
         tooltip: 'sheet.numfmt.addDecimal',
@@ -71,13 +62,12 @@ export const AddDecimalMenuItem = (componentManager: ComponentManager) => {
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    });
+    };
 };
-export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
-    const iconKey = 'icon-reduceDigitsSingle';
-    componentManager.register(iconKey, ReduceDigitsSingle);
-    return (accessor: IAccessor) => ({
-        icon: iconKey,
+
+export const SubtractDecimalMenuItem = (accessor: IAccessor) => {
+    return {
+        icon: 'ReduceDigitsSingle',
         id: SubtractDecimalCommand.id,
         title: 'sheet.numfmt.subtractDecimal',
         tooltip: 'sheet.numfmt.subtractDecimal',
@@ -86,14 +76,12 @@ export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    });
+    };
 };
 
-export const PercentMenuItem = (componentManager: ComponentManager) => {
-    const iconKey = 'icon-PercentSingle';
-    componentManager.register(iconKey, PercentSingle);
-    return (accessor: IAccessor) => ({
-        icon: iconKey,
+export const PercentMenuItem = (accessor: IAccessor) => {
+    return {
+        icon: 'PercentSingle',
         id: SetPercentCommand.id,
         title: 'sheet.numfmt.percent',
         tooltip: 'sheet.numfmt.percent',
@@ -102,81 +90,73 @@ export const PercentMenuItem = (componentManager: ComponentManager) => {
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
-    });
+    };
 };
 
-export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
-    const moreTypeKey = 'sheet.numfmt.moreNumfmtType';
-    const optionsKey = 'sheet.numfmt.moreNumfmtType.options';
+export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => {
+    const numfmtService = accessor.get(INumfmtService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const commandService = accessor.get(ICommandService);
+    const localeService = accessor.get(LocaleService);
 
-    componentManager.register(moreTypeKey, MoreNumfmtType);
-    componentManager.register(optionsKey, Options);
-
-    return (_accessor: IAccessor) => {
-        const numfmtService = _accessor.get(INumfmtService);
-        const univerInstanceService = _accessor.get(IUniverInstanceService);
-        const commandService = _accessor.get(ICommandService);
-        const localeService = _accessor.get(LocaleService);
-
-        const selectionManagerService = _accessor.get(SelectionManagerService);
-        const value$ = deriveStateFromActiveSheet$(univerInstanceService, '', ({ workbook, worksheet }) => new Observable((subscribe) =>
-            merge(
-                selectionManagerService.selectionMoveEnd$,
-                new Observable<null>((commandSubscribe) => {
-                    const commandList = [RemoveNumfmtMutation.id, SetNumfmtMutation.id];
-                    const disposable = commandService.onCommandExecuted((commandInfo) => {
-                        if (commandList.includes(commandInfo.id)) {
-                            commandSubscribe.next(null);
-                        }
-                    });
-                    return () => disposable.dispose();
-                })
-            ).subscribe(() => {
-                const selections = selectionManagerService.getSelections();
-                if (selections && selections[0]) {
-                    const range = selections[0].range;
-                    const row = range.startRow;
-                    const col = range.startColumn;
-
-                    const numfmtValue = numfmtService.getValue(workbook.getUnitId(), worksheet.getSheetId(), row, col);
-
-                    const pattern = numfmtValue?.pattern;
-                    let value: string = localeService.t('sheet.numfmt.general');
-
-                    if (pattern) {
-                        const item = MENU_OPTIONS.filter((item) => typeof item === 'object' && item.pattern).find(
-                            (item) => isPatternEqualWithoutDecimal(pattern, (item as { pattern: string }).pattern)
-                        );
-                        if (item && typeof item === 'object' && item.pattern) {
-                            value = localeService.t(item.label);
-                        } else {
-                            value = localeService.t('sheet.numfmt.moreFmt');
-                        }
+    const selectionManagerService = accessor.get(SelectionManagerService);
+    const value$ = deriveStateFromActiveSheet$(univerInstanceService, '', ({ workbook, worksheet }) => new Observable((subscribe) =>
+        merge(
+            selectionManagerService.selectionMoveEnd$,
+            new Observable<null>((commandSubscribe) => {
+                const commandList = [RemoveNumfmtMutation.id, SetNumfmtMutation.id];
+                const disposable = commandService.onCommandExecuted((commandInfo) => {
+                    if (commandList.includes(commandInfo.id)) {
+                        commandSubscribe.next(null);
                     }
-
-                    subscribe.next(value);
-                }
+                });
+                return () => disposable.dispose();
             })
-        ));
+        ).subscribe(() => {
+            const selections = selectionManagerService.getSelections();
+            if (selections && selections[0]) {
+                const range = selections[0].range;
+                const row = range.startRow;
+                const col = range.startColumn;
 
-        return {
-            label: moreTypeKey,
-            id: OpenNumfmtPanelOperator.id,
-            tooltip: 'sheet.numfmt.title',
-            type: MenuItemType.SELECTOR,
-            group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
-            positions: [MenuPosition.TOOLBAR_START],
-            selections: [
-                {
-                    label: {
-                        name: optionsKey,
-                        hoverable: false,
-                    },
+                const numfmtValue = numfmtService.getValue(workbook.getUnitId(), worksheet.getSheetId(), row, col);
+
+                const pattern = numfmtValue?.pattern;
+                let value: string = localeService.t('sheet.numfmt.general');
+
+                if (pattern) {
+                    const item = MENU_OPTIONS.filter((item) => typeof item === 'object' && item.pattern).find(
+                        (item) => isPatternEqualWithoutDecimal(pattern, (item as { pattern: string }).pattern)
+                    );
+                    if (item && typeof item === 'object' && item.pattern) {
+                        value = localeService.t(item.label);
+                    } else {
+                        value = localeService.t('sheet.numfmt.moreFmt');
+                    }
+                }
+
+                subscribe.next(value);
+            }
+        })
+    ));
+
+    return {
+        label: MORE_NUMFMT_TYPE_KEY,
+        id: OpenNumfmtPanelOperator.id,
+        tooltip: 'sheet.numfmt.title',
+        type: MenuItemType.SELECTOR,
+        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
+        positions: [MenuPosition.TOOLBAR_START],
+        selections: [
+            {
+                label: {
+                    name: OPTIONS_KEY,
+                    hoverable: false,
                 },
-            ],
-            value$,
-            hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
-            disabled$: getCurrentSheetDisabled$(_accessor),
-        } as IMenuSelectorItem;
+            },
+        ],
+        value$,
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getCurrentSheetDisabled$(accessor),
     };
 };

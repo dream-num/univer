@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-filter-ui",
-    "version": "0.1.11",
+    "version": "0.1.12",
     "private": false,
     "description": "Univer Sheets Filter UI",
     "author": "DreamNum <developer@univer.ai>",
@@ -23,7 +23,8 @@
     ],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
@@ -43,6 +44,7 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
+            "./locale/*": "./lib/locale/*.json",
             "./lib/*": "./lib/*"
         }
     },
@@ -67,13 +69,13 @@
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "0.15.2",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "react-dom": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.45",
+        "@univerjs/icons": "^0.1.52",
         "rc-virtual-list": "^3.11.5"
     },
     "devDependencies": {
@@ -85,7 +87,7 @@
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "0.15.2",
         "clsx": "^2.1.1",
         "less": "^4.2.0",
         "react": "18.2.0",

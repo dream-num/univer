@@ -854,7 +854,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
         const unitId = this._docSkeleton.getViewModel().getDataModel().getUnitId();
-        const key = `${unitId}_${viewport.viewPortKey}`;
+        const key = `${unitId}_${viewport.viewportKey}`;
 
         if (this._viewPortObserverMap.has(key)) {
             return;

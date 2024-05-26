@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
-import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
-import type { Ctor, Dependency } from '@wendellhu/redi';
+import { LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
@@ -25,11 +24,11 @@ import { ArrayFormulaDisplayController } from './controllers/array-formula-displ
 import { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
 import { FormulaClipboardController } from './controllers/formula-clipboard.controller';
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
-import { FormulaUIController } from './controllers/formula-ui.controller';
+import type { IUniverSheetsFormulaConfig } from './controllers/formula-ui.controller';
+import { DefaultSheetFormulaConfig, FormulaUIController } from './controllers/formula-ui.controller';
 import { PromptController } from './controllers/prompt.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
-import { zhCN } from './locale';
 
 import { DescriptionService, IDescriptionService } from './services/description.service';
 import {
@@ -47,20 +46,18 @@ import { FormulaRenderController } from './controllers/formula-render.controller
 /**
  * The configuration of the formula UI plugin.
  */
-interface IFormulaUIConfig {
-    description: IFunctionInfo[];
-    function: Array<[Ctor<BaseFunction>, IFunctionNames]>;
-}
 export class UniverSheetsFormulaPlugin extends Plugin {
     static override pluginName = FORMULA_UI_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private _config: Partial<IFormulaUIConfig>,
+        private readonly _config: Partial<IUniverSheetsFormulaConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
+
+        this._config = Tools.deepMerge({}, DefaultSheetFormulaConfig, this._config);
     }
 
     override onStarting(): void {
@@ -68,10 +65,6 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     }
 
     _init(): void {
-        this._localeService.load({
-            zhCN,
-        });
-
         const dependencies: Dependency[] = [
             // services
             [IFormulaPromptService, { useClass: FormulaPromptService }],
@@ -88,7 +81,12 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [RegisterOtherFormulaService],
 
             // controllers
-            [FormulaUIController],
+            [
+                FormulaUIController,
+                {
+                    useFactory: () => this._injector.createInstance(FormulaUIController, this._config),
+                },
+            ],
             [PromptController],
             [FormulaAutoFillController],
             [FormulaClipboardController],

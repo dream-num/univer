@@ -42,7 +42,7 @@ export class DesktopUIController extends Disposable {
 
     bootstrapWorkbench(options: IWorkbenchOptions): void {
         this.disposeWithMe(
-            bootStrap(this._injector, options, (canvasElement, containerElement) => {
+            bootstrap(this._injector, options, (canvasElement, containerElement) => {
                 if (this._layoutService) {
                     this.disposeWithMe(this._layoutService.registerRootContainerElement(containerElement));
                     this.disposeWithMe(this._layoutService.registerCanvasElement(canvasElement as HTMLCanvasElement));
@@ -72,7 +72,7 @@ export class DesktopUIController extends Disposable {
     }
 }
 
-function bootStrap(
+function bootstrap(
     injector: Injector,
     options: IWorkbenchOptions,
     callback: (canvasEl: HTMLElement, containerElement: HTMLElement) => void

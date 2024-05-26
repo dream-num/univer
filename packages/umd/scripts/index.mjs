@@ -24,11 +24,74 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import lodash from 'lodash';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const nodeModulesPath = path.resolve(__dirname, '../node_modules');
+
+function generateUMDTemplate(code) {
+    return `(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof module === 'object' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.UniverUMD = root.UniverUMD || {};
+    Object.assign(root.UniverUMD, factory());
+  }
+}(typeof self !== 'undefined' ? self : this, function () {
+  var exports = ${code};
+  return exports;
+}));`;
+}
+
+async function generateLocale() {
+    const libs = [
+        '@univerjs/design',
+        '@univerjs/docs-ui',
+        '@univerjs/find-replace',
+        '@univerjs/sheets',
+        '@univerjs/sheets-ui',
+        '@univerjs/sheets-formula',
+        '@univerjs/sheets-data-validation',
+        '@univerjs/sheets-conditional-formatting-ui',
+        '@univerjs/sheets-zen-editor',
+        '@univerjs/ui',
+        '@univerjs/sheets-filter-ui',
+        '@univerjs/sheets-thread-comment',
+        '@univerjs/slides-ui',
+        '@univerjs/thread-comment-ui',
+        '@univerjs/sheets-numfmt',
+        '@univerjs/uniscript',
+    ];
+
+    const languages = ['en-US', 'ru-RU', 'zh-CN'];
+
+    const outputDir = path.resolve(__dirname, '../lib/locale');
+    if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    for (const lang of languages) {
+        let output = {};
+        for (const lib of libs) {
+            const file = path.resolve(nodeModulesPath, lib, `lib/locale/${lang}.json`);
+            if (!fs.existsSync(file)) {
+                throw new Error(`File not found: ${file}`);
+            }
+
+            const data = fs.readFileSync(file, 'utf-8');
+            output = lodash.merge(JSON.parse(data), output);
+        }
+        const result = generateUMDTemplate(`{
+            "${lang}": ${JSON.stringify(output)}
+        }`);
+
+        fs.writeFileSync(path.resolve(outputDir, `${lang}.js`), result, 'utf-8');
+    }
+};
 
 function buildCSS() {
     const libs = [
@@ -42,6 +105,7 @@ function buildCSS() {
         '@univerjs/sheets-data-validation',
         '@univerjs/sheets-conditional-formatting-ui',
         '@univerjs/sheets-filter-ui',
+        '@univerjs/thread-comment-ui',
         '@univerjs/slides-ui',
         '@univerjs/find-replace',
         '@univerjs/uniscript',
@@ -114,6 +178,9 @@ function buildJS() {
         '@univerjs/sheets-data-validation',
         '@univerjs/sheets-filter',
         '@univerjs/sheets-filter-ui',
+        '@univerjs/thread-comment',
+        '@univerjs/thread-comment-ui',
+        '@univerjs/sheets-thread-comment',
         '@univerjs/slides',
         '@univerjs/slides-ui',
         '@univerjs/rpc',
@@ -145,7 +212,7 @@ function generateOutput(filename, output) {
     fs.writeFileSync(outputFile, output, 'utf-8');
 }
 
-function main() {
+async function main() {
     generateOutput('univer.css', buildCSS());
 
     const outputJS = buildJS();
@@ -161,6 +228,8 @@ function main() {
         rxjs: false,
     });
     generateOutput('univer.slim.umd.js', `${slimLib}\n${outputJS}`);
+
+    await generateLocale();
 
     // eslint-disable-next-line no-console
     console.log('\u001B[32m[@univerjs/umd] Build completed.');

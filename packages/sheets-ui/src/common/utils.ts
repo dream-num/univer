@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IPosition, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { ObjectMatrix } from '@univerjs/core';
 import { Vector2 } from '@univerjs/engine-render';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { ISetRangeValuesMutationParams, ISheetLocation } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-import type { IBoundRectNoAngle, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { IBoundRectNoAngle, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
 import { VIEWPORT_KEY } from './keys';
 
 export function checkCellContentInRanges(worksheet: Worksheet, ranges: IRange[]): boolean {
@@ -105,8 +106,8 @@ export function getCellIndexByOffsetWithMerge(offsetX: number, offsetY: number, 
     const { scaleX, scaleY } = scene.getAncestorScale();
 
     const scrollXY = {
-        x: activeViewport.actualScrollX,
-        y: activeViewport.actualScrollY,
+        x: activeViewport.viewportScrollX,
+        y: activeViewport.viewportScrollY,
     };
 
     const cellPos = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
@@ -181,7 +182,7 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
     const freezeWidth = endSheetView.startX - startSheetView.startX;
     const freezeHeight = endSheetView.startY - startSheetView.startY;
 
-    const { top, left, actualScrollX, actualScrollY } = viewMain;
+    const { top, left, viewportScrollX: actualScrollX, viewportScrollY: actualScrollY } = viewMain;
     let offsetX: number;
     // viewMain or viewTop
     if (x > left) {
@@ -200,5 +201,68 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
     return {
         x: offsetX,
         y: offsetY,
+    };
+}
+
+export function getHoverCellPosition(currentRender: IRender, workbook: Workbook, worksheet: Worksheet, skeletonParam: ISheetSkeletonManagerParam, offsetX: number, offsetY: number) {
+    const { scene } = currentRender;
+
+    const { skeleton, sheetId, unitId } = skeletonParam;
+
+    const cellIndex = getCellIndexByOffsetWithMerge(offsetX, offsetY, scene, skeleton);
+
+    if (!cellIndex) {
+        return null;
+    }
+
+    const { row, col, mergeCell, actualCol, actualRow } = cellIndex;
+
+    const location: ISheetLocation = {
+        unitId,
+        subUnitId: sheetId,
+        workbook,
+        worksheet,
+        row: actualRow,
+        col: actualCol,
+    };
+
+    let anchorCell: IRange;
+
+    if (mergeCell) {
+        anchorCell = mergeCell;
+    } else {
+        anchorCell = {
+            startRow: row,
+            endRow: row,
+            startColumn: col,
+            endColumn: col,
+        };
+    }
+
+    const activeViewport = scene.getActiveViewportByCoord(
+        Vector2.FromArray([offsetX, offsetY])
+    );
+
+    if (!activeViewport) {
+        return;
+    }
+
+    const { scaleX, scaleY } = scene.getAncestorScale();
+
+    const scrollXY = {
+        x: activeViewport.viewportScrollX,
+        y: activeViewport.viewportScrollY,
+    };
+
+    const position: IPosition = {
+        startX: (skeleton.getOffsetByPositionX(anchorCell.startColumn - 1) - scrollXY.x) * scaleX,
+        endX: (skeleton.getOffsetByPositionX(anchorCell.endColumn) - scrollXY.x) * scaleX,
+        startY: (skeleton.getOffsetByPositionY(anchorCell.startRow - 1) - scrollXY.y) * scaleY,
+        endY: (skeleton.getOffsetByPositionY(anchorCell.endRow) - scrollXY.y) * scaleY,
+    };
+
+    return {
+        position,
+        location,
     };
 }

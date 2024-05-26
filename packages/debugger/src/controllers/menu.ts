@@ -220,7 +220,7 @@ export function SaveSnapshotSetEditableMenuItemFactory(accessor: IAccessor): IMe
 
 const UNIT_ITEM_MENU_ID = 'debugger.unit-menu-item';
 
-export function UnitMenuItemFactory(): IMenuSelectorItem {
+export function UnitMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: UNIT_ITEM_MENU_ID,
         title: 'Unit',
@@ -230,7 +230,7 @@ export function UnitMenuItemFactory(): IMenuSelectorItem {
     };
 }
 
-export function DisposeCurrentUnitMenuItemFactory(): IMenuButtonItem {
+export function DisposeCurrentUnitMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: DisposeCurrentUnitCommand.id,
         title: 'Dispose Current Unit',
@@ -241,7 +241,7 @@ export function DisposeCurrentUnitMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function CreateEmptySheetMenuItemFactory(): IMenuButtonItem {
+export function CreateEmptySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: CreateEmptySheetCommand.id,
         title: 'Create Another Sheet',

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/shared",
-    "version": "0.1.11",
+    "version": "0.1.12",
     "private": true,
     "description": "Some infrastructures for univerjs",
     "author": "DreamNum <developer@univer.ai>",
@@ -17,7 +17,7 @@
         "./vite": "./vite/index.js"
     },
     "dependencies": {
-        "@typescript-eslint/parser": "^7.9.0",
+        "@typescript-eslint/parser": "^7.10.0",
         "@vitejs/plugin-react": "^4.2.1",
         "@vitest/coverage-istanbul": "^1.6.0",
         "happy-dom": "13.3.8",

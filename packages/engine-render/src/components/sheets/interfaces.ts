@@ -25,6 +25,8 @@ import type {
 
 import type { BORDER_TYPE } from '../../basics/const';
 import type { DocumentSkeleton } from '../docs/layout/doc-skeleton';
+import type { Canvas } from '../../canvas';
+import type { UniverRenderingContext } from '../../context';
 
 export interface BorderCache {
     [key: string]: BorderCacheItem | {};
@@ -68,4 +70,40 @@ export interface IStylesCache {
 export enum ShowGridlinesState {
     OFF,
     ON,
+}
+
+export enum SHEET_VIEWPORT_KEY {
+    VIEW_MAIN = 'viewMain',
+    VIEW_MAIN_LEFT_TOP = 'viewMainLeftTop',
+    VIEW_MAIN_TOP = 'viewMainTop',
+    VIEW_MAIN_LEFT = 'viewMainLeft',
+
+    VIEW_ROW_TOP = 'viewRowTop',
+    VIEW_ROW_BOTTOM = 'viewRowBottom',
+    VIEW_COLUMN_LEFT = 'viewColumnLeft',
+    VIEW_COLUMN_RIGHT = 'viewColumnRight',
+    VIEW_LEFT_TOP = 'viewLeftTop',
+}
+
+export interface IPaintForRefresh {
+    cacheCanvas: Canvas;
+    cacheCtx: UniverRenderingContext;
+    mainCtx: UniverRenderingContext;
+    topOrigin: number;
+    leftOrigin: number;
+    bufferEdgeX: number;
+    bufferEdgeY: number;
+}
+export interface IPaintForScrolling {
+    cacheCanvas: Canvas;
+    cacheCtx: UniverRenderingContext;
+    mainCtx: UniverRenderingContext;
+    topOrigin: number;
+    leftOrigin: number;
+    bufferEdgeX: number;
+    bufferEdgeY: number;
+    rowHeaderWidth: number;
+    columnHeaderHeight: number;
+    scaleX: number;
+    scaleY: number;
 }

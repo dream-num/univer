@@ -23,6 +23,8 @@ import {
     RxDisposable,
 } from '@univerjs/core';
 import { SearchSingle16 } from '@univerjs/icons';
+import type {
+    MenuConfig } from '@univerjs/ui';
 import {
     ComponentManager,
     IDialogService,
@@ -51,6 +53,12 @@ import {
 } from './find-replace.shortcut';
 import { FindReplaceMenuItemFactory } from './find-replace.menu';
 
+export interface IUniverFindReplaceConfig {
+    menu: MenuConfig;
+}
+
+export const DefaultFindReplaceConfig = {};
+
 const FIND_REPLACE_DIALOG_ID = 'DESKTOP_FIND_REPLACE_DIALOG';
 
 const FIND_REPLACE_PANEL_WIDTH = 350;
@@ -60,6 +68,7 @@ const FIND_REPLACE_PANEL_TOP_PADDING = -90;
 @OnLifecycle(LifecycleStages.Rendered, FindReplaceController)
 export class FindReplaceController extends RxDisposable {
     constructor(
+        private readonly _config: Partial<IUniverFindReplaceConfig>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IMenuService private readonly _menuService: IMenuService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
@@ -102,7 +111,9 @@ export class FindReplaceController extends RxDisposable {
     }
 
     private _initUI(): void {
-        this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(FindReplaceMenuItemFactory)));
+        const { menu = {} } = this._config;
+
+        this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(FindReplaceMenuItemFactory), menu));
         this.disposeWithMe(this._componentManager.register('FindReplaceDialog', FindReplaceDialog));
         this.disposeWithMe(this._componentManager.register('SearchIcon', SearchSingle16));
 

@@ -277,6 +277,7 @@ export enum CustomRangeType {
     BOOKMARK,
     COMMENT,
     CUSTOM,
+    MENTION,
 }
 
 /**

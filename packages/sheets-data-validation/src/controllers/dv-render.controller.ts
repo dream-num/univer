@@ -17,6 +17,7 @@
 import type { ICellDataForSheetInterceptor, ICellRenderContext, Workbook } from '@univerjs/core';
 import { DataValidationRenderMode, DataValidationStatus, DataValidationType, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, sequenceExecute, UniverInstanceType, WrapStrategy } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
+import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -34,6 +35,13 @@ import { ListRenderModeInput } from '../views/render-mode';
 import { DATA_VALIDATION_PANEL } from '../commands/operations/data-validation.operation';
 import { addDataValidationMenuFactory, dataValidationMenuFactory, openDataValidationMenuFactory } from './dv.menu';
 
+export interface IUniverSheetsDataValidation {
+    menu?: MenuConfig;
+}
+
+export const DefaultSheetsDataValidation = {
+};
+
 const INVALID_MARK = {
     tr: {
         size: 6,
@@ -47,6 +55,7 @@ const INVALID_MARK = {
 @OnLifecycle(LifecycleStages.Rendered, DataValidationRenderController)
 export class DataValidationRenderController extends RxDisposable {
     constructor(
+        private readonly _config: Partial<IUniverSheetsDataValidation>,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @IMenuService private _menuService: IMenuService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
@@ -62,6 +71,7 @@ export class DataValidationRenderController extends RxDisposable {
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
+
         this._init();
     }
 
@@ -75,15 +85,15 @@ export class DataValidationRenderController extends RxDisposable {
     }
 
     private _initMenu() {
+        const { menu = {} } = this._config;
+
         [
             dataValidationMenuFactory,
             openDataValidationMenuFactory,
             addDataValidationMenuFactory,
-        ].forEach((menu) => {
+        ].forEach((factory) => {
             this.disposeWithMe(
-                this._menuService.addMenuItem(
-                    menu(this._injector)
-                )
+                this._menuService.addMenuItem(factory(this._injector), menu)
             );
         });
     }
@@ -206,6 +216,7 @@ export class DataValidationRenderController extends RxDisposable {
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
+                    priority: 200,
                     // eslint-disable-next-line max-lines-per-function, complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId } = pos;

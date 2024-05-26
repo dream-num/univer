@@ -24,7 +24,7 @@ import { editor } from 'monaco-editor';
 import React, { useCallback, useEffect, useRef } from 'react';
 
 import { ScriptEditorService } from '../../services/script-editor.service';
-import { UniscriptExecutionService } from '../../services/script-execution.service';
+import { IUniscriptExecutionService } from '../../services/script-execution.service';
 import styles from './index.module.less';
 
 export function ScriptEditorPanel() {
@@ -106,7 +106,7 @@ export function ScriptEditorPanel() {
 }
 
 function useExecution(monacoEditorRef: React.MutableRefObject<Nullable<editor.IStandaloneCodeEditor>>) {
-    const scriptService = useDependency(UniscriptExecutionService);
+    const scriptService = useDependency(IUniscriptExecutionService);
     const messageService = useDependency(IMessageService);
     const localeService = useDependency(LocaleService);
 

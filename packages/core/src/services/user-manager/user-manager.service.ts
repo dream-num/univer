@@ -15,12 +15,26 @@
  */
 
 import type { IUser } from '@univerjs/protocol';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 export class UserManagerService {
     private _model = new Map<string, IUser>();
     private _userChange$ = new Subject<{ type: 'add' | 'delete'; user: IUser } | { type: 'clear' }>();
     public userChange$ = this._userChange$.asObservable();
+
+    private _currentUser: IUser | null;
+    private _currentUser$ = new BehaviorSubject<IUser | null>(null);
+    public currentUser$ = this._currentUser$.asObservable();
+
+    getCurrentUser() {
+        return this._currentUser;
+    }
+
+    setCurrentUser(user: IUser) {
+        this._currentUser = user;
+        this.addUser(user);
+        this._currentUser$.next(user);
+    }
 
     addUser(user: IUser) {
         this._model.set(user.userID, user);

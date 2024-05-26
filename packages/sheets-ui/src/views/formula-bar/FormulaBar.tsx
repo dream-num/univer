@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, HorizontalAlign, ThemeService, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
 import { KeyCode, ProgressBar, TextEditor } from '@univerjs/ui';
@@ -40,6 +40,8 @@ export function FormulaBar() {
 
     const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
     const editorBridgeService = useDependency(IEditorBridgeService);
+    const themeService = useDependency(ThemeService);
+    const progressBarColor = themeService.getCurrentTheme().primaryColor;
 
     const INITIAL_SNAPSHOT = {
         id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -176,7 +178,7 @@ export function FormulaBar() {
                 </div>
             </div>
 
-            <ProgressBar />
+            <ProgressBar barColor={progressBarColor} />
         </div>
     );
 }

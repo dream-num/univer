@@ -56,7 +56,8 @@ export class HTTPHeaders {
             headers[key] = values.join(',');
         });
 
-        headers.Accept ??= 'application/json, text/plain, */*';
+        headers.accept ??= 'application/json, text/plain, */*';
+        headers['content-type'] ??= 'application/json;charset=UTF-8';
 
         return headers;
     }
@@ -80,14 +81,10 @@ export class HTTPHeaders {
     }
 
     private _handleHeadersConstructorProps(headers: IHeadersConstructorProps): void {
-        Object.keys(headers).forEach(([name, value]) => {
-            this._setHeader(name, value);
-        });
+        Object.entries(headers).forEach(([name, value]) => this._setHeader(name, value));
     }
 
     private _handleHeaders(headers: Headers): void {
-        headers.forEach((value, name) => {
-            this._setHeader(name, value);
-        });
+        headers.forEach((value, name) => this._setHeader(name, value));
     }
 }

@@ -16,13 +16,16 @@
 
 import type { Workbook, Worksheet } from '@univerjs/core';
 
-export interface ISheetLocation {
-    workbook: Workbook;
-    worksheet: Worksheet;
+export interface ISheetLocationBase {
     unitId: string;
     subUnitId: string;
     row: number;
     col: number;
+}
+
+export interface ISheetLocation extends ISheetLocationBase {
+    workbook: Workbook;
+    worksheet: Worksheet;
 }
 
 export interface ISheetRowLocation {

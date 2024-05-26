@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-import { Tools } from '@univerjs/core';
+import { Disposable, Tools } from '@univerjs/core';
+import type { IRectPopupProps } from '@univerjs/design';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
-export interface IPopup {
+export interface IPopup extends Pick<IRectPopupProps, 'closeOnSelfTarget' | 'direction' | 'excludeOutside' | 'onClickOutside' > {
     anchorRect: IBoundRectNoAngle;
     anchorRect$: Observable<IBoundRectNoAngle>;
     componentKey: string;
-    onClickOutside?: (e: MouseEvent) => void;
-    closeOnSelfTarget?: boolean;
-    excludeOutside?: HTMLElement[];
+
     unitId: string;
     subUnitId: string;
-    direction?: 'vertical' | 'horizontal';
+
     offset?: [number, number];
 }
 
@@ -42,37 +41,41 @@ export interface ICanvasPopupService {
     get popups(): [string, IPopup][];
 }
 
-export const ICanvasPopupService = createIdentifier<ICanvasPopupService>('univer.popup.service');
+export const ICanvasPopupService = createIdentifier<ICanvasPopupService>('ui.popup.service');
 
-export class CanvasPopupService implements ICanvasPopupService {
-    private _popupMap = new Map<string, IPopup>();
-    private _popups$ = new BehaviorSubject<[string, IPopup][]>([]);
+export class CanvasPopupService extends Disposable implements ICanvasPopupService {
+    private readonly _popupMap = new Map<string, IPopup>();
+    private readonly _popups$ = new BehaviorSubject<[string, IPopup][]>([]);
+    readonly popups$ = this._popups$.asObservable();
+    get popups() { return Array.from(this._popupMap.entries()); }
 
-    popups$ = this._popups$.asObservable();
-
-    get popups() {
-        return Array.from(this._popupMap.entries());
+    private _update() {
+        this._popups$.next(Array.from(this._popupMap.entries()));
     }
 
-    private _notice() {
-        this._popups$.next(Array.from(this._popupMap.entries()));
+    override dispose(): void {
+        super.dispose();
+
+        this._popups$.next([]);
+        this._popups$.complete();
+        this._popupMap.clear();
     }
 
     addPopup(item: IPopup): string {
         const id = Tools.generateRandomId();
         this._popupMap.set(id, item);
-        this._notice();
+        this._update();
         return id;
     }
 
     removePopup(id: string): void {
         if (this._popupMap.delete(id)) {
-            this._notice();
+            this._update();
         }
     }
 
     removeAll(): void {
         this._popupMap.clear();
-        this._notice();
+        this._update();
     }
 }

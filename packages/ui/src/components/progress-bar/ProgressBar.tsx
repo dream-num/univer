@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import { ThemeService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import type { IProgressStep } from '../../services/progress/progress.service';
 import { IProgressService } from '../../services/progress/progress.service';
 import styles from './index.module.less';
 
-export function ProgressBar() {
-    const themeService = useDependency(ThemeService);
+export interface IProgressBarProps {
+    barColor: string;
+}
+
+export function ProgressBar(props: IProgressBarProps) {
+    const { barColor } = props;
     const progressService = useDependency(IProgressService);
-    const barColor = themeService.getCurrentTheme().primaryColor;
+
     const [progress, setProgress] = useState(0);
     const [visible, setVisible] = useState(false);
 

@@ -66,7 +66,7 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-export function MoreFunctionsMenuItemFactory(): IMenuItem {
+export function MoreFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: MoreFunctionsOperation.id,
         title: 'formula.insert.more',

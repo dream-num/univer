@@ -808,8 +808,8 @@ export class SelectionRenderService implements ISelectionRenderService {
                     yCrossTime += 1;
                 }
 
-                const startKey = startViewport.viewPortKey;
-                const endKey = endViewport.viewPortKey;
+                const startKey = startViewport.viewportKey;
+                const endKey = endViewport.viewportKey;
 
                 if (startKey === VIEWPORT_KEY.VIEW_ROW_TOP) {
                     if (moveOffsetY < viewportMain.top && (selection?.endRow ?? 0) < (freeze?.startRow ?? 0)) {

@@ -20,6 +20,7 @@ import {
     BooleanNumber,
     CellValueType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
+    DEFAULT_STYLES,
     DocumentDataModel,
     extractPureTextFromCell,
     getColorStyle,
@@ -73,7 +74,7 @@ import {
     isRectIntersect,
     mergeInfoOffset,
 } from '../../basics/tools';
-import type { IBoundRectNoAngle, IViewportBound } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import { columnIterator } from '../docs/layout/tools';
 import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
@@ -218,6 +219,9 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _rowHeaderWidth = 0;
     private _columnHeaderHeight = 0;
 
+    /**
+     * skeletonData(row col range) of visible area
+     */
     private _rowColumnSegment: IRowColumnSegment = {
         startRow: -1,
         endRow: -1,
@@ -404,7 +408,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._marginTop = top;
     }
 
-    calculateSegment(bounds?: IViewportBound) {
+    calculateSegment(bounds?: IViewportInfo) {
         if (!this._worksheetData) {
             return;
         }
@@ -422,7 +426,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return true;
     }
 
-    calculateWithoutClearingCache(bounds?: IViewportBound) {
+    calculateWithoutClearingCache(bounds?: IViewportInfo) {
         if (!this.calculateSegment(bounds)) {
             return;
         }
@@ -436,7 +440,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this;
     }
 
-    calculate(bounds?: IViewportBound) {
+    calculate(bounds?: IViewportInfo) {
         this._resetCache();
 
         this.calculateWithoutClearingCache(bounds);
@@ -604,8 +608,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         return Math.max(rowHeader.width, widthByComputation);
     }
 
-    getRowColumnSegment(bounds?: IViewportBound) {
-        return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.viewBound);
+    getRowColumnSegment(bounds?: IViewportInfo) {
+        return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.cacheBound);
+        // return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.viewBound);
     }
 
     /**
@@ -1081,10 +1086,10 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         let fontString = 'document';
 
-        const textRotation: ITextRotation = { a: 0, v: BooleanNumber.FALSE };
-        const horizontalAlign: HorizontalAlign = HorizontalAlign.UNSPECIFIED;
-        const verticalAlign: VerticalAlign = VerticalAlign.UNSPECIFIED;
-        const wrapStrategy: WrapStrategy = WrapStrategy.UNSPECIFIED;
+        const textRotation: ITextRotation = DEFAULT_STYLES.tr;
+        const horizontalAlign: HorizontalAlign = DEFAULT_STYLES.ht;
+        const verticalAlign: VerticalAlign = DEFAULT_STYLES.vt;
+        const wrapStrategy: WrapStrategy = DEFAULT_STYLES.tb;
         const paddingData: IPaddingData = DEFAULT_PADDING_DATA;
 
         fontString = getFontStyleString({}, this._localService).fontCache;
@@ -1131,17 +1136,17 @@ export class SpreadsheetSkeleton extends Skeleton {
         const cellOtherConfig = this._getOtherStyle(style) as ICellOtherConfig;
 
         const textRotation: ITextRotation = ignoreTextRotation
-            ? { a: 0, v: BooleanNumber.FALSE }
-            : cellOtherConfig.textRotation || { a: 0, v: BooleanNumber.FALSE };
-        let horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || HorizontalAlign.UNSPECIFIED;
-        const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || VerticalAlign.UNSPECIFIED;
-        const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || WrapStrategy.UNSPECIFIED;
+            ? DEFAULT_STYLES.tr
+            : cellOtherConfig.textRotation || DEFAULT_STYLES.tr;
+        let horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || DEFAULT_STYLES.ht;
+        const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || DEFAULT_STYLES.vt;
+        const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || DEFAULT_STYLES.tb;
         const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
 
         if (cell.f && displayRawFormula) {
             // The formula does not detect horizontal alignment and rotation.
             documentModel = this._getDocumentDataByStyle(cell.f.toString(), {}, { verticalAlign });
-            horizontalAlign = HorizontalAlign.UNSPECIFIED;
+            horizontalAlign = DEFAULT_STYLES.ht;
         } else if (cell.p) {
             const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
             documentModel = this._updateConfigAndGetDocumentModel(
@@ -1377,8 +1382,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         const row_ed = searchArray(rowHeightAccumulation, Math.round(viewBound.bottom) - this.columnHeaderHeightAndMarginTop);
 
         if (row_st === -1 && row_ed === 0) {
-            dataset_row_st = -1;
-            dataset_row_ed = -1;
+            dataset_row_st = 0;
+            dataset_row_ed = 0;
         } else {
             if (row_st === -1) {
                 dataset_row_st = 0;
@@ -1399,8 +1404,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         const col_ed = searchArray(columnWidthAccumulation, Math.round(viewBound.right) - this.rowHeaderWidthAndMarginLeft);
 
         if (col_st === -1 && col_ed === 0) {
-            dataset_col_st = -1;
-            dataset_col_ed = -1;
+            dataset_col_st = 0;
+            dataset_col_ed = 0;
         } else {
             if (col_st === -1) {
                 dataset_col_st = 0;
@@ -1422,7 +1427,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             endRow: dataset_row_ed,
             startColumn: dataset_col_st,
             endColumn: dataset_col_ed,
-        };
+        } as IRange;
     }
 
     private _generateRowMatrixCache(

@@ -283,4 +283,30 @@ export class Rectangle {
 
         return result;
     }
+
+    static hasIntersectionBetweenTwoBounds(
+        rect1: {
+            left: number;
+            top: number;
+            right: number;
+            bottom: number;
+        },
+        rect2: {
+            left: number;
+            top: number;
+            right: number;
+            bottom: number;
+        }
+    ) {
+        if (
+            rect1.left > rect2.right || // rect1 在 rect2 右侧
+            rect1.right < rect2.left || // rect1 在 rect2 左侧
+            rect1.top > rect2.bottom || // rect1 在 rect2 下方
+            rect1.bottom < rect2.top // rect1 在 rect2 上方
+        ) {
+            return false;
+        }
+
+        return true;
+    }
 }

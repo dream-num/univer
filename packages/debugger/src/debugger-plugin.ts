@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { Plugin } from '@univerjs/core';
+import { Plugin, Tools } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { DebuggerController } from './controllers/debugger.controller';
+import type { IUniverDebuggerConfig } from './controllers/debugger.controller';
+import { DebuggerController, DefaultDebuggerConfig } from './controllers/debugger.controller';
 import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
 import { E2EMemoryController } from './controllers/e2e/e2e-memory.controller';
-
-export interface IDebuggerPluginConfig { }
 
 export class UniverDebuggerPlugin extends Plugin {
     static override pluginName = 'DEBUGGER_PLUGIN';
@@ -30,10 +29,12 @@ export class UniverDebuggerPlugin extends Plugin {
     private _debuggerController!: DebuggerController;
 
     constructor(
-        _config: IDebuggerPluginConfig,
+        private readonly _config: Partial<IUniverDebuggerConfig> = {},
         @Inject(Injector) override readonly _injector: Injector
     ) {
         super();
+
+        this._config = Tools.deepMerge({}, DefaultDebuggerConfig, this._config);
     }
 
     override onStarting(injector: Injector): void {
@@ -44,7 +45,12 @@ export class UniverDebuggerPlugin extends Plugin {
     }
 
     override onRendered(): void {
-        this._injector.add([DebuggerController]);
+        this._injector.add([
+            DebuggerController,
+            {
+                useFactory: () => this._injector.createInstance(DebuggerController, this._config),
+            },
+        ]);
         this._debuggerController = this._injector.get(DebuggerController);
     }
 

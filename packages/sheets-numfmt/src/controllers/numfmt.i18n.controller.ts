@@ -17,16 +17,9 @@
 import { Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { enUS, zhCN } from '../locale';
-
 @OnLifecycle(LifecycleStages.Rendered, NumfmtI18nController)
 export class NumfmtI18nController extends Disposable {
     constructor(@Inject(LocaleService) private _localeService: LocaleService) {
         super();
-        this._initLocal();
     }
-
-    private _initLocal = () => {
-        this._localeService.load({ zhCN, enUS });
-    };
 }

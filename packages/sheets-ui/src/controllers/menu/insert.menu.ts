@@ -31,7 +31,7 @@ import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/inse
 import { SheetMenuPosition } from './menu';
 
 const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';
-export function ColInsertMenuItemFactory(): IMenuSelectorItem<string> {
+export function ColInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: COL_INSERT_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
@@ -41,8 +41,9 @@ export function ColInsertMenuItemFactory(): IMenuSelectorItem<string> {
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
     };
 }
+
 const ROW_INSERT_MENU_ID = 'sheet.menu.row-insert';
-export function RowInsertMenuItemFactory(): IMenuSelectorItem<string> {
+export function RowInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: ROW_INSERT_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
@@ -52,8 +53,9 @@ export function RowInsertMenuItemFactory(): IMenuSelectorItem<string> {
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
     };
 }
+
 const CELL_INSERT_MENU_ID = 'sheet.menu.cell-insert';
-export function CellInsertMenuItemFactory(): IMenuSelectorItem<string> {
+export function CellInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: CELL_INSERT_MENU_ID,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
@@ -83,6 +85,7 @@ export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
 
 export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const selectionManager = accessor.get(SelectionManagerService);
+
     return {
         id: InsertRowAfterCommand.id,
         type: MenuItemType.BUTTON,
@@ -99,6 +102,7 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
 
 export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const selectionManager = accessor.get(SelectionManagerService);
+
     return {
         id: InsertColBeforeCommand.id,
         type: MenuItemType.BUTTON,
@@ -115,6 +119,7 @@ export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
 
 export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const selectionManager = accessor.get(SelectionManagerService);
+
     return {
         id: InsertColAfterCommand.id,
         type: MenuItemType.BUTTON,
@@ -129,7 +134,7 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
     };
 }
 
-export function InsertRangeMoveRightMenuItemFactory(): IMenuButtonItem {
+export function InsertRangeMoveRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: InsertRangeMoveRightConfirmCommand.id,
         type: MenuItemType.BUTTON,
@@ -139,7 +144,7 @@ export function InsertRangeMoveRightMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function InsertRangeMoveDownMenuItemFactory(): IMenuButtonItem {
+export function InsertRangeMoveDownMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: InsertRangeMoveDownConfirmCommand.id,
         type: MenuItemType.BUTTON,

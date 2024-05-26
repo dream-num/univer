@@ -14,33 +14,34 @@
  * limitations under the License.
  */
 
-import React, { createContext } from 'react';
+import React, { createContext, useMemo } from 'react';
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
 
-import type { ILocale } from '../../locale';
-import { zhCN } from '../../locale';
+import type { ILocale } from '../../locale/interface';
 
 export interface IConfigProviderProps {
     children: React.ReactNode;
-    locale: ILocale;
+    locale?: ILocale['design'];
     mountContainer: HTMLElement | null;
 }
 
 export const ConfigContext = createContext<Omit<IConfigProviderProps, 'children'>>({
-    locale: zhCN,
     mountContainer: canUseDom() ? document.body : null,
 });
 
 export function ConfigProvider(props: IConfigProviderProps) {
     const { children, locale, mountContainer } = props;
 
-    // set default locale to enUS
-    let _locale: ILocale;
-    if (Object.prototype.hasOwnProperty.call(locale, 'design')) {
-        _locale = locale as ILocale;
-    } else {
-        _locale = zhCN;
-    }
+    const value = useMemo(() => {
+        return {
+            locale,
+            mountContainer,
+        };
+    }, [locale, mountContainer]);
 
-    return <ConfigContext.Provider value={{ locale: _locale, mountContainer }}>{children}</ConfigContext.Provider>;
+    return (
+        <ConfigContext.Provider value={value}>
+            {children}
+        </ConfigContext.Provider>
+    );
 }

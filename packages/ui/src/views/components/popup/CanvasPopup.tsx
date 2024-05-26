@@ -25,19 +25,23 @@ import type { IPopup } from '../../../services/popup/canvas-popup.service';
 
 const SingleCanvasPopup = ({ popup, children }: { popup: IPopup; children?: React.ReactNode }) => {
     const anchorRect = useObservable(popup.anchorRect$, popup.anchorRect);
-    const rect: IBoundRectNoAngle = useMemo(() => {
-        const [x = 0, y = 0] = popup.offset ?? [];
+    const { bottom, left, right, top } = anchorRect;
+    const { offset } = popup;
+
+    // We add an offset to the anchor rect to make the popup offset with the anchor.
+    const rectWithOffset: IBoundRectNoAngle = useMemo(() => {
+        const [x = 0, y = 0] = offset ?? [];
         return {
-            left: anchorRect.left - x,
-            right: anchorRect.right + x,
-            top: anchorRect.top - y,
-            bottom: anchorRect.bottom + y,
+            left: left - x,
+            right: right + x,
+            top: top - y,
+            bottom: bottom + y,
         };
-    }, [anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, popup.offset]);
+    }, [bottom, left, right, top, offset]);
 
     return (
         <RectPopup
-            anchorRect={rect}
+            anchorRect={rectWithOffset}
             direction={popup.direction}
             onClickOutside={popup.onClickOutside}
             excludeOutside={popup.excludeOutside}
@@ -52,7 +56,6 @@ export function CanvasPopup() {
     const popupService = useDependency(ICanvasPopupService);
     const popups = useObservable(popupService.popups$, undefined, true);
     const componentManager = useDependency(ComponentManager);
-
     return popups.map((item) => {
         const [key, popup] = item;
         const Component = componentManager.get(popup.componentKey);

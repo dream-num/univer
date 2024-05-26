@@ -256,7 +256,6 @@ export { getInsertRangeMutations, getRemoveRangeMutations } from './commands/uti
 export { handleInsertRangeMutation } from './commands/utils/handle-range-mutation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
-export { enUS, zhCN, ruRU } from './locale';
 export { NumfmtService } from './services/numfmt/numfmt.service';
 export type { INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
 export { INumfmtService } from './services/numfmt/type';
@@ -287,7 +286,7 @@ export {
 } from './services/ref-range/util';
 export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
 export { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
-export type { ISheetLocation } from './services/sheet-interceptor/utils/interceptor';
+export type { ISheetLocation, ISheetLocationBase, ISheetRowLocation } from './services/sheet-interceptor/utils/interceptor';
 export { MergeCellController } from './controllers/merge-cell.controller';
 export { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperationFactory } from './commands/utils/handle-merge-operation';
 

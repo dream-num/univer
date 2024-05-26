@@ -47,7 +47,7 @@ pnpm install
 ### Start dev server
 
 ```shell
-pnpm dev:demo
+pnpm dev
 ```
 
 ### Architecture

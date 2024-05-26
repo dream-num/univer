@@ -30,7 +30,6 @@ export const CellLinkPopup = () => {
     }
     const { unitId, subUnitId, id } = currentPopup;
     const link = hyperLinkModel.getHyperLink(unitId, subUnitId, id);
-
     if (!link) {
         return null;
     }

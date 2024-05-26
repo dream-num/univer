@@ -174,7 +174,6 @@ export class HyperLinkModel {
         if (!position) {
             return undefined;
         }
-        positionMap.delete(id);
         return matrix.getValue(position.row, position.column);
     }
 

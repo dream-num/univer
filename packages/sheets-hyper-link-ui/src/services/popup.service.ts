@@ -19,20 +19,30 @@ import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 
 interface IHyperLinkPopup {
     unitId: string;
     subUnitId: string;
     id: string;
-    disposable: IDisposable;
+    disposable?: IDisposable;
+}
+
+interface IHyperLinkEditing {
+    unitId: string;
+    subUnitId: string;
+    row: number;
+    column: number;
 }
 
 export class SheetsHyperLinkPopupService {
     private _currentPopup: IHyperLinkPopup | null = null;
     private _currentPopup$ = new Subject<IHyperLinkPopup | null>();
     currentPopup$ = this._currentPopup$.asObservable();
+
+    private _currentEditing$ = new BehaviorSubject<IHyperLinkEditing | null>(null);
+    currentEditing$ = this._currentEditing$.asObservable();
 
     get currentPopup() {
         return this._currentPopup;
@@ -68,9 +78,17 @@ export class SheetsHyperLinkPopupService {
 
     hideCurrentPopup() {
         if (this._currentPopup) {
-            this._currentPopup.disposable.dispose();
+            this._currentPopup.disposable?.dispose();
             this._currentPopup = null;
             this._currentPopup$.next(null);
         }
+    }
+
+    startEditing(link: IHyperLinkEditing) {
+        this._currentEditing$.next(link);
+    }
+
+    endEditing() {
+        this._currentEditing$.next(null);
     }
 }

@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-export interface ICellLinkContent {
-    /**
-     * #gid=sheet1&range=A1
-     * sub sheet: #gid=sheet1
-     * namedRange: #rangeid=123
-     * http: https://baidu.com
-     * file: file://a.xlsx
-     */
-    payload: string;
-    display: string;
-}
-
-export interface ICellHyperLink extends ICellLinkContent {
-    id: string;
-    row: number;
-    column: number;
-}
+export default {
+    hyperLink: {
+        form: {
+            editTitle: '编辑链接',
+            addTitle: '插入链接',
+            label: '文本',
+            labelPlaceholder: '输入文本',
+            type: '类型',
+            link: '链接',
+            linkPlaceholder: '输入链接地址',
+            range: '单元格',
+            worksheet: '工作表',
+            definedName: '定义的名称',
+            ok: '确认',
+            cancel: '取消',
+        },
+        menu: {
+            add: '添加链接',
+        },
+    },
+};

@@ -18,13 +18,18 @@ import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
 import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import React from 'react';
 import { CreateCopySingle, EditRegionSingle, LinkSingle } from '@univerjs/icons';
+import { ICommandService } from '@univerjs/core';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
+import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
+import { OpenHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
 import styles from './index.module.less';
 
 export const CellLinkPopup = () => {
     const popupService = useDependency(SheetsHyperLinkPopupService);
     const hyperLinkModel = useDependency(HyperLinkModel);
+    const commandService = useDependency(ICommandService);
     const currentPopup = useObservable(popupService.currentPopup$, popupService.currentPopup);
+    const resolverService = useDependency(SheetsHyperLinkResolverService);
     if (!currentPopup) {
         return null;
     }
@@ -33,20 +38,42 @@ export const CellLinkPopup = () => {
     if (!link) {
         return null;
     }
+    const linkObj = resolverService.parseHyperLink(link.payload);
 
     return (
         <div className={styles.cellLink}>
             <div className={styles.cellLinkContent}>
-                {link.payload}
+                {linkObj.name}
             </div>
             <div className={styles.cellLinkOperations}>
-                <div className={styles.cellLinkOperation}>
+                <div
+                    className={styles.cellLinkOperation}
+                    onClick={() => {
+                        if (linkObj.type === 'inner') {
+                            const url = new URL(window.location.href);
+                            url.hash = linkObj.url.slice(1);
+                            navigator.clipboard.writeText(url.href);
+                        } else {
+                            navigator.clipboard.writeText(linkObj.url);
+                        }
+                    }}
+                >
                     <CreateCopySingle />
                 </div>
-                <div className={styles.cellLinkOperation}>
+                <div
+                    className={styles.cellLinkOperation}
+                    onClick={() => {
+                        commandService.executeCommand(OpenHyperLinkSidebarOperation.id, {
+                            unitId,
+                            subUnitId,
+                            row: link.row,
+                            column: link.column,
+                        });
+                    }}
+                >
                     <EditRegionSingle />
                 </div>
-                <div className={styles.cellLinkOperation}>
+                <div className={styles.cellLinkOperation} onClick={linkObj.handler}>
                     <LinkSingle />
                 </div>
             </div>

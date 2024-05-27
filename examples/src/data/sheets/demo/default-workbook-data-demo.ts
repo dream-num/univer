@@ -181,8 +181,7 @@ const hyperLink = [{
     column: 12,
     id: '123',
     display: 'linkTest哈哈哈哈',
-    type: HyperLinkType.link,
-    payload: 'https://baidu.com',
+    payload: '#gid=sheet-0005&range=J5:M17',
 }] as ICellHyperLink[];
 
 export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {

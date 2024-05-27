@@ -14,20 +14,7 @@
  * limitations under the License.
  */
 
-export interface ICellLinkContent {
-    /**
-     * #gid=sheet1&range=A1
-     * sub sheet: #gid=sheet1
-     * namedRange: #rangeid=123
-     * http: https://baidu.com
-     * file: file://a.xlsx
-     */
-    payload: string;
-    display: string;
-}
+import zhCN from './zh-CN';
+import enUS from './en-US';
 
-export interface ICellHyperLink extends ICellLinkContent {
-    id: string;
-    row: number;
-    column: number;
-}
+export { zhCN, enUS };

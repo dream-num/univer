@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-export interface ICellLinkContent {
-    /**
-     * #gid=sheet1&range=A1
-     * sub sheet: #gid=sheet1
-     * namedRange: #rangeid=123
-     * http: https://baidu.com
-     * file: file://a.xlsx
-     */
-    payload: string;
-    display: string;
-}
-
-export interface ICellHyperLink extends ICellLinkContent {
-    id: string;
-    row: number;
-    column: number;
-}
+export default {
+    hyperLink: {
+        form: {
+            editTitle: 'Edit Link',
+            addTitle: 'Insert Link',
+            label: 'Label',
+            type: 'Type',
+            link: 'Link',
+            linkPlaceholder: 'Place text link',
+            range: 'Range',
+            worksheet: 'Worksheet',
+            definedName: 'Defined Name',
+            ok: 'OK',
+            cancel: 'Cancel',
+        },
+        menu: {
+            add: 'Insert Link',
+        },
+    },
+};

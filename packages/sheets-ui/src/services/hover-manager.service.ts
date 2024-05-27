@@ -42,7 +42,7 @@ export class HoverManagerService extends Disposable {
         )
     )));
 
-    currentCellDebounce$ = this.currentCell$.pipe(debounceTime(300));
+    currentCellDebounce$ = this.currentCell$.pipe(debounceTime(100));
 
     // Notify when mouse position changes
     currentPosition$ = this._currentCell$.asObservable();

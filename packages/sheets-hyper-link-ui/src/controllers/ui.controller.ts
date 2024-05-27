@@ -14,26 +14,64 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ComponentManager } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
+import { Disposable, ICommandService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import type { MenuConfig } from '@univerjs/ui';
+import { ComponentManager, IMenuService } from '@univerjs/ui';
+import { Inject, Injector } from '@wendellhu/redi';
 import { CellLinkPopup } from '../views/CellLinkPopup';
+import { CellLinkEdit } from '../views/CellLinkEdit';
+import { CloseHyperLinkSidebarOperation, InsertHyperLinkOperation, OpenHyperLinkSidebarOperation } from '../commands/operations/sidebar.operations';
+import { zhCN } from '../locales';
+import { insertLinkMenuFactory } from './menu';
+
+export interface IUniverSheetsHyperLinkUIConfig {
+    menu?: MenuConfig;
+}
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkUIController)
 export class SheetsHyperLinkUIController extends Disposable {
     constructor(
-        @Inject(ComponentManager) private _componentManager: ComponentManager
+        private _config: IUniverSheetsHyperLinkUIConfig | undefined,
+        @Inject(ComponentManager) private _componentManager: ComponentManager,
+        @ICommandService private _commandService: ICommandService,
+        @Inject(LocaleService) private _localeService: LocaleService,
+        @IMenuService private _menuService: IMenuService,
+        @Inject(Injector) private _injector: Injector
     ) {
         super();
 
         this._initComponents();
+        this._initCommands();
+        this._initLocale();
+        this._initMenus();
     }
 
     private _initComponents() {
         ([
             [CellLinkPopup, CellLinkPopup.componentKey],
+            [CellLinkEdit, CellLinkEdit.componentKey],
         ] as const).forEach(([comp, key]) => {
             this._componentManager.register(key, comp);
         });
+    }
+
+    private _initCommands() {
+        [
+            OpenHyperLinkSidebarOperation,
+            CloseHyperLinkSidebarOperation,
+            InsertHyperLinkOperation,
+        ].forEach((command) => {
+            this._commandService.registerCommand(command);
+        });
+    }
+
+    private _initLocale() {
+        this._localeService.load({
+            zhCN,
+        });
+    }
+
+    private _initMenus() {
+        this._menuService.addMenuItem(insertLinkMenuFactory(this._injector), this._config?.menu ?? {});
     }
 }

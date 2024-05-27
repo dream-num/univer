@@ -1378,6 +1378,10 @@ importers:
         version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
   packages/sheets-hyper-link-ui:
+    dependencies:
+      '@univerjs/sheets-hyper-link':
+        specifier: workspace:*
+        version: link:../sheets-hyper-link
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1397,9 +1401,6 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-hyper-link':
-        specifier: workspace:*
-        version: link:../sheets-hyper-link
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui

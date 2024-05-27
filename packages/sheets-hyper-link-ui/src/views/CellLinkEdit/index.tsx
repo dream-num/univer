@@ -25,6 +25,7 @@ import { AddHyperLinkCommand, HyperLinkModel, UpdateHyperLinkCommand } from '@un
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
+import styles from './index.module.less';
 
 enum LinkType {
     link = 'link',
@@ -46,6 +47,7 @@ export const CellLinkEdit = () => {
     const hyperLinkModel = useDependency(HyperLinkModel);
     const resolverService = useDependency(SheetsHyperLinkResolverService);
     const commandService = useDependency(ICommandService);
+    const [showError, setShowError] = useState(false);
 
     useEffect(() => {
         if (editing) {
@@ -163,7 +165,10 @@ export const CellLinkEdit = () => {
 
     return (
         <div>
-            <FormLayout label={localeService.t('hyperLink.form.label')}>
+            <FormLayout
+                label={localeService.t('hyperLink.form.label')}
+                error={showError && !display ? localeService.t('hyperLink.form.inputError') : ''}
+            >
                 <Input value={display} onChange={setDisplay} placeholder={localeService.t('hyperLink.form.labelPlaceholder')} />
             </FormLayout>
             <FormLayout label={localeService.t('hyperLink.form.type')}>
@@ -177,12 +182,12 @@ export const CellLinkEdit = () => {
                 />
             </FormLayout>
             {type === LinkType.link && (
-                <FormLayout>
+                <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.inputError') : ''}>
                     <Input value={payload} onChange={setPayload} placeholder={localeService.t('hyperLink.form.linkPlaceholder')} />
                 </FormLayout>
             )}
             {type === LinkType.range && (
-                <FormLayout>
+                <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.inputError') : ''}>
                     <RangeSelector
                         id={createInternalEditorID('hyper-link-edit')}
                         isSingleChoice
@@ -192,16 +197,16 @@ export const CellLinkEdit = () => {
                 </FormLayout>
             )}
             {type === LinkType.sheet && (
-                <FormLayout>
+                <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.selectError') : ''}>
                     <Select options={sheetsOption} value={payload} onChange={setPayload} />
                 </FormLayout>
             )}
             {type === LinkType.definedName && (
-                <FormLayout>
+                <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.selectError') : ''}>
                     <Select options={definedNames} value={payload} onChange={setPayload} />
                 </FormLayout>
             )}
-            <div>
+            <div className={styles.cellLinkEditButtons}>
                 <Button
                     onClick={() => {
                         commandService.executeCommand(CloseHyperLinkSidebarOperation.id);
@@ -213,6 +218,10 @@ export const CellLinkEdit = () => {
                     type="primary"
                     style={{ marginLeft: 8 }}
                     onClick={async () => {
+                        if (!display || !payload) {
+                            setShowError(true);
+                            return;
+                        }
                         handleSubmit();
                     }}
                 >

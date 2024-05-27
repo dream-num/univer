@@ -29,6 +29,8 @@ export default {
             definedName: '定义的名称',
             ok: '确认',
             cancel: '取消',
+            inputError: '请输入',
+            selectError: '请选择',
         },
         menu: {
             add: '添加链接',

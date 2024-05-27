@@ -17,6 +17,7 @@
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { Plugin, UniverInstanceType } from '@univerjs/core';
+import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
 import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
 import { SheetsHyperLinkRenderController } from './controllers/render-controllers/render.controller';
@@ -29,18 +30,19 @@ import { SheetsHyperLinkUIController } from './controllers/ui.controller';
 
 const SHEETS_HYPER_LINK_UI_PLUGIN = 'SHEETS_HYPER_LINK_UI_PLUGIN';
 
-export class UniverSheetsHyperLinkUIPlugin extends Plugin {
+export class UniverSheetsHyperLinkUIPlugin extends UniverSheetsHyperLinkPlugin {
     static override pluginName: string = SHEETS_HYPER_LINK_UI_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
         private _config: IUniverSheetsHyperLinkUIConfig,
-        @Inject(Injector) protected _injector: Injector
+        @Inject(Injector) protected override _injector: Injector
     ) {
-        super();
+        super(_config, _injector);
     }
 
     override onStarting(injector: Injector): void {
+        super.onStarting(injector);
         const dependencies: Dependency[] = [
             [SheetsHyperLinkResolverService],
             [SheetsHyperLinkPopupService],

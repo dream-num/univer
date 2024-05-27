@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-    <a href="./LICENSE.txt">
+    <a href="./LICENSE">
         <img src="https://img.shields.io/github/license/dream-num/univer" alt="GitHub License" />
     </a>
     <a href="https://github.com/dream-num/univer/actions/workflows/build.yml">

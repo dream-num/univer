@@ -1382,9 +1382,15 @@ importers:
 
   packages/sheets-hyper-link-ui:
     dependencies:
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
       '@univerjs/sheets-hyper-link':
         specifier: workspace:*
         version: link:../sheets-hyper-link
+      react:
+        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
+        version: 18.2.0
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*

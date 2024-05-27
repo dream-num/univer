@@ -20,7 +20,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { Workbook } from '@univerjs/core';
 import { createInternalEditorID, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { RangeSelector, useObservable } from '@univerjs/ui';
-import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { AddHyperLinkCommand, HyperLinkModel, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
@@ -69,8 +69,15 @@ export const CellLinkEdit = () => {
                     }
 
                     if (params.range) {
+                        const sheetName = params.gid ?
+                            univerInstanceService
+                                .getUnit<Workbook>(editing.unitId)
+                                ?.getSheetBySheetId(params.gid)
+                                ?.getName()
+                            ?? ''
+                            : '';
                         setType(LinkType.range);
-                        setPayload(params.range);
+                        setPayload(serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(params.range).range));
                         return;
                     }
 
@@ -88,7 +95,7 @@ export const CellLinkEdit = () => {
         setPayload('');
         setDisplay('');
         setId('');
-    }, [editing, hyperLinkModel, resolverService]);
+    }, [editing, hyperLinkModel, resolverService, univerInstanceService]);
 
     const linkTypeOptions = [
         {

@@ -88,7 +88,7 @@ export class SheetsHyperLinkResolverService {
     }
 
     parseHyperLink(urlStr: string) {
-        if (urlStr.startsWith('#')) {
+        if (urlStr?.startsWith('#')) {
             const search = new URLSearchParams(urlStr.slice(1));
             // range, gid, rangeid
             const searchObj: ISheetUrlParams = {

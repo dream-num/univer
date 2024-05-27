@@ -58,13 +58,11 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/protocol": "^0.1.32",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": ">=0.12.13",
+        "@wendellhu/redi": "0.15.2",
         "rxjs": ">=7.0.0"
     },
-    "dependencies": {
-    },
+    "dependencies": {},
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/protocol": "^0.1.32",

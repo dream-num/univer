@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { Plugin, UniverInstanceType } from '@univerjs/core';
+import { UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
 import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';

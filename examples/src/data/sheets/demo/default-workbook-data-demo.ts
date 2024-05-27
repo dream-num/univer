@@ -19,7 +19,6 @@ import { BooleanNumber, DataValidationErrorStyle, DataValidationOperator, DataVa
 
 import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
 import type { ICellHyperLink } from '@univerjs/sheets-hyper-link/types/interfaces/i-hyper-link.js';
-import { HyperLinkType } from '@univerjs/sheets-hyper-link/types/enums/hyper-link-type.js';
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
 const richTextDemo: IDocumentData = {

@@ -16,7 +16,7 @@
 
 import type { IRange, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { NORMAL_SELECTION_PLUGIN_NAME, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 
@@ -31,7 +31,7 @@ export class SheetsHyperLinkResolverService {
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @ICommandService private _commandService: ICommandService,
         @IDefinedNamesService private _definedNamesService: IDefinedNamesService
-    ) {}
+    ) { }
 
     private _getURLName(params: ISheetUrlParams) {
         const { gid, range, rangeid } = params;

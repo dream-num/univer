@@ -22,5 +22,7 @@ export { SheetsHyperLinkResolverService } from './services/resolver.service';
 export { SheetHyperLinkSetRangeController } from './controllers/set-range.controller';
 export { SheetsHyperLinkPopupController } from './controllers/popup.controller';
 export { SheetsHyperLinkUIController } from './controllers/ui.controller';
+export { SheetsHyperLinkAutoFillController } from './controllers/auto-fill.controller';
+export { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
 
 export { UniverSheetsHyperLinkUIPlugin } from './plugin';

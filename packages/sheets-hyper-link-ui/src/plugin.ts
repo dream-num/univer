@@ -27,8 +27,9 @@ import { SheetHyperLinkSetRangeController } from './controllers/set-range.contro
 import { SheetsHyperLinkPopupController } from './controllers/popup.controller';
 import type { IUniverSheetsHyperLinkUIConfig } from './controllers/ui.controller';
 import { SheetsHyperLinkUIController } from './controllers/ui.controller';
-
-const SHEETS_HYPER_LINK_UI_PLUGIN = 'SHEETS_HYPER_LINK_UI_PLUGIN';
+import { SHEETS_HYPER_LINK_UI_PLUGIN } from './types/const';
+import { SheetsHyperLinkAutoFillController } from './controllers/auto-fill.controller';
+import { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
 
 export class UniverSheetsHyperLinkUIPlugin extends UniverSheetsHyperLinkPlugin {
     static override pluginName: string = SHEETS_HYPER_LINK_UI_PLUGIN;
@@ -58,6 +59,8 @@ export class UniverSheetsHyperLinkUIPlugin extends UniverSheetsHyperLinkPlugin {
                     useFactory: () => this._injector.createInstance(SheetsHyperLinkUIController, this._config),
                 },
             ],
+            [SheetsHyperLinkAutoFillController],
+            [SheetsHyperLinkCopyPasteController],
         ];
 
         dependencies.forEach((dep) => {

@@ -81,6 +81,7 @@ export class DataValidationCopyPasteController extends Disposable {
         });
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _generateMutations(
         pastedRange: IDiscreteRange,
         copyInfo: {

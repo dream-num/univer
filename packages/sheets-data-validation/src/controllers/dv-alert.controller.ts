@@ -39,7 +39,7 @@ export class DataValidationAlertController extends Disposable {
     }
 
     private _initCellAlertPopup() {
-        this.disposeWithMe(this._hoverManagerService.currentCell$.subscribe((cellPos) => {
+        this.disposeWithMe(this._hoverManagerService.currentCellDebounce$.subscribe((cellPos) => {
             if (cellPos) {
                 const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 const worksheet = workbook.getActiveSheet();

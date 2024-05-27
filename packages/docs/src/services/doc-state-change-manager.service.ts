@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable, TextXAction } from '@univerjs/core';
-import { ICommandService, IUndoRedoService, IUniverInstanceService, RedoCommandId, RxDisposable, TextX, UndoCommandId } from '@univerjs/core';
+import type { JSONXActions, Nullable } from '@univerjs/core';
+import { ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, RedoCommandId, RxDisposable, UndoCommandId } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
@@ -23,13 +23,14 @@ import type { IRichTextEditingMutationParams } from '../commands/mutations/core-
 import { DeleteCommand, InsertCommand } from '../commands/commands/core-editing.command';
 
 interface IDocChangeState {
-    actions: TextXAction[];
+    actions: JSONXActions;
     textRanges: Nullable<ITextRangeWithStyle[]>;
 }
 
 export interface IDocStateChangeParams {
     commandId: string;
     unitId: string;
+    segmentId?: string;
     trigger: Nullable<string>;
     redoState: IDocChangeState;
     undoState: IDocChangeState;
@@ -133,14 +134,14 @@ export class DocStateChangeManagerService extends RxDisposable {
 
         const redoParams: IRichTextEditingMutationParams = {
             unitId,
-            actions: cacheStates.reduce((acc, cur) => TextX.compose(acc, cur.redoState.actions), [] as TextXAction[]),
+            actions: cacheStates.reduce((acc, cur) => JSONX.compose(acc, cur.redoState.actions), null as JSONXActions),
             textRanges: lastState.redoState.textRanges,
         };
 
         const undoParams: IRichTextEditingMutationParams = {
             unitId,
             // Always need to put undoParams after redoParams, because `reverse` will change the `cacheStates` order.
-            actions: cacheStates.reverse().reduce((acc, cur) => TextX.compose(acc, cur.undoState.actions), [] as TextXAction[]),
+            actions: cacheStates.reverse().reduce((acc, cur) => JSONX.compose(acc, cur.undoState.actions), null as JSONXActions),
             textRanges: firstState.undoState.textRanges,
         };
 

@@ -213,6 +213,7 @@ export function handleJsonToDom(p: IDocumentData): string {
  * @returns
  */
 
+// eslint-disable-next-line max-lines-per-function
 export function handleStyleToString(style: IStyleData, isCell: boolean = false) {
     let str = '';
     const styleMap = new Map([

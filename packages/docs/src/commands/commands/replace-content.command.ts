@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, IDocumentBody, IMutationInfo } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, TextX, TextXActionType } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
@@ -117,6 +117,7 @@ function getMutationParams(unitId: string, segmentId: string, prevBody: IDocumen
     };
 
     const textX = new TextX();
+    const jsonX = JSONX.getInstance();
 
     const deleteLen = prevBody?.dataStream.length - 2;
     if (deleteLen > 0) {
@@ -138,7 +139,7 @@ function getMutationParams(unitId: string, segmentId: string, prevBody: IDocumen
         });
     }
 
-    doMutation.params.actions = textX.serialize();
+    doMutation.params.actions = jsonX.editOp(textX.serialize());
 
     return doMutation;
 }

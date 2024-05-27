@@ -29,11 +29,11 @@ export const RemoveDrawingMutation: IMutation<ISeachDrawingMutation> = {
             return false;
         }
 
-        let drawings = univerdoc.snapshot.drawings;
+        let drawings = univerdoc.getSnapshot().drawings;
 
         if (drawings == null) {
             drawings = {};
-            univerdoc.snapshot.drawings = drawings;
+            univerdoc.getSnapshot().drawings = drawings;
         }
 
         delete drawings[params.objectId];

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { TextX } from '@univerjs/core';
-import type { Nullable, TextXAction } from '@univerjs/core';
+import { JSONX } from '@univerjs/core';
+import type { JSONXActions, Nullable } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 
@@ -73,16 +73,16 @@ export class IMEInputManagerService implements IDisposable {
         const undoMutationParams: IRichTextEditingMutationParams = {
             unitId,
             actions: this._undoMutationParamsCache.reverse().reduce((acc, cur) => {
-                return TextX.compose(acc, cur.actions);
-            }, [] as TextXAction[]),
+                return JSONX.compose(acc, cur.actions);
+            }, null as JSONXActions),
             textRanges: [], // Add empty array, will never use, just fix type error
         };
 
         const redoMutationParams: IRichTextEditingMutationParams = {
             unitId,
             actions: this._redoMutationParamsCache.reduce((acc, cur) => {
-                return TextX.compose(acc, cur.actions);
-            }, [] as TextXAction[]),
+                return JSONX.compose(acc, cur.actions);
+            }, null as JSONXActions),
             textRanges: [], // Add empty array, will never use, just fix type error
         };
 

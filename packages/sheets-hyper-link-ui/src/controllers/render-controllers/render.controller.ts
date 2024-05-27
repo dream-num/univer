@@ -51,10 +51,7 @@ export class SheetsHyperLinkRenderController extends Disposable {
                         if (link) {
                             return next({
                                 ...cell,
-                                // v: link.display,
-                                // t: CellValueType.STRING,
-                                // p: null,
-                                s: {
+                                interceptorStyle: {
                                     ul: {
                                         s: BooleanNumber.TRUE,
                                     },

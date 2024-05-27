@@ -62,6 +62,9 @@ const locale = {
             'not-between': '不介于',
             custom: '自定义',
         },
+        msg: {
+            'filter-header-forbidden': '无法移动筛选行头',
+        },
     },
 };
 

@@ -27,6 +27,7 @@ import {
     getDocsUpdateBody,
     ICommandService,
     IUniverInstanceService,
+    JSONX,
     MemoryCursor,
     TextX,
     TextXActionType,
@@ -82,6 +83,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         memoryCursor.reset();
 
         const textX = new TextX();
+        const jsonX = JSONX.getInstance();
 
         for (const selection of selections) {
             const { startOffset, endOffset, collapsed } = selection;
@@ -110,7 +112,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
-        doMutation.params.actions = textX.serialize();
+        doMutation.params.actions = jsonX.editOp(textX.serialize());
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -149,7 +151,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         }
 
         const documentModel = univerInstanceService.getUniverDocInstance(unitId);
-        const originBody = getDocsUpdateBody(documentModel!.snapshot, segmentId);
+        const originBody = getDocsUpdateBody(documentModel!.getSnapshot(), segmentId);
         if (originBody == null) {
             return false;
         }
@@ -168,6 +170,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         memoryCursor.reset();
 
         const textX = new TextX();
+        const jsonX = JSONX.getInstance();
 
         for (const selection of selections) {
             const { startOffset, endOffset, collapsed } = selection;
@@ -188,7 +191,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
-        doMutation.params.actions = textX.serialize();
+        doMutation.params.actions = jsonX.editOp(textX.serialize());
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

@@ -56,11 +56,11 @@ describe('Test inline format commands', () => {
         const univerInstanceService = get(IUniverInstanceService);
         const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC);
 
-        if (docsModel?.body?.textRuns == null) {
+        if (docsModel?.getBody()?.textRuns == null) {
             return;
         }
 
-        for (const textRun of docsModel.body?.textRuns) {
+        for (const textRun of docsModel.getBody()?.textRuns ?? []) {
             const { st, ed, ts = {} } = textRun;
 
             if (st <= pos && ed >= pos) {

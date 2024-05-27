@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-export * from './basics';
-export * from './docs-ui-plugin';
-export { DocCanvasView } from './views/doc-canvas-view';
-export * from './services';
-export { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
+import { describe, expect, it } from 'vitest';
+import { JSONX } from '../json-x';
+
+describe('Basic use of json-x', () => {
+    describe('Static methods', () => {
+        it('Should return true when the action is null', () => {
+            expect(JSONX.isNoop(null)).toBe(true);
+        });
+    });
+});

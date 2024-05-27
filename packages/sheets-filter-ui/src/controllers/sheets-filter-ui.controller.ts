@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { ICommandService, IContextService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IContextService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { ComponentManager, IMenuService, IMessageService, IShortcutService } from '@univerjs/ui';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -26,6 +26,8 @@ import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { FilterSingle } from '@univerjs/icons';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { SheetsFilterService } from '@univerjs/sheets-filter';
+import { MessageType } from '@univerjs/design';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../commands/sheets-filter.command';
 import { FilterPanel } from '../views/components/SheetsFilterPanel';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../commands/sheets-filter.operation';
@@ -53,11 +55,14 @@ export class SheetsFilterUIController extends RxDisposable {
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(SheetsFilterPanelService) private readonly _sheetsFilterPanelService: SheetsFilterPanelService,
         @Inject(SheetCanvasPopManagerService) private _sheetCanvasPopupService: SheetCanvasPopManagerService,
+        @Inject(SheetsFilterService) private _sheetsFilterService: SheetsFilterService,
+        @Inject(LocaleService) private _localeService: LocaleService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuService private readonly _menuService: IMenuService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @IMessageService private readonly _messageService: IMessageService
     ) {
         super();
 
@@ -120,6 +125,14 @@ export class SheetsFilterUIController extends RxDisposable {
                     this._closeFilterPopup();
                 }
             }));
+        this.disposeWithMe(this._sheetsFilterService.errorMsg$.subscribe((content) => {
+            if (content) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t(content),
+                });
+            }
+        }));
     }
 
     private _initRenderControllers(): void {

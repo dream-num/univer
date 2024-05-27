@@ -23,6 +23,7 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IUniverInstanceService,
+    JSONX,
     MemoryCursor,
     TextX,
     TextXActionType,
@@ -263,6 +264,7 @@ const COMMAND_ID_TO_FORMAT_KEY_MAP: Record<string, keyof IStyleBase> = {
 export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
     id: 'doc.command.set-inline-format',
     type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: ISetInlineFormatCommandParams) => {
         const { segmentId, value, preCommandId } = params;
         const commandService = accessor.get(ICommandService);
@@ -343,6 +345,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         };
 
         const textX = new TextX();
+        const jsonX = JSONX.getInstance();
 
         const memoryCursor = new MemoryCursor();
 
@@ -385,7 +388,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
-        doMutation.params.actions = textX.serialize();
+        doMutation.params.actions = jsonX.editOp(textX.serialize());
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { UpdateDocsAttributeType } from '../../shared/command-enum';
-import type { IDocumentBody } from '../../types/interfaces/i-document-data';
+import type { UpdateDocsAttributeType } from '../../../shared/command-enum';
+import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
 
 export enum TextXActionType {
     RETAIN = 'r',
@@ -30,6 +30,7 @@ export interface IRetainAction {
     t: TextXActionType.RETAIN;
     len: number;
     body?: IDocumentBody;
+    oldBody?: IDocumentBody;
     coverType?: UpdateDocsAttributeType;
     segmentId?: string;
 }
@@ -52,6 +53,7 @@ export interface IDeleteAction {
     t: TextXActionType.DELETE;
     len: number;
     line: number;
+    body?: IDocumentBody; // Add a body property to make this action invertible.
     segmentId?: string;
 }
 

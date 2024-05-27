@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, ICommandInfo } from '@univerjs/core';
-import { CommandType, ICommandService, TextX, TextXActionType } from '@univerjs/core';
+import { CommandType, ICommandService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
@@ -68,6 +68,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         };
 
         const textX = new TextX();
+        const jsonX = JSONX.getInstance();
 
         if (!previousActiveRange.collapsed && isCompositionStart) {
             textX.push(...getRetainAndDeleteFromReplace(previousActiveRange, segmentId));
@@ -98,7 +99,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             segmentId,
         });
 
-        doMutation.params!.actions = textX.serialize();
+        doMutation.params!.actions = jsonX.editOp(textX.serialize());
 
         doMutation.params!.noHistory = !isCompositionEnd;
 

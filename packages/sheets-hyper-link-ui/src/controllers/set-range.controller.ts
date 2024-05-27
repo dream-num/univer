@@ -145,7 +145,6 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                 id: link.id,
                                 payload: {
                                     payload: link.payload,
-                                    type: link.type,
                                     display: cellValue,
                                 },
                             };
@@ -155,7 +154,6 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                 id: link.id,
                                 payload: {
                                     payload: link.payload,
-                                    type: link.type,
                                     display: link.display,
                                 },
                             };

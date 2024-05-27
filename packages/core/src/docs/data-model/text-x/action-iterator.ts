@@ -15,8 +15,8 @@
  */
 
 import { Tools } from '../../../shared/tools';
-import type { TextXAction } from '../action-types';
-import { TextXActionType } from '../action-types';
+import type { TextXAction } from './action-types';
+import { TextXActionType } from './action-types';
 import { getBodySlice } from './utils';
 
 export class ActionIterator {

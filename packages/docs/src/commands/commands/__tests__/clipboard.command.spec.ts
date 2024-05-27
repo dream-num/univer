@@ -39,60 +39,64 @@ vi.mock('@univerjs/engine-render', async () => {
     };
 });
 
-const TEST_DOCUMENT_DATA_EN: IDocumentData = {
-    id: 'test-doc',
-    body: {
-        dataStream: 'What’s New in the 2022\r Gartner Hype Cycle for Emerging Technologies\r\n',
-        textRuns: [
-            {
-                st: 0,
-                ed: 22,
-                ts: {
-                    bl: BooleanNumber.FALSE,
-                    fs: 24,
-                    cl: {
-                        rgb: 'rgb(0, 40, 86)',
+function getDocumentData() {
+    const TEST_DOCUMENT_DATA_EN: IDocumentData = {
+        id: 'test-doc',
+        body: {
+            dataStream: 'What’s New in the 2022\r Gartner Hype Cycle for Emerging Technologies\r\n',
+            textRuns: [
+                {
+                    st: 0,
+                    ed: 22,
+                    ts: {
+                        bl: BooleanNumber.FALSE,
+                        fs: 24,
+                        cl: {
+                            rgb: 'rgb(0, 40, 86)',
+                        },
                     },
                 },
-            },
-            {
-                st: 23,
-                ed: 68,
-                ts: {
-                    bl: BooleanNumber.TRUE,
-                    fs: 24,
-                    cl: {
-                        rgb: 'rgb(0, 40, 86)',
+                {
+                    st: 23,
+                    ed: 68,
+                    ts: {
+                        bl: BooleanNumber.TRUE,
+                        fs: 24,
+                        cl: {
+                            rgb: 'rgb(0, 40, 86)',
+                        },
                     },
                 },
-            },
-        ],
-        paragraphs: [
-            {
-                startIndex: 22,
-            },
-            {
-                startIndex: 68,
-                paragraphStyle: {
-                    spaceAbove: 20,
-                    indentFirstLine: 20,
+            ],
+            paragraphs: [
+                {
+                    startIndex: 22,
                 },
-            },
-        ],
-        sectionBreaks: [],
-        customBlocks: [],
-    },
-    documentStyle: {
-        pageSize: {
-            width: 594.3,
-            height: 840.51,
+                {
+                    startIndex: 68,
+                    paragraphStyle: {
+                        spaceAbove: 20,
+                        indentFirstLine: 20,
+                    },
+                },
+            ],
+            sectionBreaks: [],
+            customBlocks: [],
         },
-        marginTop: 72,
-        marginBottom: 72,
-        marginRight: 90,
-        marginLeft: 90,
-    },
-};
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+
+    return TEST_DOCUMENT_DATA_EN;
+}
 
 describe('test cases in clipboard', () => {
     let univer: Univer;
@@ -103,11 +107,11 @@ describe('test cases in clipboard', () => {
         const univerInstanceService = get(IUniverInstanceService);
         const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC);
 
-        if (docsModel?.body?.textRuns == null) {
+        if (docsModel?.getBody()?.textRuns == null) {
             return;
         }
 
-        for (const textRun of docsModel.body?.textRuns) {
+        for (const textRun of docsModel.getBody()?.textRuns ?? []) {
             const { st, ed, ts = {} } = textRun;
 
             if (st <= pos && ed >= pos) {
@@ -120,11 +124,11 @@ describe('test cases in clipboard', () => {
         const univerInstanceService = get(IUniverInstanceService);
         const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC);
 
-        return docsModel?.body?.dataStream.slice(start, end);
+        return docsModel?.getBody()?.dataStream.slice(start, end);
     }
 
     beforeEach(() => {
-        const testBed = createCommandTestBed(TEST_DOCUMENT_DATA_EN);
+        const testBed = createCommandTestBed(getDocumentData());
         univer = testBed.univer;
         get = testBed.get;
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { deleteContent } from '../../../shared';
-import type { IDocumentBody } from '../../../types/interfaces';
+import { deleteContent } from '../../../../shared';
+import type { IDocumentBody } from '../../../../types/interfaces';
 import {
     deleteCustomBlocks,
     deleteCustomRanges,

@@ -43,11 +43,14 @@ export {
     type IDeleteAction,
     type IInsertAction,
     type IRetainAction,
-} from './docs/data-model/action-types';
+} from './docs/data-model/text-x/action-types';
 export { DataValidationRenderMode } from './types/enum/data-validation-render-mode';
 export { ActionIterator } from './docs/data-model/text-x/action-iterator';
 export { getBodySlice, composeBody } from './docs/data-model/text-x/utils';
 export { TextX } from './docs/data-model/text-x/text-x';
+export type { TPriority } from './docs/data-model/text-x/text-x';
+export { JSONX, JSON1 } from './docs/data-model/json-x/json-x';
+export type { JSONXActions, JSONXPath } from './docs/data-model/json-x/json-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
 export * from './observer';
 export { Plugin } from './services/plugin/plugin';
@@ -120,7 +123,7 @@ export { UserManagerService } from './services/user-manager/user-manager.service
 
 export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
 export { composeInterceptors, createInterceptorKey, InterceptorManager } from './common/interceptor';
-export { normalizeTextRuns } from './docs/data-model/apply-utils/common';
+export { normalizeTextRuns } from './docs/data-model/text-x/apply-utils/common';
 export type { PluginCtor } from './services/plugin/plugin';
 export { type DependencyOverride, mergeOverrideWithDependencies } from './services/plugin/plugin-override';
 export * from './types/const';

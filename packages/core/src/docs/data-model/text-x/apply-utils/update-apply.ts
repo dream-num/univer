@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../../../shared';
-import { Tools, UpdateDocsAttributeType } from '../../../shared';
+import type { Nullable } from '../../../../shared';
+import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import type {
     ICustomBlock,
     ICustomRange,
@@ -24,8 +24,8 @@ import type {
     ISectionBreak,
     ITable,
     ITextRun,
-} from '../../../types/interfaces';
-import { PresetListType } from '../preset-list-type';
+} from '../../../../types/interfaces';
+import { PresetListType } from '../../preset-list-type';
 import {
     deleteCustomBlocks,
     deleteCustomRanges,

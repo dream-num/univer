@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { ILogService } from '../services/log/log.service';
@@ -80,8 +81,10 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
 
     private _count: number;
 
+    private readonly _name$: BehaviorSubject<string>;
+    readonly name$: Observable<string>;
     get name(): string {
-        return this._snapshot.name;
+        return this._name$.getValue();
     }
 
     constructor(
@@ -107,6 +110,9 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         this._count = 1;
         this._worksheets = new Map<string, Worksheet>();
 
+        this._name$ = new BehaviorSubject(workbookData.name || '');
+        this.name$ = this._name$.asObservable();
+
         this._passWorksheetSnapshots();
     }
 
@@ -116,6 +122,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         this._sheetCreated$.complete();
         this._sheetDisposed$.complete();
         this._activeSheet$.complete();
+        this._name$.complete();
     }
 
     save(): IWorkbookData {
@@ -135,6 +142,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
     }
 
     setName(name: string): void {
+        this._name$.next(name);
         this._snapshot.name = name;
     }
 

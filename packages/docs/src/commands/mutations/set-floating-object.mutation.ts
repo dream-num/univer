@@ -48,7 +48,7 @@ export const SetDrawingTransformMutationFactory = (
         throw new Error('documentModel is null error!');
     }
 
-    const drawings = documentModel.snapshot.drawings;
+    const drawings = documentModel.getSnapshot().drawings;
 
     if (drawings == null) {
         return {
@@ -86,11 +86,11 @@ export const SetDrawingTransformMutation: IMutation<IDrawingTransformMutation> =
             return false;
         }
 
-        let drawings = univerdoc.snapshot.drawings;
+        let drawings = univerdoc.getSnapshot().drawings;
 
         if (drawings == null) {
             drawings = {};
-            univerdoc.snapshot.drawings = drawings;
+            univerdoc.getSnapshot().drawings = drawings;
         }
 
         const { objectId, size, positionH, positionV, angle } = params;
@@ -136,11 +136,11 @@ export const SetDrawingLayoutMutation: IMutation<IDrawingLayoutMutation> = {
             return false;
         }
 
-        let drawings = univerdoc.snapshot.drawings;
+        let drawings = univerdoc.getSnapshot().drawings;
 
         if (drawings == null) {
             drawings = {};
-            univerdoc.snapshot.drawings = drawings;
+            univerdoc.getSnapshot().drawings = drawings;
         }
 
         const { objectId, layoutType, behindDoc, start, lineTo, wrapText, distL, distR, distT, distB } = params;
@@ -188,11 +188,11 @@ export const SetDrawingInfoMutation: IMutation<IDrawingInfoMutation> = {
             return false;
         }
 
-        let drawings = univerdoc.snapshot.drawings;
+        let drawings = univerdoc.getSnapshot().drawings;
 
         if (drawings == null) {
             drawings = {};
-            univerdoc.snapshot.drawings = drawings;
+            univerdoc.getSnapshot().drawings = drawings;
         }
 
         const { objectId, title, description } = params;

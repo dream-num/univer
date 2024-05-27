@@ -707,6 +707,7 @@ export class AutoFillController extends Disposable {
     }
 
     // auto fill entry
+    // eslint-disable-next-line max-lines-per-function
     private _fillData(location: IAutoFillLocation, direction: Direction, applyType: APPLY_TYPE) {
         const undos: IMutationInfo[] = [];
         const redos: IMutationInfo[] = [];
@@ -856,9 +857,9 @@ export class AutoFillController extends Disposable {
             clearMutationParams
         );
 
-        const intercepted = this._sheetInterceptorService.onCommandExecute({ id: ClearSelectionContentCommand.id });
-        redos.push({ id: SetRangeValuesMutation.id, params: clearMutationParams }, ...intercepted.redos);
-        undos.push(...intercepted.undos, { id: SetRangeValuesMutation.id, params: undoClearMutationParams });
+        // const intercepted = this._sheetInterceptorService.onCommandExecute({ id: ClearSelectionContentCommand.id });
+        redos.push({ id: SetRangeValuesMutation.id, params: clearMutationParams });
+        undos.push({ id: SetRangeValuesMutation.id, params: undoClearMutationParams });
 
         // set range value
         const cellValue = new ObjectMatrix<ICellData>();

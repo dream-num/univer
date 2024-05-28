@@ -16,5 +16,27 @@
 
 export default {
     'sheets-sort': {
+        general: {
+            sort: 'Sort',
+            'sort-asc': 'Ascending',
+            'sort-desc': 'Descending',
+            'sort-custom': 'Custom Sort',
+            'sort-asc-ext': 'Expand Ascending',
+            'sort-desc-ext': 'Expand Descending',
+            'sort-asc-cur': 'Ascending',
+            'sort-desc-cur': 'Descending',
+        },
+        error: {
+            'merge-size': 'The selected range contains merged cells of different sizes, which cannot be sorted.',
+        },
+        dialog: {
+            'sort-reminder': 'Sort Reminder',
+            'sort-reminder-desc': 'Extend range sorting or keep range sorting?',
+            'sort-reminder-ext': 'Extend range sorting',
+            'sort-reminder-no': 'Keep range sorting',
+            'first-row-check': 'First row participates in sorting',
+            'add-condition': 'Add condition',
+
+        },
     },
 };

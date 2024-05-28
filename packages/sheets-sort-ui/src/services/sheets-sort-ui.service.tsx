@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook } from '@univerjs/core';
+import type { IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, ICommandService,
     ILogService,
     IUniverInstanceService,
     LifecycleStages,
+    LocaleService,
     OnLifecycle,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -28,12 +29,12 @@ import { Inject } from '@wendellhu/redi';
 import type { ISheetRangeLocation } from '@univerjs/sheets-ui';
 import { expandToContinuousRange } from '@univerjs/sheets-ui';
 
-import type { IOrderRule, ISortOption } from '@univerjs/sheets-sort';
+import type { ISortOption } from '@univerjs/sheets-sort';
 import { SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import React from 'react';
 import { IConfirmService } from '@univerjs/ui';
+import { BehaviorSubject } from 'rxjs';
 import { ExtendConfirm } from '../views/ExtendConfirm';
-import { CustomSortPanel } from '../views/CustomSortPanel';
 
 export enum EXTEND_TYPE {
     KEEP = 'keep',
@@ -41,14 +42,21 @@ export enum EXTEND_TYPE {
     CANCEL = 'cancel',
 }
 
+export interface ICustomSortState {
+    range: IRange;
+}
+
 @OnLifecycle(LifecycleStages.Ready, SheetsSortService)
 export class SheetsSortUIService extends Disposable {
+    private readonly _customSortState$ = new BehaviorSubject<Nullable<ICustomSortState>>(null);
+    readonly customSortState$ = this._customSortState$.asObservable();
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IConfirmService private readonly _confirmService: IConfirmService,
         @ILogService private readonly _logService: ILogService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(SheetsSortService) private readonly _sheetsSortService: SheetsSortService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService) {
         super();
     }
@@ -91,12 +99,12 @@ export class SheetsSortUIService extends Disposable {
             return false;
         }
         // open customize dialog
-        const sortOption: ISortOption | null = await this.showCustomSortPanel(location);
-        if (!sortOption) {
-            return false;
-        }
-        this._sheetsSortService.applySort(sortOption, location.unitId, location.subUnitId);
-        return true;
+        this.showCustomSortPanel(location);
+        // if (!sortOption) {
+        //     return false;
+        // }
+        // this._sheetsSortService.applySort(sortOption, location.unitId, location.subUnitId);
+        // return true;
     }
 
     private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetRangeLocation >> {
@@ -135,13 +143,11 @@ export class SheetsSortUIService extends Disposable {
         return await this._confirmService.confirm({
             id: 'sort-range-merge-error',
             title: {
-                title: 'Merge error',
+                title: this._localeService.t('sheets-sort.error.merge-size'),
             },
             children: {
                 title: <div>Different size merge-cell detected, sort aborted!</div>,
             },
-            confirmText: 'Confirm',
-            cancelText: 'Cancel',
         });
     }
 
@@ -150,7 +156,7 @@ export class SheetsSortUIService extends Disposable {
         const confirm = await this._confirmService.confirm({
             id: 'extend-sort-range-dialog',
             title: {
-                title: 'Extend or not',
+                title: this._localeService.t('sheets-sort.dialog.sort-reminder'),
             },
             children: {
                 title: (
@@ -161,8 +167,8 @@ export class SheetsSortUIService extends Disposable {
                     />
                 ),
             },
-            confirmText: 'Confirm',
-            cancelText: 'Cancel',
+            width: 400,
+
         });
         if (confirm) {
             return shouldExtend ? EXTEND_TYPE.EXTEND : EXTEND_TYPE.KEEP;
@@ -170,32 +176,34 @@ export class SheetsSortUIService extends Disposable {
         return EXTEND_TYPE.CANCEL;
     }
 
-    async showCustomSortPanel(location: ISheetRangeLocation): Promise<ISortOption | null> {
-        let list: IOrderRule[] = [];
-        const confirm = await this._confirmService.confirm({
-            id: 'custom-sort-panel',
-            title: {
-                title: 'Custom Sort',
-            },
-            children: {
-                title: (
-                    <CustomSortPanel
-                        range={location.range}
-                        onListChange={(value) => {
-                            list = value;
-                        }}
-                    />
-                ),
-            },
-            confirmText: 'Sort',
-            cancelText: 'Cancel',
-        });
-        if (confirm) {
-            return {
-                range: location.range,
-                orderRules: list,
-            };
-        }
-        return null;
+    showCustomSortPanel(location: ISheetRangeLocation) {
+        this._customSortState$.next({ range: location.range });
+
+        // let list: IOrderRule[] = [];
+        // const confirm = await this._confirmService.confirm({
+        //     id: 'custom-sort-panel',
+        //     title: {
+        //         title: 'Custom Sort',
+        //     },
+        //     children: {
+        //         title: (
+        //             <CustomSortPanel
+        //                 range={location.range}
+        //                 onListChange={(value) => {
+        //                     list = value;
+        //                 }}
+        //             />
+        //         ),
+        //     },
+        //     confirmText: 'Sort',
+        //     cancelText: 'Cancel',
+        // });
+        // if (confirm) {
+        //     return {
+        //         range: location.range,
+        //         orderRules: list,
+        //     };
+        // }
+        // return null;
     }
 }

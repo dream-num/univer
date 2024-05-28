@@ -18,6 +18,27 @@ import type enUS from './en-US';
 
 const zLocale: typeof enUS = {
     'sheets-sort': {
+        general: {
+            sort: '排序',
+            'sort-asc': '升序',
+            'sort-desc': '降序',
+            'sort-custom': '自定义排序',
+            'sort-asc-ext': '拓展区域升序',
+            'sort-desc-ext': '拓展区域降序',
+            'sort-asc-cur': '当前区域升序',
+            'sort-desc-cur': '拓展区域降序',
+        },
+        error: {
+            'merge-size': '所选区域的合并单元格的大小不一致，无法排序。',
+        },
+        dialog: {
+            'sort-reminder': '排序提醒',
+            'sort-reminder-desc': '当前仅会对选中区域进行排序，是否拓展排序范围？',
+            'sort-reminder-ext': '拓展排序范围',
+            'sort-reminder-no': '保持所选排序范围',
+            'first-row-check': '标题不参与排序',
+            'add-condition': '添加排序条件',
+        },
     },
 };
 

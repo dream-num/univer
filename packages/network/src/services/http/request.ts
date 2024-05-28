@@ -19,7 +19,7 @@ import { ApplicationJSONType } from './headers';
 import type { HTTPResponseType } from './http';
 import type { HTTPParams } from './params';
 
-export type HTTPRequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+export type HTTPRequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 export interface IHTTPRequestParams {
     // eslint-disable-next-line ts/no-explicit-any

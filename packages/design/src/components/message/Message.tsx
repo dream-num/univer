@@ -37,7 +37,9 @@ export interface IMessageProps {
     content: string;
 }
 
-export interface IMessageOptions extends IMessageProps {
+export interface IMessageOptions extends
+    Partial<Pick<IMessageProps, 'key' | 'type' >>,
+    Pick<IMessageProps, 'content'> {
     duration?: number;
 }
 

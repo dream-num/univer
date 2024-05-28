@@ -18,7 +18,7 @@ import type { IDocumentData, IWorkbookData } from '@univerjs/core';
 import { BooleanNumber, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
 
 import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
-import type { ICellHyperLink } from '@univerjs/sheets-hyper-link/types/interfaces/i-hyper-link.js';
+import type { ICellHyperLink } from '@univerjs/sheets-hyper-link';
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
 const richTextDemo: IDocumentData = {

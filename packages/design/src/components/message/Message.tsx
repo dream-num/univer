@@ -30,7 +30,7 @@ export enum MessageType {
     Info = 'info',
     Warning = 'warning',
     Error = 'error',
-    Load = 'load',
+    Loading = 'loading',
 }
 
 export interface IMessageProps {
@@ -52,7 +52,7 @@ const iconMap = {
     [MessageType.Info]: <WarningSingle className={styles.messageIconInfo} />,
     [MessageType.Warning]: <WarningSingle className={styles.messageIconWarning} />,
     [MessageType.Error]: <ErrorSingle className={styles.messageIconError} />,
-    [MessageType.Load]: <Loading className={styles.messageIconError} />,
+    [MessageType.Loading]: <Loading className={styles.messageIconError} />,
 };
 
 const MessageItem = (props: IMessageProps) => {
@@ -147,7 +147,7 @@ export class Message {
         return this.append(MessageType.Error, options);
     }
 
-    load(options: IMessageOptions): IDisposable {
-        return this.append(MessageType.Load, options);
+    loading(options: IMessageOptions): IDisposable {
+        return this.append(MessageType.Loading, options);
     }
 }

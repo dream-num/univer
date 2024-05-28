@@ -14,4 +14,14 @@
  * limitations under the License.
  */
 
-export { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './worksheet-permission/utils';
+import type { ICellDataForSheetInterceptor } from '@univerjs/core';
+import { UnitAction } from '@univerjs/protocol';
+
+export const defaultSheetActions = [
+    UnitAction.Edit,
+    UnitAction.Copy,
+];
+
+export type IWorksheetProtectionRenderCellData = ICellDataForSheetInterceptor & { hasWorksheetRule: boolean } & {
+    selectionProtection: { [UnitAction.View]: boolean; [UnitAction.Edit]: boolean }[];
+};

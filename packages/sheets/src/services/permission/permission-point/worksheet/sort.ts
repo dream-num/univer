@@ -14,4 +14,17 @@
  * limitations under the License.
  */
 
-export { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './worksheet-permission/utils';
+import type { IPermissionPoint } from '@univerjs/core';
+import { PermissionStatus } from '@univerjs/core';
+import { UnitAction, UnitObject } from '@univerjs/protocol';
+
+export class WorksheetSortPermission implements IPermissionPoint {
+    value = true;
+    type = UnitObject.Worksheet;
+    status = PermissionStatus.INIT;
+    id: string;
+    subType = UnitAction.Sort;
+    constructor(public unitId: string, public subUnitId: string) {
+        this.id = `${this.type}.${UnitAction.Sort}_${unitId}_${subUnitId}`;
+    }
+}

@@ -14,4 +14,19 @@
  * limitations under the License.
  */
 
-export { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './worksheet-permission/utils';
+import type { IPermissionPoint } from '@univerjs/core';
+import { PermissionStatus } from '@univerjs/core';
+import { UnitAction, UnitObject } from '@univerjs/protocol';
+
+export class WorkbookSharePermission implements IPermissionPoint {
+    id: string;
+    value = true;
+    type = UnitObject.Workbook;
+    status = PermissionStatus.INIT;
+    subType = UnitAction.Share;
+
+    constructor(public unitId: string) {
+        this.unitId = unitId;
+        this.id = `${this.type}.${UnitAction.Share}_${unitId}`;
+    }
+}

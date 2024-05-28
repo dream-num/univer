@@ -147,7 +147,6 @@ export class SheetsHyperLinkAutoFillController extends Disposable {
             onFillData: (location, direction, applyType) => {
                 if (
                     applyType === APPLY_TYPE.COPY ||
-                    applyType === APPLY_TYPE.ONLY_FORMAT ||
                     applyType === APPLY_TYPE.SERIES
                 ) {
                     return generalApplyFunc(location);

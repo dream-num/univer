@@ -50,10 +50,11 @@ export const CellLinkPopup = () => {
         return null;
     }
     const linkObj = resolverService.parseHyperLink(link.payload);
+    const isError = linkObj.type.indexOf('error') > -1;
 
     return (
         <div className={styles.cellLink}>
-            <div className={cs(styles.cellLinkContent, { [styles.cellLinkContentError]: linkObj.type.indexOf('error') > -1 })} onClick={linkObj.handler}>
+            <div className={cs(styles.cellLinkContent, { [styles.cellLinkContentError]: isError })} onClick={linkObj.handler}>
                 <div className={styles.cellLinkType}>
                     {iconsMap[linkObj.type]}
                 </div>
@@ -63,8 +64,11 @@ export const CellLinkPopup = () => {
             </div>
             <div className={styles.cellLinkOperations}>
                 <div
-                    className={styles.cellLinkOperation}
+                    className={cs(styles.cellLinkOperation, { [styles.cellLinkOperationError]: isError })}
                     onClick={() => {
+                        if (isError) {
+                            return;
+                        }
                         if (linkObj.type !== 'outer') {
                             const url = new URL(window.location.href);
                             url.hash = linkObj.url.slice(1);

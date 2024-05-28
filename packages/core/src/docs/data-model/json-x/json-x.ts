@@ -40,7 +40,7 @@ export interface ISubType {
 export { JSONOp as JSONXActions, Path as JSONXPath, json1 as JSON1 };
 
 export class JSONX {
-    static name = 'json-x';
+    // static name = 'json-x';
 
     static uri = 'https://github.com/dream-num/univer#json-x';
 

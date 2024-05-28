@@ -29,7 +29,9 @@ export class SheetHyperLinkUrlController extends Disposable {
 
     private _handleInitUrl() {
         const hash = location.hash;
-        const linkInfo = this._resolverService.parseHyperLink(hash);
-        linkInfo.handler();
+        if (hash) {
+            const linkInfo = this._resolverService.parseHyperLink(hash);
+            linkInfo.handler();
+        }
     }
 }

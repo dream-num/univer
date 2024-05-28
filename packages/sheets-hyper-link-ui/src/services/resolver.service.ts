@@ -80,6 +80,10 @@ export class SheetsHyperLinkResolverService {
             return;
         }
         const unitId = workbook.getUnitId();
+        if (rangeid) {
+            this.navigateToDefineName(unitId, rangeid);
+        }
+
         if (!gid) {
             return;
         }
@@ -87,10 +91,6 @@ export class SheetsHyperLinkResolverService {
         if (range) {
             const rangeInfo = deserializeRangeWithSheet(range);
             this.navigateToRange(unitId, gid, rangeInfo.range);
-        }
-
-        if (rangeid) {
-            this.navigateToDefineName(unitId, rangeid);
         }
 
         this.navigateToSheetById(unitId, gid);

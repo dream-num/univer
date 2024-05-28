@@ -29,8 +29,8 @@ import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBa
 import { SheetPermissionOpenDialogOperation } from './operation/sheet-permission-open-dialog.operation';
 import { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from './command/worksheet-protection.command';
 import { SheetPermissionPanelModel } from './service/sheet-permission-panel.model';
-import { SheetPermissionInterceptorController } from './controller/sheet-permission.interceptor.controller';
-import { SheetPermissionInitController } from './controller/sheet-permission.init.controller';
+import { SheetPermissionInterceptorRenderController } from './controller/sheet-permission-interceptor-render.controller';
+import { SheetPermissionInitController } from './controller/sheet-permission-init.controller';
 
 export class UniverSheetsPermissionUIPlugin extends Plugin {
     static override pluginName = UNIVER_SHEET_PERMISSION_PLUGIN_NAME;
@@ -99,7 +99,7 @@ export class UniverSheetsPermissionUIPlugin extends Plugin {
 
     private _registerRenderControllers(): void {
         ([
-            SheetPermissionInterceptorController,
+            SheetPermissionInterceptorRenderController,
             SheetPermissionInitController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));

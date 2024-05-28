@@ -20,11 +20,11 @@
 import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
 import { DisposableCollection, ICommandService, IPermissionService, IUniverInstanceService, LifecycleStages, LocaleService, ObjectMatrix, OnLifecycle, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, ISetRangeValuesCommandParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetNameMutationParams } from '@univerjs/sheets';
-import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SelectionManagerService, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetFilterPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
+import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SelectionManagerService, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetFilterPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
 
-import type { IRenderContext, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderController, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetPasteParams } from '@univerjs/sheets-ui';
 import { ApplyFormatPainterCommand, AutoFillCommand, HeaderMoveRenderController, HeaderResizeRenderController, IAutoFillService, ISelectionRenderService, ISheetClipboardService, SetCellEditVisibleOperation, SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand, SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
@@ -47,8 +47,8 @@ const SmartToggleSheetsFilterCommandId = 'sheet.command.smart-toggle-filter';
 
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetPermissionInterceptorController)
-export class SheetPermissionInterceptorController extends RxDisposable {
+@OnLifecycle(LifecycleStages.Rendered, SheetPermissionInterceptorRenderController)
+export class SheetPermissionInterceptorRenderController extends RxDisposable implements IRenderController {
     disposableCollection = new DisposableCollection();
 
     constructor(
@@ -318,6 +318,7 @@ export class SheetPermissionInterceptorController extends RxDisposable {
     }
 
     private _commandExecutedListener() {
+        // @ybzky todo If encounter problems with multiple instances later, you need to increase the unitId in command params.
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
                 this._getPermissionCheck(command.id, command?.params as ICheckPermissionCommandParams);
@@ -345,10 +346,11 @@ export class SheetPermissionInterceptorController extends RxDisposable {
     }
 
     private _permissionCheckWithInsertRangeMove(direction: 'top' | 'bottom' | 'left' | 'right') {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const unitId = workbook.getUnitId();
-        const worksheet = workbook?.getActiveSheet();
-        const subUnitId = worksheet.getSheetId();
+        const target = getSheetCommandTarget(this._univerInstanceService);
+        if (!target) {
+            return false;
+        }
+        const { worksheet, unitId, subUnitId } = target;
         const selectionRange = this._selectionManagerService.getLast()?.range;
         if (!selectionRange) {
             return false;
@@ -374,10 +376,11 @@ export class SheetPermissionInterceptorController extends RxDisposable {
     }
 
     private _permissionCheckWithFilter() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const unitId = workbook.getUnitId();
-        const worksheet = workbook?.getActiveSheet();
-        const subUnitId = worksheet.getSheetId();
+        const target = getSheetCommandTarget(this._univerInstanceService);
+        if (!target) {
+            return false;
+        }
+        const { unitId, subUnitId } = target;
         const filterRange = this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange();
         if (filterRange) {
             return this._permissionCheckWithRanges({
@@ -390,10 +393,11 @@ export class SheetPermissionInterceptorController extends RxDisposable {
     }
 
     private _permissionCheckByWorksheetCommand() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const unitId = workbook.getUnitId();
-        const worksheet = workbook?.getActiveSheet();
-        const subUnitId = worksheet.getSheetId();
+        const target = getSheetCommandTarget(this._univerInstanceService);
+        if (!target) {
+            return false;
+        }
+        const { unitId, subUnitId } = target;
         const worksheetRule = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
         const selectionRule = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
         if (worksheetRule || selectionRule) {
@@ -404,10 +408,11 @@ export class SheetPermissionInterceptorController extends RxDisposable {
     }
 
     private _permissionCheckWithoutRange(permissionTypes: IPermissionTypes) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook?.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const target = getSheetCommandTarget(this._univerInstanceService);
+        if (!target) {
+            return false;
+        }
+        const { worksheet, unitId, subUnitId } = target;
         const selection = this._selectionManagerService.getLast();
         const row = selection?.primary?.actualRow ?? 0;
         const col = selection?.primary?.actualColumn ?? 0;
@@ -454,8 +459,11 @@ export class SheetPermissionInterceptorController extends RxDisposable {
     }
 
     private _permissionCheckWithRanges(permissionTypes: IPermissionTypes, selectionRanges?: IRange[], unitId?: string, subUnitId?: string) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook?.getActiveSheet();
+        const target = getSheetCommandTarget(this._univerInstanceService);
+        if (!target) {
+            return false;
+        }
+        const { workbook, worksheet } = target;
         if (!unitId) {
             unitId = workbook.getUnitId();
         }
@@ -543,10 +551,11 @@ export class SheetPermissionInterceptorController extends RxDisposable {
     }
 
     private _permissionCheckByMoveCommand(params: IMoveRowsCommandParams | IMoveColsCommandParams) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook?.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const target = getSheetCommandTarget(this._univerInstanceService);
+        if (!target) {
+            return false;
+        }
+        const { worksheet, unitId, subUnitId } = target;
         const toRange = params.toRange;
         if (toRange.endRow === worksheet.getRowCount() - 1) {
             toRange.endColumn = toRange.startColumn;
@@ -587,10 +596,11 @@ export class SheetPermissionInterceptorController extends RxDisposable {
 
         const targetRange = { startRow, endRow, startColumn: startCol, endColumn: endCol };
 
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook?.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const target = getSheetCommandTarget(this._univerInstanceService);
+        if (!target) {
+            return false;
+        }
+        const { worksheet, unitId, subUnitId } = target;
 
         const permissionLapRanges = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((p, c) => {
             return [...p, ...c.ranges];
@@ -614,10 +624,11 @@ export class SheetPermissionInterceptorController extends RxDisposable {
     }
 
     private _permissionCheckByMoveRangeCommand(params: IMoveRangeCommandParams) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook?.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const target = getSheetCommandTarget(this._univerInstanceService);
+        if (!target) {
+            return false;
+        }
+        const { worksheet, unitId, subUnitId } = target;
         const toRange = params.toRange;
         const permissionLapRanges = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((p, c) => {
             return [...p, ...c.ranges];
@@ -657,10 +668,11 @@ export class SheetPermissionInterceptorController extends RxDisposable {
     private _initHeaderMovePermissionInterceptor() {
         this._headerMoveRenderController.interceptor.intercept(this._headerMoveRenderController.interceptor.getInterceptPoints().HEADER_MOVE_PERMISSION_CHECK, {
             handler: (defaultValue: Nullable<boolean>, selectionRange: IRange) => {
-                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                const worksheet = workbook.getActiveSheet();
-                const unitId = workbook.getUnitId();
-                const subUnitId = worksheet.getSheetId();
+                const target = getSheetCommandTarget(this._univerInstanceService);
+                if (!target) {
+                    return false;
+                }
+                const { worksheet, unitId, subUnitId } = target;
 
                 const workSheetEditPermission = this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false;
                 if (!workSheetEditPermission) {
@@ -698,11 +710,11 @@ export class SheetPermissionInterceptorController extends RxDisposable {
     private _initHeaderResizePermissionInterceptor() {
         this._headerResizeRenderController.interceptor.intercept(this._headerResizeRenderController.interceptor.getInterceptPoints().HEADER_RESIZE_PERMISSION_CHECK, {
             handler: (defaultValue: Nullable<boolean>, rangeParams: { row?: number; col?: number }) => {
-                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                const worksheet = workbook.getActiveSheet();
-
-                const unitId = workbook.getUnitId();
-                const subUnitId = worksheet.getSheetId();
+                const target = getSheetCommandTarget(this._univerInstanceService);
+                if (!target) {
+                    return false;
+                }
+                const { worksheet, unitId, subUnitId } = target;
 
                 const workSheetEditPermission = this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false;
                 if (!workSheetEditPermission) {
@@ -770,11 +782,11 @@ export class SheetPermissionInterceptorController extends RxDisposable {
     private _initRangeFillPermissionInterceptor() {
         this._selectionRenderService.interceptor.intercept(this._selectionRenderService.interceptor.getInterceptPoints().RANGE_FILL_PERMISSION_CHECK, {
             handler: (_: Nullable<boolean>, position: { x: number; y: number; skeleton: SpreadsheetSkeleton }) => {
-                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                const worksheet = workbook.getActiveSheet();
-
-                const unitId = workbook.getUnitId();
-                const subUnitId = worksheet.getSheetId();
+                const target = getSheetCommandTarget(this._univerInstanceService);
+                if (!target) {
+                    return false;
+                }
+                const { worksheet, unitId, subUnitId } = target;
 
                 const workSheetEditPermission = this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false;
                 if (!workSheetEditPermission) {
@@ -814,10 +826,11 @@ export class SheetPermissionInterceptorController extends RxDisposable {
     private _initRangeMovePermissionInterceptor() {
         this._selectionRenderService.interceptor.intercept(this._selectionRenderService.interceptor.getInterceptPoints().RANGE_MOVE_PERMISSION_CHECK, {
             handler: (_: Nullable<boolean>, _cellInfo: null) => {
-                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                const worksheet = workbook.getActiveSheet();
-                const unitId = workbook.getUnitId();
-                const subUnitId = worksheet.getSheetId();
+                const target = getSheetCommandTarget(this._univerInstanceService);
+                if (!target) {
+                    return false;
+                }
+                const { worksheet, unitId, subUnitId } = target;
 
                 const workSheetEditPermission = this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false;
                 if (!workSheetEditPermission) {

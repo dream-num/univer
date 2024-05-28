@@ -109,7 +109,7 @@ export class HyperLinkModel extends Disposable {
         return true;
     }
 
-    updateHyperLink(unitId: string, subUnitId: string, id: string, payload: ICellLinkContent) {
+    updateHyperLink(unitId: string, subUnitId: string, id: string, payload: Partial<ICellLinkContent>) {
         const { matrix, positionMap } = this._ensureMap(unitId, subUnitId);
         // const current = matrix.getValue();
         const position = positionMap.get(id);
@@ -124,7 +124,10 @@ export class HyperLinkModel extends Disposable {
         this._linkUpdate$.next({
             unitId,
             subUnitId,
-            payload,
+            payload: {
+                display: link.display,
+                payload: link.payload,
+            },
             id,
             type: 'update',
         });

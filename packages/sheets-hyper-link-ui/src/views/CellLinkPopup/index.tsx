@@ -19,6 +19,7 @@ import { CancelHyperLinkCommand, HyperLinkModel } from '@univerjs/sheets-hyper-l
 import React from 'react';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import { ICommandService } from '@univerjs/core';
+import cs from 'clsx';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { OpenHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
@@ -30,6 +31,8 @@ const iconsMap = {
     sheet: <Xlsx />,
     range: <AllBorderSingle />,
     defineName: <AllBorderSingle />,
+    'range-error': <AllBorderSingle />,
+    'sheet-error': <Xlsx />,
 };
 
 export const CellLinkPopup = () => {
@@ -50,7 +53,7 @@ export const CellLinkPopup = () => {
 
     return (
         <div className={styles.cellLink}>
-            <div className={styles.cellLinkContent} onClick={linkObj.handler}>
+            <div className={cs(styles.cellLinkContent, { [styles.cellLinkContentError]: linkObj.type.indexOf('error') > -1 })} onClick={linkObj.handler}>
                 <div className={styles.cellLinkType}>
                     {iconsMap[linkObj.type]}
                 </div>

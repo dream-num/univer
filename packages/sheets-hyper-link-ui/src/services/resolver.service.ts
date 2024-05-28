@@ -15,11 +15,15 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { MessageType } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { NORMAL_SELECTION_PLUGIN_NAME, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { ScrollToCellCommand } from '@univerjs/sheets-ui';
+import { IMessageService } from '@univerjs/ui';
+import { Inject } from '@wendellhu/redi';
+import { isLegalRange } from '../common/util';
 
 interface ISheetUrlParams {
     gid?: string;
@@ -31,7 +35,9 @@ export class SheetsHyperLinkResolverService {
     constructor(
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @ICommandService private _commandService: ICommandService,
-        @IDefinedNamesService private _definedNamesService: IDefinedNamesService
+        @IDefinedNamesService private _definedNamesService: IDefinedNamesService,
+        @IMessageService private _messageService: IMessageService,
+        @Inject(LocaleService) private _localeService: LocaleService
     ) { }
 
     private _getURLName(params: ISheetUrlParams) {
@@ -45,10 +51,18 @@ export class SheetsHyperLinkResolverService {
         const sheetName = sheet?.getName() ?? '';
 
         if (range) {
-            return {
-                type: 'range',
-                name: serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(range).range),
-            } as const;
+            const rangeObj = deserializeRangeWithSheet(range).range;
+            if (isLegalRange(rangeObj)) {
+                return {
+                    type: 'range',
+                    name: serializeRangeWithSheet(sheetName, rangeObj),
+                } as const;
+            } else {
+                return {
+                    type: 'range-error',
+                    name: this._localeService.t('hyperLink.message.refError'),
+                } as const;
+            }
         }
 
         if (rangeid) {
@@ -57,6 +71,11 @@ export class SheetsHyperLinkResolverService {
                 return {
                     type: 'defineName',
                     name: range.formulaOrRefString,
+                } as const;
+            } else {
+                return {
+                    type: 'range-error',
+                    name: this._localeService.t('hyperLink.message.refError'),
                 } as const;
             }
         }
@@ -67,6 +86,11 @@ export class SheetsHyperLinkResolverService {
                 return {
                     type: 'sheet',
                     name: worksheet.getName(),
+                } as const;
+            } else {
+                return {
+                    type: 'sheet-error',
+                    name: this._localeService.t('hyperLink.message.refError'),
                 } as const;
             }
         }
@@ -91,7 +115,10 @@ export class SheetsHyperLinkResolverService {
 
         if (range) {
             const rangeInfo = deserializeRangeWithSheet(range);
-            this.navigateToRange(unitId, gid, rangeInfo.range);
+            if (isLegalRange(rangeInfo.range)) {
+                this.navigateToRange(unitId, gid, rangeInfo.range);
+            }
+            return;
         }
 
         this.navigateToSheetById(unitId, gid);
@@ -157,13 +184,22 @@ export class SheetsHyperLinkResolverService {
         if (!workbook) {
             return false;
         }
-        const worksheet = workbook.getSheetBySheetName(sheetName);
+        const worksheet = workbook.getActiveSheet();
 
         if (worksheet?.getName() === sheetName) {
             return true;
         }
+        const targetSheet = workbook.getSheetBySheetName(sheetName);
 
-        return await this._commandService.executeCommand(SetWorksheetActiveOperation.id, { unitId, subUnitId: worksheet?.getSheetId() });
+        if (!targetSheet) {
+            this._messageService.show({
+                content: this._localeService.t('hyperLink.message.noSheet'),
+                type: MessageType.Error,
+            });
+            return;
+        }
+
+        return await this._commandService.executeCommand(SetWorksheetActiveOperation.id, { unitId, subUnitId: targetSheet.getSheetId() });
     }
 
     async navigateToSheetById(unitId: string, subUnitId: string) {

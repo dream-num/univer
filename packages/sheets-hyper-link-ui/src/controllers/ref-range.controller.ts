@@ -22,14 +22,19 @@ import type { IAddHyperLinkMutationParams, ICellHyperLink, IRemoveHyperLinkMutat
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkRefMutation } from '@univerjs/sheets-hyper-link';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
+import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
+import { SheetsHyperLinkResolverService } from '../services/resolver.service';
+import { isLegalRange } from '../common/util';
 
 @OnLifecycle(LifecycleStages.Starting, SheetsHyperLinkRefRangeController)
 export class SheetsHyperLinkRefRangeController extends Disposable {
     private _disposableMap = new Map<string, IDisposable>();
+    private _rangeDisableMap = new Map<string, IDisposable>();
 
     constructor(
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
-        @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel
+        @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel,
+        @Inject(SheetsHyperLinkResolverService) private readonly _resolverService: SheetsHyperLinkResolverService
     ) {
         super();
         this._initData();
@@ -114,6 +119,34 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
         disposable?.dispose();
     }
 
+    private _registerRange(unitId: string, id: string, payload: string) {
+        const linkInfo = this._resolverService.parseHyperLink(payload);
+        if (linkInfo.searchObj && linkInfo.searchObj.range && linkInfo.searchObj.gid) {
+            const subUnitId = linkInfo.searchObj.gid;
+            const range = deserializeRangeWithSheet(linkInfo.searchObj.range).range;
+            if (isLegalRange(range)) {
+                this._rangeDisableMap.set(
+                    id,
+                    this._refRangeService.watchRange(unitId, subUnitId, range, (before, aft) => {
+                        this._hyperLinkModel.updateHyperLink(
+                            unitId,
+                            subUnitId,
+                            id,
+                            {
+                                payload: `#gid=${subUnitId}&range=${!aft ? 'err' : serializeRange(range)}`,
+                            }
+                        );
+                    })
+                );
+            }
+        }
+    }
+
+    private _unregisterRange(id: string) {
+        const disposable = this._rangeDisableMap.get(id);
+        disposable?.dispose();
+    }
+
     private _initData() {
         const data = this._hyperLinkModel.getAll();
 
@@ -134,10 +167,12 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                 switch (option.type) {
                     case 'add': {
                         this._register(option.unitId, option.subUnitId, option.payload);
+                        this._registerRange(option.unitId, option.payload.id, option.payload.payload);
                         break;
                     }
                     case 'remove': {
                         this._unregister(option.unitId, option.subUnitId, option.payload.id);
+                        this._unregisterRange(option.payload.id);
                         break;
                     }
                     case 'updateRef': {
@@ -157,8 +192,15 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                             const { unitId, subUnitId, links } = subUnitData;
                             links.forEach((link) => {
                                 this._unregister(unitId, subUnitId, link.id);
+                                this._unregisterRange(link.id);
                             });
                         });
+                        break;
+                    }
+                    case 'update': {
+                        this._unregisterRange(option.id);
+                        this._registerRange(option.unitId, option.id, option.payload.payload);
+                        break;
                     }
                 }
             })

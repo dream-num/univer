@@ -38,6 +38,10 @@ const enUS: typeof zhCN = {
         menu: {
             add: 'Insert Link',
         },
+        message: {
+            noSheet: 'Target sheet has been delete',
+            refError: 'Invalid Range',
+        },
     },
 };
 

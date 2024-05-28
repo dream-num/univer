@@ -36,5 +36,9 @@ export default {
         menu: {
             add: '添加链接',
         },
+        message: {
+            noSheet: '该子表已被删除',
+            refError: '错误的引用',
+        },
     },
 };

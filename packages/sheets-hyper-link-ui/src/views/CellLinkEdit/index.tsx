@@ -22,10 +22,11 @@ import { createInternalEditorID, ICommandService, IUniverInstanceService, Locale
 import { RangeSelector, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { AddHyperLinkCommand, HyperLinkModel, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
+import { ScrollToCellOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
-import { isLegalLink } from '../../common/util';
+import { isLegalLink, isLegalRange } from '../../common/util';
 import styles from './index.module.less';
 
 enum LinkType {
@@ -51,11 +52,12 @@ export const CellLinkEdit = () => {
     const [showError, setShowError] = useState(false);
 
     useEffect(() => {
-        if (editing) {
+        if (editing?.row !== undefined && editing.column !== undefined) {
             const link = hyperLinkModel.getHyperLinkByLocation(editing.unitId, editing.subUnitId, editing.row, editing.column);
 
             if (link) {
                 const linkInfo = resolverService.parseHyperLink(link.payload);
+                setId(link.id);
                 setDisplay(link.display);
                 if (linkInfo.type === 'outer') {
                     setType(LinkType.link);
@@ -88,7 +90,6 @@ export const CellLinkEdit = () => {
                         return;
                     }
                 }
-                setId(link.id);
             }
         }
 
@@ -97,9 +98,8 @@ export const CellLinkEdit = () => {
         setDisplay('');
         setId('');
     }, [editing, hyperLinkModel, resolverService, univerInstanceService]);
-
     useEffect(() => {
-        if (!display) {
+        if (!display && payload) {
             setDisplay(payload);
         }
     }, [payload, display]);
@@ -174,6 +174,21 @@ export const CellLinkEdit = () => {
                 });
             }
         }
+        if (editing) {
+            await commandService.executeCommand(SetWorksheetActiveOperation.id, {
+                unitId: editing.unitId,
+                subUnitId: editing.subUnitId,
+            });
+            commandService.executeCommand(ScrollToCellOperation.id, {
+                range: {
+                    startRow: editing.row,
+                    endRow: editing.row,
+                    startColumn: editing.column,
+                    endCOlumn: editing.column,
+                },
+            });
+        }
+
         commandService.executeCommand(CloseHyperLinkSidebarOperation.id);
     };
 
@@ -211,6 +226,9 @@ export const CellLinkEdit = () => {
                         value={payload}
                         onChange={(newValue) => {
                             const range = newValue[0];
+                            if (!range || !isLegalRange(range.range)) {
+                                return;
+                            }
                             if (!range.sheetName) {
                                 range.sheetName = workbook.getActiveSheet().getName();
                             }
@@ -233,6 +251,12 @@ export const CellLinkEdit = () => {
             <div className={styles.cellLinkEditButtons}>
                 <Button
                     onClick={() => {
+                        if (editing) {
+                            commandService.executeCommand(SetWorksheetActiveOperation.id, {
+                                unitId: editing.unitId,
+                                subUnitId: editing.subUnitId,
+                            });
+                        }
                         commandService.executeCommand(CloseHyperLinkSidebarOperation.id);
                     }}
                 >

@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+import type { IRange } from '@univerjs/core';
+
 export function isLegalLink(link: string) {
     return link.startsWith('https://') || link.startsWith('http://');
+}
+
+export function isLegalRange(range: IRange) {
+    const { startColumn, startRow, endColumn, endRow } = range;
+    return !Number.isNaN(startColumn) && !Number.isNaN(startRow) && !Number.isNaN(endColumn) && !Number.isNaN(endRow);
 }

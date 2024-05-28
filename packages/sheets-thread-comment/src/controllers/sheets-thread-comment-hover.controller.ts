@@ -17,6 +17,7 @@
 import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { HoverManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
+import { debounceTime } from 'rxjs';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
 import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
 
@@ -32,31 +33,33 @@ export class SheetsThreadCommentHoverController extends Disposable {
     }
 
     private _initHoverEvent() {
-        this._hoverManagerService.currentCellDebounce$.subscribe((cell) => {
-            const currentPopup = this._sheetsThreadCommentPopupService.activePopup;
-            if (cell && ((currentPopup && currentPopup.temp) || !currentPopup)) {
-                const { location } = cell;
-                const { unitId, subUnitId, row, col } = location;
-                const commentId = this._sheetsThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
+        this.disposeWithMe(
+            this._hoverManagerService.currentCell$.pipe(debounceTime(100)).subscribe((cell) => {
+                const currentPopup = this._sheetsThreadCommentPopupService.activePopup;
+                if (cell && ((currentPopup && currentPopup.temp) || !currentPopup)) {
+                    const { location } = cell;
+                    const { unitId, subUnitId, row, col } = location;
+                    const commentId = this._sheetsThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
 
-                if (commentId) {
-                    const comment = this._sheetsThreadCommentModel.getComment(unitId, subUnitId, commentId);
-                    if (comment && !comment.resolved) {
-                        this._sheetsThreadCommentPopupService.showPopup({
-                            unitId,
-                            subUnitId,
-                            row,
-                            col,
-                            commentId,
-                            temp: true,
-                        });
-                    }
-                } else {
-                    if (currentPopup) {
-                        this._sheetsThreadCommentPopupService.hidePopup();
+                    if (commentId) {
+                        const comment = this._sheetsThreadCommentModel.getComment(unitId, subUnitId, commentId);
+                        if (comment && !comment.resolved) {
+                            this._sheetsThreadCommentPopupService.showPopup({
+                                unitId,
+                                subUnitId,
+                                row,
+                                col,
+                                commentId,
+                                temp: true,
+                            });
+                        }
+                    } else {
+                        if (currentPopup) {
+                            this._sheetsThreadCommentPopupService.hidePopup();
+                        }
                     }
                 }
-            }
-        });
+            })
+        );
     }
 }

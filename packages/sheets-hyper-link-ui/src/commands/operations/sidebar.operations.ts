@@ -28,7 +28,7 @@ export interface IOpenHyperLinkSidebarOperationParams extends ISheetCommandShare
 
 export const OpenHyperLinkSidebarOperation: ICommand<IOpenHyperLinkSidebarOperationParams> = {
     type: CommandType.OPERATION,
-    id: 'sheets.operation.open-hyper-link-sidebar',
+    id: 'sheet.operation.open-hyper-link-sidebar',
     handler(accessor, params) {
         if (!params) {
             return false;
@@ -69,7 +69,7 @@ export const CloseHyperLinkSidebarOperation: ICommand = {
 
 export const InsertHyperLinkOperation: ICommand = {
     type: CommandType.OPERATION,
-    id: 'sheets.operation.insert-hyper-link',
+    id: 'sheet.operation.insert-hyper-link',
     handler(accessor) {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService);

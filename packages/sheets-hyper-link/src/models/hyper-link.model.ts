@@ -15,7 +15,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { ObjectMatrix } from '@univerjs/core';
+import { Disposable, ObjectMatrix } from '@univerjs/core';
 import type { ICellHyperLink, ICellLinkContent } from '../types/interfaces/i-hyper-link';
 
 type LinkUpdate = {
@@ -50,12 +50,21 @@ type LinkUpdate = {
     }[];
 };
 
-export class HyperLinkModel {
+export class HyperLinkModel extends Disposable {
     private _linkUpdate$ = new Subject<LinkUpdate>();
     linkUpdate$ = this._linkUpdate$.asObservable();
 
     private _linkMap: Map<string, Map<string, ObjectMatrix<ICellHyperLink>>> = new Map();
     private _linkPositionMap: Map<string, Map<string, Map<string, { row: number; column: number }>>> = new Map();
+
+    constructor() {
+        super();
+        this.disposeWithMe({
+            dispose: () => {
+                this._linkUpdate$.complete();
+            },
+        });
+    }
 
     private _ensureMap(unitId: string, subUnitId: string) {
         let unitMap = this._linkMap.get(unitId);

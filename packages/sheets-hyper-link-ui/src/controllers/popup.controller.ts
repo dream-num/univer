@@ -17,6 +17,7 @@
 import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { HoverManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
+import { debounceTime } from 'rxjs';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetsHyperLinkPopupController)
@@ -31,13 +32,15 @@ export class SheetsHyperLinkPopupController extends Disposable {
     }
 
     private _initHoverListener() {
-        this.disposeWithMe(this._hoverManagerService.currentCellDebounce$.subscribe((currentCell) => {
-            if (!currentCell) {
-                this._sheetsHyperLinkPopupService.hideCurrentPopup();
-                return;
-            }
+        this.disposeWithMe(
+            this._hoverManagerService.currentCell$.pipe(debounceTime(100)).subscribe((currentCell) => {
+                if (!currentCell) {
+                    this._sheetsHyperLinkPopupService.hideCurrentPopup();
+                    return;
+                }
 
-            this._sheetsHyperLinkPopupService.showPopup(currentCell.location);
-        }));
+                this._sheetsHyperLinkPopupService.showPopup(currentCell.location);
+            })
+        );
     }
 }

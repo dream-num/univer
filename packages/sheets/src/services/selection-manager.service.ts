@@ -104,7 +104,7 @@ export class SelectionManagerService implements IDisposable {
     }
 
     changePluginNoRefresh(pluginName: string) {
-        if (this._currentSelection == null) {
+        if (this._currentSelection == null || this._currentSelection.pluginName === pluginName) {
             return;
         }
 
@@ -119,7 +119,10 @@ export class SelectionManagerService implements IDisposable {
 
         // Store the selection with the new pluginName.
         if (selections != null) {
-            this.add([...selections]);
+            this._replaceByParam({
+                ...this._currentSelection,
+                selectionDatas: [...selections],
+            });
         }
     }
 
@@ -226,6 +229,7 @@ export class SelectionManagerService implements IDisposable {
         if (this._currentSelection == null) {
             return;
         }
+
         this._addByParam({
             ...this._currentSelection,
             selectionDatas,

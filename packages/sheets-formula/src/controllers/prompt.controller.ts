@@ -248,8 +248,7 @@ export class PromptController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._textSelectionManagerService.textSelection$.subscribe((params) => {
-                    if (params?.unitId == null
-                    ) {
+                    if (params?.unitId == null) {
                         return;
                     }
 
@@ -384,7 +383,7 @@ export class PromptController extends Disposable {
             return;
         }
 
-        this._selectionManagerService.clear();
+        // this._selectionManagerService.clear();
 
         if (editorId && this._editorService.isSheetEditor(editorId)) {
             this._selectionManagerService.changePlugin(NORMAL_SELECTION_PLUGIN_NAME);
@@ -894,7 +893,7 @@ export class PromptController extends Disposable {
 
         const bodyList = this._getFormulaAndCellEditorBody(unitIds).filter((b) => !!b);
 
-        this._selectionManagerService.clear();
+        // this._selectionManagerService.clear();
 
         if (sequenceNodes == null || sequenceNodes.length === 0) {
             this._existsSequenceNode = false;

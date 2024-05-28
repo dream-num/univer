@@ -41,6 +41,8 @@ const enUS: typeof zhCN = {
         message: {
             noSheet: 'Target sheet has been delete',
             refError: 'Invalid Range',
+            hiddenSheet: 'Cannot open the link because the linked sheet is hidden',
+            coped: 'Link copied to clipboard',
         },
     },
 };

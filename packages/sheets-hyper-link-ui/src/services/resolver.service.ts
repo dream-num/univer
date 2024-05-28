@@ -199,7 +199,15 @@ export class SheetsHyperLinkResolverService {
             return;
         }
 
-        return await this._commandService.executeCommand(SetWorksheetActiveOperation.id, { unitId, subUnitId: targetSheet.getSheetId() });
+        const sheetId = targetSheet.getSheetId();
+        if (workbook.getHiddenWorksheets().indexOf(sheetId) > -1) {
+            this._messageService.show({
+                content: this._localeService.t('hyperLink.message.hiddenSheet'),
+                type: MessageType.Error,
+            });
+        }
+
+        return await this._commandService.executeCommand(SetWorksheetActiveOperation.id, { unitId, subUnitId: sheetId });
     }
 
     async navigateToSheetById(unitId: string, subUnitId: string) {

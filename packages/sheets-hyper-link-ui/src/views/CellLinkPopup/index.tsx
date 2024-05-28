@@ -18,8 +18,10 @@ import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
 import { CancelHyperLinkCommand, HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import React from 'react';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
-import { ICommandService } from '@univerjs/core';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import cs from 'clsx';
+import { MessageType } from '@univerjs/design';
+import { IMessageService } from '@univerjs/ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { OpenHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
@@ -39,6 +41,8 @@ export const CellLinkPopup = () => {
     const popupService = useDependency(SheetsHyperLinkPopupService);
     const hyperLinkModel = useDependency(HyperLinkModel);
     const commandService = useDependency(ICommandService);
+    const messageService = useDependency(IMessageService);
+    const localeService = useDependency(LocaleService);
     const currentPopup = useObservable(popupService.currentPopup$, popupService.currentPopup);
     const resolverService = useDependency(SheetsHyperLinkResolverService);
     if (!currentPopup) {
@@ -76,6 +80,10 @@ export const CellLinkPopup = () => {
                         } else {
                             navigator.clipboard.writeText(linkObj.url);
                         }
+                        messageService.show({
+                            content: localeService.t('hyperLink.message.coped'),
+                            type: MessageType.Info,
+                        });
                     }}
                 >
                     <CopySingle />

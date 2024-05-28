@@ -39,6 +39,8 @@ export default {
         message: {
             noSheet: '该子表已被删除',
             refError: '错误的引用',
+            hiddenSheet: '无法打开被隐藏的子表',
+            coped: '链接已被复制到剪贴板',
         },
     },
 };

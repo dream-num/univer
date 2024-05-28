@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMessageMethodOptions, IMessageProps } from '@univerjs/design';
+import type { IMessageOptions, IMessageProps } from '@univerjs/design';
 import type { IDisposable } from '@wendellhu/redi';
 
 import { toDisposable } from '@univerjs/core';
@@ -24,7 +24,7 @@ import type { IMessageService } from '../message.service';
  * This is a mocked message service for testing purposes.
  */
 export class MockMessageService implements IMessageService {
-    show(_options: IMessageMethodOptions & Omit<IMessageProps, 'key'>): IDisposable {
+    show(_options: IMessageOptions & Omit<IMessageProps, 'key'>): IDisposable {
         return toDisposable(() => { /* empty */ });
     }
 

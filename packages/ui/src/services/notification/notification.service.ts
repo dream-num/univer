@@ -19,7 +19,7 @@ import { createIdentifier } from '@wendellhu/redi';
 
 import type { INotificationOptions } from '../../components/notification/Notification';
 
-export const INotificationService = createIdentifier<INotificationService>('univer.notification-service');
+export const INotificationService = createIdentifier<INotificationService>('ui.notification.service');
 
 export interface INotificationService {
     show(params: INotificationOptions): IDisposable;

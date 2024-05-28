@@ -32,14 +32,13 @@ export enum MessageType {
 }
 
 export interface IMessageProps {
-    key: number;
+    key: string;
     type: MessageType;
-    content?: string;
+    content: string;
 }
 
-export interface IMessageMethodOptions {
-    content: string;
-    delay?: number;
+export interface IMessageOptions extends IMessageProps {
+    duration?: number;
 }
 
 const iconMap = {
@@ -99,9 +98,9 @@ export class Message {
         this.render();
     }
 
-    append(type: MessageType, options: IMessageMethodOptions): IDisposable {
-        const { content, delay = 3000 } = options;
-        const key = Date.now();
+    append(type: MessageType, options: IMessageOptions): IDisposable {
+        const { content, duration = 3000 } = options;
+        const key = `${Date.now()}`;
 
         this._messages.push({
             key,
@@ -111,11 +110,11 @@ export class Message {
 
         this.render();
 
-        setTimeout(() => this.teardown(key), delay);
+        setTimeout(() => this.teardown(key), duration);
         return { dispose: () => this.teardown(key) };
     }
 
-    teardown(key: number) {
+    teardown(key: string) {
         this._messages = this._messages.filter((message) => message.key !== key);
 
         this.render();
@@ -125,19 +124,19 @@ export class Message {
         render(<MessageContainer messages={this._messages} />, this._container);
     }
 
-    success(options: IMessageMethodOptions): IDisposable {
+    success(options: IMessageOptions): IDisposable {
         return this.append(MessageType.Success, options);
     }
 
-    info(options: IMessageMethodOptions): IDisposable {
+    info(options: IMessageOptions): IDisposable {
         return this.append(MessageType.Info, options);
     }
 
-    warning(options: IMessageMethodOptions): IDisposable {
+    warning(options: IMessageOptions): IDisposable {
         return this.append(MessageType.Warning, options);
     }
 
-    error(options: IMessageMethodOptions): IDisposable {
+    error(options: IMessageOptions): IDisposable {
         return this.append(MessageType.Error, options);
     }
 }

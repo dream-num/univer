@@ -25,7 +25,7 @@ import type { IAddWorksheetProtectionParams, IDeleteWorksheetProtectionParams, I
 
 export const AddWorksheetProtectionCommand: ICommand<IAddWorksheetProtectionParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.add-worksheet-protection',
+    id: 'sheet.command.add-worksheet-protection',
     async handler(accessor, params) {
         if (!params) {
             return false;
@@ -56,7 +56,7 @@ export const AddWorksheetProtectionCommand: ICommand<IAddWorksheetProtectionPara
 
 export const DeleteWorksheetProtectionCommand: ICommand<IDeleteWorksheetProtectionParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.delete-worksheet-protection',
+    id: 'sheet.command.delete-worksheet-protection',
     handler(accessor, params) {
         if (!params) {
             return false;
@@ -84,7 +84,7 @@ export const DeleteWorksheetProtectionCommand: ICommand<IDeleteWorksheetProtecti
 
 export const SetWorksheetProtectionCommand: ICommand<ISetWorksheetProtectionParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.set-worksheet-protection',
+    id: 'sheet.command.set-worksheet-protection',
     async handler(accessor, params) {
         if (!params) {
             return false;
@@ -121,7 +121,7 @@ export const SetWorksheetProtectionCommand: ICommand<ISetWorksheetProtectionPara
 
 export const DeleteWorksheetProtectionFormSheetBarCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.delete-worksheet-protection-from-sheet-bar',
+    id: 'sheet.command.delete-worksheet-protection-from-sheet-bar',
     async handler(accessor, params) {
         if (!params) {
             return false;
@@ -160,7 +160,7 @@ export const DeleteWorksheetProtectionFormSheetBarCommand: ICommand = {
 
 export const ChangeSheetProtectionFromSheetBarCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.change-sheet-protection-from-sheet-bar',
+    id: 'sheet.command.change-sheet-protection-from-sheet-bar',
     async handler(accessor) {
         const commandService = accessor.get(ICommandService);
         await commandService.executeCommand('sheet-permission.operation.openDialog');

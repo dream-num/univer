@@ -27,7 +27,7 @@ export interface IDeleteRangeProtectionCommandParams {
 }
 export const DeleteRangeProtectionCommand: ICommand<IDeleteRangeProtectionCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.delete-range-protection',
+    id: 'sheet.command.delete-range-protection',
     async handler(accessor, params) {
         if (!params) {
             return false;

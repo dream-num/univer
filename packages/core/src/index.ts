@@ -187,7 +187,7 @@ export { DataValidationType } from './types/enum/data-validation-type';
 export { DataValidationStatus } from './types/enum/data-validation-status';
 export type { IPermissionTypes } from './services/permission/type';
 
-export { AuthzIoLocalService } from './services/authz-io/authz-io';
+export { AuthzIoLocalService } from './services/authz-io/authz-io.serivce';
 export { IAuthzIoService } from './services/authz-io/type';
 export { createDefaultUser } from './services/user-manager/const';
 

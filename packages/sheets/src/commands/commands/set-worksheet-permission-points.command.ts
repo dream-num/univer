@@ -25,7 +25,7 @@ export interface ISetWorksheetPermissionPointsCommandParams {
 
 export const SetWorksheetPermissionPointsCommand: ICommand<ISetWorksheetPermissionPointsCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.set-worksheet-permission-points',
+    id: 'sheet.command.set-worksheet-permission-points',
     async handler(accessor, params) {
         if (!params) {
             return false;

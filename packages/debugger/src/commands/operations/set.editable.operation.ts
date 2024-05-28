@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand, Workbook } from '@univerjs/core';
-import { CommandType, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { WorkbookEditablePermission, WorkbookPermissionService, WorksheetEditPermission } from '@univerjs/sheets';
+import type { ICommand } from '@univerjs/core';
+import { CommandType, IPermissionService, IUniverInstanceService } from '@univerjs/core';
+import { getSheetCommandTarget, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetEditableCommandParams {
@@ -28,10 +28,11 @@ export const SetEditable: ICommand = {
     type: CommandType.OPERATION,
     handler: (accessor: IAccessor, params: ISetEditableCommandParams) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook?.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet?.getUnitId();
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) {
+            return false;
+        }
+        const { workbook, worksheet, unitId, subUnitId } = target;
         const permissionService = accessor.get(IPermissionService);
         if (!workbook || !worksheet) {
             return false;
@@ -40,7 +41,6 @@ export const SetEditable: ICommand = {
             const editable = permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id);
             permissionService.updatePermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id, !editable);
         } else {
-            const workbookPermissionService = accessor.get(WorkbookPermissionService);
             const unitId = workbook!.getUnitId();
             const editable = permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id);
             permissionService.updatePermissionPoint(new WorkbookEditablePermission(unitId).id, !editable);

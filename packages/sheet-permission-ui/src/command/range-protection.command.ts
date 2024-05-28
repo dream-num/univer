@@ -26,7 +26,7 @@ import type { IAddRangeProtectionParams, IDeleteRangeProtectionParams, ISetProte
 
 export const AddRangeProtectionFromToolbarCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.add-range-protection-from-toolbar',
+    id: 'sheet.command.add-range-protection-from-toolbar',
     async handler(accessor) {
         const commandService = accessor.get(ICommandService);
         const sheetPermissionPanelModel = accessor.get(SheetPermissionPanelModel);
@@ -38,7 +38,7 @@ export const AddRangeProtectionFromToolbarCommand: ICommand = {
 
 export const AddRangeProtectionFromContextMenuCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.add-range-protection-from-context-menu',
+    id: 'sheet.command.add-range-protection-from-context-menu',
     async handler(accessor) {
         const commandService = accessor.get(ICommandService);
         const sheetPermissionPanelModel = accessor.get(SheetPermissionPanelModel);
@@ -50,7 +50,7 @@ export const AddRangeProtectionFromContextMenuCommand: ICommand = {
 
 export const ViewSheetPermissionFromContextMenuCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.view-sheet-permission-from-context-menu',
+    id: 'sheet.command.view-sheet-permission-from-context-menu',
     async handler(accessor) {
         const commandService = accessor.get(ICommandService);
         await commandService.executeCommand(SheetPermissionOpenPanelOperation.id, { showDetail: false });
@@ -60,7 +60,7 @@ export const ViewSheetPermissionFromContextMenuCommand: ICommand = {
 
 export const AddRangeProtectionFromSheetBarCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.add-range-protection-from-sheet-bar',
+    id: 'sheet.command.add-range-protection-from-sheet-bar',
     async handler(accessor) {
         const commandService = accessor.get(ICommandService);
         const sheetPermissionPanelModel = accessor.get(SheetPermissionPanelModel);
@@ -72,7 +72,7 @@ export const AddRangeProtectionFromSheetBarCommand: ICommand = {
 
 export const ViewSheetPermissionFromSheetBarCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.view-sheet-permission-from-sheet-bar',
+    id: 'sheet.command.view-sheet-permission-from-sheet-bar',
     async handler(accessor) {
         const commandService = accessor.get(ICommandService);
         await commandService.executeCommand(SheetPermissionOpenPanelOperation.id, { showDetail: false });
@@ -82,7 +82,7 @@ export const ViewSheetPermissionFromSheetBarCommand: ICommand = {
 
 export const AddRangeProtectionCommand: ICommand<IAddRangeProtectionParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.add-range-protection',
+    id: 'sheet.command.add-range-protection',
     async handler(accessor, params) {
         if (!params) {
             return false;
@@ -123,7 +123,7 @@ export const AddRangeProtectionCommand: ICommand<IAddRangeProtectionParams> = {
 
 export const DeleteRangeSelectionCommand: ICommand<IDeleteRangeProtectionParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.delete-range-protection',
+    id: 'sheet.command.delete-range-protection',
     async handler(accessor, params) {
         if (!params) {
             return false;
@@ -153,7 +153,7 @@ export const DeleteRangeSelectionCommand: ICommand<IDeleteRangeProtectionParams>
 
 export const SetRangeProtectionCommand: ICommand<ISetRangeProtectionParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.set-range-protection',
+    id: 'sheet.command.set-range-protection',
     async handler(accessor, params) {
         if (!params) {
             return false;
@@ -206,7 +206,7 @@ export const SetRangeProtectionCommand: ICommand<ISetRangeProtectionParams> = {
 
 export const DeleteRangeProtectionFromContextMenuCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.delete-range-protection-from-context-menu',
+    id: 'sheet.command.delete-range-protection-from-context-menu',
     async handler(accessor) {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -259,7 +259,7 @@ export const DeleteRangeProtectionFromContextMenuCommand: ICommand = {
 
 export const SetRangeProtectionFromContextMenuCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.set-range-protection-from-context-menu',
+    id: 'sheet.command.set-range-protection-from-context-menu',
     async handler(accessor) {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -312,7 +312,7 @@ export const SetRangeProtectionFromContextMenuCommand: ICommand = {
 
 export const SetProtectionCommand: ICommand<ISetProtectionParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.set-protection',
+    id: 'sheet.command.set-protection',
     async handler(accessor, params) {
         if (!params) {
             return false;

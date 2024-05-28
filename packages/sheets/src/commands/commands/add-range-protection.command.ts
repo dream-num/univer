@@ -27,7 +27,7 @@ export interface IAddRangeProtectionCommandParams {
 }
 export const AddRangeProtectionCommand: ICommand<IAddRangeProtectionCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.add-range-protection',
+    id: 'sheet.command.add-range-protection',
     async handler(accessor, params) {
         if (!params) {
             return false;

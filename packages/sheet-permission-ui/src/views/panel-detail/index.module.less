@@ -1,0 +1,127 @@
+.permission-panel-detail-wrapper {
+    margin-top: 16px;
+    height: 100%;
+}
+
+.radio-group-vertical {
+    display: flex;
+    flex-direction: column;
+    font-weight: 400;
+}
+
+.sheet-permission-design-person-panel {
+    height: 300px;
+    border: 1px solid rgb(var(--grey-200));
+    border-radius: var(--border-radius-lg);
+    padding: var(--padding-base);
+    margin-bottom: var(--margin-xs);
+    display: flex;
+    flex-direction: column;
+
+    &-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        &-add {
+            cursor: pointer;
+            color: rgb(var(--blue-500));
+        }
+    }
+
+    &-split {
+        height: 1px;
+        background-color: rgb(var(--grey-200));
+        margin: var(--margin-xs) 0;
+    }
+
+    &-content {
+        &-item {
+            height: 28px;
+            line-height: 28px;
+            margin-bottom: var(--margin-sm);
+            display: flex;
+            align-items: center;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            &-name {
+                width: 143px;
+                color: rgb(var(--color-black));
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin-left: 6px;
+            }
+
+            &-select {
+                width: 83px;
+                cursor: pointer;
+            }
+        }
+    }
+
+    :global(
+            .univer-sheet-permission-design-person-panel-content-item-select.univer-select-single:not(
+                    .univer-select-customize-input
+                )
+                .univer-select-selector
+        ) {
+        border: none;
+        padding: 0;
+        color: rgb(var(--grey-900));
+    }
+
+    :global(
+            .univer-sheet-permission-design-person-panel-content-item-select.univer-select-show-arrow
+                .univer-select-arrow
+        ) {
+        right: 0;
+    }
+}
+
+.sheet-permission-design-person-panel-content {
+    flex: 1;
+}
+
+.sheet-permission-user-list-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.sheet-permission-user-list-empty-text {
+    width: 240px;
+    word-wrap: break-word;
+    color: rgb(var(--grey-400));
+    font-size: 13px;
+}
+
+.sheet-permission-panel-title {
+    font-weight: 500;
+}
+
+.permission-range-selector {
+    font-weight: 400;
+}
+
+.permission-range-selector-error,
+.sheet-permission-panel-name-input-error {
+    border: 1px solid rgb(var(--red-400));
+
+    &:hover {
+        border: 1px solid rgb(var(--red-400));
+    }
+
+    &-text {
+        height: 20px;
+        line-height: 20px;
+        color: rgb(var(--red-400));
+        font-size: var(--font-size-xs);
+        font-weight: 400;
+    }
+}

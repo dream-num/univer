@@ -93,11 +93,10 @@ export { LocaleService } from './services/locale/locale.service';
 export { DesktopLogService, ILogService, LogLevel } from './services/log/log.service';
 export {
     IPermissionService,
-    PermissionService,
-    UniverEditablePermission,
-    UniverEditablePermissionPoint,
-    UniverPermissionService,
-} from './services/permission';
+    PermissionStatus,
+} from './services/permission/type';
+export type { IPermissionParam } from './services/permission/type';
+export type { IPermissionPoint } from './services/permission/type';
 export { IResourceLoaderService } from './services/resource-loader/type';
 export { ResourceManagerService } from './services/resource-manager/resource-manager.service';
 export type { IResourceHook } from './services/resource-manager/type';
@@ -186,5 +185,10 @@ export { DataValidationImeMode } from './types/enum/data-validation-ime-mode';
 export { DataValidationOperator } from './types/enum/data-validation-operator';
 export { DataValidationType } from './types/enum/data-validation-type';
 export { DataValidationStatus } from './types/enum/data-validation-status';
+export type { IPermissionTypes } from './services/permission/type';
+
+export { AuthzIoLocalService } from './services/authz-io/authz-io';
+export { IAuthzIoService } from './services/authz-io/type';
+export { createDefaultUser } from './services/user-manager/const';
 
 installShims();

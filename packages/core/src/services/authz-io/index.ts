@@ -14,6 +14,5 @@
  * limitations under the License.
  */
 
-export { IPermissionService, PermissionService } from './permission.service';
-export { UniverEditablePermission, UniverEditablePermissionPoint } from './permission-point';
-export { UniverPermissionService } from './univer.permission.service';
+export { AuthzIoLocalService } from './authz-io';
+export { IAuthzIoService } from './type';

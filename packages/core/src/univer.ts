@@ -51,7 +51,7 @@ import type { Plugin, PluginCtor } from './services/plugin/plugin';
 import type { DependencyOverride } from './services/plugin/plugin-override';
 import { mergeOverrideWithDependencies } from './services/plugin/plugin-override';
 import { UserManagerService } from './services/user-manager/user-manager.service';
-import { AuthzIoLocalService } from './services/authz-io';
+import { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 import { IAuthzIoService } from './services/authz-io/type';
 
 export class Univer {

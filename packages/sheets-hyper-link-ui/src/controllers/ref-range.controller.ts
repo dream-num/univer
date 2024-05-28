@@ -41,12 +41,8 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
         this._initRefRange();
     }
 
-    private _getIdWithUnitId(unitId: string, subUnitId: string, id: string) {
-        return `${unitId}-${subUnitId}-${id}`;
-    }
-
     private _register(unitId: string, subUnitId: string, link: ICellHyperLink) {
-        const commentId = link.id;
+        const id = link.id;
         const oldRange: IRange = {
             startColumn: link.column,
             endColumn: link.column,
@@ -109,13 +105,13 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
         };
 
         this._disposableMap.set(
-            this._getIdWithUnitId(unitId, subUnitId, commentId),
+            id,
             this._refRangeService.registerRefRange(oldRange, handleRangeChange, unitId, subUnitId)
         );
     }
 
-    private _unregister(unitId: string, subUnitId: string, id: string) {
-        const disposable = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, id));
+    private _unregister(id: string) {
+        const disposable = this._disposableMap.get(id);
         disposable?.dispose();
     }
 
@@ -171,7 +167,7 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                         break;
                     }
                     case 'remove': {
-                        this._unregister(option.unitId, option.subUnitId, option.payload.id);
+                        this._unregister(option.payload.id);
                         this._unregisterRange(option.payload.id);
                         break;
                     }
@@ -182,16 +178,16 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                             return;
                         }
 
-                        this._unregister(unitId, subUnitId, id);
+                        this._unregister(id);
                         this._register(unitId, subUnitId, link);
                         break;
                     }
                     case 'unload': {
                         const { unitLinks } = option;
                         unitLinks.forEach((subUnitData) => {
-                            const { unitId, subUnitId, links } = subUnitData;
+                            const { links } = subUnitData;
                             links.forEach((link) => {
-                                this._unregister(unitId, subUnitId, link.id);
+                                this._unregister(link.id);
                                 this._unregisterRange(link.id);
                             });
                         });

@@ -83,7 +83,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.53",
+        "@univerjs/icons": "^0.1.54",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
         "lodash.get": "^4.4.2",
         "lodash.set": "^4.3.2",

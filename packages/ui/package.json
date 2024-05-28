@@ -79,7 +79,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.53",
+        "@univerjs/icons": "^0.1.54",
         "localforage": "^1.10.0",
         "rc-notification": "^5.5.0",
         "rc-util": "^5.39.3"

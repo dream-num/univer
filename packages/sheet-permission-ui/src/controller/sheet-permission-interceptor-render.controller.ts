@@ -17,10 +17,10 @@
 /* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
 
-import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
-import { DisposableCollection, ICommandService, IPermissionService, IUniverInstanceService, LifecycleStages, LocaleService, ObjectMatrix, OnLifecycle, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, ISheetDataValidationRule, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { DisposableCollection, FOCUSING_EDITOR_STANDALONE, ICommandService, IContextService, IPermissionService, isICellData, IUniverInstanceService, LifecycleStages, LocaleService, ObjectMatrix, OnLifecycle, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, ISetRangeValuesCommandParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetNameMutationParams } from '@univerjs/sheets';
-import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SelectionManagerService, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetFilterPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
+import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SelectionManagerService, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetFilterPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
 
@@ -38,6 +38,7 @@ import { AddCfCommand, ConditionalFormattingClearController } from '@univerjs/sh
 import type { IConditionalFormattingRuleConfig, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import { HeaderFreezeRenderController } from '@univerjs/sheets-ui/controllers/render-controllers/freeze.render-controller.js';
 import { UnitAction } from '@univerjs/protocol';
+import { deserializeRangeWithSheet, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG, UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from '../views/error-msg-dialog/interface';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
@@ -70,7 +71,9 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
         @Inject(DataValidationController) private readonly _dataValidationController: DataValidationController,
         @Inject(ConditionalFormattingClearController) private readonly _conditionalFormattingClearController: ConditionalFormattingClearController,
         @Inject(ISheetClipboardService) private _sheetClipboardService: ISheetClipboardService,
-        @Inject(HeaderFreezeRenderController) private _headerFreezeRenderController: HeaderFreezeRenderController
+        @Inject(HeaderFreezeRenderController) private _headerFreezeRenderController: HeaderFreezeRenderController,
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
         this._initialize();
@@ -105,9 +108,13 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
     private _getPermissionCheck(id: string, params: ICheckPermissionCommandParams) {
         let permission = true;
         let errorMsg = '';
+
         switch (id) {
             case InsertCommand.id:
             case SetCellEditVisibleOperation.id:
+                if (this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) === true) {
+                    break;
+                }
                 permission = this._permissionCheckWithoutRange({
                     workbookTypes: [WorkbookEditablePermission],
                     rangeTypes: [RangeProtectionPermissionEditPoint],
@@ -116,11 +123,16 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
                 errorMsg = this._localService.t('permission.dialog.editErr');
                 break;
             case SetRangeValuesCommand.id:
-                permission = this._permissionCheckBySetRangeValue({
-                    workbookTypes: [WorkbookEditablePermission],
-                    rangeTypes: [RangeProtectionPermissionEditPoint],
-                    worksheetTypes: [WorksheetSetCellValuePermission, WorksheetEditPermission],
-                }, params as ISetRangeValuesCommandParams);
+                if (isICellData((params as ISetRangeValuesCommandParams).value) && ((params as ISetRangeValuesCommandParams).value as ICellData).f) {
+                    permission = this._permissionCheckWithFormula((params as ISetRangeValuesCommandParams).value as ICellData);
+                } else {
+                    permission = this._permissionCheckBySetRangeValue({
+                        workbookTypes: [WorkbookEditablePermission],
+                        rangeTypes: [RangeProtectionPermissionEditPoint],
+                        worksheetTypes: [WorksheetSetCellValuePermission, WorksheetEditPermission],
+                    }, params as ISetRangeValuesCommandParams);
+                }
+
                 break;
             case ClearSelectionContentCommand.id:
                 permission = this._permissionCheckWithRanges({
@@ -414,6 +426,9 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
         }
         const { worksheet, unitId, subUnitId } = target;
         const selection = this._selectionManagerService.getLast();
+        if (!selection) {
+            return true;
+        }
         const row = selection?.primary?.actualRow ?? 0;
         const col = selection?.primary?.actualColumn ?? 0;
         const { workbookTypes = [WorkbookEditablePermission], worksheetTypes, rangeTypes } = permissionTypes;
@@ -999,5 +1014,48 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
                 },
             })
         );
+    }
+
+    private _permissionCheckWithFormula(value: ICellData) {
+        const formulaString = value.f;
+        if (formulaString) {
+            const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString);
+            if (!sequenceNodes) {
+                return true;
+            }
+            for (let i = 0; i < sequenceNodes.length; i++) {
+                const node = sequenceNodes[i];
+                if (typeof node === 'string') {
+                    continue;
+                }
+                const { token } = node;
+                const sequenceGrid = deserializeRangeWithSheet(token);
+                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                let targetSheet: Nullable<Worksheet> = workbook.getActiveSheet();
+                const unitId = workbook.getUnitId();
+                if (sequenceGrid.sheetName) {
+                    targetSheet = workbook.getSheetBySheetName(sequenceGrid.sheetName);
+                    if (!targetSheet) {
+                        return false;
+                    }
+                    const subUnitId = targetSheet?.getSheetId();
+                    const viewPermission = this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id);
+                    if (!viewPermission) return false;
+                }
+                if (!targetSheet) {
+                    return false;
+                }
+                const { startRow, endRow, startColumn, endColumn } = sequenceGrid.range;
+                for (let i = startRow; i <= endRow; i++) {
+                    for (let j = startColumn; j <= endColumn; j++) {
+                        const permission = (targetSheet.getCell(i, j) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
+                        if (permission?.[UnitAction.View] === false) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
 }

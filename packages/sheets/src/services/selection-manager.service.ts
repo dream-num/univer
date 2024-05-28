@@ -117,12 +117,8 @@ export class SelectionManagerService implements IDisposable {
             sheetId: this._currentSelection?.sheetId,
         };
 
-        // Store the selection with the new pluginName.
         if (selections != null) {
-            this._replaceByParam({
-                ...this._currentSelection,
-                selectionDatas: [...selections],
-            });
+            this.add([]);
         }
     }
 

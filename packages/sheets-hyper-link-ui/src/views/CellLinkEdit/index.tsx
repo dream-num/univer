@@ -17,8 +17,8 @@
 import React, { useEffect, useState } from 'react';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import type { Workbook } from '@univerjs/core';
-import { createInternalEditorID, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
+import type { ICellData, Nullable, Workbook } from '@univerjs/core';
+import { createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { RangeSelector, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { AddHyperLinkCommand, HyperLinkModel, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
@@ -34,6 +34,28 @@ enum LinkType {
     range = 'range',
     sheet = 'gid',
     definedName = 'rangeid',
+}
+
+function getCellValueOrigin(cell: Nullable<ICellData>) {
+    if (cell === null) {
+        return '';
+    }
+
+    if (cell?.p) {
+        const body = cell?.p.body;
+
+        if (body == null) {
+            return '';
+        }
+
+        const data = body.dataStream;
+        const lastString = data.substring(data.length - 2, data.length);
+        const newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
+
+        return newDataStream;
+    }
+
+    return cell?.v;
 }
 
 export const CellLinkEdit = () => {
@@ -54,7 +76,6 @@ export const CellLinkEdit = () => {
     useEffect(() => {
         if (editing?.row !== undefined && editing.column !== undefined) {
             const link = hyperLinkModel.getHyperLinkByLocation(editing.unitId, editing.subUnitId, editing.row, editing.column);
-
             if (link) {
                 const linkInfo = resolverService.parseHyperLink(link.payload);
                 setId(link.id);
@@ -91,6 +112,16 @@ export const CellLinkEdit = () => {
                     }
                 }
             }
+            const workbook = univerInstanceService.getUnit<Workbook>(editing.unitId);
+            const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
+            const cell = worksheet?.getCellRaw(editing.row, editing.column);
+
+            const cellValue = getCellValueOrigin(cell);
+            setType(LinkType.link);
+            setPayload('');
+            setDisplay((cellValue ?? '').toString());
+            setId('');
+            return;
         }
 
         setType(LinkType.link);

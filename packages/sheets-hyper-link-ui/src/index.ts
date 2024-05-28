@@ -24,5 +24,8 @@ export { SheetsHyperLinkPopupController } from './controllers/popup.controller';
 export { SheetsHyperLinkUIController } from './controllers/ui.controller';
 export { SheetsHyperLinkAutoFillController } from './controllers/auto-fill.controller';
 export { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
+export { SheetHyperLinkUrlController } from './controllers/url.controller';
 
 export { UniverSheetsHyperLinkUIPlugin } from './plugin';
+export { OpenHyperLinkSidebarOperation, InsertHyperLinkOperation, CloseHyperLinkSidebarOperation } from './commands/operations/sidebar.operations';
+export type { IOpenHyperLinkSidebarOperationParams } from './commands/operations/sidebar.operations';

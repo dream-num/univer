@@ -30,6 +30,7 @@ import { SheetsHyperLinkUIController } from './controllers/ui.controller';
 import { SHEETS_HYPER_LINK_UI_PLUGIN } from './types/const';
 import { SheetsHyperLinkAutoFillController } from './controllers/auto-fill.controller';
 import { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
+import { SheetHyperLinkUrlController } from './controllers/url.controller';
 
 export class UniverSheetsHyperLinkUIPlugin extends UniverSheetsHyperLinkPlugin {
     static override pluginName: string = SHEETS_HYPER_LINK_UI_PLUGIN;
@@ -61,6 +62,7 @@ export class UniverSheetsHyperLinkUIPlugin extends UniverSheetsHyperLinkPlugin {
             ],
             [SheetsHyperLinkAutoFillController],
             [SheetsHyperLinkCopyPasteController],
+            [SheetHyperLinkUrlController],
         ];
 
         dependencies.forEach((dep) => {

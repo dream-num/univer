@@ -16,8 +16,9 @@
 
 /* eslint-disable react-refresh/only-export-components */
 
-import { ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
+import { ErrorSingle, Loading, SuccessSingle, WarningSingle } from '@univerjs/icons';
 import { render } from 'rc-util/lib/React/render';
+import type { CSSProperties, ReactElement } from 'react';
 import React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import type { IDisposable } from '../../type';
@@ -29,12 +30,15 @@ export enum MessageType {
     Info = 'info',
     Warning = 'warning',
     Error = 'error',
+    Load = 'load',
 }
 
 export interface IMessageProps {
     key: string;
     type: MessageType;
     content: string;
+    icon?: ReactElement;
+    style?: CSSProperties;
 }
 
 export interface IMessageOptions extends
@@ -48,15 +52,16 @@ const iconMap = {
     [MessageType.Info]: <WarningSingle className={styles.messageIconInfo} />,
     [MessageType.Warning]: <WarningSingle className={styles.messageIconWarning} />,
     [MessageType.Error]: <ErrorSingle className={styles.messageIconError} />,
+    [MessageType.Load]: <Loading className={styles.messageIconError} />,
 };
 
 const MessageItem = (props: IMessageProps) => {
-    const { type, content } = props;
+    const { type, content, icon, style } = props;
 
     const messageElement = (
-        <div className={styles.messageItem}>
+        <div className={styles.messageItem} style={style}>
             <div className={styles.messageContent}>
-                <span className={styles.messageIcon}>{iconMap[type]}</span>
+                <span className={styles.messageIcon}>{icon || iconMap[type]}</span>
                 <span>{content}</span>
             </div>
         </div>
@@ -140,5 +145,9 @@ export class Message {
 
     error(options: IMessageOptions): IDisposable {
         return this.append(MessageType.Error, options);
+    }
+
+    load(options: IMessageOptions): IDisposable {
+        return this.append(MessageType.Load, options);
     }
 }

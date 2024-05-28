@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMessageMethodOptions, IMessageProps } from '@univerjs/design';
+import type { IMessageOptions, IMessageProps } from '@univerjs/design';
 import { Message } from '@univerjs/design';
 import type { IDisposable } from '@wendellhu/redi';
 
@@ -29,7 +29,7 @@ export class DesktopMessageService implements IMessageService {
         this.message = new Message(container);
     }
 
-    show(options: IMessageMethodOptions & Omit<IMessageProps, 'key'>): IDisposable {
+    show(options: IMessageOptions & Omit<IMessageProps, 'key'>): IDisposable {
         if (!this.message) {
             throw new Error('[DesktopMessageService]: no message implementation!');
         }

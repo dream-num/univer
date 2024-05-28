@@ -35,10 +35,10 @@ export class RangeProtectionRenderModel {
         @Inject(RangeProtectionRuleModel) private _selectionProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(IPermissionService) private _permissionService: IPermissionService
     ) {
-        this.init();
+        this._init();
     }
 
-    init() {
+    private _init() {
         this._permissionService.permissionPointUpdate$.pipe(
             filter((permission) => permission.type === UnitObject.SelectRange),
             filter((permission) => getAllRangePermissionPoint().some((F) => permission instanceof F)),
@@ -76,7 +76,11 @@ export class RangeProtectionRenderModel {
         });
     }
 
-    getCellInfo(unitId: string, subUnitId: string, row: number, col: number) {
+    private _createKey(unitId: string, subUnitId: string, row: number, col: number) {
+        return `${unitId}_${subUnitId}_${row}_${col}`;
+    }
+
+    public getCellInfo(unitId: string, subUnitId: string, row: number, col: number) {
         const key = this._createKey(unitId, subUnitId, row, col);
         const cacheValue = this._cache.get(key);
         if (cacheValue) {
@@ -103,11 +107,7 @@ export class RangeProtectionRenderModel {
         return result;
     }
 
-    _createKey(unitId: string, subUnitId: string, row: number, col: number) {
-        return `${unitId}_${subUnitId}_${row}_${col}`;
-    }
-
-    clear() {
+    public clear() {
         this._cache.clear();
     }
 }

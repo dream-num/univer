@@ -28,7 +28,7 @@ export class PermissionService extends Disposable implements IPermissionService 
 
     public permissionPointUpdate$ = this._permissionPointUpdate$.asObservable();
 
-    deletePermissionPoint = (permissionId: string) => {
+    deletePermissionPoint(permissionId: string) {
         const permissionPoint = this._permissionPointMap.get(permissionId);
         if (permissionPoint) {
             permissionPoint.complete();
@@ -36,7 +36,7 @@ export class PermissionService extends Disposable implements IPermissionService 
         }
     };
 
-    addPermissionPoint = <T = boolean>(item: IPermissionPoint<T>) => {
+    addPermissionPoint<T = boolean>(item: IPermissionPoint<T>) {
         if (!item.id) {
             return false;
         }
@@ -45,7 +45,7 @@ export class PermissionService extends Disposable implements IPermissionService 
         return true;
     };
 
-    updatePermissionPoint = <T = boolean>(permissionId: string, value: T) => {
+    updatePermissionPoint<T = boolean>(permissionId: string, value: T) {
         const permissionPoint = this._permissionPointMap.get(permissionId);
         if (!permissionPoint) {
             return;
@@ -57,17 +57,17 @@ export class PermissionService extends Disposable implements IPermissionService 
         this._permissionPointUpdate$.next(subject);
     };
 
-    clearPermissionMap = () => {
+    clearPermissionMap() {
         this._permissionPointMap.clear();
     };
 
-    getPermissionPoint = <T = boolean>(permissionId: string) => {
+    getPermissionPoint<T = boolean>(permissionId: string) {
         const permissionPoint = this._permissionPointMap.get(permissionId);
         if (!permissionPoint) return;
         return permissionPoint.getValue() as IPermissionPoint<T>;
     };
 
-    getPermissionPoint$ = <T = boolean>(permissionId: string) => {
+    getPermissionPoint$<T = boolean>(permissionId: string) {
         const permissionPoint = this._permissionPointMap.get(permissionId);
         if (!permissionPoint) return;
         return permissionPoint as Observable<IPermissionPoint<T>>;

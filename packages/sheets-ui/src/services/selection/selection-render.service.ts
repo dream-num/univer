@@ -15,6 +15,7 @@
  */
 
 import type {
+    IInterceptor,
     IRange,
     IRangeWithCoord,
     ISelection,
@@ -24,7 +25,7 @@ import type {
     Nullable,
     Observer,
 } from '@univerjs/core';
-import { makeCellToSelection, RANGE_TYPE, ThemeService } from '@univerjs/core';
+import { createInterceptorKey, InterceptorManager, makeCellToSelection, RANGE_TYPE, ThemeService } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { ScrollTimer, ScrollTimerType, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
@@ -51,6 +52,11 @@ export interface ISelectionRenderService {
     readonly selectionMoving$: Observable<ISelectionWithCoordAndStyle[]>;
     readonly selectionMoveStart$: Observable<ISelectionWithCoordAndStyle[]>;
     readonly usable$: Observable<boolean>;
+
+    interceptor: InterceptorManager<{
+        RANGE_MOVE_PERMISSION_CHECK: IInterceptor<boolean, null>;
+        RANGE_FILL_PERMISSION_CHECK: IInterceptor<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton }>;
+    }>;
 
     enableHeaderHighlight(): void;
     disableHeaderHighlight(): void;
@@ -111,6 +117,10 @@ export interface ISelectionRenderService {
  *
  * @todo Refactor it to RenderController.
  */
+
+export const RANGE_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('rangeMovePermissionCheck');
+export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton }>('rangeFillPermissionCheck');
+
 export class SelectionRenderService implements ISelectionRenderService {
     hasSelection: boolean = false;
 
@@ -202,6 +212,7 @@ export class SelectionRenderService implements ISelectionRenderService {
     private readonly _usable$ = new BehaviorSubject<boolean>(false);
 
     readonly usable$ = this._usable$.asObservable();
+    public interceptor = new InterceptorManager({ RANGE_MOVE_PERMISSION_CHECK, RANGE_FILL_PERMISSION_CHECK });
 
     constructor(
         @Inject(ThemeService) private readonly _themeService: ThemeService,
@@ -625,10 +636,10 @@ export class SelectionRenderService implements ISelectionRenderService {
         // In addition to pressing the ctrl or shift key, we must clear the previous selection
         if (
             (curControls.length > 0 &&
-            !evt.ctrlKey &&
-            !evt.shiftKey &&
-            !this._isShowPreviousEnable &&
-            !this._isRemainLastEnable) || (curControls.length > 0 && this._isSingleSelection && !evt.shiftKey)
+                !evt.ctrlKey &&
+                !evt.shiftKey &&
+                !this._isShowPreviousEnable &&
+                !this._isRemainLastEnable) || (curControls.length > 0 && this._isSingleSelection && !evt.shiftKey)
         ) {
             for (const control of curControls) {
                 control.dispose();

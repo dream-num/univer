@@ -18,6 +18,7 @@ import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@u
 import {
     CommandType,
     ICommandService,
+    IPermissionService,
     isICellData,
     IUndoRedoService,
     IUniverInstanceService,
@@ -31,6 +32,7 @@ import { SelectionManagerService } from '../../services/selection-manager.servic
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
+import { WorksheetEditPermission } from '../../services/permission/permission-point';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetRangeValuesCommandParams extends Partial<ISheetCommandSharedParams> {
@@ -56,6 +58,7 @@ export const SetRangeValuesCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const permissionService = accessor.get(IPermissionService);
 
         // use subUnitId and unitId from params first
         const target = getSheetCommandTarget(univerInstanceService, {
@@ -69,7 +72,12 @@ export const SetRangeValuesCommand: ICommand = {
 
         const { value, range } = params;
         const currentSelections = range ? [range] : selectionManagerService.getSelectionRanges();
+
         if (!currentSelections || !currentSelections.length) {
+            return false;
+        }
+
+        if (!permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)) {
             return false;
         }
 

@@ -18,8 +18,10 @@
 
 import type { Nullable, Observer, Workbook } from '@univerjs/core';
 import {
+    createInterceptorKey,
     Disposable,
     ICommandService,
+    InterceptorManager,
     toDisposable,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
@@ -59,6 +61,8 @@ enum HEADER_RESIZE_TYPE {
     COLUMN,
 }
 
+export const HEADER_RESIZE_PERMISSION_CHECK = createInterceptorKey<boolean, { row?: number; col?: number }>('headerResizePermissionCheck');
+
 export class HeaderResizeRenderController extends Disposable implements IRenderController {
     private _currentRow: number = 0;
 
@@ -79,6 +83,8 @@ export class HeaderResizeRenderController extends Disposable implements IRenderC
     private _startOffsetX: number = Number.POSITIVE_INFINITY;
 
     private _startOffsetY: number = Number.POSITIVE_INFINITY;
+
+    public interceptor = new InterceptorManager({ HEADER_RESIZE_PERMISSION_CHECK });
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -191,6 +197,11 @@ export class HeaderResizeRenderController extends Disposable implements IRenderC
                         return;
                     }
 
+                    const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_RESIZE_PERMISSION_CHECK)(null, { row: this._currentRow });
+                    if (!permissionCheck) {
+                        return false;
+                    }
+
                     const rowSize = rowHeaderWidth / 3;
 
                     this._rowResizeRect.transformByState({
@@ -225,6 +236,12 @@ export class HeaderResizeRenderController extends Disposable implements IRenderC
                     if (this._currentColumn === -1) {
                         return;
                     }
+
+                    const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_RESIZE_PERMISSION_CHECK)(null, { col: this._currentColumn });
+                    if (!permissionCheck) {
+                        return false;
+                    }
+
                     // TODO: @jocs remove magic number.
                     const columnSize = columnHeaderHeight * 0.7;
 

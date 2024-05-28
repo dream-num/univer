@@ -298,6 +298,10 @@ const locale: typeof zhCN = {
         deleteSheet: 'Удалить лист',
         deleteSheetContent:
             'Подтвердите удаление этого листа. После удаления его нельзя будет восстановить. Вы уверены, что хотите удалить его?',
+        addProtectSheet: 'Защитить лист',
+        removeProtectSheet: 'Снять защиту листа',
+        changeSheetPermission: 'Изменить разрешения листа',
+        viewAllProtectArea: 'Просмотреть все защищенные области',
     },
     rightClick: {
         copy: 'Копировать',
@@ -398,6 +402,11 @@ const locale: typeof zhCN = {
         deleteAllColumnsAlert: 'Нельзя удалить все столбцы на листе',
         hideAllRowsAlert: 'Нельзя скрыть все строки на листе',
         hideAllColumnsAlert: 'Нельзя скрыть все столбцы на листе',
+        protectRange: 'Защитить диапазон',
+        editProtectRange: 'Редактировать защищенный диапазон',
+        removeProtectRange: 'Удалить защиту диапазона',
+        turnOnProtectRange: 'Включить защиту диапазона',
+        viewAllProtectArea: 'Просмотреть все защищенные области',
     },
     info: {
         tooltip: 'Подсказка',

@@ -21,3 +21,4 @@ export function isForceString(str: string): boolean {
 export function extractStringFromForceString(str: string): string {
     return str.slice(1);
 }
+

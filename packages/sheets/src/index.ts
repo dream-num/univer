@@ -46,7 +46,9 @@ export { getSheetCommandTarget, getSheetCommandTargetWorkbook, getSheetMutationT
 export { alignToMergedCellsBorders, getCellAtRowCol, setEndForRange, isSingleCellSelection } from './commands/commands/utils/selection-utils';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
-export { getCurrentSheetDisabled$, SheetEditablePermission, SheetPermissionService } from './services/permission';
+export * from './services/permission/permission-point';
+export { WorksheetPermissionService } from './services/permission/worksheet-permission/worksheet-permission.service';
+export { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
 export {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
@@ -264,6 +266,7 @@ export type { EffectRefRangeParams, IOperator } from './services/ref-range/type'
 export { EffectRefRangId, OperatorType } from './services/ref-range/type';
 export { type ISetWorkbookNameCommandParams, SetWorkbookNameCommand } from './commands/commands/set-workbook-name.command';
 export { type ISetWorkbookNameMutationParams, SetWorkbookNameMutation } from './commands/mutations/set-workbook-name.mutation';
+export { DefinedNameDataController } from './controllers/defined-name-data.controller';
 export {
     handleBaseInsertRange,
     handleBaseMoveRowsCols,
@@ -296,3 +299,75 @@ export { SetDefinedNameCommand, type ISetDefinedNameCommandParams } from './comm
 export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';
 export type { FormatType } from './services/numfmt/type';
 export { getMoveRangeUndoRedoMutations } from './commands/commands/move-range.command';
+
+// permission
+export { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './services/permission';
+export type { IWorksheetProtectionRule } from './services/permission/type';
+export { WorksheetProtectionRuleModel, WorksheetProtectionPointModel, WorksheetProtectionRenderService } from './services/permission/worksheet-permission';
+export { AddWorksheetProtectionMutation } from './commands/mutations/add-worksheet-protection.mutation';
+export { SetWorksheetProtectionMutation } from './commands/mutations/set-worksheet-protection.mutation';
+export { DeleteWorksheetProtectionMutation } from './commands/mutations/delete-worksheet-protection.mutation';
+export { SetWorksheetPermissionPointsCommand } from './commands/commands/set-worksheet-permission-points.command';
+export { getAllWorkbookPermissionPoint, defaultWorkbookPermissionPoints } from './services/permission/workbook-permission';
+export {
+    WorksheetCopyPermission,
+    WorksheetSelectProtectedCellsPermission,
+    WorksheetSelectUnProtectedCellsPermission,
+    WorksheetSetCellStylePermission,
+    WorksheetSetCellValuePermission,
+    WorksheetViewPermission,
+    WorksheetSetRowStylePermission,
+    WorksheetSetColumnStylePermission,
+    WorksheetInsertRowPermission,
+    WorksheetInsertColumnPermission,
+    WorksheetInsertHyperlinkPermission,
+    WorksheetDeleteRowPermission,
+    WorksheetDeleteColumnPermission,
+    WorksheetSortPermission,
+    WorksheetFilterPermission,
+    WorksheetPivotTablePermission,
+    WorksheetEditExtraObjectPermission,
+    WorksheetManageCollaboratorPermission,
+    WorksheetEditPermission,
+
+    WorkbookCommentPermission,
+    WorkbookEditablePermission,
+    WorkbookDuplicatePermission,
+    WorkbookPrintPermission,
+    WorkbookExportPermission,
+    WorkbookMoveSheetPermission,
+    WorkbookDeleteSheetPermission,
+    WorkbookHideSheetPermission,
+    WorkbookRenameSheetPermission,
+    WorkbookCreateSheetPermission,
+    WorkbookHistoryPermission,
+    WorkbookViewPermission,
+    WorkbookSharePermission,
+    WorkbookCopyPermission,
+    WorkbookManageCollaboratorPermission,
+} from './services/permission/permission-point';
+
+// range-protection
+export { AddRangeProtectionCommand, type IAddRangeProtectionCommandParams } from './commands/commands/add-range-protection.command';
+export { DeleteRangeProtectionCommand, type IDeleteRangeProtectionCommandParams } from './commands/commands/delete-range-protection.command';
+export { SetRangeProtectionCommand, type ISetRangeProtectionCommandParams } from './commands/commands/set-range-protection.command';
+
+export { AddRangeProtectionMutation, FactoryAddRangeProtectionMutation, type IAddRangeProtectionMutationParams } from './commands/mutations/add-range-protection.mutation';
+export { DeleteRangeProtectionMutation, FactoryDeleteRangeProtectionMutation, type IDeleteSelectionProtectionMutationParams } from './commands/mutations/delete-range-protection.mutation';
+export { SetRangeProtectionMutation, FactorySetRangeProtectionMutation, type ISetRangeProtectionMutationParams } from './commands/mutations/set-range-protection.mutation';
+
+export { RangeProtectionCanViewRenderExtension, RangeProtectionCanNotViewRenderExtension, type IRangeProtectionRenderCellData, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY } from './render/range-protection/range-protection.render';
+
+export { RangeProtectionRenderModel, type ICellPermission } from './model/range-protection-render.model';
+export { RangeProtectionRuleModel, type IObjectModel, type IRangeProtectionRule, type IModel } from './model/range-protection-rule.model';
+
+export { RangeProtectionRefRangeService } from './services/permission/range-permission/range-protection.ref-range';
+export { RangeProtectionService } from './services/permission/range-permission/range-protection.service';
+export {
+    type IRangePermissionPoint,
+    getAllRangePermissionPoint,
+    getDefaultRangePermission,
+} from './services/permission/range-permission/util';
+
+export { RangeProtectionPermissionEditPoint } from './services/permission/permission-point/range/edit';
+export { RangeProtectionPermissionViewPoint } from './services/permission/permission-point/range/view';

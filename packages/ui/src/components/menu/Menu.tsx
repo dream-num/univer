@@ -202,6 +202,8 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const activated = useObservable<boolean>(menuItem.activated$, false);
     const hidden = useObservable(menuItem.hidden$, false);
     const value = useObservable<MenuItemDefaultValueType>(menuItem.value$);
+    const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
+    const selectionsFromObservable = useObservable(isObservable(item.selections) ? item.selections : undefined);
     const [inputValue, setInputValue] = useState(value);
 
     /**
@@ -237,9 +239,6 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     };
 
     const renderSelectorType = () => {
-        const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
-
-        const selectionsFromObservable = useObservable(isObservable(item.selections) ? item.selections : undefined);
         const selections = selectionsFromObservable ?? (item.selections as IValueOption[] | undefined) ?? [];
 
         if (selections.length > 0) {

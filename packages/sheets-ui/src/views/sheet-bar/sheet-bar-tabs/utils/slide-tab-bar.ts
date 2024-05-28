@@ -33,6 +33,7 @@ export interface SlideTabBarConfig {
     onChangeTab: (event: MouseEvent, id: string) => void;
     onScroll: (state: IScrollState) => void;
     onNameCheckAlert: (text: string) => boolean;
+    onNameChangeCheck: () => boolean;
 }
 
 export interface SlideTabItemAnimate {
@@ -118,6 +119,9 @@ export class SlideTabItem {
     }
 
     setEditor(callback?: (event: FocusEvent) => void): void {
+        if (!this._slideTabBar.getConfig().onNameChangeCheck()) {
+            return;
+        }
         let compositionFlag = true;
         if (this._editMode === false) {
             const input = this._slideTabItem.querySelector('span');

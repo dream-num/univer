@@ -47,7 +47,7 @@ export class UniverThreadCommentPlugin extends Plugin {
             [ThreadCommentModel],
             [ThreadCommentResourceController],
             [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
-        ], this._config.overrides) as Dependency[]).forEach(
+        ], this._config?.overrides) as Dependency[]).forEach(
             (d) => {
                 injector.add(d);
             }

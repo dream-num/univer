@@ -17,8 +17,10 @@
 import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullable, Observer, Workbook } from '@univerjs/core';
 import {
     ColorKit,
+    createInterceptorKey,
     Disposable,
     ICommandService,
+    InterceptorManager,
     RANGE_TYPE,
     ThemeService,
     toDisposable,
@@ -94,6 +96,8 @@ const FREEZE_SIZE_NORMAL = 2;
 
 const AUXILIARY_CLICK_HIDDEN_OBJECT_TRANSPARENCY = 0.01;
 
+export const FREEZE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('freezePermissionCheck');
+
 export class HeaderFreezeRenderController extends Disposable implements IRenderController {
     private _rowFreezeHeaderRect: Nullable<Rect>;
 
@@ -132,6 +136,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
     private _freezeHoverColor = '';
 
     private _lastFreeze: IFreeze | undefined = undefined;
+
+    public interceptor = new InterceptorManager({ FREEZE_PERMISSION_CHECK });
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -303,6 +309,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
 
         this._freezeMoveObservers.push(
             freezeObjectHeaderRect?.onPointerEnterObserver.add(() => {
+                const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
+                if (!permissionCheck) {
+                    return false;
+                }
                 freezeObjectHeaderRect?.setProps({
                     fill: this._freezeHoverColor,
                     zIndex: 4,
@@ -313,6 +323,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
 
         this._freezeMoveObservers.push(
             freezeObjectMainRect?.onPointerEnterObserver.add(() => {
+                const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
+                if (!permissionCheck) {
+                    return false;
+                }
                 freezeObjectHeaderRect?.setProps({
                     fill: this._freezeHoverColor,
                     zIndex: 4,
@@ -421,6 +435,11 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
             return;
         }
 
+        const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
+        if (!permissionCheck) {
+            return false;
+        }
+
         const { scene } = sheetObject;
 
         scene.setCursor(CURSOR_TYPE.GRABBING);
@@ -447,6 +466,12 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                 activeViewport || undefined,
                 true
             );
+
+            const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
+            if (!permissionCheck) {
+                return false;
+            }
+
             scene.setCursor(CURSOR_TYPE.GRABBING);
 
             const FREEZE_SIZE = FREEZE_SIZE_NORMAL / Math.max(scene.scaleX, scene.scaleY);

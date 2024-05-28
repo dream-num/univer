@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import { DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
+import { createInterceptorKey, DisposableCollection, InterceptorManager, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidationSingle } from '@univerjs/icons';
@@ -30,8 +30,12 @@ import type { SheetDataValidationManager } from '../models/sheet-data-validation
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
 import { DataValidationIcon } from './dv.menu';
 
+export const DATA_VALIDATION_PERMISSION_CHECK = createInterceptorKey<(ISheetDataValidationRule & { disable?: boolean })[], ISheetDataValidationRule[]>('dataValidationPermissionCheck');
+
 @OnLifecycle(LifecycleStages.Rendered, DataValidationController)
 export class DataValidationController extends RxDisposable {
+    public interceptor = new InterceptorManager({ DATA_VALIDATION_PERMISSION_CHECK });
+
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService,

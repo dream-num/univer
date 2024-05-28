@@ -26,6 +26,9 @@ import {
 import {
     AddWorksheetMergeMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
+    RangeProtectionRenderModel,
+    RangeProtectionRuleModel,
+    RangeProtectionService,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
     SetRangeValuesMutation,
@@ -71,6 +74,9 @@ describe('Test auto fill with formula', () => {
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
             [FormulaAutoFillController],
+            [RangeProtectionRuleModel],
+            [RangeProtectionService],
+            [RangeProtectionRenderModel],
         ]);
         univer = testBed.univer;
         get = testBed.get;

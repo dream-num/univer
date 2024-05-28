@@ -46,11 +46,9 @@ export default antfu({
     plugins: {
         header,
         barrel,
-        penetrating,
     },
     rules: {
         'barrel/no-barrel-import': 2,
-        'penetrating/no-penetrating-import': 2,
         'header/header': [
             2,
             'block',
@@ -74,4 +72,19 @@ export default antfu({
             2,
         ],
     },
-}, typescriptPreset());
+}, {
+    // Not penetrating for source files
+    files: ['**/*.ts', '**/*.tsx'],
+    plugins: {
+        penetrating,
+    },
+    ignores: [
+        '**/__tests__/**/*',
+        '**/__testing__/**/*',
+        'examples/**/*',
+    ],
+    rules: {
+        'penetrating/no-penetrating-import': 2,
+    },
+},
+typescriptPreset());

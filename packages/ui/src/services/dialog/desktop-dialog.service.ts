@@ -47,7 +47,7 @@ export class DesktopDialogService extends Disposable implements IDialogService {
         if (this._dialogOptions.find((item) => item.id === option.id)) {
             this._dialogOptions = this._dialogOptions.map((item) => ({
                 ...(item.id === option.id ? option : item),
-                visible: true,
+                visible: item.id === option.id ? true : item.visible,
             }));
         } else {
             this._dialogOptions.push({

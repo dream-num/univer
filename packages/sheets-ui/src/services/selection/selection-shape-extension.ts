@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* eslint-disable max-lines-per-function */
 import type { IFreeze, IRangeWithCoord, Nullable, Observer, ThemeService } from '@univerjs/core';
 import { ColorKit } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
@@ -24,6 +25,7 @@ import type { Injector } from '@wendellhu/redi';
 import { VIEWPORT_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { SelectionShape } from './selection-shape';
+import { ISelectionRenderService, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './selection-render.service';
 
 const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
 
@@ -148,6 +150,12 @@ export class SelectionShapeExtension {
 
         [leftControl, rightControl, topControl, bottomControl].forEach((control) => {
             control.onPointerEnterObserver.add(() => {
+                const permissionCheck = this._injector.get(ISelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_MOVE_PERMISSION_CHECK)(false, null);
+
+                if (!permissionCheck) {
+                    return;
+                }
+
                 control.setCursor(CURSOR_TYPE.MOVE);
             });
 
@@ -325,6 +333,12 @@ export class SelectionShapeExtension {
 
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+
+            const permissionCheck = this._injector.get(ISelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_MOVE_PERMISSION_CHECK)(false, null);
+
+            if (!permissionCheck) {
+                return;
+            }
 
             const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
@@ -571,7 +585,12 @@ export class SelectionShapeExtension {
     private _initialFill() {
         const { fillControl } = this._control;
 
-        fillControl.onPointerEnterObserver.add(() => {
+        fillControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            const permissionCheck = this._injector.get(ISelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_FILL_PERMISSION_CHECK)(false, { x: evt.offsetX, y: evt.offsetY, skeleton: this._skeleton });
+
+            if (!permissionCheck) {
+                return;
+            }
             fillControl.setCursor(CURSOR_TYPE.CROSSHAIR);
         });
 
@@ -805,6 +824,12 @@ export class SelectionShapeExtension {
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             const currentViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+
+            const permissionCheck = this._injector.get(ISelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_FILL_PERMISSION_CHECK)(false, { x: evt.offsetX, y: evt.offsetY, skeleton: this._skeleton });
+
+            if (!permissionCheck) {
+                return;
+            }
 
             const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
                 Vector2.FromArray([moveOffsetX, moveOffsetY])

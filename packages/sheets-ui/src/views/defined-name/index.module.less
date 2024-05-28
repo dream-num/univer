@@ -32,6 +32,15 @@
             background-color: rgb(var(--grey-50));
             color: rgb(var(--primary-color));
         }
+
+        &-disable {
+            color: rgb(var(--grey-200));
+            cursor: not-allowed;
+
+            &:hover {
+                color: rgb(var(--grey-200));
+            }
+        }
     }
 
     &-overlay {
@@ -201,9 +210,11 @@
                 color: rgb(var(--primary-color));
                 cursor: pointer;
                 padding: 4px;
+
                 &:hover {
                     background-color: rgb(var(--hyacinth-50));
                 }
+
                 transform: translate(0, -50%);
                 border-radius: var(--border-radius-base);
                 right: 60px;
@@ -220,6 +231,7 @@
                 top: 20px;
                 transform: translate(0, -50%);
                 border-radius: var(--border-radius-base);
+
                 &:hover {
                     background-color: rgb(var(--hyacinth-50));
                 }
@@ -261,6 +273,11 @@
             & > span {
                 margin-right: 2px;
             }
+        }
+
+        &-disable {
+            color: rgb(var(--grey-200));
+            cursor: not-allowed;
         }
     }
 }

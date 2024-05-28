@@ -54,6 +54,11 @@ export interface ISheetPasteParams {
     value: string;
 }
 
+export interface ISheetPasteByShortKeyParams {
+    htmlContent?: string;
+    textContent?: string;
+}
+
 export const SheetPasteCommand: IMultiCommand = {
     id: PasteCommand.id,
     type: CommandType.COMMAND,
@@ -76,6 +81,18 @@ export const SheetPasteCommand: IMultiCommand = {
         }
 
         return false;
+    },
+};
+
+export const SheetPasteShortKeyCommand: ICommand = {
+    id: 'sheet.command.paste-bu-short-key',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor, params: ISheetPasteByShortKeyParams) => {
+        const clipboardService = accessor.get(ISheetClipboardService);
+        const { htmlContent, textContent } = params;
+        clipboardService.legacyPaste(htmlContent, textContent);
+
+        return true;
     },
 };
 

@@ -100,7 +100,7 @@ import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
 import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
 import { SidebarDefinedNameOperation } from '../commands/operations/sidebar-defined-name.operation';
 import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
-import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
+
 import {
     ClearSelectionAllMenuItemFactory,
     ClearSelectionContentMenuItemFactory,
@@ -162,13 +162,7 @@ import {
     VerticalAlignMenuItemFactory,
     WrapTextMenuItemFactory,
 } from './menu/menu';
-import {
-    CellMergeAllMenuItemFactory,
-    CellMergeCancelMenuItemFactory,
-    CellMergeHorizontalMenuItemFactory,
-    CellMergeMenuItemFactory,
-    CellMergeVerticalMenuItemFactory,
-} from './menu/merge.menu';
+
 import {
     ChangeColorSheetMenuItemFactory,
     CopySheetMenuItemFactory,
@@ -227,6 +221,8 @@ import {
     ZoomInShortcutItem,
     ZoomOutShortcutItem,
 } from './shortcuts/view.shortcut';
+import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
+import { CellMergeAllMenuItemFactory, CellMergeCancelMenuItemFactory, CellMergeHorizontalMenuItemFactory, CellMergeMenuItemFactory, CellMergeVerticalMenuItemFactory } from './menu/merge.menu';
 
 export interface IUniverSheetsUIConfig {
     menu: MenuConfig;

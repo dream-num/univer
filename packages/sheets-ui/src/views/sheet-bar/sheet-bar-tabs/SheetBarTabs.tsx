@@ -15,10 +15,11 @@
  */
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import {
     InsertSheetMutation,
+    RangeProtectionRuleModel,
     RemoveSheetMutation,
     SetTabColorMutation,
     SetWorksheetActiveOperation,
@@ -27,11 +28,16 @@ import {
     SetWorksheetNameMutation,
     SetWorksheetOrderCommand,
     SetWorksheetOrderMutation,
+    WorkbookEditablePermission,
+    WorkbookManageCollaboratorPermission,
+    WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { IConfirmService, Menu } from '@univerjs/ui';
+import { IConfirmService, Menu, useObservable } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import { LockSingle } from '@univerjs/icons';
+import { merge } from 'rxjs';
 import { SheetMenuPosition } from '../../../controllers/menu/menu';
 import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
@@ -42,7 +48,7 @@ import { SheetBarItem } from './SheetBarItem';
 import type { IScrollState } from './utils/slide-tab-bar';
 import { SlideTabBar } from './utils/slide-tab-bar';
 
-export interface ISheetBarTabsProps {}
+export interface ISheetBarTabsProps { }
 
 export function SheetBarTabs() {
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
@@ -60,8 +66,43 @@ export function SheetBarTabs() {
     const confirmService = useDependency(IConfirmService);
     const selectionRenderService = useDependency(ISelectionRenderService);
     const editorBridgeService = useDependency(IEditorBridgeService);
+    const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
+    const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
+    const resetOrder = useObservable(worksheetProtectionRuleModel.resetOrder$);
 
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const permissionService = useDependency(IPermissionService);
+
+    const statusInit = useCallback(() => {
+        const currentSubUnitId = workbook.getActiveSheet().getSheetId();
+        setActiveKey(currentSubUnitId);
+
+        const sheets = workbook.getSheets();
+        const activeSheet = workbook.getActiveSheet();
+        const sheetListItems = sheets
+            .filter((sheet) => !sheet.isSheetHidden())
+            .map((sheet, index) => {
+                const worksheetRule = worksheetProtectionRuleModel.getRule(workbook.getUnitId(), sheet.getSheetId());
+                const hasSelectionRule = rangeProtectionRuleModel.getSubunitRuleList(workbook.getUnitId(), sheet.getSheetId()).length > 0;
+                const hasProtect = worksheetRule?.permissionId || hasSelectionRule;
+                const name = hasProtect
+                    ? (
+                        <>
+                            <LockSingle />
+                            <span>{sheet.getName()}</span>
+                        </>
+                    )
+                    : <span>{sheet.getName()}</span>;
+                return {
+                    sheetId: sheet.getSheetId(),
+                    label: name,
+                    index,
+                    selected: activeSheet === sheet,
+                    color: sheet.getTabColor() ?? undefined,
+                };
+            });
+        setSheetList(sheetListItems);
+    }, [workbook, worksheetProtectionRuleModel]);
 
     useEffect(() => {
         statusInit();
@@ -79,7 +120,7 @@ export function SheetBarTabs() {
             slideTabBar.destroy();
             subscribeList.forEach((subscribe) => subscribe.unsubscribe());
         };
-    }, []);
+    }, [resetOrder]);
 
     useEffect(() => {
         if (sheetList.length > 0) {
@@ -87,12 +128,25 @@ export function SheetBarTabs() {
         }
     }, [sheetList]);
 
+    useEffect(() => {
+        const subscription = merge(
+            worksheetProtectionRuleModel.ruleChange$,
+            rangeProtectionRuleModel.ruleChange$
+        ).subscribe(() => {
+            statusInit();
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [worksheetProtectionRuleModel, statusInit]);
+
     const setupSlideTabBarInit = () => {
         const slideTabBar = new SlideTabBar({
             slideTabBarClassName: styles.slideTabBar,
             slideTabBarItemActiveClassName: styles.slideTabActive,
             slideTabBarItemClassName: styles.slideTabItem,
-            slideTabBarSpanEditClassName: styles.slideTabSpanEdit,
+            slideTabBarSpanEditClassName: styles.slideTabDivEdit,
             slideTabBarItemAutoSort: true,
             slideTabBarContainer: slideTabBarContainerRef.current,
             currentIndex: 0,
@@ -102,8 +156,8 @@ export function SheetBarTabs() {
                     name: worksheetName,
                 });
             },
-            onSlideEnd: (event: Event, order: number) => {
-                commandService.executeCommand(SetWorksheetOrderCommand.id, { order });
+            onSlideEnd: async (event: Event, order: number) => {
+                const res = await commandService.executeCommand(SetWorksheetOrderCommand.id, { order });
             },
             onChangeTab: (event: MouseEvent, subUnitId: string) => {
                 // Do not use SetWorksheetActivateCommand, otherwise the sheet will not be switched before the menu pops up, resulting in incorrect menu position.
@@ -124,6 +178,18 @@ export function SheetBarTabs() {
             },
             onNameCheckAlert: (text: string) => {
                 return nameEmptyCheck(text) || nameRepeatCheck(text);
+            },
+            onNameChangeCheck: () => {
+                const unitId = workbook.getUnitId();
+                const worksheet = workbook?.getActiveSheet();
+                const subUnitId = worksheet.getSheetId();
+                const worksheetRule = worksheetProtectionRuleModel.getRule(unitId, subUnitId);
+                const selectionRule = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
+                if (worksheetRule || selectionRule) {
+                    return permissionService.getPermissionPoint(new WorkbookManageCollaboratorPermission(unitId).id)?.value ?? false;
+                } else {
+                    return permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value ?? false;
+                }
             },
         });
 
@@ -228,24 +294,6 @@ export function SheetBarTabs() {
                     break;
             }
         });
-
-    const statusInit = () => {
-        const currentSubUnitId = workbook.getActiveSheet().getSheetId();
-        setActiveKey(currentSubUnitId);
-
-        const sheets = workbook.getSheets();
-        const activeSheet = workbook.getActiveSheet();
-        const sheetListItems = sheets
-            .filter((sheet) => !sheet.isSheetHidden())
-            .map((sheet, index) => ({
-                sheetId: sheet.getSheetId(),
-                label: sheet.getName(),
-                index,
-                selected: activeSheet === sheet,
-                color: sheet.getTabColor() ?? undefined,
-            }));
-        setSheetList(sheetListItems);
-    };
 
     const setupSubscribeScroll = () =>
         sheetBarService.scroll$.subscribe((state: IScrollState) => {

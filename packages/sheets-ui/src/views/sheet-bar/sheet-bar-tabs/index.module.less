@@ -44,7 +44,7 @@ Tab Item, Put outside to be compatible with drag styles
         background-color: rgb(var(--bg-color-hover));
     }
 
-    .slide-tab-span {
+    .slide-tab-div {
         box-sizing: border-box;
         padding: var(--padding-xs) var(--padding-sm);
 
@@ -52,6 +52,8 @@ Tab Item, Put outside to be compatible with drag styles
 
         border: 2px solid transparent;
         border-radius: var(--border-radius-base);
+        display: flex;
+        align-items: center;
 
         &-edit {
             cursor: text;
@@ -73,6 +75,8 @@ Tab Item, Put outside to be compatible with drag styles
     box-shadow: @tab-shadow;
 
     transition: box-shadow 0.2s;
+    display: flex;
+    justify-content: center;
 }
 
 .slide-tab-item-dropdown {

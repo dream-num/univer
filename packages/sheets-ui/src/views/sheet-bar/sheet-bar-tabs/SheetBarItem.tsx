@@ -22,7 +22,7 @@ import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
 export interface IBaseSheetBarProps {
-    label?: string;
+    label?: React.ReactNode;
     children?: any[];
     index?: number;
     color?: string;
@@ -63,7 +63,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
                     currentSelected && color ? `0px 0px 8px rgba(0, 0, 0, 0.08), inset 0px -2px 0px 0px ${color}` : '',
             }}
         >
-            <span className={styles.slideTabSpan}>{label}</span>
+            <div className={styles.slideTabDiv}>{label}</div>
         </div>
     );
 }

@@ -30,6 +30,7 @@ import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
 import { CreateEmptySheetCommand, DisposeCurrentUnitCommand } from '../commands/commands/unit.command';
+import { ChangeUserCommand, UnitRole } from '../commands/operations/change-user.operation';
 
 export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
@@ -251,3 +252,28 @@ export function CreateEmptySheetMenuItemFactory(accessor: IAccessor): IMenuButto
         positions: [UNIT_ITEM_MENU_ID],
     };
 }
+
+export function ChangeUserMenuItemFactory(): IMenuSelectorItem {
+    return {
+        id: ChangeUserCommand.id,
+        type: MenuItemType.SELECTOR,
+        title: 'Change User',
+        positions: [MenuPosition.TOOLBAR_OTHERS],
+        selections: [
+            {
+                label: 'Owner',
+                value: UnitRole.Owner,
+            },
+            {
+                label: 'Editor',
+                value: UnitRole.Editor,
+            },
+            {
+                label: 'Reader',
+                value: UnitRole.Reader,
+            },
+
+        ],
+    };
+}
+

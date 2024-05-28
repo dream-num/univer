@@ -1,0 +1,91 @@
+.sheet-permission-user-dialog-wrapper {
+    height: 329px;
+    padding: var(--padding-base);
+}
+
+.sheet-permission-user-dialog-search {
+    &-input {
+        width: 256px;
+        height: 32px;
+    }
+}
+
+.sheet-permission-user-list {
+    height: 240px;
+    overflow-y: auto;
+}
+
+.sheet-permission-user-list-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.sheet-permission-user-list-empty-text {
+    width: 240px;
+    word-wrap: break-word;
+    color: rgb(var(--grey-400));
+    font-size: 13px;
+}
+
+.sheet-permission-user-item {
+    display: flex;
+    align-items: center;
+    margin: var(--margin-xs) 0;
+    border-radius: 6px;
+    padding: var(--padding-xs) var(--padding-sm);
+
+    &:hover {
+        background-color: rgb(var(--grey-50));
+    }
+
+    div {
+        margin-left: 6px;
+    }
+
+    &-name {
+        width: 186px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+.sheet-permission-split {
+    height: 1px;
+    background-color: rgb(var(--grey-200));
+}
+
+.sheet-permission-user-dialog-footer {
+    height: 36px;
+    padding: var(--padding-xs) 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: var(--margin-xs);
+    height: 28px;
+
+    &-confirm {
+        margin-left: var(--margin-sm);
+    }
+}
+
+.sheet-permission-user-dialog-button {
+    height: 28px;
+    line-height: 28px;
+    padding: 0px var(--padding-base);
+}
+
+:global(.sheet-permission-user-dialog .univer-dialog-close) {
+    display: none;
+}
+
+:global(.sheet-permission-user-dialog .univer-dialog-header) {
+    display: none;
+}
+
+:global(.sheet-permission-user-dialog .univer-dialog-body) {
+    padding: 0;
+}

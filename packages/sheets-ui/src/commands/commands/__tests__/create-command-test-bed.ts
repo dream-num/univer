@@ -26,7 +26,11 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { BorderStyleManagerService, SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
+import { BorderStyleManagerService,
+    RangeProtectionRuleModel,
+    SelectionManagerService,
+
+    SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -98,8 +102,11 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([BorderStyleManagerService]);
             injector.add([SheetInterceptorService]);
             injector.add([LexerTreeBuilder]);
-            injector.add([SheetPermissionService]);
-
+            injector.add([WorksheetPermissionService]);
+            injector.add([WorksheetProtectionPointModel]);
+            injector.add([WorkbookPermissionService]);
+            injector.add([WorksheetProtectionRuleModel]);
+            injector.add([RangeProtectionRuleModel]);
             dependencies?.forEach((d) => injector.add(d));
         }
     }

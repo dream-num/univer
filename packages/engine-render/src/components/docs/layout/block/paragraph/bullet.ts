@@ -26,7 +26,7 @@ export function dealWithBullet(
     lists?: ILists,
     listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
     localeService?: LocaleService
-): IDocumentSkeletonBullet | undefined {
+): Nullable<IDocumentSkeletonBullet> {
     if (!bullet || !lists) {
         return;
     }

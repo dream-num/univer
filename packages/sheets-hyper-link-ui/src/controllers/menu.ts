@@ -15,8 +15,10 @@
  */
 
 import { UniverInstanceType } from '@univerjs/core';
-import { getMenuHiddenObservable, type IMenuItem, MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
+import { getMenuHiddenObservable, KeyCode, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
+import { whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { InsertHyperLinkOperation } from '../commands/operations/sidebar.operations';
 
 export const insertLinkMenuFactory = (accessor: IAccessor) => {
@@ -27,4 +29,10 @@ export const insertLinkMenuFactory = (accessor: IAccessor) => {
         title: 'hyperLink.menu.add',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     } as IMenuItem;
+};
+
+export const InsertLinkShortcut: IShortcutItem = {
+    id: InsertHyperLinkOperation.id,
+    binding: KeyCode.K | MetaKeys.CTRL_COMMAND,
+    preconditions: whenSheetEditorFocused,
 };

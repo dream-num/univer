@@ -16,13 +16,13 @@
 
 import { Disposable, ICommandService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
+import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 import { CellLinkEdit } from '../views/CellLinkEdit';
 import { CloseHyperLinkSidebarOperation, InsertHyperLinkOperation, OpenHyperLinkSidebarOperation } from '../commands/operations/sidebar.operations';
 import { zhCN } from '../locales';
-import { insertLinkMenuFactory } from './menu';
+import { insertLinkMenuFactory, InsertLinkShortcut } from './menu';
 
 export interface IUniverSheetsHyperLinkUIConfig {
     menu?: MenuConfig;
@@ -36,7 +36,8 @@ export class SheetsHyperLinkUIController extends Disposable {
         @ICommandService private _commandService: ICommandService,
         @Inject(LocaleService) private _localeService: LocaleService,
         @IMenuService private _menuService: IMenuService,
-        @Inject(Injector) private _injector: Injector
+        @Inject(Injector) private _injector: Injector,
+        @Inject(IShortcutService) private _shortcutService: IShortcutService
     ) {
         super();
 
@@ -44,6 +45,7 @@ export class SheetsHyperLinkUIController extends Disposable {
         this._initCommands();
         this._initLocale();
         this._initMenus();
+        this._initShortCut();
     }
 
     private _initComponents() {
@@ -73,5 +75,9 @@ export class SheetsHyperLinkUIController extends Disposable {
 
     private _initMenus() {
         this._menuService.addMenuItem(insertLinkMenuFactory(this._injector), this._config?.menu ?? {});
+    }
+
+    private _initShortCut() {
+        this._shortcutService.registerShortcut(InsertLinkShortcut);
     }
 }

@@ -1,6 +1,7 @@
 import antfu from '@antfu/eslint-config';
 import header from 'eslint-plugin-header';
 import barrel from 'eslint-plugin-no-barrel-import';
+import penetrating from 'eslint-plugin-no-penetrating-import';
 import { baseRules, typescriptPreset } from '@univerjs/shared/eslint';
 
 export default antfu({
@@ -45,9 +46,11 @@ export default antfu({
     plugins: {
         header,
         barrel,
+        penetrating,
     },
     rules: {
         'barrel/no-barrel-import': 2,
+        'penetrating/no-penetrating-import': 2,
         'header/header': [
             2,
             'block',

@@ -59,6 +59,9 @@ importers:
       eslint-plugin-no-barrel-import:
         specifier: ^0.0.2
         version: 0.0.2(eslint@8.57.0)
+      eslint-plugin-no-penetrating-import:
+        specifier: ^0.0.1
+        version: 0.0.1(eslint@8.57.0)
       eslint-plugin-react:
         specifier: ^7.34.1
         version: 7.34.1(eslint@8.57.0)
@@ -6340,6 +6343,12 @@ packages:
   eslint-plugin-no-only-tests@3.1.0:
     resolution: {integrity: sha512-Lf4YW/bL6Un1R6A76pRZyE1dl1vr31G/ev8UzIc/geCgFWyrKil8hVjYqWVKGB/UIGmb6Slzs9T0wNezdSVegw==}
     engines: {node: '>=5.0.0'}
+
+  eslint-plugin-no-penetrating-import@0.0.1:
+    resolution: {integrity: sha512-uFe2sOCiGM1WB7nrHdv8yr7su8MtJqE3b0x+ayil7UmPqbRXzDr0h2l3OCKv1bz5r2+MiJG5A25fQ+V5Q5qnIg==}
+    engines: {node: ^14.17.0 || ^16.0.0 || >= 18.0.0}
+    peerDependencies:
+      eslint: '>=7'
 
   eslint-plugin-perfectionist@2.10.0:
     resolution: {integrity: sha512-P+tdrkHeMWBc55+DZsoDOAftV1WCsEoHaKm6JC7zajFus/syfT4vUPBFb3atGFSuyaVnGQGHlcKpP9X3Q0gH/w==}
@@ -15468,6 +15477,11 @@ snapshots:
       requireindex: 1.2.0
 
   eslint-plugin-no-only-tests@3.1.0: {}
+
+  eslint-plugin-no-penetrating-import@0.0.1(eslint@8.57.0):
+    dependencies:
+      eslint: 8.57.0
+      requireindex: 1.2.0
 
   eslint-plugin-perfectionist@2.10.0(eslint@8.57.0)(typescript@5.4.5)(vue-eslint-parser@9.4.2(eslint@8.57.0)):
     dependencies:

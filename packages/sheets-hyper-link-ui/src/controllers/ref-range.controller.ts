@@ -18,11 +18,8 @@ import type { IRange } from '@univerjs/core';
 import { Disposable, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
+import type { IAddHyperLinkMutationParams, ICellHyperLink, IRemoveHyperLinkMutationParams, IUpdateHyperLinkRefMutationParams } from '@univerjs/sheets-hyper-link';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkRefMutation } from '@univerjs/sheets-hyper-link';
-import type { IAddHyperLinkMutationParams } from '@univerjs/sheets-hyper-link/commands/mutations/add-hyper-link.mutation.js';
-import type { IRemoveHyperLinkMutationParams } from '@univerjs/sheets-hyper-link/commands/mutations/remove-hyper-link.mutation.js';
-import type { IUpdateHyperLinkRefMutationParams } from '@univerjs/sheets-hyper-link/commands/mutations/update-hyper-link.mutation.js';
-import type { ICellHyperLink } from '@univerjs/sheets-hyper-link/types/interfaces/i-hyper-link.js';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 

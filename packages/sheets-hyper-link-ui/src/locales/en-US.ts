@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type zhCN from './zh-CN';
+
+const enUS: typeof zhCN = {
     hyperLink: {
         form: {
             editTitle: 'Edit Link',
@@ -22,15 +24,21 @@ export default {
             label: 'Label',
             type: 'Type',
             link: 'Link',
-            linkPlaceholder: 'Place text link',
+            linkPlaceholder: 'Please input link',
             range: 'Range',
             worksheet: 'Worksheet',
             definedName: 'Defined Name',
             ok: 'OK',
             cancel: 'Cancel',
+            labelPlaceholder: 'Please input label',
+            inputError: 'Please input',
+            selectError: 'Please select',
+            linkError: 'Please input legal link',
         },
         menu: {
             add: 'Insert Link',
         },
     },
 };
+
+export default enUS;

@@ -31,6 +31,7 @@ export default {
             cancel: '取消',
             inputError: '请输入',
             selectError: '请选择',
+            linkError: '请输入合法的链接',
         },
         menu: {
             add: '添加链接',

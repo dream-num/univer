@@ -25,6 +25,7 @@ import { AddHyperLinkCommand, HyperLinkModel, UpdateHyperLinkCommand } from '@un
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
+import { isLegalLink } from '../../common/util';
 import styles from './index.module.less';
 
 enum LinkType {
@@ -189,7 +190,9 @@ export const CellLinkEdit = () => {
                 />
             </FormLayout>
             {type === LinkType.link && (
-                <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.inputError') : ''}>
+                <FormLayout
+                    error={showError ? !payload ? localeService.t('hyperLink.form.inputError') : !isLegalLink(payload) ? localeService.t('hyperLink.form.linkError') : '' : ''}
+                >
                     <Input value={payload} onChange={setPayload} placeholder={localeService.t('hyperLink.form.linkPlaceholder')} />
                 </FormLayout>
             )}

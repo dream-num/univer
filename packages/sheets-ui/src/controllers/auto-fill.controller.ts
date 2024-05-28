@@ -39,7 +39,6 @@ import type {
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
-    ClearSelectionContentCommand,
     getAddMergeMutationRangeByType,
     InsertColMutation,
     InsertRowMutation,

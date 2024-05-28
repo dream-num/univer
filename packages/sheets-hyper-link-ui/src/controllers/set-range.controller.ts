@@ -15,7 +15,7 @@
  */
 
 import type { IMutationInfo } from '@univerjs/core';
-import { CellValueType, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range } from '@univerjs/core';
+import { CellValueType, Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, getSheetCommandTarget, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
@@ -28,7 +28,6 @@ export class SheetHyperLinkSetRangeController extends Disposable {
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel,
-        @ICommandService private readonly _commandService: ICommandService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
@@ -37,11 +36,16 @@ export class SheetHyperLinkSetRangeController extends Disposable {
         this._initCommandInterceptor();
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initCommandInterceptor() {
-        this._sheetInterceptorService.interceptCommand({
+        this._initAddHyperLinkCommandInterceptor();
+        this._initSetRangeValuesCommandInterceptor();
+        this._initUpdateHyperLinkCommandInterceptor();
+        this._initClearSelectionCommandInterceptor();
+    }
 
-            // eslint-disable-next-line max-lines-per-function
+    private _initAddHyperLinkCommandInterceptor() {
+        this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
+
             getMutations: (command) => {
                 if (command.id === AddHyperLinkCommand.id) {
                     const params = command.params as IAddHyperLinkCommandParams;
@@ -73,6 +77,17 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     };
                 }
 
+                return {
+                    redos: [],
+                    undos: [],
+                };
+            },
+        }));
+    }
+
+    private _initUpdateHyperLinkCommandInterceptor() {
+        this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
+            getMutations: (command) => {
                 if (command.id === UpdateHyperLinkCommand.id) {
                     const params = command.params as IUpdateHyperLinkCommandParams;
                     const { unitId, subUnitId, id, payload } = params;
@@ -106,6 +121,17 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     }
                 }
 
+                return {
+                    redos: [],
+                    undos: [],
+                };
+            },
+        }));
+    }
+
+    private _initSetRangeValuesCommandInterceptor() {
+        this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
+            getMutations: (command) => {
                 if (command.id === SetRangeValuesCommand.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
 
@@ -173,7 +199,17 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                         redos,
                     };
                 }
+                return {
+                    redos: [],
+                    undos: [],
+                };
+            },
+        }));
+    }
 
+    private _initClearSelectionCommandInterceptor() {
+        this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
+            getMutations: (command) => {
                 if (command.id === ClearSelectionContentCommand.id || command.id === ClearSelectionAllCommand.id) {
                     const redos: IMutationInfo[] = [];
                     const undos: IMutationInfo[] = [];
@@ -215,6 +251,6 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     undos: [],
                 };
             },
-        });
+        }));
     }
 }

@@ -77,7 +77,7 @@ export const SheetPermissionUserDialog = () => {
                     : (
                         <div className={styles.sheetPermissionUserListEmpty}>
                             <img width={240} height={120} src={UserEmptyBase64} alt="" />
-                            <p className={styles.sheetPermissionUserListEmptyText}>no designated person , Share link to invite specific people</p>
+                            <p className={styles.sheetPermissionUserListEmptyText}>{localeService.t('permission.dialog.userEmpty')}</p>
                         </div>
                     )}
             </div>

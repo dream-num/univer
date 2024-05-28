@@ -52,6 +52,7 @@ export interface ISetRangeValuesCommandParams extends Partial<ISheetCommandShare
 export const SetRangeValuesCommand: ICommand = {
     id: 'sheet.command.set-range-values',
     type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params: ISetRangeValuesCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

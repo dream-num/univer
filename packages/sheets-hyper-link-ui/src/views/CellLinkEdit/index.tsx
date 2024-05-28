@@ -205,10 +205,18 @@ export const CellLinkEdit = () => {
             {type === LinkType.range && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.inputError') : ''}>
                     <RangeSelector
+                        openForSheetUnitId={workbook.getUnitId()}
                         id={createInternalEditorID('hyper-link-edit')}
                         isSingleChoice
                         value={payload}
-                        onChange={(newValue) => setPayload(serializeRangeToRefString(newValue[0]))}
+                        onChange={(newValue) => {
+                            const range = newValue[0];
+                            if (!range.sheetName) {
+                                range.sheetName = workbook.getActiveSheet().getName();
+                            }
+                            setPayload(serializeRangeToRefString(range));
+                        }}
+
                     />
                 </FormLayout>
             )}

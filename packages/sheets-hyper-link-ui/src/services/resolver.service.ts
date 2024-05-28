@@ -19,6 +19,7 @@ import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@un
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { NORMAL_SELECTION_PLUGIN_NAME, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { ScrollToCellCommand } from '@univerjs/sheets-ui';
 
 interface ISheetUrlParams {
     gid?: string;
@@ -129,7 +130,7 @@ export class SheetsHyperLinkResolverService {
 
     async navigateToRange(unitId: string, subUnitId: string, range: IRange) {
         if (await this.navigateToSheetById(unitId, subUnitId)) {
-            this._commandService.executeCommand(
+            await this._commandService.executeCommand(
                 SetSelectionsOperation.id,
                 {
                     unitId,
@@ -145,6 +146,9 @@ export class SheetsHyperLinkResolverService {
                     }],
                 } as ISetSelectionsOperationParams
             );
+            await this._commandService.executeCommand(ScrollToCellCommand.id, {
+                range,
+            });
         }
     }
 

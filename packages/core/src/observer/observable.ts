@@ -76,14 +76,6 @@ export function isObserver(value: any) {
  * @deprecated use rxjs instead
  */
 export class Observer<T = void> {
-    /** @hidden */
-    _willBeUnregistered = false;
-
-    /**
-     * Gets or sets a property defining that the observer as to be unregistered after the next notification
-     */
-    unregisterOnNextCall = false;
-
     dispose() {
         this.observable.remove(this);
     }
@@ -150,15 +142,13 @@ export class Observable<T> {
      */
     add(
         callback: (eventData: T, eventState: EventState) => void,
-        insertFirst = false,
-        unregisterOnFirstCall = false
+        insertFirst = false
     ): Nullable<Observer<T>> {
         if (!callback) {
             return null;
         }
 
         const observer = new Observer(callback, this);
-        observer.unregisterOnNextCall = unregisterOnFirstCall;
 
         if (insertFirst) {
             this._observers.unshift(observer);
@@ -174,15 +164,6 @@ export class Observable<T> {
     }
 
     /**
-     * Create a new WorkBookObserver with the specified callback and unregisters after the next notification
-     * @param callback the callback that will be executed for that WorkBookObserver
-     * @returns the new observer created for the callback
-     */
-    addOnce(callback: (eventData: T, eventState: EventState) => void): Nullable<Observer<T>> {
-        return this.add(callback, undefined, true);
-    }
-
-    /**
      * Remove an WorkBookObserver from the Observable object
      * @param observer the instance of the WorkBookObserver to remove
      * @returns false if it doesn't belong to this Observable
@@ -195,28 +176,8 @@ export class Observable<T> {
         const index = this._observers.indexOf(observer);
 
         if (index !== -1) {
-            this._deferUnregister(observer);
+            this._remove(observer);
             return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Remove a callback from the Observable object
-     * @param callback the callback to remove
-     * @returns false if it doesn't belong to this Observable
-     */
-    removeCallback(callback: (eventData: T, eventState: EventState) => void): boolean {
-        for (let index = 0; index < this._observers.length; index++) {
-            const observer = this._observers[index];
-            if (observer._willBeUnregistered) {
-                continue;
-            }
-            if (observer.callback === callback) {
-                this._deferUnregister(observer);
-                return true;
-            }
         }
 
         return false;
@@ -259,15 +220,8 @@ export class Observable<T> {
 
         for (let index = 0; index < this._observers.length; index++) {
             const obs = this._observers[index];
-            if (obs._willBeUnregistered) {
-                continue;
-            }
 
             state.lastReturnValue = obs.callback(eventData, state);
-
-            if (obs.unregisterOnNextCall) {
-                this._deferUnregister(obs);
-            }
 
             if (state.isStopPropagation) {
                 _isStopPropagation = true;
@@ -314,15 +268,8 @@ export class Observable<T> {
             if (state.skipNextObservers) {
                 continue;
             }
-            if (obs._willBeUnregistered) {
-                continue;
-            }
 
             p = p.then(() => obs.callback(eventData, state));
-
-            if (obs.unregisterOnNextCall) {
-                this._deferUnregister(obs);
-            }
         }
 
         // return the eventData
@@ -335,18 +282,10 @@ export class Observable<T> {
      * @param eventData defines the data to be sent to each callback
      */
     notifyObserver(observer: Observer<T>, eventData: T): Nullable<INotifyObserversReturn> {
-        if (observer._willBeUnregistered) {
-            return;
-        }
-
         const state = this._eventState;
         state.skipNextObservers = false;
 
         observer.callback(eventData, state);
-
-        if (observer.unregisterOnNextCall) {
-            this._deferUnregister(observer);
-        }
 
         return {
             lastReturnValue: state.lastReturnValue,
@@ -380,14 +319,6 @@ export class Observable<T> {
         result._observers = this._observers.slice(0);
 
         return result;
-    }
-
-    private _deferUnregister(observer: Observer<T>): void {
-        observer.unregisterOnNextCall = false;
-        observer._willBeUnregistered = true;
-        setTimeout(() => {
-            this._remove(observer);
-        }, 0);
     }
 
     // This should only be called when not iterating over _observers to avoid callback skipping.

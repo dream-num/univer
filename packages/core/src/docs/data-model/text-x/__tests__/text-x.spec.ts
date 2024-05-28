@@ -251,5 +251,9 @@ describe('test TextX methods and branches', () => {
 
             expect(TextX.isNoop(textX.serialize())).toBe(false);
         });
+
+        it('textX name should to be text-x', () => {
+            expect(TextX.name).toBe('text-x');
+        });
     });
 });

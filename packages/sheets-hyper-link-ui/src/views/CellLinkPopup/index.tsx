@@ -17,7 +17,7 @@
 import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
 import { CancelHyperLinkCommand, HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import React from 'react';
-import { AllBorderSingle, CancelMergeSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
+import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import { ICommandService } from '@univerjs/core';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';

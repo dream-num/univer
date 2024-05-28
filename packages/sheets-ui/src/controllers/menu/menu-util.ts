@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IPermissionTypes, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { IDrawingManagerService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
 
 import type { ICellPermission } from '@univerjs/sheets';
@@ -58,7 +58,7 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
         return of(true);
     }
     return combineLatest([userManagerService.currentUser$, workbook.activeSheet$, selectionManagerService.selectionMoveEnd$, drawingManagerService.focus$]).pipe(
-        switchMap(([user, sheet, selection, drawings]) => {
+        switchMap(([_user, _sheet, _selection, drawings]) => {
             if (drawings.length > 0) {
                 return of(true);
             }
@@ -380,7 +380,7 @@ export function getCellMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
     );
 }
 
-export function getWorkbookPermissionDisable$(accessor: IAccessor) {
+export function getWorkbookPermissionDisable$(accessor: IAccessor, workbookPermissionTypes: WorkbookPermissionPointConstructor[]) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
@@ -397,12 +397,14 @@ export function getWorkbookPermissionDisable$(accessor: IAccessor) {
             if (!activeSheet) {
                 return of(true);
             }
-            const workbookEditable$ = permissionService.getPermissionPoint$(new WorkbookEditablePermission(unitId).id)?.pipe(map((permission) => permission.value)) ?? of(false);
+            const workbookPermissionIds: string[] = [];
+            workbookPermissionTypes.forEach((F) => workbookPermissionIds.push(new F(unitId).id));
+            const workbookPermission$ = permissionService.composePermission$(workbookPermissionIds).pipe(map((list) => list.every((item) => item.value === true)));
             const workbookManageCollaboratorPermission$ = permissionService.getPermissionPoint$(new WorkbookManageCollaboratorPermission(unitId).id)?.pipe(map((permission) => permission.value)) ?? of(false);
 
-            return combineLatest([workbookEditable$, workbookManageCollaboratorPermission$]).pipe(
-                map(([editable, manageable]) => {
-                    if (!editable) {
+            return combineLatest([workbookPermission$, workbookManageCollaboratorPermission$]).pipe(
+                map(([basePermission, manageable]) => {
+                    if (!basePermission) {
                         return true;
                     }
 

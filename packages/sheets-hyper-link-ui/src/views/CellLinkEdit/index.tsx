@@ -98,6 +98,12 @@ export const CellLinkEdit = () => {
         setId('');
     }, [editing, hyperLinkModel, resolverService, univerInstanceService]);
 
+    useEffect(() => {
+        if (!display) {
+            setDisplay(payload);
+        }
+    }, [payload, display]);
+
     const linkTypeOptions = [
         {
             label: localeService.t('hyperLink.form.link'),

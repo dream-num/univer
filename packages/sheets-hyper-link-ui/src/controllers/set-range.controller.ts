@@ -130,9 +130,11 @@ export class SheetHyperLinkSetRangeController extends Disposable {
         }));
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initSetRangeValuesCommandInterceptor() {
         this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
 
+            // eslint-disable-next-line max-lines-per-function
             getMutations: (command) => {
                 if (command.id === SetRangeValuesCommand.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
@@ -141,11 +143,41 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     const redos: IMutationInfo[] = [];
                     const undos: IMutationInfo[] = [];
                     if (params.cellValue) {
+                        // eslint-disable-next-line max-lines-per-function
                         new ObjectMatrix(params.cellValue).forValue((row, col, cell) => {
                             const cellValue = (cell?.v ?? cell?.p?.body?.dataStream.slice(0, -2) ?? '').toString();
                             const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
 
-                            if (!link || link.display === cellValue) {
+                            if (!link) {
+                                if (isLegalLink(cellValue)) {
+                                    const id = Tools.generateRandomId();
+                                    undos.push({
+                                        id: RemoveHyperLinkMutation.id,
+                                        params: {
+                                            unitId,
+                                            subUnitId,
+                                            id,
+                                        },
+                                    });
+                                    redos.push({
+                                        id: AddHyperLinkMutation.id,
+                                        params: {
+                                            unitId,
+                                            subUnitId,
+                                            link: {
+                                                id,
+                                                row,
+                                                column: col,
+                                                display: cellValue,
+                                                payload: cellValue,
+                                            },
+                                        },
+                                    });
+                                }
+                                return;
+                            }
+
+                            if (link.display === cellValue) {
                                 return;
                             }
 

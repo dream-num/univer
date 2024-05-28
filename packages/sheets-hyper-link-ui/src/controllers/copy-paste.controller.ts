@@ -17,7 +17,7 @@
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import { Disposable, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, Tools } from '@univerjs/core';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import type { ICopyPastePayload, IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
+import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SPECIAL_PASTE_FORMULA } from '@univerjs/sheets-formula';
@@ -51,7 +51,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
                 const { range: pastedRange, unitId, subUnitId } = pasteTo;
                 return this._generateMutations(pastedRange, { copyType, pasteType, copyRange, unitId, subUnitId });
             },
-            onPastePlainText: (pasteTo: ISheetDiscreteRangeLocation, text: string, payload: ICopyPastePayload) => {
+            onPastePlainText: (pasteTo: ISheetDiscreteRangeLocation, text: string) => {
                 if (isLegalLink(text)) {
                     const { range, unitId, subUnitId } = pasteTo;
                     const { ranges: [pasteToRange], mapFunc } = virtualizeDiscreteRanges([range]);

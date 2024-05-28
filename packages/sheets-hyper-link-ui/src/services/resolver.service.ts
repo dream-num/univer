@@ -221,6 +221,24 @@ export class SheetsHyperLinkResolverService {
             return true;
         }
 
+        const targetSheet = workbook.getSheetBySheetId(subUnitId);
+
+        if (!targetSheet) {
+            this._messageService.show({
+                content: this._localeService.t('hyperLink.message.noSheet'),
+                type: MessageType.Error,
+            });
+            return;
+        }
+
+        if (workbook.getHiddenWorksheets().indexOf(subUnitId) > -1) {
+            this._messageService.show({
+                content: this._localeService.t('hyperLink.message.hiddenSheet'),
+                type: MessageType.Error,
+            });
+            return;
+        }
+
         return await this._commandService.executeCommand(SetWorksheetActiveOperation.id, { unitId, subUnitId });
     }
 

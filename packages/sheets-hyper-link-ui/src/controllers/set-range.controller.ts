@@ -15,12 +15,13 @@
  */
 
 import type { IMutationInfo } from '@univerjs/core';
-import { CellValueType, Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range } from '@univerjs/core';
+import { CellValueType, Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, getSheetCommandTarget, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
 import type { IAddHyperLinkCommandParams, IUpdateHyperLinkCommandParams, IUpdateHyperLinkMutationParams } from '@univerjs/sheets-hyper-link';
 import { AddHyperLinkCommand, AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkCommand, UpdateHyperLinkMutation } from '@univerjs/sheets-hyper-link';
+import { isLegalLink } from '../common/util';
 
 @OnLifecycle(LifecycleStages.Starting, SheetHyperLinkSetRangeController)
 export class SheetHyperLinkSetRangeController extends Disposable {
@@ -129,8 +130,10 @@ export class SheetHyperLinkSetRangeController extends Disposable {
         }));
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initSetRangeValuesCommandInterceptor() {
         this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
+            // eslint-disable-next-line max-lines-per-function
             getMutations: (command) => {
                 if (command.id === SetRangeValuesCommand.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
@@ -139,9 +142,55 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     const redos: IMutationInfo[] = [];
                     const undos: IMutationInfo[] = [];
                     if (params.cellValue) {
+                        // eslint-disable-next-line max-lines-per-function
                         new ObjectMatrix(params.cellValue).forValue((row, col, cell) => {
                             const cellValue = (cell?.v ?? cell?.p?.body?.dataStream.slice(0, -2) ?? '').toString();
                             const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
+                            if (isLegalLink(cellValue)) {
+                                if (link) {
+                                    redos.push({
+                                        id: RemoveHyperLinkMutation.id,
+                                        params: {
+                                            unitId,
+                                            subUnitId,
+                                            id: link.id,
+                                        },
+                                    });
+                                    undos.push({
+                                        id: AddHyperLinkMutation.id,
+                                        params: {
+                                            unitId,
+                                            subUnitId,
+                                            link,
+                                        },
+                                    });
+                                }
+                                const id = Tools.generateRandomId();
+                                redos.push({
+                                    id: AddHyperLinkMutation.id,
+                                    params: {
+                                        unitId,
+                                        subUnitId,
+                                        link: {
+                                            id,
+                                            row,
+                                            column: col,
+                                            display: cellValue,
+                                            payload: cellValue,
+                                        },
+                                    },
+                                });
+                                undos.push({
+                                    id: RemoveHyperLinkMutation.id,
+                                    params: {
+                                        unitId,
+                                        subUnitId,
+                                        id,
+                                    },
+                                });
+                                return;
+                            }
+
                             if (!link || link.display === cellValue) {
                                 return;
                             }

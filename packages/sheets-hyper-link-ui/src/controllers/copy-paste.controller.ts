@@ -15,13 +15,14 @@
  */
 
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
-import { Disposable, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools } from '@univerjs/core';
+import { Disposable, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, Tools } from '@univerjs/core';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import type { IDiscreteRange } from '@univerjs/sheets-ui';
+import type { ICopyPastePayload, IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SPECIAL_PASTE_FORMULA } from '@univerjs/sheets-formula';
 import { SHEETS_HYPER_LINK_UI_PLUGIN } from '../types/const';
+import { isLegalLink } from '../common/util';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkCopyPasteController)
 export class SheetsHyperLinkCopyPasteController extends Disposable {
@@ -49,6 +50,64 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
                 const { range: copyRange } = pasteFrom || {};
                 const { range: pastedRange, unitId, subUnitId } = pasteTo;
                 return this._generateMutations(pastedRange, { copyType, pasteType, copyRange, unitId, subUnitId });
+            },
+            onPastePlainText: (pasteTo: ISheetDiscreteRangeLocation, text: string, payload: ICopyPastePayload) => {
+                if (isLegalLink(text)) {
+                    const { range, unitId, subUnitId } = pasteTo;
+                    const { ranges: [pasteToRange], mapFunc } = virtualizeDiscreteRanges([range]);
+                    const redos: IMutationInfo[] = [];
+                    const undos: IMutationInfo[] = [];
+                    Range.foreach(pasteToRange, (originRow, originCol) => {
+                        const { row, col: column } = mapFunc(originRow, originCol);
+                        const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, column);
+                        if (link) {
+                            redos.push({
+                                id: RemoveHyperLinkMutation.id,
+                                params: {
+                                    unitId,
+                                    subUnitId,
+                                    id: link.id,
+                                },
+                            });
+                        }
+                        const newId = Tools.generateRandomId();
+                        redos.push({
+                            id: AddHyperLinkMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                link: {
+                                    id: newId,
+                                    row,
+                                    column,
+                                    display: text,
+                                    payload: text,
+                                },
+                            },
+                        });
+                        undos.push({
+                            id: RemoveHyperLinkMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                id: newId,
+                            },
+                        });
+                        if (link) {
+                            undos.push({
+                                id: AddHyperLinkMutation.id,
+                                params: {
+                                    unitId,
+                                    subUnitId,
+                                    link,
+                                },
+                            });
+                        }
+                    });
+                    return { redos, undos };
+                }
+
+                return { undos: [], redos: [] };
             },
         });
     }

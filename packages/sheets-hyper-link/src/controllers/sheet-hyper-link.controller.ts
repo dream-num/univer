@@ -20,7 +20,7 @@ import { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '../commands
 import { RemoveHyperLinkMutation } from '../commands/mutations/remove-hyper-link.mutation';
 import { AddHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
 import { UpdateHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
-import { RemoveHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
+import { CancelHyperLinkCommand, RemoveHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
 
 @OnLifecycle(LifecycleStages.Starting, SheetsHyperLinkController)
 export class SheetsHyperLinkController extends Disposable {
@@ -42,6 +42,7 @@ export class SheetsHyperLinkController extends Disposable {
             AddHyperLinkCommand,
             UpdateHyperLinkCommand,
             RemoveHyperLinkCommand,
+            CancelHyperLinkCommand,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

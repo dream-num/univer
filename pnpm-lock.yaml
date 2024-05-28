@@ -232,8 +232,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/find-replace
       '@univerjs/icons':
-        specifier: ^0.1.52
-        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.53
+        version: 0.1.53(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@univerjs/image':
         specifier: workspace:*
         version: link:../packages/image
@@ -482,8 +482,8 @@ importers:
         specifier: ^4.1.13
         version: 4.1.13
       '@univerjs/icons':
-        specifier: ^0.1.52
-        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.53
+        version: 0.1.53(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-dialog:
         specifier: ^9.4.0
         version: 9.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -1016,8 +1016,8 @@ importers:
   packages/sheets-conditional-formatting-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.52
-        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.53
+        version: 0.1.53(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../sheets-conditional-formatting
@@ -1192,8 +1192,8 @@ importers:
   packages/sheets-filter-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.52
-        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.53
+        version: 0.1.53(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-virtual-list:
         specifier: ^3.11.5
         version: 3.11.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -1405,8 +1405,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.52
-        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.53
+        version: 0.1.53(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -1502,8 +1502,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.52
-        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.53
+        version: 0.1.53(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1782,8 +1782,8 @@ importers:
   packages/thread-comment-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.52
-        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.53
+        version: 0.1.53(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@univerjs/protocol':
         specifier: ^0.1.32
         version: 0.1.32(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
@@ -1834,8 +1834,8 @@ importers:
   packages/ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.52
-        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.53
+        version: 0.1.53(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       localforage:
         specifier: ^1.10.0
         version: 1.10.0
@@ -4663,6 +4663,12 @@ packages:
 
   '@univerjs/icons@0.1.52':
     resolution: {integrity: sha512-VDg4jc1yLgNCOCZGLwcmAo5lGy/Jp/2c34QO+fClQzx2Qih6EWqxHyJfdjFILfNwWdJvrlFEIG4zMYtNM1Z2TQ==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+
+  '@univerjs/icons@0.1.53':
+    resolution: {integrity: sha512-QuwZPcX+2BK7dgl8pRZ/sMGr1+nQX+qnGIhFXpR84/sQO1ow8KIdRWezcWNpVCIUQg1MXqNyIQnn9CT79lpzoA==}
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -13550,6 +13556,11 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
 
   '@univerjs/icons@0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
+  '@univerjs/icons@0.1.53(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)

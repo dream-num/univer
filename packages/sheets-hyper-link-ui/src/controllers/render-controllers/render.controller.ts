@@ -56,7 +56,7 @@ export class SheetsHyperLinkRenderController extends Disposable {
                                         s: BooleanNumber.TRUE,
                                     },
                                     cl: {
-                                        rgb: styleSheet.blue400,
+                                        rgb: styleSheet.blue500,
                                     },
                                 },
                             });

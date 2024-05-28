@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { CancelHyperLinkCommand } from './commands/commands/remove-hyper-link.command';
 export { AddHyperLinkMutation, type IAddHyperLinkMutationParams } from './commands/mutations/add-hyper-link.mutation';
 export { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation, type IUpdateHyperLinkMutationParams, type IUpdateHyperLinkRefMutationParams } from './commands/mutations/update-hyper-link.mutation';
 export { RemoveHyperLinkMutation, type IRemoveHyperLinkMutationParams } from './commands/mutations/remove-hyper-link.mutation';

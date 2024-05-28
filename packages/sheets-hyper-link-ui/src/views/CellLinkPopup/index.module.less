@@ -4,10 +4,44 @@
     align-items: center;
     justify-content: space-between;
     padding: 12px;
-    background: rgba(var(--color-white));
-    border: 1px solid #ccc;
     box-shadow: var(--box-shadow-base);
-    border-radius: 4px;
+    border-radius: 8px;
+    border: 1px solid rgb(var(--grey-200));
+    background: rgb(var(--color-white));
+    max-width: 328px;
+    overflow: hidden;
+}
+
+.cell-link-type {
+    height: 20px;
+    width: 20px;
+    font-size: 16px;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+.cell-link-content {
+    height: 24px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 13px;
+    line-height: 20px;
+    color: rgb(var(--blue-500));
+    cursor: pointer;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cell-link-url {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .cell-link-operations {
@@ -15,6 +49,10 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    height: 24px;
+    flex-basis: auto;
+    flex-grow: 0;
+    flex-shrink: 0;
 }
 
 .cell-link-operation {
@@ -22,7 +60,7 @@
     height: 24px;
     border-radius: 4px;
     margin-left: 8px;
-    font-size: 14px;
+    font-size: 16px;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -33,11 +71,4 @@
 
 .cell-link-operation:hover {
     background: #ccc;
-}
-
-.cell-link-content {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
 }

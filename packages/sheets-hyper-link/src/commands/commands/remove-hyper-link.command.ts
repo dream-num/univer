@@ -72,3 +72,43 @@ export const RemoveHyperLinkCommand: ICommand<IRemoveHyperLinkCommandParams> = {
         return false;
     },
 };
+
+export const CancelHyperLinkCommand: ICommand<IRemoveHyperLinkCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'sheets.command.cancel-hyper-link',
+    async handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const model = accessor.get(HyperLinkModel);
+        const { unitId, subUnitId, id } = params;
+        const link = model.getHyperLink(unitId, subUnitId, id);
+
+        const redo: IMutationInfo = {
+            id: RemoveHyperLinkMutation.id,
+            params,
+        };
+        const undo: IMutationInfo = {
+            id: AddHyperLinkMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                link,
+            } as IAddHyperLinkMutationParams,
+        };
+
+        const res = await sequenceExecuteAsync([redo], commandService);
+        if (res.result) {
+            undoRedoService.pushUndoRedo({
+                redoMutations: [redo],
+                undoMutations: [undo],
+                unitID: unitId,
+            });
+            return true;
+        }
+
+        return false;
+    },
+};

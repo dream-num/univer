@@ -37,31 +37,40 @@ export class SheetsHyperLinkResolverService {
         const { gid, range, rangeid } = params;
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
-            return '';
+            return null;
         }
 
         const sheet = gid ? workbook.getSheetBySheetId(gid) : workbook.getActiveSheet();
         const sheetName = sheet?.getName() ?? '';
 
         if (range) {
-            return serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(range).range);
+            return {
+                type: 'range',
+                name: serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(range).range),
+            } as const;
         }
 
         if (rangeid) {
             const range = this._definedNamesService.getValueById(rangeid, workbook.getUnitId());
             if (range) {
-                return range.formulaOrRefString;
+                return {
+                    type: 'defineName',
+                    name: range.formulaOrRefString,
+                } as const;
             }
         }
 
         if (gid) {
             const worksheet = workbook.getSheetBySheetId(gid);
             if (worksheet) {
-                return worksheet.getName();
+                return {
+                    type: 'sheet',
+                    name: worksheet.getName(),
+                } as const;
             }
         }
 
-        return '';
+        return null;
     }
 
     navigateTo(params: ISheetUrlParams) {
@@ -96,9 +105,10 @@ export class SheetsHyperLinkResolverService {
                 range: search.get('range') ?? '',
                 rangeid: search.get('rangeid') ?? '',
             };
+            const urlInfo = this._getURLName(searchObj);
             return {
-                type: 'inner',
-                name: this._getURLName(searchObj) || urlStr,
+                type: urlInfo?.type || 'link',
+                name: urlInfo?.name || urlStr,
                 url: urlStr,
                 searchObj,
                 handler: () => {

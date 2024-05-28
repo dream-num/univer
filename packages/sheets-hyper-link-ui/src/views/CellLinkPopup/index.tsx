@@ -15,14 +15,22 @@
  */
 
 import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
-import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
+import { CancelHyperLinkCommand, HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import React from 'react';
-import { CreateCopySingle, EditRegionSingle, LinkSingle } from '@univerjs/icons';
+import { AllBorderSingle, CancelMergeSingle, Copy, LinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import { ICommandService } from '@univerjs/core';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { OpenHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
 import styles from './index.module.less';
+
+const iconsMap = {
+    outer: <LinkSingle />,
+    link: <LinkSingle />,
+    sheet: <Xlsx />,
+    range: <AllBorderSingle />,
+    defineName: <AllBorderSingle />,
+};
 
 export const CellLinkPopup = () => {
     const popupService = useDependency(SheetsHyperLinkPopupService);
@@ -42,14 +50,19 @@ export const CellLinkPopup = () => {
 
     return (
         <div className={styles.cellLink}>
-            <div className={styles.cellLinkContent}>
-                {linkObj.name}
+            <div className={styles.cellLinkContent} onClick={linkObj.handler}>
+                <div className={styles.cellLinkType}>
+                    {iconsMap[linkObj.type]}
+                </div>
+                <div className={styles.cellLinkUrl}>
+                    {linkObj.name}
+                </div>
             </div>
             <div className={styles.cellLinkOperations}>
                 <div
                     className={styles.cellLinkOperation}
                     onClick={() => {
-                        if (linkObj.type === 'inner') {
+                        if (linkObj.type !== 'outer') {
                             const url = new URL(window.location.href);
                             url.hash = linkObj.url.slice(1);
                             navigator.clipboard.writeText(url.href);
@@ -58,7 +71,7 @@ export const CellLinkPopup = () => {
                         }
                     }}
                 >
-                    <CreateCopySingle />
+                    <Copy />
                 </div>
                 <div
                     className={styles.cellLinkOperation}
@@ -71,10 +84,19 @@ export const CellLinkPopup = () => {
                         });
                     }}
                 >
-                    <EditRegionSingle />
+                    <WriteSingle />
                 </div>
-                <div className={styles.cellLinkOperation} onClick={linkObj.handler}>
-                    <LinkSingle />
+                <div
+                    className={styles.cellLinkOperation}
+                    onClick={() => {
+                        commandService.executeCommand(CancelHyperLinkCommand.id, {
+                            unitId,
+                            subUnitId,
+                            id: link.id,
+                        });
+                    }}
+                >
+                    <CancelMergeSingle />
                 </div>
             </div>
         </div>

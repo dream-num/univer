@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDocumentBody, IDocumentData, IPosition, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IDocumentBody, IPosition, Nullable } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
@@ -60,6 +60,7 @@ import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui'
 import { Inject } from '@wendellhu/redi';
 
 import { filter } from 'rxjs';
+import { ClearSelectionFormatCommand } from '@univerjs/sheets';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
@@ -520,7 +521,7 @@ export class StartEditController extends Disposable {
                 eventType === DeviceInputEventType.Keyboard ||
                 (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
             ) {
-                const snapshot = Tools.deepClone(documentDataModel.getSnapshot()) as IDocumentData;
+                const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
                 const documentViewModel = this._docViewModelManagerService.getViewModel(editorUnitId);
 
                 if (documentViewModel == null) {
@@ -674,6 +675,15 @@ export class StartEditController extends Disposable {
                     const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
 
                     this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            // Use fix https://github.com/dream-num/univer/issues/1231.
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id === ClearSelectionFormatCommand.id) {
+                    this._editorBridgeService.refreshEditCellState();
                 }
             })
         );

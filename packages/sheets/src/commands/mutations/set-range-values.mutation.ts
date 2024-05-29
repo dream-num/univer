@@ -155,6 +155,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
 
     type: CommandType.MUTATION,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         const { cellValue, subUnitId, unitId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -172,6 +173,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
         const styles = workbook.getStyles();
         const newValues = new ObjectMatrix(cellValue);
 
+        // eslint-disable-next-line complexity
         newValues.forValue((row, col, newVal) => {
             // clear all
             if (!newVal) {

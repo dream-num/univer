@@ -53,6 +53,11 @@ export interface IProgressService {
      * Interrupt and hide the progress bar directly
      */
     stop(): void;
+
+    /**
+     * Get the total number of tasks
+     */
+    getTaskCount(): number;
 }
 
 export class ProgressService extends Disposable implements IProgressService, IDisposable {
@@ -135,6 +140,10 @@ export class ProgressService extends Disposable implements IProgressService, IDi
 
         this._clear();
         this._progressVisible$.next(false);
+    }
+
+    getTaskCount(): number {
+        return this._taskCount;
     }
 
     private _clear() {

@@ -275,15 +275,33 @@ export class TriggerCalculationController extends Disposable {
                         // Each start of calculation of statistics once
                         if (completedFormulasCount === 1 && !needStartFormulaProgress) {
                             needStartFormulaProgress = true;
-                            formulaCalculationCount += totalFormulasToCalculate;
+                            if (startDependencyTimer) {
+                                formulaCalculationCount += totalFormulasToCalculate;
+                            } else {
+                                this._progressService.insertTaskCount(totalFormulasToCalculate);
+                            }
                         }
-                        debouncedFormulaPushTask(completedFormulasCount);
+
+                        if (startDependencyTimer) {
+                            this._formulaCalculationDoneCount = completedFormulasCount;
+                        } else {
+                            debouncedFormulaPushTask(completedFormulasCount);
+                        }
                     } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
                         if (completedArrayFormulasCount === 1 && !needStartArrayFormulaProgress) {
                             needStartArrayFormulaProgress = true;
-                            arrayFormulaCalculationCount += totalArrayFormulasToCalculate;
+                            if (startDependencyTimer) {
+                                arrayFormulaCalculationCount += totalArrayFormulasToCalculate;
+                            } else {
+                                this._progressService.insertTaskCount(totalArrayFormulasToCalculate);
+                            }
                         }
-                        debouncedArrayFormulaPushTask(completedArrayFormulasCount);
+
+                        if (startDependencyTimer) {
+                            this._arrayFormulaCalculationDoneCount = completedArrayFormulasCount;
+                        } else {
+                            debouncedArrayFormulaPushTask(completedArrayFormulasCount);
+                        }
                     }
 
                     // if (totalArrayFormulasToCalculate > 0) {
@@ -335,12 +353,12 @@ export class TriggerCalculationController extends Disposable {
                             } else if (state === FormulaExecutedStateType.STOP_EXECUTION) {
                                 this._progressService.stop();
                             }
-
-                            this._formulaCalculationDoneCount = 0;
-                            this._arrayFormulaCalculationDoneCount = 0;
-                            needStartFormulaProgress = false;
-                            needStartArrayFormulaProgress = false;
                         }
+
+                        this._formulaCalculationDoneCount = 0;
+                        this._arrayFormulaCalculationDoneCount = 0;
+                        needStartFormulaProgress = false;
+                        needStartArrayFormulaProgress = false;
                     }
 
                     console.warn(`execution result${result}`);
@@ -367,6 +385,10 @@ export class TriggerCalculationController extends Disposable {
      * @param completedCount
      */
     private _pushFormulaTask(completedCount: number) {
+        if (this._progressService.getTaskCount() === 0) {
+            return;
+        }
+
         const count = completedCount - this._formulaCalculationDoneCount;
         this._formulaCalculationDoneCount = completedCount;
         this._progressService.pushTask({ count });
@@ -377,6 +399,10 @@ export class TriggerCalculationController extends Disposable {
      * @param completedCount
      */
     private _pushArrayFormulaTask(completedCount: number) {
+        if (this._progressService.getTaskCount() === 0) {
+            return;
+        }
+
         const count = completedCount - this._arrayFormulaCalculationDoneCount;
         this._arrayFormulaCalculationDoneCount = completedCount;
         this._progressService.pushTask({ count });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDocumentBody, IDocumentData, IPosition, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IDocumentBody, IPosition, Nullable } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,

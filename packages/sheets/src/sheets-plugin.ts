@@ -109,7 +109,6 @@ export class UniverSheetsPlugin extends Plugin {
             [RangeProtectionRuleModel],
             [RangeProtectionRefRangeService],
             [RangeProtectionService],
-            [SheetDrawingDataController],
         ];
 
         if (!this._config?.notExecuteFormula) {

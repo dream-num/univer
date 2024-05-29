@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber, ColumnSeparatorType, DrawingTypeEnum, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, SectionType, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, DrawingTypeEnum, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {

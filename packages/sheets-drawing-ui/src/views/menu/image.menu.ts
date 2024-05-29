@@ -17,9 +17,6 @@
 import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { UniverInstanceType } from '@univerjs/core';
-import {
-    getCurrentSheetDisabled$,
-} from '@univerjs/sheets';
 
 import { COMPONENT_UPLOAD_FILE_MENU, UploadFileType } from '../upload-component/component-name';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../../commands/operations/insert-image.operation';
@@ -51,7 +48,7 @@ export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
             },
         },
         positions: [IMAGE_MENU_ID],
-        disabled$: getCurrentSheetDisabled$(_accessor),
+        // disabled$: getCurrentSheetDisabled$(_accessor),
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -68,7 +65,7 @@ export function UploadCellImageMenuFactory(_accessor: IAccessor): IMenuItem {
             },
         },
         positions: [IMAGE_MENU_ID],
-        disabled$: getCurrentSheetDisabled$(_accessor),
+        // disabled$: getCurrentSheetDisabled$(_accessor),
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

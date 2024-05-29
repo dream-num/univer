@@ -371,6 +371,5 @@ export {
 
 export { RangeProtectionPermissionEditPoint } from './services/permission/permission-point/range/edit';
 export { RangeProtectionPermissionViewPoint } from './services/permission/permission-point/range/view';
-export { SetDrawingArrangeMutation } from './commands/mutations/set-drawing-arrange.mutation';
 export { type ISheetDrawing, type ISheetUpdateDrawing, type ISheetDrawingPosition, ISheetDrawingService, SheetDrawingAnchorType, type ISheetDrawingBase } from './services/sheet-drawing.service';
 export { SetDrawingApplyMutation, type ISetDrawingApplyMutationParams, DrawingApplyType } from './commands/mutations/set-drawing-apply.mutation';

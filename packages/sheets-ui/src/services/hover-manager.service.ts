@@ -111,11 +111,7 @@ export class HoverManagerService extends Disposable {
         this._calcActiveCell();
     }
 
-    onScrollStart() {
+    onScroll() {
         this._currentCell$.next(null);
-    }
-
-    onScrollEnd() {
-        this._calcActiveCell();
     }
 }

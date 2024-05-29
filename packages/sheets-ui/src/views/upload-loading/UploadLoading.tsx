@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import { IImageRemoteService, LocaleService } from '@univerjs/core';
+import { IImageIoService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect } from 'react';
 import styles from './index.module.less';
 
 export const UploadLoading = () => {
-    const imageRemoteService = useDependency(IImageRemoteService);
+    const imageIoService = useDependency(IImageIoService);
     const localeService = useDependency(LocaleService);
 
     const [remain, setRemain] = React.useState(0);
 
     useEffect(() => {
-        const sub = imageRemoteService.change$.subscribe((count) => {
+        const sub = imageIoService.change$.subscribe((count) => {
             setRemain(count);
         });
 
         return () => {
             sub.unsubscribe();
         };
-    }, [imageRemoteService]);
+    }, [imageIoService]);
 
     return (
         <div style={{ display: remain > 0 ? 'block' : 'none' }} className={styles.uploadLoading}>

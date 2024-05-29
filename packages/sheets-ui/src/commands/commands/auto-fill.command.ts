@@ -34,7 +34,7 @@ export const AutoFillCommand: ICommand = {
 
     handler: async (accessor: IAccessor, params: IAutoFillCommandParams) => {
         const autoFillService = accessor.get(IAutoFillService);
-        return autoFillService.fillData(params.unitId, params.subUnitId); ;
+        return autoFillService.fillData(params.unitId, params.subUnitId);
     },
 };
 

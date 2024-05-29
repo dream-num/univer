@@ -38,6 +38,8 @@ const locale: typeof enUS = {
     'update-status': {
         exceedMaxSize: '图片大小超过限制, 限制为5M',
         invalidImageType: '图片类型错误',
+        exceedMaxCount: '图片数量超过限制, 限制为{0}',
+        invalidImage: '无效图片',
     },
 };
 

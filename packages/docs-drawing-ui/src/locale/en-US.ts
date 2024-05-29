@@ -36,6 +36,8 @@ const locale = {
     'update-status': {
         exceedMaxSize: 'Image size exceeds limit, limit is 5M',
         invalidImageType: 'Invalid image type',
+        exceedMaxCount: 'The number of images exceeds the limit, the limit is {0}',
+        invalidImage: 'Invalid image',
     },
 };
 

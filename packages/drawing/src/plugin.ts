@@ -15,11 +15,11 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
-import { IDrawingManagerService, IImageRemoteService, LocaleService, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { IDrawingManagerService, IImageIoService, LocaleService, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { ImageRemoteService } from './services/image-remote.service';
+import { ImageIoService } from './services/image-io.service';
 import { DrawingManagerService } from './services/drawing-manager.service';
 
 const PLUGIN_NAME = 'DRAWING_PLUGIN';
@@ -117,7 +117,7 @@ export class UniverDrawingPlugin extends Plugin {
     private _initDependencies(injector: Injector): void {
         const dependencies: Dependency[] = [
             // services
-            [IImageRemoteService, { useClass: ImageRemoteService }],
+            [IImageIoService, { useClass: ImageIoService }],
             [IDrawingManagerService, { useClass: DrawingManagerService }],
             // controllers
             // [ImageController],

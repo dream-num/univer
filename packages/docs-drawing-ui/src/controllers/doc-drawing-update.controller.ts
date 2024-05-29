@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
-import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageRemoteService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IImageIoServiceParam, Nullable } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageIoService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { getImageSize } from '@univerjs/drawing';
 import { IMessageService } from '@univerjs/ui';
@@ -36,6 +36,7 @@ import { SetDocDrawingCommand } from '../commands/commands/set-doc-drawing.comma
 
 const SHEET_IMAGE_WIDTH_LIMIT = 500;
 const SHEET_IMAGE_HEIGHT_LIMIT = 500;
+const SHEET_IMAGE_COUNT_LIMIT = 10;
 
 @OnLifecycle(LifecycleStages.Rendered, DocDrawingUpdateController)
 export class DocDrawingUpdateController extends Disposable {
@@ -44,7 +45,7 @@ export class DocDrawingUpdateController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService,
+        @IImageIoService private readonly _imageRemoteService: IImageIoService,
         @IDocDrawingService private readonly _sheetDrawingService: IDocDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
@@ -82,6 +83,16 @@ export class DocDrawingUpdateController extends Disposable {
                         return;
                     }
 
+                    const fileLength = params.files.length;
+
+                    if (fileLength > SHEET_IMAGE_COUNT_LIMIT) {
+                        this._messageService.show({
+                            type: MessageType.Error,
+                            content: this._localeService.t('update-status.exceedMaxCount', String(SHEET_IMAGE_COUNT_LIMIT)),
+                        });
+                        return;
+                    }
+
                     this._imageRemoteService.setWaitCount(params.files.length);
 
                     params.files.forEach(async (file) => {
@@ -93,22 +104,32 @@ export class DocDrawingUpdateController extends Disposable {
     }
 
     private async _insertFloatImage(file: File) {
-        const imageParam = await this._imageRemoteService.saveImage(file);
+        let imageParam: Nullable<IImageIoServiceParam>;
+
+        try {
+            imageParam = await this._imageRemoteService.saveImage(file);
+        } catch (error) {
+            const type = (error as Error).message;
+            if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t('update-status.exceedMaxSize'),
+                });
+            } else if (type === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t('update-status.invalidImageType'),
+                });
+            } else if (type === ImageUploadStatusType.ERROR_IMAGE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t('update-status.invalidImage'),
+                });
+            }
+        }
 
         if (imageParam == null) {
             return;
-        }
-
-        if (imageParam.status === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
-            this._messageService.show({
-                type: MessageType.Error,
-                content: this._localeService.t('update-status.exceedMaxSize'),
-            });
-        } else if (imageParam.status === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
-            this._messageService.show({
-                type: MessageType.Error,
-                content: this._localeService.t('update-status.invalidImageType'),
-            });
         }
 
         const info = this._getUnitInfo();
@@ -116,24 +137,7 @@ export class DocDrawingUpdateController extends Disposable {
             return;
         }
         const { unitId, subUnitId } = info;
-
-        // const currentAllDrawing = this._sheetDrawingService.getDrawingMap(unitId, subUnitId);
-        // let zIndex = 0;
-        // if (currentAllDrawing && Object.keys(currentAllDrawing).length > 0) {
-        //     const drawingIds = Object.keys(currentAllDrawing);
-        //     zIndex = drawingIds.length;
-        // }
-
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
-
-        // if (imageSourceType === ImageSourceType.UUID) {
-        //     try {
-        //         source = await this._imageRemoteService.getImage(imageId);
-        //     } catch (error) {
-        //         console.error(error);
-        //     }
-        // }
-
         const { width, height, image } = await getImageSize(base64Cache || '');
 
         this._imageRemoteService.addImageSourceCache(imageId, imageSourceType, image);

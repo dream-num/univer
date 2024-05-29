@@ -25,12 +25,14 @@ export enum ImageSourceType {
 }
 
 export enum ImageUploadStatusType {
-    SUCCUSS,
-    ERROR_EXCEED_SIZE,
-    ERROR_IMAGE_TYPE,
+    SUCCUSS = '0',
+    ERROR_EXCEED_SIZE = '1',
+    ERROR_IMAGE_TYPE = '2',
+    ERROR_UPLOAD_COUNT_LIMIT = '3',
+    ERROR_IMAGE = '4',
 }
 
-export interface IImageRemoteServiceParam {
+export interface IImageIoServiceParam {
     imageId: string;
     imageSourceType: ImageSourceType;
     source: string;
@@ -38,19 +40,16 @@ export interface IImageRemoteServiceParam {
     status: ImageUploadStatusType;
 }
 
-export interface IImageRemoteService {
+export interface IImageIoService {
     change$: Observable<number>;
     setWaitCount(count: number): void;
-    getWaitCount(): number;
-    decreaseWaiting(): void;
 
     getImage(imageId: string): Promise<string>;
 
-    saveImage(imageFile: File): Promise<Nullable<IImageRemoteServiceParam>>;
+    saveImage(imageFile: File): Promise<Nullable<IImageIoServiceParam>>;
 
-    imageSourceCache: Map<string, HTMLImageElement>;
     getImageSourceCache(source: string, imageSourceType: ImageSourceType): Nullable<HTMLImageElement>;
     addImageSourceCache(source: string, imageSourceType: ImageSourceType, imageSource: Nullable<HTMLImageElement>): void;
 }
 
-export const IImageRemoteService = createIdentifier<IImageRemoteService>('univer.plugin.image-remote.service');
+export const IImageIoService = createIdentifier<IImageIoService>('core.image-io.service');

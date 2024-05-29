@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, IOtherTransform, IUnitDrawingService } from '@univerjs/core';
+import type { IDrawingParam, IRotationSkewFlipTransform, IUnitDrawingService } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import { type IImageData, UnitDrawingService } from '@univerjs/drawing';
 
@@ -31,7 +31,7 @@ export enum SheetDrawingAnchorType {
     None = '2',
 }
 
-export interface ISheetDrawingPosition extends IOtherTransform {
+export interface ISheetDrawingPosition extends IRotationSkewFlipTransform {
     from: ICellPosition;
     to: ICellPosition;
 }

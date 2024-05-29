@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
 import { Disposable, ICommandService,
-    ILogService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
-    Range,
     Rectangle,
 } from '@univerjs/core';
 import type { ISheetRangeLocation } from '@univerjs/sheets-ui';
 
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import { type ICellValueCompareFn, ReorderRangeCommand } from '../commands/sheets-reorder.command';
 import type { ISortOption } from './interface';
-
 
 @OnLifecycle(LifecycleStages.Ready, SheetsSortService)
 export class SheetsSortService extends Disposable {
@@ -35,7 +33,6 @@ export class SheetsSortService extends Disposable {
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService) {
         super();
     }
@@ -50,24 +47,9 @@ export class SheetsSortService extends Disposable {
         if (mergeDataInRange.length === 0) {
             return true;
         }
-        const mergeCols = mergeDataInRange[0].endColumn - mergeDataInRange[0].startColumn;
-        const mergeRows = mergeDataInRange[0].endRow - mergeDataInRange[0].startRow;
-        // Every merge-cell should have the same size.
-        const sizeCheck = mergeDataInRange.every((merge) => merge.endColumn - merge.startColumn === mergeCols && merge.endRow - merge.startRow === mergeRows);
-        if (!sizeCheck) {
-            this._logService.warn('[Sort Error]: Different size of merge-cells detected in sort range, sorting aborted.');
-            return false;
-        }
-        Range.foreach(range, (row, col) => {
-            const outOfMergeCell = !mergeDataInRange.some((merge) => Rectangle.contains(merge, { startRow: row, startColumn: col, endRow: row, endColumn: col }));
-            if (outOfMergeCell) {
-                this._logService.warn('[Sort Error]: Different size of merge-cells detected in sort range, sorting aborted.');
-                return false;
-            }
-        });
-        return true;
-    }
 
+        return isRangeDividedEqually(range, mergeDataInRange);
+    }
 
     registerCompareFn(fn: ICellValueCompareFn) {
         this._compareFns.unshift(fn);
@@ -77,13 +59,40 @@ export class SheetsSortService extends Disposable {
         return this._compareFns;
     }
 
-
-    applySort(sortOption: ISortOption, unitId: string, subUnitId: string) {
+    applySort(sortOption: ISortOption, unitId?: string, subUnitId?: string) {
+        const { unitId: _unitId, subUnitId: _subUnitId } = getSheetCommandTarget(this._univerInstanceService) || {};
         this._commandService.executeCommand(ReorderRangeCommand.id, {
             orderRules: sortOption.orderRules,
             range: sortOption.range,
-            unitId,
-            subUnitId,
+            hasTitle: sortOption.hasTitle ?? false,
+            unitId: unitId || _unitId,
+            subUnitId: subUnitId || _subUnitId,
         });
     }
+}
+
+function isRangeDividedEqually(range: IRange, merges: IRange[]): boolean {
+    const rangeRows = range.endRow - range.startRow + 1;
+    const rangeCols = range.endColumn - range.startColumn + 1;
+    let mergeRows: number | null = null;
+    let mergeCols: number | null = null;
+
+    const totalArea = rangeRows * rangeCols;
+    let totalMergeArea = 0;
+    for (const merge of merges) {
+        if (merge.startRow >= range.startRow && merge.endRow <= range.endRow && merge.startColumn >= range.startColumn && merge.endColumn <= range.endColumn) {
+            const currentMergeRows = merge.endRow - merge.startRow + 1;
+            const currentMergeCols = merge.endColumn - merge.startColumn + 1;
+
+            if (mergeRows === null && mergeCols === null) {
+                mergeRows = currentMergeRows;
+                mergeCols = currentMergeCols;
+            } else if (currentMergeRows !== mergeRows || currentMergeCols !== mergeCols) {
+                return false;
+            }
+            totalMergeArea += currentMergeRows * currentMergeCols;
+        }
+    }
+
+    return totalMergeArea === totalArea;
 }

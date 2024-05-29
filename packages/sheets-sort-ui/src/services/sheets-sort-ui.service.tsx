@@ -43,7 +43,8 @@ export enum EXTEND_TYPE {
 }
 
 export interface ICustomSortState {
-    range: IRange;
+    range?: IRange;
+    show: boolean;
 }
 
 @OnLifecycle(LifecycleStages.Ready, SheetsSortService)
@@ -107,6 +108,10 @@ export class SheetsSortUIService extends Disposable {
         // return true;
     }
 
+    customSortState() {
+        return this._customSortState$.getValue();
+    }
+
     private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetRangeLocation >> {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET) as Workbook;
         const worksheet = workbook.getActiveSheet();
@@ -143,10 +148,10 @@ export class SheetsSortUIService extends Disposable {
         return await this._confirmService.confirm({
             id: 'sort-range-merge-error',
             title: {
-                title: this._localeService.t('sheets-sort.error.merge-size'),
+                title: this._localeService.t('info.tooltip'),
             },
             children: {
-                title: <div>Different size merge-cell detected, sort aborted!</div>,
+                title: <div>{this._localeService.t('sheets-sort.error.merge-size')}</div>,
             },
         });
     }
@@ -177,33 +182,10 @@ export class SheetsSortUIService extends Disposable {
     }
 
     showCustomSortPanel(location: ISheetRangeLocation) {
-        this._customSortState$.next({ range: location.range });
+        this._customSortState$.next({ range: location.range, show: true });
+    }
 
-        // let list: IOrderRule[] = [];
-        // const confirm = await this._confirmService.confirm({
-        //     id: 'custom-sort-panel',
-        //     title: {
-        //         title: 'Custom Sort',
-        //     },
-        //     children: {
-        //         title: (
-        //             <CustomSortPanel
-        //                 range={location.range}
-        //                 onListChange={(value) => {
-        //                     list = value;
-        //                 }}
-        //             />
-        //         ),
-        //     },
-        //     confirmText: 'Sort',
-        //     cancelText: 'Cancel',
-        // });
-        // if (confirm) {
-        //     return {
-        //         range: location.range,
-        //         orderRules: list,
-        //     };
-        // }
-        // return null;
+    closeCustomSortPanel() {
+        this._customSortState$.next({ show: false });
     }
 }

@@ -86,6 +86,11 @@ export interface IDialogProps {
      * Callback when the dialog is closed.
      */
     onClose?: () => void;
+
+    /**
+     *  Whether the dialog should show a mask.
+     */
+    mask?: boolean;
 }
 
 export function Dialog(props: IDialogProps) {
@@ -102,6 +107,7 @@ export function Dialog(props: IDialogProps) {
         preservePositionOnDestroy = false,
         footer,
         onClose,
+        mask,
     } = props;
     const [dragDisabled, setDragDisabled] = useState(false);
     const [positionOffset, setPositionOffset] = useState<{ x: number; y: number } | null>(null);
@@ -193,7 +199,7 @@ export function Dialog(props: IDialogProps) {
             closeIcon={closeIcon}
             destroyOnClose={destroyOnClose}
             footer={footer}
-            mask={!draggable}
+            mask={mask ?? !draggable}
             style={style}
             onClose={onClose}
         >

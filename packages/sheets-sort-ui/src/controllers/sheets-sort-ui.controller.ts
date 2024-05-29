@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { UniverInstanceService } from '@univerjs/core';
+import type { IRange, UniverInstanceService } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable } from '@univerjs/core';
 
 import { Inject, Injector } from '@wendellhu/redi';
 import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IDialogService, ILayoutService, IMenuService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
+import { serializeRange } from '@univerjs/engine-formula';
 import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/sheets-sort.command';
 import { CustomSortPanel } from '../views/CustomSortPanel';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
@@ -35,8 +36,7 @@ export const DefaultSheetsSortUIConfig = {
 
 const CUSTOM_SORT_DIALOG_ID = 'custom-sort-dialog';
 const CUSTOM_SORT_PANEL_WIDTH = 560;
-const CUSTOM_SORT_PANEL_RIGHT_PADDING = 20;
-const CUSTOM_SORT_PANEL_TOP_PADDING = -90;
+
 @OnLifecycle(LifecycleStages.Ready, SheetsSortUIController)
 export class SheetsSortUIController extends RxDisposable {
     constructor(
@@ -102,27 +102,30 @@ export class SheetsSortUIController extends RxDisposable {
 
         // this controller is also responsible for toggling the CustomSortDialog
         this._sheetsSortUIService.customSortState$.pipe(takeUntil(this.dispose$)).subscribe((newState) => {
-            if (newState && newState.range) {
-                this._openCustomSortPanel();
+            if (newState && newState.show && newState.range) {
+                this._openCustomSortPanel(newState.range);
+            } else if (!newState?.show) {
+                this._closePanel();
             }
         });
     }
 
-    private _openCustomSortPanel(): void {
+    private _openCustomSortPanel(range: IRange): void {
         this._dialogService.open({
             id: CUSTOM_SORT_DIALOG_ID,
             draggable: true,
             width: CUSTOM_SORT_PANEL_WIDTH,
-            title: { title: this._localeService.t('sheets-sort.general.sort-custom') },
+            title: { title: `${this._localeService.t('sheets-sort.general.sort-custom')}: ${serializeRange(range)}` },
             children: { label: 'CustomSortPanel' },
             destroyOnClose: true,
             defaultPosition: getCustomSortDialogDefaultPosition(),
             preservePositionOnDestroy: true,
-            onClose: () => this.closePanel(),
+            onClose: () => this._closePanel(),
+            mask: true,
         });
     }
 
-    closePanel(): void {
+    private _closePanel(): void {
         this._dialogService.close(CUSTOM_SORT_DIALOG_ID);
 
         queueMicrotask(() => this._layoutService.focus());
@@ -130,9 +133,8 @@ export class SheetsSortUIController extends RxDisposable {
 }
 
 function getCustomSortDialogDefaultPosition(): { x: number; y: number } {
-    const { innerWidth } = window;
-    const x = (innerWidth - CUSTOM_SORT_PANEL_WIDTH) / 2 - CUSTOM_SORT_PANEL_RIGHT_PADDING;
-    const y = CUSTOM_SORT_PANEL_TOP_PADDING;
+    const x = 0;
+    const y = 0;
 
     return { x, y };
 }

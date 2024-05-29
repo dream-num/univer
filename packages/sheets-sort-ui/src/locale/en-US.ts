@@ -36,7 +36,8 @@ export default {
             'sort-reminder-no': 'Keep range sorting',
             'first-row-check': 'First row participates in sorting',
             'add-condition': 'Add condition',
-
+            cancel: 'Cancel',
+            confirm: 'Confirm',
         },
     },
 };

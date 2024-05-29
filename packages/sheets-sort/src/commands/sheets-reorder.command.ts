@@ -69,7 +69,8 @@ export const ReorderRangeCommand: ICommand = {
             return mergeData.startRow;
         });
 
-        const { startRow, endRow } = range;
+        const { startRow: rangeStartRow, endRow } = range;
+        const startRow = hasTitle ? rangeStartRow + 1 : rangeStartRow;
         const toReorder: IRowComparator[] = [];
 
         const oldOrder: number[] = [];

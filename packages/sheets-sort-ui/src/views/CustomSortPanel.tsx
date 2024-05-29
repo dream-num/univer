@@ -17,10 +17,9 @@
 import type { IRange, Nullable } from '@univerjs/core';
 import { LocaleService, LocaleType, Tools } from '@univerjs/core';
 import React, { useCallback, useState } from 'react';
-import { type IOrderRule, SortType } from '@univerjs/sheets-sort';
-import { serializeRange } from '@univerjs/engine-formula';
+import { type IOrderRule, SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { Button, Checkbox, DraggableList, Dropdown, Radio, RadioGroup } from '@univerjs/design';
-import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 import { CheckMarkSingle, DeleteEmptySingle, IncreaseSingle, MoreDownSingle, SequenceSingle } from '@univerjs/icons';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 
@@ -33,14 +32,20 @@ export interface ICustomSortPanelProps {
 
 export function CustomSortPanel() {
     const sheetsSortUIService = useDependency(SheetsSortUIService);
+    const sheetsSortService = useDependency(SheetsSortService);
     const localeService = useDependency(LocaleService);
-    const state = useObservable(sheetsSortUIService.customSortState$, undefined, true);
-    if (!state) {
+
+    const state = sheetsSortUIService.customSortState();
+    if (!state || !state.range) {
         return null;
     }
+
     const { range } = state;
     const allCols = Array.from({ length: range.endColumn - range.startColumn + 1 }, (_, i) => i + range.startColumn);
+
     const [list, setList] = useState<IOrderRule[]>([]);
+    const [hasTitle, setHasTitle] = useState(false);
+
     const onItemChange = useCallback((index: number, value: Nullable<IOrderRule>) => {
         const newList = [...list];
         if (value === null) {
@@ -51,6 +56,7 @@ export function CustomSortPanel() {
 
         setList(newList as IOrderRule[]);
     }, [list]);
+
     const newItem = useCallback(() => {
         const newList = [...list];
         const nextColIndex = findNextColIndex(range, list);
@@ -59,25 +65,41 @@ export function CustomSortPanel() {
             setList(newList);
         }
     }, [list, range]);
-    const dragList = list.map((item, index) => ({ ...item, id: `${item.colIndex}` }));
-    // const dragList = useMemo(() => list.map((item, index) => ({ ...item, id: index })), [list]);
+
+    const apply = useCallback((orderRules: IOrderRule[], hasTitle: boolean) => {
+        sheetsSortService.applySort({ range, orderRules, hasTitle });
+        sheetsSortUIService.closeCustomSortPanel();
+    }, [sheetsSortService, sheetsSortUIService, range]);
+    const cancel = useCallback(() => {
+        sheetsSortUIService.closeCustomSortPanel();
+    }, [sheetsSortUIService]);
+    const canNew = list.length < allCols.length;
+
+    const dragList = list.map((item) => ({ ...item, id: `${item.colIndex}` }));
 
     return (
         <div className={styles.customSortPanelContainer}>
-            <div className={styles.customSortPanelTitle}>
-                <span>{serializeRange(range)}</span>
-            </div>
             <div className={styles.customSortPanelContent} onMouseDown={(e) => { e.stopPropagation(); }}>
                 <div className={styles.customSortPanelExt}>
                     <div className={styles.firstRowCheck}>
-                        <Checkbox>
+                        <Checkbox checked={hasTitle} onChange={(value) => setHasTitle(!!value)}>
                             {localeService.t('sheets-sort.dialog.first-row-check')}
                         </Checkbox>
                     </div>
-                    <div className={styles.addCondition} onClick={newItem}>
-                        <IncreaseSingle />
-                        <span>{localeService.t('sheets-sort.dialog.add-condition')}</span>
-                    </div>
+                    {canNew
+                        ? (
+                            <div className={styles.addCondition} onClick={newItem}>
+                                <IncreaseSingle />
+                                <span className={styles.addConditionText}>{localeService.t('sheets-sort.dialog.add-condition')}</span>
+                            </div>
+                        )
+                        : (
+                            <div className={`${styles.addCondition} ${styles.addConditionDisable}`}>
+                                <IncreaseSingle />
+                                <span className={styles.addConditionText}>{localeService.t('sheets-sort.dialog.add-condition')}</span>
+                            </div>
+                        )}
+
                 </div>
                 <div className={styles.conditionList}>
                     <DraggableList
@@ -98,67 +120,70 @@ export function CustomSortPanel() {
                     />
                 </div>
             </div>
-            <div className={styles.customSortFooter}>
-                <Button type="primary">取消</Button>
-                <Button type="primary">确认</Button>
+            <div className={styles.customSortPanelFooter}>
+                <Button className={styles.customSortPanelFooterBtn} type="default" onClick={() => cancel()}>{localeService.t('sheets-sort.dialog.cancel')}</Button>
+                <Button className={styles.customSortPanelFooterBtn} type="primary" onClick={() => apply(list, hasTitle)}>{localeService.t('sheets-sort.dialog.confirm')}</Button>
             </div>
         </div>
     );
 }
 
 export function SortOptionItem(props: { allCols: number[]; list: IOrderRule[]; item: IOrderRule; onChange: (value: Nullable<IOrderRule>, index: number) => void }) {
-    const { list, item } = props;
+    const { list, item, allCols, onChange } = props;
     const localeService = useDependency(LocaleService);
     const colTranslator = colIndexTranslator(localeService);
-    const availableMenu = props.allCols.filter((colIndex) => !list.some((item) => item.colIndex === colIndex) || colIndex === item.colIndex).map((colIndex) => ({
+    const availableMenu = allCols.filter((colIndex) => (!list.some((item) => item.colIndex === colIndex)) || colIndex === item.colIndex).map((colIndex) => ({
         index: colIndex,
         label: colTranslator(colIndex),
     }));
     const currentIndex = list.findIndex((listItem) => listItem.colIndex === item.colIndex);
     const handleChangeColIndex = useCallback((menuItem: { index: number; label: string }) => {
-        props.onChange({ ...item, colIndex: menuItem.index }, currentIndex);
-    }, [currentIndex]);
+        onChange({ ...item, colIndex: menuItem.index }, currentIndex);
+    }, [currentIndex, item, onChange]);
     return (
         <div className={styles.customSortPanelItem}>
-            <div className={styles.customSortPanelItemHandler}>
-                <SequenceSingle />
-            </div>
-            <div className={styles.customSortPanelItemColumn}>
-                <Dropdown
-                    placement="bottomLeft"
-                    trigger={['click']}
-                    overlay={(
-                        <ul className={styles.customSortColMenu}>
-                            {availableMenu.map((menuItem) => (
-                                <li
-                                    key={menuItem.index}
-                                    onClick={() => handleChangeColIndex(menuItem)}
-                                    className={styles.customSortColMenuItem}
-                                >
-                                    <span className={styles.customSortColMenuItemIcon}>
-                                        {menuItem.index === item.colIndex && (
-                                            <CheckMarkSingle style={{ color: 'rgb(var(--green-700, #409f11))' }} />
-                                        )}
-                                    </span>
-                                    <span className={styles.customSortColMenuItemDesc}>
-                                        {colTranslator(item.colIndex)}
-                                    </span>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                >
-                    <div className={styles.customSortPanelItemColumnInput}>
-                        {colTranslator(item.colIndex)}
-                        <MoreDownSingle style={{ color: '#CCCCCC', fontSize: '8px', marginLeft: '8px' }} />
-                    </div>
-                </Dropdown>
+            <div className={styles.customSortPanelItemHead}>
+                <div className={styles.customSortPanelItemHandler}>
+                    <SequenceSingle />
+                </div>
+                <div className={styles.customSortPanelItemColumn}>
+                    <Dropdown
+                        placement="bottomLeft"
+                        trigger={['click']}
+                        overlay={(
+                            <ul className={styles.customSortColMenu}>
+                                {availableMenu.map((menuItem) => (
+                                    <li
+                                        key={menuItem.index}
+                                        onClick={() => handleChangeColIndex(menuItem)}
+                                        className={styles.customSortColMenuItem}
+                                    >
+                                        <span className={styles.customSortColMenuItemDesc}>
+                                            {menuItem.label}
+                                        </span>
+                                        <span className={styles.customSortColMenuItemCheck}>
+                                            {menuItem.index === item.colIndex && (
+                                                <CheckMarkSingle />
+                                            )}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    >
+                        <div className={styles.customSortPanelItemColumnInput}>
+                            {colTranslator(item.colIndex)}
+                            <MoreDownSingle className={styles.customSortPanelItemColumnInputDropdown} />
+                        </div>
+                    </Dropdown>
+                </div>
             </div>
             <div className={styles.customSortPanelItemOrder}>
                 <RadioGroup
+                    className={styles.customSortPanelItemOrderRadio}
                     value={item.type}
                     onChange={(value) => {
-                        props.onChange({ ...props.item, type: value as SortType }, currentIndex);
+                        onChange({ ...item, type: value as SortType }, currentIndex);
                     }}
                 >
                     <Radio value={SortType.ASC}>{localeService.t('sheets-sort.general.sort-asc')}</Radio>
@@ -166,15 +191,15 @@ export function SortOptionItem(props: { allCols: number[]; list: IOrderRule[]; i
                 </RadioGroup>
             </div>
             <div className={styles.customSortPanelItemRemove}>
-                <DeleteEmptySingle onClick={() => props.onChange(null, currentIndex)} />
+                <DeleteEmptySingle onClick={() => onChange(null, currentIndex)} />
             </div>
         </div>
     );
 }
 
-function findNextColIndex(range: IRange, list: Nullabe<IOrderRule>[]): number | null {
+function findNextColIndex(range: IRange, list: Nullable<IOrderRule>[]): number | null {
     const { startColumn, endColumn } = range;
-    const used = new Set(list.map((item) => item.colIndex));
+    const used = new Set(list.map((item) => item?.colIndex));
     for (let i = startColumn; i <= endColumn; i++) {
         if (!used.has(i)) {
             return i;

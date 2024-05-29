@@ -26,7 +26,7 @@ const zLocale: typeof enUS = {
             'sort-asc-ext': '拓展区域升序',
             'sort-desc-ext': '拓展区域降序',
             'sort-asc-cur': '当前区域升序',
-            'sort-desc-cur': '拓展区域降序',
+            'sort-desc-cur': '当前区域降序',
         },
         error: {
             'merge-size': '所选区域的合并单元格的大小不一致，无法排序。',
@@ -38,6 +38,8 @@ const zLocale: typeof enUS = {
             'sort-reminder-no': '保持所选排序范围',
             'first-row-check': '标题不参与排序',
             'add-condition': '添加排序条件',
+            cancel: '取消',
+            confirm: '确认',
         },
     },
 };

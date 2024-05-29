@@ -23,7 +23,12 @@ import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCo
 const SHEETS_SORT_MENU_ID = 'sheet.menu.sheets-sort';
 const SHEETS_SORT_CTX_MENU_ID = 'sheet.menu.sheets-sort-ctx';
 
-export const SHEETS_SORT_ICON = 'data-validation-single';
+export const SHEETS_SORT_ICON = 'ascending-single';
+export const SHEETS_SORT_ASC_ICON = 'ascending-single';
+export const SHEETS_SORT_ASC_EXT_ICON = 'expand-ascending-single';
+export const SHEETS_SORT_DESC_ICON = 'descending-single';
+export const SHEETS_SORT_DESC_EXT_ICON = 'expand-descending-single';
+export const SHEETS_SORT_CUSTOM_ICON = 'custom-sort-single';
 export function sortRangeMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SHEETS_SORT_MENU_ID,
@@ -31,7 +36,7 @@ export function sortRangeMenuFactory(accessor: IAccessor): IMenuItem {
         positions: [MenuPosition.TOOLBAR_START],
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         icon: SHEETS_SORT_ICON,
-        tooltip: 'sheetsSort.title',
+        tooltip: 'sheets-sort.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -39,7 +44,8 @@ export function sortRangeMenuFactory(accessor: IAccessor): IMenuItem {
 export function sortRangeAscMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeAscCommand.id,
-        title: 'sheetsSort.toolbar.sort-asc',
+        icon: SHEETS_SORT_ASC_ICON,
+        title: 'sheets-sort.general.sort-asc-cur',
         type: MenuItemType.BUTTON,
         positions: [SHEETS_SORT_MENU_ID],
     };
@@ -48,7 +54,8 @@ export function sortRangeAscMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeAscExtMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeAscExtCommand.id,
-        title: 'sheetsSort.toolbar.sort-asc-ext',
+        title: 'sheets-sort.general.sort-asc-ext',
+        icon: SHEETS_SORT_ASC_EXT_ICON,
         type: MenuItemType.BUTTON,
         positions: [SHEETS_SORT_MENU_ID],
     };
@@ -57,7 +64,8 @@ export function sortRangeAscExtMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeDescMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeDescCommand.id,
-        title: 'sheetsSort.toolbar.sort-desc',
+        title: 'sheets-sort.general.sort-desc-cur',
+        icon: SHEETS_SORT_DESC_ICON,
         type: MenuItemType.BUTTON,
         positions: [SHEETS_SORT_MENU_ID],
     };
@@ -66,7 +74,8 @@ export function sortRangeDescMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeDescExtMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeDescExtCommand.id,
-        title: 'sheetsSort.toolbar.sort-desc-ext',
+        title: 'sheets-sort.general.sort-desc-ext',
+        icon: SHEETS_SORT_DESC_EXT_ICON,
         type: MenuItemType.BUTTON,
         positions: [SHEETS_SORT_MENU_ID],
     };
@@ -75,16 +84,17 @@ export function sortRangeDescExtMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeCustomMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeCustomCommand.id,
-        title: 'sheetsSort.toolbar.sort-custom',
+        title: 'sheets-sort.general.sort-custom',
         type: MenuItemType.BUTTON,
         positions: [SHEETS_SORT_MENU_ID],
+        icon: SHEETS_SORT_CUSTOM_ICON,
     };
 }
 
 export function sortRangeCtxMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SHEETS_SORT_CTX_MENU_ID,
-        title: 'sheetsSort.title',
+        title: 'sheets-sort.title',
         type: MenuItemType.SUBITEMS,
         positions: [
             MenuPosition.CONTEXT_MENU,
@@ -99,8 +109,9 @@ export function sortRangeCtxMenuFactory(accessor: IAccessor): IMenuItem {
 export function sortRangeAscCtxMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeAscInCtxMenuCommand.id,
-        title: 'sheetsSort.context-menu.sort-asc',
+        title: 'sheets-sort.general.sort-asc-cur',
         type: MenuItemType.BUTTON,
+        icon: SHEETS_SORT_ASC_ICON,
         positions: [SHEETS_SORT_CTX_MENU_ID],
     };
 }
@@ -108,8 +119,9 @@ export function sortRangeAscCtxMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeAscExtCtxMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeAscExtInCtxMenuCommand.id,
-        title: 'sheetsSort.context-menu.sort-asc-ext',
+        title: 'sheets-sort.general.sort-asc-ext',
         type: MenuItemType.BUTTON,
+        icon: SHEETS_SORT_ASC_EXT_ICON,
         positions: [SHEETS_SORT_CTX_MENU_ID],
     };
 }
@@ -117,26 +129,30 @@ export function sortRangeAscExtCtxMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeDescCtxMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeDescInCtxMenuCommand.id,
-        title: 'sheetsSort.context-menu.sort-desc',
+        title: 'sheets-sort.general.sort-desc-cur',
         type: MenuItemType.BUTTON,
         positions: [SHEETS_SORT_CTX_MENU_ID],
+        icon: SHEETS_SORT_DESC_ICON,
+
     };
 }
 
 export function sortRangeDescExtCtxMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeDescExtInCtxMenuCommand.id,
-        title: 'sheetsSort.context-menu.sort-desc-ext',
+        title: 'sheets-sort.general.sort-desc-ext',
         type: MenuItemType.BUTTON,
         positions: [SHEETS_SORT_CTX_MENU_ID],
+        icon: SHEETS_SORT_DESC_EXT_ICON,
     };
 }
 
 export function sortRangeCustomCtxMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SortRangeCustomInCtxMenuCommand.id,
-        title: 'sheetsSort.context-menu.sort-custom',
+        title: 'sheets-sort.general.sort-custom',
         type: MenuItemType.BUTTON,
         positions: [SHEETS_SORT_CTX_MENU_ID],
+        icon: SHEETS_SORT_CUSTOM_ICON,
     };
 }

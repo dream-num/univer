@@ -19,6 +19,7 @@ import type { IRange } from '@univerjs/core';
 export interface ISortOption {
     range: IRange;
     orderRules: IOrderRule[];
+    hasTitle?: boolean;
 }
 
 export enum SortType {

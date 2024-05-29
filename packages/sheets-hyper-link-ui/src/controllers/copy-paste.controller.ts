@@ -206,27 +206,30 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
                         },
                     });
                 }
-                redos.push({
-                    id: AddHyperLinkMutation.id,
-                    params: {
-                        unitId: copyInfo.unitId,
-                        subUnitId: copyInfo.subUnitId,
-                        link: {
-                            ...oldLink,
-                            id,
-                            row: startRow,
-                            column: startColumn,
+                if (oldLink) {
+                    redos.push({
+                        id: AddHyperLinkMutation.id,
+                        params: {
+                            unitId: copyInfo.unitId,
+                            subUnitId: copyInfo.subUnitId,
+                            link: {
+                                ...oldLink,
+                                id,
+                                row: startRow,
+                                column: startColumn,
+                            },
                         },
-                    },
-                });
-                undos.push({
-                    id: RemoveHyperLinkMutation.id,
-                    params: {
-                        unitId: copyInfo.unitId,
-                        subUnitId: copyInfo.subUnitId,
-                        id,
-                    },
-                });
+                    });
+                    undos.push({
+                        id: RemoveHyperLinkMutation.id,
+                        params: {
+                            unitId: copyInfo.unitId,
+                            subUnitId: copyInfo.subUnitId,
+                            id,
+                        },
+                    });
+                }
+
                 if (currentLink) {
                     undos.push({
                         id: AddHyperLinkMutation.id,

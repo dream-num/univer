@@ -1115,6 +1115,9 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.54
         version: 0.1.54(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@univerjs/protocol':
+        specifier: ^0.1.34
+        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../sheets-conditional-formatting
@@ -1457,7 +1460,7 @@ importers:
         version: link:../core
       '@univerjs/protocol':
         specifier: ^0.1.32
-        version: 0.1.32(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
+        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -1729,6 +1732,9 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.54
         version: 0.1.54(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*

@@ -30,8 +30,7 @@ import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '
 import type { IAccessor } from '@wendellhu/redi';
 import { merge, Observable } from 'rxjs';
 
-import { deriveStateFromActiveSheet$ } from '@univerjs/sheets-ui';
-import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui/controllers/menu/menu-util.js';
+import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { MENU_OPTIONS } from '../base/const/MENU-OPTIONS';
 import { AddDecimalCommand } from '../commands/commands/add-decimal.command';
 import { SetCurrencyCommand } from '../commands/commands/set-currency.command';

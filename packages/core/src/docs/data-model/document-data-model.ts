@@ -49,7 +49,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         throw new Error('Method not implemented.');
     }
 
-    protected snapshot: IDocumentData;
+    snapshot: IDocumentData;
 
     constructor(snapshot: Partial<IDocumentData>) {
         super();

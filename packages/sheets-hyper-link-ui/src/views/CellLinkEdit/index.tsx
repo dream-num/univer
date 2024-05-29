@@ -253,7 +253,17 @@ export const CellLinkEdit = () => {
                 <FormLayout
                     error={showError ? !payload ? localeService.t('hyperLink.form.inputError') : !isLegalLink(payload) ? localeService.t('hyperLink.form.linkError') : '' : ''}
                 >
-                    <Input value={payload} onChange={setPayload} placeholder={localeService.t('hyperLink.form.linkPlaceholder')} />
+                    <Input
+                        value={payload}
+                        onChange={(newLink) => {
+                            setPayload(newLink);
+                            if (newLink && (setByPayload.current || !display)) {
+                                setDisplay(newLink);
+                                setByPayload.current = true;
+                            }
+                        }}
+                        placeholder={localeService.t('hyperLink.form.linkPlaceholder')}
+                    />
                 </FormLayout>
             )}
             {type === LinkType.range && (

@@ -66,7 +66,7 @@ export class SheetsHyperLinkResolverService {
         }
 
         if (rangeid) {
-            const range = this._definedNamesService.getValueById(rangeid, workbook.getUnitId());
+            const range = this._definedNamesService.getValueById(workbook.getUnitId(), rangeid);
             if (range) {
                 return {
                     type: 'defineName',

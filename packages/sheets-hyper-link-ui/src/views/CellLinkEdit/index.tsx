@@ -132,12 +132,7 @@ export const CellLinkEdit = () => {
         setDisplay('');
         setId('');
     }, [editing, hyperLinkModel, resolverService, univerInstanceService]);
-    useEffect(() => {
-        if (payload && (setByPayload.current || !display)) {
-            setDisplay(payload);
-            setByPayload.current = true;
-        }
-    }, [payload]);
+
     const payloadInitial = useMemo(() => payload, [type]);
 
     const linkTypeOptions = [
@@ -276,7 +271,13 @@ export const CellLinkEdit = () => {
                             if (!range.sheetName) {
                                 range.sheetName = workbook.getActiveSheet().getName();
                             }
-                            setPayload(serializeRangeToRefString(range));
+                            const newPayload = serializeRangeToRefString(range);
+                            setPayload(newPayload);
+
+                            if (newPayload && (setByPayload.current || !display)) {
+                                setDisplay(newPayload);
+                                setByPayload.current = true;
+                            }
                         }}
 
                     />
@@ -284,12 +285,34 @@ export const CellLinkEdit = () => {
             )}
             {type === LinkType.sheet && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.selectError') : ''}>
-                    <Select options={sheetsOption} value={payload} onChange={setPayload} />
+                    <Select
+                        options={sheetsOption}
+                        value={payload}
+                        onChange={(newPayload) => {
+                            setPayload(newPayload);
+                            const label = sheetsOption.find((i) => i.value === newPayload)?.label;
+                            if (label && (setByPayload.current || !display)) {
+                                setDisplay(label);
+                                setByPayload.current = true;
+                            }
+                        }}
+                    />
                 </FormLayout>
             )}
             {type === LinkType.definedName && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.selectError') : ''}>
-                    <Select options={definedNames} value={payload} onChange={setPayload} />
+                    <Select
+                        options={definedNames}
+                        value={payload}
+                        onChange={(newValue) => {
+                            setPayload(newValue);
+                            const label = definedNames.find((i) => i.value === newValue)?.label;
+                            if (label && (setByPayload.current || !display)) {
+                                setDisplay(label);
+                                setByPayload.current = true;
+                            }
+                        }}
+                    />
                 </FormLayout>
             )}
             <div className={styles.cellLinkEditButtons}>

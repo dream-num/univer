@@ -34,9 +34,9 @@ const locale = {
         reset: 'Reset Size',
     },
     'update-status': {
-        exceedMaxSize: 'Image size exceeds limit, limit is 5M',
+        exceedMaxSize: 'Image size exceeds limit, limit is {0}M',
         invalidImageType: 'Invalid image type',
-        exceedMaxCount: 'The number of images exceeds the limit, the limit is {0}',
+        exceedMaxCount: 'Only {0} images can be uploaded at a time',
         invalidImage: 'Invalid image',
     },
 };

@@ -17,7 +17,7 @@
 import { ICommandService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useRef } from 'react';
-import { ALLOW_IMAGE_LIST } from '@univerjs/drawing';
+import { DRAWING_IMAGE_ALLOW_IMAGE_LIST } from '@univerjs/drawing';
 import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';
 import styles from './index.module.less';
 
@@ -30,7 +30,7 @@ export const UploadFileMenu = () => {
         fileInputRef.current?.click();
     };
 
-    const imageAccept = ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(',');
+    const imageAccept = DRAWING_IMAGE_ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(',');
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const fileList = event.target.files;

@@ -43,9 +43,9 @@ const locale: typeof enUS = {
         none: '不要移动或调整大小与单元格',
     },
     'update-status': {
-        exceedMaxSize: '图片大小超过限制, 限制为5M',
+        exceedMaxSize: '图片大小超过限制, 限制为{0}M',
         invalidImageType: '图片类型错误',
-        exceedMaxCount: '图片数量超过限制, 限制为{0}',
+        exceedMaxCount: '图片只能一次上传{0}张',
         invalidImage: '无效图片',
     },
 };

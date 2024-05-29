@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IImageIoServiceParam, Nullable } from '@univerjs/core';
 import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageIoService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { getImageSize } from '@univerjs/drawing';
+import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize } from '@univerjs/drawing';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
 import type { IDocDrawing } from '@univerjs/docs';
@@ -33,10 +33,6 @@ import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing
 import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.command';
 import { UngroupDocDrawingCommand } from '../commands/commands/ungroup-doc-drawing.command';
 import { SetDocDrawingCommand } from '../commands/commands/set-doc-drawing.command';
-
-const SHEET_IMAGE_WIDTH_LIMIT = 500;
-const SHEET_IMAGE_HEIGHT_LIMIT = 500;
-const SHEET_IMAGE_COUNT_LIMIT = 10;
 
 @OnLifecycle(LifecycleStages.Rendered, DocDrawingUpdateController)
 export class DocDrawingUpdateController extends Disposable {
@@ -85,15 +81,15 @@ export class DocDrawingUpdateController extends Disposable {
 
                     const fileLength = params.files.length;
 
-                    if (fileLength > SHEET_IMAGE_COUNT_LIMIT) {
+                    if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
                         this._messageService.show({
                             type: MessageType.Error,
-                            content: this._localeService.t('update-status.exceedMaxCount', String(SHEET_IMAGE_COUNT_LIMIT)),
+                            content: this._localeService.t('update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
                         });
                         return;
                     }
 
-                    this._imageRemoteService.setWaitCount(params.files.length);
+                    this._imageRemoteService.setWaitCount(fileLength);
 
                     params.files.forEach(async (file) => {
                         await this._insertFloatImage(file);
@@ -113,7 +109,7 @@ export class DocDrawingUpdateController extends Disposable {
             if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
                 this._messageService.show({
                     type: MessageType.Error,
-                    content: this._localeService.t('update-status.exceedMaxSize'),
+                    content: this._localeService.t('update-status.exceedMaxSize', String(DRAWING_IMAGE_ALLOW_SIZE / 1024 * 1024)),
                 });
             } else if (type === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
                 this._messageService.show({
@@ -143,9 +139,9 @@ export class DocDrawingUpdateController extends Disposable {
         this._imageRemoteService.addImageSourceCache(imageId, imageSourceType, image);
 
         let scale = 1;
-        if (width > SHEET_IMAGE_WIDTH_LIMIT || height > SHEET_IMAGE_HEIGHT_LIMIT) {
-            const scaleWidth = SHEET_IMAGE_WIDTH_LIMIT / width;
-            const scaleHeight = SHEET_IMAGE_HEIGHT_LIMIT / height;
+        if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
+            const scaleWidth = DRAWING_IMAGE_WIDTH_LIMIT / width;
+            const scaleHeight = DRAWING_IMAGE_HEIGHT_LIMIT / height;
             scale = Math.max(scaleWidth, scaleHeight);
         }
 

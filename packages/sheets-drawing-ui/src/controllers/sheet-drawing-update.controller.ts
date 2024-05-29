@@ -18,7 +18,7 @@ import type { ICommandInfo, IImageIoServiceParam, IRange, Nullable, Workbook } f
 import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageIoService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageData } from '@univerjs/drawing';
-import { getImageSize } from '@univerjs/drawing';
+import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets';
 import { ISheetDrawingService, SelectionManagerService } from '@univerjs/sheets';
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
@@ -34,9 +34,6 @@ import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arran
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
-
-const SHEET_IMAGE_WIDTH_LIMIT = 500;
-const SHEET_IMAGE_HEIGHT_LIMIT = 500;
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingUpdateController)
 export class SheetDrawingUpdateController extends Disposable {
@@ -81,7 +78,17 @@ export class SheetDrawingUpdateController extends Disposable {
                         return;
                     }
 
-                    this._imageRemoteService.setWaitCount(params.files.length);
+                    const fileLength = params.files.length;
+
+                    if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
+                        this._messageService.show({
+                            type: MessageType.Error,
+                            content: this._localeService.t('update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
+                        });
+                        return;
+                    }
+
+                    this._imageRemoteService.setWaitCount(fileLength);
                     if (command.id === InsertCellImageOperation.id) {
                         params.files.forEach(async (file) => {
                             await this._insertCellImage(file);
@@ -110,7 +117,7 @@ export class SheetDrawingUpdateController extends Disposable {
             if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
                 this._messageService.show({
                     type: MessageType.Error,
-                    content: this._localeService.t('update-status.exceedMaxSize'),
+                    content: this._localeService.t('update-status.exceedMaxSize', String(DRAWING_IMAGE_ALLOW_SIZE / 1024 * 1024)),
                 });
             } else if (type === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
                 this._messageService.show({
@@ -142,9 +149,9 @@ export class SheetDrawingUpdateController extends Disposable {
         this._imageRemoteService.addImageSourceCache(imageId, imageSourceType, image);
 
         let scale = 1;
-        if (width > SHEET_IMAGE_WIDTH_LIMIT || height > SHEET_IMAGE_HEIGHT_LIMIT) {
-            const scaleWidth = SHEET_IMAGE_WIDTH_LIMIT / width;
-            const scaleHeight = SHEET_IMAGE_HEIGHT_LIMIT / height;
+        if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
+            const scaleWidth = DRAWING_IMAGE_WIDTH_LIMIT / width;
+            const scaleHeight = DRAWING_IMAGE_HEIGHT_LIMIT / height;
             scale = Math.max(scaleWidth, scaleHeight);
         }
 

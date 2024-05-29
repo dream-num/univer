@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-export { DRAWING_IMAGE_WIDTH_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_ALLOW_IMAGE_LIST } from './basics/config';
-export { DrawingManagerService, UnitDrawingService, type IDrawingJson1Type, type IDrawingJsonUndo1 } from './services/drawing-manager.service';
-export { getDrawingShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
-export { getImageSize } from './utils/get-image-size';
-export { UniverDrawingPlugin } from './plugin';
-export { type IImageData } from './models/image-model-interface';
+export const DRAWING_IMAGE_WIDTH_LIMIT = 500;
 
+export const DRAWING_IMAGE_HEIGHT_LIMIT = 500;
+
+export const DRAWING_IMAGE_COUNT_LIMIT = 10;
+
+export const DRAWING_IMAGE_ALLOW_SIZE = 5 * 1024 * 1024;
+
+export const DRAWING_IMAGE_ALLOW_IMAGE_LIST = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp'];

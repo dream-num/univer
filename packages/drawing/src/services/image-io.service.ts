@@ -18,10 +18,7 @@ import type { IImageIoService, IImageIoServiceParam, Nullable } from '@univerjs/
 import { ImageSourceType, ImageUploadStatusType, Tools } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
-
-export const ALLOW_IMAGE_LIST = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp'];
-
-const ALLOW_IMAGE_SIZE = 5 * 1024 * 1024;
+import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE } from '../basics/config';
 
 export class ImageIoService implements IImageIoService {
     private _waitCount = 0;
@@ -57,12 +54,12 @@ export class ImageIoService implements IImageIoService {
 
     async saveImage(imageFile: File): Promise<Nullable<IImageIoServiceParam>> {
         return new Promise((resolve, reject) => {
-            if (!ALLOW_IMAGE_LIST.includes(imageFile.type)) {
+            if (!DRAWING_IMAGE_ALLOW_IMAGE_LIST.includes(imageFile.type)) {
                 reject(new Error(ImageUploadStatusType.ERROR_IMAGE_TYPE));
                 this._decreaseWaiting();
                 return;
             }
-            if (imageFile.size > ALLOW_IMAGE_SIZE) {
+            if (imageFile.size > DRAWING_IMAGE_ALLOW_SIZE) {
                 reject(new Error(ImageUploadStatusType.ERROR_EXCEED_SIZE));
                 this._decreaseWaiting();
                 return;

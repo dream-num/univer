@@ -70,6 +70,7 @@
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@wendellhu/redi": "0.15.2",

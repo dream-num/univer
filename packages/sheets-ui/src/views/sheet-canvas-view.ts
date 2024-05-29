@@ -63,7 +63,6 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
     private _addNewRender(workbook: Workbook) {
         const { scene, engine } = this._context;
 
-        scene.openTransformer();
         scene.addLayer(new Layer(scene, [], 0), new Layer(scene, [], 2));
 
         this._addComponent(workbook);
@@ -230,7 +229,7 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
      * | VIEW_ROW_BOTTOM |   VIEW_MAIN_LEFT   |     VIEW_MAIN     |
      * +-----------------+--------------------+-------------------+
      */
-    // eslint-disable-next-line max-lines-per-function
+
     private _addViewport(worksheet: Worksheet) {
         const scene = this._context.scene;
         if (scene == null) {
@@ -239,7 +238,18 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
         const { rowHeader, columnHeader } = worksheet.getConfig();
         const { viewMain } = this._initViewports(scene, rowHeader, columnHeader);
 
-        // mouse scroll
+        this._initMouseWheel(scene, viewMain);
+
+        // create a scroll bar
+        const scrollBar = new ScrollBar(viewMain);
+
+        scene.attachControl();
+
+        return viewMain;
+    }
+
+    // mouse scroll
+    private _initMouseWheel(scene: Scene, viewMain: Viewport) {
         this.disposeWithMe(
             toDisposable(
                 scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
@@ -323,10 +333,5 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
                 })
             )
         );
-
-        // create a scroll bar
-        new ScrollBar(viewMain);
-        scene.attachControl();
-        return viewMain;
     }
 }

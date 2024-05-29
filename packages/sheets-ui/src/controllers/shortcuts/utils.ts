@@ -17,6 +17,7 @@
 import type { IContextService } from '@univerjs/core';
 import {
     EDITOR_ACTIVATED,
+    FOCUSING_COMMON_DRAWINGS,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_FORMULA_EDITOR,
@@ -37,7 +38,8 @@ export function whenSheetEditorFocused(contextService: IContextService): boolean
     return (
         contextService.getContextValue(FOCUSING_SHEET) &&
         contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
-        !contextService.getContextValue(EDITOR_ACTIVATED)
+        !contextService.getContextValue(EDITOR_ACTIVATED) &&
+        !contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)
     );
 }
 
@@ -46,7 +48,8 @@ export function whenSheetEditorFocusedAndFxNotFocused(contextService: IContextSe
         contextService.getContextValue(FOCUSING_SHEET) &&
         contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
         !contextService.getContextValue(EDITOR_ACTIVATED) &&
-        !contextService.getContextValue(FOCUSING_FORMULA_EDITOR)
+        !contextService.getContextValue(FOCUSING_FORMULA_EDITOR) &&
+        !contextService.getContextValue(FOCUSING_COMMON_DRAWINGS)
     );
 }
 

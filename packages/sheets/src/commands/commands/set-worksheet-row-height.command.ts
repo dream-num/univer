@@ -49,9 +49,12 @@ export interface IDeltaRowHeightCommand {
 export const DeltaRowHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.delta-row-height',
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IDeltaRowHeightCommand) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = selectionManagerService.getSelections();
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+
         if (!selections?.length) {
             return false;
         }
@@ -133,6 +136,11 @@ export const DeltaRowHeightCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: DeltaRowHeightCommand.id,
+            params: redoMutationParams,
+        });
+
         const result = sequenceExecute(
             [
                 {
@@ -143,6 +151,7 @@ export const DeltaRowHeightCommand: ICommand = {
                     id: SetWorksheetRowIsAutoHeightMutation.id,
                     params: redoSetIsAutoHeightParams,
                 },
+                ...intercepted.redos,
             ],
             commandService
         );
@@ -151,6 +160,7 @@ export const DeltaRowHeightCommand: ICommand = {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
+                    ...(intercepted.preUndos ?? []),
                     {
                         id: SetWorksheetRowHeightMutation.id,
                         params: undoMutationParams,
@@ -161,6 +171,7 @@ export const DeltaRowHeightCommand: ICommand = {
                     },
                 ],
                 redoMutations: [
+                    ...(intercepted.preRedos ?? []),
                     {
                         id: SetWorksheetRowHeightMutation.id,
                         params: redoMutationParams,
@@ -184,11 +195,13 @@ export interface ISetRowHeightCommandParams {
 export const SetRowHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-row-height',
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params: ISetRowHeightCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const selections = selectionManagerService.getSelectionRanges();
         if (!selections?.length) {
@@ -222,6 +235,11 @@ export const SetRowHeightCommand: ICommand = {
         const undoSetIsAutoHeightParams: ISetWorksheetRowIsAutoHeightMutationParams =
             SetWorksheetRowIsAutoHeightMutationFactory(accessor, redoSetIsAutoHeightParams);
 
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: SetRowHeightCommand.id,
+            params: redoMutationParams,
+        });
+
         const result = sequenceExecute(
             [
                 {
@@ -232,6 +250,7 @@ export const SetRowHeightCommand: ICommand = {
                     id: SetWorksheetRowIsAutoHeightMutation.id,
                     params: redoSetIsAutoHeightParams,
                 },
+                ...intercepted.redos,
             ],
             commandService
         );
@@ -240,6 +259,7 @@ export const SetRowHeightCommand: ICommand = {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
+                    ...(intercepted.preUndos ?? []),
                     {
                         id: SetWorksheetRowHeightMutation.id,
                         params: undoMutationParams,
@@ -250,6 +270,7 @@ export const SetRowHeightCommand: ICommand = {
                     },
                 ],
                 redoMutations: [
+                    ...(intercepted.preRedos ?? []),
                     {
                         id: SetWorksheetRowHeightMutation.id,
                         params: redoMutationParams,

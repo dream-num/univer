@@ -58,6 +58,9 @@ import { IMEInputManagerService } from './services/ime-input-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
+import { SetDocDrawingApplyMutation } from './commands/mutations/set-drawing-apply.mutation';
+import { DocDrawingService, IDocDrawingService } from './services/doc-drawing.service';
+import { DocDrawingDataController } from './controllers/doc-drawing-data.controller';
 
 export interface IUniverDocsConfig {
     hasScroll?: boolean;
@@ -120,6 +123,7 @@ export class UniverDocsPlugin extends Plugin {
                 AlignRightCommand,
                 AlignOperationCommand,
                 AlignJustifyCommand,
+                SetDocDrawingApplyMutation,
             ] as ICommand[]
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
@@ -141,11 +145,13 @@ export class UniverDocsPlugin extends Plugin {
                     },
                 ],
                 [TextSelectionManagerService],
+                [IDocDrawingService, { useClass: DocDrawingService }],
 
                 // controllers
                 [NormalInputController],
                 [IMEInputController],
                 [MoveCursorController],
+                [DocDrawingDataController],
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
     }

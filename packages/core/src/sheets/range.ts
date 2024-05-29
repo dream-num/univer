@@ -427,7 +427,7 @@ export class Range {
      * Returns the font size in point size of the cell in the top-left corner of the range.
      */
     getFontSize(): number {
-        const { p } = this.getValue() ?? {};
+        const p = (this.getValue()?.p || {}) as IDocumentData;
 
         if (p && Array.isArray(p.body?.textRuns) && p.body.textRuns.length > 0) {
             if (p.body.textRuns.some((textRun) => textRun?.ts?.fs != null)) {

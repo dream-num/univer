@@ -513,6 +513,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._onSelectionStart$.next(this._getActiveRangeInstance()?.startNodePosition);
 
+        scene.getTransformer()?.clearSelectedObjects();
+
         let preMoveOffsetX = evtOffsetX;
 
         let preMoveOffsetY = evtOffsetY;

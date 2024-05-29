@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { ISize } from '../../services/floating-object/floating-object-interfaces';
+import type { ISize } from '../../services/drawing/drawing-interfaces';
+import type { IDrawingParam } from '../../services/drawing/drawing-manager.service';
 import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
 import type { IExtraModelData } from './i-extra-model-data';
 import type { IColorStyle, IStyleBase } from './i-style-data';
@@ -43,6 +44,7 @@ export interface IReferenceSource {
     headers?: IHeaders;
     lists?: ILists;
     drawings?: IDrawings;
+    drawingsOrder?: string[];
 }
 
 export interface IDocumentSettings {
@@ -74,7 +76,7 @@ export interface ILists {
  * Set of Drawings
  */
 export interface IDrawings {
-    [objectId: string]: IDrawing;
+    [drawingId: string]: IDocDrawingBase;
 }
 
 /**
@@ -436,7 +438,7 @@ export interface IParagraph {
     startIndex: number;
     paragraphStyle?: IParagraphStyle; // paragraphStyle
     bullet?: IBullet; // bullet
-    // dIds?: string[]; // drawingIds objectId
+    // dIds?: string[]; // drawingIds drawingId
 }
 
 // export interface IElementsOrder {
@@ -507,8 +509,8 @@ export interface IBullet {
  * 20.4.2.19 wrapTight (Tight Wrapping)
  * 20.4.2.20 wrapTopAndBottom (Top and Bottom Wrapping)
  */
-export interface IDrawing {
-    objectId: string;
+export interface IDocDrawingBase extends IDrawingParam {
+    drawingId: string;
 
     title: string;
 
@@ -516,7 +518,7 @@ export interface IDrawing {
 
     // embeddedObjectBorder?: IDocsBorder;
 
-    objectTransform: IObjectTransform;
+    docTransform: IDocDrawingPosition;
 
     layoutType: PositionedObjectLayoutType;
 
@@ -556,7 +558,7 @@ export enum PositionedObjectLayoutType {
 /**
  * Properties of a draw object
  */
-export interface IObjectTransform {
+export interface IDocDrawingPosition {
     size: ISize;
     positionH: IObjectPositionH;
     positionV: IObjectPositionV;

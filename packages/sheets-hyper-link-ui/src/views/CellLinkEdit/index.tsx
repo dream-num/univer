@@ -157,7 +157,8 @@ export const CellLinkEdit = () => {
     if (!workbook) {
         return;
     }
-    const sheetsOption = workbook.getSheets().map((sheet) => ({ label: sheet.getName(), value: sheet.getSheetId() }));
+    const hiddens = workbook.getHiddenWorksheets();
+    const sheetsOption = workbook.getSheets().map((sheet) => ({ label: sheet.getName(), value: sheet.getSheetId() })).filter((opt) => hiddens.indexOf(opt.value) === -1);
     const definedNames = Object.values(definedNameService.getDefinedNameMap(workbook.getUnitId()) ?? {}).map((value) => ({
         label: value.name,
         value: value.id,

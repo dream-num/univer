@@ -57,7 +57,7 @@ export const CellLinkPopup = () => {
     const isError = linkObj.type.indexOf('error') > -1;
 
     return (
-        <div className={styles.cellLink}>
+        <div className={styles.cellLink} onClick={() => popupService.hideCurrentPopup()}>
             <div className={cs(styles.cellLinkContent, { [styles.cellLinkContentError]: isError })} onClick={linkObj.handler}>
                 <div className={styles.cellLinkType}>
                     {iconsMap[linkObj.type]}

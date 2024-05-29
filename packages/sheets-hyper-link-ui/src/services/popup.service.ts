@@ -64,6 +64,7 @@ export class SheetsHyperLinkPopupService {
         const disposable = this._sheetCanvasPopManagerService.attachPopupToCell(row, col, {
             componentKey: CellLinkPopup.componentKey,
             direction: 'bottom',
+            closeOnSelfTarget: true,
         });
         if (disposable) {
             this._currentPopup = {

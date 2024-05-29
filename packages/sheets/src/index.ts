@@ -192,7 +192,7 @@ export {
     type IMoveColumnsMutationParams,
     MoveColsMutationUndoFactory,
     MoveRowsMutationUndoFactory,
-    type IMoveRowsMutationParams
+    type IMoveRowsMutationParams,
 } from './commands/mutations/move-rows-cols.mutation';
 export type {
     IRemoveNumfmtMutationParams,

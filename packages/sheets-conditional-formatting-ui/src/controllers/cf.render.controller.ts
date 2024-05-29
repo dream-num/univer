@@ -110,6 +110,7 @@ export class RenderController extends Disposable {
 
                 return next(cloneCell);
             },
+            priority: 10,
         }));
     }
 }

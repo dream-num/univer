@@ -16,6 +16,7 @@
 
 import type { ICommandInfo, IParagraph, ITextRun, Nullable } from '@univerjs/core';
 import {
+    createInterceptorKey,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
@@ -24,6 +25,7 @@ import {
     HorizontalAlign,
     ICommandService,
     IContextService,
+    InterceptorManager,
     IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
@@ -54,9 +56,13 @@ import { IFormulaEditorManagerService } from '../../services/editor/formula-edit
 import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
-@OnLifecycle(LifecycleStages.Steady, FormulaEditorController)
+export const FORMULA_EDIT_PERMISSION_CHECK = createInterceptorKey<boolean, { row: number; col: number }>('formulaEditPermissionCheck');
+
+@OnLifecycle(LifecycleStages.Starting, FormulaEditorController)
 export class FormulaEditorController extends RxDisposable {
     private _loadedMap = new WeakSet<RenderComponentType>();
+
+    public interceptor = new InterceptorManager({ FORMULA_EDIT_PERMISSION_CHECK });
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -247,6 +253,11 @@ export class FormulaEditorController extends RxDisposable {
     private _syncFormulaEditorContent() {
         this._editorBridgeService.currentEditCellState$.pipe(takeUntil(this.dispose$)).subscribe((editCellState) => {
             if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
+                return;
+            }
+
+            const permissionCheck = this.interceptor.fetchThroughInterceptors(FORMULA_EDIT_PERMISSION_CHECK)(null, { row: editCellState.row, col: editCellState.column });
+            if (!permissionCheck) {
                 return;
             }
 

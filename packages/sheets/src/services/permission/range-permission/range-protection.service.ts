@@ -18,13 +18,8 @@ import { Disposable, IPermissionService, IResourceManagerService, LifecycleStage
 
 import { Inject } from '@wendellhu/redi';
 import { UnitAction, UnitObject, UniverType } from '@univerjs/protocol';
-import type { ISheetFontRenderExtension } from '@univerjs/engine-render';
-import type { IObjectModel, IRangeProtectionRule } from '../../../model/range-protection-rule.model';
+import type { IObjectModel } from '../../../model/range-protection-rule.model';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
-import { RangeProtectionRenderModel } from '../../../model/range-protection-render.model';
-import type { IRangeProtectionRenderCellData } from '../../../render/range-protection/range-protection.render';
-import { SheetInterceptorService } from '../../sheet-interceptor/sheet-interceptor.service';
-import { INTERCEPTOR_POINT } from '../../sheet-interceptor/interceptor-const';
 
 import { getAllRangePermissionPoint } from './util';
 
@@ -35,45 +30,12 @@ export class RangeProtectionService extends Disposable {
     constructor(
         @Inject(RangeProtectionRuleModel) private _selectionProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(IPermissionService) private _permissionService: IPermissionService,
-        @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(RangeProtectionRenderModel) private _selectionProtectionRenderModel: RangeProtectionRenderModel
+        @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService
 
     ) {
         super();
         this._initSnapshot();
         this._initRuleChange();
-        this._initViewModelInterceptor();
-    }
-
-    private _initViewModelInterceptor() {
-        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-            handler: (cell = {}, context, next) => {
-                const { unitId, subUnitId, row, col } = context;
-                const permissionList = this._selectionProtectionRenderModel.getCellInfo(unitId, subUnitId, row, col)
-                    .filter((p) => !!p.ruleId)
-                    .map((p) => {
-                        const rule = this._selectionProtectionRuleModel.getRule(unitId, subUnitId, p.ruleId!) || {} as IRangeProtectionRule;
-                        return {
-                            ...p, ranges: rule.ranges!,
-                        };
-                    })
-                    .filter((p) => !!p.ranges);
-                if (permissionList.length) {
-                    const isSkipFontRender = permissionList.some((p) => !p?.[UnitAction.View]);
-                    const _cellData: IRangeProtectionRenderCellData & ISheetFontRenderExtension = { ...cell, selectionProtection: permissionList };
-                    if (isSkipFontRender) {
-                        if (!_cellData.fontRenderExtension) {
-                            _cellData.fontRenderExtension = {};
-                        }
-                        _cellData.fontRenderExtension.isSkip = isSkipFontRender;
-                    }
-                    return next(_cellData);
-                }
-                return next(cell);
-            },
-        }
-        ));
     }
 
     private _initRuleChange() {

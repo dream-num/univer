@@ -21,12 +21,12 @@ import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatr
 import { DisposableCollection, FOCUSING_EDITOR_STANDALONE, ICommandService, IContextService, IPermissionService, isICellData, IUniverInstanceService, LifecycleStages, LocaleService, ObjectMatrix, OnLifecycle, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, ISetRangeValuesCommandParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetNameMutationParams } from '@univerjs/sheets';
 import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SelectionManagerService, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetFilterPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetViewPermission } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
 
 import type { IRenderContext, IRenderController, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetPasteParams } from '@univerjs/sheets-ui';
-import { ApplyFormatPainterCommand, AutoFillCommand, HeaderMoveRenderController, HeaderResizeRenderController, IAutoFillService, ISelectionRenderService, ISheetClipboardService, SetCellEditVisibleOperation, SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand, SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import { ApplyFormatPainterCommand, AutoFillCommand, FormulaEditorController, HeaderMoveRenderController, HeaderResizeRenderController, IAutoFillService, ISelectionRenderService, ISheetClipboardService, SetCellEditVisibleOperation, SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand, SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { OpenFilterPanelOperation } from '@univerjs/sheets-filter-ui';
 import { SheetsFindReplaceController } from '@univerjs/sheets-find-replace';
@@ -48,12 +48,13 @@ const SmartToggleSheetsFilterCommandId = 'sheet.command.smart-toggle-filter';
 
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetPermissionInterceptorRenderController)
+@OnLifecycle(LifecycleStages.Steady, SheetPermissionInterceptorRenderController)
 export class SheetPermissionInterceptorRenderController extends RxDisposable implements IRenderController {
     disposableCollection = new DisposableCollection();
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
+        @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
@@ -85,6 +86,7 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
         this._initDataValidationPermissionInterceptor();
         this._initConditionalFormattingPermissionInterceptor();
         this._initFreezePermissionInterceptor();
+        this._initFormulaEditorPermissionInterceptor();
         this._initClipboardHook();
     }
 
@@ -969,6 +971,35 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
                 }
                 const permission = this._permissionService.getPermissionPoint(new WorkbookEditablePermission(workbook.getUnitId()).id)?.value ?? false;
                 return permission;
+            },
+        });
+    }
+
+    private _initFormulaEditorPermissionInterceptor() {
+        const formulaEditorController = this._injector.get(FormulaEditorController);
+        formulaEditorController.interceptor.intercept(formulaEditorController.interceptor.getInterceptPoints().FORMULA_EDIT_PERMISSION_CHECK, {
+            handler: (_: Nullable<boolean>, cellInfo: { row: number; col: number }) => {
+                const target = getSheetCommandTarget(this._univerInstanceService);
+                if (!target) {
+                    return false;
+                }
+                const { unitId, subUnitId } = target;
+
+                const worksheetViewPermission = this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false;
+                if (!worksheetViewPermission) {
+                    return false;
+                }
+
+                const { row, col } = cellInfo;
+                const permissionList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
+                    return rule.ranges.some((range) => {
+                        return Rectangle.intersects(range, { startRow: row, endRow: row, startColumn: col, endColumn: col });
+                    });
+                });
+
+                const permissionIds = permissionList.map((rule) => new RangeProtectionPermissionViewPoint(unitId, subUnitId, rule.permissionId).id);
+                const rangeViewPermission = this._permissionService.composePermission(permissionIds).every((permission) => permission.value);
+                return rangeViewPermission;
             },
         });
     }

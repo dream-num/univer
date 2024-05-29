@@ -185,6 +185,19 @@ export class Rectangle {
         );
     }
 
+    static realUnion(...ranges: IRange[]): IRange {
+        const hasColRange = ranges.some((range) => range.rangeType === RANGE_TYPE.COLUMN);
+        const hasRowRange = ranges.some((range) => range.rangeType === RANGE_TYPE.ROW);
+        const res = Rectangle.union(...ranges);
+        return {
+            startColumn: hasRowRange ? Number.NaN : res.startColumn,
+            endColumn: hasRowRange ? Number.NaN : res.endColumn,
+            startRow: hasColRange ? Number.NaN : res.startRow,
+            endRow: hasColRange ? Number.NaN : res.endRow,
+            rangeType: hasRowRange ? RANGE_TYPE.ROW : hasColRange ? RANGE_TYPE.COLUMN : RANGE_TYPE.NORMAL,
+        };
+    }
+
     static getRelativeRange = (range: IRange, originRange: IRange) =>
         ({
             startRow: range.startRow - originRange.startRow,

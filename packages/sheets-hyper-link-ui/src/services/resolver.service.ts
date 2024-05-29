@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import { ICommandService, isValidRange, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, isValidRange, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
@@ -28,6 +28,17 @@ interface ISheetUrlParams {
     gid?: string;
     range?: string;
     rangeid?: string;
+}
+
+function getContainRange(range: IRange, mergedCells: IRange[]) {
+    const relativeCells: IRange[] = [];
+    mergedCells.forEach((cell) => {
+        if (Rectangle.intersects(range, cell)) {
+            relativeCells.push(cell);
+        }
+    });
+
+    return Rectangle.realUnion(range, ...relativeCells);
 }
 
 export class SheetsHyperLinkResolverService {
@@ -155,7 +166,9 @@ export class SheetsHyperLinkResolverService {
     }
 
     async navigateToRange(unitId: string, subUnitId: string, range: IRange) {
-        if (await this.navigateToSheetById(unitId, subUnitId)) {
+        const worksheet = await this.navigateToSheetById(unitId, subUnitId);
+        if (worksheet) {
+            const realRange = getContainRange(range, worksheet.getMergeData());
             await this._commandService.executeCommand(
                 SetSelectionsOperation.id,
                 {
@@ -164,16 +177,16 @@ export class SheetsHyperLinkResolverService {
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     selections: [{
                         primary: {
-                            ...range,
-                            actualColumn: range.startColumn,
-                            actualRow: range.startRow,
+                            ...realRange,
+                            actualColumn: realRange.startColumn,
+                            actualRow: realRange.startRow,
                         },
-                        range,
+                        range: realRange,
                     }],
                 } as ISetSelectionsOperationParams
             );
             await this._commandService.executeCommand(ScrollToCellCommand.id, {
-                range,
+                range: realRange,
             });
         }
     }
@@ -217,7 +230,7 @@ export class SheetsHyperLinkResolverService {
         const worksheet = workbook.getActiveSheet();
 
         if (worksheet.getSheetId() === subUnitId) {
-            return true;
+            return worksheet;
         }
 
         const targetSheet = workbook.getSheetBySheetId(subUnitId);
@@ -227,7 +240,7 @@ export class SheetsHyperLinkResolverService {
                 content: this._localeService.t('hyperLink.message.noSheet'),
                 type: MessageType.Error,
             });
-            return;
+            return false;
         }
 
         if (workbook.getHiddenWorksheets().indexOf(subUnitId) > -1) {
@@ -235,10 +248,13 @@ export class SheetsHyperLinkResolverService {
                 content: this._localeService.t('hyperLink.message.hiddenSheet'),
                 type: MessageType.Error,
             });
-            return;
+            return false;
         }
 
-        return await this._commandService.executeCommand(SetWorksheetActiveOperation.id, { unitId, subUnitId });
+        if (await this._commandService.executeCommand(SetWorksheetActiveOperation.id, { unitId, subUnitId })) {
+            return targetSheet;
+        }
+        return false;
     }
 
     async navigateToDefineName(unitId: string, rangeid: string) {

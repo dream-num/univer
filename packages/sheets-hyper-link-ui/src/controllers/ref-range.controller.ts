@@ -196,7 +196,9 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                     }
                     case 'update': {
                         this._unregisterRange(option.id);
-                        this._registerRange(option.unitId, option.id, option.payload.payload);
+                        setTimeout(() => {
+                            this._registerRange(option.unitId, option.id, option.payload.payload);
+                        });
                         break;
                     }
                 }

@@ -128,6 +128,7 @@ import { SetRangeProtectionCommand } from '../commands/commands/set-range-protec
 import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
 import { DeleteRangeProtectionMutation } from '../commands/mutations/delete-range-protection.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
+import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './config';
 
@@ -149,10 +150,17 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
         super();
 
         [
+            AddRangeProtectionMutation,
+            AddRangeProtectionCommand,
+            AddWorksheetProtectionMutation,
+            AddWorksheetMergeMutation,
             ClearSelectionAllCommand,
             ClearSelectionContentCommand,
             ClearSelectionFormatCommand,
             CopySheetCommand,
+            DeleteRangeProtectionCommand,
+            DeleteRangeProtectionMutation,
+            DeleteWorksheetProtectionMutation,
             DeleteRangeMoveLeftCommand,
             DeleteRangeMoveUpCommand,
             DeltaColumnWidthCommand,
@@ -185,6 +193,11 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             RemoveWorksheetMergeMutation,
             ResetBackgroundColorCommand,
             ResetTextColorCommand,
+            SetRangeProtectionCommand,
+            SetRangeProtectionMutation,
+            SetWorksheetPermissionPointsCommand,
+            SetWorksheetPermissionPointsMutation,
+            SetWorksheetProtectionMutation,
             SetBackgroundColorCommand,
             SetBorderBasicCommand,
             SetBorderColorCommand,

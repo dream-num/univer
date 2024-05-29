@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { DependencyOverride, IConfigService } from '@univerjs/core';
-import { ICommandService, LocaleService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { DependencyOverride } from '@univerjs/core';
+import { ICommandService, IConfigService, LocaleService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 

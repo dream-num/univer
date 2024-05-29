@@ -228,7 +228,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
                     },
                 });
                 if (currentLink) {
-                    redos.push({
+                    undos.push({
                         id: AddHyperLinkMutation.id,
                         params: {
                             unitId: copyInfo.unitId,

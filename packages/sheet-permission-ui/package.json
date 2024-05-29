@@ -73,7 +73,6 @@
         "@univerjs/sheets-filter-ui": "workspace:*",
         "@univerjs/sheets-find-replace": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/sheets-ui/controllers/render-controllers/freeze.render-controller.js": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.15.2",
         "clsx": ">=2.0.0",

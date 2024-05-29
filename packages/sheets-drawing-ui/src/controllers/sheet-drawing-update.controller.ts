@@ -146,7 +146,7 @@ export class SheetDrawingUpdateController extends Disposable {
 
         const { width, height, image } = await getImageSize(base64Cache || '');
 
-        this._imageIoService.addImageSourceCache(imageId, imageSourceType, image);
+        this._imageIoService.addImageSourceCache(source, imageSourceType, image);
 
         let scale = 1;
         if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {

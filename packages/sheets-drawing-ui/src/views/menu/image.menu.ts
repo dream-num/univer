@@ -18,10 +18,12 @@ import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuP
 import type { IAccessor } from '@wendellhu/redi';
 import { UniverInstanceType } from '@univerjs/core';
 
+import { getCommentDisable$ } from '@univerjs/sheets-ui';
+import { WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { COMPONENT_UPLOAD_FILE_MENU, UploadFileType } from '../upload-component/component-name';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../../commands/operations/insert-image.operation';
 
-export const ImageUploadIcon = 'addition-and-subtraction-single';
+export const IMAGE_UPLOAD_ICON = 'addition-and-subtraction-single';
 const IMAGE_MENU_ID = 'sheet.menu.image';
 
 export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
@@ -30,7 +32,7 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
         type: MenuItemType.SUBITEMS,
         positions: [MenuPosition.TOOLBAR_START],
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
-        icon: ImageUploadIcon,
+        icon: IMAGE_UPLOAD_ICON,
         tooltip: 'sheetImage.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };

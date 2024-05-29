@@ -133,7 +133,7 @@ export const CellLinkEdit = () => {
         if (!display && payload) {
             setDisplay(payload);
         }
-    }, [payload, display]);
+    }, [payload]);
 
     const linkTypeOptions = [
         {
@@ -210,14 +210,15 @@ export const CellLinkEdit = () => {
                 unitId: editing.unitId,
                 subUnitId: editing.subUnitId,
             });
-            commandService.executeCommand(ScrollToCellOperation.id, {
-                range: {
-                    startRow: editing.row,
-                    endRow: editing.row,
-                    startColumn: editing.column,
-                    endCOlumn: editing.column,
-                },
-            });
+            // console.log('===editing', editing);
+            // await commandService.executeCommand(ScrollToCellOperation.id, {
+            //     range: {
+            //         startRow: editing.row,
+            //         endRow: editing.row,
+            //         startColumn: editing.column,
+            //         endColumn: editing.column,
+            //     },
+            // });
         }
 
         commandService.executeCommand(CloseHyperLinkSidebarOperation.id);
@@ -297,10 +298,11 @@ export const CellLinkEdit = () => {
                     type="primary"
                     style={{ marginLeft: 8 }}
                     onClick={async () => {
-                        if (!display || !payload) {
+                        if (!display || !payload || (type === LinkType.link && !isLegalLink(payload))) {
                             setShowError(true);
                             return;
                         }
+
                         handleSubmit();
                     }}
                 >

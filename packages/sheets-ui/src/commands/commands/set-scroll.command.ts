@@ -30,6 +30,7 @@ export interface ISetScrollRelativeCommandParams {
 
 /**
  * This command is used to manage the scroll by relative offset
+ * Usually triggered by wheel event.
  */
 export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams> = {
     id: 'sheet.command.set-scroll-relative',
@@ -51,6 +52,8 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
             sheetViewStartColumn = 0,
             offsetX: currentOffsetX = 0,
             offsetY: currentOffsetY = 0,
+            scrollLeft,
+            scrollTop,
         } = currentScroll || {};
 
         return commandService.executeCommand(SetScrollOperation.id, {
@@ -60,6 +63,8 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
             sheetViewStartColumn: sheetViewStartColumn + xSplit,
             offsetX: currentOffsetX + offsetX,
             offsetY: currentOffsetY + offsetY,
+            scrollLeft,
+            scrollTop,
         });
     },
 };
@@ -73,6 +78,7 @@ export interface IScrollCommandParams {
 
 /**
  * This command is used to manage the scroll position of the current view by specifying the cell index of the top left cell
+ * Usually triggered by click scrollbar.
  */
 export const ScrollCommand: ICommand<IScrollCommandParams> = {
     id: 'sheet.command.scroll-view',
@@ -101,6 +107,8 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
             sheetViewStartRow: currentRow,
             offsetX: currentOffsetX,
             offsetY: currentOffsetY,
+            scrollLeft,
+            scrollTop,
         } = currentScroll || {};
 
         const { xSplit, ySplit } = worksheet.getConfig().freeze;
@@ -113,6 +121,8 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
             sheetViewStartColumn: sheetViewStartColumn ?? (currentColumn ?? 0) + xSplit,
             offsetX: offsetX ?? currentOffsetX,
             offsetY: offsetY ?? currentOffsetY,
+            scrollLeft,
+            scrollTop,
         });
     },
 };
@@ -155,6 +165,8 @@ export const ResetScrollCommand: ICommand = {
             sheetId: subUnitId,
             sheetViewStartRow: 0,
             sheetViewStartColumn: 0,
+            scrollLeft: 0,
+            scrollTop: 0,
         });
     },
 };

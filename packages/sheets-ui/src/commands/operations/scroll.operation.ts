@@ -36,6 +36,11 @@ export const SetScrollOperation: IOperation<IScrollManagerInsertParam> = {
         const worksheet = workbook!.getSheetBySheetId(params!.sheetId);
         const { xSplit, ySplit } = worksheet!.getConfig().freeze;
 
+        if (!worksheet) return false;
+        const config = worksheet.getConfig();
+        config.scrollLeft = params.scrollLeft;
+        config.scrollTop = params.scrollTop;
+
         scrollManagerService.addOrReplaceByParam({
             ...params,
             sheetViewStartRow: params.sheetViewStartRow - ySplit,

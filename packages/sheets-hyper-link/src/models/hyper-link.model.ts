@@ -55,7 +55,7 @@ export class HyperLinkModel extends Disposable {
     linkUpdate$ = this._linkUpdate$.asObservable();
 
     private _linkMap: Map<string, Map<string, ObjectMatrix<ICellHyperLink>>> = new Map();
-    private _linkPositionMap: Map<string, Map<string, Map<string, { row: number; column: number }>>> = new Map();
+    private _linkPositionMap: Map<string, Map<string, Map<string, { row: number; column: number; link: ICellHyperLink }>>> = new Map();
 
     constructor() {
         super();
@@ -99,7 +99,7 @@ export class HyperLinkModel extends Disposable {
     addHyperLink(unitId: string, subUnitId: string, link: ICellHyperLink) {
         const { matrix, positionMap } = this._ensureMap(unitId, subUnitId);
         matrix.setValue(link.row, link.column, link);
-        positionMap.set(link.id, { row: link.row, column: link.column });
+        positionMap.set(link.id, { row: link.row, column: link.column, link });
         this._linkUpdate$.next({
             unitId,
             subUnitId,
@@ -141,14 +141,16 @@ export class HyperLinkModel extends Disposable {
         if (!position) {
             return false;
         }
-        const link = matrix.getValue(position.row, position.column);
-        if (!link) {
-            return false;
+
+        let link = matrix.getValue(position.row, position.column);
+        if (!link || link.id !== id) {
+            link = position.link;
+        } else {
+            matrix.realDeleteValue(position.row, position.column);
         }
-        positionMap.set(id, payload);
-        matrix.realDeleteValue(position.row, position.column);
-        matrix.setValue(payload.row, payload.column, link);
         Object.assign(link, payload);
+        positionMap.set(id, { ...payload, link });
+        matrix.setValue(payload.row, payload.column, link);
         this._linkUpdate$.next({
             unitId,
             subUnitId,

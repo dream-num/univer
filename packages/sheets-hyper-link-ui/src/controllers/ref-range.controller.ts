@@ -79,7 +79,6 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                     }],
                 };
             }
-
             return {
                 redos: [{
                     id: UpdateHyperLinkRefMutation.id,

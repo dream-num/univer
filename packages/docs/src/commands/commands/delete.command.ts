@@ -19,6 +19,7 @@ import {
     CommandType,
     ICommandService,
     IUniverInstanceService,
+    JSONX,
     TextX,
     TextXActionType,
     UpdateDocsAttributeType,
@@ -328,6 +329,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         };
 
         const textX = new TextX();
+        const jsonX = JSONX.getInstance();
 
         textX.push({
             t: TextXActionType.RETAIN,
@@ -358,7 +360,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             segmentId,
         });
 
-        doMutation.params.actions = textX.serialize();
+        doMutation.params.actions = jsonX.editOp(textX.serialize());
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

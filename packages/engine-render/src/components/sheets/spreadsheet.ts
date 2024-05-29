@@ -133,7 +133,6 @@ export class Spreadsheet extends SheetComponent {
             : undefined;
         const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo?.cacheBound)];
         const extensions = this.getExtensionsByOrder();
-
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
         for (const extension of extensions) {
             // const timeKey = `extension ${viewportInfo.viewPortKey}:${extension.constructor.name}`;
@@ -538,7 +537,7 @@ export class Spreadsheet extends SheetComponent {
         ctx.setLineWidthByPrecision(1);
 
         // TODO@jikkai: these should be configurable
-        ctx.strokeStyle = getColor([235, 236, 239]);
+        ctx.strokeStyle = getColor([214, 216, 219]);
 
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;

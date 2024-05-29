@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber, ColumnSeparatorType, DrawingTypeEnum, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, SectionType, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, DrawingTypeEnum, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
@@ -731,8 +731,8 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 //         paddingEnd: ptToPixel(15),
                 //     },
                 // ],
-                columnSeparatorType: ColumnSeparatorType.NONE,
-                sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
+                // columnSeparatorType: ColumnSeparatorType.NONE,
+                // sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
                 // textDirection: textDirectionDocument,
                 // contentDirection: textDirection!,
             },

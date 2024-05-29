@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
+/* eslint-disable max-lines-per-function */
+
 import type { IWorkbookData, UnitModel, Workbook } from '@univerjs/core';
 import {
+    AuthzIoLocalService,
+    IAuthzIoService,
     ILogService,
     IUniverInstanceService,
     LocaleService,
@@ -28,7 +32,7 @@ import {
 } from '@univerjs/core';
 import { FormulaDataModel, FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import { SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
+import { SelectionManagerService, SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import {
     DescriptionService,
     FormulaCustomFunctionService,
@@ -46,6 +50,7 @@ import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService }
 import { ISelectionRenderService, SelectionRenderService, SheetCanvasView, SheetRenderController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/ui';
 import { SheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
+
 import { FUniver } from '../facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
@@ -123,7 +128,6 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
         override onStarting(injector: Injector): void {
             injector.add([SelectionManagerService]);
             injector.add([SheetInterceptorService]);
-            injector.add([SheetPermissionService]);
             injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
             injector.add([
                 IDescriptionService,
@@ -144,6 +148,11 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([SheetSkeletonManagerService]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
+            injector.add([WorksheetPermissionService]);
+            injector.add([WorkbookPermissionService]);
+            injector.add([WorksheetProtectionPointModel]);
+            injector.add([IAuthzIoService, { useClass: AuthzIoLocalService }]);
+            injector.add([WorksheetProtectionRuleModel]);
 
             SheetsConditionalFormattingPlugin.dependencyList.forEach((d) => {
                 injector.add(d);

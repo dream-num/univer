@@ -53,7 +53,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const update = useObservable(threadCommentModel.commentUpdate$);
     const commandService = useDependency(ICommandService);
     const subUnitId = useObservable(subUnitId$);
-    const currentUser = userService.getCurrentUser();
+    const currentUser = userService.currentUser;
     const shouldScroll = useRef(true);
     const prefix = 'panel';
     const comments = useMemo(() => {

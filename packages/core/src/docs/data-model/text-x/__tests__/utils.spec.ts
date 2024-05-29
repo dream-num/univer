@@ -18,8 +18,8 @@ import { describe, expect, it } from 'vitest';
 import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
 import { BooleanNumber } from '../../../../types/enum/text-style';
 import { composeBody, getBodySlice, isUselessRetainAction } from '../utils';
-import type { IRetainAction } from '../../action-types';
-import { TextXActionType } from '../../action-types';
+import type { IRetainAction } from '../action-types';
+import { TextXActionType } from '../action-types';
 
 describe('test text-x utils', () => {
     it('test getBodySlice fn', () => {

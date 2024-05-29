@@ -20,10 +20,11 @@ import { Dropdown, Input } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
+import clsx from 'clsx';
 import styles from './index.module.less';
 import { DefinedNameOverlay } from './DefinedNameOverlay';
 
-export function DefinedName() {
+export function DefinedName({ disable }: { disable: boolean }) {
     const [rangeString, setRangeString] = React.useState('');
     const definedNamesService = useDependency(IDefinedNamesService);
 
@@ -39,10 +40,10 @@ export function DefinedName() {
 
     return (
         <div className={styles.definedName}>
-            <Input value={rangeString} type="text" size="small" affixWrapperStyle={{ border: 'none', paddingLeft: '6px', paddingRight: '6px', height: '100%' }} />
+            <Input className={clsx({ [styles.defineNameInputDisable]: disable })} value={rangeString} type="text" size="small" affixWrapperStyle={{ border: 'none', paddingLeft: '6px', paddingRight: '6px', height: '100%' }} />
 
             <Dropdown overlay={<DefinedNameOverlay />}>
-                <div className={styles.definedNameDropDown}>
+                <div className={clsx(styles.definedNameDropDown, { [styles.definedNameDropDownDisable]: disable })}>
                     <MoreDownSingle />
                 </div>
             </Dropdown>

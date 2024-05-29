@@ -15,3 +15,8 @@
  */
 
 export { UniverSheetsFilterUIPlugin } from './plugin';
+export * as zhCN from './locale/zh-CN';
+export * as enUS from './locale/en-US';
+export * as ruRU from './locale/ru-RU';
+
+export { OpenFilterPanelOperation } from './commands/sheets-filter.operation';

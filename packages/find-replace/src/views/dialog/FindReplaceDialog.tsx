@@ -168,7 +168,7 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
             messageDisposable = messageService.show({
                 content: localeService.t('find-replace.dialog.no-match'),
                 type: MessageType.Warning,
-                delay: 5000,
+                duration: 5000,
             });
         }
 

@@ -29,12 +29,13 @@ import {
 } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-
+import { WorkbookPermissionService } from '../../../services/permission/workbook-permission/workbook-permission.service';
+import { WorksheetPermissionService } from '../../../services/permission/worksheet-permission/worksheet-permission.service';
 import enUS from '../../../locale/en-US';
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
 import { SelectionManagerService } from '../../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
-import { SheetPermissionService } from '../../../services/permission';
+import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../../services/permission/worksheet-permission';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -95,10 +96,13 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
         }
 
         override onStarting(injector: Injector): void {
+            injector.add([WorksheetPermissionService]);
+            injector.add([WorksheetProtectionPointModel]);
+            injector.add([WorkbookPermissionService]);
+            injector.add([WorksheetProtectionRuleModel]);
             injector.add([SelectionManagerService]);
             injector.add([BorderStyleManagerService]);
             injector.add([SheetInterceptorService]);
-            injector.add([SheetPermissionService]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

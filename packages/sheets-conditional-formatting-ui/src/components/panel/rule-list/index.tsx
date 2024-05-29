@@ -16,6 +16,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Select, Tooltip } from '@univerjs/design';
+import { useHighlightRange } from '@univerjs/sheets-ui';
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IRange, Workbook } from '@univerjs/core';
@@ -36,8 +37,8 @@ import 'react-resizable/css/styles.css';
 import { Preview } from '../../preview';
 import { ConditionalFormattingI18nController } from '../../../controllers/cf.i18n.controller';
 import { ClearWorksheetCfCommand } from '../../../commands/commands/clear-worksheet-cf.command';
-import { useHighlightRange } from '../../hook/useHighlightRange';
 
+import { CONDITIONAL_FORMATTING_PERMISSION_CHECK, ConditionalFormattingClearController } from '../../../controllers/cf.clear.controller';
 import styles from './index.module.less';
 
 interface IRuleListProps {
@@ -109,6 +110,7 @@ export const RuleList = (props: IRuleListProps) => {
     const conditionalFormattingRuleModel = useDependency(ConditionalFormattingRuleModel);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const selectionManagerService = useDependency(SelectionManagerService);
+    const cvController = useDependency(ConditionalFormattingClearController);
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const conditionalFormattingI18nController = useDependency(ConditionalFormattingI18nController);
@@ -280,6 +282,9 @@ export const RuleList = (props: IRuleListProps) => {
 
     const layout = ruleList.map((rule, index) => ({ i: rule.cfId, x: 0, w: 12, y: index, h: 1, isResizable: false }));
 
+    const ruleListByPermissionCheck = cvController.interceptor.fetchThroughInterceptors(CONDITIONAL_FORMATTING_PERMISSION_CHECK)(ruleList, ruleList);
+    const hasDisableRule = ruleListByPermissionCheck?.some((rule) => rule.disable);
+
     return (
         <div className={styles.cfRuleList}>
             <div className={styles.ruleSelector}>
@@ -295,7 +300,7 @@ export const RuleList = (props: IRuleListProps) => {
                             <IncreaseSingle />
                         </div>
                     </Tooltip>
-                    {ruleList.length
+                    {(ruleList.length && !hasDisableRule)
                         ? (
                             <Tooltip title={localeService.t('sheet.cf.panel.clear')} placement="bottom">
                                 <div className={`${styles.gap} ${styles.icon}`} onClick={handleClear}>
@@ -325,7 +330,7 @@ export const RuleList = (props: IRuleListProps) => {
                             margin={[0, 10]}
                             draggableHandle=".draggableHandle"
                         >
-                            {ruleList.map((rule, index) => {
+                            {ruleListByPermissionCheck?.map((rule, index) => {
                                 return (
                                     <div key={`${rule.cfId}`}>
                                         <div
@@ -333,7 +338,10 @@ export const RuleList = (props: IRuleListProps) => {
                                                 rule.ranges !== currentRuleRanges && currentRuleRangesSet(rule.ranges);
                                             }}
                                             onMouseLeave={() => currentRuleRangesSet([])}
-                                            onClick={() => onClick(rule)}
+                                            onClick={() => {
+                                                if (rule.disable) return;
+                                                onClick(rule);
+                                            }}
                                             className={`${styles.ruleItem} ${draggingId === index ? styles.active : ''}`}
                                         >
                                             <div
@@ -347,15 +355,17 @@ export const RuleList = (props: IRuleListProps) => {
                                                 <div className={styles.ruleRange}>{rule.ranges.map((range) => serializeRange(range)).join(',')}</div>
                                             </div>
                                             <div className={styles.preview}><Preview rule={rule.rule} /></div>
-                                            <div
-                                                className={`${styles.deleteItem} ${draggingId === index ? styles.active : ''}`}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDelete(rule);
-                                                }}
-                                            >
-                                                <DeleteSingle />
-                                            </div>
+                                            {!rule.disable && (
+                                                <div
+                                                    className={`${styles.deleteItem} ${draggingId === index ? styles.active : ''}`}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDelete(rule);
+                                                    }}
+                                                >
+                                                    <DeleteSingle />
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 );

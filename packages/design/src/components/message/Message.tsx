@@ -16,8 +16,9 @@
 
 /* eslint-disable react-refresh/only-export-components */
 
-import { ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
+import { ErrorSingle, Loading, SuccessSingle, WarningSingle } from '@univerjs/icons';
 import { render } from 'rc-util/lib/React/render';
+import type { CSSProperties, ReactElement } from 'react';
 import React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import type { IDisposable } from '../../type';
@@ -29,17 +30,21 @@ export enum MessageType {
     Info = 'info',
     Warning = 'warning',
     Error = 'error',
+    Loading = 'loading',
 }
 
 export interface IMessageProps {
-    key: number;
+    key: string;
     type: MessageType;
-    content?: string;
+    content: string;
+    icon?: ReactElement;
+    style?: CSSProperties;
 }
 
-export interface IMessageMethodOptions {
-    content: string;
-    delay?: number;
+export interface IMessageOptions extends
+    Partial<Pick<IMessageProps, 'key' | 'type' >>,
+    Pick<IMessageProps, 'content'> {
+    duration?: number;
 }
 
 const iconMap = {
@@ -47,15 +52,16 @@ const iconMap = {
     [MessageType.Info]: <WarningSingle className={styles.messageIconInfo} />,
     [MessageType.Warning]: <WarningSingle className={styles.messageIconWarning} />,
     [MessageType.Error]: <ErrorSingle className={styles.messageIconError} />,
+    [MessageType.Loading]: <Loading className={styles.messageIconError} />,
 };
 
 const MessageItem = (props: IMessageProps) => {
-    const { type, content } = props;
+    const { type, content, icon, style } = props;
 
     const messageElement = (
-        <div className={styles.messageItem}>
+        <div className={styles.messageItem} style={style}>
             <div className={styles.messageContent}>
-                <span className={styles.messageIcon}>{iconMap[type]}</span>
+                <span className={styles.messageIcon}>{icon || iconMap[type]}</span>
                 <span>{content}</span>
             </div>
         </div>
@@ -99,9 +105,9 @@ export class Message {
         this.render();
     }
 
-    append(type: MessageType, options: IMessageMethodOptions): IDisposable {
-        const { content, delay = 3000 } = options;
-        const key = Date.now();
+    append(type: MessageType, options: IMessageOptions): IDisposable {
+        const { content, duration = 3000 } = options;
+        const key = `${Date.now()}`;
 
         this._messages.push({
             key,
@@ -111,11 +117,11 @@ export class Message {
 
         this.render();
 
-        setTimeout(() => this.teardown(key), delay);
+        setTimeout(() => this.teardown(key), duration);
         return { dispose: () => this.teardown(key) };
     }
 
-    teardown(key: number) {
+    teardown(key: string) {
         this._messages = this._messages.filter((message) => message.key !== key);
 
         this.render();
@@ -125,19 +131,23 @@ export class Message {
         render(<MessageContainer messages={this._messages} />, this._container);
     }
 
-    success(options: IMessageMethodOptions): IDisposable {
+    success(options: IMessageOptions): IDisposable {
         return this.append(MessageType.Success, options);
     }
 
-    info(options: IMessageMethodOptions): IDisposable {
+    info(options: IMessageOptions): IDisposable {
         return this.append(MessageType.Info, options);
     }
 
-    warning(options: IMessageMethodOptions): IDisposable {
+    warning(options: IMessageOptions): IDisposable {
         return this.append(MessageType.Warning, options);
     }
 
-    error(options: IMessageMethodOptions): IDisposable {
+    error(options: IMessageOptions): IDisposable {
         return this.append(MessageType.Error, options);
+    }
+
+    loading(options: IMessageOptions): IDisposable {
+        return this.append(MessageType.Loading, options);
     }
 }

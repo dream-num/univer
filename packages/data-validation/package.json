@@ -67,6 +67,9 @@
         "@wendellhu/redi": "0.15.2",
         "rxjs": ">=7.0.0"
     },
+    "dependencies": {
+        "@univerjs/protocol": "^0.1.34"
+    },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",

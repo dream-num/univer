@@ -41,7 +41,6 @@ import {
     ResourceManagerService,
     ThemeService,
     UniverInstanceService,
-    UniverPermissionService,
 } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { RediContext } from '@wendellhu/redi/react-bindings';
@@ -94,14 +93,13 @@ const preview: Preview = {
             [ThemeService],
             [LifecycleService],
             [LifecycleInitializerService],
-            [IPermissionService, { useClass: PermissionService }],
-            [UniverPermissionService],
             [ILogService, { useClass: DesktopLogService, lazy: true }],
             [ICommandService, { useClass: CommandService, lazy: true }],
             [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
             [IConfigService, { useClass: ConfigService }],
             [IContextService, { useClass: ContextService }],
             [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
+            [IPermissionService, { useClass: PermissionService }],
 
             // services
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],

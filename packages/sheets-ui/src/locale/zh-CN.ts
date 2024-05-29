@@ -296,6 +296,10 @@ const locale = {
         sheetNameAlreadyExistsError: '工作表已存在，请输入其它名称。',
         deleteSheet: '删除工作表',
         deleteSheetContent: '确认删除此工作表，删除后将不可找回，确定要删除吗？',
+        addProtectSheet: '保护工作表',
+        removeProtectSheet: '取消保护工作表',
+        changeSheetPermission: '更改工作表权限',
+        viewAllProtectArea: '查看所有保护范围',
     },
     rightClick: {
         copy: '复制',
@@ -396,6 +400,11 @@ const locale = {
         deleteAllColumnsAlert: '您无法删除工作表上的所有列',
         hideAllRowsAlert: '您无法隐藏工作表上的所有行',
         hideAllColumnsAlert: '您无法隐藏工作表上的所有列',
+        protectRange: '保护行列',
+        editProtectRange: '设置保护范围',
+        removeProtectRange: '移除保护范围',
+        turnOnProtectRange: '新增保护范围',
+        viewAllProtectArea: '查看所有保护范围',
     },
     info: {
         tooltip: '提示',

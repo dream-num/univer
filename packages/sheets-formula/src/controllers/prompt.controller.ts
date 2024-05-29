@@ -20,7 +20,6 @@ import type {
     IRange,
     IRangeWithCoord,
     ITextRun,
-
     Nullable,
     Workbook } from '@univerjs/core';
 import {
@@ -765,7 +764,7 @@ export class PromptController extends Disposable {
     private _getCurrentBodyDataStreamAndOffset() {
         const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
 
-        if (!documentModel?.snapshot?.body) {
+        if (!documentModel?.getBody()) {
             return;
         }
 
@@ -773,7 +772,7 @@ export class PromptController extends Disposable {
 
         const editor = this._editorService.getEditor(unitId);
 
-        const dataStream = documentModel.snapshot.body.dataStream;
+        const dataStream = documentModel.getBody()?.dataStream ?? '';
 
         if (!editor || !editor.onlyInputRange()) {
             return { dataStream, offset: 0 };

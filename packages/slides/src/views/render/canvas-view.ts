@@ -155,8 +155,10 @@ export class CanvasView extends RxDisposable {
 
         const { scene, engine } = currentRender;
 
-        engine.onTransformChangeObservable.addOnce(() => {
+        const observer = engine.onTransformChangeObservable.add(() => {
             this._scrollToCenter();
+            // add once
+            observer?.dispose();
         });
 
         engine.onTransformChangeObservable.add(() => {

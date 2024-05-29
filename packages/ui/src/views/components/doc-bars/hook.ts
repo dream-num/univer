@@ -157,7 +157,13 @@ export function useToolbarCollapseObserver(visibleItems: IToolbarRenderHookHandl
     useEffect(() => {
         function resize() {
             const wrapperWidth = toolbarRef.current?.clientWidth ?? 0;
-            const GAP = 8;
+            let GAP = 0;
+            if (toolbarRef.current) {
+                // firstElementChild is toolbar container
+                const gapValue = Number.parseInt(getComputedStyle(toolbarRef.current.firstElementChild!).gap, 10);
+                GAP = Number.isNaN(gapValue) ? 0 : gapValue;
+            }
+
             const itemWidths = Object.entries(toolbarItemRefs.current)
                 .filter(([_, ref]) => ref.el && ref.key && visibleItems.find((item) => item.id === ref.key))
                 .map(([_, ref]) => ({

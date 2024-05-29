@@ -71,7 +71,7 @@ export function RadioGroup(props: IRadioGroupProps) {
     });
 
     return (
-        <div className={_className} style={style}>
+        <div className={clsx(styles.radioGroup, _className)} style={style}>
             {React.Children.map(children, (child, index) => {
                 if (React.isValidElement<IRadioProps>(child)) {
                     return React.cloneElement(child, {

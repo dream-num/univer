@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { ICellData, Nullable, Workbook } from '@univerjs/core';
@@ -22,7 +22,7 @@ import { createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, ICommandService, 
 import { RangeSelector, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { AddHyperLinkCommand, HyperLinkModel, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
-import {  SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
@@ -72,6 +72,8 @@ export const CellLinkEdit = () => {
     const resolverService = useDependency(SheetsHyperLinkResolverService);
     const commandService = useDependency(ICommandService);
     const [showError, setShowError] = useState(false);
+
+    const setByPayload = useRef(false);
 
     useEffect(() => {
         if (editing?.row !== undefined && editing.column !== undefined) {
@@ -130,10 +132,12 @@ export const CellLinkEdit = () => {
         setId('');
     }, [editing, hyperLinkModel, resolverService, univerInstanceService]);
     useEffect(() => {
-        if (!display && payload) {
+        if (payload && (setByPayload.current || !display)) {
             setDisplay(payload);
+            setByPayload.current = true;
         }
     }, [payload]);
+    const payloadInitial = useMemo(() => payload, [type]);
 
     const linkTypeOptions = [
         {
@@ -230,7 +234,14 @@ export const CellLinkEdit = () => {
                 label={localeService.t('hyperLink.form.label')}
                 error={showError && !display ? localeService.t('hyperLink.form.inputError') : ''}
             >
-                <Input value={display} onChange={setDisplay} placeholder={localeService.t('hyperLink.form.labelPlaceholder')} />
+                <Input
+                    value={display}
+                    onChange={(v) => {
+                        setDisplay(v);
+                        setByPayload.current = false;
+                    }}
+                    placeholder={localeService.t('hyperLink.form.labelPlaceholder')}
+                />
             </FormLayout>
             <FormLayout label={localeService.t('hyperLink.form.type')}>
                 <Select
@@ -255,7 +266,7 @@ export const CellLinkEdit = () => {
                         openForSheetUnitId={workbook.getUnitId()}
                         id={createInternalEditorID('hyper-link-edit')}
                         isSingleChoice
-                        value={payload}
+                        value={payloadInitial}
                         onChange={(newValue) => {
                             const range = newValue[0];
                             if (!range || !isLegalRange(range.range)) {

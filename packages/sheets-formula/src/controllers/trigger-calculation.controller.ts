@@ -54,6 +54,8 @@ export class TriggerCalculationController extends Disposable {
 
     private _formulaCalculationDoneCount: number = 0;
 
+    private _arrayFormulaCalculationDoneCount: number = 0;
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
@@ -225,11 +227,14 @@ export class TriggerCalculationController extends Disposable {
         /**
          * Assignment operation after formula calculation.
          */
-        const debouncedPushTask = throttle(this._pushTask.bind(this), 300);
+        const debouncedFormulaPushTask = throttle(this._pushFormulaTask.bind(this), 300);
+        const debouncedArrayFormulaPushTask = throttle(this._pushArrayFormulaTask.bind(this), 300);
         let startDependencyTimer: NodeJS.Timeout | null = null;
-        let needStartProgress = false;
-        let formulaInsertTaskCount = false;
-        let arrayFormulaInsertTaskCount = false;
+        let calculationProcessCount = 0; // Multiple calculations are performed in parallel, but only one progress bar is displayed, and the progress is only closed after the last calculation is completed.
+        let formulaCalculationCount = 0;
+        let arrayFormulaCalculationCount = 0;
+        let needStartFormulaProgress = false;
+        let needStartArrayFormulaProgress = false;
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -249,6 +254,9 @@ export class TriggerCalculationController extends Disposable {
                     } = params.stageInfo;
 
                     if (stage === FormulaExecuteStageType.START_DEPENDENCY) {
+                        // Increment the calculation process count and assign a new ID
+                        calculationProcessCount++;
+
                         // Clear any existing timer to prevent duplicate executions
                         if (startDependencyTimer !== null) {
                             clearTimeout(startDependencyTimer);
@@ -258,24 +266,24 @@ export class TriggerCalculationController extends Disposable {
                         // If the total calculation time exceeds 1s, a progress bar is displayed. The first progress shows 5%
                         startDependencyTimer = setTimeout(() => {
                             // Ignore progress deviations, and finally the complete method ensures the correct completion of the progress
-                            this._progressService.insertTaskCount(100);
+                            const taskCount = (formulaCalculationCount - this._formulaCalculationDoneCount) + (arrayFormulaCalculationCount - this._arrayFormulaCalculationDoneCount) + 100;
+                            this._progressService.insertTaskCount(taskCount);
                             this._progressService.pushTask({ count: 5 });
-                            needStartProgress = true;
-
                             startDependencyTimer = null;
                         }, 1000);
                     } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING) {
-                        if (!formulaInsertTaskCount && needStartProgress) {
-                            formulaInsertTaskCount = true;
-                            this._progressService.insertTaskCount(totalFormulasToCalculate);
+                        // Each start of calculation of statistics once
+                        if (completedFormulasCount === 1 && !needStartFormulaProgress) {
+                            needStartFormulaProgress = true;
+                            formulaCalculationCount += totalFormulasToCalculate;
                         }
-                        debouncedPushTask(completedFormulasCount);
+                        debouncedFormulaPushTask(completedFormulasCount);
                     } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
-                        if (!arrayFormulaInsertTaskCount && needStartProgress) {
-                            arrayFormulaInsertTaskCount = true;
-                            this._progressService.insertTaskCount(totalArrayFormulasToCalculate);
+                        if (completedArrayFormulasCount === 1 && !needStartArrayFormulaProgress) {
+                            needStartArrayFormulaProgress = true;
+                            arrayFormulaCalculationCount += totalArrayFormulasToCalculate;
                         }
-                        debouncedPushTask(completedArrayFormulasCount);
+                        debouncedArrayFormulaPushTask(completedArrayFormulasCount);
                     }
 
                     // if (totalArrayFormulasToCalculate > 0) {
@@ -312,22 +320,27 @@ export class TriggerCalculationController extends Disposable {
                             break;
                     }
 
-                    if (startDependencyTimer) {
-                        // The total calculation time does not exceed 1s, and the progress bar is not displayed.
-                        clearTimeout(startDependencyTimer);
-                        startDependencyTimer = null;
-                    } else {
-                        //  Manually hide the progress bar to prevent the progress bar from not being hidden due to pushTask statistical errors
-                        if (state === FormulaExecutedStateType.SUCCESS) {
-                            this._progressService.complete();
-                        } else if (state === FormulaExecutedStateType.STOP_EXECUTION) {
-                            this._progressService.stop();
-                        }
+                    // Decrement the calculation process count
+                    calculationProcessCount--;
 
-                        formulaInsertTaskCount = false;
-                        arrayFormulaInsertTaskCount = false;
-                        needStartProgress = false;
-                        this._formulaCalculationDoneCount = 0;
+                    if (calculationProcessCount === 0) {
+                        if (startDependencyTimer) {
+                            // The total calculation time does not exceed 1s, and the progress bar is not displayed.
+                            clearTimeout(startDependencyTimer);
+                            startDependencyTimer = null;
+                        } else {
+                            // Manually hide the progress bar only if no other calculations are in process
+                            if (state === FormulaExecutedStateType.SUCCESS) {
+                                this._progressService.complete();
+                            } else if (state === FormulaExecutedStateType.STOP_EXECUTION) {
+                                this._progressService.stop();
+                            }
+
+                            this._formulaCalculationDoneCount = 0;
+                            this._arrayFormulaCalculationDoneCount = 0;
+                            needStartFormulaProgress = false;
+                            needStartArrayFormulaProgress = false;
+                        }
                     }
 
                     console.warn(`execution result${result}`);
@@ -353,9 +366,19 @@ export class TriggerCalculationController extends Disposable {
      * Update progress by completed count
      * @param completedCount
      */
-    private _pushTask(completedCount: number) {
+    private _pushFormulaTask(completedCount: number) {
         const count = completedCount - this._formulaCalculationDoneCount;
         this._formulaCalculationDoneCount = completedCount;
+        this._progressService.pushTask({ count });
+    }
+
+    /**
+     * Update progress by completed count
+     * @param completedCount
+     */
+    private _pushArrayFormulaTask(completedCount: number) {
+        const count = completedCount - this._arrayFormulaCalculationDoneCount;
+        this._arrayFormulaCalculationDoneCount = completedCount;
         this._progressService.pushTask({ count });
     }
 }

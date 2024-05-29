@@ -37,7 +37,7 @@ export class SheetsHyperLinkAutoFillController extends Disposable {
         const noopReturnFunc = () => ({ redos: [], undos: [] });
 
         // eslint-disable-next-line max-lines-per-function
-        const generalApplyFunc = (location: IAutoFillLocation) => {
+        const generalApplyFunc = (location: IAutoFillLocation, applyType: APPLY_TYPE) => {
             const { source: sourceRange, target: targetRange, unitId, subUnitId } = location;
 
             const virtualRange = virtualizeDiscreteRanges([sourceRange, targetRange]);
@@ -102,29 +102,31 @@ export class SheetsHyperLinkAutoFillController extends Disposable {
                                 },
                             });
                         }
-                        redos.push({
-                            id: AddHyperLinkMutation.id,
-                            params: {
-                                unitId,
-                                subUnitId,
-                                link: {
-                                    ...link,
-                                    id,
-                                    row: targetRow,
-                                    column: targetCol,
-                                },
-                            },
-                        });
-                        undos.push({
-                            id: RemoveHyperLinkMutation.id,
-                            params: {
-                                unitId,
-                                subUnitId,
-                                id,
-                            },
-                        });
-                        if (currentLink) {
+                        if (APPLY_TYPE.COPY === applyType) {
                             redos.push({
+                                id: AddHyperLinkMutation.id,
+                                params: {
+                                    unitId,
+                                    subUnitId,
+                                    link: {
+                                        ...link,
+                                        id,
+                                        row: targetRow,
+                                        column: targetCol,
+                                    },
+                                },
+                            });
+                            undos.push({
+                                id: RemoveHyperLinkMutation.id,
+                                params: {
+                                    unitId,
+                                    subUnitId,
+                                    id,
+                                },
+                            });
+                        }
+                        if (currentLink) {
+                            undos.push({
                                 id: AddHyperLinkMutation.id,
                                 params: {
                                     unitId,
@@ -147,9 +149,10 @@ export class SheetsHyperLinkAutoFillController extends Disposable {
             onFillData: (location, direction, applyType) => {
                 if (
                     applyType === APPLY_TYPE.COPY ||
+                    applyType === APPLY_TYPE.ONLY_FORMAT ||
                     applyType === APPLY_TYPE.SERIES
                 ) {
-                    return generalApplyFunc(location);
+                    return generalApplyFunc(location, applyType);
                 }
 
                 return noopReturnFunc();

@@ -44,7 +44,7 @@ export class ImageUpdateController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IDialogService private readonly _dialogService: IDialogService,
-        @IImageIoService private readonly _imageRemoteService: IImageIoService,
+        @IImageIoService private readonly _imageIoService: IImageIoService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
         super();
@@ -226,7 +226,7 @@ export class ImageUpdateController extends Disposable {
             const orders = this._drawingManagerService.getDrawingOrder(unitId, subUnitId);
             const zIndex = orders.indexOf(drawingId);
             const imageConfig: IImageProps = { ...transform, zIndex: zIndex === -1 ? (orders.length - 1) : zIndex };
-            const imageNativeCache = this._imageRemoteService.getImageSourceCache(source, imageSourceType);
+            const imageNativeCache = this._imageIoService.getImageSourceCache(source, imageSourceType);
 
             let shouldBeCache = false;
             if (imageNativeCache != null) {
@@ -234,7 +234,7 @@ export class ImageUpdateController extends Disposable {
             } else {
                 if (imageSourceType === ImageSourceType.UUID) {
                     try {
-                        imageConfig.url = await this._imageRemoteService.getImage(source);
+                        imageConfig.url = await this._imageIoService.getImage(source);
                     } catch (error) {
                         console.error(error);
                         return;
@@ -247,7 +247,7 @@ export class ImageUpdateController extends Disposable {
 
             const image = new Image(imageShapeKey, imageConfig);
             if (shouldBeCache) {
-                this._imageRemoteService.addImageSourceCache(source, imageSourceType, image.getNative());
+                this._imageIoService.addImageSourceCache(source, imageSourceType, image.getNative());
             }
 
             scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(image);

@@ -42,7 +42,7 @@ export class SheetDrawingUpdateController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @IImageIoService private readonly _imageRemoteService: IImageIoService,
+        @IImageIoService private readonly _imageIoService: IImageIoService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
@@ -88,7 +88,7 @@ export class SheetDrawingUpdateController extends Disposable {
                         return;
                     }
 
-                    this._imageRemoteService.setWaitCount(fileLength);
+                    this._imageIoService.setWaitCount(fileLength);
                     if (command.id === InsertCellImageOperation.id) {
                         params.files.forEach(async (file) => {
                             await this._insertCellImage(file);
@@ -111,7 +111,7 @@ export class SheetDrawingUpdateController extends Disposable {
         let imageParam: Nullable<IImageIoServiceParam>;
 
         try {
-            imageParam = await this._imageRemoteService.saveImage(file);
+            imageParam = await this._imageIoService.saveImage(file);
         } catch (error) {
             const type = (error as Error).message;
             if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
@@ -146,7 +146,7 @@ export class SheetDrawingUpdateController extends Disposable {
 
         const { width, height, image } = await getImageSize(base64Cache || '');
 
-        this._imageRemoteService.addImageSourceCache(imageId, imageSourceType, image);
+        this._imageIoService.addImageSourceCache(imageId, imageSourceType, image);
 
         let scale = 1;
         if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {

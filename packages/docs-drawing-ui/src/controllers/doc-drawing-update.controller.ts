@@ -41,7 +41,7 @@ export class DocDrawingUpdateController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @IImageIoService private readonly _imageRemoteService: IImageIoService,
+        @IImageIoService private readonly _imageIoService: IImageIoService,
         @IDocDrawingService private readonly _sheetDrawingService: IDocDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
@@ -89,7 +89,7 @@ export class DocDrawingUpdateController extends Disposable {
                         return;
                     }
 
-                    this._imageRemoteService.setWaitCount(fileLength);
+                    this._imageIoService.setWaitCount(fileLength);
 
                     params.files.forEach(async (file) => {
                         await this._insertFloatImage(file);
@@ -103,7 +103,7 @@ export class DocDrawingUpdateController extends Disposable {
         let imageParam: Nullable<IImageIoServiceParam>;
 
         try {
-            imageParam = await this._imageRemoteService.saveImage(file);
+            imageParam = await this._imageIoService.saveImage(file);
         } catch (error) {
             const type = (error as Error).message;
             if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
@@ -136,7 +136,7 @@ export class DocDrawingUpdateController extends Disposable {
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
         const { width, height, image } = await getImageSize(base64Cache || '');
 
-        this._imageRemoteService.addImageSourceCache(imageId, imageSourceType, image);
+        this._imageIoService.addImageSourceCache(imageId, imageSourceType, image);
 
         let scale = 1;
         if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {

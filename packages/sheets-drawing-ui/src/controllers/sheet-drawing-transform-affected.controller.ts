@@ -357,7 +357,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 const { from, to } = sheetTransform;
                 const { row: fromRow } = from;
                 const { row: toRow } = to;
-                if (fromRow <= rowStartIndex && toRow <= rowEndIndex) {
+                if (fromRow >= rowStartIndex && toRow <= rowEndIndex) {
                     // delete drawing
                     deleteDrawings.push({ unitId, subUnitId, drawingId });
                 } else {
@@ -437,7 +437,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 const { from, to } = sheetTransform;
                 const { column: fromColumn } = from;
                 const { column: toColumn } = to;
-                if (fromColumn <= colStartIndex && toColumn <= colEndIndex) {
+                if (fromColumn >= colStartIndex && toColumn <= colEndIndex) {
                     // delete drawing
                     deleteDrawings.push({ unitId, subUnitId, drawingId });
                 } else {
@@ -553,7 +553,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 to: { ...to, column: toColumn - colCount },
             };
             newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
-        } else if (fromColumn <= colStartIndex && toColumn <= colEndIndex) {
+        } else if (fromColumn >= colStartIndex && toColumn <= colEndIndex) {
             // delete drawing
             return null;
         } else if (fromColumn < colStartIndex && toColumn > colEndIndex) {
@@ -574,10 +574,10 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             // shrink start and end col left, then set fromColOffset to 0
             newSheetTransform = {
                 from: { ...from, column: colStartIndex, columnOffset: 0 },
-                to: { ...to, column: toColumn - colEndIndex },
+                to: { ...to, column: toColumn - fromColumn + colStartIndex },
             };
             newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
-        } else if (toColumn >= colStartIndex && toColumn <= colEndIndex) {
+        } else if (toColumn >= colStartIndex && toColumn <= colEndIndex && anchorType === SheetDrawingAnchorType.Both) {
             // shrink end col left, then set toColOffset to full cell width
             const selectionCell = this._selectionRenderService.attachRangeWithCoord({
                 startColumn: colStartIndex - 1,
@@ -691,7 +691,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 to: { ...to, row: toRow - rowCount },
             };
             newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
-        } else if (fromRow <= rowStartIndex && toRow <= rowEndIndex) {
+        } else if (fromRow >= rowStartIndex && toRow <= rowEndIndex) {
             // delete drawing
             return null;
         } else if (fromRow < rowStartIndex && toRow > rowEndIndex) {
@@ -712,10 +712,10 @@ export class SheetDrawingTransformAffectedController extends Disposable {
            // shrink start and end row up, then set fromRowOffset to 0
             newSheetTransform = {
                 from: { ...from, row: rowStartIndex, rowOffset: 0 },
-                to: { ...to, row: toRow - rowEndIndex },
+                to: { ...to, row: toRow - fromRow + rowStartIndex },
             };
             newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
-        } else if (toRow >= rowStartIndex && toRow <= rowEndIndex) {
+        } else if (toRow >= rowStartIndex && toRow <= rowEndIndex && anchorType === SheetDrawingAnchorType.Both) {
             // shrink end row up, then set toRowOffset to full cell height
             const selectionCell = this._selectionRenderService.attachRangeWithCoord({
                 startColumn: from.column,

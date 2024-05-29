@@ -509,12 +509,13 @@ export class SheetFindModel extends FindModel {
                 height,
                 evented: false,
                 inHiddenRange,
+                zIndex: FIND_REPLACE_Z_INDEX,
             };
 
             return new SheetFindReplaceHighlightShape(`find-highlight-${index}`, props);
         });
 
-        scene.addObjects(highlightShapes, FIND_REPLACE_Z_INDEX);
+        scene.addObjects(highlightShapes);
         this._highlightShapes = highlightShapes;
 
         scene.makeDirty();

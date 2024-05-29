@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
+import type { IDrawingParam, Nullable } from '@univerjs/core';
 import { ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { Checkbox, InputNumber } from '@univerjs/design';
 import clsx from 'clsx';
-import type { IChangeObserverConfig } from '@univerjs/engine-render';
+import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getUpdateParams } from '../../utils/get-update-params';
+import { MIN_DRAWING_HEIGHT_LIMIT, MIN_DRAWING_WIDTH_LIMIT, RANGE_DRAWING_ROTATION_LIMIT } from '../../utils/config';
 import styles from './index.module.less';
 
 export interface IDrawingTransformProps {
@@ -56,6 +57,12 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
     if (scene == null) {
         return;
     }
+
+    const topScene = scene.getEngine()?.activeScene as Nullable<Scene>;
+    if (topScene == null) {
+        return;
+    }
+
     const transformer = scene.getTransformerByCreate();
 
     const {
@@ -72,6 +79,35 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
     const [yPosition, setYPosition] = useState(originY);
     const [rotation, setRotation] = useState(originRotation);
     const [lockRatio, setLockRatio] = useState(transformer.keepRatio);
+
+    const checkMoveBoundary = (left: number, top: number, width: number, height: number) => {
+        const { width: topSceneWidth, height: topSceneHeight } = topScene;
+        const { ancestorLeft, ancestorTop } = scene;
+
+        let limitLeft = left;
+        let limitTop = top;
+
+        if (left + ancestorLeft < 0) {
+            limitLeft = -ancestorLeft;
+        }
+
+        if (top + ancestorTop < 0) {
+            limitTop = -ancestorTop;
+        }
+
+        if (left + width + ancestorLeft > topSceneWidth) {
+            limitLeft = topSceneWidth - width - ancestorLeft;
+        }
+
+        if (top + height + ancestorTop > topSceneHeight) {
+            limitTop = topSceneHeight - height - ancestorTop;
+        }
+
+        return {
+            limitLeft,
+            limitTop,
+        };
+    };
 
     const changeObs = (state: IChangeObserverConfig) => {
         const { objects } = state;
@@ -142,10 +178,13 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
             return;
         }
 
+        val = Math.max(val, MIN_DRAWING_WIDTH_LIMIT);
+
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { width: val } };
 
         if (lockRatio) {
-            const heightFix = (val / width) * height;
+            let heightFix = (val / width) * height;
+            heightFix = Math.max(heightFix, MIN_DRAWING_HEIGHT_LIMIT);
             setHeight(heightFix);
             updateParam.transform!.height = heightFix;
         }
@@ -163,10 +202,13 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
             return;
         }
 
+        val = Math.max(val, MIN_DRAWING_WIDTH_LIMIT);
+
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { height: val } };
 
         if (lockRatio) {
-            const widthFix = (val / height) * width;
+            let widthFix = (val / height) * width;
+            widthFix = Math.max(widthFix, MIN_DRAWING_WIDTH_LIMIT);
             setWidth(widthFix);
             updateParam.transform!.width = widthFix;
         }
@@ -184,6 +226,10 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
             return;
         }
 
+        const { limitLeft } = checkMoveBoundary(val, yPosition, width, height);
+
+        val = limitLeft;
+
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { left: val } };
 
         setXPosition(val);
@@ -199,6 +245,10 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
             return;
         }
 
+        const { limitTop } = checkMoveBoundary(xPosition, val, width, height);
+
+        val = limitTop;
+
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { top: val } };
 
         setYPosition(val);
@@ -212,6 +262,16 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
     const handleRotationChange = (val: number | null) => {
         if (val == null) {
             return;
+        }
+
+        const [min, max] = RANGE_DRAWING_ROTATION_LIMIT;
+
+        if (val < min) {
+            val = min;
+        }
+
+        if (val > max) {
+            val = max;
         }
 
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { angle: val } };

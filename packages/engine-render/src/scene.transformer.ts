@@ -87,6 +87,9 @@ export interface IChangeObserverConfig {
 
 const DEFAULT_TRANSFORMER_LAYER_INDEX = 2;
 
+const MINI_WIDTH_LIMIT = 20;
+const MINI_HEIGHT_LIMIT = 20;
+
 /**
  * Transformer constructor.  Transformer is a special type of group that allow you transform
  * primitives and shapes. Transforming tool is not changing `width` and `height` properties of nodes
@@ -545,48 +548,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
             return;
         }
 
-        const moveFunc = (moveObject: BaseObject) => {
-            const { left, top, width, height, angle } = moveObject;
-            const originState = this._startStateMap.get(moveObject.oKey) || {};
-            let state: ITransformState = {};
-
-            const { moveLeft, moveTop } = this._getMovePoint(x, y, moveObject);
-
-            if (keepRatio && type !== TransformerManagerType.RESIZE_CT && type !== TransformerManagerType.RESIZE_CB && type !== TransformerManagerType.RESIZE_LM && type !== TransformerManagerType.RESIZE_RM) {
-                switch (type) {
-                    case TransformerManagerType.RESIZE_LT:
-                        state = this._resizeLeftTop(moveObject, moveLeft, moveTop, originState);
-                        break;
-                    case TransformerManagerType.RESIZE_RT:
-                        state = this._resizeRightTop(moveObject, moveLeft, moveTop, originState);
-                        break;
-                    case TransformerManagerType.RESIZE_LB:
-                        state = this._resizeLeftBottom(moveObject, moveLeft, moveTop, originState);
-                        break;
-                    case TransformerManagerType.RESIZE_RB:
-                        state = this._resizeRightBottom(moveObject, moveLeft, moveTop, originState);
-                        break;
-                }
-            } else {
-                state = this._updateCloseKeepRatioState(type, left, top, width, height, moveLeft, moveTop);
-            }
-
-            const { width: newWidth = 0, height: newHeight = 0 } = state;
-
-            if (newWidth < 20) {
-                state.width = 20;
-            }
-
-            if (newHeight < 20) {
-                state.height = 10;
-            }
-
-            moveObject.transformByState(this._applyRotationForResult(state, { left, top, width, height }, angle, isCropper));
-        };
+        const isGroup = applyObject instanceof Group;
 
         if (!isCropper) {
             this._selectedObjectMap.forEach((moveObject) => {
-                moveFunc(moveObject);
+                this._moveFunc(moveObject, type, x, y, keepRatio, isCropper, isGroup);
             });
             this.onChangingObservable.notifyObservers({
                 objects: this._selectedObjectMap,
@@ -594,18 +560,47 @@ export class Transformer extends Disposable implements ITransformerConfig {
             });
         } else {
             // for cropper
-            moveFunc(applyObject);
+            this._moveFunc(applyObject, type, x, y, keepRatio, isCropper, isGroup);
             this.onChangingObservable.notifyObservers({
                 objects: new Map([[applyObject.oKey, applyObject]]) as Map<string, BaseObject>,
                 type: MoveObserverType.MOVING,
             });
         }
 
-        if (!(keepRatio && type !== TransformerManagerType.RESIZE_CT && type !== TransformerManagerType.RESIZE_CB && type !== TransformerManagerType.RESIZE_LM && type !== TransformerManagerType.RESIZE_RM)) {
+        if (!(keepRatio && type !== TransformerManagerType.RESIZE_CT && type !== TransformerManagerType.RESIZE_CB && type !== TransformerManagerType.RESIZE_LM && type !== TransformerManagerType.RESIZE_RM && !isGroup)) {
             this._startOffsetX = x;
             this._startOffsetY = y;
         }
     }
+
+    private _moveFunc(moveObject: BaseObject, type: TransformerManagerType, x: number, y: number, keepRatio: boolean, isCropper: boolean = false, isGroup: boolean = false) {
+        const { left, top, width, height, angle } = moveObject;
+        const originState = this._startStateMap.get(moveObject.oKey) || {};
+        let state: ITransformState = {};
+
+        const { moveLeft, moveTop } = this._getMovePoint(x, y, moveObject);
+
+        if (keepRatio && type !== TransformerManagerType.RESIZE_CT && type !== TransformerManagerType.RESIZE_CB && type !== TransformerManagerType.RESIZE_LM && type !== TransformerManagerType.RESIZE_RM && !isGroup) {
+            switch (type) {
+                case TransformerManagerType.RESIZE_LT:
+                    state = this._resizeLeftTop(moveObject, moveLeft, moveTop, originState);
+                    break;
+                case TransformerManagerType.RESIZE_RT:
+                    state = this._resizeRightTop(moveObject, moveLeft, moveTop, originState);
+                    break;
+                case TransformerManagerType.RESIZE_LB:
+                    state = this._resizeLeftBottom(moveObject, moveLeft, moveTop, originState);
+                    break;
+                case TransformerManagerType.RESIZE_RB:
+                    state = this._resizeRightBottom(moveObject, moveLeft, moveTop, originState);
+                    break;
+            }
+        } else {
+            state = this._updateCloseKeepRatioState(type, left, top, width, height, moveLeft, moveTop);
+        }
+
+        moveObject.transformByState(this._applyRotationForResult(state, { left, top, width, height }, angle, isCropper));
+    };
 
     private _getMovePoint(x: number, y: number, moveObject: BaseObject) {
         const { ancestorScaleX, ancestorScaleY } = this._scene;
@@ -657,52 +652,63 @@ export class Transformer extends Disposable implements ITransformerConfig {
         };
     }
 
+    // eslint-disable-next-line complexity
     private _updateCloseKeepRatioState(type: TransformerManagerType, left: number, top: number, width: number, height: number, moveLeft: number, moveTop: number) {
-        const state: ITransformState = {
-            left,
-            top,
-            width,
-            height,
-        };
+        const state: ITransformState = { left, top, width, height };
 
         switch (type) {
             case TransformerManagerType.RESIZE_LT:
-                state.left = left + moveLeft;
-                state.top = top + moveTop;
-                state.width = width - moveLeft;
-                state.height = height - moveTop;
+                state.width = width - moveLeft < MINI_WIDTH_LIMIT ? MINI_WIDTH_LIMIT : width - moveLeft;
+                state.height = height - moveTop < MINI_HEIGHT_LIMIT ? MINI_HEIGHT_LIMIT : height - moveTop;
+                state.left = left + width - state.width;
+                state.top = top + height - state.height;
                 break;
             case TransformerManagerType.RESIZE_CT:
-                state.top = top + moveTop;
-                state.height = height - moveTop;
+                state.height = height - moveTop < MINI_HEIGHT_LIMIT ? MINI_HEIGHT_LIMIT : height - moveTop;
+                state.top = top + height - state.height;
                 break;
             case TransformerManagerType.RESIZE_RT:
-                state.top = top + moveTop;
-                state.width = width + moveLeft;
-                state.height = height - moveTop;
+                state.width = width + moveLeft < MINI_WIDTH_LIMIT ? MINI_WIDTH_LIMIT : width + moveLeft;
+                state.height = height - moveTop < MINI_HEIGHT_LIMIT ? MINI_HEIGHT_LIMIT : height - moveTop;
+                state.top = top + height - state.height;
                 break;
             case TransformerManagerType.RESIZE_LM:
-                state.left = left + moveLeft;
-                state.width = width - moveLeft;
+                state.width = width - moveLeft < MINI_WIDTH_LIMIT ? MINI_WIDTH_LIMIT : width - moveLeft;
+                state.left = left + width - state.width;
                 break;
             case TransformerManagerType.RESIZE_RM:
-                state.width = moveLeft + width;
+                state.width = moveLeft + width < MINI_WIDTH_LIMIT ? MINI_WIDTH_LIMIT : moveLeft + width;
                 break;
             case TransformerManagerType.RESIZE_LB:
+                state.width = width - moveLeft < MINI_WIDTH_LIMIT ? MINI_WIDTH_LIMIT : width - moveLeft;
+                state.height = height + moveTop < MINI_HEIGHT_LIMIT ? MINI_HEIGHT_LIMIT : height + moveTop;
                 state.left = left + moveLeft;
-                state.width = width - moveLeft;
-                state.height = height + moveTop;
                 break;
             case TransformerManagerType.RESIZE_CB:
-                state.height = moveTop + height;
+                state.height = moveTop + height < MINI_HEIGHT_LIMIT ? MINI_HEIGHT_LIMIT : moveTop + height;
                 break;
             case TransformerManagerType.RESIZE_RB:
-                state.width = moveLeft + width;
-                state.height = moveTop + height;
+                state.width = moveLeft + width < MINI_WIDTH_LIMIT ? MINI_WIDTH_LIMIT : moveLeft + width;
+                state.height = moveTop + height < MINI_HEIGHT_LIMIT ? MINI_HEIGHT_LIMIT : moveTop + height;
                 break;
         }
 
         return state;
+    }
+
+    private _getLimitedSize(newWidth: number, newHeight: number) {
+        let limitWidth = MINI_WIDTH_LIMIT;
+        let limitHeight = MINI_HEIGHT_LIMIT;
+        if (newWidth > newHeight) {
+            limitWidth = limitWidth * Math.abs(newWidth / newHeight);
+        } else {
+            limitHeight = limitHeight * Math.abs(newHeight / newWidth);
+        }
+
+        return {
+            limitWidth,
+            limitHeight,
+        };
     }
 
     private _resizeLeftTop(moveObject: BaseObject, moveLeft: number, moveTop: number, originState: IAbsoluteTransform): ITransformState {
@@ -712,11 +718,22 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         const { moveLeft: moveLeftFix, moveTop: moveTopFix } = this._fixMoveLtRb(moveLeft, moveTop, originWidth, originHeight, aspectRatio);
 
+        let newWidth = originWidth - moveLeftFix;
+        let newHeight = originHeight - moveTopFix;
+
+        const { limitWidth, limitHeight } = this._getLimitedSize(originWidth, originHeight);
+        if (newWidth < limitWidth) {
+            newWidth = limitWidth;
+        }
+        if (newHeight < limitHeight) {
+            newHeight = limitHeight;
+        }
+
         return {
-            left: originLeft + moveLeftFix + left + width - originWidth - originLeft,
-            top: originTop + moveTopFix + top + height - originHeight - originTop,
-            width: originWidth - moveLeftFix,
-            height: originHeight - moveTopFix,
+            left: left + width - newWidth,
+            top: top + height - newHeight,
+            width: newWidth,
+            height: newHeight,
         };
     }
 
@@ -727,11 +744,22 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         const { moveLeft: moveLeftFix, moveTop: moveTopFix } = this._fixMoveLtRb(moveLeft, moveTop, originWidth, originHeight, aspectRatio);
 
+        let newWidth = originWidth + moveLeftFix;
+        let newHeight = originHeight + moveTopFix;
+
+        const { limitWidth, limitHeight } = this._getLimitedSize(originWidth, originHeight);
+        if (newWidth < limitWidth) {
+            newWidth = limitWidth;
+        }
+        if (newHeight < limitHeight) {
+            newHeight = limitHeight;
+        }
+
         return {
             left,
             top,
-            width: originWidth + moveLeftFix,
-            height: originHeight + moveTopFix,
+            width: newWidth,
+            height: newHeight,
         };
     }
 
@@ -742,11 +770,22 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         const { moveLeft: moveLeftFix, moveTop: moveTopFix } = this._fixMoveLbRt(moveLeft, moveTop, originWidth, originHeight, aspectRatio);
 
+        let newWidth = originWidth - moveLeftFix;
+        let newHeight = originHeight + moveTopFix;
+
+        const { limitWidth, limitHeight } = this._getLimitedSize(originWidth, originHeight);
+        if (newWidth < limitWidth) {
+            newWidth = limitWidth;
+        }
+        if (newHeight < limitHeight) {
+            newHeight = limitHeight;
+        }
+
         return {
-            left: originLeft + moveLeftFix + left + width - originWidth - originLeft,
+            left: left + width - newWidth,
             top,
-            width: originWidth - moveLeftFix,
-            height: originHeight + moveTopFix,
+            width: newWidth,
+            height: newHeight,
         };
     }
 
@@ -757,11 +796,22 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         const { moveLeft: moveLeftFix, moveTop: moveTopFix } = this._fixMoveLbRt(moveLeft, moveTop, originWidth, originHeight, aspectRatio);
 
+        let newWidth = originWidth + moveLeftFix;
+        let newHeight = originHeight - moveTopFix;
+
+        const { limitWidth, limitHeight } = this._getLimitedSize(originWidth, originHeight);
+        if (newWidth < limitWidth) {
+            newWidth = limitWidth;
+        }
+        if (newHeight < limitHeight) {
+            newHeight = limitHeight;
+        }
+
         return {
             left,
-            top: originTop + moveTopFix + top + height - originHeight - originTop,
-            width: originWidth + moveLeftFix,
-            height: originHeight - moveTopFix,
+            top: top + height - newHeight,
+            width: newWidth,
+            height: newHeight,
         };
     }
 

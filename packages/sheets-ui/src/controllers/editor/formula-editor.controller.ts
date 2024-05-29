@@ -58,7 +58,7 @@ import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 export const FORMULA_EDIT_PERMISSION_CHECK = createInterceptorKey<boolean, { row: number; col: number }>('formulaEditPermissionCheck');
 
-@OnLifecycle(LifecycleStages.Starting, FormulaEditorController)
+@OnLifecycle(LifecycleStages.Rendered, FormulaEditorController)
 export class FormulaEditorController extends RxDisposable {
     private _loadedMap = new WeakSet<RenderComponentType>();
 

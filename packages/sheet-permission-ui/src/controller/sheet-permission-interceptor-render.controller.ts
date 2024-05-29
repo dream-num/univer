@@ -86,7 +86,7 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
         this._initDataValidationPermissionInterceptor();
         this._initConditionalFormattingPermissionInterceptor();
         this._initFreezePermissionInterceptor();
-        this._initFormulaEditorPermissionInterceptor();
+        // this._initFormulaEditorPermissionInterceptor();
         this._initClipboardHook();
     }
 

@@ -93,7 +93,7 @@ export class SheetPermissionInitController extends RxDisposable {
                         const unitActionName = instance.subType;
                         const result = item.actions.find((action) => action.action === unitActionName);
                         if (result?.allowed !== undefined) {
-                            this._permissionService.updatePermissionPoint(instance.id, false);
+                            this._permissionService.updatePermissionPoint(instance.id, result.allowed);
                         }
                     });
                 }

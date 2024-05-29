@@ -19,7 +19,7 @@ import { Disposable, IDrawingManagerService, IResourceManagerService, LifecycleS
 import { type ISheetDrawing, ISheetDrawingService } from '../services/sheet-drawing.service';
 
 export const SHEET_DRAWING_PLUGIN = 'SHEET_DRAWING_PLUGIN';
-@OnLifecycle(LifecycleStages.Ready, SheetDrawingDataController)
+@OnLifecycle(LifecycleStages.Rendered, SheetDrawingDataController)
 export class SheetDrawingDataController extends Disposable {
     constructor(
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,

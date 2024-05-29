@@ -29,7 +29,7 @@ function onlyHasDataStream(body: IDocumentBody) {
 export type TPriority = 'left' | 'right';
 
 export class TextX {
-    static name = 'text-x';
+    // static name = 'text-x';
 
     static id = 'text-x';
 
@@ -310,3 +310,8 @@ export class TextX {
         return this;
     }
 }
+
+// FIXME: @Jocs, Use to avoid storybook error. and move the static name property to here.
+Object.defineProperty(TextX, 'name', {
+    value: 'text-x',
+});

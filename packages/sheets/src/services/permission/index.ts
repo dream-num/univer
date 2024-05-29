@@ -14,6 +14,4 @@
  * limitations under the License.
  */
 
-export { SheetEditablePermission } from './permission-point';
-export { SheetPermissionService } from './sheet-permission.service';
-export * from './tool';
+export { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './worksheet-permission/utils';

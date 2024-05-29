@@ -298,6 +298,10 @@ const locale: typeof zhCN = {
         deleteSheet: 'Delete worksheet',
         deleteSheetContent:
             'Confirm to delete this worksheet. It will not be retrieved after deletion. Are you sure you want to delete it?',
+        addProtectSheet: 'Protect Worksheet',
+        removeProtectSheet: 'Unprotect Worksheet',
+        changeSheetPermission: 'Change Worksheet Permissions',
+        viewAllProtectArea: 'View All Protection Ranges',
     },
     rightClick: {
         copy: 'Copy',
@@ -398,6 +402,11 @@ const locale: typeof zhCN = {
         deleteAllColumnsAlert: 'You can\'t delete all the columns on the sheet',
         hideAllRowsAlert: 'You can\'t hide all the rows on the sheet',
         hideAllColumnsAlert: 'You can\'t hide all the columns on the sheet',
+        protectRange: 'Protect Rows And Columns',
+        editProtectRange: 'Set Protection Range',
+        removeProtectRange: 'Remove Protection Range',
+        turnOnProtectRange: 'Add Protection Range',
+        viewAllProtectArea: 'View All Protection Ranges',
     },
     info: {
         tooltip: 'Tooltip',

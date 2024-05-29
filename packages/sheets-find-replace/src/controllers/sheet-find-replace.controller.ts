@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ColorKit, CommandType, Disposable, EDITOR_ACTIVATED, fromCallback, groupBy, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, replaceInDocumentBody, rotate, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
+import { ColorKit, CommandType, createInterceptorKey, Disposable, EDITOR_ACTIVATED, fromCallback, groupBy, ICommandService, IContextService, InterceptorManager, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, replaceInDocumentBody, rotate, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
 import type { IFindComplete, IFindMatch, IFindMoveParams, IFindQuery, IFindReplaceProvider, IReplaceAllResult } from '@univerjs/find-replace';
@@ -32,9 +32,13 @@ import type { ISheetReplaceCommandParams, ISheetReplacement } from '../commands/
 import { SheetReplaceCommand } from '../commands/commands/sheet-replace.command';
 import { isBeforePositionWithColumnPriority, isBeforePositionWithRowPriority, isBehindPositionWithColumnPriority, isBehindPositionWithRowPriority, isSamePosition, isSelectionSingleCell } from './utils';
 
+export const FIND_PERMISSION_CHECK = createInterceptorKey<boolean, { row: number; col: number; unitId: string; subUnitId: string }>('findPermissionCheck');
+
 @OnLifecycle(LifecycleStages.Steady, SheetsFindReplaceController)
 export class SheetsFindReplaceController extends Disposable implements IDisposable {
     private _provider!: SheetsFindReplaceProvider;
+
+    public interceptor = new InterceptorManager({ FIND_PERMISSION_CHECK });
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -125,7 +129,8 @@ export class SheetFindModel extends FindModel {
         @IContextService private readonly _contextService: IContextService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsFindReplaceController) private readonly _findReplaceController: SheetsFindReplaceController
     ) {
         super();
     }
@@ -365,6 +370,13 @@ export class SheetFindModel extends FindModel {
 
         for (const value of iter) {
             const { row, col, colSpan, rowSpan, value: cellData } = value;
+
+            const permissionCheck = this._findReplaceController.interceptor.fetchThroughInterceptors(FIND_PERMISSION_CHECK)(false, { row, col, unitId, subUnitId });
+
+            if (!permissionCheck) {
+                continue;
+            }
+
             if (dedupeFn?.(row, col) || !cellData) {
                 continue;
             };

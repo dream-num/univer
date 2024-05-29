@@ -133,7 +133,6 @@ export class Spreadsheet extends SheetComponent {
             : undefined;
         const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo?.cacheBound)];
         const extensions = this.getExtensionsByOrder();
-
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
         for (const extension of extensions) {
             // const timeKey = `extension ${viewportInfo.viewPortKey}:${extension.constructor.name}`;

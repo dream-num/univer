@@ -28,10 +28,11 @@ export interface IDataValidationDetailProps {
     onClick: () => void;
     unitId: string;
     subUnitId: string;
+    disable?: boolean;
 }
 
 export const DataValidationItem = (props: IDataValidationDetailProps) => {
-    const { rule, onClick, unitId, subUnitId } = props;
+    const { rule, onClick, unitId, subUnitId, disable } = props;
     const validatorRegistry = useDependency(DataValidatorRegistryService);
     const commandService = useDependency(ICommandService);
     const markSelectionService = useDependency(IMarkSelectionService);
@@ -62,6 +63,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
             className={styles.dataValidationItemContainer}
             onClick={onClick}
             onMouseEnter={() => {
+                if (disable) return;
                 setIsHover(true);
                 ids.current = rule.ranges.map((range) => markSelectionService.addShape({
                     range,

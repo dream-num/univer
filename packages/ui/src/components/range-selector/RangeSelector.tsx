@@ -42,10 +42,11 @@ export interface IRangeSelectorProps {
     size?: 'mini' | 'small' | 'middle' | 'large'; // The size of the selector.
     placeholder?: string; // Placeholder text.
     className?: string;
+    textEditorClassName?: string;
 }
 
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false, className } = props;
+    const { onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false, className, textEditorClassName } = props;
 
     const [rangeDataList, setRangeDataList] = useState<string[]>(['']);
 
@@ -271,6 +272,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
         sClassName = `${styles.rangeSelector} ${styles.rangeSelectorError}`;
     } else if (active) {
         sClassName = `${styles.rangeSelector} ${styles.rangeSelectorActive}`;
+    }
+
+    if (textEditorClassName) {
+        sClassName = `${sClassName} ${textEditorClassName}`;
     }
 
     let height = 28;

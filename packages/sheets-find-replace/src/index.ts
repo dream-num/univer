@@ -15,3 +15,4 @@
  */
 
 export { UniverSheetsFindReplacePlugin } from './plugin';
+export { SheetsFindReplaceController } from './controllers/sheet-find-replace.controller';

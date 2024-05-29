@@ -27,6 +27,7 @@ import {
     SetWorksheetNameMutation,
     SetWorksheetOrderMutation,
     SetWorksheetShowCommand,
+    WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -37,7 +38,7 @@ import { SheetBarButton } from '../sheet-bar-button/SheetBarButton';
 import styles from './index.module.less';
 
 export interface ISheetBarMenuItem {
-    label?: string;
+    label?: React.ReactNode;
     hidden?: boolean;
     selected?: boolean;
     index?: string;
@@ -57,6 +58,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const sheetBarService = useDependency(ISheetBarService);
+    const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
 
     const handleClick = (item: ISheetBarMenuItem) => {
@@ -84,16 +86,18 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
 
         const sheets = workbook.getSheets();
         const activeSheet = workbook.getActiveSheet();
-        const worksheetMenuItems = sheets.map((sheet, index) => ({
-            label: sheet.getName(),
-            index: `${index}`,
-            sheetId: sheet.getSheetId(),
-            hidden: sheet.isSheetHidden() === BooleanNumber.TRUE,
-            selected: activeSheet === sheet,
-        }));
+        const worksheetMenuItems = sheets.map((sheet, index) => {
+            return {
+                label: sheet.getName(),
+                index: `${index}`,
+                sheetId: sheet.getSheetId(),
+                hidden: sheet.isSheetHidden() === BooleanNumber.TRUE,
+                selected: activeSheet === sheet,
+            };
+        });
 
         setMenu(worksheetMenuItems);
-    }, [workbook]);
+    }, [workbook, worksheetProtectionRuleModel]);
 
     const setupStatusUpdate = useCallback(() =>
         commandService.onCommandExecuted((commandInfo: ICommandInfo) => {
@@ -152,7 +156,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                                         ? <EyelashSingle />
                                         : <CheckMarkSingle />}
                             </span>
-                            <span className={styles.sheetBarMenuItemLabel}>{item.label}</span>
+                            <div className={styles.sheetBarMenuItemLabel}>{item.label}</div>
                         </li>
                     ))}
                 </ul>

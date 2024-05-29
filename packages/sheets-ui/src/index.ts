@@ -17,14 +17,13 @@
 export * from './basics';
 export { getEditorObject } from './basics/editor/get-editor-object';
 export { AutoFillCommand } from './commands/commands/auto-fill.command';
-export { SheetPasteCommand } from './commands/commands/clipboard.command';
 export { SheetCopyCommand } from './commands/commands/clipboard.command';
 export { expandToContinuousRange } from './commands/commands/utils/selection-utils';
 export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from './commands/commands/set-selection.command';
 export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from './commands/operations/cell-edit.operation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
-export { deriveStateFromActiveSheet$ } from './controllers/menu/menu-util';
+export { deriveStateFromActiveSheet$, getCurrentRangeDisable$, getCommentDisable$ } from './controllers/menu/menu-util';
 export { SheetRenderController } from './controllers/sheet-render.controller';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export {
@@ -94,3 +93,10 @@ export { type IHoverCellPosition } from './services/hover-manager.service';
 export { AutoHeightController } from './controllers/auto-height.controller';
 export { type IDragCellPosition } from './services/drag-manager.service';
 export { SheetMenuPosition } from './controllers/menu/menu';
+export { useHighlightRange } from './hooks/useHighlightRange';
+export { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
+export { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
+export type { ISheetPasteParams } from './commands/commands/clipboard.command';
+export { SheetCutCommand, SheetPasteColWidthCommand, SheetPasteCommand, SheetPasteShortKeyCommand } from './commands/commands/clipboard.command';
+export { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeUnderlineCommand, SetRangeStrickThroughCommand } from './commands/commands/inline-format.command';
+export { ApplyFormatPainterCommand } from './commands/commands/set-format-painter.command';

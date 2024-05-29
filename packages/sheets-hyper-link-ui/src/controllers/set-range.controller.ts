@@ -21,7 +21,7 @@ import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, getSheetCommandTarget, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
 import type { IAddHyperLinkCommandParams, IUpdateHyperLinkCommandParams, IUpdateHyperLinkMutationParams } from '@univerjs/sheets-hyper-link';
 import { AddHyperLinkCommand, AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkCommand, UpdateHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import { isLegalLink } from '../common/util';
+import { hasProtocol, isLegalLink } from '../common/util';
 
 @OnLifecycle(LifecycleStages.Starting, SheetHyperLinkSetRangeController)
 export class SheetHyperLinkSetRangeController extends Disposable {
@@ -169,7 +169,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                                 row,
                                                 column: col,
                                                 display: cellValue,
-                                                payload: cellValue,
+                                                payload: hasProtocol(cellValue) ? cellValue : `http://${cellValue}`,
                                             },
                                         },
                                     });

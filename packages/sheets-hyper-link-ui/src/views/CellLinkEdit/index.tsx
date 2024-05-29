@@ -22,11 +22,11 @@ import { createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, ICommandService, 
 import { RangeSelector, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { AddHyperLinkCommand, HyperLinkModel, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
-import { ScrollToCellOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import {  SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
-import { isLegalLink, isLegalRange } from '../../common/util';
+import { hasProtocol, isLegalLink, isLegalRange } from '../../common/util';
 import styles from './index.module.less';
 
 enum LinkType {
@@ -165,7 +165,7 @@ export const CellLinkEdit = () => {
 
     const formatUrl = (type: LinkType, payload: string) => {
         if (type === LinkType.link) {
-            return payload;
+            return hasProtocol(payload) ? payload : `http://${payload}`;
         }
 
         if (type === LinkType.range) {

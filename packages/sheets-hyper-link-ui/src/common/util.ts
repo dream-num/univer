@@ -16,9 +16,17 @@
 
 import type { IRange } from '@univerjs/core';
 
-export function isLegalLink(link: string) {
-    return link.startsWith('https://') || link.startsWith('http://');
+const expression = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+const regex = new RegExp(expression);
+
+export function isLegalLink(link:string) {
+    return Boolean(link.match(regex));
 }
+
+export function hasProtocol(urlString: string) {
+    const pattern = /^[a-zA-Z]+:\/\//;
+    return pattern.test(urlString);
+  }
 
 export function isLegalRange(range: IRange) {
     const { startColumn, startRow, endColumn, endRow } = range;

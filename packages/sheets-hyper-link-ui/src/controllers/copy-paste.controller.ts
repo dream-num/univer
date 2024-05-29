@@ -22,7 +22,7 @@ import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME
 import { Inject, Injector } from '@wendellhu/redi';
 import { SPECIAL_PASTE_FORMULA } from '@univerjs/sheets-formula';
 import { SHEETS_HYPER_LINK_UI_PLUGIN } from '../types/const';
-import { isLegalLink } from '../common/util';
+import { hasProtocol, isLegalLink } from '../common/util';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkCopyPasteController)
 export class SheetsHyperLinkCopyPasteController extends Disposable {
@@ -51,8 +51,9 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
                 const { range: pastedRange, unitId, subUnitId } = pasteTo;
                 return this._generateMutations(pastedRange, { copyType, pasteType, copyRange, unitId, subUnitId });
             },
-            onPastePlainText: (pasteTo: ISheetDiscreteRangeLocation, text: string) => {
-                if (isLegalLink(text)) {
+            onPastePlainText: (pasteTo: ISheetDiscreteRangeLocation, clipText: string) => {
+                if (isLegalLink(clipText)) {
+                    let text = hasProtocol(clipText) ? clipText : 'http://'+clipText;
                     const { range, unitId, subUnitId } = pasteTo;
                     const { ranges: [pasteToRange], mapFunc } = virtualizeDiscreteRanges([range]);
                     const redos: IMutationInfo[] = [];

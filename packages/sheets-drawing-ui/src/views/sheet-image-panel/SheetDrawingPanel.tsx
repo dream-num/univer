@@ -38,7 +38,7 @@ export const SheetDrawingPanel = () => {
         });
 
         return () => {
-            focusDispose.unsubscribe(); ;
+            focusDispose.unsubscribe();
         };
     }, []);
 

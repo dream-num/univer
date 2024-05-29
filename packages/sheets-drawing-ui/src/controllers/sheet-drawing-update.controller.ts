@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageRemoteService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { ICommandInfo, IImageIoServiceParam, IRange, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageIoService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageData } from '@univerjs/drawing';
 import { getImageSize } from '@univerjs/drawing';
@@ -45,7 +45,7 @@ export class SheetDrawingUpdateController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService,
+        @IImageIoService private readonly _imageRemoteService: IImageIoService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
@@ -101,22 +101,32 @@ export class SheetDrawingUpdateController extends Disposable {
     }
 
     private async _insertFloatImage(file: File) {
-        const imageParam = await this._imageRemoteService.saveImage(file);
+        let imageParam: Nullable<IImageIoServiceParam>;
+
+        try {
+            imageParam = await this._imageRemoteService.saveImage(file);
+        } catch (error) {
+            const type = (error as Error).message;
+            if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t('update-status.exceedMaxSize'),
+                });
+            } else if (type === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t('update-status.invalidImageType'),
+                });
+            } else if (type === ImageUploadStatusType.ERROR_IMAGE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t('update-status.invalidImage'),
+                });
+            }
+        }
 
         if (imageParam == null) {
             return;
-        }
-
-        if (imageParam.status === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
-            this._messageService.show({
-                type: MessageType.Error,
-                content: this._localeService.t('update-status.exceedMaxSize'),
-            });
-        } else if (imageParam.status === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
-            this._messageService.show({
-                type: MessageType.Error,
-                content: this._localeService.t('update-status.invalidImageType'),
-            });
         }
 
         const info = this._getUnitInfo();
@@ -125,22 +135,7 @@ export class SheetDrawingUpdateController extends Disposable {
         }
         const { unitId, subUnitId } = info;
 
-        // const currentAllDrawing = this._sheetDrawingService.getDrawingMap(unitId, subUnitId);
-        // let zIndex = 0;
-        // if (currentAllDrawing && Object.keys(currentAllDrawing).length > 0) {
-        //     const drawingIds = Object.keys(currentAllDrawing);
-        //     zIndex = drawingIds.length;
-        // }
-
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
-
-        // if (imageSourceType === ImageSourceType.UUID) {
-        //     try {
-        //         source = await this._imageRemoteService.getImage(imageId);
-        //     } catch (error) {
-        //         console.error(error);
-        //     }
-        // }
 
         const { width, height, image } = await getImageSize(base64Cache || '');
 

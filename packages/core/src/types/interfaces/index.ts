@@ -31,4 +31,4 @@ export * from './i-univer-data';
 export * from './i-workbook-data';
 export * from './i-worksheet-data';
 export * from './i-worksheet-order-data';
-export * from './i-image-remote-service';
+export * from './i-image-io-service';

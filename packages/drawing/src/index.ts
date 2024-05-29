@@ -19,5 +19,5 @@ export { getDrawingShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
 export { getImageSize } from './utils/get-image-size';
 export { UniverDrawingPlugin } from './plugin';
 export { type IImageData } from './models/image-model-interface';
-export { ALLOW_IMAGE_LIST } from './services/image-remote.service';
+export { ALLOW_IMAGE_LIST } from './services/image-io.service';
 

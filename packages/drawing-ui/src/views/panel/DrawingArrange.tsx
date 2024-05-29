@@ -47,7 +47,7 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
         });
 
         return () => {
-            focusDispose.unsubscribe(); ;
+            focusDispose.unsubscribe();
         };
     }, []);
 

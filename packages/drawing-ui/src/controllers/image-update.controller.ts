@@ -19,7 +19,7 @@ import { Disposable,
     DrawingTypeEnum,
     ICommandService,
     IDrawingManagerService,
-    IImageRemoteService,
+    IImageIoService,
     ImageSourceType,
     IUniverInstanceService,
     LifecycleStages,
@@ -44,7 +44,7 @@ export class ImageUpdateController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IDialogService private readonly _dialogService: IDialogService,
-        @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService,
+        @IImageIoService private readonly _imageRemoteService: IImageIoService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
         super();

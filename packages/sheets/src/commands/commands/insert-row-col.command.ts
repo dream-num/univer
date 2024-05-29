@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange, Workbook } from '@univerjs/core';
+import type { ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -43,6 +43,7 @@ import {
     InsertRowMutationUndoFactory,
 } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../mutations/remove-row-col.mutation';
+import { SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
 import { followSelectionOperation } from './utils/selection-utils';
 
 export interface IInsertRowCommandParams {
@@ -80,7 +81,7 @@ export const InsertRowCommand: ICommand = {
         const workbook = univerInstanceService.getUniverSheetInstance(params.unitId)!;
         const worksheet = workbook.getSheetBySheetId(params.subUnitId)!;
 
-        const { range, direction, unitId, subUnitId } = params;
+        const { range, direction, unitId, subUnitId, cellValue } = params;
         const { startRow, endRow } = range;
         const anchorRow = direction === Direction.UP ? startRow : startRow - 1;
         const height = worksheet.getRowHeight(anchorRow);
@@ -100,25 +101,39 @@ export const InsertRowCommand: ICommand = {
             insertRowParams
         );
 
+        const redos: IMutationInfo[] = [{ id: InsertRowMutation.id, params: insertRowParams }];
+        const undos: IMutationInfo[] = [{ id: RemoveRowMutation.id, params: undoRowInsertionParams }];
+
+        // set range values
+        if (cellValue) {
+            redos.push({
+                id: SetRangeValuesMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    cellValue,
+                },
+            });
+        }
+
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: InsertRowCommand.id,
             params,
         });
 
-        const result = sequenceExecute(
-            [
-                { id: InsertRowMutation.id, params: insertRowParams },
-                ...intercepted.redos,
-                followSelectionOperation(range, workbook, worksheet),
-            ],
-            commandService
-        );
+        redos.unshift(...(intercepted.preRedos ?? []));
+        redos.push(...(intercepted.redos ?? []));
+        redos.push(followSelectionOperation(range, workbook, worksheet));
+        undos.unshift(...(intercepted.preUndos ?? []));
+        undos.push(...(intercepted.undos ?? []));
+
+        const result = sequenceExecute(redos, commandService);
 
         if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: params.unitId,
-                undoMutations: [...(intercepted.preUndos ?? []), { id: RemoveRowMutation.id, params: undoRowInsertionParams }, ...intercepted.undos],
-                redoMutations: [...(intercepted.preRedos ?? []), { id: InsertRowMutation.id, params: insertRowParams }, ...intercepted.redos],
+                undoMutations: undos,
+                redoMutations: redos,
             });
 
             return true;
@@ -251,7 +266,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const { range, direction, subUnitId, unitId } = params;
+        const { range, direction, subUnitId, unitId, cellValue } = params;
         const { startColumn, endColumn } = params.range;
         const workbook = univerInstanceService.getUniverSheetInstance(params.unitId)!;
         const worksheet = workbook.getSheetBySheetId(params.subUnitId)!;
@@ -273,37 +288,39 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             insertColParams
         );
 
+        const redos: IMutationInfo[] = [{ id: InsertColMutation.id, params: insertColParams }];
+        const undos: IMutationInfo[] = [{ id: RemoveColMutation.id, params: undoColInsertionParams }];
+
+        // set range values
+        if (cellValue) {
+            redos.push({
+                id: SetRangeValuesMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    cellValue,
+                },
+            });
+        }
+
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: InsertColCommand.id,
             params,
         });
 
-        const result = sequenceExecute(
-            [
-                ...(intercepted.preRedos ?? []),
-                { id: InsertColMutation.id, params: insertColParams },
-                ...intercepted.redos,
-                followSelectionOperation(range, workbook, worksheet),
-            ],
-            commandService
-        );
+        redos.unshift(...(intercepted.preRedos ?? []));
+        redos.push(...(intercepted.redos ?? []));
+        redos.push(followSelectionOperation(range, workbook, worksheet));
+        undos.unshift(...(intercepted.preUndos ?? []));
+        undos.push(...(intercepted.undos ?? []));
+
+        const result = sequenceExecute(redos, commandService);
 
         if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: params.unitId,
-                undoMutations: [
-                    ...(intercepted.preUndos ?? []),
-                    {
-                        id: RemoveColMutation.id,
-                        params: undoColInsertionParams,
-                    },
-                    ...intercepted.undos,
-                ].filter(Boolean),
-                redoMutations: [
-                    ...(intercepted.preRedos ?? []),
-                    { id: InsertColMutation.id, params: insertColParams },
-                    ...intercepted.redos,
-                ].filter(Boolean),
+                undoMutations: undos.filter(Boolean),
+                redoMutations: redos.filter(Boolean),
             });
             return true;
         }

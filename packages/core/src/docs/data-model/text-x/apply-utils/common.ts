@@ -396,6 +396,20 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
     const endIndex = currentIndex + textLength;
     const removeTextRuns: ITextRun[] = [];
 
+    // Handles special case where repeated set inline format style by cursor.
+    if (startIndex === endIndex && textRuns?.find((t) => t.st === currentIndex && t.ed === currentIndex)) {
+        const textRun = textRuns.find((t) => t.st === currentIndex && t.ed === currentIndex)!;
+        removeTextRuns.push({
+            ...textRun,
+            st: textRun.st - currentIndex,
+            ed: textRun.ed - currentIndex,
+        });
+
+        body.textRuns = body.textRuns?.filter((t) => t !== textRun);
+
+        return removeTextRuns;
+    }
+
     if (textRuns) {
         const newTextRuns = [];
 

@@ -17,9 +17,6 @@
 import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { UniverInstanceType } from '@univerjs/core';
-
-import { getCommentDisable$ } from '@univerjs/sheets-ui';
-import { WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { COMPONENT_UPLOAD_FILE_MENU, UploadFileType } from '../upload-component/component-name';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../../commands/operations/insert-image.operation';
 

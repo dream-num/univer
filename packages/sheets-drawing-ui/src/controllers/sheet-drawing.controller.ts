@@ -16,7 +16,7 @@
 
 import type { DependencyOverride } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
+import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 

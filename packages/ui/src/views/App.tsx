@@ -30,6 +30,7 @@ import { ZenZone } from './components/zen-zone/ZenZone';
 import { CanvasPopup } from './components/popup/CanvasPopup';
 import { builtInGlobalComponents } from './parts';
 import { ContextMenu } from './components/context-menu/ContextMenu';
+import { FloatDom } from './components/dom/FloatDom';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -160,6 +161,7 @@ export function App(props: IUniverAppProps) {
                                 onContextMenu={(e) => e.preventDefault()}
                             >
                                 <CanvasPopup />
+                                <FloatDom />
                                 <ComponentContainer components={contentComponents} />
                             </section>
                         </section>

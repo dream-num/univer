@@ -22,6 +22,7 @@ import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.con
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 import { SheetDrawingUIController } from './controllers/sheet-drawing.controller';
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
+import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 
 const PLUGIN_NAME = 'SHEETS_IMAGE_UI_PLUGIN';
 
@@ -49,7 +50,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
         const dependencies: Dependency[] = [
 
             // services
-
+            [SheetCanvasFloatDomManagerService],
             // controllers
             [SheetDrawingUIController],
             [SheetDrawingUpdateController],

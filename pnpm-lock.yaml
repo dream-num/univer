@@ -445,6 +445,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
+      '@univerjs/sheets-drawing-ui':
+        specifier: workspace:*
+        version: link:../sheets-drawing-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui

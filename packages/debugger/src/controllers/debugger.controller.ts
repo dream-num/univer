@@ -35,11 +35,15 @@ import { TEST_EDITOR_CONTAINER_COMPONENT } from '../views/test-editor/component-
 import VueI18nIcon from '../components/VueI18nIcon.vue';
 
 import { CreateEmptySheetCommand, DisposeCurrentUnitCommand } from '../commands/commands/unit.command';
+import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
+import { ImageDemo } from '../components/Image';
 import {
     ConfirmMenuItemFactory,
     CreateEmptySheetMenuItemFactory,
+    CreateFloatDOMMenuItemFactory,
     DialogMenuItemFactory,
     DisposeCurrentUnitMenuItemFactory,
+    FloatDomMenuItemFactory,
     LocaleMenuItemFactory,
     MessageMenuItemFactory,
     NotificationMenuItemFactory,
@@ -84,6 +88,7 @@ export class DebuggerController extends Disposable {
             SaveSnapshotOptions,
             DisposeCurrentUnitCommand,
             CreateEmptySheetCommand,
+            CreateFloatDomCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         this._injector.add([ExportController]);
@@ -106,6 +111,8 @@ export class DebuggerController extends Disposable {
             UnitMenuItemFactory,
             DisposeCurrentUnitMenuItemFactory,
             CreateEmptySheetMenuItemFactory,
+            FloatDomMenuItemFactory,
+            CreateFloatDOMMenuItemFactory,
         ] as IMenuItemFactory[]).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
         });
@@ -117,5 +124,6 @@ export class DebuggerController extends Disposable {
         this.disposeWithMe(componentManager.register('VueI18nIcon', VueI18nIcon, {
             framework: 'vue3',
         }));
+        this.disposeWithMe(componentManager.register('ImageDemo', ImageDemo));
     }
 }

@@ -30,6 +30,7 @@ import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
 import { CreateEmptySheetCommand, DisposeCurrentUnitCommand } from '../commands/commands/unit.command';
+import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 
 export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
@@ -249,5 +250,28 @@ export function CreateEmptySheetMenuItemFactory(accessor: IAccessor): IMenuButto
         icon: 'CR',
         type: MenuItemType.BUTTON,
         positions: [UNIT_ITEM_MENU_ID],
+    };
+}
+
+const FLOAT_DOM_ITEM_MENU_ID = 'debugger.float-dom-menu-item';
+
+export function FloatDomMenuItemFactory(): IMenuSelectorItem {
+    return {
+        id: FLOAT_DOM_ITEM_MENU_ID,
+        title: 'FloatDom',
+        tooltip: 'Float Dom Commands',
+        type: MenuItemType.SUBITEMS,
+        positions: [MenuPosition.TOOLBAR_OTHERS],
+    };
+}
+
+export function CreateFloatDOMMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: CreateFloatDomCommand.id,
+        title: 'Create Float Dom',
+        tooltip: 'Create Float Dom',
+        icon: 'DS',
+        type: MenuItemType.BUTTON,
+        positions: [FLOAT_DOM_ITEM_MENU_ID],
     };
 }

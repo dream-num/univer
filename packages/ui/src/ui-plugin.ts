@@ -54,6 +54,7 @@ import { EditorService, IEditorService } from './services/editor/editor.service'
 import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 import { IProgressService, ProgressService } from './services/progress/progress.service';
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
+import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 
 const PLUGIN_NAME = 'ui';
 
@@ -118,7 +119,7 @@ export class UniverUIPlugin extends Plugin {
             [IRangeSelectorService, { useClass: RangeSelectorService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
             [IProgressService, { useClass: ProgressService }],
-
+            [CanvasFloatDomService],
             // controllers
             [IUIController, { useClass: DesktopUIController }],
             [

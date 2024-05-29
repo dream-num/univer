@@ -23,6 +23,7 @@ import { RangeSelector, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { AddHyperLinkCommand, HyperLinkModel, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { ScrollToCellCommand } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
@@ -214,15 +215,15 @@ export const CellLinkEdit = () => {
                 unitId: editing.unitId,
                 subUnitId: editing.subUnitId,
             });
-            // console.log('===editing', editing);
-            // await commandService.executeCommand(ScrollToCellOperation.id, {
-            //     range: {
-            //         startRow: editing.row,
-            //         endRow: editing.row,
-            //         startColumn: editing.column,
-            //         endColumn: editing.column,
-            //     },
-            // });
+
+            await commandService.executeCommand(ScrollToCellCommand.id, {
+                range: {
+                    startRow: editing.row,
+                    endRow: editing.row,
+                    startColumn: editing.column,
+                    endColumn: editing.column,
+                },
+            });
         }
 
         commandService.executeCommand(CloseHyperLinkSidebarOperation.id);

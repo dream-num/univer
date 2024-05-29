@@ -57,8 +57,16 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
     }
 
     scrollToRange(range: IRange): boolean {
-        const { startRow, startColumn } = range;
-        return this._scrollToCell(startRow, startColumn);
+        const { endRow, endColumn, startColumn, startRow } = range;
+        const bounding = this._getViewportBounding();
+
+        if (bounding) {
+            const row = bounding.startRow > endRow ? startRow : endRow;
+            const col = bounding.startColumn > endColumn ? startColumn : endColumn;
+            return this._scrollToCell(row, col);
+        } else {
+            return this._scrollToCell(startRow, startColumn);
+        }
     }
 
     private _init() {

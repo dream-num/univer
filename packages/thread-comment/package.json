@@ -1,8 +1,8 @@
 {
     "name": "@univerjs/thread-comment",
-    "version": "0.0.1",
-    "private": true,
-    "description": "",
+    "version": "0.1.12",
+    "private": false,
+    "description": "Univer thread comment core plugin",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -61,7 +61,7 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "0.15.2",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

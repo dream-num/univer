@@ -21,13 +21,15 @@ import type { Injector } from '@wendellhu/redi';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import type { IWorkbookData } from '@univerjs/core';
 import { ICommandService, ILogService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { RefRangeService, SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
+import { RefRangeService, SelectionManagerService, SheetInterceptorService, WorksheetPermissionService, WorksheetProtectionPointModel } from '@univerjs/sheets';
 import { DesktopMenuService, DesktopShortcutService, IMenuService, IShortcutService } from '@univerjs/ui';
 import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../../commands/sheets-filter.command';
 import type { IOpenFilterPanelOperationParams } from '../../commands/sheets-filter.operation';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/sheets-filter.operation';
-import { enUS, ruRU, zhCN } from '../../locale';
+import enUS from '../../locale/en-US';
+import zhCN from '../../locale/zh-CN';
+import ruRU from '../../locale/ru-RU';
 import { WithCustomFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
 import { FilterPanel } from './SheetsFilterPanel';
 
@@ -58,7 +60,8 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
             injector.add([SelectionManagerService]);
             injector.add([IShortcutService, { useClass: DesktopShortcutService }]);
             injector.add([IMenuService, { useClass: DesktopMenuService }]);
-            injector.add([SheetPermissionService]);
+            injector.add([WorksheetPermissionService]);
+            injector.add([WorksheetProtectionPointModel]);
             injector.add([SheetInterceptorService]);
             injector.add([SheetsFilterPanelService]);
             injector.add([RefRangeService]);

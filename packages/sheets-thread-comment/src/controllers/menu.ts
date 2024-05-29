@@ -15,11 +15,12 @@
  */
 
 import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, KeyCode, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
+import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { ToggleSheetCommentPanelOperation } from '@univerjs/thread-comment-ui';
 import { UniverInstanceType } from '@univerjs/core';
-import { whenSheetEditorFocused } from '@univerjs/sheets-ui';
+import { getCommentDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
+import { RangeProtectionPermissionEditPoint, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { ShowAddSheetCommentModalOperation } from '../commands/operations/comment.operation';
 import { COMMENT_SINGLE_ICON } from '../types/const';
 
@@ -31,6 +32,11 @@ export const threadCommentMenuFactory = (accessor: IAccessor) => {
         icon: COMMENT_SINGLE_ICON,
         title: 'sheetThreadComment.menu.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getCommentDisable$(accessor, {
+            workbookTypes: [WorkbookCommentPermission],
+            worksheetTypes: [WorksheetViewPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
     } as IMenuItem;
 };
 
@@ -41,7 +47,14 @@ export const threadPanelMenuFactory = (accessor: IAccessor) => {
         icon: COMMENT_SINGLE_ICON,
         tooltip: 'sheetThreadComment.menu.commentManagement',
         positions: MenuPosition.TOOLBAR_START,
+        group: MenuGroup.TOOLBAR_OTHERS,
+        disabled$: getCommentDisable$(accessor, {
+            workbookTypes: [WorkbookCommentPermission],
+            worksheetTypes: [WorksheetViewPermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+        }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+
     };
 };
 

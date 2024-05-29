@@ -40,7 +40,7 @@ export const InsertDrawingCommand: ICommand = {
         const documentModel = univerInstanceService.getUniverDocInstance(documentId);
         if (!documentModel) return false;
 
-        const { snapshot } = documentModel;
+        const snapshot = documentModel.getSnapshot();
         if (snapshot == null || snapshot.drawings == null) return false;
 
         const { objectId, drawing } = params;

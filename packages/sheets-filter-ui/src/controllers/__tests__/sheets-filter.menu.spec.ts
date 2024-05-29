@@ -15,8 +15,8 @@
  */
 
 import type { IRange, IWorkbookData } from '@univerjs/core';
-import { DisposableCollection, ICommandService, LocaleType, Plugin, RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
-import { NORMAL_SELECTION_PLUGIN_NAME, RefRangeService, SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
+import { AuthzIoLocalService, DisposableCollection, IAuthzIoService, ICommandService, LocaleType, Plugin, RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
+import { NORMAL_SELECTION_PLUGIN_NAME, RangeProtectionRuleModel, RefRangeService, SelectionManagerService, SetWorksheetActiveOperation, SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { DesktopMenuService, DesktopPlatformService, DesktopShortcutService, IMenuService, IPlatformService, IShortcutService } from '@univerjs/ui';
@@ -66,8 +66,13 @@ function createSheetsFilterMenuTestBed() {
             injector.add([SelectionManagerService]);
             injector.add([IShortcutService, { useClass: DesktopShortcutService }]);
             injector.add([IMenuService, { useClass: DesktopMenuService }]);
-            injector.add([SheetPermissionService]);
+            injector.add([WorksheetPermissionService]);
+            injector.add([WorksheetProtectionPointModel]);
+            injector.add([WorkbookPermissionService]);
+            injector.add([IAuthzIoService, { useClass: AuthzIoLocalService }]);
+            injector.add([WorksheetProtectionRuleModel]);
             injector.add([SheetInterceptorService]);
+            injector.add([RangeProtectionRuleModel]);
 
             const commandService = injector.get(ICommandService);
             [
@@ -105,6 +110,10 @@ describe('test sheet filter menu items', () => {
         disposableCollection = new DisposableCollection();
 
         commandService = get(ICommandService);
+        commandService.registerCommand(SetWorksheetActiveOperation);
+
+        // Active sheet, prevent activeSheet from being initialized to null, causing activeFilterModel$ to also transmit null.
+        expect(commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, { unitId: 'test', subUnitId: 'sheet1' })).toBeTruthy();
     });
 
     afterEach(() => {

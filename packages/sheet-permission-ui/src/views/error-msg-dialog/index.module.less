@@ -1,0 +1,28 @@
+.sheet-permission-alert-dialog {
+    padding: var(--padding-xl) 24px;
+
+    &-title {
+        font-size: var(--font-size-lg);
+        font-weight: 500;
+        margin-bottom: var(--margin-base);
+    }
+}
+
+.sheet-permission-alert-dialog-button {
+    margin-top: var(--margin-lg);
+    display: flex;
+    justify-content: flex-end;
+}
+
+// @ybzky todo need more freedom to modify container style schemes
+:global(.sheet-permission-user-dialog .univer-dialog-close) {
+    display: none;
+}
+
+:global(.sheet-permission-user-dialog .univer-dialog-header) {
+    display: none;
+}
+
+:global(.sheet-permission-user-dialog .univer-dialog-body) {
+    padding: 0;
+}

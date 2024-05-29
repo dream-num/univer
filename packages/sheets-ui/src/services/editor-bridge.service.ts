@@ -16,6 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import {
+    CellValueType,
     createInterceptorKey,
     Disposable,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -230,6 +231,12 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         );
 
         let documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
+
+        // Rewrite the cellValueType to STRING to avoid render the value on the right side when number type.
+        const renderConfig = documentLayoutObject?.documentModel?.documentStyle.renderConfig;
+        if (renderConfig != null) {
+            renderConfig.cellValueType = CellValueType.STRING;
+        }
 
         if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
             const blankModel = skeleton.getBlankCellDocumentModel(cell);

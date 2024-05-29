@@ -37,7 +37,9 @@ import VueI18nIcon from '../components/VueI18nIcon.vue';
 import { CreateEmptySheetCommand, DisposeCurrentUnitCommand } from '../commands/commands/unit.command';
 import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 import { ImageDemo } from '../components/Image';
+import { ChangeUserCommand } from '../commands/operations/change-user.operation';
 import {
+    ChangeUserMenuItemFactory,
     ConfirmMenuItemFactory,
     CreateEmptySheetMenuItemFactory,
     CreateFloatDOMMenuItemFactory,
@@ -89,6 +91,7 @@ export class DebuggerController extends Disposable {
             DisposeCurrentUnitCommand,
             CreateEmptySheetCommand,
             CreateFloatDomCommand,
+            ChangeUserCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         this._injector.add([ExportController]);
@@ -113,6 +116,7 @@ export class DebuggerController extends Disposable {
             CreateEmptySheetMenuItemFactory,
             FloatDomMenuItemFactory,
             CreateFloatDOMMenuItemFactory,
+            ChangeUserMenuItemFactory,
         ] as IMenuItemFactory[]).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
         });

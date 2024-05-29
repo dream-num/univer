@@ -75,6 +75,7 @@ import {
     SheetPasteColWidthCommand,
     SheetPasteCommand,
     SheetPasteFormatCommand,
+    SheetPasteShortKeyCommand,
     SheetPasteValueCommand,
 } from '../../commands/commands/clipboard.command';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
@@ -129,7 +130,7 @@ export class SheetClipboardController extends RxDisposable {
             const clipboardEvent = config!.event as ClipboardEvent;
             const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
             const textContent = clipboardEvent.clipboardData?.getData('text/plain');
-            this._sheetClipboardService.legacyPaste(htmlContent, textContent);
+            this._commandService.executeCommand(SheetPasteShortKeyCommand.id, { htmlContent, textContent });
         });
     }
 
@@ -144,6 +145,7 @@ export class SheetClipboardController extends RxDisposable {
             SheetPasteFormatCommand,
             SheetPasteColWidthCommand,
             SheetPasteBesidesBorderCommand,
+            SheetPasteShortKeyCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         // register basic sheet clipboard hooks

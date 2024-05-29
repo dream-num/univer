@@ -19,6 +19,7 @@ import {
     CommandType, HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
+    JSONX,
     MemoryCursor,
     TextX,
     TextXActionType,
@@ -39,6 +40,7 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
 
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params: IAlignOperationCommandParams) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -74,6 +76,8 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
         memoryCursor.reset();
 
         const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+
         for (const paragraph of currentParagraphs) {
             const { startIndex } = paragraph;
 
@@ -109,7 +113,7 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
             memoryCursor.moveCursorTo(startIndex + 1);
         }
 
-        doMutation.params.actions = textX.serialize();
+        doMutation.params.actions = jsonX.editOp(textX.serialize());
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

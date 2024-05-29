@@ -19,6 +19,7 @@ import {
     CommandType,
     ICommandService,
     IUniverInstanceService,
+    JSONX,
     MemoryCursor,
     PRESET_LIST_TYPE,
     PresetListType,
@@ -42,6 +43,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params: IListOperationCommandParams) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -101,6 +103,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         memoryCursor.reset();
 
         const textX = new TextX();
+        const jsonX = JSONX.getInstance();
 
         const customLists = dataModel.getSnapshot().lists ?? {};
 
@@ -167,7 +170,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             memoryCursor.moveCursorTo(startIndex + 1);
         }
 
-        doMutation.params.actions = textX.serialize();
+        doMutation.params.actions = jsonX.editOp(textX.serialize());
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

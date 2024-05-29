@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs",
-    "version": "0.1.11",
+    "version": "0.1.12",
     "private": false,
     "description": "UniverSheet normal base-docs",
     "author": "DreamNum <developer@univer.ai>",
@@ -65,7 +65,7 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@wendellhu/redi": "^0.15.1",
+        "@wendellhu/redi": "0.15.2",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {

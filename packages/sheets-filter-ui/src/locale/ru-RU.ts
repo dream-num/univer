@@ -64,6 +64,9 @@ const locale: typeof zhCN = {
             'not-between': 'Не между',
             custom: 'Пользовательский',
         },
+        msg: {
+            'filter-header-forbidden': 'Вы не можете переместить строку заголовка фильтра.',
+        },
     },
 };
 

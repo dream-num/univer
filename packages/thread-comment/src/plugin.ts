@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { ICommandService, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { DependencyOverride } from '@univerjs/core';
+import { ICommandService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { type Dependency, Inject, Injector } from '@wendellhu/redi';
 import { ThreadCommentModel } from './models/thread-comment.model';
 import { ThreadCommentResourceController } from './controllers/tc-resource.controller';
@@ -23,24 +24,30 @@ import { AddCommentMutation, DeleteCommentMutation, ResolveCommentMutation, Upda
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from './commands/commands/comment.command';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
 
+export interface IUniverThreadCommentConfig {
+    overrides?: DependencyOverride;
+}
+
 export class UniverThreadCommentPlugin extends Plugin {
     static override pluginName = TC_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_UNKNOWN;
+    private _config: IUniverThreadCommentConfig;
 
     constructor(
-        _config: unknown,
+        config: IUniverThreadCommentConfig,
         @Inject(Injector) protected _injector: Injector,
         @ICommandService protected _commandService: ICommandService
     ) {
         super();
+        this._config = config;
     }
 
     override onStarting(injector: Injector): void {
-        ([
+        (mergeOverrideWithDependencies([
             [ThreadCommentModel],
             [ThreadCommentResourceController],
             [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
-        ] as Dependency[]).forEach(
+        ], this._config?.overrides) as Dependency[]).forEach(
             (d) => {
                 injector.add(d);
             }

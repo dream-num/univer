@@ -110,8 +110,16 @@ export const SetWorksheetRowAutoHeightMutationFactory = (
     const workbook = univerInstanceService.getUniverSheetInstance(unitId);
     const worksheet = workbook?.getSheetBySheetId(subUnitId);
 
+    if (!worksheet) {
+        return {
+            unitId,
+            subUnitId,
+            rowsAutoHeightInfo: [],
+        };
+    }
+
     const results: IRowAutoHeightInfo[] = [];
-    const manager = worksheet!.getRowManager();
+    const manager = worksheet.getRowManager();
 
     for (const rowInfo of rowsAutoHeightInfo) {
         const { row } = rowInfo;

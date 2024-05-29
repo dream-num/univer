@@ -27,7 +27,7 @@ import { ComponentContainer } from './components/ComponentContainer';
 import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
-import { CanvasPopup } from './components/popup';
+import { CanvasPopup } from './components/popup/CanvasPopup';
 import { FloatDom } from './components/dom';
 import { builtInGlobalComponents } from './parts';
 import { ContextMenu } from './components/context-menu/ContextMenu';
@@ -55,6 +55,15 @@ export function App(props: IUniverAppProps) {
     const uiPartsService = useDependency(IUIPartsService);
 
     const [updateTrigger, setUpdateTrigger] = useState(false);
+
+    useEffect(() => {
+        console.warn(
+            '\x1B[33m%s\x1B[0m',
+            '[Univer Warning]',
+            'We will remove the built-in language support in the next version (v0.1.13), please add the language support manually.',
+            'Please refer to the release notes for more information: https://github.com/dream-num/univer/releases/tag/v0.1.12'
+        );
+    }, []);
 
     useEffect(() => {
         const updateSubscription = uiPartsService.componentRegistered$.subscribe(() => {
@@ -119,7 +128,7 @@ export function App(props: IUniverAppProps) {
     }, [localeService, messageService, mountContainer, portalContainer, themeService.currentTheme$]);
 
     return (
-        <ConfigProvider locale={locale} mountContainer={portalContainer}>
+        <ConfigProvider locale={locale?.design} mountContainer={portalContainer}>
             {/**
               * IMPORTANT! This `tabIndex` should not be moved. This attribute allows the element to catch
               * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events

@@ -26,6 +26,7 @@ import { DataValidationItem } from '../item';
 import type { IAddSheetDataValidationCommandParams } from '../../commands/commands/data-validation.command';
 import { AddSheetDataValidationCommand } from '../../commands/commands/data-validation.command';
 import { DataValidationPanelService } from '../../services/data-validation-panel.service';
+import { DATA_VALIDATION_PERMISSION_CHECK, DataValidationController } from '../../controllers/dv.controller';
 import styles from './index.module.less';
 
 export function DataValidationList() {
@@ -46,6 +47,7 @@ function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
     const commandService = useDependency(ICommandService);
     const injector = useDependency(Injector);
     const dataValidationPanelService = useDependency(DataValidationPanelService);
+    const dataValidationController = useDependency(DataValidationController);
 
     const localeService = useDependency(LocaleService);
     const [rules, setRules] = useState<ISheetDataValidationRule[]>([]);
@@ -90,23 +92,30 @@ function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
         });
     };
 
+    const rulesByPermissionCheck = dataValidationController.interceptor.fetchThroughInterceptors(DATA_VALIDATION_PERMISSION_CHECK)(rules, rules);
+    const hasDisableRule = rulesByPermissionCheck?.some((rule) => rule.disable);
+
     return (
         <div>
-            {rules.map((rule) => (
+            {rulesByPermissionCheck?.map((rule) => (
                 <DataValidationItem
                     unitId={unitId}
                     subUnitId={subUnitId}
-                    onClick={() => dataValidationPanelService.setActiveRule({
-                        unitId,
-                        subUnitId,
-                        rule,
-                    })}
+                    onClick={() => {
+                        if (rule.disable) return;
+                        dataValidationPanelService.setActiveRule({
+                            unitId,
+                            subUnitId,
+                            rule,
+                        });
+                    }}
                     rule={rule}
                     key={rule.uid}
+                    disable={rule.disable ?? false}
                 />
             ))}
             <div className={styles.dataValidationListButtons}>
-                {rules.length
+                {(rules.length && !hasDisableRule)
                     ? (
                         <Button className={styles.dataValidationListButton} onClick={handleRemoveAll}>
                             {localeService.t('dataValidation.panel.removeAll')}

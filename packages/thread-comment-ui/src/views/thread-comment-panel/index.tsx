@@ -36,10 +36,12 @@ export interface IThreadCommentPanelProps {
     getSubUnitName: (subUnitId: string) => string;
     onResolve?: (id: string) => void;
     sortComments?: (comments: IThreadComment[]) => IThreadComment[];
+    onItemLeave?: (comment: IThreadComment) => void;
+    onItemEnter?: (comment: IThreadComment) => void;
 }
 
 export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
-    const { unitId, subUnitId$, type, onAdd, getSubUnitName, onResolve, sortComments } = props;
+    const { unitId, subUnitId$, type, onAdd, getSubUnitName, onResolve, sortComments, onItemLeave, onItemEnter } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
     const localeService = useDependency(LocaleService);
@@ -51,7 +53,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const update = useObservable(threadCommentModel.commentUpdate$);
     const commandService = useDependency(ICommandService);
     const subUnitId = useObservable(subUnitId$);
-    const currentUser = userService.getCurrentUser();
+    const currentUser = userService.currentUser;
     const shouldScroll = useRef(true);
     const prefix = 'panel';
     const comments = useMemo(() => {
@@ -176,6 +178,8 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                         });
                     }}
                     onClose={() => onResolve?.(comment.id)}
+                    onMouseEnter={() => onItemEnter?.(comment)}
+                    onMouseLeave={() => onItemLeave?.(comment)}
                 />
             ))}
             {statuedComments.length

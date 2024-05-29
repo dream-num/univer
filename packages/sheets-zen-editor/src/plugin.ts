@@ -22,7 +22,6 @@ import { ZenEditorController } from './controllers/zen-editor.controller';
 import type { IUniverSheetsZenEditorUIConfig } from './controllers/zen-editor-ui.controller';
 import { DefaultSheetZenEditorUiConfig, ZenEditorUIController } from './controllers/zen-editor-ui.controller';
 import { IZenEditorManagerService, ZenEditorManagerService } from './services/zen-editor.service';
-import { zhCN } from './locale';
 
 export class UniverSheetsZenEditorPlugin extends Plugin {
     static override pluginName = 'zen-editor';
@@ -35,13 +34,8 @@ export class UniverSheetsZenEditorPlugin extends Plugin {
     ) {
         super();
 
-        this._initialize();
         this._initializeDependencies(this._injector);
         this._config = Tools.deepMerge({}, DefaultSheetZenEditorUiConfig, this._config);
-    }
-
-    private _initialize(): void {
-        this._localeService.load({ zhCN });
     }
 
     private _initializeDependencies(injector: Injector) {

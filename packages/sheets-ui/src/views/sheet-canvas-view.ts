@@ -16,7 +16,7 @@
 
 import type { Workbook, Worksheet } from '@univerjs/core';
 import { ICommandService, RxDisposable, toDisposable } from '@univerjs/core';
-import type { IRenderContext, IRenderController, IWheelEvent } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderController, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
     Layer,
@@ -24,6 +24,7 @@ import {
     Rect,
     RENDER_CLASS_TYPE,
     ScrollBar,
+    SHEET_VIEWPORT_KEY,
     Spreadsheet,
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
@@ -37,7 +38,6 @@ import {
     SHEET_COMPONENT_HEADER_LAYER_INDEX,
     SHEET_COMPONENT_MAIN_LAYER_INDEX,
     SHEET_VIEW_KEY,
-    VIEWPORT_KEY,
 } from '../common/keys';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -85,9 +85,9 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
 
         const sheetId = worksheet.getSheetId();
 
-        this._addViewport(worksheet);
-
         const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
+        const _viewMain = this._addViewport(worksheet);
+
         const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW);
         const spreadsheetColumnHeader = new SpreadsheetColumnHeader(SHEET_VIEW_KEY.COLUMN);
         const SpreadsheetLeftTopPlaceholder = new Rect(SHEET_VIEW_KEY.LEFT_TOP, {
@@ -115,67 +115,128 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
     }
 
     // eslint-disable-next-line max-lines-per-function
+    private _initViewports(scene: Scene, rowHeader: { width: number }, columnHeader: { height: number }) {
+        const bufferEdgeX = 100;
+        const bufferEdgeY = 100;
+        // window.sc = scene;
+        const viewMain = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN, scene, {
+            left: rowHeader.width,
+            top: columnHeader.height,
+            bottom: 0,
+            right: 0,
+            isWheelPreventDefaultX: true,
+            isRelativeX: true,
+            isRelativeY: true,
+            allowCache: true,
+            bufferEdgeX,
+            bufferEdgeY,
+        });
+        const viewMainLeftTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
+            isWheelPreventDefaultX: true,
+            active: false,
+            isRelativeX: false,
+            isRelativeY: false,
+            allowCache: true,
+            bufferEdgeX: 0,
+            bufferEdgeY: 0,
+        });
+
+        const viewMainLeft = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
+            isWheelPreventDefaultX: true,
+            active: false,
+            isRelativeX: false,
+            isRelativeY: true,
+            allowCache: true,
+            bufferEdgeX: 0,
+            bufferEdgeY,
+        });
+
+        const viewMainTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
+            isWheelPreventDefaultX: true,
+            active: false,
+            isRelativeX: true,
+            isRelativeY: false,
+            allowCache: true,
+            bufferEdgeX,
+            bufferEdgeY: 0,
+        });
+
+        const viewRowTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
+            active: false,
+            isWheelPreventDefaultX: true,
+            isRelativeX: false,
+            isRelativeY: false,
+        });
+
+        const viewRowBottom = new Viewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM, scene, {
+            left: 0,
+            top: columnHeader.height,
+            bottom: 0,
+            width: rowHeader.width,
+            isWheelPreventDefaultX: true,
+            isRelativeX: false,
+            isRelativeY: true,
+        });
+
+        const viewColumnLeft = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
+            active: false,
+            isWheelPreventDefaultX: true,
+            isRelativeX: false,
+            isRelativeY: false,
+        });
+
+        const viewColumnRight = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
+            left: rowHeader.width,
+            top: 0,
+            height: columnHeader.height,
+            right: 0,
+            isWheelPreventDefaultX: true,
+            isRelativeX: true,
+            isRelativeY: false,
+        });
+
+        const viewLeftTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
+            left: 0,
+            top: 0,
+            width: rowHeader.width,
+            height: columnHeader.height,
+            isWheelPreventDefaultX: true,
+            isRelativeX: false,
+            isRelativeY: false,
+        });
+
+        return {
+            viewMain,
+            viewLeftTop,
+            viewMainLeftTop,
+            viewMainLeft,
+            viewMainTop,
+            viewColumnLeft,
+            viewRowTop,
+            viewRowBottom,
+            viewColumnRight,
+        };
+    }
+
+    /**
+     *
+     * initViewport & wheel event
+     * +-----------------+--------------------+-------------------+
+     * |  VIEW_LEFT_TOP  |  VIEW_COLUMN_LEFT  | VIEW_COLUMN_RIGHT |
+     * +-----------------+--------------------+-------------------+
+     * |  VIEW_ROW_TOP   | VIEW_MAIN_LEFT_TOP |   VIEW_MAIN_TOP   |
+     * +-----------------+--------------------+-------------------+
+     * | VIEW_ROW_BOTTOM |   VIEW_MAIN_LEFT   |     VIEW_MAIN     |
+     * +-----------------+--------------------+-------------------+
+     */
+    // eslint-disable-next-line max-lines-per-function
     private _addViewport(worksheet: Worksheet) {
         const scene = this._context.scene;
-
+        if (scene == null) {
+            return;
+        }
         const { rowHeader, columnHeader } = worksheet.getConfig();
-
-        const viewMain = new Viewport(VIEWPORT_KEY.VIEW_MAIN, scene, {
-            left: rowHeader.width,
-            top: columnHeader.height,
-            bottom: 0,
-            right: 0,
-            isWheelPreventDefaultX: true,
-        });
-
-        const VIEW_ROW_TOP = new Viewport(VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
-            active: false,
-            isWheelPreventDefaultX: true,
-        });
-
-        const VIEW_ROW_BOTTOM = new Viewport(VIEWPORT_KEY.VIEW_ROW_BOTTOM, scene, {
-            left: 0,
-            top: columnHeader.height,
-            bottom: 0,
-            width: rowHeader.width,
-            isWheelPreventDefaultX: true,
-        });
-
-        const VIEW_COLUMN_LEFT = new Viewport(VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
-            active: false,
-            isWheelPreventDefaultX: true,
-        });
-
-        const VIEW_COLUMN_RIGHT = new Viewport(VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
-            left: rowHeader.width,
-            top: 0,
-            height: columnHeader.height,
-            right: 0,
-            isWheelPreventDefaultX: true,
-        });
-
-        const VIEW_LEFT_TOP = new Viewport(VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
-            left: 0,
-            top: 0,
-            width: rowHeader.width,
-            height: columnHeader.height,
-            isWheelPreventDefaultX: true,
-        });
-
-        const VIEW_MAIN_LEFT_TOP = new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
-            isWheelPreventDefaultX: true,
-            active: false,
-        });
-
-        const VIEW_MAIN_LEFT = new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
-            isWheelPreventDefaultX: true,
-            active: false,
-        });
-
-        const VIEW_MAIN_TOP = new Viewport(VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
-            isWheelPreventDefaultX: true,
-            active: false,
-        });
+        const { viewMain } = this._initViewports(scene, rowHeader, columnHeader);
 
         // mouse scroll
         this.disposeWithMe(
@@ -193,7 +254,8 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
                         const deltaFactor = Math.abs(evt.deltaX);
                         // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
                         const scrollNum = deltaFactor;
-
+                        // 展示更多右侧内容，evt.deltaX > 0
+                        // 展示更多左侧内容, evt.deltaX < 0
                         if (evt.deltaX > 0) {
                             offsetX = scrollNum;
                         } else {
@@ -263,9 +325,7 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
 
         // create a scroll bar
         new ScrollBar(viewMain);
-
         scene.attachControl();
-
         return viewMain;
     }
 }

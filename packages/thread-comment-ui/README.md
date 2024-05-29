@@ -7,7 +7,7 @@
 
 ## Introduction
 
-> TODO: Introduction
+> `@univerjs/thread-comment` common UI package for comment. For using, please refer to [@univerjs/sheets-thread-comment](../sheets-thread-comment/README.md)
 
 ## Usage
 

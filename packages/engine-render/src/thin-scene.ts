@@ -20,7 +20,7 @@ import { Disposable, Observable } from '@univerjs/core';
 import type { BaseObject } from './base-object';
 import type { CURSOR_TYPE, EVENT_TYPE } from './basics/const';
 import { RENDER_CLASS_TYPE } from './basics/const';
-import type { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
+import type { IDragEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ITransformChangeState } from './basics/interfaces';
 import { Transform } from './basics/transform';
 import type { Vector2 } from './basics/vector2';
@@ -40,6 +40,14 @@ export abstract class ThinScene extends Disposable {
     onPointerEnterObserver = new Observable<IPointerEvent | IMouseEvent>();
 
     onPointerLeaveObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onDragEnterObserver = new Observable<IDragEvent>();
+
+    onDragOverObserver = new Observable<IDragEvent>();
+
+    onDragLeaveObserver = new Observable<IDragEvent>();
+
+    onDropObserver = new Observable<IDragEvent>();
 
     onDblclickObserver = new Observable<IPointerEvent | IMouseEvent>();
 
@@ -182,6 +190,14 @@ export abstract class ThinScene extends Disposable {
 
     abstract triggerPointerEnter(evt: IPointerEvent | IMouseEvent): void;
 
+    abstract triggerDragEnter(evt: IDragEvent | IMouseEvent): void;
+
+    abstract triggerDragOver(evt: IDragEvent | IMouseEvent): void;
+
+    abstract triggerDragLeave(evt: IDragEvent | IMouseEvent): void;
+
+    abstract triggerDrop(evt: IDragEvent | IMouseEvent): void;
+
     abstract render(parentCtx?: UniverRenderingContext): void;
 
     abstract getParent(): any;
@@ -194,6 +210,10 @@ export abstract class ThinScene extends Disposable {
         this.onPointerUpObserver.clear();
         this.onPointerEnterObserver.clear();
         this.onPointerLeaveObserver.clear();
+        this.onDragEnterObserver.clear();
+        this.onDragOverObserver.clear();
+        this.onDragLeaveObserver.clear();
+        this.onDropObserver.clear();
         this.onDblclickObserver.clear();
         this.onTripleClickObserver.clear();
         this.onMouseWheelObserver.clear();

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-data-validation",
-    "version": "0.1.11",
+    "version": "0.1.12",
     "private": false,
     "description": "Data validation for Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -22,7 +22,8 @@
     ],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/esm/index.js",
@@ -42,6 +43,7 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
+            "./locale/*": "./lib/locale/*.json",
             "./lib/*": "./lib/*"
         }
     },
@@ -75,7 +77,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.46"
+        "@univerjs/icons": "^0.1.52"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

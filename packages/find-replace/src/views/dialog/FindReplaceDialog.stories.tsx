@@ -23,7 +23,9 @@ import { DesktopLayoutService, ILayoutService } from '@univerjs/ui';
 import { LocaleService, LocaleType } from '@univerjs/core';
 import { FindReplaceService, IFindReplaceService } from '../../services/find-replace.service';
 import { FindReplaceController } from '../../controllers/find-replace.controller';
-import { enUS, ruRU, zhCN } from '../../locale';
+import enUS from '../../locale/en-US';
+import zhCN from '../../locale/zh-CN';
+import ruRU from '../../locale/ru-RU';
 import { FindReplaceDialog } from './FindReplaceDialog';
 
 const meta: Meta = {

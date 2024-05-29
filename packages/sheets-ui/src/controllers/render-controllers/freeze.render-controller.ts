@@ -17,8 +17,10 @@
 import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullable, Observer, Workbook } from '@univerjs/core';
 import {
     ColorKit,
+    createInterceptorKey,
     Disposable,
     ICommandService,
+    InterceptorManager,
     RANGE_TYPE,
     ThemeService,
     toDisposable,
@@ -90,9 +92,11 @@ const FREEZE_COLUMN_MAIN_NAME = '__SpreadsheetFreezeColumnMainName__';
 
 const FREEZE_COLUMN_HEADER_NAME = '__SpreadsheetFreezeColumnHeaderName__';
 
-const FREEZE_SIZE_NORMAL = 4;
+const FREEZE_SIZE_NORMAL = 2;
 
 const AUXILIARY_CLICK_HIDDEN_OBJECT_TRANSPARENCY = 0.01;
+
+export const FREEZE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('freezePermissionCheck');
 
 export class HeaderFreezeRenderController extends Disposable implements IRenderController {
     private _rowFreezeHeaderRect: Nullable<Rect>;
@@ -132,6 +136,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
     private _freezeHoverColor = '';
 
     private _lastFreeze: IFreeze | undefined = undefined;
+
+    public interceptor = new InterceptorManager({ FREEZE_PERMISSION_CHECK });
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -213,9 +219,14 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
         this._changeToOffsetY = startY;
 
         const scale = Math.max(scene.scaleX, scene.scaleY);
-        const FREEZE_SIZE = FREEZE_SIZE_NORMAL / (scale < 1 ? 1 : scale);
+
+        let FREEZE_SIZE = FREEZE_SIZE_NORMAL / (scale < 1 ? 1 : scale);
 
         if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
+            if (freezeRow === -1 || freezeRow === 0) {
+                FREEZE_SIZE = FREEZE_SIZE * 2;
+            }
+
             const FREEZE_OFFSET = FREEZE_SIZE;
 
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
@@ -228,11 +239,20 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
             }
 
             this._rowFreezeMainRect = new Rect(FREEZE_ROW_MAIN_NAME, {
-                fill, width: shapeWidth * 2, height: FREEZE_SIZE,
-                left: rowHeaderWidthAndMarginLeft, top: startY - FREEZE_OFFSET, zIndex: 3 });
+                fill,
+                width: shapeWidth * 2 / scale,
+                height: FREEZE_SIZE,
+                left: rowHeaderWidthAndMarginLeft,
+                top: startY - FREEZE_OFFSET,
+                zIndex: 3,
+            });
 
             scene.addObjects([this._rowFreezeHeaderRect, this._rowFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
         } else {
+            if (freezeColumn === -1 || freezeColumn === 0) {
+                FREEZE_SIZE = FREEZE_SIZE * 2;
+            }
+
             const FREEZE_OFFSET = FREEZE_SIZE;
 
             this._columnFreezeHeaderRect = new Rect(FREEZE_COLUMN_HEADER_NAME, {
@@ -245,8 +265,13 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
             }
 
             this._columnFreezeMainRect = new Rect(FREEZE_COLUMN_MAIN_NAME, {
-                fill, width: FREEZE_SIZE, height: shapeHeight * 2,
-                left: startX - FREEZE_OFFSET, top: columnHeaderHeightAndMarginTop, zIndex: 3 });
+                fill,
+                width: FREEZE_SIZE,
+                height: shapeHeight * 2 / scale,
+                left: startX - FREEZE_OFFSET,
+                top: columnHeaderHeightAndMarginTop,
+                zIndex: 3,
+            });
 
             scene.addObjects([this._columnFreezeHeaderRect, this._columnFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
         }
@@ -271,6 +296,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
 
         this._freezeMoveObservers.push(
             freezeObjectHeaderRect?.onPointerEnterObserver.add(() => {
+                const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
+                if (!permissionCheck) {
+                    return false;
+                }
                 freezeObjectHeaderRect?.setProps({
                     fill: this._freezeHoverColor,
                     zIndex: 4,
@@ -281,6 +310,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
 
         this._freezeMoveObservers.push(
             freezeObjectMainRect?.onPointerEnterObserver.add(() => {
+                const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
+                if (!permissionCheck) {
+                    return false;
+                }
                 freezeObjectHeaderRect?.setProps({
                     fill: this._freezeHoverColor,
                     zIndex: 4,
@@ -389,6 +422,11 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
             return;
         }
 
+        const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
+        if (!permissionCheck) {
+            return false;
+        }
+
         const { scene } = sheetObject;
 
         scene.setCursor(CURSOR_TYPE.GRABBING);
@@ -415,6 +453,12 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                 activeViewport || undefined,
                 true
             );
+
+            const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
+            if (!permissionCheck) {
+                return false;
+            }
+
             scene.setCursor(CURSOR_TYPE.GRABBING);
 
             const FREEZE_SIZE = FREEZE_SIZE_NORMAL / Math.max(scene.scaleX, scene.scaleY);
@@ -540,7 +584,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
             const oldFreeze = worksheet.getConfig()?.freeze;
             let xSplit = oldFreeze?.xSplit || 0;
             let ySplit = oldFreeze?.ySplit || 0;
-            const viewPortKey = this._activeViewport?.viewPortKey;
+            const viewPortKey = this._activeViewport?.viewportKey;
             if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
                 if (
                     !viewPortKey ||
@@ -806,7 +850,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                 .updateScroll({
                     actualScrollY: startSheetView.startY,
                     x: viewMain.scrollX,
-                    actualScrollX: viewMain.actualScrollX,
+                    actualScrollX: viewMain.viewportScrollX,
                 });
             viewRowTop.resize({
                 left: 0,
@@ -861,7 +905,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                 .updateScroll({
                     actualScrollX: startSheetView.startX,
                     y: viewMain.scrollY,
-                    actualScrollY: viewMain.actualScrollY,
+                    actualScrollY: viewMain.viewportScrollY,
                 });
             viewColumnLeft.resize({
                 left: rowHeaderWidthAndMarginLeft,
@@ -925,7 +969,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                 .updateScroll({
                     actualScrollX: startSheetView.startX,
                     y: viewMain.scrollY,
-                    actualScrollY: viewMain.actualScrollY,
+                    actualScrollY: viewMain.viewportScrollY,
                 });
             viewMainTop.resize({
                 left: rowHeaderWidthAndMarginLeft + leftGap,
@@ -937,7 +981,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                 .updateScroll({
                     actualScrollY: startSheetView.startY,
                     x: viewMain.scrollX,
-                    actualScrollX: viewMain.actualScrollX,
+                    actualScrollX: viewMain.viewportScrollX,
                 });
             viewMainLeftTop.resize({
                 left: rowHeaderWidthAndMarginLeft,
@@ -1467,6 +1511,15 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
         return getSheetObject(this._context.unit, this._context);
     }
 
+    /**
+     * 调整冻结 & 缩放都会进入
+     * 但是窗口 resize 并不会进入
+     * @param startRow
+     * @param startColumn
+     * @param ySplit
+     * @param xSplit
+     * @param resetScroll
+     */
     private _refreshFreeze(
         startRow: number,
         startColumn: number,
@@ -1486,7 +1539,11 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
         this._createFreeze(FREEZE_DIRECTION_TYPE.COLUMN, newFreeze);
 
         this._updateViewport(startRow, startColumn, ySplit, xSplit, resetScroll);
-
         this._getSheetObject()?.spreadsheet.makeForceDirty();
+
+        // no need to set viewport markForceDirty again
+        // when change freeze area ---> viewport.resize ---> viewport.markForceDity()
+        // this._getSheetObject()?.spreadsheet.makeForceDirty();
+        // this._getSheetObject()?.scene.getViewports().forEach(vp => vp.makeForceDirty());
     }
 }

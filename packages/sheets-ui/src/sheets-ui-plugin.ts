@@ -40,7 +40,6 @@ import { SheetRenderController } from './controllers/sheet-render.controller';
 import type { IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
 import { DefaultSheetUiConfig, SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
-import { zhCN } from './locale';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
@@ -72,6 +71,8 @@ import { SheetContextMenuRenderController } from './controllers/render-controlle
 import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
+import { DragRenderController } from './controllers/drag-render.controller';
+import { DragManagerService } from './services/drag-manager.service';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';
@@ -86,7 +87,6 @@ export class UniverSheetsUIPlugin extends Plugin {
     ) {
         super();
 
-        this._localeService.load({ zhCN });
         this._config = Tools.deepMerge({}, DefaultSheetUiConfig, this._config);
     }
 
@@ -109,6 +109,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
                 [HoverManagerService],
+                [DragManagerService],
                 [SheetCanvasPopManagerService],
                 [CellAlertManagerService],
 
@@ -161,6 +162,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             ForceStringAlertRenderController,
             MarkSelectionRenderController,
             HoverRenderController,
+            DragRenderController,
             ForceStringRenderController,
             CellCustomRenderController,
             SheetContextMenuRenderController,

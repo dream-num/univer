@@ -5,7 +5,7 @@
 
 ## 简介
 
-> TODO: Introduction
+> `@univerjs/thread-comment` 评论/批注 核心包，如需使用请查看 [@univerjs/sheets-thread-comment](../sheets-thread-comment/README-zh.md)
 
 ## 使用指南
 

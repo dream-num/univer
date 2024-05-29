@@ -19,7 +19,7 @@ import { TextX } from '../text-x';
 import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
 import { BooleanNumber } from '../../../../types/enum/text-style';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
-import { TextXActionType } from '../../action-types';
+import { TextXActionType } from '../action-types';
 
 describe('test TextX methods and branches', () => {
     describe('test TextX methods', () => {
@@ -237,6 +237,23 @@ describe('test TextX methods and branches', () => {
             expect(actions[0].t).toBe(TextXActionType.RETAIN);
             expect(actions[1].t).toBe(TextXActionType.INSERT);
             expect(actions[2].t).toBe(TextXActionType.DELETE);
+        });
+    });
+
+    describe('test TextX static methods', () => {
+        it('test TextX isNoop method', () => {
+            const textX = new TextX();
+
+            expect(TextX.isNoop(textX.serialize())).toBe(true);
+
+            textX.retain(4, '');
+            textX.delete(5, '');
+
+            expect(TextX.isNoop(textX.serialize())).toBe(false);
+        });
+
+        it('textX name should to be text-x', () => {
+            expect(TextX.name).toBe('text-x');
         });
     });
 });

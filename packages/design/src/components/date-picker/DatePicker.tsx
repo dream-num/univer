@@ -52,7 +52,7 @@ export function DatePicker(props: IDatePickerProps) {
             value={value}
             prefixCls={styles.datePicker}
             generateConfig={generateConfig}
-            locale={locale.design.Picker}
+            locale={locale?.Picker!}
             suffixIcon={<CalendarSingle className={styles.datePickerSuffixIcon} />}
             onChange={handleChange}
         />

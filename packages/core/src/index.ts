@@ -43,11 +43,14 @@ export {
     type IDeleteAction,
     type IInsertAction,
     type IRetainAction,
-} from './docs/data-model/action-types';
+} from './docs/data-model/text-x/action-types';
 export { DataValidationRenderMode } from './types/enum/data-validation-render-mode';
 export { ActionIterator } from './docs/data-model/text-x/action-iterator';
 export { getBodySlice, composeBody } from './docs/data-model/text-x/utils';
 export { TextX } from './docs/data-model/text-x/text-x';
+export type { TPriority } from './docs/data-model/text-x/text-x';
+export { JSONX, JSON1 } from './docs/data-model/json-x/json-x';
+export type { JSONXActions, JSONXPath } from './docs/data-model/json-x/json-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
 export * from './observer';
 export { Plugin } from './services/plugin/plugin';
@@ -99,11 +102,10 @@ export { LocaleService } from './services/locale/locale.service';
 export { DesktopLogService, ILogService, LogLevel } from './services/log/log.service';
 export {
     IPermissionService,
-    PermissionService,
-    UniverEditablePermission,
-    UniverEditablePermissionPoint,
-    UniverPermissionService,
-} from './services/permission';
+    PermissionStatus,
+} from './services/permission/type';
+export type { IPermissionParam } from './services/permission/type';
+export type { IPermissionPoint } from './services/permission/type';
 export { IResourceLoaderService } from './services/resource-loader/type';
 export { ResourceManagerService } from './services/resource-manager/resource-manager.service';
 export type { IResourceHook } from './services/resource-manager/type';
@@ -129,7 +131,7 @@ export { UserManagerService } from './services/user-manager/user-manager.service
 
 export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
 export { composeInterceptors, createInterceptorKey, InterceptorManager } from './common/interceptor';
-export { normalizeTextRuns } from './docs/data-model/apply-utils/common';
+export { normalizeTextRuns } from './docs/data-model/text-x/apply-utils/common';
 export type { PluginCtor } from './services/plugin/plugin';
 export { type DependencyOverride, mergeOverrideWithDependencies } from './services/plugin/plugin-override';
 export * from './types/const';
@@ -192,6 +194,11 @@ export { DataValidationImeMode } from './types/enum/data-validation-ime-mode';
 export { DataValidationOperator } from './types/enum/data-validation-operator';
 export { DataValidationType } from './types/enum/data-validation-type';
 export { DataValidationStatus } from './types/enum/data-validation-status';
+export type { IPermissionTypes } from './services/permission/type';
+
+export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
+export { IAuthzIoService } from './services/authz-io/type';
+export { createDefaultUser } from './services/user-manager/const';
 
 installShims();
 

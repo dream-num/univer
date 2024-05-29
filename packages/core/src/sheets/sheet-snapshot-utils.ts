@@ -26,10 +26,10 @@ export const DEFAULT_WORKSHEET_COLUMN_COUNT_KEY = 'DEFAULT_WORKSHEET_COLUMN_COUN
 export const DEFAULT_WORKSHEET_COLUMN_COUNT = 20;
 
 export const DEFAULT_WORKSHEET_ROW_HEIGHT_KEY = 'DEFAULT_WORKSHEET_ROW_HEIGHT';
-export const DEFAULT_WORKSHEET_ROW_HEIGHT = 19;
+export const DEFAULT_WORKSHEET_ROW_HEIGHT = 24;
 
 export const DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY = 'DEFAULT_WORKSHEET_COLUMN_WIDTH';
-export const DEFAULT_WORKSHEET_COLUMN_WIDTH = 73;
+export const DEFAULT_WORKSHEET_COLUMN_WIDTH = 88;
 
 export const DEFAULT_WORKSHEET_ROW_TITLE_WIDTH_KEY = 'DEFAULT_WORKSHEET_ROW_TITLE_WIDTH';
 export const DEFAULT_WORKSHEET_ROW_TITLE_WIDTH = 46;
@@ -46,7 +46,7 @@ export const DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT = 20;
  */
 export function mergeWorksheetSnapshotWithDefault(snapshot: Partial<IWorksheetData>): IWorksheetData {
     const defaultSnapshot: IWorksheetData = {
-        name: 'Sheet1',
+        name: 'Sheet1', // TODO: name should have i18n
         id: 'sheet-01',
         tabColor: '',
         hidden: BooleanNumber.FALSE,

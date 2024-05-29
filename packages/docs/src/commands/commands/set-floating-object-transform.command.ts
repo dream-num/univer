@@ -48,7 +48,7 @@ export const SetDrawingSizeCommand: ICommand = {
         const documentModel = univerInstanceService.getUniverDocInstance(documentId);
         if (!documentModel) return false;
 
-        const snapshot = documentModel.snapshot;
+        const snapshot = documentModel.getSnapshot();
         if (snapshot == null) return false;
 
         const { objectId, size } = params;
@@ -100,7 +100,7 @@ export const SetDrawingPositionCommand: ICommand = {
         const documentModel = univerInstanceService.getUniverDocInstance(documentId);
         if (!documentModel) return false;
 
-        const snapshot = documentModel.snapshot;
+        const snapshot = documentModel.getSnapshot();
         if (snapshot == null) return false;
 
         const { objectId, positionH, positionV } = params;

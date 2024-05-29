@@ -19,8 +19,9 @@ import { LocaleService, LocaleType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { RediContext } from '@wendellhu/redi/react-bindings';
 import React, { useContext, useState } from 'react';
-
-import { enUS, ruRU, zhCN } from '../../locale';
+import enUS from '../../locale/en-US';
+import zhCN from '../../locale/zh-CN';
+import ruRU from '../../locale/ru-RU';
 import type { ISheetNumfmtPanelProps } from '../index';
 import { SheetNumfmtPanel } from '../index';
 import { UserHabitController } from '../../controllers/user-habit.controller';

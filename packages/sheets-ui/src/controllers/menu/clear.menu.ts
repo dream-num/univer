@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand } from '@univerjs/sheets';
+import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 
 import type { IAccessor } from '@wendellhu/redi';
 import { SheetMenuPosition } from './menu';
+import { getCurrentRangeDisable$ } from './menu-util';
 
 const CLEAR_SELECTION_MENU_ID = 'sheet.menu.clear-selection';
 export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
@@ -43,23 +44,24 @@ export function ClearSelectionContentMenuItemFactory(accessor: IAccessor): IMenu
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearContent',
         positions: [CLEAR_SELECTION_MENU_ID],
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }
-
 export function ClearSelectionFormatMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ClearSelectionFormatCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearFormat',
         positions: [CLEAR_SELECTION_MENU_ID],
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }
-
 export function ClearSelectionAllMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ClearSelectionAllCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearAll',
         positions: [CLEAR_SELECTION_MENU_ID],
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }

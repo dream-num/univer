@@ -26,7 +26,6 @@ import { DataValidationCacheService } from './services/dv-cache.service';
 import { DataValidationFormulaService } from './services/dv-formula.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
-import { zhCN } from './locale';
 import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 import { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
 import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
@@ -92,7 +91,5 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });
-
-        this._localeService.load({ zhCN });
     }
 }

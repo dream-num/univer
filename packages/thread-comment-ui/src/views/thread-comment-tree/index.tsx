@@ -24,6 +24,7 @@ import { useObservable } from '@univerjs/ui';
 import dayjs from 'dayjs';
 import { Dropdown, Menu, MenuItem } from '@univerjs/design';
 import type { IUser } from '@univerjs/protocol';
+import cs from 'clsx';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { ThreadCommentEditor } from '../thread-comment-editor';
 import { transformDocument2TextNodes, transformTextNodes2Document } from '../thread-comment-editor/util';
@@ -42,6 +43,8 @@ export interface IThreadCommentTreeProps {
     getSubUnitName: (subUnitId: string) => string;
     prefix?: string;
     autoFocus?: boolean;
+    onMouseEnter?: () => void;
+    onMouseLeave?: () => void;
 }
 
 export interface IThreadCommentItemProps {
@@ -107,8 +110,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                             <Dropdown
                                 overlay={(
                                     <Menu>
-                                        <MenuItem onClick={() => onEditingChange?.(true)}>{localeService.t('threadCommentUI.item.edit')}</MenuItem>
-                                        <MenuItem onClick={handleDeleteItem}>{localeService.t('threadCommentUI.item.delete')}</MenuItem>
+                                        <MenuItem key="edit" onClick={() => onEditingChange?.(true)}>{localeService.t('threadCommentUI.item.edit')}</MenuItem>
+                                        <MenuItem key="delete" onClick={handleDeleteItem}>{localeService.t('threadCommentUI.item.delete')}</MenuItem>
                                     </Menu>
                                 )}
                             >
@@ -180,9 +183,11 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         getSubUnitName,
         prefix,
         autoFocus,
+        onMouseEnter,
+        onMouseLeave,
     } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
-
+    const [isHover, setIsHover] = useState(false);
     const [editingId, setEditingId] = useState('');
     useObservable(threadCommentModel.commentMap$);
     const comments = id ? threadCommentModel.getCommentWithChildren(unitId, subUnitId, id) : null;
@@ -231,8 +236,22 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     };
 
     return (
-        <div className={styles.threadComment} onClick={onClick} id={`${prefix}-${unitId}-${subUnitId}-${id}`}>
-            {showHighlight ? <div className={styles.threadCommentHighlight} /> : null}
+        <div
+            className={cs(styles.threadComment, {
+                [styles.threadCommentActive]: !resolved && (showHighlight || isHover || prefix === 'cell'),
+            })}
+            onClick={onClick}
+            id={`${prefix}-${unitId}-${subUnitId}-${id}`}
+            onMouseEnter={() => {
+                onMouseEnter?.();
+                setIsHover(true);
+            }}
+            onMouseLeave={() => {
+                onMouseLeave?.();
+                setIsHover(false);
+            }}
+        >
+            {!resolved && showHighlight ? <div className={styles.threadCommentHighlight} /> : null}
             <div className={styles.threadCommentTitle}>
                 <div className={styles.threadCommentTitlePosition}>
                     <div className={styles.threadCommentTitleHighlight} />

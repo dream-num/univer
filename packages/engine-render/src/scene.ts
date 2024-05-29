@@ -19,7 +19,7 @@ import { sortRules, sortRulesByDesc, toDisposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import type { BaseObject } from './base-object';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
-import type { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
+import type { IDragEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { IObjectFullState, ISceneTransformState, ITransformChangeState } from './basics/interfaces';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { precisionTo, requestNewFrame } from './basics/tools';
@@ -485,7 +485,7 @@ export class Scene extends ThinScene {
     override removeViewport(key: string) {
         for (let i = 0, len = this._viewports.length; i < len; i++) {
             const viewport = this._viewports[i];
-            if (viewport.viewPortKey === key) {
+            if (viewport.viewportKey === key) {
                 this._viewports.splice(i, 1);
                 return viewport;
             }
@@ -498,7 +498,7 @@ export class Scene extends ThinScene {
 
     getViewport(key: string) {
         for (const viewport of this._viewports) {
-            if (viewport.viewPortKey === key) {
+            if (viewport.viewportKey === key) {
                 return viewport;
             }
         }
@@ -516,7 +516,6 @@ export class Scene extends ThinScene {
         for (let i = 0, len = layers.length; i < len; i++) {
             layers[i].render(parentCtx, i === len - 1);
         }
-        // this.getViewports()?.forEach((vp: Viewport) => vp.render(parentCtx));
     }
 
     async requestRender(parentCtx?: UniverRenderingContext) {
@@ -591,8 +590,8 @@ export class Scene extends ThinScene {
         let x = 0;
         let y = 0;
         if (viewPort) {
-            const actualX = viewPort.actualScrollX || 0;
-            const actualY = viewPort.actualScrollY || 0;
+            const actualX = viewPort.viewportScrollX || 0;
+            const actualY = viewPort.viewportScrollY || 0;
             x += actualX;
             y += actualY;
         }
@@ -626,8 +625,8 @@ export class Scene extends ThinScene {
                 const scene = parent as Scene;
                 const viewPort = scene.getActiveViewportByCoord(coord);
                 if (viewPort) {
-                    const actualX = viewPort.actualScrollX || 0;
-                    const actualY = viewPort.actualScrollY || 0;
+                    const actualX = viewPort.viewportScrollX || 0;
+                    const actualY = viewPort.viewportScrollY || 0;
                     coord = coord.addByPoint(actualX, actualY);
                 }
             } else if (parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
@@ -896,6 +895,50 @@ export class Scene extends ThinScene {
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerPointerEnter(evt);
+            return false;
+        }
+        return true;
+    }
+
+    override triggerDragLeave(evt: IDragEvent) {
+        if (
+            !this.onDragLeaveObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
+            (this._parent as SceneViewer)?.triggerDragLeave(evt);
+            return false;
+        }
+        return true;
+    }
+
+    override triggerDragOver(evt: IDragEvent) {
+        if (
+            !this.onDragOverObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
+            (this._parent as SceneViewer)?.triggerDragOver(evt);
+            return false;
+        }
+        return true;
+    }
+
+    override triggerDragEnter(evt: IDragEvent) {
+        if (
+            !this.onDragEnterObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
+            (this._parent as SceneViewer)?.triggerDragEnter(evt);
+            return false;
+        }
+        return true;
+    }
+
+    override triggerDrop(evt: IDragEvent) {
+        if (
+            !this.onDropObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
+            (this._parent as SceneViewer)?.triggerDrop(evt);
             return false;
         }
         return true;

@@ -43,7 +43,6 @@ import { DefaultDocUiConfig } from './basics';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AppUIController } from './controllers';
 import { DocUIController } from './controllers/doc-ui.controller';
-import { zhCN } from './locale';
 
 import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
@@ -55,6 +54,7 @@ import { DocFloatingObjectController } from './controllers/doc-floating-object.c
 import { ZoomController } from './controllers/zoom.controller';
 import { TextSelectionController } from './controllers/text-selection.controller';
 import { BackScrollController } from './controllers/back-scroll.controller';
+import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
@@ -67,8 +67,6 @@ export class UniverDocsUIPlugin extends Plugin {
         @ILogService private _logService: ILogService
     ) {
         super();
-
-        this._localeService.load({ zhCN });
 
         this._config = Tools.deepMerge({}, DefaultDocUiConfig, this._config);
         this._initDependencies(_injector);
@@ -128,6 +126,7 @@ export class UniverDocsUIPlugin extends Plugin {
                     useClass: DocClipboardService,
                 },
             ],
+            [DocCanvasPopManagerService],
 
             // Render views
             [DocCanvasView],

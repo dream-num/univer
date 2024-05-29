@@ -15,8 +15,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { TextXAction } from '../../action-types';
-import { TextXActionType } from '../../action-types';
+import type { TextXAction } from '../action-types';
+import { TextXActionType } from '../action-types';
 import { BooleanNumber } from '../../../../types/enum/text-style';
 import { TextX } from '../text-x';
 

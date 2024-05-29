@@ -29,7 +29,6 @@ export * from './lifecycle';
 export * from './locale';
 export * from './lru/index';
 export * from './object-matrix';
-export * from './permission';
 export * from './rectangle';
 export { RefAlias } from './ref-alias';
 export * from './row-col-iter';

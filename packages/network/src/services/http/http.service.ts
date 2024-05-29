@@ -110,6 +110,10 @@ export class HTTPService extends Disposable {
         return this._request<T>('DELETE', url, options);
     }
 
+    patch<T>(url: string, options?: IPostRequestParams): Promise<HTTPResponse<T>> {
+        return this._request<T>('PATCH', url, options);
+    }
+
     /** The HTTP request implementations */
     private async _request<T>(
         method: HTTPRequestMethod,
@@ -126,7 +130,7 @@ export class HTTPService extends Disposable {
             params,
             withCredentials: options?.withCredentials ?? false, // default value for withCredentials is false by MDN
             responseType: options?.responseType ?? 'json',
-            body: (method === 'GET') ? undefined : (options as IPostRequestParams)?.body,
+            body: (['GET', 'DELETE'].includes(method)) ? undefined : (options as IPostRequestParams)?.body,
         });
 
         // eslint-disable-next-line ts/no-explicit-any

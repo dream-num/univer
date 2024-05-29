@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/design",
-    "version": "0.1.11",
+    "version": "0.1.12",
     "private": false,
     "description": "UI component library for building exceptional Univer.",
     "author": "DreamNum <developer@univer.ai>",
@@ -25,7 +25,8 @@
     ],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
@@ -45,6 +46,7 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
+            "./locale/*": "./lib/locale/*.json",
             "./lib/*": "./lib/*"
         }
     },
@@ -75,7 +77,7 @@
         "@rc-component/color-picker": "^1.5.3",
         "@rc-component/trigger": "^1.18.3",
         "@types/react-mentions": "^4.1.13",
-        "@univerjs/icons": "^0.1.46",
+        "@univerjs/icons": "^0.1.52",
         "rc-dialog": "^9.4.0",
         "rc-dropdown": "^4.2.0",
         "rc-input": "^1.4.5",

@@ -29,7 +29,6 @@ import { DefaultSheetFormulaConfig, FormulaUIController } from './controllers/fo
 import { PromptController } from './controllers/prompt.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
-import { zhCN } from './locale';
 
 import { DescriptionService, IDescriptionService } from './services/description.service';
 import {
@@ -66,8 +65,6 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     }
 
     _init(): void {
-        this._localeService.load({ zhCN });
-
         const dependencies: Dependency[] = [
             // services
             [IFormulaPromptService, { useClass: FormulaPromptService }],

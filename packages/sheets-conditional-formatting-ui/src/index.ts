@@ -15,4 +15,10 @@
  */
 
 export { UniverSheetsConditionalFormattingUIPlugin } from './plugin';
-export { enUS, zhCN, ruRU } from './locale';
+export { AddCfCommand } from './commands/commands/add-cf.command';
+export type { IAddCfCommandParams } from './commands/commands/add-cf.command';
+export { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
+export * as enUS from './locale/en-US';
+export * as zhCN from './locale/zh-CN';
+export * as ruRU from './locale/ru-RU';
+

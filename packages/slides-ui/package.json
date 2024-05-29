@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/slides-ui",
-    "version": "0.1.11",
+    "version": "0.1.12",
     "private": false,
     "description": "Univer normal ui-plugin-slides",
     "author": "DreamNum <developer@univer.ai>",
@@ -25,7 +25,8 @@
     ],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
@@ -45,6 +46,7 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
+            "./locale/*": "./lib/locale/*.json",
             "./lib/*": "./lib/*"
         }
     },

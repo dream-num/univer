@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, Nullable, Workbook } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, HorizontalAlign, IPermissionService, IUniverInstanceService, ThemeService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
 import { KeyCode, ProgressBar, TextEditor } from '@univerjs/ui';
@@ -23,6 +23,10 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 
+import type { ICellPermission } from '@univerjs/sheets';
+import { RangeProtectionRuleModel, SelectionManagerService, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import { merge } from 'rxjs';
+import { UnitAction } from '@univerjs/protocol';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
@@ -40,6 +44,49 @@ export function FormulaBar() {
 
     const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
     const editorBridgeService = useDependency(IEditorBridgeService);
+    const themeService = useDependency(ThemeService);
+    const progressBarColor = themeService.getCurrentTheme().primaryColor;
+    const [disable, setDisable] = useState<boolean>(false);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const selectionManager = useDependency(SelectionManagerService);
+    const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
+    const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
+    const permissionService = useDependency(IPermissionService);
+
+    useEffect(() => {
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        merge(
+            worksheetProtectionRuleModel.ruleChange$,
+            rangeProtectionRuleModel.ruleChange$,
+            selectionManager.selectionMoveEnd$
+        ).subscribe(() => {
+            const unitId = workbook.getUnitId();
+            const worksheet = workbook.getActiveSheet();
+            const subUnitId = worksheet.getSheetId();
+            const range = selectionManager.getLast()?.range;
+            if (!range) return;
+            const worksheetSetCellValuePermission = permissionService.getPermissionPoint(new WorksheetSetCellValuePermission(unitId, subUnitId).id);
+            const worksheetSetCellStylePermission = permissionService.getPermissionPoint(new WorksheetSetCellStylePermission(unitId, subUnitId).id);
+
+            if (!worksheetSetCellValuePermission || !worksheetSetCellStylePermission) {
+                setDisable(true);
+                return;
+            }
+
+            const { startRow, endRow, startColumn, endColumn } = range;
+            for (let row = startRow; row <= endRow; row++) {
+                for (let col = startColumn; col <= endColumn; col++) {
+                    const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
+                    if (permission?.[UnitAction.Edit] === false) {
+                        setDisable(true);
+                        return;
+                    }
+                }
+            }
+            setDisable(false);
+        }
+        );
+    }, [selectionManager, rangeProtectionRuleModel, univerInstanceService, worksheetProtectionRuleModel]);
 
     const INITIAL_SNAPSHOT = {
         id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -125,13 +172,19 @@ export function FormulaBar() {
     }
 
     return (
-        <div className={styles.formulaBox} style={{ height: ArrowDirection.Down === arrowDirection ? '28px' : '82px' }}>
+        <div
+            className={styles.formulaBox}
+            style={{
+                height: ArrowDirection.Down === arrowDirection ? '28px' : '82px',
+                pointerEvents: disable ? 'none' : 'auto',
+            }}
+        >
             <div className={styles.nameRanges}>
-                <DefinedName />
+                <DefinedName disable={disable} />
             </div>
 
             <div className={styles.formulaBar}>
-                <div className={styles.formulaIcon}>
+                <div className={clsx(styles.formulaIcon, { [styles.formulaIconDisable]: disable })}>
                     <div className={styles.formulaIconWrapper}>
                         <span
                             className={clsx(styles.iconContainer, styles.iconContainerError, iconStyle)}
@@ -164,7 +217,7 @@ export function FormulaBar() {
                         snapshot={INITIAL_SNAPSHOT}
                         isSingle={false}
                     />
-                    <div className={styles.arrowContainer} onClick={handleArrowClick}>
+                    <div className={clsx(styles.arrowContainer, { [styles.arrowContainerDisable]: disable })} onClick={handleArrowClick}>
                         {arrowDirection === ArrowDirection.Down
                             ? (
                                 <DropdownSingle />
@@ -176,7 +229,7 @@ export function FormulaBar() {
                 </div>
             </div>
 
-            <ProgressBar />
+            <ProgressBar barColor={progressBarColor} />
         </div>
     );
 }

@@ -111,6 +111,7 @@ export const UndoCommand = new (class extends MultiImplementationCommand impleme
     async handler(accessor: IAccessor) {
         const undoRedoService = accessor.get(IUndoRedoService);
         const element = undoRedoService.pitchTopUndoElement();
+
         if (!element) {
             return false;
         }

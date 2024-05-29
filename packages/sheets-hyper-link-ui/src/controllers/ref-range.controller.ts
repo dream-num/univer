@@ -15,7 +15,7 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { Disposable, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { Disposable, isValidRange, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import type { IAddHyperLinkMutationParams, ICellHyperLink, IRemoveHyperLinkMutationParams, IUpdateHyperLinkRefMutationParams } from '@univerjs/sheets-hyper-link';
@@ -24,7 +24,6 @@ import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
-import { isLegalRange } from '../common/util';
 
 @OnLifecycle(LifecycleStages.Starting, SheetsHyperLinkRefRangeController)
 export class SheetsHyperLinkRefRangeController extends Disposable {
@@ -119,16 +118,19 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
         if (linkInfo.searchObj && linkInfo.searchObj.range && linkInfo.searchObj.gid) {
             const subUnitId = linkInfo.searchObj.gid;
             const range = deserializeRangeWithSheet(linkInfo.searchObj.range).range;
-            if (isLegalRange(range)) {
+            if (isValidRange(range)) {
                 this._rangeDisableMap.set(
                     id,
                     this._refRangeService.watchRange(unitId, subUnitId, range, (before, aft) => {
+                        if (aft && serializeRange(before) === serializeRange(aft)) {
+                            return;
+                        }
                         this._hyperLinkModel.updateHyperLink(
                             unitId,
                             subUnitId,
                             id,
                             {
-                                payload: `#gid=${subUnitId}&range=${!aft ? 'err' : serializeRange(range)}`,
+                                payload: `#gid=${subUnitId}&range=${!aft ? 'err' : serializeRange(aft)}`,
                             }
                         );
                     })

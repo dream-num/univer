@@ -18,7 +18,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { ICellData, Nullable, Workbook } from '@univerjs/core';
-import { createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
+import { createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, ICommandService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { RangeSelector, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { AddHyperLinkCommand, HyperLinkModel, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
@@ -27,7 +27,7 @@ import { ScrollToCellCommand } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
-import { hasProtocol, isLegalLink, isLegalRange } from '../../common/util';
+import { hasProtocol, isLegalLink } from '../../common/util';
 import styles from './index.module.less';
 
 enum LinkType {
@@ -265,7 +265,7 @@ export const CellLinkEdit = () => {
                         value={payloadInitial}
                         onChange={(newValue) => {
                             const range = newValue[0];
-                            if (!range || !isLegalRange(range.range)) {
+                            if (!range || !isValidRange(range.range)) {
                                 return;
                             }
                             if (!range.sheetName) {

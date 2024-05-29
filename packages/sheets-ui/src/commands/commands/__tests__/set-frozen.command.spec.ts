@@ -80,6 +80,8 @@ describe('Test commands used for change selections', () => {
             sheetViewStartColumn: startColumn,
             offsetX,
             offsetY,
+            scrollLeft: 0,
+            scrollTop: 0,
             ...currentInfo,
         });
     };

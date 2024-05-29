@@ -571,12 +571,16 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 };
             }
         } else if (fromColumn >= colStartIndex && fromColumn <= colEndIndex) {
-            // shrink start and end col left, then set fromColOffset to 0
-            newSheetTransform = {
-                from: { ...from, column: colStartIndex, columnOffset: 0 },
-                to: { ...to, column: toColumn - fromColumn + colStartIndex },
-            };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            if (fromColumn === colStartIndex) {
+                newTransform = { ...transform, left: (transform.left || 0) - sheetTransform.from.columnOffset };
+            } else {
+                const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: colStartIndex, endColumn: fromColumn - 1, startRow: from.row, endRow: to.row });
+                if (selectionCell == null) {
+                    return;
+                }
+                newTransform = { ...transform, left: (transform.left || 0) - selectionCell.endX + selectionCell.startX - sheetTransform.from.columnOffset };
+            }
+            newSheetTransform = transformToDrawingPosition(newTransform, this._selectionRenderService);
         } else if (toColumn >= colStartIndex && toColumn <= colEndIndex && anchorType === SheetDrawingAnchorType.Both) {
             // shrink end col left, then set toColOffset to full cell width
             const selectionCell = this._selectionRenderService.attachRangeWithCoord({
@@ -710,19 +714,19 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             }
         } else if (fromRow >= rowStartIndex && fromRow <= rowEndIndex) {
            // shrink start and end row up, then set fromRowOffset to 0
-            newSheetTransform = {
-                from: { ...from, row: rowStartIndex, rowOffset: 0 },
-                to: { ...to, row: toRow - fromRow + rowStartIndex },
-            };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            if (fromRow === rowStartIndex) {
+                newTransform = { ...transform, top: (transform.top || 0) - sheetTransform.from.rowOffset };
+            } else {
+                const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startRow: rowStartIndex, endRow: fromRow - 1, startColumn: from.column, endColumn: to.column });
+                if (selectionCell == null) {
+                    return;
+                }
+                newTransform = { ...transform, top: (transform.top || 0) - selectionCell.endY + selectionCell.startY - sheetTransform.from.rowOffset };
+            }
+            newSheetTransform = transformToDrawingPosition(newTransform, this._selectionRenderService);
         } else if (toRow >= rowStartIndex && toRow <= rowEndIndex && anchorType === SheetDrawingAnchorType.Both) {
             // shrink end row up, then set toRowOffset to full cell height
-            const selectionCell = this._selectionRenderService.attachRangeWithCoord({
-                startColumn: from.column,
-                endColumn: from.column,
-                startRow: rowStartIndex - 1,
-                endRow: rowStartIndex - 1,
-            });
+            const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: from.column, endColumn: from.column, startRow: rowStartIndex - 1, endRow: rowStartIndex - 1 });
 
             if (selectionCell == null) {
                 return;

@@ -16,7 +16,6 @@
 
 import type { ITextRange, Nullable } from '@univerjs/core';
 import { COLORS, Tools } from '@univerjs/core';
-
 import type { INodePosition } from '../../../basics/interfaces';
 import type { ISuccinctTextRangeParam, ITextSelectionStyle } from '../../../basics/range';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RANGE_DIRECTION } from '../../../basics/range';
@@ -37,11 +36,9 @@ import {
 } from './convert-cursor';
 
 const TEXT_RANGE_KEY_PREFIX = '__TestSelectionRange__';
-
 const TEXT_ANCHOR_KEY_PREFIX = '__TestSelectionAnchor__';
 
 const ID_LENGTH = 6;
-
 const BLINK_ON = 500;
 const BLINK_OFF = 500;
 

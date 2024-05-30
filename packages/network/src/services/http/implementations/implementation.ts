@@ -18,7 +18,7 @@ import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 
 import type { HTTPRequest } from '../request';
-import type { HTTPEvent } from '../response';
+import type { HTTPResponse } from '../response';
 
 /**
  * HTTP service could be implemented differently on platforms.
@@ -29,6 +29,6 @@ export interface IHTTPImplementation {
      * @param request the request to be sent
      */
     // eslint-disable-next-line ts/no-explicit-any
-    send(request: HTTPRequest): Observable<HTTPEvent<any>>;
+    send(request: HTTPRequest): Observable<HTTPResponse<any>>;
 }
 export const IHTTPImplementation = createIdentifier<IHTTPImplementation>('network.http-implementation');

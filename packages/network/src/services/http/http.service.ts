@@ -19,7 +19,7 @@ import { Disposable, remove, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, of } from 'rxjs';
-import { concatMap } from 'rxjs/operators';
+import { concatMap, map } from 'rxjs/operators';
 
 import { HTTPHeaders } from './headers';
 import type { HTTPResponseType } from './http';
@@ -27,8 +27,8 @@ import { IHTTPImplementation } from './implementations/implementation';
 import { HTTPParams } from './params';
 import type { HTTPRequestMethod } from './request';
 import { HTTPRequest } from './request';
-import type { HTTPEvent, HTTPResponseError } from './response';
-import { HTTPResponse } from './response';
+import type { HTTPEvent } from './response';
+import { HTTPResponse, HTTPResponseError } from './response';
 import type { HTTPHandlerFn, HTTPInterceptorFn, RequestPipe } from './interceptor';
 
 export interface IRequestParams {
@@ -118,7 +118,7 @@ export class HTTPService extends Disposable {
         method: HTTPRequestMethod,
         url: string,
         options?: IPostRequestParams
-    ): Observable<HTTPEvent<T>> {
+    ): Observable<HTTPResponse<T>> {
         // Things to do when sending a HTTP request:
         // 1. Generate HTTPRequest/HTTPHeader object
         // 2. Call interceptors and finally the HTTP implementation.
@@ -133,7 +133,14 @@ export class HTTPService extends Disposable {
         });
 
         return of(request).pipe(
-            concatMap((request) => this._runInterceptorsAndImplementation(request))
+            concatMap((request) => this._runInterceptorsAndImplementation(request)),
+            map((response) => {
+                if (response instanceof HTTPResponseError) {
+                    throw response;
+                }
+
+                return response;
+            })
         );
     }
 

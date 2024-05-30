@@ -45,11 +45,11 @@ import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { Inject, Injector } from '@wendellhu/redi';
-import {ISheetClipboardService, SheetSkeletonManagerService} from '@univerjs/sheets-ui';
+import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
-import {
-    covertCellValue,
+import { covertCellValue,
     covertCellValues,
+    isCellMerged,
     transformCoreHorizontalAlignment,
     transformCoreVerticalAlignment,
     transformFacadeHorizontalAlignment,
@@ -100,6 +100,10 @@ export class FRange {
     getCell(): ISelectionCellWithCoord {
         const { skeleton } = this._sheetSkeletonManagerService.getUnitSkeleton(this._workbook.getUnitId(), this._worksheet.getSheetId())!;
         return skeleton.getCellByIndex(this._range.startRow, this._range.startColumn);
+    }
+
+    isMerged() {
+        return isCellMerged(this.getCell().mergeInfo, this._range);
     }
 
     getCellRect(): DOMRect {

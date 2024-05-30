@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, IRangeWithCoord, Nullable } from '@univerjs/core';
 import {
     HorizontalAlign,
     isCellV,
@@ -135,4 +135,18 @@ export function covertCellValues(
     }
 
     return cellValue.getMatrix();
+}
+
+export function isCellMerged(mergeInfo: IRangeWithCoord, range: IRange) {
+    if (!isSingleCell(mergeInfo, range)) {
+        return false;
+    }
+    return range.startColumn !== range.endColumn || range.startRow !== range.endRow;
+}
+
+export function isSingleCell(mergeInfo: IRangeWithCoord, range: IRange) {
+    return mergeInfo.startColumn === range.startColumn
+        && mergeInfo.endColumn === range.endColumn
+        && mergeInfo.startRow === range.startRow
+        && mergeInfo.endRow === range.endRow;
 }

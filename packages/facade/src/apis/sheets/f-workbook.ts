@@ -34,6 +34,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FWorksheet } from './f-worksheet';
+import { isSingleCell } from './utils.ts';
 
 export class FWorkbook {
     readonly id: string;
@@ -264,10 +265,7 @@ export class FWorkbook {
 
             const selectionCellWithCoord = sheetSkeletonManagerParam.skeleton.getCellByIndex(selection.startRow, selection.startColumn);
             const { mergeInfo } = selectionCellWithCoord;
-            if (mergeInfo.startColumn === selection.startColumn
-                && mergeInfo.endColumn === selection.endColumn
-                && mergeInfo.startRow === selection.startRow
-                && mergeInfo.endRow === selection.endRow) {
+            if (isSingleCell(mergeInfo, selection)) {
                 callback(selectionCellWithCoord);
             }
         });

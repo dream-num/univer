@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-export { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
-
 export * from './basics';
 export { getEditorObject } from './basics/editor/get-editor-object';
 export { AutoFillCommand } from './commands/commands/auto-fill.command';

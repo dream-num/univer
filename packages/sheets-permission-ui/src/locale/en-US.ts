@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const locale = {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     permission: {
         toolbarMenu: 'Protection',
         panel: {

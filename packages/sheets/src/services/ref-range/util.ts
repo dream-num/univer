@@ -42,11 +42,13 @@ import { EffectRefRangId, OperatorType } from './type';
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 export const handleRangeTypeInput = (range: IRange) => {
     const _range = { ...range };
-    if (_range.rangeType === RANGE_TYPE.COLUMN) {
+    const isColumn = Number.isNaN(_range.startRow) && Number.isNaN(_range.endRow) && !Number.isNaN(_range.startColumn) && !Number.isNaN(_range.endColumn);
+    const isRow = Number.isNaN(_range.startColumn) && Number.isNaN(_range.endColumn) && !Number.isNaN(_range.startRow) && !Number.isNaN(_range.endRow);
+    if (_range.rangeType === RANGE_TYPE.COLUMN || isColumn) {
         _range.startRow = 0;
         _range.endRow = MAX_SAFE_INTEGER;
     }
-    if (_range.rangeType === RANGE_TYPE.ROW) {
+    if (_range.rangeType === RANGE_TYPE.ROW || isRow) {
         _range.startColumn = 0;
         _range.endColumn = MAX_SAFE_INTEGER;
     }
@@ -83,11 +85,18 @@ export const handleRangeTypeOutput = (range: IRange, maxRow: number, maxCol: num
 export const rotateRange = (range: IRange): IRange => {
     // rotate {startRow:2,endRow:3,startCol:3,endCol:10} to
     // {startRow:3,endRow:10,startCol:2,endRow:3}
+    let rangeType = range.rangeType;
+    if (range.rangeType === RANGE_TYPE.COLUMN) {
+        rangeType = RANGE_TYPE.ROW;
+    } else if (range.rangeType === RANGE_TYPE.ROW) {
+        rangeType = RANGE_TYPE.COLUMN;
+    }
     return {
         startRow: range.startColumn,
         endRow: range.endColumn,
         startColumn: range.startRow,
         endColumn: range.endRow,
+        rangeType,
     };
 };
 interface ILine {

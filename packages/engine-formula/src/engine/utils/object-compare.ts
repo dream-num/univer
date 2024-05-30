@@ -47,7 +47,7 @@ export function findCompareToken(str: string): [compareToken, BaseValueObject] {
  * 2. >=apple*: normal value, >apple: obtains the same effect as >=apple*
  * 3. <apple*: normal value, <=apple: obtains the same effect as <apple*
  */
-export function valueObjectCompare(range: BaseValueObject, criteria: BaseValueObject, operator?: compareToken) {
+export function valueObjectCompare(range: BaseValueObject, criteria: BaseValueObject, operator?: compareToken, isCaseSensitive?: boolean) {
     if (!operator) {
         // Only strings can extract comparison symbols, other types of values are 'equal to'
         // TODO: criteria: 32, ">32", B5, "3?", "apple*", "*~?", TODAY(), ">"&A1:B3
@@ -61,7 +61,7 @@ export function valueObjectCompare(range: BaseValueObject, criteria: BaseValueOb
         }
     }
 
-    return range.compare(criteria, operator);
+    return range.compare(criteria, operator, isCaseSensitive);
 }
 
 /**

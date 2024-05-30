@@ -114,6 +114,29 @@ export class HTTPService extends Disposable {
         return this._request<T>('PATCH', url, options);
     }
 
+    getSSE<T>(
+        method: HTTPRequestMethod,
+        url: string,
+        options?: IPostRequestParams
+    ): Observable<HTTPEvent<T>> {
+        // Things to do when sending a HTTP request:
+        // 1. Generate HTTPRequest/HTTPHeader object
+        // 2. Call interceptors and finally the HTTP implementation.
+        const headers = new HTTPHeaders(options?.headers);
+        const params = new HTTPParams(options?.params);
+        const request = new HTTPRequest(method, url, {
+            headers,
+            params,
+            withCredentials: options?.withCredentials ?? false, // default value for withCredentials is false by MDN
+            responseType: options?.responseType ?? 'json',
+            body: (['GET', 'DELETE'].includes(method)) ? undefined : (options as IPostRequestParams)?.body,
+        });
+
+        return of(request).pipe(
+            concatMap((request) => this._runInterceptorsAndImplementation(request))
+        );
+    }
+
     /** The HTTP request implementations */
     private async _request<T>(
         method: HTTPRequestMethod,

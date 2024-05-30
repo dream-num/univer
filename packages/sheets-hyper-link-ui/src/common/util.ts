@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-
 const expression = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
 const regex = new RegExp(expression);
 
 export function isLegalLink(link: string) {
+    if (link.startsWith('http://localhost:3002') || link.startsWith('localhost:3002')) {
+        return true;
+    }
     return Boolean(link.match(regex));
 }
 

@@ -23,6 +23,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { SPECIAL_PASTE_FORMULA } from '@univerjs/sheets-formula';
 import { SHEETS_HYPER_LINK_UI_PLUGIN } from '../types/const';
 import { hasProtocol, isLegalLink } from '../common/util';
+import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkCopyPasteController)
 export class SheetsHyperLinkCopyPasteController extends Disposable {
@@ -35,12 +36,14 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
     constructor(
         @ISheetClipboardService private _sheetClipboardService: ISheetClipboardService,
         @Inject(HyperLinkModel) private _hyperLinkModel: HyperLinkModel,
-        @Inject(Injector) private _injector: Injector
+        @Inject(Injector) private _injector: Injector,
+        @Inject(SheetsHyperLinkResolverService) private _resolverService: SheetsHyperLinkResolverService
     ) {
         super();
         this._initCopyPaste();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initCopyPaste() {
         this._sheetClipboardService.addClipboardHook({
             id: SHEETS_HYPER_LINK_UI_PLUGIN,
@@ -53,7 +56,20 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
             },
             onPastePlainText: (pasteTo: ISheetDiscreteRangeLocation, clipText: string) => {
                 if (isLegalLink(clipText)) {
-                    let text = hasProtocol(clipText) ? clipText : 'http://'+clipText;
+                    let text = hasProtocol(clipText) ? clipText : `http://${clipText}`;
+                    const url = new URL(text);
+                    const name = clipText;
+                    if (
+                        url.hostname === location.hostname &&
+                        url.port === location.port &&
+                        url.protocol === location.protocol &&
+                        url.pathname === location.pathname
+                    ) {
+                        text = url.hash;
+                        // const urlInfo = this._resolverService.parseHyperLink(text);
+                        // name = urlInfo.name || clipText;
+                    }
+
                     const { range, unitId, subUnitId } = pasteTo;
                     const { ranges: [pasteToRange], mapFunc } = virtualizeDiscreteRanges([range]);
                     const redos: IMutationInfo[] = [];
@@ -81,7 +97,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
                                     id: newId,
                                     row,
                                     column,
-                                    display: text,
+                                    display: name,
                                     payload: text,
                                 },
                             },

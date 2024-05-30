@@ -19,7 +19,7 @@ import type {
     ICellData,
     IColorStyle,
     IObjectMatrixPrimitiveType,
-    IRange,
+    IRange, ISelectionCellWithCoord,
     IStyleData,
     ITextDecoration,
     Workbook,
@@ -45,7 +45,7 @@ import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ISheetClipboardService } from '@univerjs/sheets-ui';
+import {ISheetClipboardService, SheetSkeletonManagerService} from '@univerjs/sheets-ui';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import {
     covertCellValue,
@@ -67,7 +67,8 @@ export class FRange {
         private readonly _range: IRange,
         @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
+        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         // empty
     }
@@ -94,6 +95,17 @@ export class FRange {
      */
     getCellData(): ICellData | null {
         return this._worksheet.getCell(this._range.startRow, this._range.startColumn) ?? null;
+    }
+
+    getCell(): ISelectionCellWithCoord {
+        const { skeleton } = this._sheetSkeletonManagerService.getUnitSkeleton(this._workbook.getUnitId(), this._worksheet.getSheetId())!;
+        return skeleton.getCellByIndex(this._range.startRow, this._range.startColumn);
+    }
+
+    getCellRect(): DOMRect {
+        const { startX: x1, startY: y1, endX: x2, endY: y2 } = this.getCell();
+        const data = { x: x1, y: y1, width: x2 - x1, height: y2 - y1, top: y1, left: x1, bottom: y2, right: x2 };
+        return { ...data, toJSON: () => JSON.stringify(data) };
     }
 
     /**

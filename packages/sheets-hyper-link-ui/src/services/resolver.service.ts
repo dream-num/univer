@@ -23,6 +23,7 @@ import { NORMAL_SELECTION_PLUGIN_NAME, SetSelectionsOperation, SetWorksheetActiv
 import { ScrollToCellCommand } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
+import { ERROR_RANGE } from '../types/const';
 
 interface ISheetUrlParams {
     gid?: string;
@@ -62,7 +63,7 @@ export class SheetsHyperLinkResolverService {
 
         if (range) {
             const rangeObj = deserializeRangeWithSheet(range).range;
-            if (isValidRange(rangeObj)) {
+            if (isValidRange(rangeObj) && range !== ERROR_RANGE) {
                 return {
                     type: 'range',
                     name: serializeRangeWithSheet(sheetName, rangeObj),
@@ -125,7 +126,7 @@ export class SheetsHyperLinkResolverService {
 
         if (range) {
             const rangeInfo = deserializeRangeWithSheet(range);
-            if (isValidRange(rangeInfo.range)) {
+            if (isValidRange(rangeInfo.range) && range !== ERROR_RANGE) {
                 this.navigateToRange(unitId, gid, rangeInfo.range);
             }
             return;

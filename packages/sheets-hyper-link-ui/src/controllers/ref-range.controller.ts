@@ -24,6 +24,7 @@ import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
+import { ERROR_RANGE } from '../types/const';
 
 @OnLifecycle(LifecycleStages.Starting, SheetsHyperLinkRefRangeController)
 export class SheetsHyperLinkRefRangeController extends Disposable {
@@ -130,8 +131,9 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                             subUnitId,
                             id,
                             {
-                                payload: `#gid=${subUnitId}&range=${!aft ? 'err' : serializeRange(aft)}`,
-                            }
+                                payload: `#gid=${subUnitId}&range=${!aft ? ERROR_RANGE : serializeRange(aft)}`,
+                            },
+                            true
                         );
                     })
                 );
@@ -195,10 +197,6 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                         break;
                     }
                     case 'update': {
-                        this._unregisterRange(option.id);
-                        setTimeout(() => {
-                            this._registerRange(option.unitId, option.id, option.payload.payload);
-                        });
                         break;
                     }
                 }

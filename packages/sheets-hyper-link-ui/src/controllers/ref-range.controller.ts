@@ -119,6 +119,7 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
         if (linkInfo.searchObj && linkInfo.searchObj.range && linkInfo.searchObj.gid) {
             const subUnitId = linkInfo.searchObj.gid;
             const range = deserializeRangeWithSheet(linkInfo.searchObj.range).range;
+
             if (isValidRange(range)) {
                 this._rangeDisableMap.set(
                     id,
@@ -197,6 +198,8 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                         break;
                     }
                     case 'update': {
+                        this._unregisterRange(option.id);
+                        this._registerRange(option.unitId, option.id, option.payload.payload);
                         break;
                     }
                 }

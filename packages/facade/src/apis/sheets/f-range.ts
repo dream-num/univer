@@ -103,8 +103,8 @@ export class FRange {
     }
 
     getCellRect(): DOMRect {
-        const { startX: x1, startY: y1, endX: x2, endY: y2 } = this.getCell();
-        const data = { x: x1, y: y1, width: x2 - x1, height: y2 - y1, top: y1, left: x1, bottom: y2, right: x2 };
+        const { startX: x, startY: y, endX: x2, endY: y2 } = this.getCell();
+        const data = { x, y, width: x2 - x, height: y2 - y, top: y, left: x, bottom: y2, right: x2 };
         return { ...data, toJSON: () => JSON.stringify(data) };
     }
 

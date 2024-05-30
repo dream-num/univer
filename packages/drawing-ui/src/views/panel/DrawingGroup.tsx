@@ -123,6 +123,10 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             ungroup(drawing)
         ).filter((o) => o != null) as IDrawingGroupUpdateParam[];
 
+        if (params.length === 0) {
+            return;
+        }
+
         drawingManagerService.featurePluginUngroupUpdateNotification(params);
     };
 

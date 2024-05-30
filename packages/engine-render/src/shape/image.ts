@@ -46,6 +46,8 @@ export class Image extends Shape<IImageProps> {
 
     private _renderByCropper: boolean = false;
 
+    private _transformCalculateSrcRect: boolean = true;
+
     constructor(id: string, config: IImageProps) {
         super(id, config);
         this._props = {
@@ -89,6 +91,12 @@ export class Image extends Shape<IImageProps> {
 
     override get classType(): RENDER_CLASS_TYPE {
         return RENDER_CLASS_TYPE.IMAGE;
+    }
+
+    transformByStateCloseCropper(option: IObjectFullState) {
+        this._transformCalculateSrcRect = false;
+        this.transformByState(option);
+        this._transformCalculateSrcRect = true;
     }
 
     changeSource(url: string) {
@@ -145,6 +153,7 @@ export class Image extends Shape<IImageProps> {
         this._renderByCropper = true;
         this._transformBySrcRect();
     }
+
     // override transformForAngle(transform: Transform) {
     //     if (this.angle === 0) {
     //         return transform;
@@ -292,7 +301,7 @@ export class Image extends Shape<IImageProps> {
     }
 
     private _updateSrcRectByTransform(state: ITransformChangeState) {
-        if (this.srcRect == null) {
+        if (this.srcRect == null || !this._transformCalculateSrcRect) {
             return;
         }
         const { width, height, left, top, angle } = this;

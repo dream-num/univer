@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
@@ -37,6 +37,7 @@ export class DrawingPopupMenuController extends RxDisposable {
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopManagerService: SheetCanvasPopManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IContextService private readonly _contextService: IContextService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService
 
@@ -96,6 +97,8 @@ export class DrawingPopupMenuController extends RxDisposable {
         this.disposeWithMe(
             toDisposable(
                 transformer.onCreateControlObservable.add(() => {
+                    this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
+
                     if (this._hasCropObject(scene)) {
                         return;
                     }
@@ -135,6 +138,8 @@ export class DrawingPopupMenuController extends RxDisposable {
             toDisposable(
                 transformer.onClearControlObservable.add((changeSelf) => {
                     disposePopups.forEach((dispose) => dispose.dispose());
+
+                    this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
 
                     // if (changeSelf === true) {
                     //     this._commandService.executeCommand(SidebarSheetDrawingOperation.id, { value: 'close' });

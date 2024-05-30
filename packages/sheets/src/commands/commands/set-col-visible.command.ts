@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICommand, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -80,34 +80,34 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
             })),
         };
 
+        const commandService = accessor.get(ICommandService);
+
+        const result = sequenceExecute([
+            { id: SetColVisibleMutation.id, params: redoMutationParams },
+            { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+        ], commandService);
+
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: SetSpecificColsVisibleCommand.id,
             params,
         });
 
-        const commandService = accessor.get(ICommandService);
-        const result = sequenceExecute(
-            [
-                { id: SetColVisibleMutation.id, params: redoMutationParams },
-                ...intercepted.redos,
-                { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
-            ],
-            commandService
-        );
+        const interceptedResult = sequenceExecute([...intercepted.redos], commandService);
 
-        if (result.result) {
+        if (result.result && interceptedResult.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    ...(intercepted.preUndos ?? []),
                     { id: SetColHiddenMutation.id, params: undoMutationParams },
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
+                    ...(intercepted.undos ?? []),
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
                     { id: SetColVisibleMutation.id, params: redoMutationParams },
                     { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+                    ...intercepted.redos,
                 ],
             });
 
@@ -191,34 +191,35 @@ export const SetColHiddenCommand: ICommand = {
             })),
         };
 
+        const commandService = accessor.get(ICommandService);
+
+        const result = sequenceExecute([
+            { id: SetColHiddenMutation.id, params: redoMutationParams },
+            { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+        ], commandService);
+
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: SetColHiddenCommand.id,
             params: redoMutationParams,
         });
 
-        const commandService = accessor.get(ICommandService);
-        const result = sequenceExecute(
-            [
-                { id: SetColHiddenMutation.id, params: redoMutationParams },
-                { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
-                ...intercepted.redos,
-            ],
-            commandService
-        );
-        if (result.result) {
+        const interceptedResult = sequenceExecute([...intercepted.redos], commandService);
+
+        if (result.result && interceptedResult.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             const undoMutationParams = SetColHiddenUndoMutationFactory(accessor, redoMutationParams);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    ...(intercepted.preUndos ?? []),
                     { id: SetColVisibleMutation.id, params: undoMutationParams },
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
+                    ...(intercepted.undos ?? []),
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
                     { id: SetColHiddenMutation.id, params: redoMutationParams },
                     { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+                    ...intercepted.redos,
                 ],
             });
             return true;

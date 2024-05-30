@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IRange } from '@univerjs/core';
+import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -141,22 +141,20 @@ export const DeltaRowHeightCommand: ICommand = {
             params: redoMutationParams,
         });
 
-        const result = sequenceExecute(
-            [
-                {
-                    id: SetWorksheetRowHeightMutation.id,
-                    params: redoMutationParams,
-                },
-                {
-                    id: SetWorksheetRowIsAutoHeightMutation.id,
-                    params: redoSetIsAutoHeightParams,
-                },
-                ...intercepted.redos,
-            ],
-            commandService
-        );
+        const result = sequenceExecute([
+            {
+                id: SetWorksheetRowHeightMutation.id,
+                params: redoMutationParams,
+            },
+            {
+                id: SetWorksheetRowIsAutoHeightMutation.id,
+                params: redoSetIsAutoHeightParams,
+            },
+        ], commandService);
 
-        if (result.result) {
+        const interceptedResult = sequenceExecute([...intercepted.redos], commandService);
+
+        if (result.result && interceptedResult.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
@@ -169,6 +167,7 @@ export const DeltaRowHeightCommand: ICommand = {
                         id: SetWorksheetRowIsAutoHeightMutation.id,
                         params: undoSetIsAutoHeightParams,
                     },
+                    ...intercepted.undos,
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
@@ -180,6 +179,7 @@ export const DeltaRowHeightCommand: ICommand = {
                         id: SetWorksheetRowIsAutoHeightMutation.id,
                         params: redoSetIsAutoHeightParams,
                     },
+                    ...intercepted.redos,
                 ],
             });
             return true;
@@ -235,31 +235,29 @@ export const SetRowHeightCommand: ICommand = {
         const undoSetIsAutoHeightParams: ISetWorksheetRowIsAutoHeightMutationParams =
             SetWorksheetRowIsAutoHeightMutationFactory(accessor, redoSetIsAutoHeightParams);
 
+        const result = sequenceExecute([
+            {
+                id: SetWorksheetRowHeightMutation.id,
+                params: redoMutationParams,
+            },
+            {
+                id: SetWorksheetRowIsAutoHeightMutation.id,
+                params: redoSetIsAutoHeightParams,
+            },
+        ], commandService);
+
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: SetRowHeightCommand.id,
             params: redoMutationParams,
         });
 
-        const result = sequenceExecute(
-            [
-                {
-                    id: SetWorksheetRowHeightMutation.id,
-                    params: redoMutationParams,
-                },
-                {
-                    id: SetWorksheetRowIsAutoHeightMutation.id,
-                    params: redoSetIsAutoHeightParams,
-                },
-                ...intercepted.redos,
-            ],
-            commandService
-        );
+        const sheetInterceptorResult = sequenceExecute([...intercepted.redos], commandService);
 
-        if (result.result) {
+        if (result.result && sheetInterceptorResult.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    ...(intercepted.preUndos ?? []),
+                    ...intercepted.preRedos ?? [],
                     {
                         id: SetWorksheetRowHeightMutation.id,
                         params: undoMutationParams,
@@ -268,9 +266,10 @@ export const SetRowHeightCommand: ICommand = {
                         id: SetWorksheetRowIsAutoHeightMutation.id,
                         params: undoSetIsAutoHeightParams,
                     },
+                    ...intercepted.undos,
                 ],
                 redoMutations: [
-                    ...(intercepted.preRedos ?? []),
+                    ...intercepted.preRedos ?? [],
                     {
                         id: SetWorksheetRowHeightMutation.id,
                         params: redoMutationParams,
@@ -279,6 +278,7 @@ export const SetRowHeightCommand: ICommand = {
                         id: SetWorksheetRowIsAutoHeightMutation.id,
                         params: redoSetIsAutoHeightParams,
                     },
+                    ...intercepted.redos,
                 ],
             });
             return true;

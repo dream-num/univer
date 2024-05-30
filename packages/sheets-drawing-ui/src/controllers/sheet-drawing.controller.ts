@@ -23,7 +23,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { AddImageSingle } from '@univerjs/icons';
 import { UploadFileMenu } from '../views/upload-component/UploadFile';
 import { COMPONENT_UPLOAD_FILE_MENU } from '../views/upload-component/component-name';
-import { IMAGE_UPLOAD_ICON, ImageMenuFactory, UploadCellImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
+import { IMAGE_UPLOAD_ICON, ImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
@@ -78,7 +78,7 @@ export class SheetDrawingUIController extends Disposable {
         [
             ImageMenuFactory,
             UploadFloatImageMenuFactory,
-            UploadCellImageMenuFactory,
+            // UploadCellImageMenuFactory,
         ].forEach((menuFactory) => {
             this._menuService.addMenuItem(menuFactory(this._injector), menu);
         });

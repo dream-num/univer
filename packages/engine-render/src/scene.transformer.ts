@@ -90,6 +90,8 @@ const DEFAULT_TRANSFORMER_LAYER_INDEX = 2;
 const MINI_WIDTH_LIMIT = 20;
 const MINI_HEIGHT_LIMIT = 20;
 
+const DEFAULT_CONTROL_PLUS_INDEX = 5000;
+
 /**
  * Transformer constructor.  Transformer is a special type of group that allow you transform
  * primitives and shapes. Transforming tool is not changing `width` and `height` properties of nodes
@@ -219,6 +221,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     refreshControls() {
+        this._clearControls();
         this._selectedObjectMap.forEach((object) => {
             this._createControl(object);
         });
@@ -1465,7 +1468,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             return;
         }
         const oKey = applyObject.oKey;
-        const zIndex = this._selectedObjectMap.size + applyObject.maxZIndex + 1;
+        const zIndex = this._selectedObjectMap.size + applyObject.maxZIndex + DEFAULT_CONTROL_PLUS_INDEX;
         const layerIndex = applyObject.getLayerIndex() || DEFAULT_TRANSFORMER_LAYER_INDEX;
         const groupElements: BaseObject[] = [];
 

@@ -346,6 +346,7 @@ export class ImageUpdateController extends Disposable {
                     const dialog = this._dialogService.open({
                         width: adjustSize.width,
                         id: dialogId,
+                        style: { margin: '0', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' },
                         children: {
                             label: {
                                 name: COMPONENT_IMAGE_VIEWER,

@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         crop: 'Обрезать',
         reset: 'Сбросить размер',
     },
+    'image-cropper': {
+        error: 'Невозможно обрезать не изображения.',
+    },
     'image-panel': {
         arrange: {
             title: 'Расположение',
@@ -64,6 +67,7 @@ const locale: typeof enUS = {
             horizon: 'Распределить горизонтально',
             vertical: 'Распределить вертикально',
         },
+        null: 'Нет выбранных объектов',
     },
 };
 

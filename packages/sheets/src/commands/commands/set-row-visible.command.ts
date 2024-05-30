@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICommand, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -87,32 +87,33 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
             })),
         };
 
+        const result = sequenceExecute(
+            [
+                { id: SetRowVisibleMutation.id, params: redoMutationParams },
+                { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+            ], commandService);
+
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: SetSpecificRowsVisibleCommand.id,
             params,
         });
 
-        const result = sequenceExecute(
-            [
-                { id: SetRowVisibleMutation.id, params: redoMutationParams },
-                ...intercepted.redos,
-                { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
-            ],
-            commandService
-        );
+        const interceptedResult = sequenceExecute([...intercepted.redos], commandService);
 
-        if (result.result) {
+        if (result.result && interceptedResult.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
                     ...(intercepted.preUndos ?? []),
                     { id: SetRowHiddenMutation.id, params: undoMutationParams },
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
+                    ...(intercepted.undos ?? []),
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
                     { id: SetRowVisibleMutation.id, params: redoMutationParams },
                     { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+                    ...intercepted.redos,
                 ],
             });
 
@@ -198,32 +199,38 @@ export const SetRowHiddenCommand: ICommand = {
             })),
         };
 
+        const undoMutationParams = SetRowHiddenUndoMutationFactory(accessor, redoMutationParams);
+
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: SetRowHiddenCommand.id,
             params: redoMutationParams,
         });
 
-        const undoMutationParams = SetRowHiddenUndoMutationFactory(accessor, redoMutationParams);
-        const result = sequenceExecute(
-            [
-                { id: SetRowHiddenMutation.id, params: redoMutationParams },
-                ...intercepted.redos,
-                { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
-            ],
-            commandService
-        );
-        if (result.result) {
+        if (intercepted.preRedos && intercepted.preRedos.length > 0) {
+            sequenceExecute([...intercepted.preRedos], commandService);
+        }
+
+        const result = sequenceExecute([
+            { id: SetRowHiddenMutation.id, params: redoMutationParams },
+            { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+        ], commandService);
+
+        const interceptedResult = sequenceExecute([...intercepted.redos], commandService);
+
+        if (result.result && interceptedResult.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
                     ...(intercepted.preUndos ?? []),
                     { id: SetRowVisibleMutation.id, params: undoMutationParams },
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
+                    ...(intercepted.undos ?? []),
                 ],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),
                     { id: SetRowHiddenMutation.id, params: redoMutationParams },
                     { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+                    ...intercepted.redos,
                 ],
             });
             return true;

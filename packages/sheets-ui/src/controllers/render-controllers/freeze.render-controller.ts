@@ -26,7 +26,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, IScrollObserverParam, Viewport } from '@univerjs/engine-render';
-import { CURSOR_TYPE, Rect, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
 import type {
     IInsertColCommandParams,
     IInsertRowCommandParams,
@@ -184,6 +184,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
         this._zoomRefresh();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _createFreeze(
         freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW,
         freezeConfig?: IFreeze
@@ -635,20 +636,20 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
         }
         const { scene } = sheetObject;
 
-        const viewColumnLeft = scene.getViewport(VIEWPORT_KEY.VIEW_COLUMN_LEFT);
-        const viewColumnRight = scene.getViewport(VIEWPORT_KEY.VIEW_COLUMN_RIGHT);
+        const viewColumnLeft = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT);
+        const viewColumnRight = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT);
 
         // row header
-        const viewRowTop = scene.getViewport(VIEWPORT_KEY.VIEW_ROW_TOP);
-        const viewRowBottom = scene.getViewport(VIEWPORT_KEY.VIEW_ROW_BOTTOM);
+        const viewRowTop = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_TOP);
+        const viewRowBottom = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM);
 
-        const viewLeftTop = scene.getViewport(VIEWPORT_KEY.VIEW_LEFT_TOP);
+        const viewLeftTop = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP);
 
         // skeleton
-        const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-        const viewMainLeftTop = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
-        const viewMainLeft = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT);
-        const viewMainTop = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_TOP);
+        const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        const viewMainLeftTop = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
+        const viewMainLeft = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT);
+        const viewMainTop = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP);
 
         if (
             viewColumnLeft == null ||
@@ -720,7 +721,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                             actualScrollX,
                         });
                 }
-            })!
+            })
         );
     }
 

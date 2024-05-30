@@ -958,7 +958,7 @@ export class Scene extends ThinScene {
 
         this.transform = composeResult;
         this.getViewports().forEach((vp: Viewport) => {
-            vp.resetSizeAndScrollBar();
+            vp.resetCanvasSizeAndUpdateScrollBar();
         });
         this.makeDirty(true);
     }

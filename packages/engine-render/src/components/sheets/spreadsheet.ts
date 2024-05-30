@@ -705,10 +705,6 @@ export class Spreadsheet extends SheetComponent {
         const spreadsheetSkeleton = this.getSkeleton()!;
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
         const { left, top, right, bottom } = cacheBound;
-        // left -= rowHeaderWidth;
-        // top -= columnHeaderHeight;
-        // right -= rowHeaderWidth;
-        // bottom -= columnHeaderHeight;
         const findClosestHundred = (number: number) => {
             const remainder = number % 100;
             return number + (100 - remainder);

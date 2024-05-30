@@ -143,7 +143,7 @@ export class ScrollTimer {
             y,
         });
 
-        const actualScroll = viewport?.getActualScroll(x, y);
+        const actualScroll = viewport?.transScroll2ViewportScrollValue(x, y);
 
         this._scrollX = actualScroll?.x || 0;
         this._scrollY = actualScroll?.y || 0;

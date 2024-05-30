@@ -24,8 +24,10 @@ export interface IScrollManagerParam {
     offsetY: number;
     sheetViewStartRow: number;
     sheetViewStartColumn: number;
-    scrollLeft: number;
-    scrollTop: number;
+    scrollLeft?: number;
+    scrollTop?: number;
+    viewportScrollLeft?: number;
+    viewportScrollTop?: number;
 }
 
 export interface IScrollManagerSearchParam {
@@ -54,19 +56,23 @@ export class ScrollManagerService {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
+        window.sms = this;
     }
 
     dispose(): void {
         this._scrollInfo$.complete();
     }
 
-    setCurrentScroll(param: IScrollManagerSearchParam) {
+    setSearchParam(param: IScrollManagerSearchParam) {
         this._searchParamForScroll = param;
+    }
 
+    setSearchParamAndRefresh(param: IScrollManagerSearchParam) {
+        this._searchParamForScroll = param;
         this._refresh(param);
     }
 
-    getScrollByParam(param: IScrollManagerSearchParam): Readonly<Nullable<IScrollManagerParam>> {
+    getScrollInfoByParam(param: IScrollManagerSearchParam): Readonly<Nullable<IScrollManagerParam>> {
         return this._getCurrentScroll(param);
     }
 
@@ -74,23 +80,23 @@ export class ScrollManagerService {
         return this._getCurrentScroll(this._searchParamForScroll);
     }
 
-    addOrReplace(scroll: IScrollManagerParam) {
+    setScrollInfoToCurrSheet(scrollInfo: IScrollManagerParam) {
         if (this._searchParamForScroll == null) {
             return;
         }
 
-        this._addByParam({
+        this._setScrollInfo({
             ...this._searchParamForScroll,
-            ...scroll,
+            ...scrollInfo,
         });
     }
 
-    addOrReplaceNoRefresh(scroll: IScrollManagerParam) {
+    setScrollInfoToCurrSheetWithoutNotify(scroll: IScrollManagerParam) {
         if (this._searchParamForScroll == null) {
             return;
         }
 
-        this._addByParam(
+        this._setScrollInfo(
             {
                 ...this._searchParamForScroll,
                 ...scroll,
@@ -99,8 +105,14 @@ export class ScrollManagerService {
         );
     }
 
-    addOrReplaceByParam(param: IScrollManagerInsertParam) {
-        this._addByParam(param);
+    /**
+     * set scrollInfo by cmd,
+     * wheelevent --> sheetCanvasView -->  cmd('sheet.operation.set-scroll') --> scrollOperation --> this.setScrollInfo  --> scrollInfo$.next --> scroll.render-controller --> viewportMain.scrollTo & notify -->
+     * scroll.render-controller@onScrollAfterObserver --> this.setScrollInfoToCurrSheetWithoutNotify --> this._setScrollInfo
+     * @param param
+     */
+    setScrollInfo(param: IScrollManagerInsertParam) {
+        this._setScrollInfo(param);
     }
 
     clear(): void {
@@ -120,8 +132,8 @@ export class ScrollManagerService {
     //     const {} = skeleton.getCellByIndex(startRow, startColumn);
     // }
 
-    getScrollFromLeftTop(param: IScrollManagerInsertParam) {
-        const { unitId } = param;
+    calcViewportScrollFromOffset(newScrollInfo: IScrollManagerInsertParam) {
+        const { unitId } = newScrollInfo;
         const workbookScrollInfo = this._scrollInfo.get(unitId);
         if (workbookScrollInfo == null) {
             return {
@@ -129,32 +141,41 @@ export class ScrollManagerService {
                 scrollLeft: 0,
             };
         }
-        const { sheetViewStartColumn, sheetViewStartRow, offsetX, offsetY } = param;
+        // const scrollInfo = workbookScrollInfo.get(param.sheetId);
+        let { sheetViewStartColumn, sheetViewStartRow, offsetX, offsetY } = newScrollInfo;
+        sheetViewStartRow = sheetViewStartRow || 0;
+        offsetY = offsetY || 0;
         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
         const rowAcc = skeleton?.rowHeightAccumulation[sheetViewStartRow - 1] || 0;
-        const colAcc = skeleton?.rowHeightAccumulation[sheetViewStartColumn - 1] || 0;
+        const colAcc = skeleton?.columnWidthAccumulation[sheetViewStartColumn - 1] || 0;
+        const viewportScrollLeft = colAcc + offsetX;
+        const viewportScrollTop = rowAcc + offsetY;
+
         return {
-            scrollTop: rowAcc + offsetY,
-            scrollLeft: colAcc + offsetX,
+            viewportScrollLeft,
+            viewportScrollTop,
+            // scrollTop: rowAcc + offsetY,
+            // scrollLeft: colAcc + offsetX,
         };
     }
 
-    private _addByParam(insertParam: IScrollManagerInsertParam, isRefresh = true): void {
-        const { unitId, sheetId, sheetViewStartColumn, sheetViewStartRow, offsetX, offsetY } = insertParam;
+    private _setScrollInfo(newScrollInfo: IScrollManagerInsertParam, isRefresh = true): void {
+        const { unitId, sheetId, sheetViewStartColumn, sheetViewStartRow, offsetX, offsetY } = newScrollInfo;
 
         if (!this._scrollInfo.has(unitId)) {
             this._scrollInfo.set(unitId, new Map());
         }
 
         const workbookScrollInfo = this._scrollInfo.get(unitId)!;
-        const scrollLeftTop = this.getScrollFromLeftTop(insertParam);
-        const scrollInfo = {
+        const scrollLeftTopByRowColOffset = this.calcViewportScrollFromOffset(newScrollInfo);
+        console.log('scrollTop', newScrollInfo.sheetId, newScrollInfo.scrollTop, scrollLeftTopByRowColOffset.scrollTop);
+        const scrollInfo: IScrollManagerParam = {
             sheetViewStartRow,
             sheetViewStartColumn,
             offsetX,
             offsetY,
-            scrollLeft: scrollLeftTop.scrollLeft,
-            scrollTop: scrollLeftTop.scrollTop,
+            viewportScrollLeft: scrollLeftTopByRowColOffset.viewportScrollLeft,
+            viewportScrollTop: scrollLeftTopByRowColOffset.viewportScrollTop,
         };
         workbookScrollInfo.set(sheetId, scrollInfo);
         if (isRefresh === true) {
@@ -163,14 +184,14 @@ export class ScrollManagerService {
     }
 
     private _clearByParam(param: IScrollManagerSearchParam): void {
-        this._addByParam({
+        this._setScrollInfo({
             ...param,
             sheetViewStartRow: 0,
             sheetViewStartColumn: 0,
             offsetX: 0,
             offsetY: 0,
-            scrollLeft: 0,
-            scrollTop: 0,
+            // scrollLeft: 0,
+            // scrollTop: 0,
         });
 
         this._refresh(param);
@@ -185,6 +206,9 @@ export class ScrollManagerService {
     }
 
     private _refresh(param: IScrollManagerSearchParam): void {
-        this._scrollInfo$.next(this._getCurrentScroll(param));
+        const scrollInfo = this._getCurrentScroll(param);
+
+        // subscribe this._scrollManagerService.scrollInfo$ in scroll.render-controller
+        this._scrollInfo$.next(scrollInfo);
     }
 }

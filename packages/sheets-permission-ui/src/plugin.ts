@@ -22,7 +22,6 @@ import { PermissionRenderService } from './service/permission-render.service';
 import { UNIVER_SHEET_PERMISSION_PLUGIN_NAME } from './const';
 import type { IUniverSheetsPermissionMenuConfig } from './controller/sheet-permission-render.controller';
 import { DefaultSheetPermissionMenuConfig, SheetPermissionRenderController } from './controller/sheet-permission-render.controller';
-import { enUS, zhCN } from './locale';
 import { SheetPermissionOpenPanelOperation } from './operation/sheet-permission-open-panel.operation';
 import { SheetPermissionUserManagerService } from './service';
 import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetProtectionCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from './command/range-protection.command';
@@ -89,11 +88,6 @@ export class UniverSheetsPermissionUIPlugin extends Plugin {
             SetProtectionCommand,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
-        });
-
-        this._localeService.load({
-            zhCN,
-            enUS,
         });
     }
 

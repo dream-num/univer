@@ -18,14 +18,17 @@ import type { IRange, UniverInstanceService } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable } from '@univerjs/core';
 
 import { Inject, Injector } from '@wendellhu/redi';
-import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IDialogService, ILayoutService, IMenuService } from '@univerjs/ui';
+import type { MenuConfig, UIPartsService } from '@univerjs/ui';
+import { ComponentManager, IDialogService, ILayoutService, IMenuService, IUIPartsService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import { serializeRange } from '@univerjs/engine-formula';
+import { AscendingSingle, CustomSortSingle, DescendingSingle, ExpandAscendingSingle, ExpandDescendingSingle } from '@univerjs/icons';
+import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/sheets-sort.command';
 import { CustomSortPanel } from '../views/CustomSortPanel';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
-import { sortRangeAscCtxMenuFactory, sortRangeAscExtCtxMenuFactory, sortRangeAscExtMenuFactory, sortRangeAscMenuFactory, sortRangeCtxMenuFactory, sortRangeCustomCtxMenuFactory, sortRangeCustomMenuFactory, sortRangeDescCtxMenuFactory, sortRangeDescExtCtxMenuFactory, sortRangeDescExtMenuFactory, sortRangeDescMenuFactory, sortRangeMenuFactory } from './sheets-sort.menu';
+import EmbedSortBtn from '../views/EmbedSortBtn';
+import { SHEETS_SORT_ASC_EXT_ICON, SHEETS_SORT_ASC_ICON, SHEETS_SORT_CUSTOM_ICON, SHEETS_SORT_DESC_EXT_ICON, SHEETS_SORT_DESC_ICON, sortRangeAscCtxMenuFactory, sortRangeAscExtCtxMenuFactory, sortRangeAscExtMenuFactory, sortRangeAscMenuFactory, sortRangeCtxMenuFactory, sortRangeCustomCtxMenuFactory, sortRangeCustomMenuFactory, sortRangeDescCtxMenuFactory, sortRangeDescExtCtxMenuFactory, sortRangeDescExtMenuFactory, sortRangeDescMenuFactory, sortRangeMenuFactory } from './sheets-sort.menu';
 
 export interface IUniverSheetsSortUIConfig {
     menu: MenuConfig;
@@ -46,6 +49,7 @@ export class SheetsSortUIController extends RxDisposable {
         @IMenuService private readonly _menuService: IMenuService,
         @IDialogService private readonly _dialogService: IDialogService,
         @ILayoutService private readonly _layoutService: ILayoutService,
+        @IUIPartsService private readonly _uiPartsService: UIPartsService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(SheetsSortUIService) private readonly _sheetsSortUIService: SheetsSortUIService,
         @Inject(Injector) private _injector: Injector,
@@ -62,14 +66,14 @@ export class SheetsSortUIController extends RxDisposable {
         [
             sortRangeMenuFactory,
             sortRangeAscMenuFactory,
-            sortRangeAscExtMenuFactory,
             sortRangeDescMenuFactory,
+            sortRangeAscExtMenuFactory,
             sortRangeDescExtMenuFactory,
             sortRangeCustomMenuFactory,
             sortRangeCtxMenuFactory,
             sortRangeAscCtxMenuFactory,
-            sortRangeAscExtCtxMenuFactory,
             sortRangeDescCtxMenuFactory,
+            sortRangeAscExtCtxMenuFactory,
             sortRangeDescExtCtxMenuFactory,
             sortRangeCustomCtxMenuFactory,
         ].forEach((factory) => {
@@ -99,6 +103,12 @@ export class SheetsSortUIController extends RxDisposable {
 
     private _initUI(): void {
         this.disposeWithMe(this._componentManager.register('CustomSortPanel', CustomSortPanel));
+        this.disposeWithMe(this._uiPartsService.registerComponent('filter-panel-embed-point', () => connectInjector(EmbedSortBtn, this._injector)));
+        this.disposeWithMe(this._componentManager.register(SHEETS_SORT_ASC_ICON, AscendingSingle));
+        this.disposeWithMe(this._componentManager.register(SHEETS_SORT_ASC_EXT_ICON, ExpandAscendingSingle));
+        this.disposeWithMe(this._componentManager.register(SHEETS_SORT_DESC_ICON, DescendingSingle));
+        this.disposeWithMe(this._componentManager.register(SHEETS_SORT_DESC_EXT_ICON, ExpandDescendingSingle));
+        this.disposeWithMe(this._componentManager.register(SHEETS_SORT_CUSTOM_ICON, CustomSortSingle));
 
         // this controller is also responsible for toggling the CustomSortDialog
         this._sheetsSortUIService.customSortState$.pipe(takeUntil(this.dispose$)).subscribe((newState) => {

@@ -23,20 +23,19 @@ import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCo
 const SHEETS_SORT_MENU_ID = 'sheet.menu.sheets-sort';
 const SHEETS_SORT_CTX_MENU_ID = 'sheet.menu.sheets-sort-ctx';
 
-export const SHEETS_SORT_ICON = 'ascending-single';
-export const SHEETS_SORT_ASC_ICON = 'ascending-single';
-export const SHEETS_SORT_ASC_EXT_ICON = 'expand-ascending-single';
-export const SHEETS_SORT_DESC_ICON = 'descending-single';
-export const SHEETS_SORT_DESC_EXT_ICON = 'expand-descending-single';
-export const SHEETS_SORT_CUSTOM_ICON = 'custom-sort-single';
+export const SHEETS_SORT_ASC_ICON = 'AscendingSingle';
+export const SHEETS_SORT_ASC_EXT_ICON = 'ExpandAscendingSingle';
+export const SHEETS_SORT_DESC_ICON = 'DescendingSingle';
+export const SHEETS_SORT_DESC_EXT_ICON = 'ExpandDescendingSingle';
+export const SHEETS_SORT_CUSTOM_ICON = 'CustomSortSingle';
 export function sortRangeMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SHEETS_SORT_MENU_ID,
         type: MenuItemType.SUBITEMS,
         positions: [MenuPosition.TOOLBAR_START],
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
-        icon: SHEETS_SORT_ICON,
-        tooltip: 'sheets-sort.title',
+        icon: SHEETS_SORT_ASC_ICON,
+        tooltip: 'sheets-sort.general.sort',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -94,7 +93,7 @@ export function sortRangeCustomMenuFactory(_accessor: IAccessor): IMenuItem {
 export function sortRangeCtxMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SHEETS_SORT_CTX_MENU_ID,
-        title: 'sheets-sort.title',
+        title: 'sheets-sort.general.sort',
         type: MenuItemType.SUBITEMS,
         positions: [
             MenuPosition.CONTEXT_MENU,
@@ -102,7 +101,7 @@ export function sortRangeCtxMenuFactory(accessor: IAccessor): IMenuItem {
             SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
         ],
         group: MenuGroup.CONTEXT_MENU_DATA,
-        icon: SHEETS_SORT_ICON,
+        icon: SHEETS_SORT_ASC_ICON,
     };
 }
 

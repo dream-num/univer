@@ -47,6 +47,10 @@ export interface ICustomSortState {
     show: boolean;
 }
 
+export interface ISheetSortLocation extends ISheetRangeLocation {
+    colIndex: number;
+}
+
 @OnLifecycle(LifecycleStages.Ready, SheetsSortService)
 export class SheetsSortUIService extends Disposable {
     private readonly _customSortState$ = new BehaviorSubject<Nullable<ICustomSortState>>(null);
@@ -62,8 +66,8 @@ export class SheetsSortUIService extends Disposable {
         super();
     }
 
-    async triggerSortDirectly(asc: boolean, extend?: boolean): Promise<boolean> {
-        const location = await this._detectSortLocation(extend);
+    async triggerSortDirectly(asc: boolean, extend: boolean, sheetRangeLocation?: ISheetSortLocation): Promise<boolean> {
+        const location = sheetRangeLocation || await this._detectSortLocation(extend);
         if (!location) {
             return false;
         }
@@ -73,14 +77,11 @@ export class SheetsSortUIService extends Disposable {
             this.showMergeError();
             return false;
         }
-        const primary = this._selectionManagerService.getLast()?.primary;
-        if (!primary) {
-            return false;
-        }
+
         const sortOption: ISortOption = {
             orderRules: [{
                 type: asc ? SortType.ASC : SortType.DESC,
-                colIndex: primary.actualColumn,
+                colIndex: location.colIndex,
             }],
             range: location.range,
         };
@@ -106,16 +107,16 @@ export class SheetsSortUIService extends Disposable {
         // }
         // this._sheetsSortService.applySort(sortOption, location.unitId, location.subUnitId);
         // return true;
+        return true;
     }
 
     customSortState() {
         return this._customSortState$.getValue();
     }
 
-    private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetRangeLocation >> {
+    private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetSortLocation >> {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET) as Workbook;
         const worksheet = workbook.getActiveSheet();
-        const matrix = worksheet.getCellMatrix();
         const selection = this._selectionManagerService.getLast();
         if (!selection) {
             return null;
@@ -136,11 +137,16 @@ export class SheetsSortUIService extends Disposable {
                 range = expandToContinuousRange(selection.range, { up: true, down: true, left: true, right: true }, worksheet);
             }
         }
+        const primary = this._selectionManagerService.getLast()?.primary;
+        if (!primary) {
+            return null;
+        }
 
         return {
             range,
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
+            colIndex: primary.actualColumn,
         };
     }
 
@@ -181,7 +187,7 @@ export class SheetsSortUIService extends Disposable {
         return EXTEND_TYPE.CANCEL;
     }
 
-    showCustomSortPanel(location: ISheetRangeLocation) {
+    showCustomSortPanel(location: ISheetSortLocation) {
         this._customSortState$.next({ range: location.range, show: true });
     }
 

@@ -1445,8 +1445,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/icons':
-        specifier: ^0.1.44
-        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.55
+        version: 0.1.55(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-virtual-list:
         specifier: ^3.11.5
         version: 3.11.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -3634,7 +3634,7 @@ packages:
     resolution: {integrity: sha512-j9ednRT81vYJ9OfVuXG6ERSTdEL1xVsNgqpkxMsbIabzSo3goCjDIveeGv5d03om39ML71RdmrGNjG5SReBP/Q==}
 
   '@protobufjs/fetch@1.1.0':
-    resolution: {integrity: sha1-upn7WYYUr2VwDBYZ/wbUVLDYTEU=}
+    resolution: {integrity: sha512-lljVXpqXebpsijW71PZaCYeIcE5on1w5DlQy5WH6GLbFryLUrBD4932W/E2BSpfRJWseIL4v/KPgBFxDOIdKpQ==}
 
   '@protobufjs/float@1.0.2':
     resolution: {integrity: sha512-Ddb+kVXlXst9d+R9PfTIxh1EdNkgoRe5tOX6t01f1lYWOvJnSPDBlG241QLzcyPdoNTsblLUdujGSE4RzrTZGQ==}
@@ -4670,6 +4670,12 @@ packages:
 
   '@univerjs/icons@0.1.52':
     resolution: {integrity: sha512-VDg4jc1yLgNCOCZGLwcmAo5lGy/Jp/2c34QO+fClQzx2Qih6EWqxHyJfdjFILfNwWdJvrlFEIG4zMYtNM1Z2TQ==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+
+  '@univerjs/icons@0.1.55':
+    resolution: {integrity: sha512-qSfHP196ZCNP4dbdM6nhHFhZ/317BYMt2uqsZaKb6faDzOvDnyL+kB6DjMmzbRK6WKleVksYPOrMlc1v3DBmjQ==}
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -13547,6 +13553,11 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
 
   '@univerjs/icons@0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
+  '@univerjs/icons@0.1.55(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)

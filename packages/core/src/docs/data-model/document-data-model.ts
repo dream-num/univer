@@ -264,9 +264,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             return;
         }
 
-        const doc = this.snapshot;
-
-        return JSONX.apply(doc, actions);
+        return JSONX.apply(this.snapshot, actions);
     }
 
     sliceBody(startOffset: number, endOffset: number): Nullable<IDocumentBody> {

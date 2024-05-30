@@ -63,7 +63,8 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
                         url.hostname === location.hostname &&
                         url.port === location.port &&
                         url.protocol === location.protocol &&
-                        url.pathname === location.pathname
+                        url.pathname === location.pathname &&
+                        url.hash
                     ) {
                         text = url.hash;
                         // const urlInfo = this._resolverService.parseHyperLink(text);

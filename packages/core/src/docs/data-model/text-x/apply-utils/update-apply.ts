@@ -167,9 +167,15 @@ export function coverTextRuns(
             if (updateEd < removeEd) {
                 updateIndex++;
                 removeTextRuns[removeIndex].st = updateEd;
+                if (removeTextRuns[removeIndex].st === removeTextRuns[removeIndex].ed) {
+                    removeIndex++;
+                }
             } else {
                 removeIndex++;
                 updateDataTextRuns[updateIndex].st = removeEd;
+                if (updateDataTextRuns[updateIndex].st === updateDataTextRuns[updateIndex].ed) {
+                    updateIndex++;
+                }
             }
 
             const pendingTextRun = {
@@ -179,9 +185,7 @@ export function coverTextRuns(
                 sId: updateEd < removeEd ? sId : undefined,
             };
 
-            if (pendingTextRun.ed > pendingTextRun.st) {
-                pending = pendingTextRun;
-            }
+            pending = pendingTextRun.ed > pendingTextRun.st ? pendingTextRun : null;
         }
     }
 

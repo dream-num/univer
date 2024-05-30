@@ -164,8 +164,30 @@ describe('test case in apply utils', () => {
                 },
             ];
 
+            const expectedTextRuns = [
+                {
+                    st: 0,
+                    ed: 5,
+                    ts: {
+                        it: BooleanNumber.TRUE,
+                        bl: BooleanNumber.TRUE,
+                        fs: 28,
+                    },
+                },
+                {
+                    st: 5,
+                    ed: 10,
+                    ts: {
+                        it: BooleanNumber.FALSE,
+                        bl: BooleanNumber.TRUE,
+                        fs: 28,
+                    },
+                },
+            ];
+
             const needUpdateTextRuns = coverTextRuns(updateTextRuns, removeTextRuns, UpdateDocsAttributeType.COVER);
 
+            expect(needUpdateTextRuns).toEqual(expectedTextRuns);
             expect(needUpdateTextRuns.length).toBe(2);
             expect(needUpdateTextRuns[0]?.ts?.bl).toBe(BooleanNumber.TRUE);
             expect(needUpdateTextRuns[1]?.ts?.bl).toBe(BooleanNumber.TRUE);

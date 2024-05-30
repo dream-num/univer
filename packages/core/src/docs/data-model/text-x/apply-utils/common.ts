@@ -131,7 +131,10 @@ export function insertTextRuns(
                         ed: insertTextRuns[0].st,
                     };
 
-                    pendingTextRuns.push(startSplitTextRun);
+                    if (startSplitTextRun.ed > startSplitTextRun.st) {
+                        pendingTextRuns.push(startSplitTextRun);
+                    }
+
                     pendingTextRuns.push(...insertTextRuns);
 
                     const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
@@ -142,7 +145,9 @@ export function insertTextRuns(
                         ed: ed + textLength,
                     };
 
-                    pendingTextRuns.push(endSplitTextRun);
+                    if (endSplitTextRun.ed > endSplitTextRun.st) {
+                        pendingTextRuns.push(endSplitTextRun);
+                    }
                 } else {
                     pendingTextRuns.push(textRun);
                 }

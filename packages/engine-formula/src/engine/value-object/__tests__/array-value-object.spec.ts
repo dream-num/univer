@@ -71,7 +71,7 @@ describe('arrayValueObject test', () => {
             ]);
         });
 
-        it('row==0,1,;column=,,2', () => {
+        it('row==0,1,;column=,,2,first undefined', () => {
             expect(originArrayValueObject.slice(undefined, [2, 3])?.toValue()).toStrictEqual([[3], [8], [13]]);
         });
 
@@ -475,6 +475,12 @@ describe('arrayValueObject test', () => {
             // transpose
             const transpose = arrayValueObject.transpose();
             expect(transpose.getFirstCell().getValue()).toStrictEqual(false);
+        });
+    });
+    describe('Test utils', () => {
+        it('ArrayValueObject static createByArray', () => {
+            const arrayValueObject = ArrayValueObject.createByArray([['cell1', 2, null], ['1', false, true]]);
+            expect(arrayValueObject.toValue()).toStrictEqual([['cell1', 2, 0], [1, false, true]]);
         });
     });
 });

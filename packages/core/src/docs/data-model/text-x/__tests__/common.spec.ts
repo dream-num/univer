@@ -57,6 +57,13 @@ describe('common utils test cases', () => {
 
             const expectedTextRuns: ITextRun[] = [
                 {
+                    st: 0,
+                    ed: 0,
+                    ts: {
+                        bl: BooleanNumber.FALSE,
+                    },
+                },
+                {
                     st: 15,
                     ed: 35,
                     ts: {

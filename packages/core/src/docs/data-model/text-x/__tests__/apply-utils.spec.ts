@@ -133,6 +133,84 @@ describe('test case in apply utils', () => {
             expect(body?.textRuns![2].st).toBe(18);
             expect(body?.textRuns![2].ed).toBe(20);
         });
+
+        it('Should return collapsed textRun when textLength is 0', () => {
+            const removeTextRuns = deleteTextRuns(body as IDocumentBody, 0, 5);
+
+            const expectedTextRuns = [{
+                st: 0,
+                ed: 0,
+                ts: {
+                    bl: BooleanNumber.FALSE,
+                },
+            }];
+
+            expect(removeTextRuns).toEqual(expectedTextRuns);
+        });
+
+        it('Should return collapsed textRun when textLength is 0 and remove the collapsed textRun in body', () => {
+            const body = {
+                dataStream: 'hello\rworld hello\rworld hello\rworld he\r\n',
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: 15,
+                        ts: {
+                            bl: BooleanNumber.FALSE,
+                        },
+                    },
+                    {
+                        st: 15,
+                        ed: 15,
+                        ts: {
+                            it: BooleanNumber.TRUE,
+                        },
+                    },
+                    {
+                        st: 15,
+                        ed: 20,
+                        ts: {
+                            bl: BooleanNumber.FALSE,
+                            it: BooleanNumber.TRUE,
+                        },
+                    },
+                    {
+                        st: 30,
+                        ed: 40,
+                        ts: {
+                            bl: BooleanNumber.FALSE,
+                        },
+                    },
+                ],
+                paragraphs: [
+                    {
+                        startIndex: 5,
+                    },
+                    {
+                        startIndex: 17,
+                    },
+                    {
+                        startIndex: 29,
+                    },
+                    {
+                        startIndex: 38,
+                    },
+                ],
+            };
+
+            const removeTextRuns = deleteTextRuns(body as IDocumentBody, 0, 15);
+
+            const expectedTextRuns = [{
+                st: 0,
+                ed: 0,
+                ts: {
+                    it: BooleanNumber.TRUE,
+                },
+            }];
+
+            expect(removeTextRuns).toEqual(expectedTextRuns);
+            expect(body?.textRuns?.length).toBe(3);
+        });
     });
 
     describe('test cases in function coverTextRuns', () => {
@@ -164,8 +242,30 @@ describe('test case in apply utils', () => {
                 },
             ];
 
+            const expectedTextRuns = [
+                {
+                    st: 0,
+                    ed: 5,
+                    ts: {
+                        it: BooleanNumber.TRUE,
+                        bl: BooleanNumber.TRUE,
+                        fs: 28,
+                    },
+                },
+                {
+                    st: 5,
+                    ed: 10,
+                    ts: {
+                        it: BooleanNumber.FALSE,
+                        bl: BooleanNumber.TRUE,
+                        fs: 28,
+                    },
+                },
+            ];
+
             const needUpdateTextRuns = coverTextRuns(updateTextRuns, removeTextRuns, UpdateDocsAttributeType.COVER);
 
+            expect(needUpdateTextRuns).toEqual(expectedTextRuns);
             expect(needUpdateTextRuns.length).toBe(2);
             expect(needUpdateTextRuns[0]?.ts?.bl).toBe(BooleanNumber.TRUE);
             expect(needUpdateTextRuns[1]?.ts?.bl).toBe(BooleanNumber.TRUE);
@@ -298,143 +398,175 @@ describe('test case in apply utils', () => {
             expect(needUpdateTextRuns[2]?.ts?.bl).toBe(BooleanNumber.FALSE);
             expect(needUpdateTextRuns[3]?.ts?.bl).toBe(BooleanNumber.TRUE);
         });
-    });
 
-    describe('test cases in function insertTextRuns', () => {
-        it('it should pass the case when the insertTextRuns is at the beginning of one testRun', async () => {
-            insertTextRuns(
-                body as IDocumentBody,
-                {
-                    textRuns: updateTextRuns,
-                } as IDocumentBody,
-                10,
-                0
-            );
-
-            expect(body?.textRuns!.length).toBe(4);
-        });
-
-        it('it should pass the case when the insertTextRuns is between original testRuns', async () => {
-            insertTextRuns(
-                body as IDocumentBody,
-                {
-                    textRuns: updateTextRuns,
-                } as IDocumentBody,
-                10,
-                25
-            );
-
-            expect(body?.textRuns!.length).toBe(4);
-            expect(body?.textRuns![0].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns![1].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns![2].ts?.bl).toBe(BooleanNumber.TRUE);
-            expect(body?.textRuns![3].ts?.bl).toBe(BooleanNumber.FALSE);
-        });
-
-        it('it should pass the case when the insertTextRuns is at the end of one testRun', async () => {
-            insertTextRuns(
-                body as IDocumentBody,
-                {
-                    textRuns: updateTextRuns,
-                } as IDocumentBody,
-                10,
-                15
-            );
-
-            expect(body?.textRuns!.length).toBe(4);
-        });
-
-        it('it should pass the case when the insertTextRuns is at the in the middle of one testRun', async () => {
-            insertTextRuns(
-                body as IDocumentBody,
-                {
-                    textRuns: updateTextRuns,
-                } as IDocumentBody,
-                10,
-                10
-            );
-
-            expect(body?.textRuns!.length).toBe(5);
-        });
-
-        it('it should pass the case when the insertTextRuns has the same style with the origin textRun, and should be merged', async () => {
+        it('it should be pass the test when the updateTextRuns and removeTextRuns are both collapsed', () => {
             const updateTextRuns = [
                 {
                     st: 0,
-                    ed: 10,
+                    ed: 0,
                     ts: {
-                        bl: BooleanNumber.FALSE,
+                        bl: BooleanNumber.TRUE,
                     },
                 },
             ];
-            insertTextRuns(
-                body as IDocumentBody,
-                {
-                    textRuns: updateTextRuns,
-                } as IDocumentBody,
-                10,
-                10
-            );
 
-            expect(body?.textRuns!.length).toBe(3);
-            expect(body?.textRuns![0].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns![1].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns![2].ts?.bl).toBe(BooleanNumber.FALSE);
-        });
-
-        it('it should pass the case when the insertTextRuns is empty', async () => {
-            insertTextRuns(
-                body as IDocumentBody,
-                {
-                    textRuns: [],
-                } as unknown as IDocumentBody,
-                10,
-                10
-            );
-
-            expect(body?.textRuns!.length).toBe(3);
-            expect(body?.textRuns![0].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns![1].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns![2].ts?.bl).toBe(BooleanNumber.FALSE);
-        });
-
-        it('If textRuns doesn\'t intersect, they shouldn\'t be merged', async () => {
-            const updateTextRuns = [
+            const removedTextRuns = [
                 {
                     st: 0,
-                    ed: 10,
+                    ed: 0,
                     ts: {
-                        bl: BooleanNumber.FALSE,
+                        cl: { rgb: 'rgb(30, 30, 30)' },
+                        ff: 'Microsoft YaHei',
+                        fs: 12,
                     },
                 },
             ];
-            insertTextRuns(
-                body as IDocumentBody,
-                {
-                    textRuns: updateTextRuns,
-                } as unknown as IDocumentBody,
-                10,
-                25
-            );
 
-            expect(body?.textRuns!.length).toBe(4);
-            expect(body?.textRuns![0].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns![1].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns![2].ts?.bl).toBe(BooleanNumber.FALSE);
-            expect(body?.textRuns![3].ts?.bl).toBe(BooleanNumber.FALSE);
-        });
-    });
+            const needUpdateTextRuns = coverTextRuns(updateTextRuns, removedTextRuns, UpdateDocsAttributeType.COVER);
 
-    describe('test cases in function deleteParagraphs', () => {
-        it('it should pass the case when the delete range has no paragraphs', async () => {
-            const removedParagraphs = deleteParagraphs(body!, 2, 0);
-            expect(removedParagraphs.length).toBe(0);
+            expect(needUpdateTextRuns.length).toBe(1);
+            expect(needUpdateTextRuns[0]?.ts?.bl).toBe(BooleanNumber.TRUE);
+            expect(needUpdateTextRuns[0]?.ts?.cl?.rgb).toBe('rgb(30, 30, 30)');
+            expect(needUpdateTextRuns[0]?.ts?.ff).toBe('Microsoft YaHei');
+            expect(needUpdateTextRuns[0]?.ts?.fs).toBe(12);
         });
 
-        it('it should pass the case when the delete range has one paragraphs', async () => {
-            const removedParagraphs = deleteParagraphs(body!, 2, 5);
-            expect(removedParagraphs.length).toBe(1);
-            expect(removedParagraphs[0].startIndex).toBe(0);
+        describe('test cases in function insertTextRuns', () => {
+            it('it should pass the case when the insertTextRuns is at the beginning of one testRun', async () => {
+                insertTextRuns(
+                    body as IDocumentBody,
+                    {
+                        textRuns: updateTextRuns,
+                    } as IDocumentBody,
+                    10,
+                    0
+                );
+
+                expect(body?.textRuns!.length).toBe(4);
+            });
+
+            it('it should pass the case when the insertTextRuns is between original testRuns', async () => {
+                insertTextRuns(
+                    body as IDocumentBody,
+                    {
+                        textRuns: updateTextRuns,
+                    } as IDocumentBody,
+                    10,
+                    25
+                );
+
+                expect(body?.textRuns!.length).toBe(4);
+                expect(body?.textRuns![0].ts?.bl).toBe(BooleanNumber.FALSE);
+                expect(body?.textRuns![1].ts?.bl).toBe(BooleanNumber.FALSE);
+                expect(body?.textRuns![2].ts?.bl).toBe(BooleanNumber.TRUE);
+                expect(body?.textRuns![3].ts?.bl).toBe(BooleanNumber.FALSE);
+            });
+
+            it('it should pass the case when the insertTextRuns is at the end of one testRun', async () => {
+                insertTextRuns(
+                    body as IDocumentBody,
+                    {
+                        textRuns: updateTextRuns,
+                    } as IDocumentBody,
+                    10,
+                    15
+                );
+
+                expect(body?.textRuns!.length).toBe(4);
+            });
+
+            it('it should pass the case when the insertTextRuns is at the in the middle of one testRun', async () => {
+                insertTextRuns(
+                    body as IDocumentBody,
+                    {
+                        textRuns: updateTextRuns,
+                    } as IDocumentBody,
+                    10,
+                    10
+                );
+
+                expect(body?.textRuns!.length).toBe(5);
+            });
+
+            it('it should pass the case when the insertTextRuns has the same style with the origin textRun, and should be merged', async () => {
+                const updateTextRuns = [
+                    {
+                        st: 0,
+                        ed: 10,
+                        ts: {
+                            bl: BooleanNumber.FALSE,
+                        },
+                    },
+                ];
+                insertTextRuns(
+                    body as IDocumentBody,
+                    {
+                        textRuns: updateTextRuns,
+                    } as IDocumentBody,
+                    10,
+                    10
+                );
+
+                expect(body?.textRuns!.length).toBe(3);
+                expect(body?.textRuns![0].ts?.bl).toBe(BooleanNumber.FALSE);
+                expect(body?.textRuns![1].ts?.bl).toBe(BooleanNumber.FALSE);
+                expect(body?.textRuns![2].ts?.bl).toBe(BooleanNumber.FALSE);
+            });
+
+            it('it should pass the case when the insertTextRuns is empty', async () => {
+                insertTextRuns(
+                    body as IDocumentBody,
+                    {
+                        textRuns: [],
+                    } as unknown as IDocumentBody,
+                    10,
+                    10
+                );
+
+                expect(body?.textRuns!.length).toBe(3);
+                expect(body?.textRuns![0].ts?.bl).toBe(BooleanNumber.FALSE);
+                expect(body?.textRuns![1].ts?.bl).toBe(BooleanNumber.FALSE);
+                expect(body?.textRuns![2].ts?.bl).toBe(BooleanNumber.FALSE);
+            });
+
+            it('If textRuns doesn\'t intersect, they shouldn\'t be merged', async () => {
+                const updateTextRuns = [
+                    {
+                        st: 0,
+                        ed: 10,
+                        ts: {
+                            bl: BooleanNumber.FALSE,
+                        },
+                    },
+                ];
+                insertTextRuns(
+                    body as IDocumentBody,
+                    {
+                        textRuns: updateTextRuns,
+                    } as unknown as IDocumentBody,
+                    10,
+                    25
+                );
+
+                expect(body?.textRuns!.length).toBe(4);
+                expect(body?.textRuns![0].ts?.bl).toBe(BooleanNumber.FALSE);
+                expect(body?.textRuns![1].ts?.bl).toBe(BooleanNumber.FALSE);
+                expect(body?.textRuns![2].ts?.bl).toBe(BooleanNumber.FALSE);
+                expect(body?.textRuns![3].ts?.bl).toBe(BooleanNumber.FALSE);
+            });
+        });
+
+        describe('test cases in function deleteParagraphs', () => {
+            it('it should pass the case when the delete range has no paragraphs', async () => {
+                const removedParagraphs = deleteParagraphs(body!, 2, 0);
+                expect(removedParagraphs.length).toBe(0);
+            });
+
+            it('it should pass the case when the delete range has one paragraphs', async () => {
+                const removedParagraphs = deleteParagraphs(body!, 2, 5);
+                expect(removedParagraphs.length).toBe(1);
+                expect(removedParagraphs[0].startIndex).toBe(0);
+            });
         });
     });
 });

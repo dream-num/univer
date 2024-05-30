@@ -199,6 +199,9 @@ describe('Test insert and remove rows cols commands', () => {
             expect(getRowCount()).toBe(21);
             // the merged cell should be moved down
             expect(getMergedInfo(3, 2)).toEqual({ startRow: 3, endRow: 4, startColumn: 2, endColumn: 2 });
+            // Insert row style
+            expect(getCellStyle(1, 1)).toBe('s2');
+            expect(getCellStyle(2, 1)).toBe('s2');
 
             await commandService.executeCommand(UndoCommand.id);
             expect(getRowCount()).toBe(20);
@@ -236,6 +239,9 @@ describe('Test insert and remove rows cols commands', () => {
             const result = await commandService.executeCommand(InsertColBeforeCommand.id);
             expect(result).toBeTruthy();
             expect(getColCount()).toBe(21);
+            // Insert column style
+            expect(getCellStyle(1, 1)).toBe('s2');
+            expect(getCellStyle(1, 2)).toBe('s2');
 
             const undoResult = await commandService.executeCommand(UndoCommand.id);
             expect(undoResult).toBeTruthy();
@@ -385,7 +391,11 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookData = {
     locale: LocaleType.ZH_CN,
     name: '',
     sheetOrder: [],
-    styles: {},
+    styles: {
+        s2: { bl: 0 },
+        s3: { bl: 1 },
+        s4: { fs: 12 },
+    },
 };
 
 function createInsertRowColTestBed() {

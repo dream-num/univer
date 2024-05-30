@@ -842,8 +842,10 @@ export class AutoFillController extends Disposable {
             removeMergeMutationParams
         );
 
-        redos.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
-        undos.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+        if (deleteMergeRanges.length) {
+            redos.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
+            undos.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+        }
 
         // clear range value
         const clearMutationParams: ISetRangeValuesMutationParams = {

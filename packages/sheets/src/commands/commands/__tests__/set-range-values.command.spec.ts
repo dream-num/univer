@@ -52,6 +52,14 @@ const getTestWorkbookDataDemo = (): IWorkbookData => ({
                         v: 'A2',
                     },
                 },
+                1: {},
+                2: {
+                    1: { v: 'B2', s: 's2' },
+                    4: { v: 'E2', s: 's3' },
+                },
+                3: {
+                    1: { v: 'B3', s: 's4' },
+                },
             },
             columnData: {
                 1: {
@@ -82,7 +90,11 @@ const getTestWorkbookDataDemo = (): IWorkbookData => ({
     locale: LocaleType.ZH_CN,
     name: '',
     sheetOrder: [],
-    styles: {},
+    styles: {
+        s2: { bl: 0 },
+        s3: { bl: 1 },
+        s4: { fs: 12 },
+    },
 });
 
 describe('Test set range values commands', () => {
@@ -531,6 +543,27 @@ describe('Test set range values commands', () => {
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getStyle()).toStrictEqual((allStyle.value as ICellData).s);
+            });
+
+            it('set formats for blank cell', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: { 1: { 1: { s: 's2' }, 4: { s: 's3' } } },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+                expect(getValues(1, 1, 1, 4)).toStrictEqual([[{ s: 's2' }, null, null, { s: 's3' }]]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValues(1, 1, 1, 4)).toStrictEqual([[{}, null, null, {}]]);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValues(1, 1, 1, 4)).toStrictEqual([[{ s: 's2' }, null, null, { s: 's3' }]]);
             });
         });
 

@@ -117,7 +117,7 @@ export class HTTPService extends Disposable {
     getSSE<T>(
         method: HTTPRequestMethod,
         url: string,
-        options?: IRequestParams
+        options?: IPostRequestParams
     ): Observable<HTTPEvent<T>> {
         // Things to do when sending a HTTP request:
         // 1. Generate HTTPRequest/HTTPHeader object

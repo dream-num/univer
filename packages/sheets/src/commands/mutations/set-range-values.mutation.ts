@@ -92,7 +92,9 @@ export const SetRangeValuesUndoMutationFactory = (
     newValues.forValue((row, col, newVal) => {
         const cell = Tools.deepClone(cellMatrix?.getValue(row, col)) || {}; // clone cell data，prevent modify the original data
         const oldStyle = styles.getStyleByCell(cell);
-        const newStyle = transformStyle(oldStyle, newVal && newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
+        // transformStyle does not accept style id
+        let newStyle = styles.getStyleByCell(newVal);
+        newStyle = transformStyle(oldStyle, newStyle);
 
         cell.s = newStyle;
 
@@ -155,6 +157,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
 
     type: CommandType.MUTATION,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         const { cellValue, subUnitId, unitId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -172,6 +175,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
         const styles = workbook.getStyles();
         const newValues = new ObjectMatrix(cellValue);
 
+        // eslint-disable-next-line complexity
         newValues.forValue((row, col, newVal) => {
             // clear all
             if (!newVal) {

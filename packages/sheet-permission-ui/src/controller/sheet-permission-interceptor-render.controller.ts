@@ -26,7 +26,7 @@ import { IDialogService } from '@univerjs/ui';
 
 import type { IRenderContext, IRenderController, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetPasteParams } from '@univerjs/sheets-ui';
-import { ApplyFormatPainterCommand, AutoFillCommand, HeaderMoveRenderController, HeaderResizeRenderController, IAutoFillService, ISelectionRenderService, ISheetClipboardService, SetCellEditVisibleOperation, SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand, SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import { ApplyFormatPainterCommand, AutoFillCommand, HeaderFreezeRenderController, HeaderMoveRenderController, HeaderResizeRenderController, IAutoFillService, ISelectionRenderService, ISheetClipboardService, SetCellEditVisibleOperation, SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand, SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { OpenFilterPanelOperation } from '@univerjs/sheets-filter-ui';
 import { SheetsFindReplaceController } from '@univerjs/sheets-find-replace';
@@ -36,7 +36,6 @@ import { AddSheetDataValidationCommand, DataValidationController, UpdateSheetDat
 import type { IAddCfCommandParams } from '@univerjs/sheets-conditional-formatting-ui';
 import { AddCfCommand, ConditionalFormattingClearController } from '@univerjs/sheets-conditional-formatting-ui';
 import type { IConditionalFormattingRuleConfig, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
-import { HeaderFreezeRenderController } from '@univerjs/sheets-ui/controllers/render-controllers/freeze.render-controller.js';
 import { UnitAction } from '@univerjs/protocol';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG, UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from '../views/error-msg-dialog/interface';
 

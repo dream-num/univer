@@ -46,6 +46,11 @@ const arrayValueObject2 = ArrayValueObject.create(/*ts*/ `{
         3, "Third"
 }`);
 
+const arrayValueObject3 = ArrayValueObject.create(/*ts*/ `{
+    "First",1;
+    "Second",2;
+}`);
+
 const matchArrayValueObject = ArrayValueObject.create(/*ts*/ `{
     1, 3;
     4, 6;
@@ -228,6 +233,16 @@ describe('Test vlookup', () => {
                 rangeLookupArrayValueObject.clone()
             ) as BaseValueObject;
             expect(getObjectValue(resultObject)).toStrictEqual([['First', 'First', 'First', 'First'], ['Fourth', 'Fourth', 'Fourth', 'Fourth'], ['Eighth', 'Eighth', 'Eighth', 'Eighth']]);
+        });
+
+        it('LookupValue is string, case sensitive', async () => {
+            const resultObject = textFunction.calculate(
+                StringValueObject.create('second'),
+                arrayValueObject3.clone(),
+                NumberValueObject.create(2),
+                NumberValueObject.create(0)
+            ) as BaseValueObject;
+            expect(getObjectValue(resultObject)).toStrictEqual([[2]]);
         });
     });
 

@@ -100,3 +100,4 @@ export type { ISheetPasteParams } from './commands/commands/clipboard.command';
 export { SheetCutCommand, SheetPasteColWidthCommand, SheetPasteCommand, SheetPasteShortKeyCommand } from './commands/commands/clipboard.command';
 export { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeUnderlineCommand, SetRangeStrickThroughCommand } from './commands/commands/inline-format.command';
 export { ApplyFormatPainterCommand } from './commands/commands/set-format-painter.command';
+export { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';

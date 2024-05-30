@@ -15,9 +15,10 @@
  */
 
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
-import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
+import { UniverInstanceType } from '@univerjs/core';
 import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../command/range-protection.command';
 import { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionFormSheetBarCommand } from '../command/worksheet-protection.command';
 import { permissionLockIconKey, permissionMenuIconKey } from '../const';
@@ -42,6 +43,7 @@ export function sheetPermissionToolbarMenuFactory(accessor: IAccessor): IMenuIte
         group: MenuGroup.TOOLBAR_OTHERS,
         icon: permissionMenuIconKey,
         tooltip: 'permission.toolbarMenu',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getAddPermissionDisableBase$(accessor),
     };
 }

@@ -28,7 +28,8 @@ import type { IRenderContext, IRenderController, SpreadsheetSkeleton } from '@un
 import type { ISheetPasteParams } from '@univerjs/sheets-ui';
 import { ApplyFormatPainterCommand, AutoFillCommand, FormulaEditorController, HeaderMoveRenderController, HeaderResizeRenderController, IAutoFillService, ISelectionRenderService, ISheetClipboardService, SetCellEditVisibleOperation, SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand, SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
-import { OpenFilterPanelOperation } from '@univerjs/sheets-filter-ui';
+import type { IOpenFilterPanelOperationParams } from '@univerjs/sheets-filter-ui';
+import { OpenFilterPanelOperation, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter-ui';
 import { SheetsFindReplaceController } from '@univerjs/sheets-find-replace';
 import { InsertCommand } from '@univerjs/docs';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
@@ -42,9 +43,7 @@ import { deserializeRangeWithSheet, LexerTreeBuilder } from '@univerjs/engine-fo
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG, UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from '../views/error-msg-dialog/interface';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
-type ICheckPermissionCommandParams = IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISheetPasteParams | ISetSpecificRowsVisibleCommandParams | IUpdateSheetDataValidationRangeCommandParams | IAddCfCommandParams;
-
-const SmartToggleSheetsFilterCommandId = 'sheet.command.smart-toggle-filter';
+type ICheckPermissionCommandParams = IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISheetPasteParams | ISetSpecificRowsVisibleCommandParams | IUpdateSheetDataValidationRangeCommandParams | IAddCfCommandParams | IOpenFilterPanelOperationParams;
 
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
@@ -221,7 +220,7 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
                 errorMsg = this._localService.t('permission.dialog.autoFillErr');
                 break;
 
-            case SmartToggleSheetsFilterCommandId:
+            case SmartToggleSheetsFilterCommand.id:
                 permission = this._permissionCheckWithoutRange({
                     workbookTypes: [WorkbookEditablePermission],
                     rangeTypes: [RangeProtectionPermissionViewPoint],
@@ -239,7 +238,7 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
                 }
                 break;
             case OpenFilterPanelOperation.id:
-                permission = this._permissionCheckWithFilter();
+                permission = this._permissionCheckWithFilter(params as IOpenFilterPanelOperationParams);
                 errorMsg = this._localService.t('permission.dialog.filterErr');
                 break;
 
@@ -389,19 +388,22 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
         return true;
     }
 
-    private _permissionCheckWithFilter() {
+    private _permissionCheckWithFilter(params: IOpenFilterPanelOperationParams) {
         const target = getSheetCommandTarget(this._univerInstanceService);
         if (!target) {
             return false;
         }
         const { unitId, subUnitId } = target;
         const filterRange = this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange();
-        if (filterRange) {
+        const colRange = Tools.deepClone(filterRange);
+        if (colRange) {
+            colRange.startColumn = params.col;
+            colRange.endColumn = params.col;
             return this._permissionCheckWithRanges({
                 workbookTypes: [WorkbookEditablePermission],
                 rangeTypes: [RangeProtectionPermissionViewPoint],
                 worksheetTypes: [WorksheetFilterPermission, WorksheetEditPermission],
-            }, [filterRange]);
+            }, [colRange]);
         }
         return true;
     }

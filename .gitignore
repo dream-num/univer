@@ -112,3 +112,4 @@ storybook-static
 /playwright/.cache/
 
 *storybook.log
+typedoc.json

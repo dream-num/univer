@@ -125,7 +125,8 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
                 break;
             case SetRangeValuesCommand.id:
                 if (isICellData((params as ISetRangeValuesCommandParams).value) && ((params as ISetRangeValuesCommandParams).value as ICellData).f) {
-                    permission = this._permissionCheckWithFormula((params as ISetRangeValuesCommandParams).value as ICellData);
+                    permission = this._permissionCheckWithFormula((params as ISetRangeValuesCommandParams));
+                    errorMsg = this._localService.t('permission.dialog.formulaErr');
                 } else {
                     permission = this._permissionCheckBySetRangeValue({
                         workbookTypes: [WorkbookEditablePermission],
@@ -1051,7 +1052,9 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
         );
     }
 
-    private _permissionCheckWithFormula(value: ICellData) {
+    private _permissionCheckWithFormula(params: ISetRangeValuesCommandParams) {
+        const value = params.value as ICellData;
+        const range = params.range;
         const formulaString = value.f;
         if (formulaString) {
             const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString);
@@ -1089,6 +1092,24 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
                         }
                     }
                 }
+            }
+        }
+        if (range) {
+            const target = getSheetCommandTarget(this._univerInstanceService);
+            if (!target) {
+                return false;
+            }
+            const unitId = params.unitId || target.unitId;
+            const subunitId = params.subUnitId || target.subUnitId;
+            const permissionList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subunitId).filter((rule) => {
+                return rule.ranges.some((ruleRange) => {
+                    return Rectangle.intersects(ruleRange, range);
+                });
+            });
+            const permissionIds = permissionList.map((rule) => new RangeProtectionPermissionEditPoint(unitId, subunitId, rule.permissionId).id);
+            const editPermission = this._permissionService.composePermission(permissionIds).every((permission) => permission.value);
+            if (!editPermission) {
+                return false;
             }
         }
         return true;

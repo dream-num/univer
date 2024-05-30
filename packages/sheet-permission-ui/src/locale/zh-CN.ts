@@ -91,6 +91,7 @@ const locale = {
             operatorSheetErr: '该工作表已被保护，目前无操作工作表权限。如需操作工作表，请联系创建者。',
             insertOrDeleteMoveRangeErr: '插入、删除区域与保护范围相交，暂不支持此操作。',
             printErr: '该工作表已被保护，目前无打印权限。如需打印，请联系创建者。',
+            formulaErr: '该范围或者引用范围已被保护，目前无编辑权限。如需编辑，请联系创建者。',
         },
         button: {
             confirm: '确认',

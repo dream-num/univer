@@ -180,7 +180,7 @@ const hyperLink = [{
     column: 12,
     id: '123',
     display: 'linkTest哈哈哈哈',
-    payload: '#gid=sheet-0011&range=A1',
+    payload: '#gid=sheet-0011&range=1:1',
 }] as ICellHyperLink[];
 
 export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {

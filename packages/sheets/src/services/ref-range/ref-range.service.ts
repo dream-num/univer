@@ -142,12 +142,15 @@ export class RefRangeService extends Disposable {
 
     private _serializer = createRangeSerializer();
 
+    // eslint-disable-next-line max-lines-per-function
     private _onRefRangeChange = () => {
         this._sheetInterceptorService.interceptCommand({
+            // eslint-disable-next-line max-lines-per-function
             getMutations: (command: EffectRefRangeParams) => {
                 const worksheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
                 const unitId = getUnitId(this._univerInstanceService);
                 const subUnitId = getSubUnitId(this._univerInstanceService);
+                // eslint-disable-next-line max-lines-per-function
                 const getEffectsCbList = () => {
                     switch (command.id) {
                         case EffectRefRangId.MoveColsCommandId: {
@@ -306,9 +309,17 @@ export class RefRangeService extends Disposable {
 
             keyList.forEach((key) => {
                 const cbList = manager.get(key);
+
                 const range = this._serializer.deserialize(key);
+                const realRange: IRange = {
+                    ...range,
+                    startRow: +range.startRow,
+                    endRow: +range.endRow,
+                    startColumn: +range.startColumn,
+                    endColumn: +range.endColumn,
+                };
                 // Todo@Gggpound : How to reduce this calculation
-                if (effectRanges.some((item) => Rectangle.intersects(item, range))) {
+                if (effectRanges.some((item) => Rectangle.intersects(item, realRange))) {
                     cbList &&
                         cbList.forEach((callback) => {
                             callbackSet.add(callback);

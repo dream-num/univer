@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import { Disposable, isValidRange, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
+import { Disposable, isValidRange, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
-import type { IAddHyperLinkMutationParams, ICellHyperLink, IRemoveHyperLinkMutationParams, IUpdateHyperLinkRefMutationParams } from '@univerjs/sheets-hyper-link';
-import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkRefMutation } from '@univerjs/sheets-hyper-link';
+import type { IAddHyperLinkMutationParams, ICellHyperLink, IRemoveHyperLinkMutationParams, IUpdateHyperLinkMutationParams, IUpdateHyperLinkRefMutationParams } from '@univerjs/sheets-hyper-link';
+import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '@univerjs/sheets-hyper-link';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
-import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 import { ERROR_RANGE } from '../types/const';
 
@@ -34,7 +34,8 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
     constructor(
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
         @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel,
-        @Inject(SheetsHyperLinkResolverService) private readonly _resolverService: SheetsHyperLinkResolverService
+        @Inject(SheetsHyperLinkResolverService) private readonly _resolverService: SheetsHyperLinkResolverService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._initData();
@@ -112,6 +113,7 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
     private _unregister(id: string) {
         const disposable = this._disposableMap.get(id);
         disposable?.dispose();
+        this._disposableMap.delete(id);
     }
 
     private _registerRange(unitId: string, id: string, payload: string) {
@@ -120,24 +122,42 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
             const subUnitId = linkInfo.searchObj.gid;
             const range = deserializeRangeWithSheet(linkInfo.searchObj.range).range;
 
-            if (isValidRange(range)) {
-                this._rangeDisableMap.set(
-                    id,
-                    this._refRangeService.watchRange(unitId, subUnitId, range, (before, aft) => {
-                        if (aft && serializeRange(before) === serializeRange(aft)) {
-                            return;
-                        }
-                        this._hyperLinkModel.updateHyperLink(
-                            unitId,
-                            subUnitId,
-                            id,
-                            {
-                                payload: `#gid=${subUnitId}&range=${!aft ? ERROR_RANGE : serializeRange(aft)}`,
-                            },
-                            true
-                        );
-                    })
-                );
+            if (isValidRange(range) && linkInfo.searchObj.range !== ERROR_RANGE) {
+                const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
+                    const resultRange = handleDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
+                    if (resultRange && serializeRange(resultRange) === serializeRange(range)) {
+                        return {
+                            redos: [],
+                            undos: [],
+                        };
+                    }
+
+                    return {
+                        redos: [{
+                            id: UpdateHyperLinkMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                id,
+                                payload: {
+                                    payload: `#gid=${subUnitId}&range=${resultRange ? serializeRange(resultRange) : 'err'}`,
+                                },
+                            } as IUpdateHyperLinkMutationParams,
+                        }],
+                        undos: [{
+                            id: UpdateHyperLinkMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                id,
+                                payload: {
+                                    payload,
+                                },
+                            } as IUpdateHyperLinkMutationParams,
+                        }],
+                    };
+                };
+                this._rangeDisableMap.set(id, this._refRangeService.registerRefRange(range, handleRangeChange, unitId, subUnitId));
             }
         }
     }
@@ -145,6 +165,7 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
     private _unregisterRange(id: string) {
         const disposable = this._rangeDisableMap.get(id);
         disposable?.dispose();
+        this._rangeDisableMap.delete(id);
     }
 
     private _initData() {

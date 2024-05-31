@@ -702,59 +702,67 @@ export class NumberValueObject extends BaseValueObject {
     override compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {
         const currentValue = this.getValue();
         let result = false;
+
         if (typeof value === 'string') {
-            switch (operator) {
-                case compareToken.EQUALS:
-                case compareToken.GREATER_THAN:
-                case compareToken.GREATER_THAN_OR_EQUAL:
-                    result = false;
-                    break;
-                case compareToken.LESS_THAN:
-                case compareToken.LESS_THAN_OR_EQUAL:
-                case compareToken.NOT_EQUAL:
-                    result = true;
-                    break;
-            }
+            result = this._compareString(operator);
         } else if (typeof value === 'number') {
-            if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
-                result = this._compareInfinity(currentValue, value, operator);
-            } else {
-                switch (operator) {
-                    case compareToken.EQUALS:
-                        result = Big(currentValue).eq(value);
-                        break;
-                    case compareToken.GREATER_THAN:
-                        result = Big(currentValue).gt(value);
-                        break;
-                    case compareToken.GREATER_THAN_OR_EQUAL:
-                        result = Big(currentValue).gte(value);
-                        break;
-                    case compareToken.LESS_THAN:
-                        result = Big(currentValue).lt(value);
-                        break;
-                    case compareToken.LESS_THAN_OR_EQUAL:
-                        result = Big(currentValue).lte(value);
-                        break;
-                    case compareToken.NOT_EQUAL:
-                        result = !Big(currentValue).eq(value);
-                        break;
-                }
-            }
+            result = this._compareNumber(currentValue, value, operator);
         } else if (typeof value === 'boolean') {
-            switch (operator) {
-                case compareToken.EQUALS:
-                case compareToken.GREATER_THAN:
-                case compareToken.GREATER_THAN_OR_EQUAL:
-                    result = false;
-                    break;
-                case compareToken.LESS_THAN:
-                case compareToken.LESS_THAN_OR_EQUAL:
-                case compareToken.NOT_EQUAL:
-                    result = true;
-                    break;
-            }
+            result = this._compareBoolean(operator);
         }
+
         return BooleanValueObject.create(result);
+    }
+
+    private _compareString(operator: compareToken): boolean {
+        switch (operator) {
+            case compareToken.EQUALS:
+            case compareToken.GREATER_THAN:
+            case compareToken.GREATER_THAN_OR_EQUAL:
+                return false;
+            case compareToken.LESS_THAN:
+            case compareToken.LESS_THAN_OR_EQUAL:
+            case compareToken.NOT_EQUAL:
+                return true;
+        }
+    }
+
+    private _compareNumber(currentValue: number, value: number, operator: compareToken): boolean {
+        if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+            return this._compareInfinity(currentValue, value, operator);
+        } else {
+            return this._compareFiniteNumber(currentValue, value, operator);
+        }
+    }
+
+    private _compareFiniteNumber(currentValue: number, value: number, operator: compareToken): boolean {
+        switch (operator) {
+            case compareToken.EQUALS:
+                return Big(currentValue).eq(value);
+            case compareToken.GREATER_THAN:
+                return Big(currentValue).gt(value);
+            case compareToken.GREATER_THAN_OR_EQUAL:
+                return Big(currentValue).gte(value);
+            case compareToken.LESS_THAN:
+                return Big(currentValue).lt(value);
+            case compareToken.LESS_THAN_OR_EQUAL:
+                return Big(currentValue).lte(value);
+            case compareToken.NOT_EQUAL:
+                return !Big(currentValue).eq(value);
+        }
+    }
+
+    private _compareBoolean(operator: compareToken): boolean {
+        switch (operator) {
+            case compareToken.EQUALS:
+            case compareToken.GREATER_THAN:
+            case compareToken.GREATER_THAN_OR_EQUAL:
+                return false;
+            case compareToken.LESS_THAN:
+            case compareToken.LESS_THAN_OR_EQUAL:
+            case compareToken.NOT_EQUAL:
+                return true;
+        }
     }
 
     override pow(valueObject: BaseValueObject): BaseValueObject {
@@ -1254,74 +1262,83 @@ export class StringValueObject extends BaseValueObject {
         return StringValueObject.create(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
     }
 
-    override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
+    override compare(valueObject: BaseValueObject, operator: compareToken, isCaseSensitive?: boolean): BaseValueObject {
         if (valueObject.isArray()) {
             // const o = valueObject.getReciprocal();
             // if (o.isError()) {
             //     return o;
             // }
-            return valueObject.compare(this, reverseCompareOperator(operator));
+            return valueObject.compare(this, reverseCompareOperator(operator), isCaseSensitive);
         }
-        return this.compareBy(valueObject.getValue(), operator);
+        return this.compareBy(valueObject.getValue(), operator, isCaseSensitive);
     }
 
-    override compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {
-        const currentValue = this.getValue();
+    override compareBy(value: string | number | boolean, operator: compareToken, isCaseSensitive: boolean = false): BaseValueObject {
+        let currentValue = this.getValue();
         let result = false;
+
         if (typeof value === 'string') {
+            // Case sensitivity needs to be considered, most functions are case-insensitive, like VLOOKUP/HLOOKUP/XLOOKUP/MATCH/COUNTIF/COUNTIFS/SUMIF/SUMIFS/SEARCH/FIND(in SUBSTITUTE)
+            // A few functions are case-sensitive, like EXACT/FIND/FINDB/REPLACE/REPLACEB/MIDB
+            if (!isCaseSensitive) {
+                currentValue = currentValue.toLocaleLowerCase();
+                value = value.toLocaleLowerCase();
+            }
+
             if (isWildcard(value)) {
                 return this._checkWildcard(value, operator);
             }
-
-            switch (operator) {
-                case compareToken.EQUALS:
-                    result = currentValue === value;
-                    break;
-                case compareToken.GREATER_THAN:
-                    result = currentValue > value;
-                    break;
-                case compareToken.GREATER_THAN_OR_EQUAL:
-                    result = currentValue >= value;
-                    break;
-                case compareToken.LESS_THAN:
-                    result = currentValue < value;
-                    break;
-                case compareToken.LESS_THAN_OR_EQUAL:
-                    result = currentValue <= value;
-                    break;
-                case compareToken.NOT_EQUAL:
-                    result = currentValue !== value;
-                    break;
-            }
+            result = this._compareString(currentValue, value, operator);
         } else if (typeof value === 'number') {
-            switch (operator) {
-                case compareToken.NOT_EQUAL:
-                case compareToken.GREATER_THAN:
-                case compareToken.GREATER_THAN_OR_EQUAL:
-                    result = true;
-                    break;
-
-                case compareToken.EQUALS:
-                case compareToken.LESS_THAN:
-                case compareToken.LESS_THAN_OR_EQUAL:
-                    result = false;
-                    break;
-            }
+            result = this._compareNumber(operator);
         } else if (typeof value === 'boolean') {
-            switch (operator) {
-                case compareToken.EQUALS:
-                case compareToken.GREATER_THAN:
-                case compareToken.GREATER_THAN_OR_EQUAL:
-                    result = false;
-                    break;
-                case compareToken.LESS_THAN:
-                case compareToken.LESS_THAN_OR_EQUAL:
-                case compareToken.NOT_EQUAL:
-                    result = true;
-                    break;
-            }
+            result = this._compareBoolean(operator);
         }
+
         return BooleanValueObject.create(result);
+    }
+
+    private _compareString(currentValue: string, value: string, operator: compareToken): boolean {
+        switch (operator) {
+            case compareToken.EQUALS:
+                return currentValue === value;
+            case compareToken.GREATER_THAN:
+                return currentValue > value;
+            case compareToken.GREATER_THAN_OR_EQUAL:
+                return currentValue >= value;
+            case compareToken.LESS_THAN:
+                return currentValue < value;
+            case compareToken.LESS_THAN_OR_EQUAL:
+                return currentValue <= value;
+            case compareToken.NOT_EQUAL:
+                return currentValue !== value;
+        }
+    }
+
+    private _compareNumber(operator: compareToken): boolean {
+        switch (operator) {
+            case compareToken.NOT_EQUAL:
+            case compareToken.GREATER_THAN:
+            case compareToken.GREATER_THAN_OR_EQUAL:
+                return true;
+            case compareToken.EQUALS:
+            case compareToken.LESS_THAN:
+            case compareToken.LESS_THAN_OR_EQUAL:
+                return false;
+        }
+    }
+
+    private _compareBoolean(operator: compareToken): boolean {
+        switch (operator) {
+            case compareToken.EQUALS:
+            case compareToken.GREATER_THAN:
+            case compareToken.GREATER_THAN_OR_EQUAL:
+                return false;
+            case compareToken.LESS_THAN:
+            case compareToken.LESS_THAN_OR_EQUAL:
+            case compareToken.NOT_EQUAL:
+                return true;
+        }
     }
 
     override convertToNumberObjectValue() {

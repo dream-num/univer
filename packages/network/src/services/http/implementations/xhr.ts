@@ -103,8 +103,7 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
                         })
                     );
                 } else {
-                    // next http error here
-                    observer.next(
+                    observer.error(
                         new HTTPResponseError({
                             error,
                             headers,
@@ -124,7 +123,7 @@ export class XHRHTTPImplementation implements IHTTPImplementation {
                     headers: buildResponseHeader().headers,
                 });
 
-                observer.next(res);
+                observer.error(res);
             };
 
             xhr.addEventListener('load', onLoadHandler);

@@ -39,20 +39,16 @@ export class Line extends docExtension {
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, glyph: IDocumentSkeletonGlyph) {
         const line = glyph.parent?.parent;
-        const { ts: textStyle, bBox } = glyph;
+        const { ts: textStyle, bBox, content } = glyph;
 
-        if (line == null || textStyle == null) {
+        if (line == null || textStyle == null || content === '\r') {
             return;
         }
 
         const { asc, dsc } = line;
-
         const { sp: strikeoutPosition, spo, sbo, bd } = bBox;
-
         const scale = getScale(parentScale);
-
         const DELTA = 0.5;
-
         const { ul: underline, st: strikethrough, ol: overline, va: baselineOffset } = textStyle;
 
         if (underline) {

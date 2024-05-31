@@ -29,8 +29,14 @@ import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBa
 import { SheetPermissionOpenDialogOperation } from './operation/sheet-permission-open-dialog.operation';
 import { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from './command/worksheet-protection.command';
 import { SheetPermissionPanelModel } from './service/sheet-permission-panel.model';
-import { SheetPermissionInterceptorRenderController } from './controller/sheet-permission-interceptor-render.controller';
+import { SheetPermissionInterceptorBaseController } from './controller/sheet-permission-interceptor-base.controller';
 import { SheetPermissionInitController } from './controller/sheet-permission-init.controller';
+import { SheetPermissionInterceptorCanvasRenderController } from './controller/sheet-permission-interceptor-canvas-render.controller';
+import { SheetPermissionInterceptorFindReplaceController } from './controller/sheet-permission-interceptor-find-replace.controller';
+import { SheetPermissionInterceptorFormulaController } from './controller/sheet-permission-interceptor-formula.controller';
+import { SheetPermissionInterceptorDvController } from './controller/sheet-permission-interceptor-dv.controller';
+import { SheetPermissionInterceptorCfController } from './controller/sheet-permission-interceptor-cf.controller';
+import { SheetPermissionInterceptorClipboardController } from './controller/sheet-permission-interceptor-clipboard.controller';
 
 export class UniverSheetsPermissionUIPlugin extends Plugin {
     static override pluginName = UNIVER_SHEET_PERMISSION_PLUGIN_NAME;
@@ -54,9 +60,18 @@ export class UniverSheetsPermissionUIPlugin extends Plugin {
     override onStarting() {
         ([
             [SheetPermissionPanelModel],
+
             [SheetPermissionUserManagerService],
             [PermissionRenderService],
             [WorksheetProtectionRenderService],
+
+            [SheetPermissionInterceptorFindReplaceController],
+            [SheetPermissionInterceptorFormulaController],
+            [SheetPermissionInterceptorDvController],
+            [SheetPermissionInterceptorCfController],
+            [SheetPermissionInterceptorClipboardController],
+            [SheetPermissionInterceptorBaseController],
+            [SheetPermissionInitController],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
         });
@@ -100,8 +115,7 @@ export class UniverSheetsPermissionUIPlugin extends Plugin {
 
     private _registerRenderControllers(): void {
         ([
-            SheetPermissionInterceptorRenderController,
-            SheetPermissionInitController,
+            SheetPermissionInterceptorCanvasRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
         });

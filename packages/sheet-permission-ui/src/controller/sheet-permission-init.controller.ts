@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { IAuthzIoService, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { Disposable, IAuthzIoService, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, UserManagerService } from '@univerjs/core';
 
 import type { IRangeProtectionRenderCellData, IRangeProtectionRule, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
 import { defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, INTERCEPTOR_POINT, RangeProtectionRenderModel, RangeProtectionRuleModel, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
@@ -29,7 +29,7 @@ import type { IDataBarCellData, IIconSetCellData } from '@univerjs/sheets-condit
 import { changeRenderExtensionSkip } from './util';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetPermissionInitController)
-export class SheetPermissionInitController extends RxDisposable {
+export class SheetPermissionInitController extends Disposable {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,

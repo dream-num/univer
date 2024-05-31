@@ -19,8 +19,6 @@ import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { COMPONENT_IMAGE_POPUP_MENU } from '../views/image-popup-menu/component-name';
 import { ImagePopupMenu } from '../views/image-popup-menu/ImagePopupMenu';
-import zhCN from '../locale/zh-CN';
-import enUS from '../locale/en-US';
 import { AutoImageCropOperation, CloseImageCropOperation, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ImageViewer } from '../views/image-viewer/ImageViewer';
 import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
@@ -37,11 +35,6 @@ export class DrawingUIController extends Disposable {
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
-
-        this._localeService.load({
-            zhCN,
-            enUS,
-        });
 
         this._init();
     }

@@ -15,7 +15,7 @@
  */
 
 import type { IDrawingParam } from '@univerjs/core';
-import { IDrawingManagerService } from '@univerjs/core';
+import { IDrawingManagerService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -38,6 +38,7 @@ export interface IDrawingCommonPanelProps {
 export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
+    const localeService = useDependency(LocaleService);
 
     const { drawings, hasArrange = true, hasTransform = true, hasAlign = true, hasCropper = true, hasGroup = true } = props;
 
@@ -60,6 +61,7 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
     const [transformShow, setTransformShow] = useState(true);
     const [alignShow, setAlignShow] = useState(false);
     const [cropperShow, setCropperShow] = useState(true);
+    const [nullShow, setNullShow] = useState(false);
     // const [groupShow, setGroupShow] = useState(false);
 
     useEffect(() => {
@@ -69,6 +71,7 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
                 setTransformShow(false);
                 setAlignShow(false);
                 setCropperShow(false);
+                setNullShow(true);
             }
         });
 
@@ -81,27 +84,60 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
                 setTransformShow(false);
                 setAlignShow(false);
                 setCropperShow(false);
+                setNullShow(true);
             } else if (params.length === 1) {
                 setArrangeShow(true);
                 setTransformShow(true);
                 setAlignShow(false);
                 setCropperShow(true);
+                setNullShow(false);
             } else {
                 setArrangeShow(true);
                 setTransformShow(false);
                 setAlignShow(true);
                 setCropperShow(false);
+                setNullShow(false);
+            }
+        });
+
+        const onFocusObserver = drawingManagerService.focus$.subscribe((drawings) => {
+            if (drawings.length === 0) {
+                setArrangeShow(false);
+                setTransformShow(false);
+                setAlignShow(false);
+                setCropperShow(false);
+                setNullShow(true);
+            } else if (drawings.length === 1) {
+                setArrangeShow(true);
+                setTransformShow(true);
+                setAlignShow(false);
+                setCropperShow(true);
+                setNullShow(false);
+            } else {
+                setArrangeShow(true);
+                setTransformShow(false);
+                setAlignShow(true);
+                setCropperShow(false);
+                setNullShow(false);
             }
         });
 
         return () => {
             onChangeStartObserver?.dispose();
             onClearControlObserver?.dispose();
+            onFocusObserver?.unsubscribe();
         };
     }, []);
 
     return (
         <>
+            <div style={{ display: nullShow === true ? 'block' : 'none', height: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', top: '50%', marginTop: '-100px' }}>
+                    <span>
+                        {localeService.t('image-panel.null')}
+                    </span>
+                </div>
+            </div>
             <DrawingArrange arrangeShow={hasArrange === true ? arrangeShow : false} drawings={drawings} />
             <DrawingTransform transformShow={hasTransform === true ? transformShow : false} drawings={drawings} />
             <DrawingAlign alignShow={hasAlign === true ? alignShow : false} drawings={drawings} />

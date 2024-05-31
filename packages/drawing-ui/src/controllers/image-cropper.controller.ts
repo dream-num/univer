@@ -15,11 +15,14 @@
  */
 
 import type { ICommandInfo, IDrawingSearch, ISrcRect, ITransformState, Nullable } from '@univerjs/core';
-import { checkIfMove, Disposable, ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { checkIfMove, Disposable, ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, toDisposable } from '@univerjs/core';
 import type { IImageData } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
-import type { BaseObject, Image, Scene } from '@univerjs/engine-render';
-import { CURSOR_TYPE, degToRad, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
+import type { BaseObject, Scene } from '@univerjs/engine-render';
+import { CURSOR_TYPE, degToRad, Image, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
+import { IMessageService } from '@univerjs/ui';
+import { Inject } from '@wendellhu/redi';
+import { MessageType } from '@univerjs/design';
 import type { IOpenImageCropOperationBySrcRectParams } from '../commands/operations/image-crop.operation';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ImageCropperObject } from '../views/crop/image-cropper-object';
@@ -32,7 +35,9 @@ export class ImageCropperController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
+        @IMessageService private readonly _messageService: IMessageService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
 
@@ -80,13 +85,20 @@ export class ImageCropperController extends Disposable {
 
                 const imageCropperObject = this._searchCropObject(scene);
                 if (imageCropperObject != null) {
-                    this._commandService.syncExecuteCommand(CloseImageCropOperation.id);
-                    return;
+                    this._commandService.syncExecuteCommand(CloseImageCropOperation.id, { isAuto: true });
                 }
 
                 const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
-                const imageShape = scene.getObject(imageShapeKey) as Image;
+                const imageShape = scene.getObject(imageShapeKey);
+
+                if (!(imageShape instanceof Image)) {
+                    this._messageService.show({
+                        type: MessageType.Error,
+                        content: this._localeService.t('image-cropper.error'),
+                    });
+                    return;
+                }
 
                 if (imageShape == null) {
                     return;
@@ -176,13 +188,11 @@ export class ImageCropperController extends Disposable {
         imageShape.setSrcRect(newSrcRect);
 
         const { left: newLeft = 0, top: newTop = 0, bottom: newBottom = 0, right: newRight = 0 } = newSrcRect;
-
-        imageShape.transformByState({
+        imageShape.transformByStateCloseCropper({
             left: left + newLeft,
             top: top + newTop,
             width: width - newRight - newLeft,
             height: height - newBottom - newTop,
-
         });
     }
 
@@ -222,16 +232,19 @@ export class ImageCropperController extends Disposable {
 
                 const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
-                const imageShape = scene.getObject(imageShapeKey) as Image;
+                const imageShape = scene.getObject(imageShapeKey);
 
                 if (imageShape == null) {
                     return;
                 }
 
-                // imageShape.evented = false;
-                // imageShape.hide();
-                // scene.getTransformer()?.clearControls();
-
+                if (!(imageShape instanceof Image)) {
+                    this._messageService.show({
+                        type: MessageType.Error,
+                        content: this._localeService.t('image-cropper.error'),
+                    });
+                    return;
+                }
                 const transformer = scene.getTransformer();
 
                 transformer?.clearControls();
@@ -247,10 +260,10 @@ export class ImageCropperController extends Disposable {
                 this._addHoverForImageCopper(imageCropperObject);
 
                 imageShape.openRenderByCropper();
-
                 transformer?.refreshControls();
-
                 imageCropperObject.makeDirty(true);
+
+                this._drawingManagerService.focusDrawing([{ unitId, subUnitId, drawingId }]);
             })
         );
     }

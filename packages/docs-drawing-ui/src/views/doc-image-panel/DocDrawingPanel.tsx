@@ -38,7 +38,7 @@ export const DocDrawingPanel = () => {
         });
 
         return () => {
-            focusDispose.unsubscribe(); ;
+            focusDispose.unsubscribe();
         };
     }, []);
 

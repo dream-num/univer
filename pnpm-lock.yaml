@@ -661,8 +661,11 @@ importers:
       less:
         specifier: ^4.2.0
         version: 4.2.0
+      ot-json1:
+        specifier: ^1.0.2
+        version: 1.0.2
       react:
-        specifier: ^18.2.0
+        specifier: 18.2.0
         version: 18.2.0
       rxjs:
         specifier: ^7.8.1
@@ -1402,6 +1405,9 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
@@ -1858,6 +1864,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula

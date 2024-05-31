@@ -485,7 +485,7 @@ export class DrawingUpdateController extends Disposable {
 
         this._drawingManagerService.featurePluginUpdateNotification(updateParams);
 
-        transformer.refreshControls();
+        transformer.refreshControls().changeNotification();
     }
 
     private _sortDrawingTransform(drawingTransformCaches: IDrawingTransformCache[], alignType: AlignType) {

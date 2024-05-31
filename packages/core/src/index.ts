@@ -77,7 +77,7 @@ export { IConfigService } from './services/config/config.service';
 export * from './services/context/context';
 export { ContextService, IContextService } from './services/context/context.service';
 export { ErrorService, type IError } from './services/error/error.service';
-export type { IOffset, IScale, ISize, ITransformState, IOtherTransform, IAbsoluteTransform, ISrcRect } from './services/drawing/drawing-interfaces';
+export type { IOffset, IScale, ISize, ITransformState, IRotationSkewFlipTransform, IAbsoluteTransform, ISrcRect } from './services/drawing/drawing-interfaces';
 export {
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
     type DrawingType,

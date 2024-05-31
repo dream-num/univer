@@ -22,6 +22,9 @@ const locale = {
         crop: 'Crop',
         reset: 'Reset Size',
     },
+    'image-cropper': {
+        error: 'Cannot crop non-image objects.',
+    },
     'image-panel': {
         arrange: {
             title: 'Arrange',
@@ -62,6 +65,7 @@ const locale = {
             horizon: 'Distribute Horizontally ',
             vertical: 'Distribute Vertically ',
         },
+        null: 'No Object Selection',
     },
 };
 

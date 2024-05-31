@@ -72,8 +72,8 @@ export const SetDocDrawingApplyMutation: IMutation<ISetDrawingApplyMutationParam
 
         // TODO: @Jocs Update the document snapshot
         const documentDataModel = univerInstanceService.getUnit(unitId) as DocumentDataModel;
-        documentDataModel.snapshot.drawings = drawingManagerService.getDrawingData(unitId, subUnitId) as IDrawings;
-        documentDataModel.snapshot.drawingsOrder = drawingManagerService.getDrawingOrder(unitId, subUnitId);
+        documentDataModel.getSnapshot().drawings = drawingManagerService.getDrawingData(unitId, subUnitId) as IDrawings;
+        documentDataModel.getSnapshot().drawingsOrder = drawingManagerService.getDrawingOrder(unitId, subUnitId);
 
         return true;
     },

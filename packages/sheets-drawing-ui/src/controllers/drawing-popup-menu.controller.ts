@@ -15,18 +15,19 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
+import { COMPONENT_IMAGE_POPUP_MENU, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { takeUntil } from 'rxjs';
+import { ImageCropperObject } from '@univerjs/drawing-ui/views/crop/image-cropper-object.js';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 
-@OnLifecycle(LifecycleStages.Rendered, DrawingPopupMenuController)
+@OnLifecycle(LifecycleStages.Steady, DrawingPopupMenuController)
 export class DrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
 
@@ -36,6 +37,7 @@ export class DrawingPopupMenuController extends RxDisposable {
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopManagerService: SheetCanvasPopManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IContextService private readonly _contextService: IContextService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService
 
@@ -89,12 +91,12 @@ export class DrawingPopupMenuController extends RxDisposable {
         if (!transformer) {
             return;
         }
-
         const disposePopups: IDisposable[] = [];
-
         this.disposeWithMe(
             toDisposable(
                 transformer.onCreateControlObservable.add(() => {
+                    this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
+
                     if (this._hasCropObject(scene)) {
                         return;
                     }
@@ -126,18 +128,28 @@ export class DrawingPopupMenuController extends RxDisposable {
                             menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId),
                         },
                     })));
+
+                    this._drawingManagerService.focusDrawing([{
+                        unitId,
+                        subUnitId,
+                        drawingId,
+                    }]);
                 })
             )
         );
-
         this.disposeWithMe(
             toDisposable(
-                transformer.onClearControlObservable.add((changeSelf) => {
+                transformer.onClearControlObservable.add(() => {
                     disposePopups.forEach((dispose) => dispose.dispose());
-
-                    // if (changeSelf === true) {
-                    //     this._commandService.executeCommand(SidebarSheetDrawingOperation.id, { value: 'close' });
-                    // }
+                    this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
+                    this._drawingManagerService.focusDrawing(null);
+                })
+            )
+        );
+        this.disposeWithMe(
+            toDisposable(
+                transformer.onChangingObservable.add(() => {
+                    disposePopups.forEach((dispose) => dispose.dispose());
                 })
             )
         );

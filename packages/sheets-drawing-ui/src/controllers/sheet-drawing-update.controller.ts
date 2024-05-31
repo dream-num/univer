@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageRemoteService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { ICommandInfo, IImageIoServiceParam, IRange, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageIoService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageData } from '@univerjs/drawing';
-import { getImageSize } from '@univerjs/drawing';
+import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets';
 import { ISheetDrawingService, SelectionManagerService } from '@univerjs/sheets';
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
@@ -35,9 +36,6 @@ import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawi
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
 
-const SHEET_IMAGE_WIDTH_LIMIT = 500;
-const SHEET_IMAGE_HEIGHT_LIMIT = 500;
-
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingUpdateController)
 export class SheetDrawingUpdateController extends Disposable {
     constructor(
@@ -45,12 +43,13 @@ export class SheetDrawingUpdateController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService,
+        @IImageIoService private readonly _imageIoService: IImageIoService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -81,7 +80,17 @@ export class SheetDrawingUpdateController extends Disposable {
                         return;
                     }
 
-                    this._imageRemoteService.setWaitCount(params.files.length);
+                    const fileLength = params.files.length;
+
+                    if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
+                        this._messageService.show({
+                            type: MessageType.Error,
+                            content: this._localeService.t('update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
+                        });
+                        return;
+                    }
+
+                    this._imageIoService.setWaitCount(fileLength);
                     if (command.id === InsertCellImageOperation.id) {
                         params.files.forEach(async (file) => {
                             await this._insertCellImage(file);
@@ -101,22 +110,32 @@ export class SheetDrawingUpdateController extends Disposable {
     }
 
     private async _insertFloatImage(file: File) {
-        const imageParam = await this._imageRemoteService.saveImage(file);
+        let imageParam: Nullable<IImageIoServiceParam>;
+
+        try {
+            imageParam = await this._imageIoService.saveImage(file);
+        } catch (error) {
+            const type = (error as Error).message;
+            if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t('update-status.exceedMaxSize', String(DRAWING_IMAGE_ALLOW_SIZE / (1024 * 1024))),
+                });
+            } else if (type === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t('update-status.invalidImageType'),
+                });
+            } else if (type === ImageUploadStatusType.ERROR_IMAGE) {
+                this._messageService.show({
+                    type: MessageType.Error,
+                    content: this._localeService.t('update-status.invalidImage'),
+                });
+            }
+        }
 
         if (imageParam == null) {
             return;
-        }
-
-        if (imageParam.status === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
-            this._messageService.show({
-                type: MessageType.Error,
-                content: this._localeService.t('update-status.exceedMaxSize'),
-            });
-        } else if (imageParam.status === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
-            this._messageService.show({
-                type: MessageType.Error,
-                content: this._localeService.t('update-status.invalidImageType'),
-            });
         }
 
         const info = this._getUnitInfo();
@@ -125,35 +144,28 @@ export class SheetDrawingUpdateController extends Disposable {
         }
         const { unitId, subUnitId } = info;
 
-        // const currentAllDrawing = this._sheetDrawingService.getDrawingMap(unitId, subUnitId);
-        // let zIndex = 0;
-        // if (currentAllDrawing && Object.keys(currentAllDrawing).length > 0) {
-        //     const drawingIds = Object.keys(currentAllDrawing);
-        //     zIndex = drawingIds.length;
-        // }
-
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
-
-        // if (imageSourceType === ImageSourceType.UUID) {
-        //     try {
-        //         source = await this._imageRemoteService.getImage(imageId);
-        //     } catch (error) {
-        //         console.error(error);
-        //     }
-        // }
 
         const { width, height, image } = await getImageSize(base64Cache || '');
 
-        this._imageRemoteService.addImageSourceCache(imageId, imageSourceType, image);
+        const renderObject = this._renderManagerService.getRenderById(unitId);
+
+        if (renderObject == null) {
+            return;
+        }
+
+        const { width: sceneWidth, height: sceneHeight } = renderObject.scene;
+
+        this._imageIoService.addImageSourceCache(source, imageSourceType, image);
 
         let scale = 1;
-        if (width > SHEET_IMAGE_WIDTH_LIMIT || height > SHEET_IMAGE_HEIGHT_LIMIT) {
-            const scaleWidth = SHEET_IMAGE_WIDTH_LIMIT / width;
-            const scaleHeight = SHEET_IMAGE_HEIGHT_LIMIT / height;
+        if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
+            const scaleWidth = DRAWING_IMAGE_WIDTH_LIMIT / width;
+            const scaleHeight = DRAWING_IMAGE_HEIGHT_LIMIT / height;
             scale = Math.max(scaleWidth, scaleHeight);
         }
 
-        const sheetTransform = this._getImagePosition(width, height, scale);
+        const sheetTransform = this._getImagePosition(width * scale, height * scale, sceneWidth, sceneHeight);
 
         if (sheetTransform == null) {
             return;
@@ -196,7 +208,7 @@ export class SheetDrawingUpdateController extends Disposable {
         };
     }
 
-    private _getImagePosition(imageWidth: number, imageHeight: number, scale: number): Nullable<ISheetDrawingPosition> {
+    private _getImagePosition(imageWidth: number, imageHeight: number, sceneWidth: number, sceneHeight: number): Nullable<ISheetDrawingPosition> {
         const selections = this._selectionManagerService.getSelections();
         let range: IRange = {
             startRow: 0,
@@ -213,7 +225,41 @@ export class SheetDrawingUpdateController extends Disposable {
             return;
         }
 
-        const { startColumn, startRow, startX, startY } = rangeWithCoord;
+        let { startColumn, startRow, startX, startY } = rangeWithCoord;
+
+        let isChangeStart = false;
+        if (startX + imageWidth > sceneWidth) {
+            startX = sceneWidth - imageWidth;
+
+            if (startX < 0) {
+                startX = 0;
+                imageWidth = sceneWidth;
+            }
+
+            isChangeStart = true;
+        }
+
+        if (startY + imageHeight > sceneHeight) {
+            startY = sceneHeight - imageHeight;
+
+            if (startY < 0) {
+                startY = 0;
+                imageHeight = sceneHeight;
+            }
+
+            isChangeStart = true;
+        }
+
+        if (isChangeStart) {
+            const newCoord = this._selectionRenderService.getSelectionCellByPosition(startX, startY);
+            if (newCoord == null) {
+                return;
+            }
+            startX = newCoord.startX;
+            startY = newCoord.startY;
+            startColumn = newCoord.actualColumn;
+            startRow = newCoord.actualRow;
+        }
 
         const from = {
             column: startColumn,
@@ -222,7 +268,7 @@ export class SheetDrawingUpdateController extends Disposable {
             rowOffset: 0,
         };
 
-        const endSelectionCell = this._selectionRenderService.getSelectionCellByPosition(startX + imageWidth * scale, startY + imageHeight * scale);
+        const endSelectionCell = this._selectionRenderService.getSelectionCellByPosition(startX + imageWidth, startY + imageHeight);
 
         if (endSelectionCell == null) {
             return;
@@ -230,9 +276,9 @@ export class SheetDrawingUpdateController extends Disposable {
 
         const to = {
             column: endSelectionCell.actualColumn,
-            columnOffset: startX + imageWidth * scale - endSelectionCell.startX,
+            columnOffset: startX + imageWidth - endSelectionCell.startX,
             row: endSelectionCell.actualRow,
-            rowOffset: startY + imageHeight * scale - endSelectionCell.startY,
+            rowOffset: startY + imageHeight - endSelectionCell.startY,
         };
 
         return {
@@ -307,6 +353,8 @@ export class SheetDrawingUpdateController extends Disposable {
     private _groupDrawingListener() {
         this._drawingManagerService.featurePluginGroupUpdate$.subscribe((params) => {
             this._commandService.executeCommand(GroupSheetDrawingCommand.id, params);
+            const { unitId, subUnitId, drawingId } = params[0].parent;
+            this._drawingManagerService.focusDrawing([{ unitId, subUnitId, drawingId }]);
         });
 
         this._drawingManagerService.featurePluginUngroupUpdate$.subscribe((params) => {

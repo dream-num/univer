@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import type { DependencyOverride } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IMenuItemFactory } from '@univerjs/ui';
+import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { AddImageSingle } from '@univerjs/icons';
 import { UploadFileMenu } from '../views/upload-component/UploadFile';
 import { COMPONENT_UPLOAD_FILE_MENU } from '../views/upload-component/component-name';
-import { ImageMenuFactory, ImageUploadIcon, UploadCellImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
+import { IMAGE_UPLOAD_ICON, ImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
@@ -40,9 +41,19 @@ import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.comm
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 
+export interface IUniverSheetsDrawingConfig {
+    menu?: MenuConfig;
+    overrides?: DependencyOverride;
+}
+
+export const DefaultSheetsDrawingConfig: IUniverSheetsDrawingConfig = {
+
+};
+
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingUIController)
 export class SheetDrawingUIController extends Disposable {
     constructor(
+        private readonly _config: Partial<IUniverSheetsDrawingConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IMenuService private readonly _menuService: IMenuService,
@@ -56,21 +67,20 @@ export class SheetDrawingUIController extends Disposable {
 
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
-        this.disposeWithMe(componentManager.register(ImageUploadIcon, AddImageSingle));
+        this.disposeWithMe(componentManager.register(IMAGE_UPLOAD_ICON, AddImageSingle));
         this.disposeWithMe(componentManager.register(COMPONENT_UPLOAD_FILE_MENU, UploadFileMenu));
         this.disposeWithMe(componentManager.register(COMPONENT_SHEET_DRAWING_PANEL, SheetDrawingPanel));
     }
 
     private _initMenus(): void {
+        const { menu = {} } = this._config;
         // init menus
-        (
-            [
-                ImageMenuFactory,
-                UploadFloatImageMenuFactory,
-                UploadCellImageMenuFactory,
-            ] as IMenuItemFactory[]
-        ).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), {}));
+        [
+            ImageMenuFactory,
+            UploadFloatImageMenuFactory,
+            // UploadCellImageMenuFactory,
+        ].forEach((menuFactory) => {
+            this._menuService.addMenuItem(menuFactory(this._injector), menu);
         });
     }
 

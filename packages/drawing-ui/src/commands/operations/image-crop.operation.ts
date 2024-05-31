@@ -25,7 +25,7 @@ export const OpenImageCropOperation: IOperation<IDrawingSearch> = {
     },
 };
 
-export const CloseImageCropOperation: IOperation<IDrawingSearch> = {
+export const CloseImageCropOperation: IOperation<{ isAuto?: boolean }> = {
     id: 'sheet.operation.close-image-crop',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {

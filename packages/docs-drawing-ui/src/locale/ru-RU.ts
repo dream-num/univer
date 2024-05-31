@@ -18,28 +18,28 @@ import type enUS from './en-US';
 
 const locale: typeof enUS = {
     docImage: {
-        title: '图片',
+        title: 'Изображение',
 
         upload: {
-            float: '插入图片',
+            float: 'Вставить изображение',
         },
 
         panel: {
-            title: '编辑图片',
+            title: 'Редактировать изображение',
         },
     },
     'image-popup': {
-        replace: '替换',
-        delete: '删除',
-        edit: '编辑',
-        crop: '裁剪',
-        reset: '重置大小',
+        replace: 'Заменить',
+        delete: 'Удалить',
+        edit: 'Редактировать',
+        crop: 'Обрезать',
+        reset: 'Сбросить размер',
     },
     'update-status': {
-        exceedMaxSize: '图片大小超过限制, 限制为{0}M',
-        invalidImageType: '图片类型错误',
-        exceedMaxCount: '图片只能一次上传{0}张',
-        invalidImage: '无效图片',
+        exceedMaxSize: 'Размер изображения превышает лимит, лимит составляет {0}М',
+        invalidImageType: 'Недопустимый тип изображения',
+        exceedMaxCount: 'За один раз можно загрузить только {0} изображений',
+        invalidImage: 'Недопустимое изображение',
     },
 };
 

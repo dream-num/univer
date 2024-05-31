@@ -23,7 +23,8 @@
     ],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
@@ -43,6 +44,7 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
+            "./locale/*": "./lib/locale/*.json",
             "./lib/*": "./lib/*"
         }
     },
@@ -83,12 +85,14 @@
         "@univerjs/drawing": "workspace:*",
         "@univerjs/drawing-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
+        "@univerjs/icons": "^0.1.52",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.15.2",
         "clsx": "^2.1.0",
         "less": "^4.2.0",
-        "react": "^18.2.0",
+        "ot-json1": "^1.0.2",
+        "react": "18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.1.4",

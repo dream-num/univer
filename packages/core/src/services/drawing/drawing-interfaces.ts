@@ -29,7 +29,7 @@ export interface IOffset {
     top?: number;
 }
 
-export interface IOtherTransform {
+export interface IRotationSkewFlipTransform {
     angle?: number;
     skewX?: number;
     skewY?: number;
@@ -46,6 +46,6 @@ export interface IAbsoluteTransform extends ISize, IOffset, IScale {
 
 }
 
-export interface ITransformState extends IAbsoluteTransform, IOtherTransform {
+export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform {
 
 }

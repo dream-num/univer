@@ -40,7 +40,7 @@ import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.c
 import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
 import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 
-@OnLifecycle(LifecycleStages.Rendered, DocDrawingUIController)
+@OnLifecycle(LifecycleStages.Ready, DocDrawingUIController)
 export class DocDrawingUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,

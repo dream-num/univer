@@ -41,8 +41,10 @@ const locale = {
         none: "Don't move or size with cells",
     },
     'update-status': {
-        exceedMaxSize: 'Image size exceeds limit, limit is 5M',
+        exceedMaxSize: 'Image size exceeds limit, limit is {0}M',
         invalidImageType: 'Invalid image type',
+        exceedMaxCount: 'Only {0} images can be uploaded at a time',
+        invalidImage: 'Invalid image',
     },
 };
 

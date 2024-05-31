@@ -18,11 +18,12 @@ import { Disposable, ICommandService, LifecycleStages, LocaleService, OnLifecycl
 import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
+import { LinkSingle } from '@univerjs/icons';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 import { CellLinkEdit } from '../views/CellLinkEdit';
-import { CloseHyperLinkSidebarOperation, InsertHyperLinkOperation, OpenHyperLinkSidebarOperation } from '../commands/operations/sidebar.operations';
+import { CloseHyperLinkSidebarOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkSidebarOperation } from '../commands/operations/sidebar.operations';
 import { zhCN } from '../locales';
-import { insertLinkMenuFactory, InsertLinkShortcut } from './menu';
+import { insertLinkMenuFactory, insertLinkMenuToolbarFactory, InsertLinkShortcut } from './menu';
 
 export interface IUniverSheetsHyperLinkUIConfig {
     menu?: MenuConfig;
@@ -52,6 +53,7 @@ export class SheetsHyperLinkUIController extends Disposable {
         ([
             [CellLinkPopup, CellLinkPopup.componentKey],
             [CellLinkEdit, CellLinkEdit.componentKey],
+            [LinkSingle, 'LinkSingle'],
         ] as const).forEach(([comp, key]) => {
             this._componentManager.register(key, comp);
         });
@@ -62,6 +64,7 @@ export class SheetsHyperLinkUIController extends Disposable {
             OpenHyperLinkSidebarOperation,
             CloseHyperLinkSidebarOperation,
             InsertHyperLinkOperation,
+            InsertHyperLinkToolbarOperation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });
@@ -75,6 +78,7 @@ export class SheetsHyperLinkUIController extends Disposable {
 
     private _initMenus() {
         this._menuService.addMenuItem(insertLinkMenuFactory(this._injector), this._config?.menu ?? {});
+        this._menuService.addMenuItem(insertLinkMenuToolbarFactory(this._injector), this._config?.menu ?? {});
     }
 
     private _initShortCut() {

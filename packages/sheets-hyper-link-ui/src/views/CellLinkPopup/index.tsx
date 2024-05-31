@@ -20,7 +20,7 @@ import React from 'react';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import cs from 'clsx';
-import { MessageType } from '@univerjs/design';
+import { MessageType, Tooltip } from '@univerjs/design';
 import { IMessageService } from '@univerjs/ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
@@ -86,7 +86,10 @@ export const CellLinkPopup = () => {
                         });
                     }}
                 >
-                    <CopySingle />
+                    <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.copy')}>
+                        <CopySingle />
+                    </Tooltip>
+
                 </div>
                 <div
                     className={styles.cellLinkOperation}
@@ -99,7 +102,9 @@ export const CellLinkPopup = () => {
                         });
                     }}
                 >
-                    <WriteSingle />
+                    <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.edit')}>
+                        <WriteSingle />
+                    </Tooltip>
                 </div>
                 <div
                     className={styles.cellLinkOperation}
@@ -111,7 +116,9 @@ export const CellLinkPopup = () => {
                         });
                     }}
                 >
-                    <UnlinkSingle />
+                    <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.cancel')}>
+                        <UnlinkSingle />
+                    </Tooltip>
                 </div>
             </div>
         </div>

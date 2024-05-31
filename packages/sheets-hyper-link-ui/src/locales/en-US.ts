@@ -44,6 +44,11 @@ const enUS: typeof zhCN = {
             hiddenSheet: 'Cannot open the link because the linked sheet is hidden',
             coped: 'Link copied to clipboard',
         },
+        popup: {
+            copy: 'Copy Link',
+            edit: 'Edit Link',
+            cancel: 'Cancel Link',
+        },
     },
 };
 

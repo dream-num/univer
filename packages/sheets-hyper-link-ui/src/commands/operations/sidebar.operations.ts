@@ -92,3 +92,17 @@ export const InsertHyperLinkOperation: ICommand = {
         });
     },
 };
+
+export const InsertHyperLinkToolbarOperation: ICommand = {
+    type: CommandType.OPERATION,
+    id: 'sheet.operation.insert-hyper-link-toolbar',
+    handler(accessor) {
+        const commandService = accessor.get(ICommandService);
+        const popupService = accessor.get(SheetsHyperLinkPopupService);
+        if (popupService.currentEditing) {
+            return commandService.executeCommand(CloseHyperLinkSidebarOperation.id);
+        } else {
+            return commandService.executeCommand(InsertHyperLinkOperation.id);
+        }
+    },
+};

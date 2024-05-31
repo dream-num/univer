@@ -48,6 +48,10 @@ export class SheetsHyperLinkPopupService {
         return this._currentPopup;
     }
 
+    get currentEditing() {
+        return this._currentEditing$.getValue();
+    }
+
     constructor(
         @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel,
         @Inject(SheetCanvasPopManagerService) private readonly _sheetCanvasPopManagerService: SheetCanvasPopManagerService

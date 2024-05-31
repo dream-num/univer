@@ -42,5 +42,10 @@ export default {
             hiddenSheet: '无法打开被隐藏的子表',
             coped: '链接已被复制到剪贴板',
         },
+        popup: {
+            copy: '复制',
+            edit: '编辑',
+            cancel: '取消链接',
+        },
     },
 };

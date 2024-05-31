@@ -18,7 +18,6 @@ import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/c
 import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-import type { IRenderContext } from '@univerjs/engine-render';
 import { ISheetClipboardService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { UnitAction } from '@univerjs/protocol';
 import { SheetPermissionInterceptorBaseController } from './sheet-permission-interceptor-base.controller';
@@ -31,7 +30,6 @@ export class SheetPermissionInterceptorClipboardController extends Disposable {
     disposableCollection = new DisposableCollection();
 
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(LocaleService) private readonly _localService: LocaleService,

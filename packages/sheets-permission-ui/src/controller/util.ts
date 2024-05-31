@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import { IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import type { ICellData, Workbook } from '@univerjs/core';
+import { IDrawingManagerService, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import type { ISheetRenderExtension } from '@univerjs/engine-render';
 import { RangeProtectionRuleModel, SelectionManagerService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import { combineLatest, map, merge, of, startWith, switchMap } from 'rxjs';
@@ -155,10 +156,11 @@ export function getAddPermissionDisableBase$(accessor: IAccessor) {
     const selectionManagerService = accessor.get(SelectionManagerService);
     const userManagerService = accessor.get(UserManagerService);
     const permissionService = accessor.get(IPermissionService);
+    const drawingManagerService = accessor.get(IDrawingManagerService);
 
-    return combineLatest([workbook.activeSheet$, userManagerService.currentUser$]).pipe(
-        switchMap(([sheet, _]) => {
-            if (!sheet) {
+    return combineLatest([workbook.activeSheet$, userManagerService.currentUser$, drawingManagerService.focus$]).pipe(
+        switchMap(([sheet, _, drawings]) => {
+            if (!sheet || drawings.length > 0) {
                 return of(true);
             }
             const subUnitId = sheet.getSheetId();
@@ -380,3 +382,10 @@ export function getViewPermissionDisable$(accessor: IAccessor) {
         })
     );
 }
+
+export const changeRenderExtensionSkip = (cellData: ICellData & ISheetRenderExtension, key: keyof ISheetRenderExtension, value: boolean) => {
+    if (!cellData[key]) {
+        cellData[key] = {};
+    }
+    cellData[key]!.isSkip = value;
+};

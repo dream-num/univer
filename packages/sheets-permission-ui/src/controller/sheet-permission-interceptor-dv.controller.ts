@@ -18,7 +18,6 @@ import type { ICellDataForSheetInterceptor, IRange, ISheetDataValidationRule, Nu
 import { Disposable, DisposableCollection, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { WorksheetViewPermission } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-import type { IRenderContext } from '@univerjs/engine-render';
 import { DataValidationController, DataValidationFormulaController } from '@univerjs/sheets-data-validation';
 import { UnitAction } from '@univerjs/protocol';
 import { deserializeRangeWithSheet, LexerTreeBuilder } from '@univerjs/engine-formula';
@@ -31,7 +30,6 @@ export class SheetPermissionInterceptorDvController extends Disposable {
     disposableCollection = new DisposableCollection();
 
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @Inject(DataValidationController) private readonly _dataValidationController: DataValidationController,

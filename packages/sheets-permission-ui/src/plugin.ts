@@ -22,14 +22,21 @@ import { PermissionRenderService } from './service/permission-render.service';
 import { UNIVER_SHEET_PERMISSION_PLUGIN_NAME } from './const';
 import type { IUniverSheetsPermissionMenuConfig } from './controller/sheet-permission-render.controller';
 import { DefaultSheetPermissionMenuConfig, SheetPermissionRenderController } from './controller/sheet-permission-render.controller';
+import { enUS, ruRU, zhCN } from './locale';
 import { SheetPermissionOpenPanelOperation } from './operation/sheet-permission-open-panel.operation';
 import { SheetPermissionUserManagerService } from './service';
 import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetProtectionCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from './command/range-protection.command';
 import { SheetPermissionOpenDialogOperation } from './operation/sheet-permission-open-dialog.operation';
 import { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from './command/worksheet-protection.command';
 import { SheetPermissionPanelModel } from './service/sheet-permission-panel.model';
-import { SheetPermissionInterceptorRenderController } from './controller/sheet-permission-interceptor-render.controller';
+import { SheetPermissionInterceptorBaseController } from './controller/sheet-permission-interceptor-base.controller';
 import { SheetPermissionInitController } from './controller/sheet-permission-init.controller';
+import { SheetPermissionInterceptorCanvasRenderController } from './controller/sheet-permission-interceptor-canvas-render.controller';
+import { SheetPermissionInterceptorFindReplaceController } from './controller/sheet-permission-interceptor-find-replace.controller';
+import { SheetPermissionInterceptorFormulaRenderController } from './controller/sheet-permission-interceptor-formula-render.controller';
+import { SheetPermissionInterceptorDvController } from './controller/sheet-permission-interceptor-dv.controller';
+import { SheetPermissionInterceptorCfController } from './controller/sheet-permission-interceptor-cf.controller';
+import { SheetPermissionInterceptorClipboardController } from './controller/sheet-permission-interceptor-clipboard.controller';
 
 export class UniverSheetsPermissionUIPlugin extends Plugin {
     static override pluginName = UNIVER_SHEET_PERMISSION_PLUGIN_NAME;
@@ -53,9 +60,17 @@ export class UniverSheetsPermissionUIPlugin extends Plugin {
     override onStarting() {
         ([
             [SheetPermissionPanelModel],
+
             [SheetPermissionUserManagerService],
             [PermissionRenderService],
             [WorksheetProtectionRenderService],
+
+            [SheetPermissionInterceptorFindReplaceController],
+            [SheetPermissionInterceptorDvController],
+            [SheetPermissionInterceptorCfController],
+            [SheetPermissionInterceptorClipboardController],
+            [SheetPermissionInterceptorBaseController],
+            [SheetPermissionInitController],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
         });
@@ -89,12 +104,18 @@ export class UniverSheetsPermissionUIPlugin extends Plugin {
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });
+
+        this._localeService.load({
+            zhCN,
+            enUS,
+            ruRU,
+        });
     }
 
     private _registerRenderControllers(): void {
         ([
-            SheetPermissionInterceptorRenderController,
-            SheetPermissionInitController,
+            SheetPermissionInterceptorCanvasRenderController,
+            SheetPermissionInterceptorFormulaRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
         });

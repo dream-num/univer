@@ -17,7 +17,6 @@
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import type { IRenderContext } from '@univerjs/engine-render';
 import { ConditionalFormattingClearController } from '@univerjs/sheets-conditional-formatting-ui';
 import type { IConditionalFormattingRuleConfig, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import { UnitAction } from '@univerjs/protocol';
@@ -31,7 +30,6 @@ export class SheetPermissionInterceptorCfController extends Disposable {
     disposableCollection = new DisposableCollection();
 
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(ConditionalFormattingClearController) private readonly _conditionalFormattingClearController: ConditionalFormattingClearController
     ) {

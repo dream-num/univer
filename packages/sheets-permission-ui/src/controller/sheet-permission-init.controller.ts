@@ -15,20 +15,22 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { IAuthzIoService, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { Disposable, IAuthzIoService, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, UserManagerService } from '@univerjs/core';
 
-import { defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionRuleModel, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import type { IRangeProtectionRenderCellData, IRangeProtectionRule, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
+import { defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, INTERCEPTOR_POINT, RangeProtectionRenderModel, RangeProtectionRuleModel, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
 
 import { UnitAction, UnitObject, UniverType } from '@univerjs/protocol';
 
-import type { IRenderContext } from '@univerjs/engine-render';
+import type { ISheetFontRenderExtension, ISheetRenderExtension } from '@univerjs/engine-render';
+import type { IDataBarCellData, IIconSetCellData } from '@univerjs/sheets-conditional-formatting';
+import { changeRenderExtensionSkip } from './util';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetPermissionInitController)
-export class SheetPermissionInitController extends RxDisposable {
+export class SheetPermissionInitController extends Disposable {
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IDialogService private readonly _dialogService: IDialogService,
         @IPermissionService private _permissionService: IPermissionService,
@@ -36,7 +38,10 @@ export class SheetPermissionInitController extends RxDisposable {
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
         @Inject(UserManagerService) private _userManagerService: UserManagerService,
-        @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel
+        @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
+        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
+        @Inject(RangeProtectionRenderModel) private _selectionProtectionRenderModel: RangeProtectionRenderModel,
+        @Inject(RangeProtectionRuleModel) private _selectionProtectionRuleModel: RangeProtectionRuleModel
     ) {
         super();
         this._initRangePermissionFromSnapshot();
@@ -46,6 +51,8 @@ export class SheetPermissionInitController extends RxDisposable {
         this._initWorksheetPermissionPointsChange();
         this._initWorkbookPermissionChange();
         this._initUserChange();
+        this._initViewModelByRangeInterceptor();
+        this._initViewModelBySheetInterceptor();
     }
 
     private _initRangePermissionFromSnapshot() {
@@ -115,7 +122,7 @@ export class SheetPermissionInitController extends RxDisposable {
                             const unitActionName = instance.subType;
                             const action = actionList.find((item) => item.action === unitActionName);
                             if (action) {
-                                this._permissionService.updatePermissionPoint(instance.id, action.allowed);
+                                this._permissionService.updatePermissionPoint(instance.id, false);
                             }
                         });
                     });
@@ -297,5 +304,71 @@ export class SheetPermissionInitController extends RxDisposable {
                 this._initRangePermissionFromSnapshot();
             })
         );
+    }
+
+    private _initViewModelByRangeInterceptor() {
+        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            handler: (cell = {}, context, next) => {
+                const { unitId, subUnitId, row, col } = context;
+
+                const permissionList = this._selectionProtectionRenderModel.getCellInfo(unitId, subUnitId, row, col)
+                    .filter((p) => !!p.ruleId)
+                    .map((p) => {
+                        const rule = this._selectionProtectionRuleModel.getRule(unitId, subUnitId, p.ruleId!) || {} as IRangeProtectionRule;
+                        return {
+                            ...p, ranges: rule.ranges!,
+                        };
+                    })
+                    .filter((p) => !!p.ranges);
+                if (permissionList.length) {
+                    const isSkipRender = permissionList.some((p) => !p?.[UnitAction.View]);
+                    const _cellData: IRangeProtectionRenderCellData & ISheetRenderExtension & IIconSetCellData & IDataBarCellData = { ...cell, selectionProtection: permissionList };
+                    const { dataBar, iconSet, markers, dataValidation } = _cellData;
+                    if (isSkipRender) {
+                        dataBar && (dataBar.isSkip = true);
+                        iconSet && (iconSet.isSkip = true);
+                        markers && (markers.isSkip = true);
+                        dataValidation && (dataValidation.isSkip = true);
+                        changeRenderExtensionSkip(_cellData, 'fontRenderExtension', true);
+                        changeRenderExtensionSkip(_cellData, 'backgroundRenderExtension', true);
+                        changeRenderExtensionSkip(_cellData, 'borderRenderExtension', true);
+                    }
+
+                    return next(_cellData);
+                }
+                return next(cell);
+            },
+        }
+        ));
+    }
+
+    private _initViewModelBySheetInterceptor() {
+        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            handler: (cell = {}, context, next) => {
+                const { unitId, subUnitId } = context;
+                const worksheetRule = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
+                if (worksheetRule?.permissionId && worksheetRule.name) {
+                    const selectionProtection = [{
+                        [UnitAction.View]: this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id)?.value ?? false,
+                        [UnitAction.Edit]: this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false,
+                    }];
+                    const isSkipRender = !selectionProtection[0]?.[UnitAction.View];
+                    const _cellData: IWorksheetProtectionRenderCellData & ISheetFontRenderExtension & IIconSetCellData & IDataBarCellData = { ...cell, hasWorksheetRule: true, selectionProtection };
+                    const { dataBar, iconSet, markers, dataValidation } = _cellData;
+                    if (isSkipRender) {
+                        dataBar && (dataBar.isSkip = true);
+                        iconSet && (iconSet.isSkip = true);
+                        markers && (markers.isSkip = true);
+                        dataValidation && (dataValidation.isSkip = true);
+                        changeRenderExtensionSkip(_cellData, 'fontRenderExtension', true);
+                        changeRenderExtensionSkip(_cellData, 'backgroundRenderExtension', true);
+                        changeRenderExtensionSkip(_cellData, 'borderRenderExtension', true);
+                    }
+                    return next(_cellData);
+                }
+                return next(cell);
+            },
+        }
+        ));
     }
 }

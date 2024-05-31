@@ -17,7 +17,6 @@
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import type { IRenderContext } from '@univerjs/engine-render';
 import { SheetsFindReplaceController } from '@univerjs/sheets-find-replace';
 import { UnitAction } from '@univerjs/protocol';
 
@@ -30,7 +29,6 @@ export class SheetPermissionInterceptorFindReplaceController extends Disposable 
     disposableCollection = new DisposableCollection();
 
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetsFindReplaceController) private _sheetsFindReplaceController: SheetsFindReplaceController
     ) {

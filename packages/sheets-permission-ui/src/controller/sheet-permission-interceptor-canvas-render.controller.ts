@@ -20,8 +20,8 @@ import { getSheetCommandTarget, RangeProtectionRuleModel, SelectionManagerServic
 import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
 import type { IRenderContext, IRenderController, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { HeaderMoveRenderController, HeaderResizeRenderController, ISelectionRenderService } from '@univerjs/sheets-ui';
-import { HeaderFreezeRenderController } from '@univerjs/sheets-ui/controllers/render-controllers/freeze.render-controller.js';
+import { HeaderFreezeRenderController, HeaderMoveRenderController, HeaderResizeRenderController, ISelectionRenderService } from '@univerjs/sheets-ui';
+
 import { UnitAction } from '@univerjs/protocol';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG, UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from '../views/error-msg-dialog/interface';
 

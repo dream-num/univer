@@ -15,11 +15,11 @@
  */
 
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { getSheetCommandTarget, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, WorksheetEditPermission } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
-import { filter } from 'rxjs/operators';
-import type { IRenderContext } from '@univerjs/engine-render';
+import { debounceTime, filter } from 'rxjs/operators';
+import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
 import { FormulaEditorController, StatusBarController } from '@univerjs/sheets-ui';
 import { UnitAction } from '@univerjs/protocol';
 import { NullValueObject } from '@univerjs/engine-formula';
@@ -28,8 +28,8 @@ type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?:
 
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
-@OnLifecycle(LifecycleStages.Steady, SheetPermissionInterceptorFormulaController)
-export class SheetPermissionInterceptorFormulaController extends Disposable {
+@OnLifecycle(LifecycleStages.Steady, SheetPermissionInterceptorFormulaRenderController)
+export class SheetPermissionInterceptorFormulaRenderController extends RxDisposable implements IRenderController {
     disposableCollection = new DisposableCollection();
 
     constructor(
@@ -79,7 +79,7 @@ export class SheetPermissionInterceptorFormulaController extends Disposable {
         this.disposeWithMe(
             this._univerInstanceService.unitAdded$.pipe(filter((unitInstance) => {
                 return unitInstance.type === UniverInstanceType.UNIVER_DOC && unitInstance.getUnitId() === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
-            })).subscribe(() => {
+            }), debounceTime(200)).subscribe(() => {
                 const formulaEditorController = this._injector.get(FormulaEditorController);
                 handlerRemove && handlerRemove();
                 handlerRemove = formulaEditorController.interceptor.intercept(formulaEditorController.interceptor.getInterceptPoints().FORMULA_EDIT_PERMISSION_CHECK, {

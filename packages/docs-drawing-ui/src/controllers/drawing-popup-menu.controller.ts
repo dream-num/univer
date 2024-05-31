@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import { ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, IContextService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
@@ -36,8 +36,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         @Inject(DocCanvasPopManagerService) private readonly _canvasPopManagerService: DocCanvasPopManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @ICommandService private readonly _commandService: ICommandService
+        @IContextService private readonly _contextService: IContextService
 
     ) {
         super();
@@ -126,18 +125,29 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                             menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId),
                         },
                     })));
+
+                    this._drawingManagerService.focusDrawing([{
+                        unitId,
+                        subUnitId,
+                        drawingId,
+                    }]);
                 })
             )
         );
 
         this.disposeWithMe(
             toDisposable(
-                transformer.onClearControlObservable.add((changeSelf) => {
+                transformer.onClearControlObservable.add(() => {
                     disposePopups.forEach((dispose) => dispose.dispose());
-
-                    // if (changeSelf === true) {
-                    //     this._commandService.executeCommand(SidebarSheetDrawingOperation.id, { value: 'close' });
-                    // }
+                    this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
+                    this._drawingManagerService.focusDrawing(null);
+                })
+            )
+        );
+        this.disposeWithMe(
+            toDisposable(
+                transformer.onChangingObservable.add(() => {
+                    disposePopups.forEach((dispose) => dispose.dispose());
                 })
             )
         );

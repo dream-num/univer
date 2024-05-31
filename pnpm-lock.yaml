@@ -213,9 +213,18 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../packages/docs
+      '@univerjs/docs-drawing-ui':
+        specifier: workspace:*
+        version: link:../packages/docs-drawing-ui
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../packages/docs-ui
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../packages/drawing
+      '@univerjs/drawing-ui':
+        specifier: workspace:*
+        version: link:../packages/drawing-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../packages/engine-formula
@@ -231,9 +240,6 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.52
         version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@univerjs/image':
-        specifier: workspace:*
-        version: link:../packages/image
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../packages/rpc
@@ -249,6 +255,9 @@ importers:
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../packages/sheets-data-validation
+      '@univerjs/sheets-drawing-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-drawing-ui
       '@univerjs/sheets-filter':
         specifier: workspace:*
         version: link:../packages/sheets-filter
@@ -576,6 +585,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
@@ -596,6 +608,64 @@ importers:
         version: 5.2.11(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
       vitest:
         specifier: ^1.6.0
+        version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+
+  packages/docs-drawing-ui:
+    dependencies:
+      '@univerjs/icons':
+        specifier: ^0.1.46
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
+      '@univerjs/drawing-ui':
+        specifier: workspace:*
+        version: link:../drawing-ui
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@wendellhu/redi':
+        specifier: 0.15.2
+        version: 0.15.2
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.1
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.3.3
+        version: 5.4.5
+      vite:
+        specifier: ^5.1.4
+        version: 5.2.11(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+      vitest:
+        specifier: ^1.3.1
         version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
   packages/docs-ui:
@@ -641,6 +711,98 @@ importers:
         version: 5.2.11(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
       vitest:
         specifier: ^1.6.0
+        version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+
+  packages/drawing:
+    dependencies:
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/icons':
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      ot-json1:
+        specifier: ^1.0.2
+        version: 1.0.2
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@wendellhu/redi':
+        specifier: 0.15.2
+        version: 0.15.2
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
+      vite:
+        specifier: ^5.2.11
+        version: 5.2.11(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+
+  packages/drawing-ui:
+    dependencies:
+      '@univerjs/icons':
+        specifier: ^0.1.52
+        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@wendellhu/redi':
+        specifier: 0.15.2
+        version: 0.15.2
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.1
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.3.3
+        version: 5.4.5
+      vite:
+        specifier: ^5.1.4
+        version: 5.2.11(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+      vitest:
+        specifier: ^1.3.1
         version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
   packages/engine-formula:
@@ -842,52 +1004,6 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
-  packages/image:
-    dependencies:
-      '@univerjs/icons':
-        specifier: ^0.1.52
-        version: 0.1.52(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-    devDependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-      '@univerjs/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
-      '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
-      react:
-        specifier: 18.2.0
-        version: 18.2.0
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-      typescript:
-        specifier: ^5.4.5
-        version: 5.4.5
-      vite:
-        specifier: ^5.2.11
-        version: 5.2.11(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
-      vitest:
-        specifier: ^1.6.0
-        version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
-
   packages/network:
     devDependencies:
       '@univerjs/core':
@@ -945,6 +1061,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
@@ -1171,6 +1290,64 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
+  packages/sheets-drawing-ui:
+    dependencies:
+      '@univerjs/icons':
+        specifier: ^0.1.29
+        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
+      '@univerjs/drawing-ui':
+        specifier: workspace:*
+        version: link:../drawing-ui
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../sheets-ui
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@wendellhu/redi':
+        specifier: 0.15.2
+        version: 0.15.2
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.1
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.3.3
+        version: 5.4.5
+      vite:
+        specifier: ^5.1.4
+        version: 5.2.11(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+      vitest:
+        specifier: ^1.3.1
+        version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+
   packages/sheets-filter:
     devDependencies:
       '@univerjs/core':
@@ -1216,6 +1393,9 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
@@ -1584,6 +1764,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
@@ -1937,6 +2120,9 @@ importers:
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
@@ -1952,9 +2138,6 @@ importers:
       '@univerjs/find-replace':
         specifier: workspace:*
         version: link:../find-replace
-      '@univerjs/image':
-        specifier: workspace:*
-        version: link:../image
       '@univerjs/network':
         specifier: workspace:*
         version: link:../network

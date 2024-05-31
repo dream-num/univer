@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { PageElementType, PageType, ShapeType } from '@univerjs/core';
+import { BasicShapes, PageElementType, PageType } from '@univerjs/core';
 
 import { DEFAULT_DOCUMENT_DATA_EN } from '../../docs/default-document-data-en';
 
@@ -39,7 +39,7 @@ export const DEFAULT_SIXTH_PAGE = {
             description: '',
             type: PageElementType.SHAPE,
             shape: {
-                shapeType: ShapeType.RECTANGLE,
+                shapeType: BasicShapes.Rect,
                 text: '',
                 shapeProperties: {
                     shapeBackgroundFill: {

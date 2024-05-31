@@ -18,8 +18,8 @@ import type {
     BulletAlignment,
     ColumnSeparatorType,
     DataStreamTreeTokenType,
+    IDocDrawingBase,
     IDocumentRenderConfig,
-    IDrawing,
     IIndentStart,
     INestingLevel,
     ITextStyle,
@@ -188,7 +188,7 @@ export interface IDocumentSkeletonGlyph {
     parent?: IDocumentSkeletonDivide;
     url?: string; // image url
     featureId?: string; // support interaction for feature ,eg. hyperLine person
-    objectId?: string; // drawing.objectId
+    drawingId?: string; // drawing.drawingId
 }
 
 export interface IDocumentSkeletonBullet extends IIndentStart {
@@ -207,14 +207,14 @@ export interface IDocumentSkeletonBullet extends IIndentStart {
 }
 
 export interface IDocumentSkeletonDrawing {
-    objectId: string;
+    drawingId: string;
     aLeft: number; // 相对于 page 的左方
     aTop: number; // 相对于 page 的上方
     width: number;
     height: number;
     angle: number; // 旋转
     initialState: boolean; // 是否初始化
-    drawingOrigin: IDrawing;
+    drawingOrigin: IDocDrawingBase;
 }
 
 export interface IDocumentSkeletonFontStyle {

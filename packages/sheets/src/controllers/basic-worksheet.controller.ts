@@ -83,7 +83,6 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
-import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
@@ -128,7 +127,10 @@ import { SetRangeProtectionCommand } from '../commands/commands/set-range-protec
 import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
 import { DeleteRangeProtectionMutation } from '../commands/mutations/delete-range-protection.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
+import { SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
+import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
+import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './config';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -231,15 +233,14 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetRowHeightMutation,
             SetWorksheetRowIsAutoHeightCommand,
             SetWorksheetRowIsAutoHeightMutation,
-            SetWorksheetShowCommand,
             SetNumfmtMutation,
             SetSelectionsOperation,
             RemoveNumfmtMutation,
             EmptyMutation,
+            ScrollToCellOperation,
             InsertDefinedNameCommand,
             RemoveDefinedNameCommand,
             SetDefinedNameCommand,
-            ScrollToCellOperation,
 
             SetWorksheetPermissionPointsCommand,
             AddWorksheetProtectionMutation,
@@ -255,6 +256,15 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             DeleteRangeProtectionMutation,
             SetRangeProtectionMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+
+        const onlyRegisterFormulaRelatedMutations = this._configService.getConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY) ?? false;
+        if (!onlyRegisterFormulaRelatedMutations) {
+            // TODO: more commands should be moved into this array
+            [
+                SetWorksheetShowCommand,
+                SetDrawingApplyMutation,
+            ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        }
 
         this._configService.setConfig(MAX_CELL_PER_SHEET_KEY, MAX_CELL_PER_SHEET_DEFAULT);
     }

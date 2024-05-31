@@ -1,0 +1,47 @@
+.upload-loading {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    background-color: rgba(var(--color-black), 0.5);
+    z-index: 1000;
+    user-select: none;
+
+    &-body {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgb(var(--color-white));
+        padding: 20px 40px;
+        display: flex;
+        align-items: center;
+        justify-items: center;
+        border-radius: var(--border-radius-lg);
+
+        &-animation {
+            width: 30px;
+            height: 30px;
+            border: 2px solid rgb(var(--color-black));
+            border-top-color: transparent;
+            border-radius: 100%;
+
+            animation: UniverCircleAnimation infinite 0.75s linear;
+        }
+
+        &-text {
+            font-size: var(--font-size-xs);
+            color: var(--color-black);
+            padding: 10px;
+        }
+    }
+}
+
+@keyframes UniverCircleAnimation {
+    0% {
+        transform: rotate(0);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

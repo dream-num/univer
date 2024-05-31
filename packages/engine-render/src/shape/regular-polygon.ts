@@ -18,7 +18,7 @@ import type { IKeyValue } from '@univerjs/core';
 
 import type { IObjectFullState } from '../basics/interfaces';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
-import type { IPoint } from '../basics/vector2';
+import type { IPoint, Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
@@ -67,6 +67,59 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         ctx.closePath();
 
         this._renderPaintInOrder(ctx, props);
+    }
+
+    override isHit(coord: Vector2) {
+        const oCoord = this.getInverseCoord(coord);
+        if (
+            oCoord.x >= -this.strokeWidth / 2 &&
+            oCoord.x <= this.width + this.strokeWidth / 2 &&
+            oCoord.y >= -this.strokeWidth / 2 &&
+            oCoord.y <= this.height + this.strokeWidth / 2 &&
+            this._contains(oCoord)
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    // 判断点是否在多边形内（包括处理洞）
+    private _contains(point: Vector2): boolean {
+        let inside = false;
+
+        for (const vertices of this._pointsGroup) {
+            let count = 0;
+            const n = vertices.length;
+            for (let i = 0; i < n; i++) {
+                const v1 = vertices[i];
+                const v2 = vertices[(i + 1) % n];
+
+                if (this._isOnLine(point, v1, v2)) {
+                    return true; // 点在边界上
+                }
+
+                if ((v1.y > point.y) !== (v2.y > point.y)) {
+                    const xCross = v1.x + (point.y - v1.y) * (v2.x - v1.x) / (v2.y - v1.y);
+                    if (point.x < xCross) {
+                        count++;
+                    }
+                }
+            }
+            // 对于每个子路径，如果点在路径内部，我们需要切换inside的状态。
+            if (count % 2 !== 0) {
+                inside = !inside;
+            }
+        }
+
+        return inside;
+    }
+
+    // 辅助函数：判断点是否在给定的线段上
+    private _isOnLine(point: IPoint, v1: IPoint, v2: IPoint): boolean {
+        const area = (v1.x - point.x) * (v2.y - point.y) - (v2.x - point.x) * (v1.y - point.y);
+        if (area !== 0) return false;
+        return point.x >= Math.min(v1.x, v2.x) && point.x <= Math.max(v1.x, v2.x) &&
+               point.y >= Math.min(v1.y, v2.y) && point.y <= Math.max(v1.y, v2.y);
     }
 
     updatePointGroup(pointGroup: IPoint[][]) {

@@ -1660,7 +1660,7 @@ export class PromptController extends Disposable {
 
         this._syncToEditor(sequenceNodes, node.endIndex + 1);
 
-        controlSelection.update(toRange, undefined, undefined, undefined, this._selectionRenderService.convertCellRangeToInfo(primary));
+        controlSelection.update(toRange, undefined, undefined, undefined, this._selectionRenderService.attachPrimaryWithCoord(primary));
     }
 
     private _refreshFormulaAndCellEditor(unitIds: string[]) {

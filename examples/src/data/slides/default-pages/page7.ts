@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { PageElementType, PageType, ShapeType } from '@univerjs/core';
+import { BasicShapes, PageElementType, PageType } from '@univerjs/core';
 
 import { generateUnlimitedSlideData } from '../unlimited-slide-data';
 
@@ -55,7 +55,7 @@ export const DEFAULT_SEVEN_PAGE = {
             description: '',
             type: PageElementType.SHAPE,
             shape: {
-                shapeType: ShapeType.RECTANGLE,
+                shapeType: BasicShapes.Rect,
                 text: '',
                 shapeProperties: {
                     shapeBackgroundFill: {
@@ -94,7 +94,7 @@ export const DEFAULT_SEVEN_PAGE = {
             description: '',
             type: PageElementType.SHAPE,
             shape: {
-                shapeType: ShapeType.RECTANGLE,
+                shapeType: BasicShapes.Rect,
                 text: '',
                 shapeProperties: {
                     shapeBackgroundFill: {

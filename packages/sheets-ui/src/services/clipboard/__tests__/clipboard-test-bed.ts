@@ -550,7 +550,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
             ]);
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
             injector.add([ISelectionRenderService, { useClass: SelectionRenderService }]);
-            injector.add([INotificationService, { useClass: testNotificationService }]); ;
+            injector.add([INotificationService, { useClass: testNotificationService }]);
             injector.add([IPlatformService, { useClass: testPlatformService }]);
             // Because SheetClipboardController is initialized in the rendered life cycle, here we need to initialize it manually
             const sheetClipboardController = injector.createInstance(SheetClipboardController);

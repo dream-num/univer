@@ -90,7 +90,7 @@ export class Xmatch extends BaseFunction {
             lookupArray,
             matchModeValue,
             searchModeValue
-        ); ;
+        );
     }
 
     private _handleSingleObject(

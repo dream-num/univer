@@ -40,6 +40,9 @@ import { UniverDebuggerPlugin } from '@univerjs/debugger';
 
 import { FUniver } from '@univerjs/facade';
 import { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
+import { UniverDrawingPlugin } from '@univerjs/drawing';
+import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
+import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { enUS, ruRU, zhCN } from '../locales';
 
@@ -69,9 +72,13 @@ univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
 });
 
+univer.registerPlugin(UniverDrawingPlugin);
+
 univer.registerPlugin(UniverDocsUIPlugin);
 
-univer.registerPlugin(UniverSheetsPlugin);
+univer.registerPlugin(UniverSheetsPlugin, {
+    notExecuteFormula: true,
+});
 univer.registerPlugin(UniverSheetsUIPlugin);
 
 // sheet feature plugins
@@ -102,6 +109,9 @@ univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // sheet permission
 univer.registerPlugin(UniverSheetsPermissionUIPlugin);
+// drawing
+univer.registerPlugin(UniverDrawingUIPlugin);
+univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {

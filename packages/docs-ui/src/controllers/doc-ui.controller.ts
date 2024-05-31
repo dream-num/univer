@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, IDrawingMapItemData } from '@univerjs/core';
+import { Disposable, IDrawingManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
 import { BuiltInUIPart, ComponentManager, IEditorService, ILayoutService, IMenuService, IUIPartsService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { type IDocDrawing, IDocDrawingService } from '@univerjs/docs';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 import {
     FONT_FAMILY_COMPONENT,
@@ -32,6 +33,7 @@ import {
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { DocBackground } from '../views/doc-background/DocBackground';
 import type { IUniverDocsUIConfig } from '../basics';
+import { docDrawingPositionToTransform } from '../basics/transform-position';
 import {
     AlignCenterMenuItemFactory,
     AlignJustifyMenuItemFactory,
@@ -63,7 +65,10 @@ export class DocUIController extends Disposable {
         @IEditorService private readonly _editorService: IEditorService,
         @IMenuService private readonly _menuService: IMenuService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(ITextSelectionRenderManager) private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
+        @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService
     ) {
         super();
 
@@ -112,6 +117,7 @@ export class DocUIController extends Disposable {
         this._initMenus();
         this._initDocBackground();
         this._initFocusHandler();
+        this._initDataLoader();
     }
 
     private _initDocBackground() {
@@ -135,5 +141,42 @@ export class DocUIController extends Disposable {
                 textSelectionManagerService.focus();
             })
         );
+    }
+
+    private _initDataLoader() {
+        const dataModel = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!dataModel) {
+            return false;
+        }
+
+        const unitId = dataModel.getUnitId();
+        const subUnitId = unitId;
+
+        const drawingDataModels = dataModel.getDrawings();
+        const drawingOrderModel = dataModel.getDrawingsOrder();
+
+        if (!drawingDataModels || !drawingOrderModel) {
+            return false;
+        }
+
+        Object.keys(drawingDataModels).forEach((drawingId) => {
+            const drawingDataModel = drawingDataModels[drawingId];
+            const docTransform = drawingDataModel.docTransform;
+            const transform = docDrawingPositionToTransform(docTransform, this._textSelectionRenderManager);
+
+            drawingDataModels[drawingId] = { ...drawingDataModel, transform } as IDocDrawing;
+        });
+
+        const subDrawings = {
+            [subUnitId]: {
+                unitId,
+                subUnitId,
+                data: drawingDataModels as IDrawingMapItemData<IDocDrawing>,
+                order: drawingOrderModel,
+            },
+        };
+
+        this._docDrawingService.registerDrawingData(unitId, subDrawings);
+        this._drawingManagerService.registerDrawingData(unitId, subDrawings);
     }
 }

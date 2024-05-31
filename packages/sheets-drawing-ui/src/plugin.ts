@@ -17,7 +17,6 @@
 import { LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { enUS, zhCN } from './locale';
 import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 import type { IUniverSheetsDrawingConfig } from './controllers/sheet-drawing.controller';
@@ -40,11 +39,6 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
         super();
 
         this._pluginConfig = Tools.deepMerge({}, DefaultSheetsDrawingConfig, config);
-
-        this._localeService.load({
-            zhCN,
-            enUS,
-        });
     }
 
     override onStarting(_injector: Injector): void {

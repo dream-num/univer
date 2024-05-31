@@ -79,7 +79,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.54",
+        "@univerjs/icons": "^0.1.55",
         "localforage": "^1.10.0",
         "rc-notification": "^5.5.0",
         "rc-util": "^5.39.3"
@@ -105,7 +105,7 @@
         "react-dom": "18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.11",
+        "vite": "^5.2.12",
         "vitest": "^1.6.0",
         "vue": "^3.4.27"
     }

@@ -17,7 +17,6 @@
 import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { enUS, zhCN } from './locale';
 import { DocDrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { DocDrawingUIController } from './controllers/doc-drawing.controller';
 import { DocDrawingUpdateController } from './controllers/doc-drawing-update.controller';
@@ -33,11 +32,6 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
-
-        this._localeService.load({
-            zhCN,
-            enUS,
-        });
     }
 
     override onStarting(_injector: Injector): void {

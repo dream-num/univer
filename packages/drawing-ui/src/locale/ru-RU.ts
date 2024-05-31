@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type enUS from './en-US';
+import type zhCN from './zh-CN';
 
-const locale: typeof enUS = {
+const locale: typeof zhCN = {
     'image-popup': {
         replace: 'Заменить',
         delete: 'Удалить',

@@ -51,7 +51,7 @@
         "@univerjs/uniscript": "workspace:*",
         "@wendellhu/redi": "0.15.2",
         "clsx": "^2.1.1",
-        "monaco-editor": "0.48.0",
+        "monaco-editor": "0.49.0",
         "react": "18.2.0",
         "react-dom": "18.2.0",
         "react-mosaic-component": "^6.1.0",

@@ -15,3 +15,4 @@
  */
 
 export { UniverSheetsDrawingUIPlugin } from './plugin';
+export { SheetCanvasFloatDomManagerService, type ICanvasFloatDom } from './services/canvas-float-dom-manager.service';

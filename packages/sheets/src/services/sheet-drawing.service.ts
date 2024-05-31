@@ -52,7 +52,13 @@ export interface ISheetShape extends IDrawingParam, ISheetDrawingBase {
 
 }
 
-export type ISheetDrawing = ISheetImage | ISheetShape;
+export interface IFloatDomData extends IDrawingParam {
+    componentKey: string;
+}
+
+export interface ISheetFloatDom extends IFloatDomData, ISheetDrawingBase {}
+
+export type ISheetDrawing = ISheetImage | ISheetShape | ISheetFloatDom;
 
 type OptionalField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type ISheetUpdateDrawing = OptionalField<ISheetImage | ISheetShape, 'sheetTransform'>;

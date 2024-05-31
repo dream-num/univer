@@ -91,9 +91,7 @@ export class DrawingPopupMenuController extends RxDisposable {
         if (!transformer) {
             return;
         }
-
         const disposePopups: IDisposable[] = [];
-
         this.disposeWithMe(
             toDisposable(
                 transformer.onCreateControlObservable.add(() => {
@@ -139,7 +137,6 @@ export class DrawingPopupMenuController extends RxDisposable {
                 })
             )
         );
-
         this.disposeWithMe(
             toDisposable(
                 transformer.onClearControlObservable.add(() => {
@@ -149,7 +146,6 @@ export class DrawingPopupMenuController extends RxDisposable {
                 })
             )
         );
-
         this.disposeWithMe(
             toDisposable(
                 transformer.onChangingObservable.add(() => {

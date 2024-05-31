@@ -155,18 +155,24 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
         const onChangeStartObserver = transformer.onChangeStartObservable.add((state) => {
             const { objects } = state;
             const params = getUpdateParams(objects, drawingManagerService);
+            const groupParams = params.filter((o) => o?.drawingType === DrawingTypeEnum.DRAWING_GROUP) as IDrawingParam[];
 
-            if (params.length === 0) {
-                setGroupShow(false);
-            } else if (params.length === 1) {
-                setGroupShow(true);
-                setGroupBtnShow(false);
-                setUngroupBtnShow(true);
-            } else {
-                setGroupShow(true);
-                setGroupBtnShow(true);
-                setUngroupBtnShow(true);
+            let groupBtnShow = false;
+            let ungroupBtnShow = false;
+
+            if (params.length > 1) {
+                groupBtnShow = true;
             }
+
+            if (groupParams.length > 0) {
+                ungroupBtnShow = true;
+            }
+
+            const groupShow = groupBtnShow || ungroupBtnShow;
+
+            setGroupShow(groupShow);
+            setGroupBtnShow(groupBtnShow);
+            setUngroupBtnShow(ungroupBtnShow);
         });
 
         return () => {

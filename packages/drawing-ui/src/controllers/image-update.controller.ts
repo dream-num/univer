@@ -180,7 +180,7 @@ export class ImageUpdateController extends Disposable {
 
         sceneList.forEach((scene) => {
             const transformer = scene.getTransformerByCreate();
-            transformer.refreshControls();
+            transformer.refreshControls().changeNotification();
         });
 
         this._drawingManagerService.focusDrawing(params);

@@ -129,6 +129,9 @@ export class Transformer extends Disposable implements ITransformerConfig {
     keepRatio = true;
     centeredScaling = false;
 
+    zeroLeft = 0;
+    zeroTop = 0;
+
     /**
      * leftTop centerTop rightTop
      * leftMiddle rightMiddle
@@ -182,6 +185,14 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._initialProps(config);
     }
 
+    changeNotification() {
+        this.onChangingObservable.notifyObservers({
+            objects: this._selectedObjectMap,
+            type: MoveObserverType.MOVE_START,
+        });
+        return this;
+    }
+
     getSelectedObjectMap() {
         return this._selectedObjectMap;
     }
@@ -225,6 +236,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._selectedObjectMap.forEach((object) => {
             this._createControl(object);
         });
+        return this;
     }
 
     createControlForCopper(applyObject: BaseObject) {
@@ -442,11 +454,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _checkMoveBoundary(moveObject: BaseObject, moveLeft: number, moveTop: number, ancestorLeft: number, ancestorTop: number, topSceneWidth: number, topSceneHeight: number) {
         const { left, top, width, height } = moveObject;
 
-        if (moveLeft + left + ancestorLeft < 0) {
+        if (moveLeft + left + ancestorLeft < this.zeroLeft) {
             moveLeft = -ancestorLeft;
         }
 
-        if (moveTop + top + ancestorTop < 0) {
+        if (moveTop + top + ancestorTop < this.zeroTop) {
             moveTop = -ancestorTop;
         }
 
@@ -937,14 +949,14 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
             const newTransform: ITransformState = {};
 
-            if (left + ancestorLeft < 0) {
+            if (left + ancestorLeft < this.zeroLeft) {
                 newTransform.left = -ancestorLeft;
                 newTransform.width = width + left;
             } else if (left + width + ancestorLeft > topSceneWidth) {
                 newTransform.width = topSceneWidth - left - ancestorLeft;
             }
 
-            if (top + ancestorTop < 0) {
+            if (top + ancestorTop < this.zeroTop) {
                 newTransform.top = -ancestorTop;
                 newTransform.height = height + top;
             } else if (top + height + ancestorTop > topSceneHeight) {

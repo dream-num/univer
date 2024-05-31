@@ -15,7 +15,7 @@
  */
 
 import type { IDrawingParam, Nullable } from '@univerjs/core';
-import { ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
+import { debounce, ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { Checkbox, InputNumber } from '@univerjs/design';
@@ -30,6 +30,8 @@ export interface IDrawingTransformProps {
     transformShow: boolean;
     drawings: IDrawingParam[];
 }
+
+const INPUT_DEBOUNCE_TIME = 300;
 
 export const DrawingTransform = (props: IDrawingTransformProps) => {
     const commandService = useDependency(ICommandService);
@@ -86,6 +88,8 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         let limitLeft = left;
         let limitTop = top;
+        let limitWidth = width;
+        let limitHeight = height;
 
         if (left + ancestorLeft < 0) {
             limitLeft = -ancestorLeft;
@@ -95,17 +99,35 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
             limitTop = -ancestorTop;
         }
 
-        if (left + width + ancestorLeft > topSceneWidth) {
+        if (limitLeft + width + ancestorLeft > topSceneWidth) {
+            limitWidth = topSceneWidth - limitLeft - ancestorLeft;
+        }
+
+        if (limitWidth < MIN_DRAWING_WIDTH_LIMIT) {
+            limitWidth = MIN_DRAWING_WIDTH_LIMIT;
+        }
+
+        if (limitTop + height + ancestorTop > topSceneHeight) {
+            limitHeight = topSceneHeight - limitTop - ancestorTop;
+        }
+
+        if (limitHeight < MIN_DRAWING_WIDTH_LIMIT) {
+            limitHeight = MIN_DRAWING_WIDTH_LIMIT;
+        }
+
+        if (left + limitWidth + ancestorLeft > topSceneWidth) {
             limitLeft = topSceneWidth - width - ancestorLeft;
         }
 
-        if (top + height + ancestorTop > topSceneHeight) {
+        if (top + limitHeight + ancestorTop > topSceneHeight) {
             limitTop = topSceneHeight - height - ancestorTop;
         }
 
         return {
             limitLeft,
             limitTop,
+            limitWidth,
+            limitHeight,
         };
     };
 
@@ -220,12 +242,16 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
         };
     }, []);
 
-    const handleWidthChange = (val: number | null) => {
+    const handleWidthChange = debounce((val: number | null) => {
         if (val == null) {
             return;
         }
 
         val = Math.max(val, MIN_DRAWING_WIDTH_LIMIT);
+
+        const { limitWidth } = checkMoveBoundary(xPosition, yPosition, val, height);
+
+        val = limitWidth;
 
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { width: val } };
 
@@ -240,15 +266,19 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.refreshControls();
-    };
+        transformer.refreshControls().changeNotification();
+    }, INPUT_DEBOUNCE_TIME);
 
-    const handleHeightChange = (val: number | null) => {
+    const handleHeightChange = debounce((val: number | null) => {
         if (val == null) {
             return;
         }
 
         val = Math.max(val, MIN_DRAWING_WIDTH_LIMIT);
+
+        const { limitHeight } = checkMoveBoundary(xPosition, yPosition, width, val);
+
+        val = limitHeight;
 
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { height: val } };
 
@@ -263,10 +293,10 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.refreshControls();
-    };
+        transformer.refreshControls().changeNotification();
+    }, INPUT_DEBOUNCE_TIME);
 
-    const handleXChange = (val: number | null) => {
+    const handleXChange = debounce((val: number | null) => {
         if (val == null) {
             return;
         }
@@ -281,10 +311,10 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.refreshControls();
-    };
+        transformer.refreshControls().changeNotification();
+    }, INPUT_DEBOUNCE_TIME);
 
-    const handleYChange = (val: number | null) => {
+    const handleYChange = debounce((val: number | null) => {
         if (val == null) {
             return;
         }
@@ -299,8 +329,8 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.refreshControls();
-    };
+        transformer.refreshControls().changeNotification();
+    }, INPUT_DEBOUNCE_TIME);
 
     const handleRotationChange = (val: number | null) => {
         if (val == null) {
@@ -323,7 +353,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.refreshControls();
+        transformer.refreshControls().changeNotification();
     };
 
     const handleLockRatioChange = (val: string | number | boolean) => {
@@ -352,7 +382,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={width} onChange={handleWidthChange} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={width} onChange={(val) => { handleWidthChange(val); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -366,7 +396,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={height} onChange={handleHeightChange} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={height} onChange={(val) => { handleHeightChange(val); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -396,7 +426,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={xPosition} onChange={handleXChange} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={xPosition} onChange={(val) => { handleXChange(val); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -410,7 +440,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={yPosition} onChange={handleYChange} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={yPosition} onChange={(val) => { handleYChange(val); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>

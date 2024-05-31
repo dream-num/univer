@@ -245,11 +245,6 @@ export class ImageCropperController extends Disposable {
                     });
                     return;
                 }
-
-                // imageShape.evented = false;
-                // imageShape.hide();
-                // scene.getTransformer()?.clearControls();
-
                 const transformer = scene.getTransformer();
 
                 transformer?.clearControls();
@@ -265,10 +260,10 @@ export class ImageCropperController extends Disposable {
                 this._addHoverForImageCopper(imageCropperObject);
 
                 imageShape.openRenderByCropper();
-
                 transformer?.refreshControls();
-
                 imageCropperObject.makeDirty(true);
+
+                this._drawingManagerService.focusDrawing([{ unitId, subUnitId, drawingId }]);
             })
         );
     }

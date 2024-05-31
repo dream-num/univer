@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IImageIoServiceParam, IRange, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageIoService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageIoService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageData } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize } from '@univerjs/drawing';

@@ -1761,6 +1761,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
+import type { ICommand, IRange } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICommand, IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,

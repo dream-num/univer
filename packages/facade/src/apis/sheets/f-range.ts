@@ -97,15 +97,27 @@ export class FRange {
         return this._worksheet.getCell(this._range.startRow, this._range.startColumn) ?? null;
     }
 
+    /**
+     * Return this cell information, including whether it is merged and cell coordinates
+     * @returns The cell information
+     */
     getCell(): ISelectionCellWithCoord {
         const { skeleton } = this._sheetSkeletonManagerService.getUnitSkeleton(this._workbook.getUnitId(), this._worksheet.getSheetId())!;
         return skeleton.getCellByIndex(this._range.startRow, this._range.startColumn);
     }
 
+    /**
+     * Return range whether this range is merged
+     * @returns if true is merged
+     */
     isMerged() {
         return isCellMerged(this.getCell().mergeInfo, this._range);
     }
 
+    /**
+     * Returns the coordinates of this cell,does not include units
+     * @returns coordinates of the cell， top, right, bottom, left
+     */
     getCellRect(): DOMRect {
         const { startX: x, startY: y, endX: x2, endY: y2 } = this.getCell();
         const data = { x, y, width: x2 - x, height: y2 - y, top: y, left: x, bottom: y2, right: x2 };

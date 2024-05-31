@@ -16,18 +16,23 @@
 
 import { UniverInstanceType } from '@univerjs/core';
 import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, KeyCode, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
+import { ComponentManager, getMenuHiddenObservable, KeyCode, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { whenSheetEditorFocused } from '@univerjs/sheets-ui';
+import { LinkSingle } from '@univerjs/icons';
 import { InsertHyperLinkOperation } from '../commands/operations/sidebar.operations';
 
 export const insertLinkMenuFactory = (accessor: IAccessor) => {
+    const componentManager = accessor.get(ComponentManager);
+    componentManager.register('LinkSingle', LinkSingle);
+
     return {
         id: InsertHyperLinkOperation.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'hyperLink.menu.add',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        icon: 'LinkSingle',
     } as IMenuItem;
 };
 

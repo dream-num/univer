@@ -24,6 +24,7 @@ import { ISheetDrawingService, SelectionManagerService } from '@univerjs/sheets'
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
@@ -47,7 +48,8 @@ export class SheetDrawingUpdateController extends Disposable {
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -117,7 +119,7 @@ export class SheetDrawingUpdateController extends Disposable {
             if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
                 this._messageService.show({
                     type: MessageType.Error,
-                    content: this._localeService.t('update-status.exceedMaxSize', String(DRAWING_IMAGE_ALLOW_SIZE / 1024 * 1024)),
+                    content: this._localeService.t('update-status.exceedMaxSize', String(DRAWING_IMAGE_ALLOW_SIZE / (1024 * 1024))),
                 });
             } else if (type === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
                 this._messageService.show({
@@ -146,6 +148,14 @@ export class SheetDrawingUpdateController extends Disposable {
 
         const { width, height, image } = await getImageSize(base64Cache || '');
 
+        const renderObject = this._renderManagerService.getRenderById(unitId);
+
+        if (renderObject == null) {
+            return;
+        }
+
+        const { width: sceneWidth, height: sceneHeight } = renderObject.scene;
+
         this._imageIoService.addImageSourceCache(source, imageSourceType, image);
 
         let scale = 1;
@@ -155,7 +165,7 @@ export class SheetDrawingUpdateController extends Disposable {
             scale = Math.max(scaleWidth, scaleHeight);
         }
 
-        const sheetTransform = this._getImagePosition(width, height, scale);
+        const sheetTransform = this._getImagePosition(width * scale, height * scale, sceneWidth, sceneHeight);
 
         if (sheetTransform == null) {
             return;
@@ -198,7 +208,7 @@ export class SheetDrawingUpdateController extends Disposable {
         };
     }
 
-    private _getImagePosition(imageWidth: number, imageHeight: number, scale: number): Nullable<ISheetDrawingPosition> {
+    private _getImagePosition(imageWidth: number, imageHeight: number, sceneWidth: number, sceneHeight: number): Nullable<ISheetDrawingPosition> {
         const selections = this._selectionManagerService.getSelections();
         let range: IRange = {
             startRow: 0,
@@ -215,7 +225,41 @@ export class SheetDrawingUpdateController extends Disposable {
             return;
         }
 
-        const { startColumn, startRow, startX, startY } = rangeWithCoord;
+        let { startColumn, startRow, startX, startY } = rangeWithCoord;
+
+        let isChangeStart = false;
+        if (startX + imageWidth > sceneWidth) {
+            startX = sceneWidth - imageWidth;
+
+            if (startX < 0) {
+                startX = 0;
+                imageWidth = sceneWidth;
+            }
+
+            isChangeStart = true;
+        }
+
+        if (startY + imageHeight > sceneHeight) {
+            startY = sceneHeight - imageHeight;
+
+            if (startY < 0) {
+                startY = 0;
+                imageHeight = sceneHeight;
+            }
+
+            isChangeStart = true;
+        }
+
+        if (isChangeStart) {
+            const newCoord = this._selectionRenderService.getSelectionCellByPosition(startX, startY);
+            if (newCoord == null) {
+                return;
+            }
+            startX = newCoord.startX;
+            startY = newCoord.startY;
+            startColumn = newCoord.actualColumn;
+            startRow = newCoord.actualRow;
+        }
 
         const from = {
             column: startColumn,
@@ -224,7 +268,7 @@ export class SheetDrawingUpdateController extends Disposable {
             rowOffset: 0,
         };
 
-        const endSelectionCell = this._selectionRenderService.getSelectionCellByPosition(startX + imageWidth * scale, startY + imageHeight * scale);
+        const endSelectionCell = this._selectionRenderService.getSelectionCellByPosition(startX + imageWidth, startY + imageHeight);
 
         if (endSelectionCell == null) {
             return;
@@ -232,9 +276,9 @@ export class SheetDrawingUpdateController extends Disposable {
 
         const to = {
             column: endSelectionCell.actualColumn,
-            columnOffset: startX + imageWidth * scale - endSelectionCell.startX,
+            columnOffset: startX + imageWidth - endSelectionCell.startX,
             row: endSelectionCell.actualRow,
-            rowOffset: startY + imageHeight * scale - endSelectionCell.startY,
+            rowOffset: startY + imageHeight - endSelectionCell.startY,
         };
 
         return {

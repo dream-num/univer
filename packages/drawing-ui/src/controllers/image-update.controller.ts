@@ -182,6 +182,8 @@ export class ImageUpdateController extends Disposable {
             const transformer = scene.getTransformerByCreate();
             transformer.refreshControls();
         });
+
+        this._drawingManagerService.focusDrawing(params);
     }
 
     private _drawingAddListener() {

@@ -167,9 +167,56 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
             changeObs(state);
         });
 
+        const onFocusObserver = drawingManagerService.focus$.subscribe((drawings) => {
+            if (drawings.length !== 1) {
+                return;
+            }
+
+            const drawingParam = drawingManagerService.getDrawingByParam(drawings[0]);
+
+            if (drawingParam == null) {
+                return;
+            }
+
+            const transform = drawingParam.transform;
+
+            if (transform == null) {
+                return;
+            }
+
+            const {
+                width: originWidth,
+                height: originHeight,
+                left: originX,
+                top: originY,
+                angle: originRotation,
+            } = transform;
+
+            if (originWidth != null) {
+                setWidth(originWidth);
+            }
+
+            if (originHeight != null) {
+                setHeight(originHeight);
+            }
+
+            if (originX != null) {
+                setXPosition(originX);
+            }
+
+            if (originY != null) {
+                setYPosition(originY);
+            }
+
+            if (originRotation != null) {
+                setRotation(originRotation);
+            }
+        });
+
         return () => {
             onChangingObserver?.dispose();
             onChangeStartObserver?.dispose();
+            onFocusObserver?.unsubscribe();
         };
     }, []);
 
@@ -193,7 +240,6 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.clearControls(false);
         transformer.refreshControls();
     };
 
@@ -217,7 +263,6 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.clearControls(false);
         transformer.refreshControls();
     };
 
@@ -236,7 +281,6 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.clearControls(false);
         transformer.refreshControls();
     };
 
@@ -255,7 +299,6 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.clearControls(false);
         transformer.refreshControls();
     };
 
@@ -280,7 +323,6 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.clearControls(false);
         transformer.refreshControls();
     };
 

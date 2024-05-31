@@ -221,7 +221,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     refreshControls() {
-        this._clearControls();
+        this._clearControlMap();
         this._selectedObjectMap.forEach((object) => {
             this._createControl(object);
         });
@@ -351,7 +351,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
                 this._moving(moveOffsetX, moveOffsetY, scrollTimer, isCropper);
 
-                !isCropper && this._clearControls();
+                !isCropper && this._clearControlMap();
 
                 scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
                     this._moving(moveOffsetX, moveOffsetY, scrollTimer, isCropper);
@@ -873,7 +873,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
                     const cursor = this._getRotateAnchorCursor(type);
                     if (!isCropper) {
-                        this._clearControls();
+                        this._clearControlMap();
                         this.onChangeStartObservable.notifyObservers({
                             objects: this._selectedObjectMap,
                             type: MoveObserverType.MOVE_START,
@@ -983,7 +983,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
                     const centerX = (width / 2) + ancestorLeft;
                     const centerY = (height / 2) + ancestorTop;
-                    this._clearControls();
+                    this._clearControlMap();
 
                     this.onChangeStartObservable.notifyObservers({
                         objects: this._selectedObjectMap,
@@ -1452,12 +1452,16 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _clearControls(changeSelf = false) {
+        this._clearControlMap();
+
+        this.onClearControlObservable.notifyObservers(changeSelf);
+    }
+
+    private _clearControlMap() {
         this._transformerControlMap.forEach((control) => {
             control.dispose();
         });
         this._transformerControlMap.clear();
-
-        this.onClearControlObservable.notifyObservers(changeSelf);
     }
 
     private _createControl(applyObject: BaseObject, isSkipOnCropper = true) {
@@ -1555,7 +1559,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         if (!evt.ctrlKey) {
             this._selectedObjectMap.clear();
-            this._clearControls(true);
+            this._clearControlMap();
         }
 
         if (!isCropper) {

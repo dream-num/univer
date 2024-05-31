@@ -27,7 +27,7 @@ import { ImageCropperObject } from '@univerjs/drawing-ui/views/crop/image-croppe
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 
-@OnLifecycle(LifecycleStages.Rendered, DrawingPopupMenuController)
+@OnLifecycle(LifecycleStages.Steady, DrawingPopupMenuController)
 export class DrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
 
@@ -130,20 +130,30 @@ export class DrawingPopupMenuController extends RxDisposable {
                             menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId),
                         },
                     })));
+
+                    this._drawingManagerService.focusDrawing([{
+                        unitId,
+                        subUnitId,
+                        drawingId,
+                    }]);
                 })
             )
         );
 
         this.disposeWithMe(
             toDisposable(
-                transformer.onClearControlObservable.add((changeSelf) => {
+                transformer.onClearControlObservable.add(() => {
                     disposePopups.forEach((dispose) => dispose.dispose());
-
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
+                    this._drawingManagerService.focusDrawing(null);
+                })
+            )
+        );
 
-                    // if (changeSelf === true) {
-                    //     this._commandService.executeCommand(SidebarSheetDrawingOperation.id, { value: 'close' });
-                    // }
+        this.disposeWithMe(
+            toDisposable(
+                transformer.onChangingObservable.add(() => {
+                    disposePopups.forEach((dispose) => dispose.dispose());
                 })
             )
         );

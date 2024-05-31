@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CommandListener, ICommandInfo, IRange, ISelectionCellWithCoord, IWorkbookData, Workbook } from '@univerjs/core';
+import type { CommandListener, ICommandInfo, IRange, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     IResourceLoaderService,
@@ -35,6 +35,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FWorksheet } from './f-worksheet';
 import { isSingleCell } from './utils.ts';
+import { FRange } from './f-range.ts';
 
 export class FWorkbook {
     readonly id: string;
@@ -244,7 +245,7 @@ export class FWorkbook {
      * @param sheetId a Univer sheet id, default value is ActiveSheet id
      * @returns A function to dispose the listening.
      */
-    onCellClick(callback: (selection: ISelectionCellWithCoord) => void, sheetId?: string): IDisposable {
+    onCellClick(callback: (selection: FRange) => void, sheetId?: string): IDisposable {
         let hasStart = false;
         const disposableStart = toDisposable(this._selectionManagerService.selectionMoveStart$.subscribe(() => (hasStart = true)));
         const disposableChange = this.onSelectionChange(async (selections) => {
@@ -258,6 +259,7 @@ export class FWorkbook {
 
             const [selection] = selections;
             sheetId ??= this._workbook.getActiveSheet().getSheetId();
+
             const sheetSkeletonManagerParam = this._sheetSkeletonManagerService.getUnitSkeleton(this._workbook.getUnitId(), sheetId);
             if (!sheetSkeletonManagerParam) {
                 return;
@@ -266,7 +268,7 @@ export class FWorkbook {
             const selectionCellWithCoord = sheetSkeletonManagerParam.skeleton.getCellByIndex(selection.startRow, selection.startColumn);
             const { mergeInfo } = selectionCellWithCoord;
             if (isSingleCell(mergeInfo, selection)) {
-                callback(selectionCellWithCoord);
+                callback(this._injector.createInstance(FRange, this._workbook, this._workbook.getSheetBySheetId(sheetId)!, selection));
             }
         });
 

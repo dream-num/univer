@@ -177,11 +177,7 @@ export class SheetsHyperLinkResolverService {
                     subUnitId,
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     selections: [{
-                        primary: {
-                            ...realRange,
-                            actualColumn: realRange.startColumn,
-                            actualRow: realRange.startRow,
-                        },
+
                         range: realRange,
                     }],
                 } as ISetSelectionsOperationParams

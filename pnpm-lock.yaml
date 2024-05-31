@@ -4969,12 +4969,6 @@ packages:
       react: '*'
       react-dom: '*'
 
-  '@univerjs/icons@0.1.54':
-    resolution: {integrity: sha512-s82L8pDlOJsx3UJZM/uBhzZp7w/Kg7MiVoLIDS2upowQwkNprlZJNTrVz2nKxwtl2WdMtfLeQIW0f07n9oyChw==}
-    peerDependencies:
-      react: '*'
-      react-dom: '*'
-
   '@univerjs/protocol@0.1.32':
     resolution: {integrity: sha512-B9hZGRM9ssHrx6+Ey4+n31Ji7p5G70Qmr8UFG/h5rYLpIPFQ5CBtu79teSAYxHrK31Sf/xtfF2HLLxXK+649xg==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
@@ -14033,11 +14027,6 @@ snapshots:
   '@univerjs/icons-svg@0.1.45': {}
 
   '@univerjs/icons@0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
-    dependencies:
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-
-  '@univerjs/icons@0.1.54(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)

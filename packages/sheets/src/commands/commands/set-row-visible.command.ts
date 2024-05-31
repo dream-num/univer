@@ -87,17 +87,16 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
             })),
         };
 
+        const result = sequenceExecute(
+            [
+                { id: SetRowVisibleMutation.id, params: redoMutationParams },
+                { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+            ], commandService);
+
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: SetSpecificRowsVisibleCommand.id,
             params,
         });
-
-        const result = sequenceExecute(
-            [
-                { id: SetRowVisibleMutation.id, params: redoMutationParams },
-                ...intercepted.redos,
-                { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
-            ], commandService);
 
         const interceptedResult = sequenceExecute([...intercepted.redos], commandService);
 
@@ -160,7 +159,6 @@ export const SetSelectedRowsVisibleCommand: ICommand = {
 export const SetRowHiddenCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-rows-hidden',
-
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
@@ -201,12 +199,12 @@ export const SetRowHiddenCommand: ICommand = {
             })),
         };
 
+        const undoMutationParams = SetRowHiddenUndoMutationFactory(accessor, redoMutationParams);
+
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: SetRowHiddenCommand.id,
             params: redoMutationParams,
         });
-
-        const undoMutationParams = SetRowHiddenUndoMutationFactory(accessor, redoMutationParams);
 
         if (intercepted.preRedos && intercepted.preRedos.length > 0) {
             sequenceExecute([...intercepted.preRedos], commandService);

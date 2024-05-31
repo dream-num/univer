@@ -85,7 +85,6 @@
         "@univerjs/drawing": "workspace:*",
         "@univerjs/drawing-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.52",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.15.2",

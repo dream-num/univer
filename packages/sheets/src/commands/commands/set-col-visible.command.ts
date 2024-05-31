@@ -80,17 +80,17 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
             })),
         };
 
-        const intercepted = sheetInterceptorService.onCommandExecute({
-            id: SetSpecificColsVisibleCommand.id,
-            params,
-        });
-
         const commandService = accessor.get(ICommandService);
 
         const result = sequenceExecute([
             { id: SetColVisibleMutation.id, params: redoMutationParams },
             { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
         ], commandService);
+
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: SetSpecificColsVisibleCommand.id,
+            params,
+        });
 
         const interceptedResult = sequenceExecute([...intercepted.redos], commandService);
 
@@ -99,7 +99,6 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    ...(intercepted.preUndos ?? []),
                     { id: SetColHiddenMutation.id, params: undoMutationParams },
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
                     ...(intercepted.undos ?? []),
@@ -192,17 +191,17 @@ export const SetColHiddenCommand: ICommand = {
             })),
         };
 
-        const intercepted = sheetInterceptorService.onCommandExecute({
-            id: SetColHiddenCommand.id,
-            params: redoMutationParams,
-        });
-
         const commandService = accessor.get(ICommandService);
 
         const result = sequenceExecute([
             { id: SetColHiddenMutation.id, params: redoMutationParams },
             { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
         ], commandService);
+
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: SetColHiddenCommand.id,
+            params: redoMutationParams,
+        });
 
         const interceptedResult = sequenceExecute([...intercepted.redos], commandService);
 
@@ -212,7 +211,6 @@ export const SetColHiddenCommand: ICommand = {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    ...(intercepted.preUndos ?? []),
                     { id: SetColVisibleMutation.id, params: undoMutationParams },
                     { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
                     ...(intercepted.undos ?? []),

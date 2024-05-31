@@ -27,8 +27,8 @@ import { SheetExtension } from './sheet-extension';
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 
 /**
- * in prev version background ext is higer than font ext. now turing back lower than font ext.
- * font ext zindex is 30.
+ * in prev version background ext is higher than font ext. now turing back lower than font ext.
+ * font ext z-index is 30.
  */
 const DOC_EXTENSION_Z_INDEX = 21;
 const PRINTING_Z_INDEX = 21;

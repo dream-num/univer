@@ -36,21 +36,17 @@ export class Background extends docExtension {
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, span: IDocumentSkeletonGlyph) {
         const line = span.parent?.parent;
-        if (!line) {
+        if (line == null) {
             return;
         }
 
         const { contentHeight = 0 } = line;
-        const { ts: textStyle, width } = span;
-        if (!textStyle) {
+        const { ts: textStyle, width, content } = span;
+        if (textStyle?.bg == null) {
             return;
         }
 
         const { bg } = textStyle;
-
-        if (!bg) {
-            return;
-        }
 
         const background = getColorStyle(bg);
 
@@ -58,7 +54,7 @@ export class Background extends docExtension {
 
         const DELTA = 1.5;
 
-        if (background) {
+        if (background && content !== '\r') {
             ctx.fillStyle = background;
             ctx.fillRectByPrecision(spanStartPoint.x - 0.5, spanStartPoint.y - 1, width + 1, contentHeight + 2 * DELTA);
         }

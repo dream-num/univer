@@ -1103,91 +1103,6 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
-<<<<<<< HEAD
-  packages/sheet-permission-ui:
-    dependencies:
-      '@univerjs/icons':
-        specifier: ^0.1.45
-        version: 0.1.55(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@univerjs/protocol':
-        specifier: ^0.1.34
-        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
-      dayjs:
-        specifier: ^1.11.10
-        version: 1.11.11
-    devDependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../docs
-      '@univerjs/engine-formula':
-        specifier: workspace:*
-        version: link:../engine-formula
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-      '@univerjs/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
-      '@univerjs/sheets-conditional-formatting':
-        specifier: workspace:*
-        version: link:../sheets-conditional-formatting
-      '@univerjs/sheets-conditional-formatting-ui':
-        specifier: workspace:*
-        version: link:../sheets-conditional-formatting-ui
-      '@univerjs/sheets-data-validation':
-        specifier: workspace:*
-        version: link:../sheets-data-validation
-      '@univerjs/sheets-filter':
-        specifier: workspace:*
-        version: link:../sheets-filter
-      '@univerjs/sheets-filter-ui':
-        specifier: workspace:*
-        version: link:../sheets-filter-ui
-      '@univerjs/sheets-find-replace':
-        specifier: workspace:*
-        version: link:../sheets-find-replace
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
-      '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
-      clsx:
-        specifier: ^2.1.0
-        version: 2.1.1
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-      typescript:
-        specifier: ^5.4.5
-        version: 5.4.5
-      vite:
-        specifier: ^5.2.8
-        version: 5.2.12(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
-      vitest:
-        specifier: ^1.4.0
-        version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
-
-=======
->>>>>>> a698796b2 (fix: repalce file name)
   packages/sheets:
     dependencies:
       '@univerjs/protocol':
@@ -2000,8 +1915,8 @@ importers:
         specifier: workspace:*
         version: link:../docs-ui
       '@univerjs/icons':
-        specifier: ^0.1.46
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.55
+        version: 0.1.55(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@univerjs/protocol':
         specifier: ^0.1.34
         version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
@@ -5151,12 +5066,6 @@ packages:
 
   '@univerjs/icons-svg@0.1.55':
     resolution: {integrity: sha512-zbvyHAwkRliH8GiJDvdWDXcVSKWXSs2XKG8woZzJ/xl2GjOWVtzXTUD3/ixhHbNtDlxBqbGbEtr2R4IvN+ga/Q==}
-
-  '@univerjs/icons@0.1.47':
-    resolution: {integrity: sha512-JluQi//M5lrVJtxVc6IaVmPXVw1FSryP4WQXUvjdZ7QoSLGdEihkNLKdl/em26MZQAH4R5hIuiATOxXiR3YJWw==}
-    peerDependencies:
-      react: '*'
-      react-dom: '*'
 
   '@univerjs/icons@0.1.55':
     resolution: {integrity: sha512-qSfHP196ZCNP4dbdM6nhHFhZ/317BYMt2uqsZaKb6faDzOvDnyL+kB6DjMmzbRK6WKleVksYPOrMlc1v3DBmjQ==}
@@ -10675,13 +10584,8 @@ packages:
       vite:
         optional: true
 
-<<<<<<< HEAD
   vite@5.2.12:
     resolution: {integrity: sha512-/gC8GxzxMK5ntBwb48pR32GGhENnjtY30G4A0jemunsBkiEZFw60s8InGpN8gkhHEkjnRK1aSAxeQgwvFhUHAA==}
-=======
-  vite@5.2.11:
-    resolution: {integrity: sha512-HndV31LWW05i1BLPMUCE1B9E9GFbOu1MbenhS58FuK6owSO5qHm7GiCotrNY1YE5rMeQSFBGmT5ZaLEjFizgiQ==}
->>>>>>> a698796b2 (fix: repalce file name)
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -14267,11 +14171,6 @@ snapshots:
   '@univerjs/icons-svg@0.1.45': {}
 
   '@univerjs/icons-svg@0.1.55': {}
-
-  '@univerjs/icons@0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
-    dependencies:
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
 
   '@univerjs/icons@0.1.55(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
@@ -20438,11 +20337,7 @@ snapshots:
       - rollup
       - supports-color
 
-<<<<<<< HEAD
   vite@5.2.12(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0):
-=======
-  vite@5.2.11(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0):
->>>>>>> a698796b2 (fix: repalce file name)
     dependencies:
       esbuild: 0.20.2
       postcss: 8.4.38

@@ -571,6 +571,10 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
 
         const _context = this._context;
 
+        if (!this._isDrawable) {
+            return;
+        }
+
         if (a.length === 3) {
             _context.drawImage(args[0], args[1], args[2]);
         } else if (a.length === 5) {
@@ -578,6 +582,22 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         } else if (a.length === 9) {
             _context.drawImage(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
         }
+    }
+
+    _isDrawable(args: any[]): boolean {
+        if (Array.isArray(args) && args.length > 0) {
+            const canvasImageSource: CanvasImageSource = args[0];
+            if (
+                canvasImageSource instanceof HTMLImageElement
+                || canvasImageSource instanceof HTMLCanvasElement
+                || canvasImageSource instanceof ImageBitmap
+            ) {
+                if (canvasImageSource.width === 0 || canvasImageSource.height === 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**

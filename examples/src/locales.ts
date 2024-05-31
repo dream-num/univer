@@ -24,6 +24,9 @@ import DocsUIZhCN from '@univerjs/docs-ui/locale/zh-CN';
 import FindReplaceEnUS from '@univerjs/find-replace/locale/en-US';
 import FindReplaceRuRU from '@univerjs/find-replace/locale/ru-RU';
 import FindReplaceZhCN from '@univerjs/find-replace/locale/zh-CN';
+import SheetsFindReplaceEnUS from '@univerjs/sheets-find-replace/locale/en-US';
+import SheetsFindReplaceRuRU from '@univerjs/sheets-find-replace/locale/ru-RU';
+import SheetsFindReplaceZhCN from '@univerjs/sheets-find-replace/locale/zh-CN';
 import SheetsEnUS from '@univerjs/sheets/locale/en-US';
 import SheetsRuRU from '@univerjs/sheets/locale/ru-RU';
 import SheetsZhCN from '@univerjs/sheets/locale/zh-CN';
@@ -80,6 +83,7 @@ export const zhCN = Tools.deepMerge(
     SheetsZhCN,
     DocsUIZhCN,
     FindReplaceZhCN,
+    SheetsFindReplaceZhCN,
     SheetsUIZhCN,
     SheetsFormulaZhCN,
     SheetsDataValidationZhCN,
@@ -103,6 +107,7 @@ export const enUS = Tools.deepMerge(
     SheetsEnUS,
     DocsUIEnUS,
     FindReplaceEnUS,
+    SheetsFindReplaceEnUS,
     SheetsUIEnUS,
     SheetsFormulaEnUS,
     SheetsDataValidationEnUS,
@@ -126,6 +131,7 @@ export const ruRU = Tools.deepMerge(
     SheetsRuRU,
     DocsUIRuRU,
     FindReplaceRuRU,
+    SheetsFindReplaceRuRU,
     SheetsUIRuRU,
     SheetsFormulaRuRU,
     SheetsDataValidationRuRU,

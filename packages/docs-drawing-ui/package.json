@@ -75,7 +75,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.46"
+        "@univerjs/icons": "^0.1.54"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
@@ -90,7 +90,8 @@
         "@wendellhu/redi": "0.15.2",
         "clsx": "^2.1.0",
         "less": "^4.2.0",
-        "react": "^18.2.0",
+        "ot-json1": "^1.0.2",
+        "react": "18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.1.4",

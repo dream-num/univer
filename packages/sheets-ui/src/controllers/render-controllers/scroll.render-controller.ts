@@ -20,6 +20,7 @@ import {
     Disposable,
     ICommandService,
     IUniverInstanceService,
+    RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
 import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
@@ -57,8 +58,23 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
     }
 
     scrollToRange(range: IRange): boolean {
-        const { startRow, startColumn } = range;
-        return this._scrollToCell(startRow, startColumn);
+        let { endRow, endColumn, startColumn, startRow } = range;
+        const bounding = this._getViewportBounding();
+        if (range.rangeType === RANGE_TYPE.ROW) {
+            startColumn = 0;
+            endColumn = 0;
+        } else if (range.rangeType === RANGE_TYPE.COLUMN) {
+            startRow = 0;
+            endRow = 0;
+        }
+
+        if (bounding) {
+            const row = bounding.startRow > endRow ? startRow : endRow;
+            const col = bounding.startColumn > endColumn ? startColumn : endColumn;
+            return this._scrollToCell(row, col);
+        } else {
+            return this._scrollToCell(startRow, startColumn);
+        }
     }
 
     private _init() {

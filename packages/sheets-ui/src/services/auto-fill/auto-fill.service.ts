@@ -312,7 +312,6 @@ export class AutoFillService extends Disposable implements IAutoFillService {
                 redos.push(...hookRedos);
             }
         });
-
         const result = redos.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
         if (result) {
             // add to undo redo services

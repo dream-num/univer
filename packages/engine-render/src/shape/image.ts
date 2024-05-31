@@ -153,7 +153,6 @@ export class Image extends Shape<IImageProps> {
         this._renderByCropper = true;
         this._transformBySrcRect();
     }
-
     // override transformForAngle(transform: Transform) {
     //     if (this.angle === 0) {
     //         return transform;

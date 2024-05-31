@@ -24,7 +24,9 @@ import { RemoveSheetMutation } from '../../commands/mutations/remove-sheet.mutat
 import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../commands/mutations/insert-row-col.mutation';
 import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
+import type { SelectionManagerService } from '../selection-manager.service';
 import type {
+    EffectRefRangeParams,
     IDeleteRangeMoveLeftCommand,
     IDeleteRangeMoveUpCommand,
     IInsertColCommand,
@@ -42,11 +44,13 @@ import { EffectRefRangId, OperatorType } from './type';
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 export const handleRangeTypeInput = (range: IRange) => {
     const _range = { ...range };
-    if (_range.rangeType === RANGE_TYPE.COLUMN) {
+    const isColumn = Number.isNaN(_range.startRow) && Number.isNaN(_range.endRow) && !Number.isNaN(_range.startColumn) && !Number.isNaN(_range.endColumn);
+    const isRow = Number.isNaN(_range.startColumn) && Number.isNaN(_range.endColumn) && !Number.isNaN(_range.startRow) && !Number.isNaN(_range.endRow);
+    if (_range.rangeType === RANGE_TYPE.COLUMN || isColumn) {
         _range.startRow = 0;
         _range.endRow = MAX_SAFE_INTEGER;
     }
-    if (_range.rangeType === RANGE_TYPE.ROW) {
+    if (_range.rangeType === RANGE_TYPE.ROW || isRow) {
         _range.startColumn = 0;
         _range.endColumn = MAX_SAFE_INTEGER;
     }
@@ -83,11 +87,18 @@ export const handleRangeTypeOutput = (range: IRange, maxRow: number, maxCol: num
 export const rotateRange = (range: IRange): IRange => {
     // rotate {startRow:2,endRow:3,startCol:3,endCol:10} to
     // {startRow:3,endRow:10,startCol:2,endRow:3}
+    let rangeType = range.rangeType;
+    if (range.rangeType === RANGE_TYPE.COLUMN) {
+        rangeType = RANGE_TYPE.ROW;
+    } else if (range.rangeType === RANGE_TYPE.ROW) {
+        rangeType = RANGE_TYPE.COLUMN;
+    }
     return {
         startRow: range.startColumn,
         endRow: range.endColumn,
         startColumn: range.startRow,
         endColumn: range.endRow,
+        rangeType,
     };
 };
 interface ILine {
@@ -1031,5 +1042,170 @@ export function adjustRangeOnMutation(range: Readonly<IRange>, mutation: IMutati
         return Array.isArray(baseRangeOperator) ? runRefRangeMutations(baseRangeOperator, range) : runRefRangeMutations([baseRangeOperator as IOperator], range);
     } else {
         return range;
+    }
+}
+
+const MAX_BOUND = Math.floor(Number.MAX_SAFE_INTEGER / 10);
+
+// eslint-disable-next-line max-lines-per-function
+export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: { selectionManagerService: SelectionManagerService }) {
+    const { selectionManagerService } = deps;
+    switch (command.id) {
+        case EffectRefRangId.MoveColsCommandId: {
+            const params = command.params!;
+            const startColumn = Math.min(params.fromRange.startColumn, params.toRange.startColumn);
+            return [{ ...params.fromRange, startColumn, endColumn: MAX_BOUND }];
+        }
+        case EffectRefRangId.MoveRowsCommandId: {
+            const params = command.params!;
+            const startRow = Math.min(params.fromRange.startRow, params.toRange.startRow);
+
+            return [{ ...params.fromRange, startRow, endRow: MAX_BOUND }];
+        }
+        case EffectRefRangId.MoveRangeCommandId: {
+            const params = command;
+            return [params.params!.fromRange, params.params!.toRange];
+        }
+        case EffectRefRangId.InsertRowCommandId: {
+            const params = command;
+            const rowStart = params.params!.range.startRow;
+            const range: IRange = {
+                startRow: rowStart,
+                endRow: MAX_BOUND,
+                startColumn: 0,
+                endColumn: MAX_BOUND,
+            };
+            return [range];
+        }
+        case EffectRefRangId.InsertColCommandId: {
+            const params = command;
+            const colStart = params.params!.range.startColumn;
+            const range: IRange = {
+                startRow: 0,
+                endRow: MAX_BOUND,
+                startColumn: colStart,
+                endColumn: MAX_BOUND,
+            };
+            return [range];
+        }
+        case EffectRefRangId.RemoveRowCommandId: {
+            const params = command;
+
+            const rowStart = params.params!.range.startRow;
+            const range: IRange = {
+                startRow: rowStart,
+                endRow: MAX_BOUND,
+                startColumn: 0,
+                endColumn: MAX_BOUND,
+            };
+            return [range];
+        }
+        case EffectRefRangId.RemoveColCommandId: {
+            const params = command;
+            const colStart = params.params!.range.startColumn;
+            const range: IRange = {
+                startRow: 0,
+                endRow: MAX_BOUND,
+                startColumn: colStart,
+                endColumn: MAX_BOUND,
+            };
+            return [range];
+        }
+        case EffectRefRangId.DeleteRangeMoveUpCommandId:
+        case EffectRefRangId.InsertRangeMoveDownCommandId: {
+            const params = command;
+            const range = params.params?.range || selectionManagerService.getSelectionRanges()?.[0];
+            if (!range) {
+                return [];
+            }
+            const effectRange = {
+                startRow: range.startRow,
+                startColumn: range.startColumn,
+                endColumn: range.endColumn,
+                endRow: MAX_BOUND,
+            };
+            return [effectRange];
+        }
+        case EffectRefRangId.DeleteRangeMoveLeftCommandId:
+        case EffectRefRangId.InsertRangeMoveRightCommandId: {
+            const params = command;
+            const range = params.params?.range || selectionManagerService.getSelectionRanges()?.[0];
+            if (!range) {
+                return [];
+            }
+            const effectRange = {
+                startRow: range.startRow,
+                startColumn: range.startColumn,
+                endColumn: MAX_BOUND,
+                endRow: range.endRow,
+            };
+            return [effectRange];
+        }
+    }
+}
+
+export function getEffectedRangesOnMutation(mutation: IMutationInfo<MutationsAffectRange>) {
+    switch (mutation.id) {
+        case MoveColsMutation.id: {
+            const params = mutation.params as IMoveColumnsMutationParams;
+            const startColumn = Math.min(params.sourceRange.startColumn, params.targetRange.startColumn);
+            return [{ ...params.sourceRange, startColumn, endColumn: MAX_BOUND }];
+        }
+        case MoveRowsMutation.id: {
+            const params = mutation.params as IMoveRowsMutationParams;
+            const startRow = Math.min(params.sourceRange.startRow, params.targetRange.startRow);
+            return [{ ...params.sourceRange, startRow, endRow: MAX_BOUND }];
+        }
+
+        case MoveRangeMutation.id: {
+            const params = mutation.params as IMoveRangeMutationParams;
+            return [new ObjectMatrix(params.from).getRange(), new ObjectMatrix(params.to).getRange()];
+        }
+        case InsertColMutation.id: {
+            const params = mutation.params as IInsertColMutationParams;
+            const colStart = params.range.startColumn;
+            const range: IRange = {
+                startRow: 0,
+                endRow: MAX_BOUND,
+                startColumn: colStart,
+                endColumn: MAX_BOUND,
+            };
+            return [range];
+        }
+        case InsertRowMutation.id: {
+            const params = mutation.params as IInsertRowMutationParams;
+            const rowStart = params.range.startRow;
+            const range: IRange = {
+                startRow: rowStart,
+                endRow: MAX_BOUND,
+                startColumn: 0,
+                endColumn: MAX_BOUND,
+            };
+            return [range];
+        }
+        case RemoveColMutation.id: {
+            const params = mutation.params as IRemoveColMutationParams;
+            const colStart = params.range.startColumn;
+            const range: IRange = {
+                startRow: 0,
+                endRow: MAX_BOUND,
+                startColumn: colStart,
+                endColumn: MAX_BOUND,
+            };
+            return [range];
+        }
+        case RemoveRowMutation.id: {
+            const params = mutation.params as IRemoveRowsMutationParams;
+            const rowStart = params.range.startRow;
+            const range: IRange = {
+                startRow: rowStart,
+                endRow: MAX_BOUND,
+                startColumn: 0,
+                endColumn: MAX_BOUND,
+            };
+            return [range];
+        }
+        default:
+            break;
     }
 }

@@ -17,48 +17,107 @@
 import Big from 'big.js';
 
 /**
- * Precise arithmetic operations in JavaScript using native Number type.
+ * Handle addition, subtraction, multiplication and division of floating-point numbers to avoid loss of precision. The method here cannot guarantee complete accuracy.
+ *
+ * Learn more https://zhuanlan.zhihu.com/p/100353781
  */
+interface IntegerTransform {
+    times: number;
+    num: number;
+}
+
+enum Operation {
+    PLUS,
+    MINUS,
+    MULTIPLY,
+    DIVIDE,
+}
+
+function toInteger(floatNum: number): IntegerTransform {
+    const isNegative = floatNum < 0;
+    if (Number.isInteger(floatNum)) {
+        return { times: 1, num: floatNum };
+    }
+
+    const eSplit = floatNum.toString().split(/[eE]/);
+    const len = (eSplit[0].split('.')[1] || '').length - +(eSplit[1] || 0);
+    const times = 10 ** (len > 0 ? len : 0);
+
+    /* Why add 0.5?
+    Multiplication can also cause precision problems
+    Assume that 0.16344556 is passed in and the multiple is 100000000
+    Math.abs(0.16344556) * 100000000=0.16344556*10000000=1634455.5999999999
+    0.0000000001 is missing
+    Add 0.5 0.16344556*10000000+0.5=1634456.0999999999 After parseInt, the precision problem of multiplication is corrected
+    */
+    const intNum = Number.parseInt((Math.abs(floatNum) * times + 0.5).toString(), 10);
+
+    return {
+        times,
+        num: isNegative ? -intNum : intNum,
+    };
+}
 
 /**
- * Performs precise addition of two numbers by scaling.
- * @param a The first number.
- * @param b The second number.
- * @returns The sum of a and b.
+ * Core method to implement plus, minus, multiply and divide operations to ensure no loss of precision
+ *
+ * 1. Enlarge the decimal to an integer (multiplication), perform arithmetic operations, and then reduce it to a decimal (division)
+   2. Truncate the result value to the first 12 digits. If the error is acceptable, it means there is still a precision problem. Take the truncated value
+ * @param a
+ * @param b
+ * @param op
+ * @returns
  */
+function operation(a: number, b: number, op: Operation): number {
+    const o1 = toInteger(a);
+    const o2 = toInteger(b);
+    const t1 = o1.times;
+    const t2 = o2.times;
+    const max = Math.max(t1, t2);
+    let result: number;
+
+    switch (op) {
+        case Operation.PLUS:
+            result = t1 === t2 ? o1.num + o2.num : t1 > t2 ? o1.num + o2.num * (t1 / t2) : o1.num * (t2 / t1) + o2.num;
+            result /= max;
+            break;
+        case Operation.MINUS:
+            result = t1 === t2 ? o1.num - o2.num : t1 > t2 ? o1.num - o2.num * (t1 / t2) : o1.num * (t2 / t1) - o2.num;
+            result /= max;
+            break;
+        case Operation.MULTIPLY:
+            result = (o1.num * o2.num) / (t1 * t2);
+            break;
+        case Operation.DIVIDE:
+            result = (o1.num / o2.num) * (t2 / t1);
+            break;
+        default:
+            throw new Error("Operation must be 'plus', 'minus', 'multiply', or 'divide'");
+    }
+
+    // Why 12?
+    // This is an empirical choice. Generally, choosing 12 can solve most of the 0001 and 0009 problems. e.g. 0.07/0.1 = 0.7000000000000001
+    const stripResult = strip(result, 12);
+    if (withinErrorMargin(result, stripResult)) {
+        return stripResult;
+    }
+    return result;
+}
+
 export function plus(a: number, b: number): number {
-    return (a * 10 + b * 10) / 10;
+    return operation(a, b, Operation.PLUS);
 }
 
-/**
- * Performs precise subtraction of two numbers by scaling.
- * @param a The first number.
- * @param b The second number.
- * @returns The difference between a and b.
- */
 export function minus(a: number, b: number): number {
-    return (a * 10 - b * 10) / 10;
+    return operation(a, b, Operation.MINUS);
 }
 
-/**
- * Multiplies two numbers.
- * @param a The first number.
- * @param b The second number.
- * @returns The product of a and b.
- */
 export function multiply(a: number, b: number): number {
-    return a * b;
+    return operation(a, b, Operation.MULTIPLY);
 }
 
-/**
- * Divides the first number by the second number.
- * @param a The dividend.
- * @param b The divisor.
- * @returns The quotient of a and b.
- */
 export function divide(a: number, b: number): number {
-    const divisor = 100000000; // Adjust the scaling factor based on required precision
-    return ((a * divisor) / (b * divisor));
+    return operation(a, b, Operation.DIVIDE);
 }
 
 /**
@@ -189,6 +248,16 @@ export function lessThanOrEquals(a: number, b: number): boolean {
  */
 export function strip(num: number, precision = 16) {
     return Number.parseFloat(num.toPrecision(precision));
+}
+
+/**
+ * Set an error range for floating-point calculations. If the error is less than Number.EPSILON, we can consider the result reliable.
+ * @param left
+ * @param right
+ * @returns
+ */
+function withinErrorMargin(left: number, right: number) {
+    return Math.abs(left - right) < Number.EPSILON;
 }
 
 /**

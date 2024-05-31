@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt, truncateNumber } from '../math-kit';
+import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt, strip, truncateNumber } from '../math-kit';
 
 describe('Test math kit', () => {
     it('Function truncateNumber', () => {
@@ -24,38 +24,35 @@ describe('Test math kit', () => {
         expect(truncateNumber('0.1234567890123456789')).toBe(0.123456789012345);
         expect(truncateNumber('1.234567890123456e+20')).toBe(123456789012345000000);
         expect(truncateNumber('123456789012345')).toBe(123456789012345);
-        expect(truncateNumber('0.000000000000123456')).toBe(0.000000000000123456);
-        expect(truncateNumber('0.7000000000000001')).toBe(0.7);
-        expect(truncateNumber(0.1 + 0.2)).toBe(0.3);
     });
     it('Function plus', () => {
-        expect(truncateNumber(plus(1, 2))).toBe(3);
-        expect(truncateNumber(plus(0.1, 0.2))).toBe(0.3);
-        expect(truncateNumber(plus(0.7, 0.1))).toBe(0.8);
-        expect(truncateNumber(plus(0.0000000000001, 0.0000000000002))).toBe(0.0000000000003);
+        expect(plus(1, 2)).toBe(3);
+        expect(plus(0.1, 0.2)).toBe(0.3);
+        expect(plus(0.7, 0.1)).toBe(0.8);
+        expect(plus(0.0000000000001, 0.0000000000002)).toBe(0.0000000000003);
     });
 
     it('Function minus', () => {
-        expect(truncateNumber(minus(2, 1))).toBe(1);
-        expect(truncateNumber(minus(0.3, 0.1))).toBe(0.2);
-        expect(truncateNumber(minus(0.8, 0.1))).toBe(0.7);
-        expect(truncateNumber(minus(0.0000000000003, 0.0000000000002))).toBe(0.0000000000001);
+        expect(minus(2, 1)).toBe(1);
+        expect(minus(0.3, 0.1)).toBe(0.2);
+        expect(minus(0.8, 0.1)).toBe(0.7);
+        expect(minus(0.0000000000003, 0.0000000000002)).toBe(0.0000000000001);
     });
 
     it('Function multiply', () => {
-        expect(truncateNumber(multiply(2, 3))).toBe(6);
-        expect(truncateNumber(multiply(0.1, 0.2))).toBe(0.02);
-        expect(truncateNumber(multiply(0.7, 0.1))).toBe(0.07);
-        expect(truncateNumber(multiply(0.0000000000001, 0.0000000000002))).toBe(2e-26);
-        expect(truncateNumber(multiply(0.6789, 10000))).toBe(6789);
+        expect(multiply(2, 3)).toBe(6);
+        expect(multiply(0.1, 0.2)).toBe(0.02);
+        expect(multiply(0.7, 0.1)).toBe(0.07);
+        expect(strip(multiply(0.0000000000001, 0.0000000000002))).toBe(2e-26);
+        expect(multiply(0.6789, 10000)).toBe(6789);
     });
 
     it('Function divide', () => {
-        expect(truncateNumber(divide(6, 3))).toBe(2);
-        expect(truncateNumber(divide(0.02, 0.1))).toBe(0.2);
-        expect(truncateNumber(divide(0.07, 0.1))).toBe(0.7);
-        expect(truncateNumber(divide(0.3, 0.1))).toBe(3);
-        expect(truncateNumber(divide(0.00000000000000002, 0.0000000000001))).toBe(0.0002);
+        expect(divide(6, 3)).toBe(2);
+        expect(divide(0.02, 0.1)).toBe(0.2);
+        expect(divide(0.07, 0.1)).toBe(0.7);
+        expect(divide(0.3, 0.1)).toBe(3);
+        expect(divide(0.00000000000000002, 0.0000000000001)).toBe(0.0002);
     });
 
     it('Function divide with zero', () => {

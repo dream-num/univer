@@ -15,7 +15,6 @@
  */
 
 import { MemoryCursor } from '../../../common/memory-cursor';
-import type { Nullable } from '../../../shared';
 import { Tools } from '../../../shared';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import type { IDocumentBody } from '../../../types/interfaces';
@@ -26,15 +25,11 @@ import { updateAttribute } from './apply-utils/update-apply';
 
 function updateApply(
     doc: IDocumentBody,
-    updateBody: Nullable<IDocumentBody>,
+    updateBody: IDocumentBody,
     textLength: number,
     currentIndex: number,
     coverType = UpdateDocsAttributeType.COVER
 ): IDocumentBody {
-    if (updateBody == null) {
-        throw new Error('updateBody is none');
-    }
-
     return updateAttribute(doc, updateBody, textLength, currentIndex, coverType);
 }
 
@@ -74,23 +69,32 @@ export function textXApply(doc: IDocumentBody, actions: TextXAction[]): IDocumen
         // be modified to have no side effects in the future?
         action = Tools.deepClone(action);
 
-        if (action.t === TextXActionType.RETAIN) {
-            const { coverType, body, len } = action;
-            if (body != null) {
-                updateApply(doc, body, len, memoryCursor.cursor, coverType);
+        switch (action.t) {
+            case TextXActionType.RETAIN: {
+                const { coverType, body, len } = action;
+                if (body != null) {
+                    updateApply(doc, body, len, memoryCursor.cursor, coverType);
+                }
+
+                memoryCursor.moveCursor(len);
+                break;
             }
 
-            memoryCursor.moveCursor(len);
-        } else if (action.t === TextXActionType.INSERT) {
-            const { body, len } = action;
+            case TextXActionType.INSERT: {
+                const { body, len } = action;
 
-            insertApply(doc, body!, len, memoryCursor.cursor);
-            memoryCursor.moveCursor(len);
-        } else if (action.t === TextXActionType.DELETE) {
-            const { len } = action;
-            deleteApply(doc, len, memoryCursor.cursor);
-        } else {
-            throw new Error(`Unknown action type for action: ${action}.`);
+                insertApply(doc, body!, len, memoryCursor.cursor);
+                memoryCursor.moveCursor(len);
+                break;
+            }
+
+            case TextXActionType.DELETE: {
+                const { len } = action;
+                deleteApply(doc, len, memoryCursor.cursor);
+                break;
+            }
+            default:
+                throw new Error(`Unknown action type for action: ${action}.`);
         }
     });
 

@@ -44,6 +44,11 @@ export interface IMessageProps {
 export interface IMessageOptions extends
     Partial<Pick<IMessageProps, 'key' | 'type' >>,
     Pick<IMessageProps, 'content'> {
+
+    /**
+     * After `duration` milliseconds, the message would be removed automatically. However, if `duration` is set to 0,
+     * the message would not be removed automatically.
+     */
     duration?: number;
 }
 
@@ -117,7 +122,10 @@ export class Message {
 
         this.render();
 
-        setTimeout(() => this.teardown(key), duration);
+        if (duration !== 0) {
+            setTimeout(() => this.teardown(key), duration);
+        }
+
         return { dispose: () => this.teardown(key) };
     }
 

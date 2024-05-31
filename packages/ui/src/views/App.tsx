@@ -57,15 +57,6 @@ export function App(props: IUniverAppProps) {
     const [updateTrigger, setUpdateTrigger] = useState(false);
 
     useEffect(() => {
-        console.warn(
-            '\x1B[33m%s\x1B[0m',
-            '[Univer Warning]',
-            'We will remove the built-in language support in the next version (v0.1.13), please add the language support manually.',
-            'Please refer to the release notes for more information: https://github.com/dream-num/univer/releases/tag/v0.1.12'
-        );
-    }, []);
-
-    useEffect(() => {
         const updateSubscription = uiPartsService.componentRegistered$.subscribe(() => {
             setUpdateTrigger((prev) => !prev);
         });

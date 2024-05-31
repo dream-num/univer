@@ -130,7 +130,8 @@ export interface IDocumentSkeletonLine {
     lineHeight: number; // 行总体高度 lineHeight =max(glyph.fontBoundingBoxAscent + glyph.fontBoundingBoxDescent, glyph2.....) + space
     contentHeight: number; // contentHeight 行内容高度，contentHeight,=max(glyph.fontBoundingBoxAscent + glyph.fontBoundingBoxDescent, glyph2.....)
     top: number; // top paragraph(spaceAbove, spaceBelow, lineSpacing*PreLineHeight)
-    asc: number; //  =max(glyph.textMetrics.asc) alphabet对齐，需要校准
+    asc: number; //  =max(glyph.textMetrics.ba) alphabet 对齐，需要校准
+    dsc: number; //  =max(glyph.textMetrics.bd) alphabet 对齐，需要校准
     paddingTop: number; // paddingTop 内容到顶部的距离
     paddingBottom: number; // paddingBottom 内容到底部的距离
     marginTop: number; // marginTop 针对段落的spaceAbove

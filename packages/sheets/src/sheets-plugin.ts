@@ -32,27 +32,27 @@ import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SelectionManagerService } from './services/selection-manager.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
-import { ISheetDrawingService, SheetDrawingService } from './services/sheet-drawing.service';
-import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
-import { SheetDrawingDataController } from './controllers/sheet-drawing-data.controller';
 import { WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from './services/permission/worksheet-permission';
 import { RangeProtectionRenderModel } from './model/range-protection-render.model';
 import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
 
 import { RangeProtectionRefRangeService } from './services/permission/range-permission/range-protection.ref-range';
 import { RangeProtectionService } from './services/permission/range-permission/range-protection.service';
+import { ISheetDrawingService, SheetDrawingService } from './services/sheet-drawing.service';
+import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
+import { SheetDrawingDataController } from './controllers/sheet-drawing-data.controller';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 
 export interface IUniverSheetsConfig {
     notExecuteFormula?: boolean;
+    override?: DependencyOverride;
 
     /**
      * Only register the mutations related to the formula calculation. Especially useful for the
      * web worker environment or server-side-calculation.
      */
     onlyRegisterFormulaRelatedMutations?: true;
-    override?: DependencyOverride;
 }
 
 /**

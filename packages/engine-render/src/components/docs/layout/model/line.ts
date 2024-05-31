@@ -479,7 +479,8 @@ function _getLineSke(lineType: LineType, paragraphIndex: number): IDocumentSkele
         lineHeight: 0, // lineHeight =max(glyph.fontBoundingBoxAscent + glyph.fontBoundingBoxDescent, span2.....) + space
         contentHeight: 0, // contentHeight =max(glyph.fontBoundingBoxAscent + glyph.fontBoundingBoxDescent, span2.....)
         top: 0, // top paragraph(spaceAbove, spaceBelow, lineSpacing*PreLineHeight)
-        asc: 0, // =max(glyph.textMetrics.asc) alphaBeta对齐，需要校准
+        asc: 0, // =max(glyph.textMetrics.ba) alphaBeta对齐，需要校准
+        dsc: 0, // =max(glyph.textMetrics.bd) alphaBeta对齐，需要校准
         paddingTop: 0, // paddingTop 内容到顶部的距离
         paddingBottom: 0, // paddingBottom 内容到底部的距离
         marginTop: 0, // marginTop 针对段落的spaceAbove

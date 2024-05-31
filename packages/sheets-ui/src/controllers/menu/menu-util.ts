@@ -15,7 +15,7 @@
  */
 
 import type { ICellDataForSheetInterceptor, IPermissionTypes, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { IDrawingManagerService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
 
 import type { ICellPermission } from '@univerjs/sheets';
@@ -53,11 +53,16 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
     const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const userManagerService = accessor.get(UserManagerService);
+    const drawingManagerService = accessor.get(IDrawingManagerService);
     if (!workbook) {
         return of(true);
     }
-    return combineLatest([userManagerService.currentUser$, workbook.activeSheet$, selectionManagerService.selectionMoveEnd$]).pipe(
-        switchMap(() => {
+    return combineLatest([userManagerService.currentUser$, workbook.activeSheet$, selectionManagerService.selectionMoveEnd$, drawingManagerService.focus$]).pipe(
+        switchMap(([user, sheet, selection, drawings]) => {
+            if (drawings.length > 0) {
+                return of(true);
+            }
+
             const worksheet = workbook.getActiveSheet();
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();

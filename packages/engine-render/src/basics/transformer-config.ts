@@ -55,4 +55,7 @@ export interface ITransformerConfig {
     boundBoxFunc?: Nullable<(oldBox: BaseObject, newBox: BaseObject) => BaseObject>;
     useSingleNodeRotation?: boolean;
     shouldOverdrawWholeArea?: boolean;
+
+    zeroLeft?: number;
+    zeroTop?: number;
 }

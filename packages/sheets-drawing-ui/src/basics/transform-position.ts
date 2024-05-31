@@ -53,8 +53,16 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, sele
     const left = precisionTo(startSelectionX + fromColumnOffset, 1);
     const top = precisionTo(startSelectionY + fromRowOffset, 1);
 
-    const width = precisionTo(endSelectionX + toColumnOffset - left, 1);
-    const height = precisionTo(endSelectionY + toRowOffset - top, 1);
+    let width = precisionTo(endSelectionX + toColumnOffset - left, 1);
+    let height = precisionTo(endSelectionY + toRowOffset - top, 1);
+
+    if (startSelectionCell.startX === endSelectionCell.endX) {
+        width = 0;
+    }
+
+    if (startSelectionCell.startY === endSelectionCell.endY) {
+        height = 0;
+    }
 
     return {
         left,

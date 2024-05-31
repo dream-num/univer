@@ -146,30 +146,30 @@ export class ImageCropperObject<T extends IImageCropperObjectProps = IImageCropp
 
         this._initialCacheCanvas();
 
-        if (this._dirty) {
-            this._cacheCanvas?.clear();
-            const cacheCtx = this._cacheCanvas?.getContext();
-            if (cacheCtx == null) {
-                return;
-            }
-
-            cacheCtx.save();
-
-            Rect.drawWith(cacheCtx, {
-                left: 0,
-                top: 0,
-                width: engineWidth,
-                height: engineHeight,
-                fill: 'rgba(0, 0, 0, 0.5)',
-            });
-
-            cacheCtx.setTransform(ctx.getTransform());
-            this._clipForApplyObject(cacheCtx);
-            this._applyCache(ctx);
-            cacheCtx.restore();
-        } else {
-            this._applyCache(ctx);
+        // if (this._dirty) {
+        this._cacheCanvas?.clear();
+        const cacheCtx = this._cacheCanvas?.getContext();
+        if (cacheCtx == null) {
+            return;
         }
+
+        cacheCtx.save();
+
+        Rect.drawWith(cacheCtx, {
+            left: 0,
+            top: 0,
+            width: engineWidth,
+            height: engineHeight,
+            fill: 'rgba(0, 0, 0, 0.5)',
+        });
+
+        cacheCtx.setTransform(ctx.getTransform());
+        this._clipForApplyObject(cacheCtx);
+        this._applyCache(ctx);
+        cacheCtx.restore();
+        // } else {
+        //     this._applyCache(ctx);
+        // }
     }
 
     private _clipForApplyObject(cacheCtx: UniverRenderingContext) {

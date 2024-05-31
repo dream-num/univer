@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 
-export { default as zhCN } from './zh-CN';
-export { default as enUS } from './en-US';
+export const SHEETS_HYPER_LINK_UI_PLUGIN = 'SHEETS_HYPER_LINK_UI_PLUGIN';
+
+export const ERROR_RANGE = 'err';

@@ -60,6 +60,9 @@ import SheetsNumfmtZhCN from '@univerjs/sheets-numfmt/locale/zh-CN';
 import UniscriptEnUS from '@univerjs/uniscript/locale/en-US';
 import UniscriptRuRU from '@univerjs/uniscript/locale/ru-RU';
 import UniscriptZhCN from '@univerjs/uniscript/locale/zh-CN';
+import SheetPermissionUIEnUS from '@univerjs/sheets-permission-ui/locale/en-US';
+import SheetPermissionUIRuRU from '@univerjs/sheets-permission-ui/locale/ru-RU';
+import SheetPermissionUIZhCN from '@univerjs/sheets-permission-ui/locale/zh-CN';
 
 export const zhCN = Tools.deepMerge(
     SheetsZhCN,
@@ -76,7 +79,8 @@ export const zhCN = Tools.deepMerge(
     SheetsThreadCommentZhCN,
     ThreadCommentUIZhCN,
     SheetsNumfmtZhCN,
-    UniscriptZhCN
+    UniscriptZhCN,
+    SheetPermissionUIZhCN
 );
 
 export const enUS = Tools.deepMerge(
@@ -94,7 +98,8 @@ export const enUS = Tools.deepMerge(
     SheetsThreadCommentEnUS,
     ThreadCommentUIEnUS,
     SheetsNumfmtEnUS,
-    UniscriptEnUS
+    UniscriptEnUS,
+    SheetPermissionUIEnUS
 );
 
 export const ruRU = Tools.deepMerge(
@@ -112,5 +117,6 @@ export const ruRU = Tools.deepMerge(
     SheetsThreadCommentRuRU,
     ThreadCommentUIRuRU,
     SheetsNumfmtRuRU,
-    UniscriptRuRU
+    UniscriptRuRU,
+    SheetPermissionUIRuRU
 );

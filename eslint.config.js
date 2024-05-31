@@ -1,6 +1,7 @@
 import antfu from '@antfu/eslint-config';
 import header from 'eslint-plugin-header';
 import barrel from 'eslint-plugin-no-barrel-import';
+import penetrating from 'eslint-plugin-no-penetrating-import';
 import { baseRules, typescriptPreset } from '@univerjs/shared/eslint';
 
 export default antfu({
@@ -71,4 +72,19 @@ export default antfu({
             2,
         ],
     },
-}, typescriptPreset());
+}, {
+    // Not penetrating for source files
+    files: ['**/*.ts', '**/*.tsx'],
+    plugins: {
+        penetrating,
+    },
+    ignores: [
+        '**/__tests__/**/*',
+        '**/__testing__/**/*',
+        'examples/**/*',
+    ],
+    rules: {
+        'penetrating/no-penetrating-import': 2,
+    },
+},
+typescriptPreset());

@@ -179,6 +179,7 @@ export function getInsertRangeMutations(accessor: IAccessor, params: IInsertRang
     };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function getRemoveRangeMutations(accessor: IAccessor, params: IDeleteRangeMutationParams) {
     const redo: IMutationInfo[] = [];
     const undo: IMutationInfo[] = [];

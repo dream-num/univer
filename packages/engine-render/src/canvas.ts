@@ -144,7 +144,7 @@ export class Canvas {
             canvsElement.style.height = `${this._height}px`;
         }
 
-        this.getContext().setTransform(this._pixelRatio, 0, 0, this._pixelRatio, 0, 0);
+        this.getContext()?.setTransform(this._pixelRatio, 0, 0, this._pixelRatio, 0, 0);
     }
 
     setPixelRatio(pixelRatio: number) {

@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
-import { ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
+import type { IDrawingParam, Nullable } from '@univerjs/core';
+import { debounce, ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { Checkbox, InputNumber } from '@univerjs/design';
 import clsx from 'clsx';
-import type { IChangeObserverConfig } from '@univerjs/engine-render';
+import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getUpdateParams } from '../../utils/get-update-params';
+import { MIN_DRAWING_HEIGHT_LIMIT, MIN_DRAWING_WIDTH_LIMIT, RANGE_DRAWING_ROTATION_LIMIT } from '../../utils/config';
 import styles from './index.module.less';
 
 export interface IDrawingTransformProps {
     transformShow: boolean;
     drawings: IDrawingParam[];
 }
+
+const INPUT_DEBOUNCE_TIME = 300;
 
 export const DrawingTransform = (props: IDrawingTransformProps) => {
     const commandService = useDependency(ICommandService);
@@ -56,6 +59,12 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
     if (scene == null) {
         return;
     }
+
+    const topScene = scene.getEngine()?.activeScene as Nullable<Scene>;
+    if (topScene == null) {
+        return;
+    }
+
     const transformer = scene.getTransformerByCreate();
 
     const {
@@ -72,6 +81,55 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
     const [yPosition, setYPosition] = useState(originY);
     const [rotation, setRotation] = useState(originRotation);
     const [lockRatio, setLockRatio] = useState(transformer.keepRatio);
+
+    const checkMoveBoundary = (left: number, top: number, width: number, height: number) => {
+        const { width: topSceneWidth, height: topSceneHeight } = topScene;
+        const { ancestorLeft, ancestorTop } = scene;
+
+        let limitLeft = left;
+        let limitTop = top;
+        let limitWidth = width;
+        let limitHeight = height;
+
+        if (left + ancestorLeft < 0) {
+            limitLeft = -ancestorLeft;
+        }
+
+        if (top + ancestorTop < 0) {
+            limitTop = -ancestorTop;
+        }
+
+        if (limitLeft + width + ancestorLeft > topSceneWidth) {
+            limitWidth = topSceneWidth - limitLeft - ancestorLeft;
+        }
+
+        if (limitWidth < MIN_DRAWING_WIDTH_LIMIT) {
+            limitWidth = MIN_DRAWING_WIDTH_LIMIT;
+        }
+
+        if (limitTop + height + ancestorTop > topSceneHeight) {
+            limitHeight = topSceneHeight - limitTop - ancestorTop;
+        }
+
+        if (limitHeight < MIN_DRAWING_WIDTH_LIMIT) {
+            limitHeight = MIN_DRAWING_WIDTH_LIMIT;
+        }
+
+        if (left + limitWidth + ancestorLeft > topSceneWidth) {
+            limitLeft = topSceneWidth - width - ancestorLeft;
+        }
+
+        if (top + limitHeight + ancestorTop > topSceneHeight) {
+            limitTop = topSceneHeight - height - ancestorTop;
+        }
+
+        return {
+            limitLeft,
+            limitTop,
+            limitWidth,
+            limitHeight,
+        };
+    };
 
     const changeObs = (state: IChangeObserverConfig) => {
         const { objects } = state;
@@ -131,21 +189,75 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
             changeObs(state);
         });
 
+        const onFocusObserver = drawingManagerService.focus$.subscribe((drawings) => {
+            if (drawings.length !== 1) {
+                return;
+            }
+
+            const drawingParam = drawingManagerService.getDrawingByParam(drawings[0]);
+
+            if (drawingParam == null) {
+                return;
+            }
+
+            const transform = drawingParam.transform;
+
+            if (transform == null) {
+                return;
+            }
+
+            const {
+                width: originWidth,
+                height: originHeight,
+                left: originX,
+                top: originY,
+                angle: originRotation,
+            } = transform;
+
+            if (originWidth != null) {
+                setWidth(originWidth);
+            }
+
+            if (originHeight != null) {
+                setHeight(originHeight);
+            }
+
+            if (originX != null) {
+                setXPosition(originX);
+            }
+
+            if (originY != null) {
+                setYPosition(originY);
+            }
+
+            if (originRotation != null) {
+                setRotation(originRotation);
+            }
+        });
+
         return () => {
             onChangingObserver?.dispose();
             onChangeStartObserver?.dispose();
+            onFocusObserver?.unsubscribe();
         };
     }, []);
 
-    const handleWidthChange = (val: number | null) => {
+    const handleWidthChange = debounce((val: number | null) => {
         if (val == null) {
             return;
         }
 
+        val = Math.max(val, MIN_DRAWING_WIDTH_LIMIT);
+
+        const { limitWidth } = checkMoveBoundary(xPosition, yPosition, val, height);
+
+        val = limitWidth;
+
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { width: val } };
 
         if (lockRatio) {
-            const heightFix = (val / width) * height;
+            let heightFix = (val / width) * height;
+            heightFix = Math.max(heightFix, MIN_DRAWING_HEIGHT_LIMIT);
             setHeight(heightFix);
             updateParam.transform!.height = heightFix;
         }
@@ -154,19 +266,25 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.clearControls(false);
-        transformer.refreshControls();
-    };
+        transformer.refreshControls().changeNotification();
+    }, INPUT_DEBOUNCE_TIME);
 
-    const handleHeightChange = (val: number | null) => {
+    const handleHeightChange = debounce((val: number | null) => {
         if (val == null) {
             return;
         }
 
+        val = Math.max(val, MIN_DRAWING_WIDTH_LIMIT);
+
+        const { limitHeight } = checkMoveBoundary(xPosition, yPosition, width, val);
+
+        val = limitHeight;
+
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { height: val } };
 
         if (lockRatio) {
-            const widthFix = (val / height) * width;
+            let widthFix = (val / height) * width;
+            widthFix = Math.max(widthFix, MIN_DRAWING_WIDTH_LIMIT);
             setWidth(widthFix);
             updateParam.transform!.width = widthFix;
         }
@@ -175,14 +293,17 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.clearControls(false);
-        transformer.refreshControls();
-    };
+        transformer.refreshControls().changeNotification();
+    }, INPUT_DEBOUNCE_TIME);
 
-    const handleXChange = (val: number | null) => {
+    const handleXChange = debounce((val: number | null) => {
         if (val == null) {
             return;
         }
+
+        const { limitLeft } = checkMoveBoundary(val, yPosition, width, height);
+
+        val = limitLeft;
 
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { left: val } };
 
@@ -190,14 +311,17 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.clearControls(false);
-        transformer.refreshControls();
-    };
+        transformer.refreshControls().changeNotification();
+    }, INPUT_DEBOUNCE_TIME);
 
-    const handleYChange = (val: number | null) => {
+    const handleYChange = debounce((val: number | null) => {
         if (val == null) {
             return;
         }
+
+        const { limitTop } = checkMoveBoundary(xPosition, val, width, height);
+
+        val = limitTop;
 
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { top: val } };
 
@@ -205,13 +329,22 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.clearControls(false);
-        transformer.refreshControls();
-    };
+        transformer.refreshControls().changeNotification();
+    }, INPUT_DEBOUNCE_TIME);
 
     const handleRotationChange = (val: number | null) => {
         if (val == null) {
             return;
+        }
+
+        const [min, max] = RANGE_DRAWING_ROTATION_LIMIT;
+
+        if (val < min) {
+            val = min;
+        }
+
+        if (val > max) {
+            val = max;
         }
 
         const updateParam: IDrawingParam = { unitId, subUnitId, drawingId, drawingType, transform: { angle: val } };
@@ -220,8 +353,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
 
         drawingManagerService.featurePluginUpdateNotification([updateParam]);
 
-        transformer.clearControls(false);
-        transformer.refreshControls();
+        transformer.refreshControls().changeNotification();
     };
 
     const handleLockRatioChange = (val: string | number | boolean) => {
@@ -250,7 +382,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={width} onChange={handleWidthChange} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={width} onChange={(val) => { handleWidthChange(val); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -264,7 +396,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={height} onChange={handleHeightChange} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={height} onChange={(val) => { handleHeightChange(val); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -294,7 +426,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={xPosition} onChange={handleXChange} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={xPosition} onChange={(val) => { handleXChange(val); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -308,7 +440,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={yPosition} onChange={handleYChange} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={yPosition} onChange={(val) => { handleYChange(val); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>

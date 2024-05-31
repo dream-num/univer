@@ -24,6 +24,9 @@ const locale: typeof enUS = {
         crop: '裁剪',
         reset: '重置大小',
     },
+    'image-cropper': {
+        error: '无法裁剪非图片元素',
+    },
     'image-panel': {
         arrange: {
             title: '排列',
@@ -64,6 +67,7 @@ const locale: typeof enUS = {
             horizon: '水平分布',
             vertical: '垂直分布',
         },
+        null: '未选中任何对象',
     },
 };
 

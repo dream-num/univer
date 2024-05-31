@@ -37,7 +37,7 @@ import { UniverSheetsPermissionUIPlugin } from '@univerjs/sheets-permission-ui';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
-
+import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
 import { FUniver } from '@univerjs/facade';
 import { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
@@ -93,6 +93,8 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',
 } as IUniverRPCMainThreadConfig);
 
+univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
+
 // find replace
 univer.registerPlugin(UniverFindReplacePlugin);
 univer.registerPlugin(UniverSheetsFindReplacePlugin);
@@ -107,11 +109,11 @@ univer.registerPlugin(UniverSheetsFilterPlugin);
 // sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
+// sheet permission
+univer.registerPlugin(UniverSheetsPermissionUIPlugin);
 // drawing
 univer.registerPlugin(UniverDrawingUIPlugin);
 univer.registerPlugin(UniverSheetsDrawingUIPlugin);
-// sheet permission
-univer.registerPlugin(UniverSheetsPermissionUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {

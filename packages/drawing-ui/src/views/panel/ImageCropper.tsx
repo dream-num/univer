@@ -17,11 +17,11 @@
 import type { IDrawingParam } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CreateCopySingle } from '@univerjs/icons';
 import { Button, Select } from '@univerjs/design';
 import clsx from 'clsx';
-import { AutoImageCropOperation, CropType } from '../../commands/operations/image-crop.operation';
+import { AutoImageCropOperation, CloseImageCropOperation, CropType } from '../../commands/operations/image-crop.operation';
 import styles from './index.module.less';
 
 export interface IImageCropperProps {
@@ -42,6 +42,9 @@ export const ImageCropper = (props: IImageCropperProps) => {
     }
 
     const [cropValue, setCropValue] = useState<string>(CropType.FREE as string);
+
+    const cropStateRef = useRef(false);
+
     const cropOptions = [
         {
             label: localeService.t('image-panel.crop.mode'),
@@ -76,8 +79,28 @@ export const ImageCropper = (props: IImageCropperProps) => {
         },
     ];
 
+    useEffect(() => {
+        const onChangeStartObserver = commandService.onCommandExecuted((command) => {
+            if (command.id === CloseImageCropOperation.id) {
+                const params = command.params as { isAuto?: boolean };
+                if (!params?.isAuto) {
+                    cropStateRef.current = false;
+                }
+            }
+        });
+
+        return () => {
+            onChangeStartObserver?.dispose();
+        };
+    }, []);
+
     function handleCropChange(value: string | number | boolean) {
         setCropValue((value as string));
+        if (cropStateRef.current) {
+            commandService.executeCommand(AutoImageCropOperation.id, {
+                cropType: value as CropType,
+            });
+        }
     }
 
     const gridDisplay = (isShow: boolean) => {
@@ -88,6 +111,7 @@ export const ImageCropper = (props: IImageCropperProps) => {
         commandService.executeCommand(AutoImageCropOperation.id, {
             cropType: val,
         });
+        cropStateRef.current = true;
     };
 
     return (

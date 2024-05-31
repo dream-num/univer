@@ -210,7 +210,6 @@ export class NodePositionConvertToCursor {
     getRangePointData(startOrigin: Nullable<INodePosition>, endOrigin: Nullable<INodePosition>) {
         const borderBoxPointGroup: IPoint[][] = [];
         const contentBoxPointGroup: IPoint[][] = [];
-
         const cursorList: ITextRange[] = [];
 
         if (startOrigin == null || endOrigin == null) {
@@ -224,25 +223,24 @@ export class NodePositionConvertToCursor {
         const { start, end } = compareNodePosition(startOrigin, endOrigin);
 
         this._selectionIterator(start, end, (start_sp, end_sp, isFirst, isLast, divide, line) => {
-            const { lineHeight, marginTop, contentHeight } = line;
-
+            const { lineHeight, marginTop, asc } = line;
             const { glyphGroup, st } = divide;
-
             const { x: startX, y: startY } = this._liquid;
 
             let borderBoxPosition: IPosition;
             let contentBoxPosition: IPosition;
 
-            const firstSpan = glyphGroup[start_sp];
-            const lastSpan = glyphGroup[end_sp];
+            const firstGlyph = glyphGroup[start_sp];
+            const lastGlyph = glyphGroup[end_sp];
+            const preGlyph = glyphGroup[start_sp - 1];
 
-            const firstSpanLeft = firstSpan?.left || 0;
-            const firstSpanWidth = firstSpan?.width || 0;
+            const firstGlyphLeft = firstGlyph?.left || 0;
+            const firstGlyphWidth = firstGlyph?.width || 0;
 
-            const lastSpanLeft = lastSpan?.left || 0;
-            const lastSpanWidth = lastSpan?.width || 0;
+            const lastGlyphLeft = lastGlyph?.left || 0;
+            const lastGlyphWidth = lastGlyph?.width || 0;
 
-            const isCurrentList = firstSpan?.glyphType === GlyphType.LIST;
+            const isCurrentList = firstGlyph?.glyphType === GlyphType.LIST;
 
             const { startOffset, endOffset } = getOffsetInDivide(glyphGroup, start_sp, end_sp, st);
 
@@ -251,36 +249,37 @@ export class NodePositionConvertToCursor {
             const isEndBack = end.glyph === end_sp && isLast ? end.isBack : false;
 
             const collapsed = start === end;
+            const anchorGlyph = isStartBack ? (preGlyph ?? firstGlyph) : firstGlyph;
 
             if (start_sp === 0 && end_sp === glyphGroup.length - 1) {
                 borderBoxPosition = {
-                    startX: startX + firstSpanLeft + (isCurrentList ? firstSpanWidth : 0),
+                    startX: startX + firstGlyphLeft + (isCurrentList ? firstGlyphWidth : 0),
                     startY,
-                    endX: startX + lastSpanLeft + lastSpanWidth,
+                    endX: startX + lastGlyphLeft + lastGlyphWidth,
                     endY: startY + lineHeight,
                 };
 
                 contentBoxPosition = {
-                    startX: startX + firstSpanLeft + (isCurrentList ? firstSpanWidth : 0),
-                    startY: startY + marginTop,
-                    endX: startX + lastSpanLeft + lastSpanWidth,
-                    endY: startY + marginTop + contentHeight,
+                    startX: startX + firstGlyphLeft + (isCurrentList ? firstGlyphWidth : 0),
+                    startY: startY + marginTop + asc - anchorGlyph.bBox.ba,
+                    endX: startX + lastGlyphLeft + lastGlyphWidth,
+                    endY: startY + marginTop + asc + anchorGlyph.bBox.bd,
                 };
             } else {
                 const isStartBackFin = isStartBack && !isCurrentList;
 
                 borderBoxPosition = {
-                    startX: startX + firstSpanLeft + (isStartBackFin ? 0 : firstSpanWidth),
+                    startX: startX + firstGlyphLeft + (isStartBackFin ? 0 : firstGlyphWidth),
                     startY,
-                    endX: startX + lastSpanLeft + (isEndBack ? 0 : lastSpanWidth),
+                    endX: startX + lastGlyphLeft + (isEndBack ? 0 : lastGlyphWidth),
                     endY: startY + lineHeight,
                 };
 
                 contentBoxPosition = {
-                    startX: startX + firstSpanLeft + (isStartBackFin ? 0 : firstSpanWidth),
-                    startY: startY + marginTop,
-                    endX: startX + lastSpanLeft + (isEndBack ? 0 : lastSpanWidth),
-                    endY: startY + marginTop + contentHeight,
+                    startX: startX + firstGlyphLeft + (isStartBackFin ? 0 : firstGlyphWidth),
+                    startY: startY + marginTop + asc - anchorGlyph.bBox.ba,
+                    endX: startX + lastGlyphLeft + (isEndBack ? 0 : lastGlyphWidth),
+                    endY: startY + marginTop + asc + anchorGlyph.bBox.bd,
                 };
             }
 
@@ -288,8 +287,8 @@ export class NodePositionConvertToCursor {
             contentBoxPointGroup.push(this._pushToPoints(contentBoxPosition));
 
             cursorList.push({
-                startOffset: isStartBack ? startOffset : startOffset + firstSpan.count,
-                endOffset: isEndBack ? endOffset : endOffset + lastSpan.count,
+                startOffset: isStartBack ? startOffset : startOffset + firstGlyph.count,
+                endOffset: isEndBack ? endOffset : endOffset + lastGlyph.count,
                 collapsed,
             });
         });
@@ -546,7 +545,7 @@ export class NodePositionConvertToCursor {
                             this._liquid.translateSave();
                             this._liquid.translateDivide(divide);
 
-                            const glyphGroup = divide.glyphGroup;
+                            const { glyphGroup } = divide;
 
                             const { start_next: start_sp, end_next: end_sp } = this._getSelectionRuler(
                                 NodePositionMap.divide,
@@ -557,7 +556,6 @@ export class NodePositionConvertToCursor {
                             );
 
                             let isFirst = false;
-
                             let isLast = false;
 
                             if (p === pageIndex && s === start_s && c === start_c && l === start_l && d === start_d) {

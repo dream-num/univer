@@ -25,6 +25,9 @@ import { delay, filter, take } from 'rxjs';
 
 import { ILayoutService } from '../../services/layout/layout.service';
 import { App } from '../../views/App';
+import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
+import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
+import { FloatDom } from '../../views/components/dom/FloatDom';
 import type { IWorkbenchOptions } from './ui.controller';
 
 const STEADY_TIMEOUT = 3000;
@@ -35,9 +38,11 @@ export class DesktopUIController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
+        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
         @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
     ) {
         super();
+        this._initBuiltinComponents();
     }
 
     bootstrapWorkbench(options: IWorkbenchOptions): void {
@@ -69,6 +74,11 @@ export class DesktopUIController extends Disposable {
                 });
             })
         );
+    }
+
+    private _initBuiltinComponents() {
+        this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(CanvasPopup, this._injector)));
+        this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(FloatDom, this._injector)));
     }
 }
 

@@ -64,7 +64,7 @@ export function App(props: IUniverAppProps) {
         return () => {
             updateSubscription.unsubscribe();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const { headerComponents, contentComponents, footerComponents, headerMenuComponents, leftSidebarComponents, globalComponents } = useMemo(() => ({
@@ -74,14 +74,14 @@ export function App(props: IUniverAppProps) {
         headerMenuComponents: uiPartsService.getComponents(BuiltInUIPart.HEADER_MENU),
         leftSidebarComponents: uiPartsService.getComponents(BuiltInUIPart.LEFT_SIDEBAR),
         globalComponents: uiPartsService.getComponents(BuiltInUIPart.GLOBAL),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }), [updateTrigger]);
 
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
             themeService.setTheme(defaultTheme);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -151,8 +151,6 @@ export function App(props: IUniverAppProps) {
                                 data-range-selector
                                 onContextMenu={(e) => e.preventDefault()}
                             >
-                                <CanvasPopup />
-                                <FloatDom />
                                 <ComponentContainer components={contentComponents} />
                             </section>
                         </section>

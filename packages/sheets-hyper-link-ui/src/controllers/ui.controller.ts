@@ -22,7 +22,6 @@ import { LinkSingle } from '@univerjs/icons';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 import { CellLinkEdit } from '../views/CellLinkEdit';
 import { CloseHyperLinkSidebarOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkSidebarOperation } from '../commands/operations/sidebar.operations';
-import { zhCN } from '../locales';
 import { insertLinkMenuFactory, insertLinkMenuToolbarFactory, InsertLinkShortcut } from './menu';
 
 export interface IUniverSheetsHyperLinkUIConfig {
@@ -44,7 +43,6 @@ export class SheetsHyperLinkUIController extends Disposable {
 
         this._initComponents();
         this._initCommands();
-        this._initLocale();
         this._initMenus();
         this._initShortCut();
     }
@@ -67,12 +65,6 @@ export class SheetsHyperLinkUIController extends Disposable {
             InsertHyperLinkToolbarOperation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
-        });
-    }
-
-    private _initLocale() {
-        this._localeService.load({
-            zhCN,
         });
     }
 

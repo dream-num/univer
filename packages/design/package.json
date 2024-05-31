@@ -77,7 +77,7 @@
         "@rc-component/color-picker": "^1.5.3",
         "@rc-component/trigger": "^1.18.3",
         "@types/react-mentions": "^4.1.13",
-        "@univerjs/icons": "^0.1.54",
+        "@univerjs/icons": "^0.1.55",
         "rc-dialog": "^9.4.0",
         "rc-dropdown": "^4.2.0",
         "rc-input": "^1.4.5",
@@ -107,7 +107,7 @@
         "react": "18.2.0",
         "react-dom": "18.2.0",
         "typescript": "^5.4.5",
-        "vite": "^5.2.11",
+        "vite": "^5.2.12",
         "vitest": "^1.6.0"
     }
 }

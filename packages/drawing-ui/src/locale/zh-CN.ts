@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type enUS from './en-US';
-
-const locale: typeof enUS = {
+const locale = {
     'image-popup': {
         replace: '替换',
         delete: '删除',

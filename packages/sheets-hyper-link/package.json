@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/sheets-hyper-link",
-    "version": "0.0.1",
-    "private": true,
+    "version": "0.1.12",
+    "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -71,7 +71,7 @@
         "@wendellhu/redi": "^0.15.2",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.11",
+        "vite": "^5.2.12",
         "vitest": "^1.6.0"
     }
 }

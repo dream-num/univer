@@ -37,17 +37,15 @@ export class Line extends docExtension {
 
     private _preBackgroundColor = '';
 
-    override draw(ctx: UniverRenderingContext, parentScale: IScale, span: IDocumentSkeletonGlyph) {
-        const line = span.parent?.parent;
-        if (!line) {
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, glyph: IDocumentSkeletonGlyph) {
+        const line = glyph.parent?.parent;
+        const { ts: textStyle, bBox } = glyph;
+
+        if (line == null || textStyle == null) {
             return;
         }
 
         const { asc, dsc } = line;
-        const { ts: textStyle, bBox } = span;
-        if (!textStyle) {
-            return;
-        }
 
         const { sp: strikeoutPosition, spo, sbo, bd } = bBox;
 
@@ -60,7 +58,7 @@ export class Line extends docExtension {
         if (underline) {
             const startY = asc + dsc;
 
-            this._drawLine(ctx, span, underline, startY, scale);
+            this._drawLine(ctx, glyph, underline, startY, scale);
         }
 
         if (strikethrough) {
@@ -80,13 +78,13 @@ export class Line extends docExtension {
                 startY += sbo;
             }
 
-            this._drawLine(ctx, span, strikethrough, startY, scale);
+            this._drawLine(ctx, glyph, strikethrough, startY, scale);
         }
 
         if (overline) {
             const startY = -DEFAULT_OFFSET_SPACING - DELTA;
 
-            this._drawLine(ctx, span, overline, startY, scale);
+            this._drawLine(ctx, glyph, overline, startY, scale);
         }
     }
 
@@ -96,7 +94,7 @@ export class Line extends docExtension {
 
     private _drawLine(
         ctx: UniverRenderingContext,
-        span: IDocumentSkeletonGlyph,
+        glyph: IDocumentSkeletonGlyph,
         line: ITextDecoration,
         startY: number,
         _scale: number
@@ -113,7 +111,7 @@ export class Line extends docExtension {
             renderConfig = {},
         } = this.extensionOffset;
 
-        const { left, width } = span;
+        const { left, width } = glyph;
 
         const { centerAngle: centerAngleDeg = 0, vertexAngle: vertexAngleDeg = 0 } = renderConfig;
 
@@ -125,7 +123,7 @@ export class Line extends docExtension {
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
         const color =
-            (c === BooleanNumber.TRUE ? getColorStyle(span.ts?.cl) : getColorStyle(colorStyle)) || COLOR_BLACK_RGB;
+            (c === BooleanNumber.TRUE ? getColorStyle(glyph.ts?.cl) : getColorStyle(colorStyle)) || COLOR_BLACK_RGB;
         ctx.strokeStyle = color;
 
         this._setLineType(ctx, lineType || TextDecoration.SINGLE);

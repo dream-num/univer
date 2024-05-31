@@ -26,7 +26,7 @@ import { IDialogService } from '@univerjs/ui';
 import { filter, first } from 'rxjs/operators';
 import type { IRenderContext, IRenderController, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetPasteParams } from '@univerjs/sheets-ui';
-import { ApplyFormatPainterCommand, AutoFillCommand, FormulaEditorController, HeaderMoveRenderController, HeaderResizeRenderController, IAutoFillService, ISelectionRenderService, ISheetClipboardService, SetCellEditVisibleOperation, SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand, SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import { ApplyFormatPainterCommand, AutoFillCommand, FormulaEditorController, HeaderMoveRenderController, HeaderResizeRenderController, IAutoFillService, ISelectionRenderService, ISheetClipboardService, SetCellEditVisibleOperation, SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand, SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand, StatusBarController, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import type { IOpenFilterPanelOperationParams } from '@univerjs/sheets-filter-ui';
 import { OpenFilterPanelOperation, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter-ui';
@@ -39,7 +39,7 @@ import { AddCfCommand, ConditionalFormattingClearController } from '@univerjs/sh
 import type { IConditionalFormattingRuleConfig, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import { HeaderFreezeRenderController } from '@univerjs/sheets-ui/controllers/render-controllers/freeze.render-controller.js';
 import { UnitAction } from '@univerjs/protocol';
-import { deserializeRangeWithSheet, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, LexerTreeBuilder, NullValueObject } from '@univerjs/engine-formula';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG, UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from '../views/error-msg-dialog/interface';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
@@ -73,7 +73,8 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
         @Inject(ISheetClipboardService) private _sheetClipboardService: ISheetClipboardService,
         @Inject(HeaderFreezeRenderController) private _headerFreezeRenderController: HeaderFreezeRenderController,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @Inject(StatusBarController) private readonly _statusBarController: StatusBarController
     ) {
         super();
         this._initialize();
@@ -86,6 +87,7 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
         this._initConditionalFormattingPermissionInterceptor();
         this._initFreezePermissionInterceptor();
         this._initFormulaEditorPermissionInterceptor();
+        this._initStatusBarPermissionInterceptor();
         this._initClipboardHook();
     }
 
@@ -962,6 +964,35 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
                 return rulesByPermissionCheck;
             },
         });
+    }
+
+    private _initStatusBarPermissionInterceptor() {
+        this.disposeWithMe(
+            this._statusBarController.interceptor.intercept(this._statusBarController.interceptor.getInterceptPoints().STATUS_BAR_PERMISSION_CORRECT, {
+                priority: 100,
+                handler: (defaultValue, originValue) => {
+                    const target = getSheetCommandTarget(this._univerInstanceService);
+                    if (!target) {
+                        return defaultValue ?? [];
+                    }
+                    const { worksheet } = target;
+                    originValue.forEach((item) => {
+                        const itemValue = item.getArrayValue();
+                        const startRow = item.getCurrentRow();
+                        const startCol = item.getCurrentColumn();
+                        itemValue.forEach((row, rowIndex) => {
+                            row.forEach((col, colIndex) => {
+                                const permission = (worksheet.getCell(rowIndex + startRow, colIndex + startCol) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
+                                if (permission?.[UnitAction.View] === false) {
+                                    itemValue[rowIndex][colIndex] = NullValueObject.create();
+                                }
+                            });
+                        });
+                    });
+                    return originValue;
+                },
+            })
+        );
     }
 
     private _initFreezePermissionInterceptor() {

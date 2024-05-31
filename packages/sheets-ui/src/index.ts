@@ -102,3 +102,4 @@ export { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeUnderlineCommand, S
 export { ApplyFormatPainterCommand } from './commands/commands/set-format-painter.command';
 export { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 export { FormulaEditorController } from './controllers/editor/formula-editor.controller';
+export { StatusBarController } from './controllers/status-bar.controller';

@@ -32,10 +32,7 @@ import { InsertSheetCommand, RemoveSheetCommand, SelectionManagerService, SetWor
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FWorksheet } from './f-worksheet';
-import { isSingleCell } from './utils.ts';
-import { FRange } from './f-range.ts';
 
 export class FWorkbook {
     readonly id: string;
@@ -46,8 +43,7 @@ export class FWorkbook {
         @Inject(IResourceLoaderService) private readonly _resourceLoaderService: IResourceLoaderService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @ICommandService private readonly _commandService: ICommandService
 
     ) {
         this.id = this._workbook.getUnitId();
@@ -237,47 +233,6 @@ export class FWorkbook {
 
             callback(command);
         });
-    }
-
-    /**
-     * Registers a callback that will be triggered when a cell is clicked.
-     * @param callback the callback.
-     * @param sheetId a Univer sheet id, default value is ActiveSheet id
-     * @returns A function to dispose the listening.
-     */
-    onCellClick(callback: (selection: FRange) => void, sheetId?: string): IDisposable {
-        let hasStart = false;
-        const disposableStart = toDisposable(this._selectionManagerService.selectionMoveStart$.subscribe(() => (hasStart = true)));
-        const disposableChange = this.onSelectionChange(async (selections) => {
-            if (!hasStart) {
-                return;
-            }
-            hasStart = false;
-            if (selections.length !== 1) {
-                return;
-            }
-
-            const [selection] = selections;
-            sheetId ??= this._workbook.getActiveSheet().getSheetId();
-
-            const sheetSkeletonManagerParam = this._sheetSkeletonManagerService.getUnitSkeleton(this._workbook.getUnitId(), sheetId);
-            if (!sheetSkeletonManagerParam) {
-                return;
-            }
-
-            const selectionCellWithCoord = sheetSkeletonManagerParam.skeleton.getCellByIndex(selection.startRow, selection.startColumn);
-            const { mergeInfo } = selectionCellWithCoord;
-            if (isSingleCell(mergeInfo, selection)) {
-                callback(this._injector.createInstance(FRange, this._workbook, this._workbook.getSheetBySheetId(sheetId)!, selection));
-            }
-        });
-
-        return {
-            dispose() {
-                disposableStart.dispose();
-                disposableChange.dispose();
-            },
-        };
     }
 
     onSelectionChange(callback: (selections: IRange[]) => void): IDisposable {

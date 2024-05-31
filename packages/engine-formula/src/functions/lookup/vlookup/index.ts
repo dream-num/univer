@@ -61,44 +61,62 @@ export class Vlookup extends BaseFunction {
         // Otherwise colIndexNum takes the first value
 
         if (isSingleValueObject(lookupValue) && isSingleValueObject(rangeLookup) && colIndexNum.isArray()) {
-            lookupValue = lookupValue.isArray() ? (lookupValue as ArrayValueObject).getFirstCell() : lookupValue;
-
-            const rangeLookupValue = this.getZeroOrOneByOneDefault(rangeLookup);
-
-            if (rangeLookupValue == null) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            let errorValue: BaseValueObject | undefined;
-            const result: BaseValueObject[][] = [];
-
-            (colIndexNum as ArrayValueObject).iterator((colIndexNumValueObject: Nullable<BaseValueObject>, rowIndex: number, columnIndex: number) => {
-                if (colIndexNumValueObject === null || colIndexNumValueObject === undefined) {
-                    errorValue = ErrorValueObject.create(ErrorType.VALUE);
-                    return false;
-                }
-
-                const searchObject = this._handleTableArray(lookupValue, tableArray, colIndexNumValueObject, rangeLookupValue);
-
-                if (searchObject.isError()) {
-                    errorValue = searchObject;
-                    return false;
-                }
-
-                if (result[rowIndex] === undefined) {
-                    result[rowIndex] = [];
-                }
-
-                result[rowIndex][columnIndex] = searchObject;
-            });
-
-            if (errorValue) {
-                return errorValue;
-            }
-
-            return createNewArray(result, result.length, result[0].length, this.unitId || '', this.subUnitId || '');
+            return this._handleArrayColIndexNum(lookupValue, tableArray, colIndexNum, rangeLookup);
         }
 
+        return this._handleNonArrayColIndexNum(lookupValue, tableArray, colIndexNum, rangeLookup);
+    }
+
+    private _handleArrayColIndexNum(
+        lookupValue: BaseValueObject,
+        tableArray: BaseValueObject,
+        colIndexNum: BaseValueObject,
+        rangeLookup: BaseValueObject
+    ) {
+        lookupValue = lookupValue.isArray() ? (lookupValue as ArrayValueObject).getFirstCell() : lookupValue;
+
+        const rangeLookupValue = this.getZeroOrOneByOneDefault(rangeLookup);
+
+        if (rangeLookupValue == null) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        let errorValue: BaseValueObject | undefined;
+        const result: BaseValueObject[][] = [];
+
+        (colIndexNum as ArrayValueObject).iterator((colIndexNumValueObject: Nullable<BaseValueObject>, rowIndex: number, columnIndex: number) => {
+            if (colIndexNumValueObject === null || colIndexNumValueObject === undefined) {
+                errorValue = ErrorValueObject.create(ErrorType.VALUE);
+                return false;
+            }
+
+            const searchObject = this._handleTableArray(lookupValue, tableArray, colIndexNumValueObject, rangeLookupValue);
+
+            if (searchObject.isError()) {
+                errorValue = searchObject;
+                return false;
+            }
+
+            if (result[rowIndex] === undefined) {
+                result[rowIndex] = [];
+            }
+
+            result[rowIndex][columnIndex] = searchObject;
+        });
+
+        if (errorValue) {
+            return errorValue;
+        }
+
+        return createNewArray(result, result.length, result[0].length, this.unitId || '', this.subUnitId || '');
+    }
+
+    private _handleNonArrayColIndexNum(
+        lookupValue: BaseValueObject,
+        tableArray: BaseValueObject,
+        colIndexNum: BaseValueObject,
+        rangeLookup: BaseValueObject
+    ) {
         // max row length
         const maxRowLength = Math.max(
             lookupValue.isArray() ? (lookupValue as ArrayValueObject).getRowCount() : 1,

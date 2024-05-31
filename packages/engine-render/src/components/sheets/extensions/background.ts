@@ -16,8 +16,9 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 
-import { getColor } from '../../../basics/tools';
+import { fixLineWidthByScale, getColor, inViewRanges, mergeRangeIfIntersects } from '../../../basics/tools';
 import type { UniverRenderingContext } from '../../../context';
+import type { IDrawInfo } from '../../extension';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import type { Spreadsheet } from '../spreadsheet';
@@ -25,8 +26,12 @@ import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 
-const DOC_EXTENSION_Z_INDEX = 40;
-const PRINTING_Z_INDEX = 20;
+/**
+ * in prev version background ext is higer than font ext. now turing back lower than font ext.
+ * font ext zindex is 30.
+ */
+const DOC_EXTENSION_Z_INDEX = 21;
+const PRINTING_Z_INDEX = 21;
 
 export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
@@ -43,7 +48,8 @@ export class Background extends SheetExtension {
         ctx: UniverRenderingContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
-        diffRanges?: IRange[]
+        diffRanges: IRange[],
+        { viewRanges, checkOutOfViewBound }: IDrawInfo
     ) {
         const { stylesCache } = spreadsheetSkeleton;
         const { background, backgroundPositions } = stylesCache;
@@ -63,61 +69,54 @@ export class Background extends SheetExtension {
             return;
         }
         ctx.save();
-
-        ctx.setGlobalCompositeOperation('destination-over');
+        const { scaleX, scaleY } = ctx.getScale();
         background &&
             Object.keys(background).forEach((rgb: string) => {
                 const backgroundCache = background[rgb];
 
                 ctx.fillStyle = rgb || getColor([255, 255, 255])!;
-                ctx.beginPath();
-                backgroundCache.forValue((rowIndex, columnIndex) => {
-                    const cellInfo = backgroundPositions?.getValue(rowIndex, columnIndex);
 
+                const backgroundPaths = new Path2D();
+                backgroundCache.forValue((rowIndex, columnIndex) => {
+                    if (!checkOutOfViewBound && !inViewRanges(viewRanges, rowIndex, columnIndex)) {
+                        return true;
+                    }
+
+                    const cellInfo = backgroundPositions?.getValue(rowIndex, columnIndex);
                     if (cellInfo == null) {
                         return true;
                     }
                     let { startY, endY, startX, endX } = cellInfo;
                     const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+                    const mergeTo = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
+                    const combineWithMergeRanges = mergeRangeIfIntersects(mergeTo, [mergeInfo]);
+
+                    // If curr cell is not in the viewrange (viewport + merged cells), exit early.
+                    if (!inViewRanges(combineWithMergeRanges!, rowIndex, columnIndex)) {
+                        return true;
+                    }
+
+                    // For merged cells && cells that are not top-left,
+                    // we need to use the background color of the top-left cell.
                     if (isMerged) {
                         return true;
                     }
 
-                    if (
-                        !this.isRenderDiffRangesByCell(
-                            {
-                                startRow: mergeInfo.startRow,
-                                endRow: mergeInfo.endRow,
-                                startColumn: mergeInfo.startColumn,
-                                endColumn: mergeInfo.endColumn,
-                            },
-                            diffRanges
-                        )
-                    ) {
-                        return true;
-                    }
-
-                    // if (
-                    //     !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
-                    //     !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
-                    // ) {
-                    //     return true;
-                    // }
-
+                    // For merged cells, and the current cell is the top-left cell in the merged region.
                     if (isMergedMainCell) {
                         startY = mergeInfo.startY;
                         endY = mergeInfo.endY;
                         startX = mergeInfo.startX;
                         endX = mergeInfo.endX;
                     }
-
-                    ctx.moveToByPrecision(startX, startY);
-                    ctx.lineToByPrecision(startX, endY);
-                    ctx.lineToByPrecision(endX, endY);
-                    ctx.lineToByPrecision(endX, startY);
+                    // precise is a workaround for windows, macOS does not have this issue.
+                    const startXPrecise = fixLineWidthByScale(startX, scaleX);
+                    const startYPrecise = fixLineWidthByScale(startY, scaleY);
+                    const endXPrecise = fixLineWidthByScale(endX, scaleX);
+                    const endYPrecise = fixLineWidthByScale(endY, scaleY);
+                    backgroundPaths.rect(startXPrecise, startYPrecise, endXPrecise - startXPrecise, endYPrecise - startYPrecise);
                 });
-                ctx.closePath();
-                ctx.fill();
+                ctx.fill(backgroundPaths);
             });
         ctx.restore();
     }

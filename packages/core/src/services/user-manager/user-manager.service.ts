@@ -15,24 +15,29 @@
  */
 
 import type { IUser } from '@univerjs/protocol';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { UnitRole } from '@univerjs/protocol';
 
+import { BehaviorSubject, Subject } from 'rxjs';
+import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
+import { createDefaultUser } from './const';
+
+@OnLifecycle(LifecycleStages.Starting, UserManagerService)
 export class UserManagerService {
     private _model = new Map<string, IUser>();
     private _userChange$ = new Subject<{ type: 'add' | 'delete'; user: IUser } | { type: 'clear' }>();
     public userChange$ = this._userChange$.asObservable();
-
-    private _currentUser: IUser | null;
-    private _currentUser$ = new BehaviorSubject<IUser | null>(null);
+    private _currentUser$ = new BehaviorSubject<IUser>(createDefaultUser(UnitRole.Owner));
+    /**
+     * When the current user undergoes a switch or change
+     * @memberof UserManagerService
+     */
     public currentUser$ = this._currentUser$.asObservable();
 
-    getCurrentUser() {
-        return this._currentUser;
+    get currentUser() {
+        return this._currentUser$.getValue();
     }
 
-    setCurrentUser(user: IUser) {
-        this._currentUser = user;
-        this.addUser(user);
+    set currentUser(user: IUser) {
         this._currentUser$.next(user);
     }
 

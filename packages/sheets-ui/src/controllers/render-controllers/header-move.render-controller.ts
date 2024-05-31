@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { Nullable, Observer, Workbook } from '@univerjs/core';
+import type { IRange, Nullable, Observer, Workbook } from '@univerjs/core';
 import {
+    createInterceptorKey,
     Disposable,
     ICommandService,
+    InterceptorManager,
     RANGE_TYPE,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
@@ -57,6 +59,8 @@ enum HEADER_MOVE_TYPE {
     COLUMN,
 }
 
+export const HEADER_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, IRange>('headerMovePermissionCheck');
+
 export class HeaderMoveRenderController extends Disposable implements IRenderController {
     private _startOffsetX: number = Number.NEGATIVE_INFINITY;
 
@@ -85,6 +89,8 @@ export class HeaderMoveRenderController extends Disposable implements IRenderCon
     private _changeToColumn = -1;
 
     private _changeToRow = -1;
+
+    public interceptor = new InterceptorManager({ HEADER_MOVE_PERMISSION_CHECK });
 
     override dispose(): void {
         this._moveHelperBackgroundShape?.dispose();
@@ -127,6 +133,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderCon
         this._initialRowOrColumn(HEADER_MOVE_TYPE.COLUMN);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initialRowOrColumn(initialType: HEADER_MOVE_TYPE = HEADER_MOVE_TYPE.ROW) {
         const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
@@ -138,6 +145,15 @@ export class HeaderMoveRenderController extends Disposable implements IRenderCon
             eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                 if (skeleton == null) {
+                    return;
+                }
+
+                const selectionRange = this._selectionManagerService.getLast()?.range;
+                if (!selectionRange) return;
+
+                const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_MOVE_PERMISSION_CHECK)(false, selectionRange);
+
+                if (!permissionCheck) {
                     return;
                 }
 
@@ -170,9 +186,19 @@ export class HeaderMoveRenderController extends Disposable implements IRenderCon
         );
 
         this._rowOrColumnDownObservers.push(
+            // eslint-disable-next-line max-lines-per-function
             eventBindingObject?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                 if (skeleton == null) {
+                    return;
+                }
+
+                const selectionRange = this._selectionManagerService.getLast()?.range;
+                if (!selectionRange) return;
+
+                const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_MOVE_PERMISSION_CHECK)(false, selectionRange);
+
+                if (!permissionCheck) {
                     return;
                 }
 

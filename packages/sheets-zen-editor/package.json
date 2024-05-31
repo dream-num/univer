@@ -71,6 +71,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.15.2",
@@ -79,7 +80,8 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.52"
+        "@univerjs/icons": "^0.1.52",
+        "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
@@ -87,6 +89,7 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.15.2",

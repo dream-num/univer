@@ -96,7 +96,6 @@ describe('test menu items', () => {
         expect(disabled).toBeFalsy();
 
         select({ startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 });
-
         expect(await commandService.executeCommand(SetBoldCommand.id)).toBeTruthy();
         expect(activated).toBe(true);
     });

@@ -35,7 +35,9 @@ import { TEST_EDITOR_CONTAINER_COMPONENT } from '../views/test-editor/component-
 import VueI18nIcon from '../components/VueI18nIcon.vue';
 
 import { CreateEmptySheetCommand, DisposeCurrentUnitCommand } from '../commands/commands/unit.command';
+import { ChangeUserCommand } from '../commands/operations/change-user.operation';
 import {
+    ChangeUserMenuItemFactory,
     ConfirmMenuItemFactory,
     CreateEmptySheetMenuItemFactory,
     DialogMenuItemFactory,
@@ -84,6 +86,7 @@ export class DebuggerController extends Disposable {
             SaveSnapshotOptions,
             DisposeCurrentUnitCommand,
             CreateEmptySheetCommand,
+            ChangeUserCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         this._injector.add([ExportController]);
@@ -106,6 +109,7 @@ export class DebuggerController extends Disposable {
             UnitMenuItemFactory,
             DisposeCurrentUnitMenuItemFactory,
             CreateEmptySheetMenuItemFactory,
+            ChangeUserMenuItemFactory,
         ] as IMenuItemFactory[]).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
         });

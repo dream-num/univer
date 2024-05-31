@@ -19,6 +19,8 @@ import { getMenuHiddenObservable, MenuItemType, MenuPosition } from '@univerjs/u
 import type { IAccessor } from '@wendellhu/redi';
 
 import { UniverInstanceType } from '@univerjs/core';
+import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
+import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
 
 export function UniscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -31,6 +33,6 @@ export function UniscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         positions: [MenuPosition.TOOLBAR_START],
         // FIXME hidden$ and disabled$ are not correctly in doc
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        // disabled$: getCurrentSheetDisabled$(accessor),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable react-refresh/only-export-components */
+
 import { ConfigContext } from '@univerjs/design';
 import { CloseSingle, ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
 import clsx from 'clsx';
@@ -34,6 +36,10 @@ const iconMap = {
 };
 
 export interface INotificationOptions {
+    /**
+     * Key of the notification.
+     */
+    key?: string;
     /**
      * Component type, optional success, warning, error
      */
@@ -88,8 +94,7 @@ export const PureContent = (props: INotificationOptions) => {
 
 export function Notification() {
     const { mountContainer } = useContext(ConfigContext);
-
-    if (!mountContainer) return <></>;
+    if (!mountContainer) return null;
 
     const [api, contextHolder] = useNotification({
         prefixCls: styles.notification,
@@ -117,6 +122,7 @@ export function Notification() {
                         lines={options.lines}
                     />
                 ),
+                key: options.key,
                 placement: options.placement ?? 'topRight',
                 duration: options.duration ?? 4.5,
                 closable: options.closable ?? true,
@@ -126,7 +132,7 @@ export function Notification() {
         return () => {
             subscription.unsubscribe();
         };
-    }, []);
+    }, [api]);
 
     return <>{contextHolder}</>;
 }

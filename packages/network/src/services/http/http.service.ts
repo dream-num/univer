@@ -19,7 +19,7 @@ import { Disposable, remove, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, of } from 'rxjs';
-import { concatMap } from 'rxjs/operators';
+import { concatMap, map } from 'rxjs/operators';
 
 import { HTTPHeaders } from './headers';
 import type { HTTPResponseType } from './http';
@@ -27,8 +27,8 @@ import { IHTTPImplementation } from './implementations/implementation';
 import { HTTPParams } from './params';
 import type { HTTPRequestMethod } from './request';
 import { HTTPRequest } from './request';
-import type { HTTPEvent, HTTPResponseError } from './response';
-import { HTTPResponse } from './response';
+import type { HTTPEvent } from './response';
+import { HTTPResponse, HTTPResponseError } from './response';
 import type { HTTPHandlerFn, HTTPInterceptorFn, RequestPipe } from './interceptor';
 
 export interface IRequestParams {
@@ -110,6 +110,40 @@ export class HTTPService extends Disposable {
         return this._request<T>('DELETE', url, options);
     }
 
+    patch<T>(url: string, options?: IPostRequestParams): Promise<HTTPResponse<T>> {
+        return this._request<T>('PATCH', url, options);
+    }
+
+    getSSE<T>(
+        method: HTTPRequestMethod,
+        url: string,
+        options?: IPostRequestParams
+    ): Observable<HTTPResponse<T>> {
+        // Things to do when sending a HTTP request:
+        // 1. Generate HTTPRequest/HTTPHeader object
+        // 2. Call interceptors and finally the HTTP implementation.
+        const headers = new HTTPHeaders(options?.headers);
+        const params = new HTTPParams(options?.params);
+        const request = new HTTPRequest(method, url, {
+            headers,
+            params,
+            withCredentials: options?.withCredentials ?? false, // default value for withCredentials is false by MDN
+            responseType: options?.responseType ?? 'json',
+            body: (['GET', 'DELETE'].includes(method)) ? undefined : (options as IPostRequestParams)?.body,
+        });
+
+        return of(request).pipe(
+            concatMap((request) => this._runInterceptorsAndImplementation(request)),
+            map((response) => {
+                if (response instanceof HTTPResponseError) {
+                    throw response;
+                }
+
+                return response;
+            })
+        );
+    }
+
     /** The HTTP request implementations */
     private async _request<T>(
         method: HTTPRequestMethod,
@@ -126,7 +160,7 @@ export class HTTPService extends Disposable {
             params,
             withCredentials: options?.withCredentials ?? false, // default value for withCredentials is false by MDN
             responseType: options?.responseType ?? 'json',
-            body: (method === 'GET') ? undefined : (options as IPostRequestParams)?.body,
+            body: (['GET', 'DELETE'].includes(method)) ? undefined : (options as IPostRequestParams)?.body,
         });
 
         // eslint-disable-next-line ts/no-explicit-any

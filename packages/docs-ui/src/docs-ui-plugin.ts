@@ -54,6 +54,7 @@ import { DocFloatingObjectController } from './controllers/doc-floating-object.c
 import { ZoomController } from './controllers/zoom.controller';
 import { TextSelectionController } from './controllers/text-selection.controller';
 import { BackScrollController } from './controllers/back-scroll.controller';
+import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
@@ -125,6 +126,7 @@ export class UniverDocsUIPlugin extends Plugin {
                     useClass: DocClipboardService,
                 },
             ],
+            [DocCanvasPopManagerService],
 
             // Render views
             [DocCanvasView],

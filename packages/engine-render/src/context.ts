@@ -16,6 +16,7 @@
 
 import { Tools } from '@univerjs/core';
 import { fixLineWidthByScale, getColor } from './basics/tools';
+import { Transform } from './basics';
 
 export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     readonly canvas: HTMLCanvasElement;
@@ -279,9 +280,12 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
 
     private _getScale() {
         const m = this.getTransform();
+        const transformer = Transform.create([m.a, m.b, m.c, m.d, m.e, m.f]);
+        const { scaleX, scaleY } = transformer.decompose();
+
         return {
-            scaleX: m.a,
-            scaleY: m.d,
+            scaleX,
+            scaleY,
         };
     }
 
@@ -358,7 +362,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterClockwise?: boolean) {
-        this._context.arc(x, y, radius, startAngle, endAngle, counterClockwise);
+        this._context.arc(x, y, Math.max(0, radius), startAngle, endAngle, counterClockwise);
     }
 
     /**

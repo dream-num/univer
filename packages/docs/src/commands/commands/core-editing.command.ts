@@ -22,7 +22,7 @@ import type {
     ITextRange,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import { CommandType, ICommandService, TextX, TextXActionType } from '@univerjs/core';
+import { CommandType, ICommandService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
@@ -61,6 +61,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         };
 
         const textX = new TextX();
+        const jsonX = JSONX.getInstance();
 
         if (collapsed) {
             if (startOffset > 0) {
@@ -82,7 +83,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             segmentId,
         });
 
-        doMutation.params.actions = textX.serialize();
+        doMutation.params.actions = jsonX.editOp(textX.serialize());
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -132,6 +133,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         };
 
         const textX = new TextX();
+        const jsonX = JSONX.getInstance();
 
         if (startOffset > 0) {
             textX.push({
@@ -148,7 +150,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             segmentId,
         });
 
-        doMutation.params.actions = textX.serialize();
+        doMutation.params.actions = jsonX.editOp(textX.serialize());
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -190,6 +192,7 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
         };
 
         const textX = new TextX();
+        const jsonX = JSONX.getInstance();
 
         const { startOffset, endOffset } = range;
 
@@ -207,7 +210,7 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
             coverType,
         });
 
-        doMutation.params.actions = textX.serialize();
+        doMutation.params.actions = jsonX.editOp(textX.serialize());
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

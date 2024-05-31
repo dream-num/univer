@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-import type { IMessageMethodOptions, IMessageProps } from '@univerjs/design';
+import type { IMessageOptions, IMessageProps } from '@univerjs/design';
 import { Message } from '@univerjs/design';
 import type { IDisposable } from '@wendellhu/redi';
 
 import type { IMessageService } from './message.service';
 
 export class DesktopMessageService implements IMessageService {
-    portalContainer: HTMLElement = document.body;
-    message?: Message;
+    protected _portalContainer: HTMLElement = document.body;
+    protected _message?: Message;
 
     setContainer(container: HTMLElement): void {
-        this.portalContainer = container;
-        this.message = new Message(container);
+        this._portalContainer = container;
+        this._message = new Message(container);
     }
 
-    show(options: IMessageMethodOptions & Omit<IMessageProps, 'key'>): IDisposable {
-        if (!this.message) {
+    show(options: IMessageOptions & Omit<IMessageProps, 'key'>): IDisposable {
+        if (!this._message) {
             throw new Error('[DesktopMessageService]: no message implementation!');
         }
 
         const { type, ...rest } = options;
-        return this.message[type](rest);
+        return this._message[type](rest);
     }
 }

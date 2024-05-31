@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentRenderConfig, IScale, Nullable } from '@univerjs/core';
+import type { IDocumentRenderConfig, IRange, IScale, Nullable } from '@univerjs/core';
 import { Registry } from '@univerjs/core';
 
 import type { BaseObject } from '../base-object';
@@ -31,6 +31,11 @@ export interface IExtensionConfig {
     renderConfig?: IDocumentRenderConfig;
 }
 
+export interface IDrawInfo {
+    viewRanges: IRange[];
+    viewportKey: string;
+    checkOutOfViewBound?: boolean;
+}
 export class ComponentExtension<T, U, V> {
     uKey: string = '';
 
@@ -50,7 +55,7 @@ export class ComponentExtension<T, U, V> {
         return this.Z_INDEX;
     }
 
-    draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: T, diffBounds?: V) {
+    draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: T, diffBounds?: V, more?: IDrawInfo) {
         /* abstract */
     }
 

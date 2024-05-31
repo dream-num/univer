@@ -27,7 +27,7 @@ export class WholeValidator extends BaseDataValidator<number> {
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
     id: string = DataValidationType.WHOLE;
-    title: string = this.localeService.t('dataValidation.whole.title');
+    title: string = 'dataValidation.whole.title';
 
     operators: DataValidationOperator[] = [
         DataValidationOperator.BETWEEN,

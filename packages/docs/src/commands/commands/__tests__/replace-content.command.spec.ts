@@ -38,22 +38,27 @@ vi.mock('@univerjs/engine-render', async () => {
     };
 });
 
-const TEST_DOCUMENT_DATA_EN: IDocumentData = {
-    id: 'test-doc',
-    body: {
-        dataStream: '=SUM(A2:B4)\r\n',
-    },
-    documentStyle: {
-        pageSize: {
-            width: 594.3,
-            height: 840.51,
+function getDocumentData() {
+    const TEST_DOCUMENT_DATA_EN: IDocumentData = {
+        id: 'test-doc',
+        body: {
+            dataStream: '=SUM(A2:B4)\r\n',
+            textRuns: [],
         },
-        marginTop: 72,
-        marginBottom: 72,
-        marginRight: 90,
-        marginLeft: 90,
-    },
-};
+        documentStyle: {
+            pageSize: {
+                width: 594.3,
+                height: 840.51,
+            },
+            marginTop: 72,
+            marginBottom: 72,
+            marginRight: 90,
+            marginLeft: 90,
+        },
+    };
+
+    return TEST_DOCUMENT_DATA_EN;
+}
 
 describe('replace or cover content of document', () => {
     let univer: Univer;
@@ -63,16 +68,13 @@ describe('replace or cover content of document', () => {
     function getDataStream() {
         const univerInstanceService = get(IUniverInstanceService);
         const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC);
+        const dataStream = docsModel?.getBody()?.dataStream;
 
-        if (docsModel?.body?.dataStream == null) {
-            return '';
-        }
-
-        return docsModel?.body?.dataStream;
+        return typeof dataStream === 'string' ? dataStream : '';
     }
 
     beforeEach(() => {
-        const testBed = createCommandTestBed(TEST_DOCUMENT_DATA_EN);
+        const testBed = createCommandTestBed(getDocumentData());
         univer = testBed.univer;
         get = testBed.get;
 
@@ -114,7 +116,6 @@ describe('replace or cover content of document', () => {
             await commandService.executeCommand(ReplaceContentCommand.id, commandParams);
 
             expect(getDataStream().length).toBe(17);
-
             await commandService.executeCommand(UndoCommand.id);
 
             expect(getDataStream().length).toBe(13);
@@ -130,7 +131,7 @@ describe('replace or cover content of document', () => {
 
     describe('cover content of document and clear undo and redo stack', () => {
         it('Should pass the test case when cover content', async () => {
-            expect(getDataStream().length).toBe(13);
+            expect(getDataStream()!.length).toBe(13);
             const commandParams = {
                 unitId: 'test-doc',
                 body: {

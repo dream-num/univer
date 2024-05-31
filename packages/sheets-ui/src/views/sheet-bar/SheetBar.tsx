@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import { ICommandService } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { ICommandService, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
-import { InsertSheetCommand } from '@univerjs/sheets';
+import { InsertSheetCommand, WorkbookEditablePermission } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
+import { map } from 'rxjs';
 import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';
 import { SheetBarButton } from './sheet-bar-button/SheetBarButton';
@@ -32,9 +34,16 @@ const SCROLL_WIDTH = 100;
 export const SheetBar = () => {
     const [leftScrollState, setLeftScrollState] = useState(true);
     const [rightScrollState, setRightScrollState] = useState(true);
+    const [editPermission, setEditPermission] = useState(false);
 
     const commandService = useDependency(ICommandService);
     const sheetBarService = useDependency(ISheetBarService);
+
+    const permissionService = useDependency(IPermissionService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const unitId = workbook.getUnitId();
 
     useEffect(() => {
         const subscription = sheetBarService.scroll$.subscribe((state: IScrollState) => {
@@ -43,6 +52,18 @@ export const SheetBar = () => {
 
         return () => {
             subscription.unsubscribe();
+        };
+    }, []);
+
+    useEffect(() => {
+        const subscription = permissionService.getPermissionPoint$(new WorkbookEditablePermission(unitId)?.id)?.pipe(
+            map((permission) => permission?.value ?? false)
+        )?.subscribe((permission) => {
+            setEditPermission(permission ?? false);
+        });
+
+        return () => {
+            subscription && subscription.unsubscribe();
         };
     }, []);
 
@@ -72,7 +93,7 @@ export const SheetBar = () => {
         <div className={styles.sheetBar}>
             <div className={styles.sheetBarOptions}>
                 {/* Add sheet button */}
-                <SheetBarButton onClick={addSheet}>
+                <SheetBarButton onClick={addSheet} disabled={!editPermission}>
                     <IncreaseSingle />
                 </SheetBarButton>
                 {/* All sheets button */}

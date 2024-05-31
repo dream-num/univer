@@ -64,6 +64,9 @@ const locale: typeof zhCN = {
             'not-between': 'Not Between',
             custom: 'Custom',
         },
+        msg: {
+            'filter-header-forbidden': 'You can\'t move the header row of a filter.',
+        },
     },
 };
 

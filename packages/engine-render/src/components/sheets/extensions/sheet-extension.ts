@@ -37,14 +37,14 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
         return getCellByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
     }
 
-    isRenderDiffRangesByCell(range: IRange, diffRanges?: IRange[]) {
+    isRenderDiffRangesByCell(rangeP: IRange, diffRanges?: IRange[]) {
         if (diffRanges == null || diffRanges.length === 0) {
             return true;
         }
 
         for (const range of diffRanges) {
             const { startRow, startColumn, endRow, endColumn } = range;
-            const isIntersect = Rectangle.intersects(range, {
+            const isIntersect = Rectangle.intersects(rangeP, {
                 startRow,
                 endRow,
                 startColumn,
@@ -117,6 +117,49 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
             // if (row >= startRow && row <= endRow) {
             //     return true;
             // }
+            const isIntersect = Rectangle.intersects(
+                {
+                    startRow: curStartRow,
+                    endRow: curEndRow,
+                    startColumn: 0,
+                    endColumn: 0,
+                },
+                {
+                    startRow,
+                    endRow,
+                    startColumn: 0,
+                    endColumn: 0,
+                }
+            );
+
+            if (isIntersect) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * 传入的 row 范围和 diffRanges 有相交, 返回 true
+     * @param curStartRow
+     * @param curEndRow
+     * @param viewranges
+     */
+    isRowInRanges(curStartRow: number, curEndRow: number, viewranges?: IRange[]) {
+        if (viewranges == null || viewranges.length === 0) {
+            return true;
+        }
+
+        for (const range of viewranges) {
+            const { startRow, endRow } = range;
+            if (curStartRow >= startRow && curStartRow <= endRow) {
+                return true;
+            }
+            if (curEndRow >= startRow && curEndRow <= endRow) {
+                return true;
+            }
+
             const isIntersect = Rectangle.intersects(
                 {
                     startRow: curStartRow,

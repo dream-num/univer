@@ -84,6 +84,7 @@
     },
     "dependencies": {
         "@univerjs/icons": "^0.1.52",
+        "@univerjs/protocol": "^0.1.34",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
         "lodash.get": "^4.4.2",
         "lodash.set": "^4.3.2",
@@ -98,7 +99,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons-svg": "^0.1.44",
+        "@univerjs/icons-svg": "^0.1.45",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

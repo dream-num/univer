@@ -91,10 +91,12 @@ export interface IDialogProps {
      *  Whether the dialog should show a mask.
      */
     mask?: boolean;
+    className?: string;
 }
 
 export function Dialog(props: IDialogProps) {
     const {
+        className,
         children,
         style,
         visible = false,
@@ -189,6 +191,7 @@ export function Dialog(props: IDialogProps) {
 
     return mountContainer && (
         <RcDialog
+            className={className}
             width={width}
             prefixCls={styles.dialog}
             rootClassName={draggable ? styles.dialogRootDraggable : styles.dialogRoot}

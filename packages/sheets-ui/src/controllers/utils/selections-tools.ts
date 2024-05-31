@@ -14,21 +14,41 @@
  * limitations under the License.
  */
 
-import { Rectangle } from '@univerjs/core';
-import { SelectionManagerService } from '@univerjs/sheets';
+import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { RangeProtectionRuleModel, SelectionManagerService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-import { filter, map } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 
 export function getSheetSelectionsDisabled$(accessor: IAccessor) {
     const selectionManagerService = accessor.get(SelectionManagerService);
+    const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const unitId = workbook.getUnitId();
 
-    return selectionManagerService.selectionMoveEnd$.pipe(
-        filter((param) => param != null && param.length >= 2),
-        map((param) => {
-            if (!param) return false;
-            for (let i = 0; i < param.length; i++) {
-                for (let j = i + 1; j < param.length; j++) {
-                    if (Rectangle.intersects(param[i].range, param[j].range)) {
+    return combineLatest([
+        selectionManagerService.selectionMoveEnd$,
+        workbook.activeSheet$,
+    ]).pipe(
+        map(([selection, sheet]) => {
+            if (!sheet) return false;
+            if (!selection || selection.length === 0) return false;
+            const subUnitId = sheet.getSheetId();
+            const subUnitRuleRange = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId)
+                .map((rule) => rule.ranges).flat();
+
+            if (selection.length < 2) {
+                const range = selection[0].range;
+                const hasLap = subUnitRuleRange.some((ruleRange) => {
+                    return Rectangle.intersects(ruleRange, range) && !Rectangle.contains(ruleRange, range);
+                });
+                return hasLap;
+            }
+
+            for (let i = 0; i < selection.length; i++) {
+                for (let j = i + 1; j < selection.length; j++) {
+                    if (Rectangle.intersects(selection[i].range, selection[j].range)) {
                         return true;
                     }
                 }

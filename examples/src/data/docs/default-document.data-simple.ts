@@ -32,6 +32,9 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                         rgb: 'rgb(0, 0, 0)',
                     },
                     bl: BooleanNumber.TRUE,
+                    ul: {
+                        s: BooleanNumber.TRUE,
+                    },
                 },
             },
             {
@@ -91,7 +94,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
         marginRight: 40,
         marginLeft: 40,
         renderConfig: {
-            vertexAngle: 0,
+            vertexAngle: 90,
             centerAngle: 0,
         },
     },

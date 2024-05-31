@@ -109,7 +109,7 @@ export class DocDrawingUpdateController extends Disposable {
             if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
                 this._messageService.show({
                     type: MessageType.Error,
-                    content: this._localeService.t('update-status.exceedMaxSize', String(DRAWING_IMAGE_ALLOW_SIZE / 1024 * 1024)),
+                    content: this._localeService.t('update-status.exceedMaxSize', String(DRAWING_IMAGE_ALLOW_SIZE / (1024 * 1024))),
                 });
             } else if (type === ImageUploadStatusType.ERROR_IMAGE_TYPE) {
                 this._messageService.show({
@@ -136,6 +136,14 @@ export class DocDrawingUpdateController extends Disposable {
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
         const { width, height, image } = await getImageSize(base64Cache || '');
 
+        const renderObject = this._renderManagerService.getRenderById(unitId);
+
+        if (renderObject == null) {
+            return;
+        }
+
+        const { width: sceneWidth, height: sceneHeight } = renderObject.scene;
+
         this._imageIoService.addImageSourceCache(imageId, imageSourceType, image);
 
         let scale = 1;
@@ -145,7 +153,7 @@ export class DocDrawingUpdateController extends Disposable {
             scale = Math.max(scaleWidth, scaleHeight);
         }
 
-        const docTransform = this._getImagePosition(width, height, scale);
+        const docTransform = this._getImagePosition(width * scale, height * scale, sceneWidth, sceneHeight);
 
         if (docTransform == null) {
             return;
@@ -186,7 +194,7 @@ export class DocDrawingUpdateController extends Disposable {
         };
     }
 
-    private _getImagePosition(imageWidth: number, imageHeight: number, scale: number): Nullable<IDocDrawingPosition> {
+    private _getImagePosition(imageWidth: number, imageHeight: number, sceneWidth: number, sceneHeight: number): Nullable<IDocDrawingPosition> {
         const activeTextRange = this._textSelectionManagerService.getActiveTextRange();
         const position = activeTextRange?.getAbsolutePosition() || {
             left: 0,
@@ -196,8 +204,8 @@ export class DocDrawingUpdateController extends Disposable {
         // TODO:@Jocs calculate the position of the image in doc
         return {
             size: {
-                width: imageWidth * scale,
-                height: imageHeight * scale,
+                width: imageWidth,
+                height: imageHeight,
             },
             positionH: {
                 relativeFrom: ObjectRelativeFromH.MARGIN,

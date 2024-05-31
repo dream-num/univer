@@ -247,7 +247,7 @@ describe('arrayValueObject test', () => {
                 column: 0,
             });
 
-            expect(originValueObject.mean().getValue()).toStrictEqual(16.928333333333335);
+            expect(originValueObject.mean().getValue()).toStrictEqual(16.92833333333333);
         });
     });
 
@@ -270,7 +270,7 @@ describe('arrayValueObject test', () => {
                 column: 0,
             });
 
-            expect(originValueObject.var().getValue()).toStrictEqual(1382.9296138888888);
+            expect(originValueObject.var().getValue()).toStrictEqual(1382.9296138888892);
         });
     });
 

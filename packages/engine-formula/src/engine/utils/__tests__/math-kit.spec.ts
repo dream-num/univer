@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt, strip, truncateNumber } from '../math-kit';
+import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt, truncateNumber } from '../math-kit';
 
 describe('Test math kit', () => {
     it('Function truncateNumber', () => {
@@ -43,7 +43,7 @@ describe('Test math kit', () => {
         expect(multiply(2, 3)).toBe(6);
         expect(multiply(0.1, 0.2)).toBe(0.02);
         expect(multiply(0.7, 0.1)).toBe(0.07);
-        expect(strip(multiply(0.0000000000001, 0.0000000000002))).toBe(2e-26);
+        expect(multiply(0.0000000000001, 0.0000000000002)).toBe(2e-26);
         expect(multiply(0.6789, 10000)).toBe(6789);
     });
 
@@ -121,6 +121,7 @@ describe('Test math kit', () => {
         expect(pow(2, -1)).toBe(0.5);
         expect(pow(2, -2)).toBe(0.25);
         expect(pow(2, -3)).toBe(0.125);
+        expect(pow(0.2, 3)).toBe(0.008);
     });
     // test sqrt
     it('Function sqrt', () => {

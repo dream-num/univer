@@ -76,8 +76,8 @@ describe('Test power function', () => {
             const power = NumberValueObject.create(2);
             const result = textFunction.calculate(number, power);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                [1, ErrorType.VALUE, 1.5128999999999999, 1, 0, 0],
-                [0, 10000, 5.4755999999999991, ErrorType.VALUE, 9, ErrorType.VALUE],
+                [1, ErrorType.VALUE, 1.5129, 1, 0, 0],
+                [0, 10000, 5.4756, ErrorType.VALUE, 9, ErrorType.VALUE],
             ]);
         });
 
@@ -110,7 +110,7 @@ describe('Test power function', () => {
             const result = textFunction.calculate(number, power);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [1, ErrorType.VALUE, 1.23, 1, 0, 0],
-                [0, 10000, 5.4755999999999991, ErrorType.VALUE, 9, ErrorType.VALUE],
+                [0, 10000, 5.4756, ErrorType.VALUE, 9, ErrorType.VALUE],
                 [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
         });

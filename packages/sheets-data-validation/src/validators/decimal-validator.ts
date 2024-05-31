@@ -39,7 +39,7 @@ export class DecimalValidator extends BaseDataValidator<number> {
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
     id: string = DataValidationType.DECIMAL;
-    title: string = this.localeService.t('dataValidation.decimal.title');
+    title: string = 'dataValidation.decimal.title';
 
     operators: DataValidationOperator[] = [
         DataValidationOperator.BETWEEN,

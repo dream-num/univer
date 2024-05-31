@@ -143,9 +143,7 @@ export class SheetDrawingUpdateController extends Disposable {
             return;
         }
         const { unitId, subUnitId } = info;
-
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
-
         const { width, height, image } = await getImageSize(base64Cache || '');
 
         const renderObject = this._renderManagerService.getRenderById(unitId);

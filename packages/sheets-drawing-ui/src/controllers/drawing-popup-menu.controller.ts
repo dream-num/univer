@@ -36,9 +36,7 @@ export class DrawingPopupMenuController extends RxDisposable {
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopManagerService: SheetCanvasPopManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IContextService private readonly _contextService: IContextService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @ICommandService private readonly _commandService: ICommandService
+        @IContextService private readonly _contextService: IContextService
 
     ) {
         super();

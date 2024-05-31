@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
 import { Disposable, isValidRange, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
@@ -22,7 +22,7 @@ import type { IAddHyperLinkMutationParams, ICellHyperLink, IRemoveHyperLinkMutat
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '@univerjs/sheets-hyper-link';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
-import { deserializeRangeWithSheet, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 import { ERROR_RANGE } from '../types/const';
 

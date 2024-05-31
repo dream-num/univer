@@ -21,3 +21,4 @@ export { DrawingCommonPanel } from './views/panel/DrawingCommonPanel';
 export { ImagePopupMenu } from './views/image-popup-menu/ImagePopupMenu';
 export { COMPONENT_IMAGE_POPUP_MENU } from './views/image-popup-menu/component-name';
 export { UniverDrawingUIPlugin } from './plugin';
+export { ImageCropperObject } from './views/crop/image-cropper-object';

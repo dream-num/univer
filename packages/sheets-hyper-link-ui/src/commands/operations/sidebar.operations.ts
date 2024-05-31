@@ -56,7 +56,7 @@ export const OpenHyperLinkSidebarOperation: ICommand<IOpenHyperLinkSidebarOperat
 
 export const CloseHyperLinkSidebarOperation: ICommand = {
     type: CommandType.OPERATION,
-    id: 'sheets.operation.close-hyper-link-sidebar',
+    id: 'sheet.operation.close-hyper-link-sidebar',
     handler(accessor) {
         const sidebarService = accessor.get(ISidebarService);
         const popupService = accessor.get(SheetsHyperLinkPopupService);

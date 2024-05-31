@@ -55,7 +55,8 @@ class WatchRange extends Disposable {
         private readonly _unitId: string,
         private readonly _subUnitId: string,
         private _range: Nullable<IRange>,
-        private readonly _callback: WatchRangeCallback
+        private readonly _callback: WatchRangeCallback,
+        private readonly _skipIntersects: boolean = false
     ) {
         super();
     }
@@ -106,7 +107,7 @@ export class RefRangeService extends Disposable {
         });
     }
 
-    watchRange(unitId: string, subUnitId: string, range: IRange, callback: WatchRangeCallback): IDisposable {
+    watchRange(unitId: string, subUnitId: string, range: IRange, callback: WatchRangeCallback, skipIntersects?: boolean): IDisposable {
         let watchRangesListener: Nullable<IDisposable>;
         if (this._watchRanges.size === 0) {
             watchRangesListener = this._commandService.onCommandExecuted((command) => {
@@ -118,7 +119,7 @@ export class RefRangeService extends Disposable {
             });
         }
 
-        const watchRange = new WatchRange(unitId, subUnitId, range, callback);
+        const watchRange = new WatchRange(unitId, subUnitId, range, callback, skipIntersects);
         this._watchRanges.add(watchRange);
 
         const teardownWatching = toDisposable(() => {

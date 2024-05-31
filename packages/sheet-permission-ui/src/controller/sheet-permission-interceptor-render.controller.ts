@@ -33,7 +33,7 @@ import { OpenFilterPanelOperation, SmartToggleSheetsFilterCommand } from '@unive
 import { SheetsFindReplaceController } from '@univerjs/sheets-find-replace';
 import { InsertCommand } from '@univerjs/docs';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
-import { AddSheetDataValidationCommand, DataValidationController, UpdateSheetDataValidationRangeCommand } from '@univerjs/sheets-data-validation';
+import { AddSheetDataValidationCommand, DataValidationController, DataValidationFormulaController, UpdateSheetDataValidationRangeCommand } from '@univerjs/sheets-data-validation';
 import type { IAddCfCommandParams } from '@univerjs/sheets-conditional-formatting-ui';
 import { AddCfCommand, ConditionalFormattingClearController } from '@univerjs/sheets-conditional-formatting-ui';
 import type { IConditionalFormattingRuleConfig, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
@@ -74,7 +74,8 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
         @Inject(HeaderFreezeRenderController) private _headerFreezeRenderController: HeaderFreezeRenderController,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @IContextService private readonly _contextService: IContextService,
-        @Inject(StatusBarController) private readonly _statusBarController: StatusBarController
+        @Inject(StatusBarController) private readonly _statusBarController: StatusBarController,
+        @Inject(DataValidationFormulaController) private readonly _dataValidationFormulaController: DataValidationFormulaController
     ) {
         super();
         this._initialize();
@@ -88,6 +89,7 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
         this._initFreezePermissionInterceptor();
         this._initFormulaEditorPermissionInterceptor();
         this._initStatusBarPermissionInterceptor();
+        this._initDvFormulaPermissionInterceptor();
         this._initClipboardHook();
     }
 
@@ -993,6 +995,51 @@ export class SheetPermissionInterceptorRenderController extends RxDisposable imp
                 },
             })
         );
+    }
+
+    private _initDvFormulaPermissionInterceptor() {
+        this._dataValidationFormulaController.interceptor.intercept(this._dataValidationFormulaController.interceptor.getInterceptPoints().DV_FORMULA_PERMISSION_CHECK, {
+            priority: 100,
+            handler: (_, formulaString: string) => {
+                const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString);
+                if (!sequenceNodes) {
+                    return true;
+                }
+                for (let i = 0; i < sequenceNodes.length; i++) {
+                    const node = sequenceNodes[i];
+                    if (typeof node === 'string') {
+                        continue;
+                    }
+                    const { token } = node;
+                    const sequenceGrid = deserializeRangeWithSheet(token);
+                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                    let targetSheet: Nullable<Worksheet> = workbook.getActiveSheet();
+                    const unitId = workbook.getUnitId();
+                    if (sequenceGrid.sheetName) {
+                        targetSheet = workbook.getSheetBySheetName(sequenceGrid.sheetName);
+                        if (!targetSheet) {
+                            return false;
+                        }
+                        const subUnitId = targetSheet?.getSheetId();
+                        const viewPermission = this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id);
+                        if (!viewPermission) return false;
+                    }
+                    if (!targetSheet) {
+                        return false;
+                    }
+                    const { startRow, endRow, startColumn, endColumn } = sequenceGrid.range;
+                    for (let i = startRow; i <= endRow; i++) {
+                        for (let j = startColumn; j <= endColumn; j++) {
+                            const permission = (targetSheet.getCell(i, j) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
+                            if (permission?.[UnitAction.View] === false) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            },
+        });
     }
 
     private _initFreezePermissionInterceptor() {

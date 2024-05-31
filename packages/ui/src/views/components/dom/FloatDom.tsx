@@ -15,18 +15,19 @@
  */
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React from 'react';
+import React, { memo } from 'react';
 import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
 import { useObservable } from '../../../components/hooks/observable';
 import { ComponentManager } from '../../../common';
 import styles from './index.module.less';
 
-const FloatDomSingle = (props: { layer: IFloatDom; id: string }) => {
+const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     const { layer, id } = props;
     const componentManager = useDependency(ComponentManager);
     const position = useObservable(layer.position$);
-    const Component = componentManager.get(layer.componentKey);
+    const Component = typeof layer.componentKey === 'string' ? componentManager.get(layer.componentKey) : layer.componentKey;
+
     return position
         ? (
             <div
@@ -69,7 +70,7 @@ const FloatDomSingle = (props: { layer: IFloatDom; id: string }) => {
             </div>
         )
         : null;
-};
+});
 
 export const FloatDom = () => {
     const domLayerService = useDependency(CanvasFloatDomService);

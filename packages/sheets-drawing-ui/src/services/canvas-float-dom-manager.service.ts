@@ -410,7 +410,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         this.disposeWithMe(
             this._drawingManagerService.remove$.subscribe((params) => {
                 params.forEach((param) => {
-                    this.removeFloatDom(param.drawingId);
+                    this._removeDom(param.drawingId);
                 });
             })
         );
@@ -458,7 +458,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         return id;
     }
 
-    removeFloatDom(id: string) {
+    private _removeDom(id: string, removeDrawing = false) {
         const info = this._domLayerInfoMap.get(id);
         if (!info) {
             return;
@@ -472,15 +472,20 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (renderObject) {
             renderObject.scene.removeObject(info.rect);
         }
-        this._remove$.next({ unitId, subUnitId, id });
 
-        const param = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId: id });
-        if (!param) {
-            return;
+        if (removeDrawing) {
+            const param = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId: id });
+            if (!param) {
+                return;
+            }
+            const jsonOp = this._sheetDrawingService.getBatchRemoveOp([param]) as IDrawingJsonUndo1;
+
+            const { redo, objects } = jsonOp;
+            this._commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.REMOVE });
         }
-        const jsonOp = this._sheetDrawingService.getBatchRemoveOp([param]) as IDrawingJsonUndo1;
+    }
 
-        const { redo, objects } = jsonOp;
-        this._commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.REMOVE });
+    removeFloatDom(id: string) {
+        this._removeDom(id, true);
     }
 }

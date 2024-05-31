@@ -64,7 +64,7 @@ export function transformBound2DOMBound(originBound: IBoundRectNoAngle, scene: S
     const { left, right, top, bottom } = originBound;
     const freeze = worksheet.getFreeze();
     const { startColumn, startRow, xSplit, ySplit } = freeze;
-     // freeze start
+    // freeze start
     const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(startRow - ySplit, startColumn - xSplit);
     //  freeze end
     const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(startRow, startColumn);
@@ -455,7 +455,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         } as IInsertDrawingCommandParams);
         const map = this._ensureMap(unitId, subUnitId);
         map.set(id, layer);
-        return id;
+
+        return {
+            id,
+            dispose: () => {
+                this._removeDom(id, true);
+            },
+        };
     }
 
     private _removeDom(id: string, removeDrawing = false) {
@@ -483,9 +489,5 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             const { redo, objects } = jsonOp;
             this._commandService.syncExecuteCommand(SetDrawingApplyMutation.id, { unitId, subUnitId, op: redo, objects, type: DrawingApplyType.REMOVE });
         }
-    }
-
-    removeFloatDom(id: string) {
-        this._removeDom(id, true);
     }
 }

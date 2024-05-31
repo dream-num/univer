@@ -27,10 +27,8 @@ import { ComponentContainer } from './components/ComponentContainer';
 import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
-import { CanvasPopup } from './components/popup/CanvasPopup';
 import { builtInGlobalComponents } from './parts';
 import { ContextMenu } from './components/context-menu/ContextMenu';
-import { FloatDom } from './components/dom/FloatDom';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;

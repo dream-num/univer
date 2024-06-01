@@ -702,16 +702,22 @@ export interface ICell {
  * @returns pure text in this cell
  */
 export function extractPureTextFromCell(cell: Nullable<ICellData>): string {
-    if (!cell) return '';
+    if (!cell) {
+        return '';
+    }
 
     const richTextValue = cell.p?.body?.dataStream;
-    if (richTextValue) return richTextValue;
+    if (richTextValue) {
+        return richTextValue;
+    }
 
     const rawValue = cell.v;
 
     if (typeof rawValue === 'string') {
-        if (cell.t === CellValueType.BOOLEAN) return rawValue.toUpperCase();
-        return rawValue;
+        if (cell.t === CellValueType.BOOLEAN) {
+            return rawValue.toUpperCase();
+        }
+        return rawValue.replace(/[\r\n]/g, '');
     };
 
     if (typeof rawValue === 'number') {

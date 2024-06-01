@@ -493,6 +493,10 @@ export class DocumentViewModel implements IDisposable {
         children: DataStreamTreeNode[],
         nodeType = DataStreamTreeNodeType.SECTION_BREAK
     ) {
+        if (children.length === 0) {
+            throw new Error('Missing `paragraphs` or `sectionBreaks` fields, or doesn\'t correspond to the location in `dataStream`.');
+        }
+
         for (const child of children) {
             child.parent = parent;
             parent.children.push(child);

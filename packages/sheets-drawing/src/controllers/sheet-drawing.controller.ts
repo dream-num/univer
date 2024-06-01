@@ -15,12 +15,26 @@
  */
 
 import type { IDrawingSubunitMap } from '@univerjs/core';
-import { Disposable, IDrawingManagerService, IResourceManagerService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { type ISheetDrawing, ISheetDrawingService } from '../services/sheet-drawing.service';
+import { Disposable, ICommandService, IDrawingManagerService, IResourceManagerService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { ISheetDrawing } from '../services/sheet-drawing.service';
+import { ISheetDrawingService } from '../services/sheet-drawing.service';
+import { SetDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 
 export const SHEET_DRAWING_PLUGIN = 'SHEET_DRAWING_PLUGIN';
-@OnLifecycle(LifecycleStages.Ready, SheetDrawingDataController)
-export class SheetDrawingDataController extends Disposable {
+
+@OnLifecycle(LifecycleStages.Starting, SheetsDrawingLoadController)
+export class SheetsDrawingLoadController extends Disposable {
+    constructor(
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
+        super();
+
+        this.disposeWithMe(this._commandService.registerCommand(SetDrawingApplyMutation));
+    }
+}
+
+@OnLifecycle(LifecycleStages.Ready, SheetsDrawingController)
+export class SheetsDrawingController extends Disposable {
     constructor(
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,

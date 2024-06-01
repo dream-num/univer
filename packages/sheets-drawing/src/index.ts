@@ -14,27 +14,8 @@
  * limitations under the License.
  */
 
-import type { DrawingTypeEnum } from '@univerjs/core';
-import type { ISheetDrawing } from '@univerjs/sheets-drawing';
+export { UniverSheetsDrawingPlugin } from './plugin';
+export { DrawingApplyType, SetDrawingApplyMutation } from './commands/mutations/set-drawing-apply.mutation';
+export { ISheetDrawingService, SheetDrawingAnchorType } from './services/sheet-drawing.service';
+export type { IFloatDomData, ISheetDrawing, ISheetDrawingPosition, ISheetFloatDom } from './services/sheet-drawing.service';
 
-export interface IInsertDrawingCommandParams {
-    unitId: string;
-    drawings: ISheetDrawing[];
-}
-
-export interface IDeleteDrawingCommandParam {
-    unitId: string;
-    subUnitId: string;
-    drawingId: string;
-    drawingType: DrawingTypeEnum;
-}
-
-export interface IDeleteDrawingCommandParams {
-    unitId: string;
-    drawings: IDeleteDrawingCommandParam[];
-}
-
-export interface ISetDrawingCommandParams {
-    unitId: string;
-    drawings: Partial<ISheetDrawing>[];
-}

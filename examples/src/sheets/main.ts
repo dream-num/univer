@@ -42,7 +42,9 @@ import { FUniver } from '@univerjs/facade';
 import { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
+import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
+
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { enUS, ruRU, zhCN } from '../locales';
 
@@ -112,6 +114,7 @@ univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 // sheet permission
 univer.registerPlugin(UniverSheetsPermissionUIPlugin);
 // drawing
+univer.registerPlugin(UniverSheetsDrawingPlugin);
 univer.registerPlugin(UniverDrawingUIPlugin);
 univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 

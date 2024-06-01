@@ -15,8 +15,8 @@
  */
 
 import { CommandType, type ICommand, ICommandService } from '@univerjs/core';
-import type { ISheetDrawing } from '@univerjs/sheets';
-import { ISheetDrawingService } from '@univerjs/sheets';
+import type { ISheetDrawing } from '@univerjs/sheets-drawing';
+import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import type { IAccessor } from '@wendellhu/redi';
 import { RemoveSheetDrawingCommand } from './remove-sheet-drawing.command';
 import type { IDeleteDrawingCommandParams } from './interfaces';

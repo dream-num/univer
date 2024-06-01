@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IParagraph, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IParagraph, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
 import {
+    BooleanNumber,
     createInterceptorKey,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -286,7 +287,7 @@ export class FormulaEditorController extends RxDisposable {
 
         let dataStream = body?.dataStream;
         let paragraphs = body?.paragraphs;
-        let textRuns: ITextRun[] = [];
+        let textRuns = body?.textRuns;
 
         if (dataStream == null || paragraphs == null) {
             return;
@@ -302,8 +303,7 @@ export class FormulaEditorController extends RxDisposable {
                     startIndex: 0,
                 },
             ];
-        } else if (param.isInArrayFormulaRange === true) {
-            textRuns = body?.textRuns || [];
+            textRuns = [];
         }
 
         this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns);
@@ -324,12 +324,27 @@ export class FormulaEditorController extends RxDisposable {
                 const { unitId, actions } = params;
 
                 if (INCLUDE_LIST.includes(unitId)) {
+                    // sync cell content to formula editor bar when edit cell editor and vice verse.
+                    const editorDocDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+                    const dataStream = editorDocDataModel?.getBody()?.dataStream;
+                    const paragraphs = editorDocDataModel?.getBody()?.paragraphs;
+                    const textRuns = editorDocDataModel?.getBody()?.textRuns;
+
                     const syncId =
                         unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
                             ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
                             : DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
 
-                    this._syncActionsAndRender(syncId, actions);
+                    if (dataStream == null || paragraphs == null) {
+                        return;
+                    }
+
+                    if (syncId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                        this._checkAndSetRenderStyleConfig(editorDocDataModel!);
+                        this._syncActionsAndRender(syncId, actions);
+                    } else {
+                        this._syncContentAndRender(syncId, dataStream, paragraphs, textRuns);
+                    }
 
                     // handle weather need to show scroll bar.
                     this._autoScroll();
@@ -431,6 +446,8 @@ export class FormulaEditorController extends RxDisposable {
         // Update document data model.
         docDataModel.apply(actions);
 
+        this._checkAndSetRenderStyleConfig(docDataModel);
+
         docViewModel.reset(docDataModel);
 
         const { skeleton } = docsSkeletonObject;
@@ -471,6 +488,8 @@ export class FormulaEditorController extends RxDisposable {
             docDataModel.getBody()!.textRuns = textRuns;
         }
 
+        this._checkAndSetRenderStyleConfig(docDataModel);
+
         docViewModel.reset(docDataModel);
 
         const { skeleton } = docsSkeletonObject;
@@ -485,6 +504,28 @@ export class FormulaEditorController extends RxDisposable {
 
         if (INCLUDE_LIST.includes(unitId)) {
             currentRender.mainComponent?.makeDirty();
+        }
+    }
+
+    private _checkAndSetRenderStyleConfig(documentDataModel: DocumentDataModel) {
+        const snapshot = documentDataModel.getSnapshot();
+        const { body } = snapshot;
+
+        if (snapshot.id !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            return;
+        }
+
+        let renderConfig = snapshot.documentStyle.renderConfig;
+
+        if (renderConfig == null) {
+            renderConfig = {};
+            snapshot.documentStyle.renderConfig = renderConfig;
+        }
+
+        if ((body?.dataStream ?? '').startsWith('=')) {
+            renderConfig.isRenderStyle = BooleanNumber.TRUE;
+        } else {
+            renderConfig.isRenderStyle = BooleanNumber.FALSE;
         }
     }
 

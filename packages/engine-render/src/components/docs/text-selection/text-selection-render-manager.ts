@@ -41,6 +41,7 @@ import { ScrollTimer } from '../../../scroll-timer';
 import type { IScrollObserverParam, Viewport } from '../../../viewport';
 import type { DocumentSkeleton } from '../layout/doc-skeleton';
 import type { Documents } from '../document';
+import { getSystemHighlightColor } from '../../../basics/tools';
 import { cursorConvertToTextRange, TextRange } from './text-range';
 
 export function getCanvasOffsetByEngine(engine: Nullable<Engine>) {
@@ -256,6 +257,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         super();
 
         this._initDOM();
+
+        this._setSystemHighlightColorToStyle();
     }
 
     __getEditorContainer(): HTMLElement {
@@ -290,7 +293,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         const { _scene: scene, _docSkeleton: docSkeleton } = this;
 
         for (const range of ranges) {
-            const textSelection = cursorConvertToTextRange(scene!, range, docSkeleton!, this._document!);
+            const textSelection = cursorConvertToTextRange(scene!, {
+                style: this._selectionStyle,
+                ...range,
+            }, docSkeleton!, this._document!);
 
             this._add(textSelection);
         }
@@ -491,7 +497,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         if (evt.shiftKey && this._getActiveRangeInstance()) {
             this._updateActiveRangeFocusPosition(position);
         } else if (evt.ctrlKey || this._isEmpty()) {
-            const newTextSelection = new TextRange(scene, this._document!, this._docSkeleton!, position);
+            const newTextSelection = new TextRange(scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle);
 
             this._addTextRange(newTextSelection);
         } else {
@@ -575,6 +581,20 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     removeAllTextRanges() {
         this._removeAllTextRanges();
         this.deactivate();
+    }
+
+    private _setSystemHighlightColorToStyle() {
+        const { r, g, b, a } = getSystemHighlightColor();
+
+        // Only set selection use highlight color.
+        const style: ITextSelectionStyle = {
+            strokeWidth: 1.5,
+            stroke: 'rgba(0, 0, 0, 0)',
+            strokeActive: 'rgba(0, 0, 0, 1)',
+            fill: `rgba(${r}, ${g}, ${b}, ${a ?? 0.2})`,
+        };
+
+        this.setStyle(style);
     }
 
     private _getAllTextRanges() {
@@ -753,7 +773,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         let lastRange = this._rangeList.pop();
 
         if (!lastRange) {
-            lastRange = new TextRange(this._scene, this._document!, this._docSkeleton!, position);
+            lastRange = new TextRange(this._scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle);
         }
 
         this._removeAllTextRanges();

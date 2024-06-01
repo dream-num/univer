@@ -16,6 +16,8 @@
 
 import { installShims } from './common/shims';
 
+installShims();
+
 export { type UnitType, UnitModel, UniverInstanceType } from './common/unit';
 export { Registry, RegistryAsMap } from './common/registry';
 export { Univer } from './univer';
@@ -202,6 +204,3 @@ export type { IPermissionTypes } from './services/permission/type';
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';
 export { createDefaultUser } from './services/user-manager/const';
-
-installShims();
-

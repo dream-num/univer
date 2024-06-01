@@ -14,27 +14,6 @@
  * limitations under the License.
  */
 
-import type { DrawingTypeEnum } from '@univerjs/core';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
-
-export interface IInsertDrawingCommandParams {
-    unitId: string;
-    drawings: IDocDrawing[];
-}
-
-export interface IDeleteDrawingCommandParam {
-    unitId: string;
-    subUnitId: string;
-    drawingId: string;
-    drawingType: DrawingTypeEnum;
-}
-
-export interface IDeleteDrawingCommandParams {
-    unitId: string;
-    drawings: IDeleteDrawingCommandParam[];
-}
-
-export interface ISetDrawingCommandParams {
-    unitId: string;
-    drawings: Partial<IDocDrawing>[];
-}
+export { UniverDocsDrawingPlugin } from './plugin';
+export { DocDrawingApplyType, SetDocDrawingApplyMutation, type ISetDrawingApplyMutationParams } from './commands/mutations/set-drawing-apply.mutation';
+export { type IDocDrawing, IDocDrawingService, DocDrawingService } from './services/doc-drawing.service';

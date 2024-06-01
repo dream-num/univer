@@ -18,9 +18,8 @@ import type { ICommand } from '@univerjs/core';
 import { CommandType, Direction, ICommandService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import type { IDocDrawing } from '@univerjs/docs';
-import { IDocDrawingService } from '@univerjs/docs';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import type { IDocDrawing } from '@univerjs/docs-drawing';
+import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { transformToDocDrawingPosition } from '@univerjs/docs-ui';
 import { ClearDocDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import type { ISetDrawingCommandParams } from './interfaces';
@@ -36,7 +35,6 @@ export const MoveDocDrawingsCommand: ICommand = {
     handler: (accessor: IAccessor, params: IMoveDrawingsCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const docDrawingService = accessor.get(IDocDrawingService);
-        const textSelectionRenderService = accessor.get(ITextSelectionRenderManager);
 
         const { direction } = params;
 

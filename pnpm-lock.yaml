@@ -216,6 +216,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../packages/docs
+      '@univerjs/docs-drawing':
+        specifier: workspace:*
+        version: link:../packages/docs-drawing
       '@univerjs/docs-drawing-ui':
         specifier: workspace:*
         version: link:../packages/docs-drawing-ui
@@ -597,9 +600,6 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
-      '@univerjs/drawing':
-        specifier: workspace:*
-        version: link:../drawing
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
@@ -627,6 +627,18 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../drawing
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -661,6 +673,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/docs-drawing':
+        specifier: workspace:*
+        version: link:../docs-drawing
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui

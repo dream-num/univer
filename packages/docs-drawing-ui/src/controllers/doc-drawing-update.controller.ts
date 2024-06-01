@@ -20,8 +20,9 @@ import { Inject } from '@wendellhu/redi';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize } from '@univerjs/drawing';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
-import type { IDocDrawing } from '@univerjs/docs';
-import { DocSkeletonManagerService, IDocDrawingService, TextSelectionManagerService } from '@univerjs/docs';
+import type { IDocDrawing } from '@univerjs/docs-drawing';
+import { IDocDrawingService } from '@univerjs/docs-drawing';
+import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
 import { docDrawingPositionToTransform, transformToDocDrawingPosition } from '@univerjs/docs-ui';
 import type { Documents } from '@univerjs/engine-render';
 import { IRenderManagerService, ITextSelectionRenderManager, Liquid } from '@univerjs/engine-render';
@@ -166,7 +167,7 @@ export class DocDrawingUpdateController extends Disposable {
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType,
             source,
-            transform: docDrawingPositionToTransform(docTransform, this._textSelectionRenderManager),
+            transform: docDrawingPositionToTransform(docTransform),
             docTransform,
             title: '', description: '', layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
         };

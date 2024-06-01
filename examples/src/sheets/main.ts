@@ -45,6 +45,7 @@ import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 
+import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { enUS, ruRU, zhCN } from '../locales';
 
@@ -113,7 +114,9 @@ univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // sheet permission
 univer.registerPlugin(UniverSheetsPermissionUIPlugin);
+
 // drawing
+univer.registerPlugin(UniverDocsDrawingPlugin);
 univer.registerPlugin(UniverSheetsDrawingPlugin);
 univer.registerPlugin(UniverDrawingUIPlugin);
 univer.registerPlugin(UniverSheetsDrawingUIPlugin);

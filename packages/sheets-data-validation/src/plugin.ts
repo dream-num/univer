@@ -35,6 +35,7 @@ import { CloseValidationPanelOperation, HideDataValidationDropdown, OpenValidati
 import { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
 import { DataValidationPanelService } from './services/data-validation-panel.service';
 import { DataValidationFormulaController } from './controllers/dv-formula.controller';
+import { DataValidationPermissionController } from './controllers/dv-permission.controller';
 
 export class UniverSheetsDataValidationPlugin extends Plugin {
     static override pluginName = DATA_VALIDATION_PLUGIN_NAME;
@@ -71,6 +72,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             ],
             [DataValidationAlertController],
             [DataValidationRefRangeController],
+            [DataValidationPermissionController],
             [DataValidationAutoFillController],
             [DataValidationCopyPasteController],
             [DataValidationFormulaController],

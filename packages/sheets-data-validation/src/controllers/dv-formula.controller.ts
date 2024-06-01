@@ -14,19 +14,60 @@
  * limitations under the License.
  */
 
-import { createInterceptorKey, Disposable, InterceptorManager, LifecycleStages, OnLifecycle } from '@univerjs/core';
-
-export const DV_FORMULA_PERMISSION_CHECK = createInterceptorKey<boolean, string>('dvFormulaPermissionCheck');
+import type { ICellDataForSheetInterceptor, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { Disposable, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { deserializeRangeWithSheet, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { type ICellPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { UnitAction } from '@univerjs/protocol';
+import { Inject } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationFormulaController)
 export class DataValidationFormulaController extends Disposable {
-    public interceptor = new InterceptorManager({ DV_FORMULA_PERMISSION_CHECK });
-
-    constructor() {
+    constructor(
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IPermissionService private readonly _permissionService: IPermissionService,
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
+    ) {
         super();
     }
 
-    getFormulaRefCheck(str: string) {
-        return this.interceptor.fetchThroughInterceptors(DV_FORMULA_PERMISSION_CHECK)(true, str);
+    getFormulaRefCheck(formulaString: string) {
+        const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString);
+        if (!sequenceNodes) {
+            return true;
+        }
+        for (let i = 0; i < sequenceNodes.length; i++) {
+            const node = sequenceNodes[i];
+            if (typeof node === 'string') {
+                continue;
+            }
+            const { token } = node;
+            const sequenceGrid = deserializeRangeWithSheet(token);
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            let targetSheet: Nullable<Worksheet> = workbook.getActiveSheet();
+            const unitId = workbook.getUnitId();
+            if (sequenceGrid.sheetName) {
+                targetSheet = workbook.getSheetBySheetName(sequenceGrid.sheetName);
+                if (!targetSheet) {
+                    return false;
+                }
+                const subUnitId = targetSheet?.getSheetId();
+                const viewPermission = this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id);
+                if (!viewPermission) return false;
+            }
+            if (!targetSheet) {
+                return false;
+            }
+            const { startRow, endRow, startColumn, endColumn } = sequenceGrid.range;
+            for (let i = startRow; i <= endRow; i++) {
+                for (let j = startColumn; j <= endColumn; j++) {
+                    const permission = (targetSheet.getCell(i, j) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
+                    if (permission?.[UnitAction.View] === false) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 }

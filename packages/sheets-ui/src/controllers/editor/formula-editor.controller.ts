@@ -258,6 +258,7 @@ export class FormulaEditorController extends RxDisposable {
 
             const permissionCheck = this.interceptor.fetchThroughInterceptors(FORMULA_EDIT_PERMISSION_CHECK)(null, { row: editCellState.row, col: editCellState.column });
             if (!permissionCheck) {
+                this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, '', [{ startIndex: 0 }], []);
                 return;
             }
 

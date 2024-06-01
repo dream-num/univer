@@ -2211,6 +2211,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/docs-drawing':
+        specifier: workspace:*
+        version: link:../docs-drawing
       '@univerjs/docs-drawing-ui':
         specifier: workspace:*
         version: link:../docs-drawing-ui
@@ -2259,6 +2262,9 @@ importers:
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../sheets-data-validation
+      '@univerjs/sheets-drawing':
+        specifier: workspace:*
+        version: link:../sheets-drawing
       '@univerjs/sheets-drawing-ui':
         specifier: workspace:*
         version: link:../sheets-drawing-ui

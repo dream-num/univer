@@ -94,6 +94,7 @@ export function FormulaBar() {
             }
         }
         );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const INITIAL_SNAPSHOT = {
@@ -154,6 +155,7 @@ export function FormulaBar() {
         }, ANIMATION_DURATION);
     }
 
+    // Handle click the "×" button.
     function handleCloseBtnClick() {
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {
@@ -165,6 +167,7 @@ export function FormulaBar() {
         }
     }
 
+    // Handle click the "√" button.
     function handleConfirmBtnClick() {
         const visibleState = editorBridgeService.isVisible();
         if (visibleState.visible) {

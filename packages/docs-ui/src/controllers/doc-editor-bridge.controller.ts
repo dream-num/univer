@@ -265,7 +265,7 @@ export class DocEditorBridgeController extends Disposable {
     }
 
     /**
-     * Listen to document edits to refresh the size of the normula editor.
+     * Listen to document edits to refresh the size of the formula editor.
      */
     private _commandExecutedListener() {
         const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];

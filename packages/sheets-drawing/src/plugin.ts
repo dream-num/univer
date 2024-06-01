@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import { Plugin } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { SheetsDrawingController, SheetsDrawingLoadController } from './controllers/sheet-drawing.controller';
+import { SHEET_DRAWING_PLUGIN, SheetsDrawingController, SheetsDrawingLoadController } from './controllers/sheet-drawing.controller';
 import { ISheetDrawingService, SheetDrawingService } from './services/sheet-drawing.service';
 
 export class UniverSheetsDrawingPlugin extends Plugin {
+    static override pluginName = SHEET_DRAWING_PLUGIN;
+    static override type = UniverInstanceType.UNIVER_SHEET;
+
     constructor(
         @Inject(Injector) override readonly _injector: Injector
     ) {

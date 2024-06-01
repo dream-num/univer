@@ -19,11 +19,11 @@ import { ICommandService, IDrawingManagerService, LocaleService } from '@univerj
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import styles from '@univerjs/drawing-ui/views/panel/index.module.less';
 import type { BaseObject } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { SetDocDrawingCommand } from '../../commands/commands/set-doc-drawing.command';
+import styles from './index.module.less';
 
 export interface IDocDrawingAnchorProps {
     drawings: IDrawingParam[];

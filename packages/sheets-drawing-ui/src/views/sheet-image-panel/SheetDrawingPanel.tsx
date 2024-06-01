@@ -19,7 +19,7 @@ import { IDrawingManagerService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { DrawingCommonPanel } from '@univerjs/drawing-ui';
-import styles from '@univerjs/drawing-ui/views/panel/index.module.less';
+import styles from './index.module.less';
 import { SheetDrawingAnchor } from './SheetDrawingAnchor';
 
 export const SheetDrawingPanel = () => {

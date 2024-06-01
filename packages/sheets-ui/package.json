@@ -76,7 +76,6 @@
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.15.2",
         "clsx": ">=2.0.0",

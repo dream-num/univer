@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IPermissionTypes, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
 import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
 

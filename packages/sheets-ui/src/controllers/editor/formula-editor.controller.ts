@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IParagraph, ITextRun, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IParagraph, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
 import {
     createInterceptorKey,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -280,6 +280,7 @@ export class FormulaEditorController extends RxDisposable {
         });
     }
 
+    // Sync cell content to formula editor bar when sheet selection changed or visible changed.
     private _editorSyncHandler(param: IEditorBridgeServiceParam) {
         const body = param.documentLayoutObject.documentModel?.getBody();
 
@@ -320,7 +321,7 @@ export class FormulaEditorController extends RxDisposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
                     const params = command.params as IRichTextEditingMutationParams;
-                    const { unitId } = params;
+                    const { unitId, actions } = params;
 
                     if (INCLUDE_LIST.includes(unitId)) {
                         // sync cell content to formula editor bar when edit cell editor and vice verse.
@@ -337,7 +338,11 @@ export class FormulaEditorController extends RxDisposable {
                             return;
                         }
 
-                        this._syncContentAndRender(syncId, dataStream, paragraphs);
+                        if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+                            this._syncActionsAndRender(syncId, actions);
+                        } else {
+                            this._syncContentAndRender(syncId, dataStream, paragraphs);
+                        }
 
                         // handle weather need to show scroll bar.
                         this._autoScroll();
@@ -387,6 +392,41 @@ export class FormulaEditorController extends RxDisposable {
                 }
             })
         );
+    }
+
+    // Sync actions between cell editor and formula editor, and make `dataStream` and `paragraph` is the same.
+    private _syncActionsAndRender(
+        unitId: string,
+        actions: JSONXActions
+    ) {
+        const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
+
+        const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
+        const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+        const docViewModel = this._docViewModelManagerService.getViewModel(unitId);
+
+        if (docDataModel == null || docViewModel == null || docsSkeletonObject == null) {
+            return;
+        }
+
+        // Update document data model.
+        docDataModel.apply(actions);
+
+        docViewModel.reset(docDataModel);
+
+        const { skeleton } = docsSkeletonObject;
+
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+
+        if (currentRender == null) {
+            return;
+        }
+
+        skeleton.calculate();
+
+        if (INCLUDE_LIST.includes(unitId)) {
+            currentRender.mainComponent?.makeDirty();
+        }
     }
 
     private _syncContentAndRender(

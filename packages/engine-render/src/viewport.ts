@@ -68,8 +68,8 @@ export interface IScrollObserverParam {
     /**
      * scrollX for viewport
      */
-    actualScrollX?: number;
-    actualScrollY?: number;
+    viewportScrollX?: number;
+    viewportScrollY?: number;
     limitX?: number;
     limitY?: number;
     isTrigger?: boolean;
@@ -94,19 +94,19 @@ export class Viewport {
      */
     scrollX: number = 0;
     scrollY: number = 0;
-    _preScrollX: number = 0;
-    _preScrollY: number = 0;
+    private _preScrollX: number = 0;
+    private _preScrollY: number = 0;
 
     /**
-     * The actual scroll offset equals the distance from the content area position to the top, and there is a conversion relationship with scrollX and scrollY
-     * use getActualScroll to get scrolling value for spreadsheet.
+     * The viewport scroll offset equals the distance from the content area position to the top, and there is a conversion relationship with scrollX and scrollY
+     * use transScroll2ViewportScrollValue to get scrolling value for spreadsheet.
      */
-    viewportScrollX: number = 0;
-    viewportScrollY: number = 0;
-    preViewportScrollX: number = 0;
-    preViewportScrollY: number = 0;
-    _deltaViewportScrollX: number = 0;
-    _deltaViewportScrollY: number = 0;
+    private _viewportScrollX: number = 0;
+    private _viewportScrollY: number = 0;
+    private _preViewportScrollX: number = 0;
+    private _preViewportScrollY: number = 0;
+    private _deltaViewportScrollX: number = 0;
+    private _deltaViewportScrollY: number = 0;
 
     onMouseWheelObserver = new Observable<IWheelEvent>();
 
@@ -252,9 +252,6 @@ export class Viewport {
             this._mainCanvasResizeHandler();
         });
         this._mainCanvasResizeHandler();
-        if (this.viewportKey === 'viewMain') {
-            console.log('viewMain init');
-        }
     }
 
     initCacheCanvas(props?: IViewProps) {
@@ -377,6 +374,22 @@ export class Viewport {
         return this._active;
     }
 
+    set viewportScrollX(val: number) {
+        this._viewportScrollX = val;
+    }
+
+    get viewportScrollX() {
+        return this._viewportScrollX;
+    }
+
+    set viewportScrollY(val: number) {
+        this._viewportScrollY = val;
+    }
+
+    get viewportScrollY() {
+        return this._viewportScrollY;
+    }
+
     private set top(num: number) {
         this._topOrigin = num;
         this._top = toPx(num, this._scene?.getParent()?.height);
@@ -488,30 +501,27 @@ export class Viewport {
     }
 
     /**
-     * scroll to scrollbar position, absolute,
-     * only viewMain would call scrollTo, other views did not call scroll
-     * see scroll.render-controller
+     * set scrollXY and viewportScrollXY, and update scrollInfo without notify listeners of scrollInfo$
+     * mainly call by scroll.render-controller and viewport.resize ...
+     * only viewMain would call scrollTo, other views did not call scroll, see scroll.render-controller
+     * @param pos
+     *
+     * when scrolling:
+     *
      * scroll.render-controller@_scrollManagerService.scrollInfo$.subscribe --> scrollTo
      *
-     * mainly call by scroll.render-controller and viewport.resize ...
+     * when change skelenton:
+     * _currentSkeletonBefore$ ---> scroll.render-controller@_updateSceneSize --> setSearchParam --> scene@_setTransForm ---> viewport.resetCanvasSizeAndUpdateScrollBar ---> scrollTo ---> _scroll
+     * --> onScrollAfterObserver.notifyObservers --> scroll.render-controller@onScrollAfterObserver ---> setScrollInfoToCurrSheetWithoutNotify  ---> sms._setScrollInfo
      *
-     * after change skelenton
-     * exec sequence
-     * _currentSkeleton$ ---> selection.render-controller ---> formula@_autoScroll ---> viewport.resize
+     * _currentSkeleton$ ---> selection.render-controller ---> formula@_autoScroll ---> viewport.resize ---> get scrollXY by viewportScrollXY ---> scrollTo
      * _currentSkeleton$ ---> selection.render-controller ---> setCurrentSelection ---> formula@_autoScroll ---> scrollTo
-     * _currentSkeleton$ ---> freeze.render-controller@_refreshFreeze --> viewport.resize ---> scrollTo  ---> _scroll (XXXX)
-     * _currentSkeleton$ ---> scroll.render-controller@updateSceneSize --> setSearchParam --> _setTransForm ---> viewport.resetCanvasSizeAndScrollbar ---> scrollTo ---> _scroll
-     * --> onScrollAfterObserver.notifyObservers --> scroll.render-controller@observer ---> setScrollInfoWithoutNotify
-     *
-     * render-controller@addOrReplaceNoRefresh ---> _setScrollInfo
-     * _currentSkeleton$ ---> scrollManagerService@setCurrentScroll --> scrollTo
-     * _currentSkeleton$ ---> scroll.render-controller@updateSceneSize --> viewport.resetCanvasSizeAndScrollbar ---> scrollTo
+     * _currentSkeleton$ ---> freeze.render-controller@_refreshFreeze --> viewport.resize ---> scrollTo  ---> _scroll
      * Debug
      * window.scene.getViewports()[0].scrollTo({x: 14.2, y: 1.8}, true)
-     * @param pos
      */
-    scrollTo(pos: IScrollBarPosition, isTrigger = true) {
-        return this._scrollToScrollbarPos(SCROLL_TYPE.scrollTo, pos, isTrigger);
+    scrollTo(pos: IScrollBarPosition) {
+        return this._scrollToScrollbarPos(SCROLL_TYPE.scrollTo, pos);
     }
 
     /**
@@ -532,8 +542,8 @@ export class Viewport {
             scrollY: this.scrollY,
             x,
             y,
-            actualScrollX: this.viewportScrollX,
-            actualScrollY: this.viewportScrollY,
+            viewportScrollX: this.viewportScrollX,
+            viewportScrollY: this.viewportScrollY,
             limitX: this._scrollBar?.limitX,
             limitY: this._scrollBar?.limitY,
             isTrigger,
@@ -655,7 +665,7 @@ export class Viewport {
         // this._deltaScrollY = this.scrollY - this._preScrollY;
         this._preScrollX = this.scrollX;
         this._preScrollY = this.scrollY;
-        const { scrollX, scrollY, actualScrollX, actualScrollY } = current;
+        const { scrollX, scrollY, viewportScrollX, viewportScrollY } = current;
         if (scrollX !== undefined) {
             this.scrollX = scrollX;
         }
@@ -664,16 +674,16 @@ export class Viewport {
             this.scrollY = scrollY;
         }
 
-        if (actualScrollX !== undefined) {
-            this.preViewportScrollX = this.viewportScrollX;
-            this.viewportScrollX = actualScrollX;
-            this._deltaViewportScrollX = actualScrollX - this.preViewportScrollX;
+        if (viewportScrollX !== undefined) {
+            this._preViewportScrollX = this.viewportScrollX;
+            this.viewportScrollX = viewportScrollX;
+            this._deltaViewportScrollX = viewportScrollX - this._preViewportScrollX;
         }
 
-        if (actualScrollY !== undefined) {
-            this.preViewportScrollY = this.viewportScrollY;
-            this.viewportScrollY = actualScrollY;
-            this._deltaViewportScrollY = actualScrollY - this.preViewportScrollY;
+        if (viewportScrollY !== undefined) {
+            this._preViewportScrollY = this.viewportScrollY;
+            this.viewportScrollY = viewportScrollY;
+            this._deltaViewportScrollY = viewportScrollY - this._preViewportScrollY;
         }
         return this;
     }
@@ -1133,8 +1143,6 @@ export class Viewport {
      * resize canvas & use viewportScrollXY to scrollTo
      */
     private _resizeCacheCanvas() {
-        const viewportScrollX = this.viewportScrollX;
-        const viewportScrollY = this.viewportScrollY;
         const { width, height } = this._getViewPortSize();
 
         const scaleX = this.scene.scaleX;
@@ -1145,21 +1153,6 @@ export class Viewport {
         this.cacheBound = this._viewBound;
         this.preCacheBound = null;
 
-        // const contentWidth = (this._scene.width - this._paddingEndX) * this._scene.scaleX;
-        // const contentHeight = (this._scene.height - this._paddingEndY) * this._scene.scaleY;
-        // // @ts-expect-error
-        // if (this.viewportKey === 'sheetViewMain') {
-        //     console.log('cotnentHeight', contentHeight, window.sms?._searchParamForScroll);
-        // }
-
-        // if (this._scrollBar) {
-        //     this._scrollBar.resize(width, height, contentWidth, contentHeight);
-        //     const { x, y } = this.transViewportScroll2ScrollValue(viewportScrollX, viewportScrollY);
-        //     this.scrollTo({
-        //         x,
-        //         y,
-        //     });
-        // }
         this.markForceDirty(true);
     }
 
@@ -1169,10 +1162,6 @@ export class Viewport {
         const { width, height } = this._getViewPortSize();
         const contentWidth = (this._scene.width - this._paddingEndX) * this._scene.scaleX;
         const contentHeight = (this._scene.height - this._paddingEndY) * this._scene.scaleY;
-        // @ts-expect-error
-        if (this.viewportKey === 'sheetViewMain') {
-            console.log('cotnentHeight', contentHeight, window.sms?._searchParamForScroll);
-        }
 
         if (this._scrollBar) {
             this._scrollBar.resize(width, height, contentWidth, contentHeight);
@@ -1256,8 +1245,7 @@ export class Viewport {
             y: number;
         },
         x?: number,
-        y?: number,
-        isTrigger = true
+        y?: number
     ) {
         clearTimeout(this._scrollStopNum);
         this._scrollStopNum = setTimeout(() => {
@@ -1267,11 +1255,10 @@ export class Viewport {
                 scrollY: this.scrollY,
                 x,
                 y,
-                actualScrollX: scroll.x,
-                actualScrollY: scroll.y,
+                viewportScrollX: scroll.x,
+                viewportScrollY: scroll.y,
                 limitX: this._scrollBar?.limitX,
                 limitY: this._scrollBar?.limitY,
-                isTrigger,
             });
         }, 2);
     }
@@ -1286,7 +1273,7 @@ export class Viewport {
      * @param scrollBarPos viewMain 滚动条的位置
      * @param isTrigger
      */
-    private _scrollToScrollbarPos(scrollType: SCROLL_TYPE, scrollBarPos: IScrollBarPosition, isTrigger = true) {
+    private _scrollToScrollbarPos(scrollType: SCROLL_TYPE, scrollBarPos: IScrollBarPosition, isTrigger: boolean = true) {
         const { x, y } = scrollBarPos;
         if (this._scrollBar == null) {
             return;
@@ -1317,7 +1304,7 @@ export class Viewport {
         }
 
         const limited = this.limitedScroll(); // 限制滚动范围
-        isTrigger && this.onScrollBeforeObserver.notifyObservers({
+        this.onScrollBeforeObserver.notifyObservers({
             viewport: this,
             scrollX: this.scrollX,
             scrollY: this.scrollY,
@@ -1337,19 +1324,22 @@ export class Viewport {
         this.viewportScrollY = vpScroll.y;
 
         // scroll.render-controller@onScrollAfterObserver ---> setScrollInfo but no notify
-        isTrigger && this.onScrollAfterObserver.notifyObservers({
+        // calc startRow & offset by viewportScrollXY, then update scrollInfo
+        // other viewports, rowHeader & colHeader depend on this notify
+        this.onScrollAfterObserver.notifyObservers({
             viewport: this,
             scrollX: this.scrollX,
             scrollY: this.scrollY,
             x,
             y,
-            actualScrollX: vpScroll.x,
-            actualScrollY: vpScroll.y,
+            viewportScrollX: vpScroll.x,
+            viewportScrollY: vpScroll.y,
             limitX: this._scrollBar?.limitX,
             limitY: this._scrollBar?.limitY,
+            isTrigger,
         });
 
-        this._triggerScrollStop(vpScroll, x, y, isTrigger);
+        this._triggerScrollStop(vpScroll, x, y);
 
         return limited;
     }
@@ -1395,7 +1385,6 @@ export class Viewport {
             : 0b00;
 
         const shouldCacheUpdate = nearEdge | viewBoundOutCacheArea;
-        // console.log(`shouldCacheUpdate${shouldCacheUpdate}`, `${this.viewportKey}:`, this.preCacheBound, this.cacheBound, this.viewBound, this._preCacheVisibleBound);
         return shouldCacheUpdate;
     }
 

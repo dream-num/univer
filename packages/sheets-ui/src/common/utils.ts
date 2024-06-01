@@ -194,18 +194,18 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
     const freezeWidth = endSheetView.startX - startSheetView.startX;
     const freezeHeight = endSheetView.startY - startSheetView.startY;
 
-    const { top, left, viewportScrollX: actualScrollX, viewportScrollY: actualScrollY } = viewMain;
+    const { top, left, viewportScrollX, viewportScrollY } = viewMain;
     let offsetX: number;
     // viewMain or viewTop
     if (x > left) {
-        offsetX = (x - actualScrollX) * scaleX;
+        offsetX = (x - viewportScrollX) * scaleX;
     } else {
         offsetX = ((freezeWidth + rowHeaderWidth) - (left - x)) * scaleX;
     }
 
     let offsetY: number;
     if (y > top) {
-        offsetY = (y - actualScrollY) * scaleY;
+        offsetY = (y - viewportScrollY) * scaleY;
     } else {
         offsetY = ((freezeHeight + columnHeaderHeight) - (top - y)) * scaleX;
     }

@@ -27,13 +27,14 @@ import { merge } from 'rxjs';
 import type { IPermissionPoint } from '@univerjs/protocol';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { DeleteSingle, WriteSingle } from '@univerjs/icons';
-import { useHighlightRange } from '@univerjs/sheets-ui';
+
 import { serializeRange } from '@univerjs/engine-formula';
 
 import { DeleteWorksheetProtectionCommand } from '../../../commands/commands/worksheet-protection.command';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionPanelModel } from '../../../services/permission/sheet-permission-panel.model';
 import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../../basics/const/permission';
+import { useHighlightRange } from '../../../hooks/useHighlightRange';
 import { panelListEmptyBase64 } from './constant';
 import styles from './index.module.less';
 

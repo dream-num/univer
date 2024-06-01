@@ -20,10 +20,12 @@ import { getSheetCommandTarget, RangeProtectionRuleModel, SelectionManagerServic
 import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
 import type { IRenderContext, IRenderController, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { HeaderFreezeRenderController, HeaderMoveRenderController, HeaderResizeRenderController, ISelectionRenderService } from '@univerjs/sheets-ui';
 
 import { UnitAction } from '@univerjs/protocol';
-import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG, UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from '../../views/permission/error-msg-dialog/interface';
+import { HeaderMoveRenderController } from '../render-controllers/header-move.render-controller';
+import { HeaderResizeRenderController } from '../render-controllers/header-resize.render-controller';
+import { ISelectionRenderService } from '../../services/selection/selection-render.service';
+import { HeaderFreezeRenderController } from '../render-controllers/freeze.render-controller';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 
@@ -51,23 +53,6 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
         this._initRangeFillPermissionInterceptor();
         this._initRangeMovePermissionInterceptor();
         this._initFreezePermissionInterceptor();
-    }
-
-    private _haveNotPermissionHandle(errorMsg: string) {
-        const dialogProps = {
-            id: UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID,
-            title: { title: '' },
-            children: {
-                label: UNIVER_SHEET_PERMISSION_ALERT_DIALOG,
-                errorMsg,
-            },
-            width: 320,
-            destroyOnClose: true,
-            onClose: () => this._dialogService.close(UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID),
-            className: 'sheet-permission-user-dialog',
-        };
-        this._dialogService.open(dialogProps);
-        throw new Error('have not permission');
     }
 
     private _initHeaderMovePermissionInterceptor() {

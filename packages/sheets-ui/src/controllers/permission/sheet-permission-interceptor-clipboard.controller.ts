@@ -18,8 +18,9 @@ import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/c
 import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-import { ISheetClipboardService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { UnitAction } from '@univerjs/protocol';
+import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
+import { virtualizeDiscreteRanges } from '../utils/range-tools';
 import { SheetPermissionInterceptorBaseController } from './sheet-permission-interceptor-base.controller';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };

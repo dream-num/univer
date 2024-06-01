@@ -23,12 +23,17 @@ import type { IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandP
 import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SelectionManagerService, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
-import type { ISheetPasteParams } from '@univerjs/sheets-ui';
-import { ApplyFormatPainterCommand, AutoFillCommand, IAutoFillService, SetCellEditVisibleOperation, SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand, SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand } from '@univerjs/sheets-ui';
 import { InsertCommand } from '@univerjs/docs';
 import { UnitAction } from '@univerjs/protocol';
 import { deserializeRangeWithSheet, IDefinedNamesService, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG, UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID } from '../../views/permission/error-msg-dialog/interface';
+import type { ISheetPasteParams } from '../../commands/commands/clipboard.command';
+import { SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand } from '../../commands/commands/clipboard.command';
+import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
+import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
+import { ApplyFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
+import { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand } from '../../commands/commands/inline-format.command';
+import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 type ICheckPermissionCommandParams = IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISheetPasteParams | ISetSpecificRowsVisibleCommandParams;

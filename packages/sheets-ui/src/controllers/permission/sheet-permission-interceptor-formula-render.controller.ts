@@ -20,9 +20,10 @@ import { getSheetCommandTarget, RangeProtectionPermissionViewPoint, RangeProtect
 import { Inject, Injector } from '@wendellhu/redi';
 import { debounceTime, filter } from 'rxjs/operators';
 import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
-import { FormulaEditorController, StatusBarController } from '@univerjs/sheets-ui';
 import { UnitAction } from '@univerjs/protocol';
 import { NullValueObject } from '@univerjs/engine-formula';
+import { StatusBarController } from '../status-bar.controller';
+import { FormulaEditorController } from '../editor/formula-editor.controller';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 

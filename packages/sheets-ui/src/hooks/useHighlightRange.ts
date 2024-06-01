@@ -17,7 +17,7 @@
 import { useEffect } from 'react';
 import type { IRange } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { IMarkSelectionService } from '@univerjs/sheets-ui';
+import { IMarkSelectionService } from '../services/mark-selection/mark-selection.service';
 
 export const useHighlightRange = (ranges: IRange[] = []) => {
     const markSelectionService = useDependency(IMarkSelectionService);

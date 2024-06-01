@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, Workbook } from '@univerjs/core';
-import { IDrawingManagerService, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import type { ISheetRenderExtension } from '@univerjs/engine-render';
 import { RangeProtectionRuleModel, SelectionManagerService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
@@ -156,13 +156,15 @@ export function getAddPermissionDisableBase$(accessor: IAccessor) {
     const selectionManagerService = accessor.get(SelectionManagerService);
     const userManagerService = accessor.get(UserManagerService);
     const permissionService = accessor.get(IPermissionService);
-    const drawingManagerService = accessor.get(IDrawingManagerService);
+    const contextService = accessor.get(IContextService);
+    const focusingDrawing$ = contextService.subscribeContextValue$(FOCUSING_COMMON_DRAWINGS);
 
-    return combineLatest([workbook.activeSheet$, userManagerService.currentUser$, drawingManagerService.focus$]).pipe(
-        switchMap(([sheet, _, drawings]) => {
-            if (!sheet || drawings.length > 0) {
+    return combineLatest([workbook.activeSheet$, userManagerService.currentUser$, focusingDrawing$]).pipe(
+        switchMap(([sheet, _, focusOnDrawing]) => {
+            if (!sheet || focusOnDrawing) {
                 return of(true);
             }
+
             const subUnitId = sheet.getSheetId();
             const permission$ = permissionService.getPermissionPoint$(new WorkbookManageCollaboratorPermission(unitId).id)?.pipe(map((e) => !!e.value)) ?? of(false);
             const ruleChange$ = merge(

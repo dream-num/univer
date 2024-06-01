@@ -20,8 +20,6 @@ import {
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
     Disposable,
     ICommandService,
-    IDrawingManagerService,
-    IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     PositionedObjectLayoutType,
@@ -41,10 +39,8 @@ export class DocFloatingObjectController extends Disposable {
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IEditorService private readonly _editorService: IEditorService
     ) {
         super();

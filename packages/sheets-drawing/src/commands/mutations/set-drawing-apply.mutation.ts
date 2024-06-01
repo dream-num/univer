@@ -33,7 +33,7 @@ export interface ISetDrawingApplyMutationParams extends IDrawingJson1Type {
 }
 
 export const SetDrawingApplyMutation: IMutation<ISetDrawingApplyMutationParams> = {
-    id: 'sheet.mutation.set-drawing-json-apply',
+    id: 'sheet.mutation.set-drawing-apply',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const drawingManagerService = accessor.get(IDrawingManagerService);

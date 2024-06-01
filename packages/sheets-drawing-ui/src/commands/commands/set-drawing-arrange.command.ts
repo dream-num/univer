@@ -21,7 +21,7 @@ import { ArrangeTypeEnum,
     IUndoRedoService,
 } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets';
+import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetDrawingArrangeCommandParams extends IDrawingOrderMapParam {

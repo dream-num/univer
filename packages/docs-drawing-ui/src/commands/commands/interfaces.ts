@@ -15,7 +15,7 @@
  */
 
 import type { DrawingTypeEnum } from '@univerjs/core';
-import type { IDocDrawing } from '@univerjs/docs';
+import type { IDocDrawing } from '@univerjs/docs-drawing';
 
 export interface IInsertDrawingCommandParams {
     unitId: string;

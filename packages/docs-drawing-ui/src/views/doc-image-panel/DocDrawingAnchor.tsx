@@ -22,7 +22,7 @@ import clsx from 'clsx';
 import styles from '@univerjs/drawing-ui/views/panel/index.module.less';
 import type { BaseObject } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IDocDrawing } from '@univerjs/docs';
+import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { SetDocDrawingCommand } from '../../commands/commands/set-doc-drawing.command';
 
 export interface IDocDrawingAnchorProps {

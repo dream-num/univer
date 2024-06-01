@@ -56,6 +56,7 @@ export interface IFloatDomData extends IDrawingParam {
     componentKey: string;
 }
 
+// TODO@wzhudev: this shouldn't be here. It should be in the sheets package
 export interface ISheetFloatDom extends IFloatDomData, ISheetDrawingBase {}
 
 export type ISheetDrawing = ISheetImage | ISheetShape | ISheetFloatDom;
@@ -67,4 +68,4 @@ export class SheetDrawingService extends UnitDrawingService<ISheetDrawing> {}
 
 export interface ISheetDrawingService extends IUnitDrawingService<ISheetDrawing> {}
 
-export const ISheetDrawingService = createIdentifier<ISheetDrawingService>('univer.sheet.plugin.sheet-drawing.service');
+export const ISheetDrawingService = createIdentifier<ISheetDrawingService>('sheets-drawing.sheet-drawing.service');

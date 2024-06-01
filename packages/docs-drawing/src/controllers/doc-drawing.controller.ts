@@ -14,18 +14,34 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDrawingMapItem, IDrawingSubunitMap } from '@univerjs/core';
-import { Disposable, IDrawingManagerService, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, IDrawingMapItem, IDrawingMapItemData, IDrawingSubunitMap } from '@univerjs/core';
+import { Disposable, ICommandService, IDrawingManagerService, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
 import { type IDocDrawing, IDocDrawingService } from '../services/doc-drawing.service';
+import { SetDocDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 
-export const DOC_DRAWING_PLUGIN = 'DOC_DRAWING_PLUGIN';
-@OnLifecycle(LifecycleStages.Rendered, DocDrawingDataController)
-export class DocDrawingDataController extends Disposable {
+export const DOCS_DRAWING_PLUGIN = 'DOC_DRAWING_PLUGIN';
+
+@OnLifecycle(LifecycleStages.Starting, DocDrawingLoadController)
+export class DocDrawingLoadController extends Disposable {
+    constructor(
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
+        super();
+
+        this.disposeWithMe(this._commandService.registerCommand(SetDocDrawingApplyMutation));
+    }
+}
+
+@OnLifecycle(LifecycleStages.Rendered, DocDrawingController)
+export class DocDrawingController extends Disposable {
     constructor(
         @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IResourceManagerService private _resourceManagerService: IResourceManagerService,
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
     ) {
         super();
 
@@ -34,6 +50,7 @@ export class DocDrawingDataController extends Disposable {
 
     private _init(): void {
         this._initSnapshot();
+        this._initDataLoader();
     }
 
     private _initSnapshot() {
@@ -56,7 +73,7 @@ export class DocDrawingDataController extends Disposable {
         };
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource<IDrawingSubunitMap<IDocDrawing>>({
-                pluginName: DOC_DRAWING_PLUGIN,
+                pluginName: DOCS_DRAWING_PLUGIN,
                 businesses: [UniverInstanceType.UNIVER_DOC],
                 toJson: (unitId) => toJson(unitId),
                 parseJson: (json) => parseJson(json),
@@ -81,5 +98,45 @@ export class DocDrawingDataController extends Disposable {
         }
 
         documentDataModel.resetDrawing(drawingMapItem.data, drawingMapItem.order);
+    }
+
+    private _initDataLoader(): boolean {
+        const dataModel = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!dataModel) {
+            return false;
+        }
+
+        const unitId = dataModel.getUnitId();
+        const subUnitId = unitId;
+
+        const drawingDataModels = dataModel.getDrawings();
+        const drawingOrderModel = dataModel.getDrawingsOrder();
+
+        if (!drawingDataModels || !drawingOrderModel) {
+            return false;
+        }
+
+        // TODO@wzhudev: should move to docs-drawing
+
+        Object.keys(drawingDataModels).forEach((drawingId) => {
+            const drawingDataModel = drawingDataModels[drawingId];
+            const docTransform = drawingDataModel.docTransform;
+            const transform = docDrawingPositionToTransform(docTransform);
+
+            drawingDataModels[drawingId] = { ...drawingDataModel, transform } as IDocDrawing;
+        });
+
+        const subDrawings = {
+            [subUnitId]: {
+                unitId,
+                subUnitId,
+                data: drawingDataModels as IDrawingMapItemData<IDocDrawing>,
+                order: drawingOrderModel,
+            },
+        };
+
+        this._docDrawingService.registerDrawingData(unitId, subDrawings);
+        this._drawingManagerService.registerDrawingData(unitId, subDrawings);
+        return true;
     }
 }

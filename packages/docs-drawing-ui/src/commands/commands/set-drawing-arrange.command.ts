@@ -20,7 +20,7 @@ import { ArrangeTypeEnum,
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-import { DocDrawingApplyType, IDocDrawingService, SetDocDrawingApplyMutation } from '@univerjs/docs';
+import { DocDrawingApplyType, IDocDrawingService, SetDocDrawingApplyMutation } from '@univerjs/docs-drawing';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { IAccessor } from '@wendellhu/redi';
 

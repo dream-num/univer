@@ -16,7 +16,7 @@
 
 import type { ITransformState, Nullable } from '@univerjs/core';
 import { precisionTo } from '@univerjs/engine-render';
-import type { ISheetDrawingPosition } from '@univerjs/sheets';
+import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import type { ISelectionRenderService } from '@univerjs/sheets-ui';
 
 export function drawingPositionToTransform(position: ISheetDrawingPosition, selectionRenderService: ISelectionRenderService): Nullable<ITransformState> {

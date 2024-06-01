@@ -20,12 +20,12 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { Radio, RadioGroup } from '@univerjs/design';
 import clsx from 'clsx';
-import styles from '@univerjs/drawing-ui/views/panel/index.module.less';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import { SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import type { BaseObject } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetSheetDrawingCommand } from '../../commands/commands/set-sheet-drawing.command';
+import styles from './index.module.less';
 
 export interface ISheetDrawingAnchorProps {
     drawings: IDrawingParam[];

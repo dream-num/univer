@@ -191,20 +191,26 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
                     <Button size="small" onClick={() => { onGroupBtnClick(); }} style={{ display: gridDisplay(groupBtnShow) }}>
-                        <div className={clsx(styles.imageCommonPanelInline)}><GroupSingle /></div>
-                        <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.group')}</div>
+                        <span className={styles.imageCommonPanelInline}>
+                            <GroupSingle />
+                            {localeService.t('image-panel.group.group')}
+                        </span>
                     </Button>
                 </div>
                 {/* <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan3)}>
                     <Button size="small" onClick={() => { onGroupBtnClick(GroupType.regroup); }} style={{ display: gridDisplay(groupBtnShow) }}>
-                        <div className={clsx(styles.imageCommonPanelInline)}><CreateCopySingle /></div>
-                        <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.reGroup')}</div>
+                        <span className={styles.imageCommonPanelInline}>
+                            <CreateCopySingle />
+                            {localeService.t('image-panel.group.reGroup')}
+                        </span>
                     </Button>
                 </div> */}
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
                     <Button size="small" onClick={() => { onUngroupBtnClick(); }} style={{ display: gridDisplay(ungroupBtnShow) }}>
-                        <div className={clsx(styles.imageCommonPanelInline)}><UngroupSingle /></div>
-                        <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.unGroup')}</div>
+                        <span className={styles.imageCommonPanelInline}>
+                            <UngroupSingle />
+                            {localeService.t('image-panel.group.unGroup')}
+                        </span>
                     </Button>
                 </div>
             </div>

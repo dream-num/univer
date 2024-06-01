@@ -571,7 +571,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
 
         const _context = this._context;
 
-        if (!this._isDrawable) {
+        if (!this._isDrawable(a)) {
             return;
         }
 
@@ -584,7 +584,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         }
     }
 
-    _isDrawable(args: any[]): boolean {
+    private _isDrawable(args: any[]): boolean {
         if (Array.isArray(args) && args.length > 0) {
             const canvasImageSource: CanvasImageSource = args[0];
             if (

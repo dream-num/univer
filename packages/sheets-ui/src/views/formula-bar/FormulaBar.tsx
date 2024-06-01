@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, Nullable, Workbook } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, HorizontalAlign, IPermissionService, IUniverInstanceService, ThemeService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, HorizontalAlign, IPermissionService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
 import { KeyCode, ProgressBar, TextEditor } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 
-import type { ICellPermission } from '@univerjs/sheets';
-import { RangeProtectionRuleModel, SelectionManagerService, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SelectionManagerService, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { merge } from 'rxjs';
-import { UnitAction } from '@univerjs/protocol';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
@@ -53,7 +51,7 @@ export function FormulaBar() {
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
     const permissionService = useDependency(IPermissionService);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         merge(
             worksheetProtectionRuleModel.ruleChange$,
@@ -66,27 +64,37 @@ export function FormulaBar() {
             const range = selectionManager.getLast()?.range;
             if (!range) return;
             const worksheetSetCellValuePermission = permissionService.getPermissionPoint(new WorksheetSetCellValuePermission(unitId, subUnitId).id);
-            const worksheetSetCellStylePermission = permissionService.getPermissionPoint(new WorksheetSetCellStylePermission(unitId, subUnitId).id);
+            const worksheetEditPermission = permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id);
 
-            if (!worksheetSetCellValuePermission || !worksheetSetCellStylePermission) {
+            if (!worksheetSetCellValuePermission || !worksheetEditPermission) {
                 setDisable(true);
                 return;
             }
 
-            const { startRow, endRow, startColumn, endColumn } = range;
-            for (let row = startRow; row <= endRow; row++) {
-                for (let col = startColumn; col <= endColumn; col++) {
-                    const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                    if (permission?.[UnitAction.Edit] === false) {
-                        setDisable(true);
-                        return;
-                    }
-                }
+            const selectionRanges = selectionManager.getSelections()?.map((selection) => selection.range);
+            const permissionList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
+                return rule.ranges.some((r) => {
+                    return selectionRanges?.some((selectionRange) => {
+                        return Rectangle.intersects(r, selectionRange);
+                    });
+                });
+            });
+
+            const permissionEditIds: string[] = [];
+            permissionList.forEach((p) => {
+                permissionEditIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, p.permissionId).id);
+            });
+
+            const rangeEditPermission = permissionService.composePermission(permissionEditIds).every((p) => p.value);
+
+            if (rangeEditPermission) {
+                setDisable(false);
+            } else {
+                setDisable(true);
             }
-            setDisable(false);
         }
         );
-    }, [selectionManager, rangeProtectionRuleModel, univerInstanceService, worksheetProtectionRuleModel]);
+    }, []);
 
     const INITIAL_SNAPSHOT = {
         id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,

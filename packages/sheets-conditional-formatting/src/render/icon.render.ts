@@ -62,6 +62,10 @@ export class ConditionalFormattingIcon extends SheetExtension {
                     return;
                 }
 
+                if (cellData.iconSet?.isSkip) {
+                    return;
+                }
+
                 const { iconType, iconId } = cellData.iconSet;
                 if (iconType === EMPTY_ICON_TYPE) {
                     return;

@@ -16,7 +16,8 @@
 
 import { BooleanNumber, DataValidationRenderMode, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, HorizontalAlign, ICommandService, LocaleService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import type { ICellRenderContext, IDocumentData, IPaddingData, IStyleData, Nullable } from '@univerjs/core';
-import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, type IMouseEvent, type IPointerEvent, type ISheetFontRenderExtension, Rect, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
+import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, Rect } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, ISheetFontRenderExtension, SpreadsheetSkeleton, UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
@@ -152,7 +153,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         return `${row}.${col}`;
     }
 
-    private _drawDownIcon(ctx: UniverRenderingContext2D, cellBounding: { startX: number;startY: number }, cellWidth: number, cellHeight: number, vt: VerticalAlign) {
+    private _drawDownIcon(ctx: UniverRenderingContext2D, cellBounding: { startX: number; startY: number }, cellWidth: number, cellHeight: number, vt: VerticalAlign) {
         const left = cellWidth - ICON_PLACE + 4;
         let top = 4;
 
@@ -178,7 +179,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton): void {
         const { primaryWithCoord, row, col, style, data, subUnitId } = info;
         const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
-
         const rule = data.dataValidation?.rule;
         const validator = data.dataValidation?.validator as ListValidator;
         // @ts-ignore
@@ -190,6 +190,10 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         }
 
         if (!validator.skipDefaultFontRender(rule)) {
+            return;
+        }
+
+        if (data.dataValidation?.isSkip) {
             return;
         }
 

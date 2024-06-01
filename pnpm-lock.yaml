@@ -288,9 +288,6 @@ importers:
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../packages/sheets-numfmt
-      '@univerjs/sheets-permission-ui':
-        specifier: workspace:*
-        version: link:../packages/sheets-permission-ui
       '@univerjs/sheets-thread-comment':
         specifier: workspace:*
         version: link:../packages/sheets-thread-comment
@@ -1279,6 +1276,9 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.55
         version: 0.1.55(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@univerjs/protocol':
+        specifier: ^0.1.34
+        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1521,6 +1521,10 @@ importers:
         version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
   packages/sheets-find-replace:
+    dependencies:
+      '@univerjs/protocol':
+        specifier: 0.1.34
+        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1769,85 +1773,6 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
-  packages/sheets-permission-ui:
-    dependencies:
-      '@univerjs/icons':
-        specifier: ^0.1.55
-        version: 0.1.55(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@univerjs/protocol':
-        specifier: ^0.1.34
-        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
-    devDependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../docs
-      '@univerjs/engine-formula':
-        specifier: workspace:*
-        version: link:../engine-formula
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-      '@univerjs/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
-      '@univerjs/sheets-conditional-formatting':
-        specifier: workspace:*
-        version: link:../sheets-conditional-formatting
-      '@univerjs/sheets-conditional-formatting-ui':
-        specifier: workspace:*
-        version: link:../sheets-conditional-formatting-ui
-      '@univerjs/sheets-data-validation':
-        specifier: workspace:*
-        version: link:../sheets-data-validation
-      '@univerjs/sheets-filter':
-        specifier: workspace:*
-        version: link:../sheets-filter
-      '@univerjs/sheets-filter-ui':
-        specifier: workspace:*
-        version: link:../sheets-filter-ui
-      '@univerjs/sheets-find-replace':
-        specifier: workspace:*
-        version: link:../sheets-find-replace
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
-      '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
-      react:
-        specifier: 18.2.0
-        version: 18.2.0
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-      typescript:
-        specifier: ^5.4.5
-        version: 5.4.5
-      vite:
-        specifier: ^5.2.12
-        version: 5.2.12(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
-      vitest:
-        specifier: ^1.6.0
-        version: 1.6.0(@types/node@20.12.12)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
-
   packages/sheets-thread-comment:
     dependencies:
       '@univerjs/engine-render':
@@ -1912,8 +1837,8 @@ importers:
         specifier: workspace:*
         version: link:../docs-ui
       '@univerjs/icons':
-        specifier: ^0.1.46
-        version: 0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^0.1.55
+        version: 0.1.55(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@univerjs/protocol':
         specifier: ^0.1.34
         version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
@@ -2358,9 +2283,6 @@ importers:
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../sheets-numfmt
-      '@univerjs/sheets-permission-ui':
-        specifier: workspace:*
-        version: link:../sheets-permission-ui
       '@univerjs/sheets-thread-comment':
         specifier: workspace:*
         version: link:../sheets-thread-comment
@@ -5005,6 +4927,10 @@ packages:
       typescript:
         optional: true
 
+  '@typescript-eslint/types@7.10.0':
+    resolution: {integrity: sha512-7fNj+Ya35aNyhuqrA1E/VayQX9Elwr8NKZ4WueClR3KwJ7Xx9jcCdOrLW04h51de/+gNbyFMs+IDxh5xIwfbNg==}
+    engines: {node: ^18.18.0 || >=20.0.0}
+
   '@typescript-eslint/types@7.11.0':
     resolution: {integrity: sha512-MPEsDRZTyCiXkD4vd3zywDCifi7tatc4K37KqTprCvaXptP7Xlpdw0NR2hRJTetG5TxbWDB79Ys4kLmHliEo/w==}
     engines: {node: ^18.18.0 || >=20.0.0}
@@ -5059,12 +4985,6 @@ packages:
 
   '@univerjs/icons-svg@0.1.55':
     resolution: {integrity: sha512-zbvyHAwkRliH8GiJDvdWDXcVSKWXSs2XKG8woZzJ/xl2GjOWVtzXTUD3/ixhHbNtDlxBqbGbEtr2R4IvN+ga/Q==}
-
-  '@univerjs/icons@0.1.47':
-    resolution: {integrity: sha512-JluQi//M5lrVJtxVc6IaVmPXVw1FSryP4WQXUvjdZ7QoSLGdEihkNLKdl/em26MZQAH4R5hIuiATOxXiR3YJWw==}
-    peerDependencies:
-      react: '*'
-      react-dom: '*'
 
   '@univerjs/icons@0.1.55':
     resolution: {integrity: sha512-qSfHP196ZCNP4dbdM6nhHFhZ/317BYMt2uqsZaKb6faDzOvDnyL+kB6DjMmzbRK6WKleVksYPOrMlc1v3DBmjQ==}
@@ -12011,7 +11931,7 @@ snapshots:
     dependencies:
       '@types/eslint': 8.56.10
       '@types/estree': 1.0.5
-      '@typescript-eslint/types': 7.11.0
+      '@typescript-eslint/types': 7.10.0
       comment-parser: 1.4.1
       esquery: 1.5.0
       jsdoc-type-pratt-parser: 4.0.0
@@ -12020,7 +11940,7 @@ snapshots:
     dependencies:
       '@types/eslint': 8.56.10
       '@types/estree': 1.0.5
-      '@typescript-eslint/types': 7.11.0
+      '@typescript-eslint/types': 7.10.0
       comment-parser: 1.4.1
       esquery: 1.5.0
       jsdoc-type-pratt-parser: 4.0.0
@@ -14097,6 +14017,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@typescript-eslint/types@7.10.0': {}
+
   '@typescript-eslint/types@7.11.0': {}
 
   '@typescript-eslint/types@7.9.0': {}
@@ -14168,11 +14090,6 @@ snapshots:
   '@univerjs/icons-svg@0.1.45': {}
 
   '@univerjs/icons-svg@0.1.55': {}
-
-  '@univerjs/icons@0.1.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
-    dependencies:
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
 
   '@univerjs/icons@0.1.55(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
@@ -20310,7 +20227,7 @@ snapshots:
       cac: 6.7.14
       debug: 4.3.4
       pathe: 1.1.2
-      picocolors: 1.0.0
+      picocolors: 1.0.1
       vite: 5.2.12(@types/node@20.12.12)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
     transitivePeerDependencies:
       - '@types/node'

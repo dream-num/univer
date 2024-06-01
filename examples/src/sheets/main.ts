@@ -33,7 +33,6 @@ import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
-import { UniverSheetsPermissionUIPlugin } from '@univerjs/sheets-permission-ui';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
@@ -111,9 +110,6 @@ univer.registerPlugin(UniverSheetsFilterPlugin);
 
 // sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
-
-// sheet permission
-univer.registerPlugin(UniverSheetsPermissionUIPlugin);
 
 // drawing
 univer.registerPlugin(UniverDocsDrawingPlugin);

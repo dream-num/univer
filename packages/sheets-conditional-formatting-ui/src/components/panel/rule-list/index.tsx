@@ -19,15 +19,17 @@ import { Select, Tooltip } from '@univerjs/design';
 import { useHighlightRange } from '@univerjs/sheets-ui';
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import type { IRange, Workbook } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
+import type { ICellPermission } from '@univerjs/sheets';
 import { SelectionManagerService, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import GridLayout from 'react-grid-layout';
 import { debounceTime, Observable } from 'rxjs';
+import { UnitAction } from '@univerjs/protocol';
 import { AddConditionalRuleMutation, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, MoveConditionalRuleMutation, SetConditionalRuleMutation } from '@univerjs/sheets-conditional-formatting';
-import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
+import type { IConditionalFormattingRuleConfig, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import type { IDeleteCfCommandParams } from '../../../commands/commands/delete-cf.command';
 import { DeleteCfCommand } from '../../../commands/commands/delete-cf.command';
 import type { IMoveCfCommand } from '../../../commands/commands/move-cf.command';
@@ -38,7 +40,6 @@ import { Preview } from '../../preview';
 import { ConditionalFormattingI18nController } from '../../../controllers/cf.i18n.controller';
 import { ClearWorksheetCfCommand } from '../../../commands/commands/clear-worksheet-cf.command';
 
-import { CONDITIONAL_FORMATTING_PERMISSION_CHECK, ConditionalFormattingClearController } from '../../../controllers/cf.clear.controller';
 import styles from './index.module.less';
 
 interface IRuleListProps {
@@ -110,7 +111,6 @@ export const RuleList = (props: IRuleListProps) => {
     const conditionalFormattingRuleModel = useDependency(ConditionalFormattingRuleModel);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const selectionManagerService = useDependency(SelectionManagerService);
-    const cvController = useDependency(ConditionalFormattingClearController);
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const conditionalFormattingI18nController = useDependency(ConditionalFormattingI18nController);
@@ -152,6 +152,33 @@ export const RuleList = (props: IRuleListProps) => {
         }
         return [];
     };
+
+    const getConditionalFormattingRulesByPermissionCorrect = (rules: (IConditionFormattingRule<IConditionalFormattingRuleConfig>)[]): ((IConditionFormattingRule<IConditionalFormattingRuleConfig> & { disable?: boolean }))[] => {
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const worksheet = workbook.getActiveSheet();
+        const rulesByPermissionCheck = rules.map((rule) => {
+            const ranges = rule.ranges;
+            const haveNotPermission = ranges?.some((range: IRange) => {
+                const { startRow, startColumn, endRow, endColumn } = range;
+                for (let row = startRow; row <= endRow; row++) {
+                    for (let col = startColumn; col <= endColumn; col++) {
+                        const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
+                        if (permission?.[UnitAction.Edit] === false || permission?.[UnitAction.View] === false) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            });
+            if (haveNotPermission) {
+                return { ...rule, disable: true };
+            } else {
+                return { ...rule };
+            }
+        });
+        return rulesByPermissionCheck;
+    };
+
     const [ruleList, ruleListSet] = useState(getRuleList);
 
     useHighlightRange(currentRuleRanges);
@@ -282,7 +309,7 @@ export const RuleList = (props: IRuleListProps) => {
 
     const layout = ruleList.map((rule, index) => ({ i: rule.cfId, x: 0, w: 12, y: index, h: 1, isResizable: false }));
 
-    const ruleListByPermissionCheck = cvController.interceptor.fetchThroughInterceptors(CONDITIONAL_FORMATTING_PERMISSION_CHECK)(ruleList, ruleList);
+    const ruleListByPermissionCheck = getConditionalFormattingRulesByPermissionCorrect(ruleList);
     const hasDisableRule = ruleListByPermissionCheck?.some((rule) => rule.disable);
 
     return (

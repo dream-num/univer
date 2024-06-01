@@ -115,10 +115,15 @@ export function getCommentDisable$(accessor: IAccessor, permissionTypes: IPermis
     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
     const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
     const userManagerService = accessor.get(UserManagerService);
-    return combineLatest([userManagerService.currentUser$, selectionManagerService.selectionMoveEnd$]).pipe(
-        switchMap(() => {
+    const drawingManagerService = accessor.get(IDrawingManagerService);
+    return combineLatest([userManagerService.currentUser$, selectionManagerService.selectionMoveEnd$, drawingManagerService.focus$]).pipe(
+        switchMap(([_, __, drawings]) => {
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             if (!workbook) {
+                return of(true);
+            }
+
+            if (drawings.length > 0) {
                 return of(true);
             }
             const worksheet = workbook.getActiveSheet();

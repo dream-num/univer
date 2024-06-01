@@ -20,18 +20,12 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs/operators';
 
 // import type { UnitAction, UnitObject } from '@univerjs/protocol';
-import { UnitAction, UniverType } from '@univerjs/protocol';
-import type { ISheetFontRenderExtension } from '@univerjs/engine-render';
-import {
-    WorksheetEditPermission,
-    WorksheetViewPermission,
-} from '../permission-point';
+import { UniverType } from '@univerjs/protocol';
+
 import type { IObjectModel, IObjectPointModel } from '../type';
 import { SheetInterceptorService } from '../../sheet-interceptor/sheet-interceptor.service';
-import { INTERCEPTOR_POINT } from '../../sheet-interceptor/interceptor-const';
 import { WorksheetProtectionRuleModel } from './worksheet-permission-rule.model';
 import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './utils';
-import type { IWorksheetProtectionRenderCellData } from './type';
 import { WorksheetProtectionPointModel } from './worksheet-permission-point.model';
 
 export const RULE_MODEL_PLUGIN_NAME = 'SHEET_WORKSHEET_PROTECTION_PLUGIN';
@@ -53,7 +47,6 @@ export class WorksheetPermissionService extends RxDisposable {
         this._initRuleChange();
         this._initRuleSnapshot();
         this._initPointSnapshot();
-        this._initViewModelInterceptor();
     }
 
     private _init() {
@@ -199,31 +192,5 @@ export class WorksheetPermissionService extends RxDisposable {
                 },
             })
         );
-    }
-
-    private _initViewModelInterceptor() {
-        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-            handler: (cell = {}, context, next) => {
-                const { unitId, subUnitId } = context;
-                const worksheetRule = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
-                if (worksheetRule?.permissionId && worksheetRule.name) {
-                    const selectionProtection = [{
-                        [UnitAction.View]: this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id)?.value ?? false,
-                        [UnitAction.Edit]: this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false,
-                    }];
-                    const isSkipFontRender = !selectionProtection[0]?.[UnitAction.View];
-                    const _cellData: IWorksheetProtectionRenderCellData & ISheetFontRenderExtension = { ...cell, hasWorksheetRule: true, selectionProtection };
-                    if (isSkipFontRender) {
-                        if (!_cellData.fontRenderExtension) {
-                            _cellData.fontRenderExtension = {};
-                        }
-                        _cellData.fontRenderExtension.isSkip = isSkipFontRender;
-                    }
-                    return next(_cellData);
-                }
-                return next(cell);
-            },
-        }
-        ));
     }
 }

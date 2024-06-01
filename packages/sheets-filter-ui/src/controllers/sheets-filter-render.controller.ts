@@ -214,6 +214,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                     },
                 });
             },
+            priority: 10,
         });
     }
 

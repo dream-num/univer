@@ -65,6 +65,7 @@ export class FormulaRenderController extends RxDisposable {
                             },
                         });
                     },
+                    priority: 10,
                 }
             )
         );

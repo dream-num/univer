@@ -16,7 +16,8 @@
 
 import { HorizontalAlign, ICommandService, VerticalAlign } from '@univerjs/core';
 import type { ICellRenderContext } from '@univerjs/core';
-import { getFontStyleString, type IMouseEvent, type IPointerEvent, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
+import { getFontStyleString } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, Spreadsheet, SpreadsheetSkeleton, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import type { ListMultipleValidator } from '../validators/list-multiple-validator';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
@@ -51,7 +52,7 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         return `${row}.${col}`;
     }
 
-    private _drawDownIcon(ctx: UniverRenderingContext2D, cellBounding: { startX: number;startY: number }, cellWidth: number, cellHeight: number, vt: VerticalAlign) {
+    private _drawDownIcon(ctx: UniverRenderingContext2D, cellBounding: { startX: number; startY: number }, cellWidth: number, cellHeight: number, vt: VerticalAlign) {
         const left = cellWidth - ICON_PLACE + 4;
         let top = 4;
 
@@ -89,6 +90,11 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         if (!validation) {
             return;
         }
+
+        if (data.dataValidation?.isSkip) {
+            return;
+        }
+
         const cellBounding = {
             startX: _cellBounding.startX + leftOffset,
             endX: _cellBounding.endX - rightOffset,

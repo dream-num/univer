@@ -101,3 +101,6 @@ export { SheetCutCommand, SheetPasteColWidthCommand, SheetPasteCommand, SheetPas
 export { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeUnderlineCommand, SetRangeStrickThroughCommand } from './commands/commands/inline-format.command';
 export { ApplyFormatPainterCommand } from './commands/commands/set-format-painter.command';
 export { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
+export { FormulaEditorController } from './controllers/editor/formula-editor.controller';
+export { StatusBarController } from './controllers/status-bar.controller';
+export { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';

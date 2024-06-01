@@ -186,6 +186,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderCo
 
                     return next(cell);
                 },
+                priority: 10,
             })
         );
     }

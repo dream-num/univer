@@ -73,6 +73,7 @@ export interface ICellMarks {
     tr?: ICellMarksStyle;
     bl?: ICellMarksStyle;
     br?: ICellMarksStyle;
+    isSkip?: boolean;
 }
 
 export interface ICellDataForSheetInterceptor extends ICellData {

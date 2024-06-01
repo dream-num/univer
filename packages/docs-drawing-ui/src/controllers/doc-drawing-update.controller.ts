@@ -267,7 +267,7 @@ export class DocDrawingUpdateController extends Disposable {
 
                 const newDrawing: Partial<IDocDrawing> = {
                     ...param,
-                    transform: { ...transform, ...docDrawingPositionToTransform(docTransform, this._textSelectionRenderManager) },
+                    transform: { ...transform, ...docDrawingPositionToTransform(docTransform) },
                     docTransform: { ...docTransform },
                 };
 

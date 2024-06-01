@@ -313,40 +313,59 @@ export class FormulaEditorController extends RxDisposable {
     }
 
     private _commandExecutedListener() {
-        const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
-
         const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (updateCommandList.includes(command.id)) {
-                    const params = command.params as IRichTextEditingMutationParams;
-                    const { unitId, actions } = params;
+                if (command.id !== RichTextEditingMutation.id) {
+                    return;
+                }
+                const params = command.params as IRichTextEditingMutationParams;
+                const { unitId, actions } = params;
 
-                    if (INCLUDE_LIST.includes(unitId)) {
-                        // sync cell content to formula editor bar when edit cell editor and vice verse.
-                        const editorDocDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
-                        const dataStream = editorDocDataModel?.getBody()?.dataStream;
-                        const paragraphs = editorDocDataModel?.getBody()?.paragraphs;
+                if (INCLUDE_LIST.includes(unitId)) {
+                    const syncId =
+                        unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+                            ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
+                            : DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
 
-                        const syncId =
-                            unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
-                                ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
-                                : DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+                    this._syncActionsAndRender(syncId, actions);
 
-                        if (dataStream == null || paragraphs == null) {
-                            return;
-                        }
+                    // handle weather need to show scroll bar.
+                    this._autoScroll();
+                }
+            })
+        );
 
-                        if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-                            this._syncActionsAndRender(syncId, actions);
-                        } else {
-                            this._syncContentAndRender(syncId, dataStream, paragraphs);
-                        }
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== SetEditorResizeOperation.id) {
+                    return;
+                }
 
-                        // handle weather need to show scroll bar.
-                        this._autoScroll();
+                const params = command.params as IRichTextEditingMutationParams;
+                const { unitId } = params;
+
+                if (INCLUDE_LIST.includes(unitId)) {
+                    // sync cell content to formula editor bar when edit cell editor and vice verse.
+                    const editorDocDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+                    const dataStream = editorDocDataModel?.getBody()?.dataStream;
+                    const paragraphs = editorDocDataModel?.getBody()?.paragraphs;
+                    const textRuns = editorDocDataModel?.getBody()?.textRuns;
+
+                    const syncId =
+                        unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+                            ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
+                            : DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+
+                    if (dataStream == null || paragraphs == null) {
+                        return;
                     }
+
+                    this._syncContentAndRender(syncId, dataStream, paragraphs, textRuns);
+
+                    // handle weather need to show scroll bar.
+                    this._autoScroll();
                 }
             })
         );

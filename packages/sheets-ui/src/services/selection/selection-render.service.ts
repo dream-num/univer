@@ -536,7 +536,6 @@ export class SelectionRenderService implements ISelectionRenderService {
      * @param zIndex Stacking order of the selection object
      * @param rangeType Determines whether the selection is made normally according to the range or by rows and columns
      */
-    // eslint-disable-next-line max-lines-per-function, complexity
     eventTrigger(
         evt: IPointerEvent | IMouseEvent,
         zIndex = 0,
@@ -784,7 +783,6 @@ export class SelectionRenderService implements ISelectionRenderService {
         let lastX = newEvtOffsetX;
         let lastY = newEvtOffsetY;
 
-        // eslint-disable-next-line max-lines-per-function, complexity
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
@@ -1043,8 +1041,6 @@ export class SelectionRenderService implements ISelectionRenderService {
     /**
      * When mousedown and mouseup need to go to the coordination and undo stack, when mousemove does not need to go to the coordination and undo stack
      */
-
-    // eslint-disable-next-line max-lines-per-function
     private _moving(
         moveOffsetX: number,
         moveOffsetY: number,

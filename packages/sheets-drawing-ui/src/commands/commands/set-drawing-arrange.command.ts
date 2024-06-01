@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDrawingOrderMapParam, Nullable } from '@univerjs/core';
-import { ArrangeTypeEnum,
+import type { ICommand, Nullable } from '@univerjs/core';
+import {
     CommandType,
     ICommandService,
     IUndoRedoService,
 } from '@univerjs/core';
-import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
+import { ArrangeTypeEnum } from '@univerjs/drawing';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import type { IAccessor } from '@wendellhu/redi';
 

@@ -14,20 +14,4 @@
  * limitations under the License.
  */
 
-export * from './i-cell-data';
-export * from './i-column-data';
-export * from './i-document-data';
-export * from './i-freeze';
-export * from './i-image-properties';
-export * from './i-placeholder';
-export * from './i-range';
-export * from './i-row-data';
-export * from './i-selection-data';
-export * from './i-service-data';
-export * from './i-shape-properties';
-export * from './i-slide-data';
-export * from './i-style-data';
-export * from './i-univer-data';
-export * from './i-workbook-data';
-export * from './i-worksheet-data';
-export * from './i-worksheet-order-data';
+export const DEFAULT_DOCUMENT_SUB_COMPONENT_ID = '__default_document_sub_component_id20231101__';

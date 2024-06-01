@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import type { IDrawingGroupUpdateParam, IDrawingParam } from '@univerjs/core';
-import { DrawingTypeEnum, ICommandService, IDrawingManagerService, LocaleService, Tools } from '@univerjs/core';
+import { LocaleService, Tools } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { GroupSingle, UngroupSingle } from '@univerjs/icons';
 import { Button } from '@univerjs/design';
 import clsx from 'clsx';
 import { getGroupState, IRenderManagerService, transformObjectOutOfGroup } from '@univerjs/engine-render';
+import type { IDrawingGroupUpdateParam, IDrawingParam } from '@univerjs/drawing';
+import { DrawingTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
 import { getUpdateParams } from '../../utils/get-update-params';
+
 import styles from './index.module.less';
 
 export interface IDrawingGroupProps {
@@ -31,7 +33,6 @@ export interface IDrawingGroupProps {
 }
 
 export const DrawingGroup = (props: IDrawingGroupProps) => {
-    const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const renderManagerService = useDependency(IRenderManagerService);
     const drawingManagerService = useDependency(IDrawingManagerService);

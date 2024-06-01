@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, Nullable } from '@univerjs/core';
-import { debounce, ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { debounce, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { Checkbox, InputNumber } from '@univerjs/design';
 import clsx from 'clsx';
 import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IDrawingParam } from '@univerjs/drawing';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { getUpdateParams } from '../../utils/get-update-params';
 import { MIN_DRAWING_HEIGHT_LIMIT, MIN_DRAWING_WIDTH_LIMIT, RANGE_DRAWING_ROTATION_LIMIT } from '../../utils/config';
 import styles from './index.module.less';
@@ -34,7 +36,6 @@ export interface IDrawingTransformProps {
 const INPUT_DEBOUNCE_TIME = 300;
 
 export const DrawingTransform = (props: IDrawingTransformProps) => {
-    const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);

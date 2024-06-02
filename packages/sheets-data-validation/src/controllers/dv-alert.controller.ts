@@ -47,6 +47,9 @@ export class DataValidationAlertController extends Disposable {
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 
                 if (cellData?.dataValidation?.validStatus === DataValidationStatus.INVALID) {
+                    if (cellData.dataValidation?.isSkip) {
+                        return;
+                    }
                     const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
                     const currentLoc = currentAlert?.alert?.location;
                     if (

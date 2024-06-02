@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// TODO@Jocs: should be moved out of core.
+
 export enum BasicShapes {
     Line = 'line',
     LineInv = 'lineInv',

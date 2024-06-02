@@ -28,3 +28,16 @@ export function hasProtocol(urlString: string) {
     const pattern = /^[a-zA-Z]+:\/\//;
     return pattern.test(urlString);
 }
+
+export function isEmail(url: string) {
+    const pattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    return pattern.test(url);
+}
+
+export function serializeUrl(url: string) {
+    if (isLegalLink(url)) {
+        return hasProtocol(url) ? url : isEmail(url) ? `mailto://${url}` : `http://${url}`;
+    }
+
+    return url;
+}

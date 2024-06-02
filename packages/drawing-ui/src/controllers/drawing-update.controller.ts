@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { DrawingTypeEnum, ICommandInfo, IDrawingGroupUpdateParam, IDrawingOrderMapParam, IDrawingParam, IDrawingSearch, ITransformState,
-    Nullable } from '@univerjs/core';
+import type {
+    ICommandInfo,
+    Nullable,
+} from '@univerjs/core';
 import {
     checkIfMove,
     Disposable,
     ICommandService,
-    IDrawingManagerService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -28,7 +29,8 @@ import {
 } from '@univerjs/core';
 import type { BaseObject, IShapeProps, Scene, Shape } from '@univerjs/engine-render';
 import { DRAWING_OBJECT_LAYER_INDEX, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
-import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
+import type { DrawingTypeEnum, IDrawingGroupUpdateParam, IDrawingOrderMapParam, IDrawingParam, IDrawingSearch, ITransformState } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
 import { AlignType, SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';

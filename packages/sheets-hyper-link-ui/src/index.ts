@@ -29,3 +29,4 @@ export { SheetHyperLinkUrlController } from './controllers/url.controller';
 export { UniverSheetsHyperLinkUIPlugin } from './plugin';
 export { OpenHyperLinkSidebarOperation, InsertHyperLinkOperation, CloseHyperLinkSidebarOperation } from './commands/operations/sidebar.operations';
 export type { IOpenHyperLinkSidebarOperationParams } from './commands/operations/sidebar.operations';
+export { InsertLinkShortcut } from './controllers/menu';

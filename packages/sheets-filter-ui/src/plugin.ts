@@ -21,6 +21,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import type { IUniverSheetsFilterUIConfig } from './controllers/sheets-filter-ui.controller';
 import { DefaultSheetFilterUiConfig, SheetsFilterUIController } from './controllers/sheets-filter-ui.controller';
 import { SheetsFilterPanelService } from './services/sheets-filter-panel.service';
+import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 
 const NAME = 'SHEET_FILTER_UI_PLUGIN';
 
@@ -41,6 +42,7 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
     override onStarting(injector: Injector): void {
         ([
             [SheetsFilterPanelService],
+            [SheetsFilterPermissionController],
             [
                 SheetsFilterUIController,
                 {

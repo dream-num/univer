@@ -15,9 +15,10 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, IDrawingManagerService, LocaleService } from '@univerjs/core';
+import { CommandType, LocaleService } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { COMPONENT_DOC_DRAWING_PANEL } from '../../views/doc-image-panel/component-name';
 
 export interface IUIComponentCommandParams {

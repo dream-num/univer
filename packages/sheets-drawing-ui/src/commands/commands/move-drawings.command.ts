@@ -16,8 +16,8 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, Direction, ICommandService } from '@univerjs/core';
-import type { ISheetDrawing } from '@univerjs/sheets';
-import { ISheetDrawingService } from '@univerjs/sheets';
+import type { ISheetDrawing } from '@univerjs/sheets-drawing';
+import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import type { IAccessor } from '@wendellhu/redi';
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
 

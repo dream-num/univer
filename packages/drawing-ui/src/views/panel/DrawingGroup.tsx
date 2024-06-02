@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import type { IDrawingGroupUpdateParam, IDrawingParam } from '@univerjs/core';
-import { DrawingTypeEnum, ICommandService, IDrawingManagerService, LocaleService, Tools } from '@univerjs/core';
+import { LocaleService, Tools } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { GroupSingle, UngroupSingle } from '@univerjs/icons';
 import { Button } from '@univerjs/design';
 import clsx from 'clsx';
 import { getGroupState, IRenderManagerService, transformObjectOutOfGroup } from '@univerjs/engine-render';
+import type { IDrawingGroupUpdateParam, IDrawingParam } from '@univerjs/drawing';
+import { DrawingTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
 import { getUpdateParams } from '../../utils/get-update-params';
+
 import styles from './index.module.less';
 
 export interface IDrawingGroupProps {
@@ -31,7 +33,6 @@ export interface IDrawingGroupProps {
 }
 
 export const DrawingGroup = (props: IDrawingGroupProps) => {
-    const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const renderManagerService = useDependency(IRenderManagerService);
     const drawingManagerService = useDependency(IDrawingManagerService);
@@ -191,20 +192,26 @@ export const DrawingGroup = (props: IDrawingGroupProps) => {
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
                     <Button size="small" onClick={() => { onGroupBtnClick(); }} style={{ display: gridDisplay(groupBtnShow) }}>
-                        <div className={clsx(styles.imageCommonPanelInline)}><GroupSingle /></div>
-                        <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.group')}</div>
+                        <span className={styles.imageCommonPanelInline}>
+                            <GroupSingle />
+                            {localeService.t('image-panel.group.group')}
+                        </span>
                     </Button>
                 </div>
                 {/* <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan3)}>
                     <Button size="small" onClick={() => { onGroupBtnClick(GroupType.regroup); }} style={{ display: gridDisplay(groupBtnShow) }}>
-                        <div className={clsx(styles.imageCommonPanelInline)}><CreateCopySingle /></div>
-                        <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.reGroup')}</div>
+                        <span className={styles.imageCommonPanelInline}>
+                            <CreateCopySingle />
+                            {localeService.t('image-panel.group.reGroup')}
+                        </span>
                     </Button>
                 </div> */}
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2, styles.imageCommonPanelColumnCenter)}>
                     <Button size="small" onClick={() => { onUngroupBtnClick(); }} style={{ display: gridDisplay(ungroupBtnShow) }}>
-                        <div className={clsx(styles.imageCommonPanelInline)}><UngroupSingle /></div>
-                        <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.group.unGroup')}</div>
+                        <span className={styles.imageCommonPanelInline}>
+                            <UngroupSingle />
+                            {localeService.t('image-panel.group.unGroup')}
+                        </span>
                     </Button>
                 </div>
             </div>

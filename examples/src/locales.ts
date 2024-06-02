@@ -63,9 +63,6 @@ import SheetsNumfmtZhCN from '@univerjs/sheets-numfmt/locale/zh-CN';
 import UniscriptEnUS from '@univerjs/uniscript/locale/en-US';
 import UniscriptRuRU from '@univerjs/uniscript/locale/ru-RU';
 import UniscriptZhCN from '@univerjs/uniscript/locale/zh-CN';
-import SheetPermissionUIEnUS from '@univerjs/sheets-permission-ui/locale/en-US';
-import SheetPermissionUIRuRU from '@univerjs/sheets-permission-ui/locale/ru-RU';
-import SheetPermissionUIZhCN from '@univerjs/sheets-permission-ui/locale/zh-CN';
 import SheetsHyperLinkUIEnUS from '@univerjs/sheets-hyper-link-ui/locale/en-US';
 import SheetsHyperLinkUIRuRU from '@univerjs/sheets-hyper-link-ui/locale/ru-RU';
 import SheetsHyperLinkUIZhCN from '@univerjs/sheets-hyper-link-ui/locale/zh-CN';
@@ -96,7 +93,6 @@ export const zhCN = Tools.deepMerge(
     ThreadCommentUIZhCN,
     SheetsNumfmtZhCN,
     UniscriptZhCN,
-    SheetPermissionUIZhCN,
     SheetsHyperLinkUIZhCN,
     DrawingUIZhCN,
     SheetsDrawingUIZhCN,
@@ -120,7 +116,6 @@ export const enUS = Tools.deepMerge(
     ThreadCommentUIEnUS,
     SheetsNumfmtEnUS,
     UniscriptEnUS,
-    SheetPermissionUIEnUS,
     SheetsHyperLinkUIEnUS,
     DrawingUIEnUS,
     SheetsDrawingUIEnUS,
@@ -144,7 +139,6 @@ export const ruRU = Tools.deepMerge(
     ThreadCommentUIRuRU,
     SheetsNumfmtRuRU,
     UniscriptRuRU,
-    SheetPermissionUIRuRU,
     SheetsHyperLinkUIRuRU,
     DrawingUIRuRU,
     SheetsDrawingUIRuRU,

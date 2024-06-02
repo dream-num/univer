@@ -121,8 +121,10 @@ export class EndEditController extends Disposable {
         this._cursorStateListener();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initialExitInput() {
         this.disposeWithMe(
+            // eslint-disable-next-line max-lines-per-function
             this._editorBridgeService.visible$.subscribe(async (param) => {
                 const { visible, keycode, eventType } = param;
 

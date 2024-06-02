@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingSearch, ISrcRect, ITransformState, Nullable } from '@univerjs/core';
-import { checkIfMove, Disposable, ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, toDisposable } from '@univerjs/core';
-import type { IImageData } from '@univerjs/drawing';
-import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
+import type { ICommandInfo, ISrcRect, Nullable } from '@univerjs/core';
+import { checkIfMove, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, toDisposable } from '@univerjs/core';
+import type { IDrawingSearch, IImageData, ITransformState } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { CURSOR_TYPE, degToRad, Image, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
 import { IMessageService } from '@univerjs/ui';

@@ -15,7 +15,7 @@
  */
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { IProgressStep } from '../../services/progress/progress.service';
 import { IProgressService } from '../../services/progress/progress.service';
 import styles from './index.module.less';
@@ -27,8 +27,7 @@ export interface IProgressBarProps {
 export function ProgressBar(props: IProgressBarProps) {
     const { barColor } = props;
     const progressService = useDependency(IProgressService);
-
-    const [progress, setProgress] = useState(0);
+    const progressBarInnerRef = useRef<HTMLDivElement>(null);
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
@@ -37,7 +36,9 @@ export function ProgressBar(props: IProgressBarProps) {
                 // Wait for the progress animation to complete before hiding the progress bar
                 setTimeout(() => {
                     setVisible(isVisible);
-                    setProgress(0);
+                    if (progressBarInnerRef.current) {
+                        progressBarInnerRef.current.style.width = '0%';
+                    }
                 }, 500);
             } else {
                 setVisible(isVisible);
@@ -46,10 +47,13 @@ export function ProgressBar(props: IProgressBarProps) {
 
         const progressChange = progressService.progressChange$.subscribe((task: IProgressStep) => {
             const { step } = task;
-            setProgress((currentProgress) => {
-                const newProgress = currentProgress + (1 - currentProgress) * step;
-                return newProgress;
-            });
+
+            // UseState asynchronous updates will not be reflected in the UI in time, so we use direct DOM manipulation
+            if (progressBarInnerRef.current) {
+                const currentProgress = Number.parseFloat(progressBarInnerRef.current.style.width) || 0;
+                const newProgress = currentProgress + (100 - currentProgress) * step;
+                progressBarInnerRef.current.style.width = `${newProgress}%`;
+            }
         });
 
         return () => {
@@ -61,9 +65,9 @@ export function ProgressBar(props: IProgressBarProps) {
     return (
         <div className={styles.progressBar} style={{ display: visible ? 'block' : 'none' }}>
             <div
+                ref={progressBarInnerRef}
                 className={styles.progressBarInner}
                 style={{
-                    width: `${Math.floor(progress * 100)}%`,
                     backgroundColor: barColor,
                 }}
             />

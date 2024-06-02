@@ -34,6 +34,8 @@ import { DataValidationDropdownManagerService } from './services/dropdown-manage
 import { CloseValidationPanelOperation, HideDataValidationDropdown, OpenValidationPanelOperation, ShowDataValidationDropdown, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
 import { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
 import { DataValidationPanelService } from './services/data-validation-panel.service';
+import { DataValidationFormulaController } from './controllers/dv-formula.controller';
+import { DataValidationPermissionController } from './controllers/dv-permission.controller';
 
 export class UniverSheetsDataValidationPlugin extends Plugin {
     static override pluginName = DATA_VALIDATION_PLUGIN_NAME;
@@ -70,8 +72,10 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             ],
             [DataValidationAlertController],
             [DataValidationRefRangeController],
+            [DataValidationPermissionController],
             [DataValidationAutoFillController],
             [DataValidationCopyPasteController],
+            [DataValidationFormulaController],
             [DataValidationRejectInputController],
         ] as Dependency[]).forEach((dep) => {
             injector.add(dep);

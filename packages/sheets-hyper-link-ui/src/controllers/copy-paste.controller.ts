@@ -22,7 +22,7 @@ import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME
 import { Inject, Injector } from '@wendellhu/redi';
 import { SPECIAL_PASTE_FORMULA } from '@univerjs/sheets-formula';
 import { SHEETS_HYPER_LINK_UI_PLUGIN } from '../types/const';
-import { hasProtocol, isLegalLink } from '../common/util';
+import { isLegalLink, serializeUrl } from '../common/util';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkCopyPasteController)
@@ -56,7 +56,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
             },
             onPastePlainText: (pasteTo: ISheetDiscreteRangeLocation, clipText: string) => {
                 if (isLegalLink(clipText)) {
-                    let text = hasProtocol(clipText) ? clipText : `http://${clipText}`;
+                    let text = serializeUrl(clipText);
                     const url = new URL(text);
                     const name = clipText;
                     if (

@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingSearch, Nullable } from '@univerjs/core';
+import type { ICommandInfo, Nullable } from '@univerjs/core';
 import { Disposable,
-    DrawingTypeEnum,
     ICommandService,
-    IDrawingManagerService,
-    IImageIoService,
-    ImageSourceType,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -28,8 +24,8 @@ import { Disposable,
 } from '@univerjs/core';
 import type { IImageProps, Scene } from '@univerjs/engine-render';
 import { CURSOR_TYPE, DRAWING_OBJECT_LAYER_INDEX, Image, IRenderManagerService } from '@univerjs/engine-render';
-import type { IImageData } from '@univerjs/drawing';
-import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
+import type { IDrawingSearch, IImageData } from '@univerjs/drawing';
+import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
 import { IDialogService } from '@univerjs/ui';
 import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';

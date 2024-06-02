@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IImageIoServiceParam, IRange, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageIoService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import type { IImageData } from '@univerjs/drawing';
-import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize } from '@univerjs/drawing';
-import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets';
-import { ISheetDrawingService, SelectionManagerService } from '@univerjs/sheets';
+import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
+import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
+import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
+import { ISheetDrawingService } from '@univerjs/sheets-drawing';
+import { SelectionManagerService } from '@univerjs/sheets';
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';

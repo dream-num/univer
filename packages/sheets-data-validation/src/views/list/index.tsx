@@ -17,16 +17,18 @@
 import React, { useEffect, useState } from 'react';
 import { Injector } from '@wendellhu/redi';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, ISheetDataValidationRule, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { createDefaultNewRule, DataValidationModel, RemoveAllDataValidationCommand } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
 import { useObservable } from '@univerjs/ui';
+import type { ICellPermission } from '@univerjs/sheets';
+import { UnitAction } from '@univerjs/protocol';
 import { DataValidationItem } from '../item';
 import type { IAddSheetDataValidationCommandParams } from '../../commands/commands/data-validation.command';
 import { AddSheetDataValidationCommand } from '../../commands/commands/data-validation.command';
 import { DataValidationPanelService } from '../../services/data-validation-panel.service';
-import { DATA_VALIDATION_PERMISSION_CHECK, DataValidationController } from '../../controllers/dv.controller';
+import { DataValidationController } from '../../controllers/dv.controller';
 import styles from './index.module.less';
 
 export function DataValidationList() {
@@ -44,6 +46,7 @@ export function DataValidationList() {
 
 function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
     const dataValidationModel = useDependency(DataValidationModel);
+    const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const injector = useDependency(Injector);
     const dataValidationPanelService = useDependency(DataValidationPanelService);
@@ -92,7 +95,33 @@ function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
         });
     };
 
-    const rulesByPermissionCheck = dataValidationController.interceptor.fetchThroughInterceptors(DATA_VALIDATION_PERMISSION_CHECK)(rules, rules);
+    const getDvRulesByPermissionCorrect = (rules: ISheetDataValidationRule[]) => {
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const worksheet = workbook.getActiveSheet();
+        const rulesByPermissionCheck = rules.map((rule) => {
+            const { ranges } = rule;
+            const haveNotPermission = ranges?.some((range) => {
+                const { startRow, startColumn, endRow, endColumn } = range;
+                for (let row = startRow; row <= endRow; row++) {
+                    for (let col = startColumn; col <= endColumn; col++) {
+                        const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
+                        if (permission?.[UnitAction.Edit] === false || permission?.[UnitAction.View] === false) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            });
+            if (haveNotPermission) {
+                return { ...rule, disable: true };
+            } else {
+                return { ...rule };
+            }
+        });
+        return rulesByPermissionCheck;
+    };
+
+    const rulesByPermissionCheck: (ISheetDataValidationRule & { disable?: boolean })[] = getDvRulesByPermissionCorrect(rules);
     const hasDisableRule = rulesByPermissionCheck?.some((rule) => rule.disable);
 
     return (

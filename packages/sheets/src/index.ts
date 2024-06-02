@@ -304,8 +304,6 @@ export { SetDefinedNameCommand, type ISetDefinedNameCommandParams } from './comm
 export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';
 export type { FormatType } from './services/numfmt/type';
 export { getMoveRangeUndoRedoMutations } from './commands/commands/move-range.command';
-export { type ISheetDrawing, type ISheetUpdateDrawing, type ISheetDrawingPosition, ISheetDrawingService, SheetDrawingAnchorType, type ISheetDrawingBase, type IFloatDomData, type ISheetFloatDom } from './services/sheet-drawing.service';
-export { SetDrawingApplyMutation, type ISetDrawingApplyMutationParams, DrawingApplyType } from './commands/mutations/set-drawing-apply.mutation';
 
 // permission
 export { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './services/permission';
@@ -367,6 +365,7 @@ export { RangeProtectionCanViewRenderExtension, RangeProtectionCanNotViewRenderE
 
 export { RangeProtectionRenderModel, type ICellPermission } from './model/range-protection-render.model';
 export { RangeProtectionRuleModel, type IObjectModel, type IRangeProtectionRule, type IModel } from './model/range-protection-rule.model';
+export type { IWorksheetProtectionRenderCellData } from './services/permission/worksheet-permission/type';
 
 export { RangeProtectionRefRangeService } from './services/permission/range-permission/range-protection.ref-range';
 export { RangeProtectionService } from './services/permission/range-permission/range-protection.service';

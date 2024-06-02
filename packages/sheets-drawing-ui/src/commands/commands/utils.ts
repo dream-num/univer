@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DrawingTypeEnum, type IDrawingGroupUpdateParam, type IDrawingParam } from '@univerjs/core';
+import { DrawingTypeEnum, type IDrawingGroupUpdateParam, type IDrawingParam } from '@univerjs/drawing';
 import { getGroupState, transformObjectOutOfGroup } from '@univerjs/engine-render';
 
 export function ungroupToGroup(ungroupParams: IDrawingGroupUpdateParam[]) {

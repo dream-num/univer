@@ -37,7 +37,7 @@ export class DataBar extends SheetExtension {
         diffRanges?: IRange[]
     ) {
         const { rowHeightAccumulation, columnWidthAccumulation, worksheet, dataMergeCache } =
-        spreadsheetSkeleton;
+            spreadsheetSkeleton;
         if (!worksheet) {
             return false;
         }
@@ -47,6 +47,10 @@ export class DataBar extends SheetExtension {
             const cellData = worksheet.getCell(row, col) as IDataBarCellData;
             if (cellData && cellData.dataBar) {
                 if (!worksheet.getColVisible(col) || !worksheet.getRowRawVisible(row)) {
+                    return;
+                }
+
+                if (cellData?.dataBar?.isSkip) {
                     return;
                 }
 

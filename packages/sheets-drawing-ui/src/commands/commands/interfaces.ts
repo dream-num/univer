@@ -15,7 +15,7 @@
  */
 
 import type { DrawingTypeEnum } from '@univerjs/core';
-import type { ISheetDrawing } from '@univerjs/sheets';
+import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 
 export interface IInsertDrawingCommandParams {
     unitId: string;

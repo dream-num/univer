@@ -1,8 +1,6 @@
 .image-common-panel {
-    position: absolute;
-    height: 100%;
-    width: 90%;
     text-align: center;
+    padding: var(--padding-sm);
     font-size: var(--font-size-sm);
     &-grid {
         position: relative;
@@ -45,7 +43,9 @@
     }
 
     &-inline {
-        display: inline-block;
+        display: flex;
+        align-items: center;
+        gap: var(--margin-xxs);
     }
 
     &-span2 {

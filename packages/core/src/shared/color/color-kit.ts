@@ -410,6 +410,7 @@ const rgbNormalize = (val: number) => {
     return val <= 0.03928 ? val / 12.92 : ((val + 0.055) / 1.055) ** 2.4;
 };
 
+// eslint-disable-next-line max-lines-per-function
 const toColor: (color: string | Color) => Color | undefined = (color) => {
     if (isObject(color)) {
         if ('r' in color) {

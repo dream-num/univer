@@ -33,7 +33,6 @@ import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
-import { UniverSheetsPermissionUIPlugin } from '@univerjs/sheets-permission-ui';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
@@ -42,7 +41,10 @@ import { FUniver } from '@univerjs/facade';
 import { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
+import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
+
+import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { enUS, ruRU, zhCN } from '../locales';
 
@@ -109,9 +111,9 @@ univer.registerPlugin(UniverSheetsFilterPlugin);
 // sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
-// sheet permission
-univer.registerPlugin(UniverSheetsPermissionUIPlugin);
 // drawing
+univer.registerPlugin(UniverDocsDrawingPlugin);
+univer.registerPlugin(UniverSheetsDrawingPlugin);
 univer.registerPlugin(UniverDrawingUIPlugin);
 univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 

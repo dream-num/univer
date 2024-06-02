@@ -16,9 +16,11 @@
 
 import type { ICommandInfo, IRange, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import {
+    createInterceptorKey,
     debounce,
     Disposable,
     ICommandService,
+    InterceptorManager,
     IUniverInstanceService,
     LifecycleStages,
     ObjectMatrix,
@@ -26,7 +28,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { BaseValueObject, ISheetData } from '@univerjs/engine-formula';
+import type { ArrayValueObject, BaseValueObject, ISheetData } from '@univerjs/engine-formula';
 import {
     convertUnitDataToRuntime,
     FormulaDataModel,
@@ -34,7 +36,8 @@ import {
     RangeReferenceObject,
 } from '@univerjs/engine-formula';
 import type {
-    ISelectionWithStyle } from '@univerjs/sheets';
+    ISelectionWithStyle,
+} from '@univerjs/sheets';
 import {
     INumfmtService,
     NORMAL_SELECTION_PLUGIN_NAME,
@@ -46,9 +49,14 @@ import { Inject } from '@wendellhu/redi';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import { IStatusBarService } from '../services/status-bar.service';
 
+export const STATUS_BAR_PERMISSION_CORRECT = createInterceptorKey<ArrayValueObject[], ArrayValueObject[]>('statusBarPermissionCorrect');
+
 @OnLifecycle(LifecycleStages.Ready, StatusBarController)
 export class StatusBarController extends Disposable {
     private _calculateTimeout: number | NodeJS.Timeout = -1;
+
+    public interceptor = new InterceptorManager({ STATUS_BAR_PERMISSION_CORRECT });
+
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
@@ -123,7 +131,6 @@ export class StatusBarController extends Disposable {
         if (!workbook) {
             return this._clearResult();
         }
-
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
         const sheetData: ISheetData = {};
@@ -155,9 +162,13 @@ export class StatusBarController extends Disposable {
 
             const functions = this._statusBarService.getFunctions();
 
-            const arrayValue = refs.map((ref) => {
+            let arrayValue = refs.map((ref) => {
                 return ref.toArrayValueObject(false);
             });
+            const correctArrayValue = this.interceptor.fetchThroughInterceptors(STATUS_BAR_PERMISSION_CORRECT)(arrayValue, arrayValue);
+            if (correctArrayValue) {
+                arrayValue = correctArrayValue;
+            }
 
             const calcResult = functions.map((f) => {
                 const executor = this._functionService.getExecutor(f.func);

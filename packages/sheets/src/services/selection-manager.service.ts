@@ -104,14 +104,22 @@ export class SelectionManagerService implements IDisposable {
     }
 
     changePluginNoRefresh(pluginName: string) {
-        if (this._currentSelection == null) {
+        if (this._currentSelection == null || this._currentSelection.pluginName === pluginName) {
             return;
         }
+
+        // Fetch the old selections.
+        const selections = this.getSelectionDatasByParam(this._currentSelection);
+
         this._currentSelection = {
             pluginName,
             unitId: this._currentSelection?.unitId,
             sheetId: this._currentSelection?.sheetId,
         };
+
+        if (selections != null) {
+            this.add([]);
+        }
     }
 
     reset() {
@@ -217,6 +225,7 @@ export class SelectionManagerService implements IDisposable {
         if (this._currentSelection == null) {
             return;
         }
+
         this._addByParam({
             ...this._currentSelection,
             selectionDatas,

@@ -15,14 +15,15 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import { FOCUSING_COMMON_DRAWINGS, IContextService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, IContextService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { takeUntil } from 'rxjs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 
@@ -31,7 +32,6 @@ export class DocDrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
 
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @Inject(DocCanvasPopManagerService) private readonly _canvasPopManagerService: DocCanvasPopManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,

@@ -15,12 +15,14 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
-import { IDrawingManagerService, IImageIoService, LocaleService, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { ImageIoService } from './services/image-io.service';
-import { DrawingManagerService } from './services/drawing-manager.service';
+import { ImageIoService } from './services/image-io-impl.service';
+import { DrawingManagerService } from './services/drawing-manager-impl.service';
+import { IImageIoService } from './services/image-io.service';
+import { IDrawingManagerService } from './services/drawing-manager.service';
 
 const PLUGIN_NAME = 'DRAWING_PLUGIN';
 
@@ -28,11 +30,8 @@ export class UniverDrawingPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        private _config: {
-            override?: DependencyOverride;
-        },
-        @Inject(Injector) protected _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        private _config: { override?: DependencyOverride },
+        @Inject(Injector) protected _injector: Injector
     ) {
         super();
     }
@@ -43,16 +42,11 @@ export class UniverDrawingPlugin extends Plugin {
 
     private _initDependencies(injector: Injector): void {
         const dependencies: Dependency[] = [
-            // services
             [IImageIoService, { useClass: ImageIoService }],
             [IDrawingManagerService, { useClass: DrawingManagerService }],
-            // controllers
-            // [ImageController],
         ];
 
         const dependency = mergeOverrideWithDependencies(dependencies, this._config?.override);
-        dependency.forEach((d) => {
-            this._injector.add(d);
-        });
+        dependency.forEach((d) => injector.add(d));
     }
 }

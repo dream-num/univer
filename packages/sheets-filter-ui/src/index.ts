@@ -20,3 +20,5 @@ export * as enUS from './locale/en-US';
 export * as ruRU from './locale/ru-RU';
 
 export { OpenFilterPanelOperation } from './commands/sheets-filter.operation';
+export type { IOpenFilterPanelOperationParams } from './commands/sheets-filter.operation';
+export { SmartToggleSheetsFilterCommand } from './commands/sheets-filter.command';

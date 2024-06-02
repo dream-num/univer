@@ -15,17 +15,19 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { Disposable, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { IRangeProtectionRenderCellData, IRangeProtectionRule, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
+import { INTERCEPTOR_POINT, RangeProtectionRenderModel, RangeProtectionRuleModel, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { bufferTime, filter } from 'rxjs/operators';
-import type { ISheetFontRenderExtension } from '@univerjs/engine-render';
+import type { ISheetFontRenderExtension, ISheetRenderExtension } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
 
-import type { IConditionalFormattingCellData } from '@univerjs/sheets-conditional-formatting';
+import type { IConditionalFormattingCellData, IDataBarCellData, IIconSetCellData } from '@univerjs/sheets-conditional-formatting';
+import { UnitAction } from '@univerjs/protocol';
 
 /**
  * @todo RenderUnit
@@ -38,7 +40,12 @@ export class RenderController extends Disposable {
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
-        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService) {
+        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @Inject(RangeProtectionRenderModel) private _selectionProtectionRenderModel: RangeProtectionRenderModel,
+        @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
+        @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
+        @IPermissionService private _permissionService: IPermissionService
+    ) {
         super();
         this._initViewModelInterceptor();
         this._initSkeleton();
@@ -110,6 +117,63 @@ export class RenderController extends Disposable {
 
                 return next(cloneCell);
             },
+            priority: 10,
         }));
+    }
+
+    private _initViewModelByRangeInterceptor() {
+        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            handler: (cell = {}, context, next) => {
+                const { unitId, subUnitId, row, col } = context;
+
+                const permissionList = this._selectionProtectionRenderModel.getCellInfo(unitId, subUnitId, row, col)
+                    .filter((p) => !!p.ruleId)
+                    .map((p) => {
+                        const rule = this._rangeProtectionRuleModel.getRule(unitId, subUnitId, p.ruleId!) || {} as IRangeProtectionRule;
+                        return {
+                            ...p, ranges: rule.ranges!,
+                        };
+                    })
+                    .filter((p) => !!p.ranges);
+                if (permissionList.length) {
+                    const isSkipRender = permissionList.some((p) => !p?.[UnitAction.View]);
+                    const _cellData: IRangeProtectionRenderCellData & ISheetRenderExtension & IIconSetCellData & IDataBarCellData = { ...cell, selectionProtection: permissionList };
+                    const { dataBar, iconSet } = _cellData;
+                    if (isSkipRender) {
+                        dataBar && (dataBar.isSkip = true);
+                        iconSet && (iconSet.isSkip = true);
+                    }
+
+                    return next(_cellData);
+                }
+                return next(cell);
+            },
+        }
+        ));
+    }
+
+    private _initViewModelBySheetInterceptor() {
+        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            handler: (cell = {}, context, next) => {
+                const { unitId, subUnitId } = context;
+                const worksheetRule = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
+                if (worksheetRule?.permissionId && worksheetRule.name) {
+                    const selectionProtection = [{
+                        [UnitAction.View]: this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id)?.value ?? false,
+                        [UnitAction.Edit]: this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false,
+                    }];
+                    const isSkipRender = !selectionProtection[0]?.[UnitAction.View];
+                    const _cellData: IWorksheetProtectionRenderCellData & ISheetFontRenderExtension & IIconSetCellData & IDataBarCellData = { ...cell, hasWorksheetRule: true, selectionProtection };
+                    const { dataBar, iconSet } = _cellData;
+                    if (isSkipRender) {
+                        dataBar && (dataBar.isSkip = true);
+                        iconSet && (iconSet.isSkip = true);
+                    }
+                    return next(_cellData);
+                }
+                return next(cell);
+            },
+        }
+        ));
     }
 }

@@ -16,6 +16,7 @@
 
 import { installShims } from './common/shims';
 
+export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './docs/data-model/subdocument';
 export { type UnitType, UnitModel, UniverInstanceType } from './common/unit';
 export { Registry, RegistryAsMap } from './common/registry';
 export { Univer } from './univer';
@@ -77,26 +78,6 @@ export { IConfigService } from './services/config/config.service';
 export * from './services/context/context';
 export { ContextService, IContextService } from './services/context/context.service';
 export { ErrorService, type IError } from './services/error/error.service';
-export type { IOffset, IScale, ISize, ITransformState, IRotationSkewFlipTransform, IAbsoluteTransform, ISrcRect } from './services/drawing/drawing-interfaces';
-export {
-    DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
-    type DrawingType,
-    DrawingTypeEnum,
-    type IDrawingSearch,
-    type IDrawingSpace,
-    type IDrawingParam,
-    IDrawingManagerService,
-    type IDrawingOrderUpdateParam,
-    type IUnitDrawingService,
-    type IDrawingMap,
-    type IDrawingSubunitMap,
-    type IDrawingOrderMapParam,
-    type IDrawingGroupUpdateParam,
-    type IDrawingVisibleParam,
-    type IDrawingMapItemData,
-    type IDrawingMapItem,
-    ArrangeTypeEnum,
-} from './services/drawing/drawing-manager.service';
 export { IUniverInstanceService } from './services/instance/instance.service';
 export { LifecycleStages, OnLifecycle, runOnLifecycle } from './services/lifecycle/lifecycle';
 export { LifecycleService } from './services/lifecycle/lifecycle.service';

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import { IImageIoService, LocaleService } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect } from 'react';
+import { IImageIoService } from '@univerjs/drawing';
+
 import styles from './index.module.less';
 
 export const UploadLoading = () => {

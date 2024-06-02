@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
-import { IDrawingManagerService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { DrawingCommonPanel } from '@univerjs/drawing-ui';
+import type { IDrawingParam } from '@univerjs/drawing';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import styles from './index.module.less';
 import { SheetDrawingAnchor } from './SheetDrawingAnchor';
 

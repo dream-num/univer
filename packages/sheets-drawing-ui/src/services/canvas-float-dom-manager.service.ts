@@ -15,7 +15,7 @@
  */
 
 import type { IPosition, ITransformState, Nullable, Worksheet } from '@univerjs/core';
-import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, IDrawingManagerService, IUniverInstanceService, Tools } from '@univerjs/core';
+import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, IUniverInstanceService, Tools } from '@univerjs/core';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, Rect } from '@univerjs/engine-render';
 import type { IFloatDomLayout } from '@univerjs/ui';
@@ -24,7 +24,7 @@ import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { getDrawingShapeKeyByDrawingSearch } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { ISelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService, VIEWPORT_KEY } from '@univerjs/sheets-ui';
 import type { ISetFrozenMutationParams } from '@univerjs/sheets';
 import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';

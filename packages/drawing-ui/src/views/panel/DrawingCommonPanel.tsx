@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
-import { IDrawingManagerService, LocaleService } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';
 import { getUpdateParams } from '../../utils/get-update-params';
 import { DrawingArrange } from './DrawingArrange';
 import { DrawingTransform } from './DrawingTransform';

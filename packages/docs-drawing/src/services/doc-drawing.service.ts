@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDocDrawingBase, IUnitDrawingService } from '@univerjs/core';
+import type { IDocDrawingBase } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
-import { type IImageData, UnitDrawingService } from '@univerjs/drawing';
+import { type IImageData, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
 
-export interface IDocImage extends IImageData, IDocDrawingBase {
-
-}
+export interface IDocImage extends IImageData, IDocDrawingBase {}
 
 /**
  * test type
  */
-export interface IDocShape extends IDocDrawingBase {
-
-}
+export interface IDocShape extends IDocDrawingBase {}
 
 export type IDocDrawing = IDocImage | IDocShape;
 

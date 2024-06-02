@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ISize, ITransformState } from '../../services/drawing/drawing-interfaces';
+import type { ISize } from '../../shared/shape';
 import type { IKeyType, Nullable } from '../../shared/types';
 import type { LocaleType, ThemeColorType } from '../enum';
 import type { ShapeType } from '../enum/prst-geom-type';
-import type { ICustomBlock, IDocumentData, ILists } from './i-document-data';
+import type { ICustomBlock, IDocumentData, ILists, ITransformState } from './i-document-data';
 import type { IExtraModelData } from './i-extra-model-data';
 import type { IImageProperties } from './i-image-properties';
 import type { IPlaceholder } from './i-placeholder';

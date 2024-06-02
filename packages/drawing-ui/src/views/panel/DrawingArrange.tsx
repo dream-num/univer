@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
-import { ArrangeTypeEnum, ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
 import { Button } from '@univerjs/design';
 import clsx from 'clsx';
+import type { IDrawingParam } from '@univerjs/drawing';
+import { ArrangeTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
 import styles from './index.module.less';
 
 export interface IDrawingArrangeProps {
@@ -31,7 +32,6 @@ export interface IDrawingArrangeProps {
 export const DrawingArrange = (props: IDrawingArrangeProps) => {
     const { arrangeShow, drawings: focusDrawings } = props;
 
-    const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
 

@@ -26,7 +26,6 @@ import { FormulaBar } from '../formula-bar/FormulaBar';
 import { OperateContainer } from '../operate-container/OperateContainer';
 import { SheetBar } from '../sheet-bar/SheetBar';
 import { StatusBar } from '../status-bar/StatusBar';
-import { UploadLoading } from '../upload-loading/UploadLoading';
 import styles from './index.module.less';
 
 export function RenderSheetFooter() {
@@ -53,6 +52,9 @@ export function RenderSheetHeader() {
     );
 }
 
+/**
+ * @deprecated We should not write into this component anymore.
+ */
 export function RenderSheetContent() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
@@ -62,7 +64,6 @@ export function RenderSheetContent() {
         <>
             <EditorContainer />
             <OperateContainer />
-            <UploadLoading />
         </>
     );
 }

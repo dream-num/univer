@@ -14,20 +14,7 @@
  * limitations under the License.
  */
 
-export interface ISize {
-    width?: number;
-    height?: number;
-}
-
-export interface IScale {
-    scaleX?: number;
-    scaleY?: number;
-}
-
-export interface IOffset {
-    left?: number;
-    top?: number;
-}
+import type { IAbsoluteTransform, IOffset } from '@univerjs/core';
 
 export interface IRotationSkewFlipTransform {
     angle?: number;
@@ -42,10 +29,4 @@ export interface ISrcRect extends IOffset {
     bottom?: number;
 }
 
-export interface IAbsoluteTransform extends ISize, IOffset, IScale {
-
-}
-
-export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform {
-
-}
+export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform {}

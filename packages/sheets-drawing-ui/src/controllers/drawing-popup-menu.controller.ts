@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { FOCUSING_COMMON_DRAWINGS, IContextService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, IContextService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
@@ -23,21 +23,26 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { takeUntil } from 'rxjs';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
+import { connectInjector } from '@wendellhu/redi/react-bindings';
+
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
+import { UploadLoading } from '../views/upload-loading/UploadLoading';
 
 @OnLifecycle(LifecycleStages.Steady, DrawingPopupMenuController)
 export class DrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
 
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(Injector) private _injector: Injector,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopManagerService: SheetCanvasPopManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IContextService private readonly _contextService: IContextService
-
+        @IContextService private readonly _contextService: IContextService,
+        @Inject(IUIPartsService) private readonly _uiPartsService: IUIPartsService
     ) {
         super();
 
@@ -48,6 +53,8 @@ export class DrawingPopupMenuController extends RxDisposable {
         this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._create(workbook));
         this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._dispose(workbook));
         this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => this._create(workbook));
+
+        this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(UploadLoading, this._injector));
     }
 
     private _dispose(workbook: Workbook) {

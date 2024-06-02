@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, IRotationSkewFlipTransform, IUnitDrawingService } from '@univerjs/core';
+import { type IDrawingParam, type IImageData, type IRotationSkewFlipTransform, type IUnitDrawingService, UnitDrawingService } from '@univerjs/drawing';
 import { createIdentifier } from '@wendellhu/redi';
-import { type IImageData, UnitDrawingService } from '@univerjs/drawing';
 
 interface ICellPosition {
     column: number; // column number

@@ -124,8 +124,10 @@ export const ImageCropper = (props: IImageCropperProps) => {
             <div className={clsx(styles.imageCommonPanelRow, styles.imageCommonPanelRowVertical)}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
                     <Button size="small" onClick={() => { onCropperBtnClick(cropValue as CropType); }}>
-                        <div className={clsx(styles.imageCommonPanelInline)}><CreateCopySingle /></div>
-                        <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.crop.start')}</div>
+                        <span className={styles.imageCommonPanelInline}>
+                            <CreateCopySingle />
+                            {localeService.t('image-panel.crop.start')}
+                        </span>
                     </Button>
                 </div>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>

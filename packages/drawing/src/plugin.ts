@@ -15,7 +15,7 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
-import { LocaleService, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/* eslint-disable complexity */
+/* eslint-disable max-lines-per-function */
+
 import type {
     IInterceptor,
     IRange,
@@ -307,7 +310,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         const skeleton = this._skeleton;
 
-        let style = data.style;
+        let { style } = data;
 
         if (style == null) {
             style = getNormalSelectionStyle(this._themeService);
@@ -321,6 +324,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         const control = new SelectionShape(scene, currentControls.length, this._isHeaderHighlight, this._themeService);
 
+        // eslint-disable-next-line no-new
         new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
@@ -336,12 +340,6 @@ export class SelectionRenderService implements ISelectionRenderService {
         currentControls.push(control);
     }
 
-    /**
-     * update selection
-     * @param selectionRange
-     * @param curCellRange
-     * @returns
-     */
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]) {
         const currentControls = this.getCurrentControls();
         if (!currentControls) {
@@ -538,7 +536,6 @@ export class SelectionRenderService implements ISelectionRenderService {
      * @param zIndex Stacking order of the selection object
      * @param rangeType Determines whether the selection is made normally according to the range or by rows and columns
      */
-    // eslint-disable-next-line max-lines-per-function, complexity
     eventTrigger(
         evt: IPointerEvent | IMouseEvent,
         zIndex = 0,
@@ -786,7 +783,6 @@ export class SelectionRenderService implements ISelectionRenderService {
         let lastX = newEvtOffsetX;
         let lastY = newEvtOffsetY;
 
-        // eslint-disable-next-line max-lines-per-function, complexity
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
@@ -1045,8 +1041,6 @@ export class SelectionRenderService implements ISelectionRenderService {
     /**
      * When mousedown and mouseup need to go to the coordination and undo stack, when mousemove does not need to go to the coordination and undo stack
      */
-
-    // eslint-disable-next-line max-lines-per-function
     private _moving(
         moveOffsetX: number,
         moveOffsetY: number,

@@ -248,8 +248,7 @@ export class PromptController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._textSelectionManagerService.textSelection$.subscribe((params) => {
-                    if (params?.unitId == null
-                    ) {
+                    if (params?.unitId == null) {
                         return;
                     }
 

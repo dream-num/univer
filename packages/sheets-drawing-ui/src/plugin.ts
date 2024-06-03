@@ -27,7 +27,7 @@ import { DefaultSheetsDrawingConfig, SheetDrawingUIController } from './controll
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
 import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 
-const PLUGIN_NAME = 'SHEETS_IMAGE_UI_PLUGIN';
+const PLUGIN_NAME = 'SHEET_IMAGE_UI_PLUGIN';
 
 @DependentOn(UniverDrawingPlugin, UniverDrawingUIPlugin, UniverSheetsDrawingPlugin)
 export class UniverSheetsDrawingUIPlugin extends Plugin {

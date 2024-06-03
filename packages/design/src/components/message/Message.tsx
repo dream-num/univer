@@ -17,7 +17,7 @@
 /* eslint-disable react-refresh/only-export-components */
 
 import { ErrorSingle, Loading, SuccessSingle, WarningSingle } from '@univerjs/icons';
-import { render } from 'rc-util/lib/React/render';
+import { render, unmount } from 'rc-util/lib/React/render';
 import type { CSSProperties, ReactElement } from 'react';
 import React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
@@ -98,7 +98,7 @@ const MessageContainer = (props: { messages: IMessageProps[] }) => {
     );
 };
 
-export class Message {
+export class Message implements IDisposable {
     protected _container: HTMLDivElement;
 
     protected _messages: IMessageProps[] = [];
@@ -108,6 +108,11 @@ export class Message {
         container.appendChild(this._container);
 
         this.render();
+    }
+
+    dispose(): void {
+        unmount(this._container);
+        this._container.remove();
     }
 
     append(type: MessageType, options: IMessageOptions): IDisposable {

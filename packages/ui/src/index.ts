@@ -80,7 +80,7 @@ export { IZenZoneService } from './services/zen-zone/zen-zone.service';
 export { UniverUIPlugin, DISABLE_AUTO_FOCUS_KEY } from './ui-plugin';
 export * from './utils';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
-export { ComponentContainer } from './views/components/ComponentContainer';
+export { ComponentContainer, useComponentsOfPart, type IComponentContainerProps } from './views/components/ComponentContainer';
 export { IEditorService, EditorService } from './services/editor/editor.service';
 export { TextEditor } from './components/editor/TextEditor';
 export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';

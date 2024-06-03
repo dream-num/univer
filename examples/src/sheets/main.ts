@@ -37,7 +37,7 @@ import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
 import { FUniver } from '@univerjs/facade';
-import { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
+import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
@@ -140,9 +140,10 @@ class CustomMentionDataService implements IThreadCommentMentionDataService {
     }
 }
 
-univer.registerPlugin(UniverSheetsThreadCommentPlugin, {
+univer.registerPlugin(UniverThreadCommentUIPlugin, {
     overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
 });
+univer.registerPlugin(UniverSheetsThreadCommentPlugin);
 
 // debugger plugin
 univer.registerPlugin(UniverDebuggerPlugin);

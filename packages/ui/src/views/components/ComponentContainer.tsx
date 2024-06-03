@@ -14,14 +14,41 @@
  * limitations under the License.
  */
 
+import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { ComponentType } from 'react';
-import React from 'react';
+import React, { useMemo, useRef } from 'react';
+import { filter, map } from 'rxjs';
+import { useObservable } from '../../components/hooks/observable';
+import { IUIPartsService } from '../../services/parts/parts.service';
 
-export function ComponentContainer(props: { components?: Set<() => ComponentType> }) {
-    const { components } = props;
-    if (!components) return null;
+export interface IComponentContainerProps {
+    components?: Set<() => ComponentType>;
+    fallback?: React.ReactNode;
+    sharedProps?: Record<string, unknown>;
+}
+
+export function ComponentContainer(props: IComponentContainerProps) {
+    const { components, fallback, sharedProps } = props;
+    if (!components || components.size === 0) return fallback ?? null;
 
     return Array.from(components.values()).map((component, index) =>
-        React.createElement(component(), { key: `${index}` })
+        React.createElement(component(), { key: `${index}`, ...sharedProps })
     );
+}
+
+export function useComponentsOfPart(part: string) {
+    const uiPartsService = useDependency(IUIPartsService);
+    const updateCounterRef = useRef<number>(0);
+    const componentPartUpdateCount = useObservable(
+        () => uiPartsService.componentRegistered$.pipe(
+            filter((key) => key === part),
+            map(() => updateCounterRef.current += 1)
+        ),
+        undefined,
+        undefined,
+        [uiPartsService]
+    );
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return useMemo(() => uiPartsService.getComponents(part), [componentPartUpdateCount]);
 }

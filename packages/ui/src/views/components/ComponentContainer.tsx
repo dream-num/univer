@@ -18,6 +18,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { ComponentType } from 'react';
 import React, { useMemo, useRef } from 'react';
 import { filter, map } from 'rxjs';
+import type { Injector } from '@wendellhu/redi';
 import { useObservable } from '../../components/hooks/observable';
 import { IUIPartsService } from '../../services/parts/parts.service';
 
@@ -36,8 +37,15 @@ export function ComponentContainer(props: IComponentContainerProps) {
     );
 }
 
-export function useComponentsOfPart(part: string) {
-    const uiPartsService = useDependency(IUIPartsService);
+/**
+ * Get a set of render functions to render components of a part.
+ *
+ * @param part The part name.
+ * @param injector The injector to get the service. It is optional. However, you should not change this prop in a given
+ * component.
+ */
+export function useComponentsOfPart(part: string, injector?: Injector) {
+    const uiPartsService = injector?.get(IUIPartsService) ?? useDependency(IUIPartsService);
     const updateCounterRef = useRef<number>(0);
     const componentPartUpdateCount = useObservable(
         () => uiPartsService.componentRegistered$.pipe(

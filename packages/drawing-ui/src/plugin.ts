@@ -22,7 +22,7 @@ import { DrawingUIController } from './controllers/drawing-ui.controller';
 import { ImageCropperController } from './controllers/image-cropper.controller';
 import { ImageUpdateController } from './controllers/image-update.controller';
 
-const PLUGIN_NAME = 'IMAGE_UI_PLUGIN';
+const PLUGIN_NAME = 'DRAWING_UI_PLUGIN';
 
 export class UniverDrawingUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

@@ -15,8 +15,8 @@
  */
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { Ctor } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { type Ctor, Optional } from '@wendellhu/redi';
+import { DataSyncPrimaryController } from '@univerjs/rpc';
 
 import type { IFunctionNames } from '../basics/function';
 import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
@@ -64,8 +64,8 @@ export class FormulaController extends Disposable {
     constructor(
         private _function: Array<[Ctor<BaseFunction>, IFunctionNames]> = [],
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(Injector) private readonly _injector: Injector,
-        @IFunctionService private readonly _functionService: IFunctionService
+        @IFunctionService private readonly _functionService: IFunctionService,
+        @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController?: DataSyncPrimaryController
     ) {
         super();
 
@@ -98,7 +98,10 @@ export class FormulaController extends Disposable {
             SetSuperTableOptionMutation,
             RegisterFunctionMutation,
             UnregisterFunctionMutation,
-        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        ].forEach((mutation) => {
+            this._commandService.registerCommand(mutation);
+            this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
+        });
     }
 
     private _registerFunctions() {

@@ -909,6 +909,15 @@ export const handleDefaultRangeChangeWithEffectRefCommands = (range: IRange, com
     return resultRange;
 };
 
+export const handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests = (range: IRange, commandInfo: ICommandInfo, deps: { selectionManagerService: SelectionManagerService }) => {
+    const effectRanges = getEffectedRangesOnCommand(commandInfo as EffectRefRangeParams, deps);
+    if (effectRanges.some((effectRange) => Rectangle.intersects(effectRange, range))) {
+        return handleDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
+    }
+
+    return range;
+};
+
 type MutationsAffectRange =
     ISheetCommandSharedParams
     | IRemoveSheetMutationParams
@@ -1074,6 +1083,7 @@ export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: 
                 endRow: MAX_BOUND,
                 startColumn: 0,
                 endColumn: MAX_BOUND,
+                rangeType: RANGE_TYPE.ROW,
             };
             return [range];
         }
@@ -1085,6 +1095,7 @@ export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: 
                 endRow: MAX_BOUND,
                 startColumn: colStart,
                 endColumn: MAX_BOUND,
+                rangeType: RANGE_TYPE.COLUMN,
             };
             return [range];
         }
@@ -1097,6 +1108,7 @@ export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: 
                 endRow: MAX_BOUND,
                 startColumn: 0,
                 endColumn: MAX_BOUND,
+                rangeType: RANGE_TYPE.ROW,
             };
             return [range];
         }
@@ -1108,6 +1120,7 @@ export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: 
                 endRow: MAX_BOUND,
                 startColumn: colStart,
                 endColumn: MAX_BOUND,
+                rangeType: RANGE_TYPE.COLUMN,
             };
             return [range];
         }
@@ -1149,12 +1162,12 @@ export function getEffectedRangesOnMutation(mutation: IMutationInfo<MutationsAff
         case MoveColsMutation.id: {
             const params = mutation.params as IMoveColumnsMutationParams;
             const startColumn = Math.min(params.sourceRange.startColumn, params.targetRange.startColumn);
-            return [{ ...params.sourceRange, startColumn, endColumn: MAX_BOUND }];
+            return [{ ...params.sourceRange, startColumn, endColumn: MAX_BOUND, rangeType: RANGE_TYPE.COLUMN }];
         }
         case MoveRowsMutation.id: {
             const params = mutation.params as IMoveRowsMutationParams;
             const startRow = Math.min(params.sourceRange.startRow, params.targetRange.startRow);
-            return [{ ...params.sourceRange, startRow, endRow: MAX_BOUND }];
+            return [{ ...params.sourceRange, startRow, endRow: MAX_BOUND, rangeType: RANGE_TYPE.ROW }];
         }
 
         case MoveRangeMutation.id: {
@@ -1169,6 +1182,7 @@ export function getEffectedRangesOnMutation(mutation: IMutationInfo<MutationsAff
                 endRow: MAX_BOUND,
                 startColumn: colStart,
                 endColumn: MAX_BOUND,
+                rangeType: RANGE_TYPE.COLUMN,
             };
             return [range];
         }
@@ -1180,6 +1194,7 @@ export function getEffectedRangesOnMutation(mutation: IMutationInfo<MutationsAff
                 endRow: MAX_BOUND,
                 startColumn: 0,
                 endColumn: MAX_BOUND,
+                rangeType: RANGE_TYPE.ROW,
             };
             return [range];
         }
@@ -1191,6 +1206,7 @@ export function getEffectedRangesOnMutation(mutation: IMutationInfo<MutationsAff
                 endRow: MAX_BOUND,
                 startColumn: colStart,
                 endColumn: MAX_BOUND,
+                rangeType: RANGE_TYPE.COLUMN,
             };
             return [range];
         }
@@ -1202,6 +1218,7 @@ export function getEffectedRangesOnMutation(mutation: IMutationInfo<MutationsAff
                 endRow: MAX_BOUND,
                 startColumn: 0,
                 endColumn: MAX_BOUND,
+                rangeType: RANGE_TYPE.ROW,
             };
             return [range];
         }

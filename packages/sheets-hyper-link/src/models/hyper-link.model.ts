@@ -136,7 +136,7 @@ export class HyperLinkModel extends Disposable {
         return true;
     }
 
-    updateHyperLinkRef(unitId: string, subUnitId: string, id: string, payload: { row: number; column: number }) {
+    updateHyperLinkRef(unitId: string, subUnitId: string, id: string, payload: { row: number; column: number }, silent = false) {
         const { matrix, positionMap } = this._ensureMap(unitId, subUnitId);
         // const current = matrix.getValue();
         const position = positionMap.get(id);
@@ -153,13 +153,15 @@ export class HyperLinkModel extends Disposable {
         Object.assign(link, payload);
         positionMap.set(id, { ...payload, link });
         matrix.setValue(payload.row, payload.column, link);
-        this._linkUpdate$.next({
-            unitId,
-            subUnitId,
-            payload,
-            id,
-            type: 'updateRef',
-        });
+        if (!silent) {
+            this._linkUpdate$.next({
+                unitId,
+                subUnitId,
+                payload,
+                id,
+                type: 'updateRef',
+            });
+        }
         return true;
     }
 

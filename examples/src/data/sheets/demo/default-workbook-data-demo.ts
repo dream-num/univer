@@ -175,6 +175,19 @@ const dataValidation = [
     },
 ];
 
+const dv2 = [
+    {
+        uid: 'xxx-2',
+        type: DataValidationType.CHECKBOX,
+        ranges: [{
+            startRow: 1,
+            endRow: 2,
+            startColumn: 1,
+            endColumn: 2,
+        }],
+    },
+];
+
 const hyperLink = [{
     row: 20,
     column: 12,
@@ -189,6 +202,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
     name: 'UniverSheet Demo',
     sheetOrder: [
         'sheet-0011',
+        'dv-test',
         'sheet-0001',
         'sheet-0002',
         'sheet-0003',
@@ -14202,6 +14216,16 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             ],
             rightToLeft: 0,
         },
+        'dv-test': {
+            name: 'dv-test',
+            id: 'dv-test',
+            tabColor: '',
+            hidden: 0,
+            rowCount: 1000,
+            columnCount: 20,
+            zoomRatio: 1,
+            cellData: {},
+        },
         'sheet-0010': {
             name: 'sheet-0010',
             id: 'sheet-0010',
@@ -23564,6 +23588,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             name: DATA_VALIDATION_PLUGIN_NAME,
             data: JSON.stringify({
                 'sheet-0011': dataValidation,
+                'dv-test': dv2,
             }),
         },
         {

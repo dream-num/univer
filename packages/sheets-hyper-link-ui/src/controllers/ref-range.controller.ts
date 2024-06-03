@@ -15,9 +15,9 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { Disposable, isValidRange, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { Disposable, DisposableCollection, isValidRange, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
+import { handleDefaultRangeChangeWithEffectRefCommands, handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SelectionManagerService } from '@univerjs/sheets';
 import type { IAddHyperLinkMutationParams, ICellHyperLink, IRemoveHyperLinkMutationParams, IUpdateHyperLinkMutationParams, IUpdateHyperLinkRefMutationParams } from '@univerjs/sheets-hyper-link';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '@univerjs/sheets-hyper-link';
 import type { IDisposable } from '@wendellhu/redi';
@@ -35,7 +35,8 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
         @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel,
         @Inject(SheetsHyperLinkResolverService) private readonly _resolverService: SheetsHyperLinkResolverService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
         this._initData();
@@ -51,15 +52,7 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
             endRow: link.row,
         };
 
-        const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
-            const resultRange = handleDefaultRangeChangeWithEffectRefCommands(oldRange, commandInfo);
-            if (resultRange && resultRange.startColumn === oldRange.startColumn && resultRange.startRow === oldRange.startRow) {
-                return {
-                    undos: [],
-                    redos: [],
-                };
-            }
-
+        const handleRangeChange = (resultRange: IRange | null, silent: boolean) => {
             if (!resultRange) {
                 return {
                     redos: [{
@@ -89,6 +82,7 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                         id: link.id,
                         row: resultRange.startRow,
                         column: resultRange.startColumn,
+                        silent,
                     } as IUpdateHyperLinkRefMutationParams,
                 }],
                 undos: [{
@@ -99,15 +93,24 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                         id: link.id,
                         row: oldRange.startRow,
                         column: oldRange.startColumn,
+                        silent,
                     } as IUpdateHyperLinkRefMutationParams,
                 }],
             };
         };
 
-        this._disposableMap.set(
-            id,
-            this._refRangeService.registerRefRange(oldRange, handleRangeChange, unitId, subUnitId)
-        );
+        const handleRefRangeChange = (commandInfo: EffectRefRangeParams) => {
+            const resultRange = handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests(oldRange, commandInfo, { selectionManagerService: this._selectionManagerService });
+            if (resultRange && resultRange.startColumn === oldRange.startColumn && resultRange.startRow === oldRange.startRow) {
+                return {
+                    undos: [],
+                    redos: [],
+                };
+            }
+
+            return handleRangeChange(resultRange, false);
+        };
+        this._disposableMap.set(id, this._refRangeService.registerRefRange(oldRange, handleRefRangeChange, unitId, subUnitId));
     }
 
     private _unregister(id: string) {

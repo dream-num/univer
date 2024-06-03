@@ -291,6 +291,7 @@ export {
     runRefRangeMutations,
     handleCommonDefaultRangeChangeWithEffectRefCommands,
     handleDefaultRangeChangeWithEffectRefCommands,
+    handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests,
 } from './services/ref-range/util';
 export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
 export { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';

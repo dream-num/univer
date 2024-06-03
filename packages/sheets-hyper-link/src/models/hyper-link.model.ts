@@ -23,23 +23,27 @@ type LinkUpdate = {
     payload: ICellHyperLink;
     unitId: string;
     subUnitId: string;
+    silent?: boolean;
 } | {
     type: 'remove';
     payload: ICellHyperLink;
     unitId: string;
     subUnitId: string;
+    silent?: boolean;
 } | {
     type: 'update';
     unitId: string;
     subUnitId: string;
     payload: ICellLinkContent;
     id: string;
+    silent?: boolean;
 } | {
     type: 'updateRef';
     unitId: string;
     subUnitId: string;
     id: string;
     payload: { row: number; column: number };
+    silent?: boolean;
 } | {
     type: 'unload';
     unitId: string;
@@ -48,6 +52,7 @@ type LinkUpdate = {
         subUnitId: string;
         links: ICellHyperLink[];
     }[];
+    silent?: boolean;
 };
 
 export class HyperLinkModel extends Disposable {
@@ -121,18 +126,18 @@ export class HyperLinkModel extends Disposable {
             return false;
         }
         Object.assign(link, payload);
-        if (!silent) {
-            this._linkUpdate$.next({
-                unitId,
-                subUnitId,
-                payload: {
-                    display: link.display,
-                    payload: link.payload,
-                },
-                id,
-                type: 'update',
-            });
-        }
+
+        this._linkUpdate$.next({
+            unitId,
+            subUnitId,
+            payload: {
+                display: link.display,
+                payload: link.payload,
+            },
+            id,
+            type: 'update',
+            silent,
+        });
         return true;
     }
 
@@ -153,15 +158,14 @@ export class HyperLinkModel extends Disposable {
         Object.assign(link, payload);
         positionMap.set(id, { ...payload, link });
         matrix.setValue(payload.row, payload.column, link);
-        if (!silent) {
-            this._linkUpdate$.next({
-                unitId,
-                subUnitId,
-                payload,
-                id,
-                type: 'updateRef',
-            });
-        }
+        this._linkUpdate$.next({
+            unitId,
+            subUnitId,
+            payload,
+            id,
+            type: 'updateRef',
+            silent,
+        });
         return true;
     }
 

@@ -19,7 +19,6 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
-import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
 import { SheetsHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 import { SheetsHyperLinkPopupService } from './services/popup.service';
 import { SheetsHyperLinkResolverService } from './services/resolver.service';
@@ -50,7 +49,6 @@ export class UniverSheetsHyperLinkUIPlugin extends UniverSheetsHyperLinkPlugin {
             [SheetsHyperLinkPopupService],
 
             [SheetsHyperLinkRemoveSheetController],
-            [SheetsHyperLinkRefRangeController],
             [SheetsHyperLinkRenderController],
             [SheetHyperLinkSetRangeController],
             [SheetsHyperLinkPopupController],

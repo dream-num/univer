@@ -1054,22 +1054,16 @@ export function adjustRangeOnMutation(range: Readonly<IRange>, mutation: IMutati
     }
 }
 
-const MAX_BOUND = Math.floor(Number.MAX_SAFE_INTEGER / 10);
-
-// eslint-disable-next-line max-lines-per-function
 export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: { selectionManagerService: SelectionManagerService }) {
     const { selectionManagerService } = deps;
     switch (command.id) {
         case EffectRefRangId.MoveColsCommandId: {
             const params = command.params!;
-            const startColumn = Math.min(params.fromRange.startColumn, params.toRange.startColumn);
-            return [{ ...params.fromRange, startColumn, endColumn: MAX_BOUND }];
+            return [params.fromRange, params.toRange];
         }
         case EffectRefRangId.MoveRowsCommandId: {
             const params = command.params!;
-            const startRow = Math.min(params.fromRange.startRow, params.toRange.startRow);
-
-            return [{ ...params.fromRange, startRow, endRow: MAX_BOUND }];
+            return [params.fromRange, params.toRange];
         }
         case EffectRefRangId.MoveRangeCommandId: {
             const params = command;
@@ -1077,51 +1071,22 @@ export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: 
         }
         case EffectRefRangId.InsertRowCommandId: {
             const params = command;
-            const rowStart = params.params!.range.startRow;
-            const range: IRange = {
-                startRow: rowStart,
-                endRow: MAX_BOUND,
-                startColumn: 0,
-                endColumn: MAX_BOUND,
-                rangeType: RANGE_TYPE.ROW,
-            };
+            const range: IRange = params.params!.range;
             return [range];
         }
         case EffectRefRangId.InsertColCommandId: {
             const params = command;
-            const colStart = params.params!.range.startColumn;
-            const range: IRange = {
-                startRow: 0,
-                endRow: MAX_BOUND,
-                startColumn: colStart,
-                endColumn: MAX_BOUND,
-                rangeType: RANGE_TYPE.COLUMN,
-            };
+            const range: IRange = params.params!.range;
             return [range];
         }
         case EffectRefRangId.RemoveRowCommandId: {
             const params = command;
-
-            const rowStart = params.params!.range.startRow;
-            const range: IRange = {
-                startRow: rowStart,
-                endRow: MAX_BOUND,
-                startColumn: 0,
-                endColumn: MAX_BOUND,
-                rangeType: RANGE_TYPE.ROW,
-            };
+            const range: IRange = params.params!.range;
             return [range];
         }
         case EffectRefRangId.RemoveColCommandId: {
             const params = command;
-            const colStart = params.params!.range.startColumn;
-            const range: IRange = {
-                startRow: 0,
-                endRow: MAX_BOUND,
-                startColumn: colStart,
-                endColumn: MAX_BOUND,
-                rangeType: RANGE_TYPE.COLUMN,
-            };
+            const range: IRange = params.params!.range;
             return [range];
         }
         case EffectRefRangId.DeleteRangeMoveUpCommandId:
@@ -1131,13 +1096,7 @@ export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: 
             if (!range) {
                 return [];
             }
-            const effectRange = {
-                startRow: range.startRow,
-                startColumn: range.startColumn,
-                endColumn: range.endColumn,
-                endRow: MAX_BOUND,
-            };
-            return [effectRange];
+            return [range];
         }
         case EffectRefRangId.DeleteRangeMoveLeftCommandId:
         case EffectRefRangId.InsertRangeMoveRightCommandId: {
@@ -1146,13 +1105,7 @@ export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: 
             if (!range) {
                 return [];
             }
-            const effectRange = {
-                startRow: range.startRow,
-                startColumn: range.startColumn,
-                endColumn: MAX_BOUND,
-                endRow: range.endRow,
-            };
-            return [effectRange];
+            return [range];
         }
     }
 }
@@ -1161,13 +1114,11 @@ export function getEffectedRangesOnMutation(mutation: IMutationInfo<MutationsAff
     switch (mutation.id) {
         case MoveColsMutation.id: {
             const params = mutation.params as IMoveColumnsMutationParams;
-            const startColumn = Math.min(params.sourceRange.startColumn, params.targetRange.startColumn);
-            return [{ ...params.sourceRange, startColumn, endColumn: MAX_BOUND, rangeType: RANGE_TYPE.COLUMN }];
+            return [params.sourceRange, params.targetRange];
         }
         case MoveRowsMutation.id: {
             const params = mutation.params as IMoveRowsMutationParams;
-            const startRow = Math.min(params.sourceRange.startRow, params.targetRange.startRow);
-            return [{ ...params.sourceRange, startRow, endRow: MAX_BOUND, rangeType: RANGE_TYPE.ROW }];
+            return [params.sourceRange, params.targetRange];
         }
 
         case MoveRangeMutation.id: {
@@ -1176,50 +1127,22 @@ export function getEffectedRangesOnMutation(mutation: IMutationInfo<MutationsAff
         }
         case InsertColMutation.id: {
             const params = mutation.params as IInsertColMutationParams;
-            const colStart = params.range.startColumn;
-            const range: IRange = {
-                startRow: 0,
-                endRow: MAX_BOUND,
-                startColumn: colStart,
-                endColumn: MAX_BOUND,
-                rangeType: RANGE_TYPE.COLUMN,
-            };
+            const range: IRange = params.range;
             return [range];
         }
         case InsertRowMutation.id: {
             const params = mutation.params as IInsertRowMutationParams;
-            const rowStart = params.range.startRow;
-            const range: IRange = {
-                startRow: rowStart,
-                endRow: MAX_BOUND,
-                startColumn: 0,
-                endColumn: MAX_BOUND,
-                rangeType: RANGE_TYPE.ROW,
-            };
+            const range: IRange = params.range;
             return [range];
         }
         case RemoveColMutation.id: {
             const params = mutation.params as IRemoveColMutationParams;
-            const colStart = params.range.startColumn;
-            const range: IRange = {
-                startRow: 0,
-                endRow: MAX_BOUND,
-                startColumn: colStart,
-                endColumn: MAX_BOUND,
-                rangeType: RANGE_TYPE.COLUMN,
-            };
+            const range: IRange = params.range;
             return [range];
         }
         case RemoveRowMutation.id: {
             const params = mutation.params as IRemoveRowsMutationParams;
-            const rowStart = params.range.startRow;
-            const range: IRange = {
-                startRow: rowStart,
-                endRow: MAX_BOUND,
-                startColumn: 0,
-                endColumn: MAX_BOUND,
-                rangeType: RANGE_TYPE.ROW,
-            };
+            const range: IRange = params.range;
             return [range];
         }
         default:

@@ -374,8 +374,8 @@ importers:
   packages/core:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.34
-        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.35
+        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       nanoid:
         specifier: 5.0.7
         version: 5.0.7
@@ -411,8 +411,8 @@ importers:
   packages/data-validation:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.34
-        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.35
+        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1103,8 +1103,8 @@ importers:
   packages/sheets:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.34
-        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.35
+        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1143,8 +1143,8 @@ importers:
   packages/sheets-conditional-formatting:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.34
-        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.35
+        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1192,8 +1192,8 @@ importers:
         specifier: ^0.1.56
         version: 0.1.56(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: ^0.1.34
-        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.35
+        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../sheets-conditional-formatting
@@ -1280,8 +1280,8 @@ importers:
         specifier: ^0.1.56
         version: 0.1.56(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: ^0.1.34
-        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.35
+        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1633,8 +1633,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@univerjs/protocol':
-        specifier: ^0.1.32
-        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.35
+        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -1840,8 +1840,8 @@ importers:
         specifier: ^0.1.56
         version: 0.1.56(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: ^0.1.34
-        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.35
+        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@types/react':
         specifier: ^18.3.3
@@ -2031,8 +2031,8 @@ importers:
   packages/thread-comment:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.32
-        version: 0.1.32(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.35
+        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2068,8 +2068,8 @@ importers:
         specifier: ^0.1.56
         version: 0.1.56(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: ^0.1.34
-        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.35
+        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -2239,8 +2239,8 @@ importers:
         specifier: workspace:*
         version: link:../network
       '@univerjs/protocol':
-        specifier: ^0.1.34
-        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.35
+        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -2338,8 +2338,8 @@ importers:
   packages/uniscript:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.34
-        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.35
+        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -4978,15 +4978,15 @@ packages:
       react: '*'
       react-dom: '*'
 
-  '@univerjs/protocol@0.1.32':
-    resolution: {integrity: sha512-B9hZGRM9ssHrx6+Ey4+n31Ji7p5G70Qmr8UFG/h5rYLpIPFQ5CBtu79teSAYxHrK31Sf/xtfF2HLLxXK+649xg==}
+  '@univerjs/protocol@0.1.34':
+    resolution: {integrity: sha512-GD/bgjFmnaySkCTgZkPxhNAnkYOLaIOrn7lc+iqE6XgSdjUhkmd8yqSK7cu/nCUHa9wIBHyrk0i+ZkHegaPQgA==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
       '@grpc/grpc-js': ^1.9.14
       rxjs: '>=7.0.0'
 
-  '@univerjs/protocol@0.1.34':
-    resolution: {integrity: sha512-GD/bgjFmnaySkCTgZkPxhNAnkYOLaIOrn7lc+iqE6XgSdjUhkmd8yqSK7cu/nCUHa9wIBHyrk0i+ZkHegaPQgA==}
+  '@univerjs/protocol@0.1.35':
+    resolution: {integrity: sha512-dVzx6XiVO7UVoBwx4K/mP3QFRgqfu+xaS/Hw2U/SmyUWmdGpwckbH0Xl4fUWhRuJIxSqZZKTLfgGSI58Qj5i2g==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
       '@grpc/grpc-js': ^1.9.14
@@ -14158,12 +14158,12 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@univerjs/protocol@0.1.32(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)':
+  '@univerjs/protocol@0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)':
     dependencies:
       '@grpc/grpc-js': 1.10.6
       rxjs: 7.8.1
 
-  '@univerjs/protocol@0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)':
+  '@univerjs/protocol@0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)':
     dependencies:
       '@grpc/grpc-js': 1.10.6
       rxjs: 7.8.1

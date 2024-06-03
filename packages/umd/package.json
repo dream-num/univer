@@ -56,7 +56,7 @@
         "@univerjs/facade": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/network": "workspace:*",
-        "@univerjs/protocol": "^0.1.34",
+        "@univerjs/protocol": "^0.1.35",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",

@@ -22,16 +22,14 @@ import type { IUpdateCommentPayload, IUpdateCommentRefPayload } from '../command
 export type CommentUpdate = {
     unitId: string;
     subUnitId: string;
+    silent?: boolean;
+} & ({
     type: 'add';
     payload: IThreadComment;
 } | {
-    unitId: string;
-    subUnitId: string;
     type: 'update';
     payload: IUpdateCommentPayload;
 } | {
-    unitId: string;
-    subUnitId: string;
     type: 'delete';
     payload: {
         commentId: string;
@@ -39,19 +37,15 @@ export type CommentUpdate = {
         comment: IThreadComment;
     };
 } | {
-    unitId: string;
-    subUnitId: string;
     type: 'updateRef';
     payload: IUpdateCommentRefPayload;
 } | {
-    unitId: string;
-    subUnitId: string;
     type: 'resolve';
     payload: {
         commentId: string;
         resolved: boolean;
     };
-};
+});
 
 export class ThreadCommentModel {
     private _commentsMap: Record<string, Record<string, Record<string, IThreadComment>>> = {};
@@ -166,7 +160,7 @@ export class ThreadCommentModel {
         return true;
     }
 
-    updateComment(unitId: string, subUnitId: string, payload: IUpdateCommentPayload) {
+    updateComment(unitId: string, subUnitId: string, payload: IUpdateCommentPayload, silent?: boolean) {
         const { commentMap } = this.ensureMap(unitId, subUnitId);
         const oldComment = commentMap[payload.commentId];
         if (!oldComment) {
@@ -182,13 +176,14 @@ export class ThreadCommentModel {
             subUnitId,
             type: 'update',
             payload,
+            silent,
         });
         this._refreshCommentsMap$();
         this._refreshCommentsTreeMap$();
         return true;
     }
 
-    updateCommentRef(unitId: string, subUnitId: string, payload: IUpdateCommentRefPayload) {
+    updateCommentRef(unitId: string, subUnitId: string, payload: IUpdateCommentRefPayload, silent?: boolean) {
         const { commentMap } = this.ensureMap(unitId, subUnitId);
         const oldComment = commentMap[payload.commentId];
         if (!oldComment) {
@@ -202,6 +197,7 @@ export class ThreadCommentModel {
             subUnitId,
             type: 'updateRef',
             payload,
+            silent,
         });
         this._refreshCommentsMap$();
         this._refreshCommentsTreeMap$();

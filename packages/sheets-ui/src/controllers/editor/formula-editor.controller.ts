@@ -36,11 +36,11 @@ import {
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import {
     CoverContentCommand,
+    VIEWPORT_KEY as DOC_VIEWPORT_KEY,
     DocSkeletonManagerService,
     DocViewModelManagerService,
     RichTextEditingMutation,
     TextSelectionManagerService,
-    VIEWPORT_KEY,
 } from '@univerjs/docs';
 import type { RenderComponentType } from '@univerjs/engine-render';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
@@ -51,9 +51,9 @@ import { takeUntil } from 'rxjs';
 
 import { SetEditorResizeOperation } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
-import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, FormulaEditorController)
 export class FormulaEditorController extends RxDisposable {
@@ -553,7 +553,7 @@ export class FormulaEditorController extends RxDisposable {
         actualHeight += marginTop + marginBottom;
 
         const { width, height } = position;
-        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        const viewportMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
 
         let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
@@ -568,7 +568,7 @@ export class FormulaEditorController extends RxDisposable {
             if (scrollBar == null) {
                 viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
             } else {
-                viewportMain?.resetSizeAndScrollBar();
+                viewportMain?.resetCanvasSizeAndUpdateScrollBar();
             }
         } else {
             scrollBar = null;

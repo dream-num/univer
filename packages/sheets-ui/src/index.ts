@@ -35,7 +35,7 @@ export {
     type IScrollToCellCommandParams,
     type ISetScrollRelativeCommandParams,
 } from './commands/commands/set-scroll.command';
-export { VIEWPORT_KEY } from './common/keys';
+export { SHEET_VIEWPORT_KEY as VIEWPORT_KEY } from './common/keys';
 export { AutoFillController } from './controllers/auto-fill.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';

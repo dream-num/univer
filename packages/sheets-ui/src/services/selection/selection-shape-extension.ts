@@ -18,11 +18,10 @@
 import type { IFreeze, IRangeWithCoord, Nullable, Observer, ThemeService } from '@univerjs/core';
 import { ColorKit } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import { CURSOR_TYPE, isRectIntersect, Rect, ScrollTimer, ScrollTimerType, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, isRectIntersect, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 
-import { VIEWPORT_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { SelectionShape } from './selection-shape';
 import { ISelectionRenderService, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './selection-render.service';
@@ -117,21 +116,21 @@ export class SelectionShapeExtension {
         };
 
         switch (viewport.viewportKey) {
-            case VIEWPORT_KEY.VIEW_MAIN:
+            case SHEET_VIEWPORT_KEY.VIEW_MAIN:
                 return selection.endRow >= freeze.startRow && selection.endColumn >= freeze.startColumn;
 
-            case VIEWPORT_KEY.VIEW_MAIN_TOP:
-            case VIEWPORT_KEY.VIEW_COLUMN_RIGHT:
+            case SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP:
+            case SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT:
                 return selection.endColumn >= freeze.startColumn && selection.startRow < freeze.startRow;
 
-            case VIEWPORT_KEY.VIEW_MAIN_LEFT:
-            case VIEWPORT_KEY.VIEW_ROW_BOTTOM:
+            case SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT:
+            case SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM:
                 return selection.endRow >= freeze.startRow && selection.startColumn < freeze.startColumn;
 
-            case VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP:
-            case VIEWPORT_KEY.VIEW_COLUMN_LEFT:
-            case VIEWPORT_KEY.VIEW_ROW_TOP:
-            case VIEWPORT_KEY.VIEW_LEFT_TOP:
+            case SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP:
+            case SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT:
+            case SHEET_VIEWPORT_KEY.VIEW_ROW_TOP:
+            case SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP:
                 return selection.startRow < freeze.startRow && selection.startColumn < freeze.startColumn;
             default:
                 break;
@@ -321,7 +320,7 @@ export class SelectionShapeExtension {
         // const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         // const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
-        const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!;
+        const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
 
         const scrollTimer = ScrollTimer.create(scene);
 
@@ -804,11 +803,11 @@ export class SelectionShapeExtension {
 
         this._activeViewport = scene.getActiveViewportByCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]))!;
 
-        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
         const scrollTimer = ScrollTimer.create(
             scene,
-            this._activeViewport.viewportKey === VIEWPORT_KEY.VIEW_MAIN ? ScrollTimerType.ALL : ScrollTimerType.NONE
+            this._activeViewport.viewportKey === SHEET_VIEWPORT_KEY.VIEW_MAIN ? ScrollTimerType.ALL : ScrollTimerType.NONE
         );
 
         scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewportMain);

@@ -43,8 +43,9 @@ export interface ISheetSkeletonManagerSearch {
  * The viewModel is also a temporary storage variable, which does not need to be persisted,
  * so it is managed uniformly through the service.
  */
-export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
-    private _currentSkeleton: ISheetSkeletonManagerSearch = {
+export class SheetSkeletonManagerService implements IDisposable {
+    private _currentSkeletonSearchParam: ISheetSkeletonManagerSearch = {
+        unitId: '',
         sheetId: '',
     };
 
@@ -78,7 +79,7 @@ export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
 
     /** @deprecated */
     getCurrent(): Nullable<ISheetSkeletonManagerParam> {
-        return this._getSkeleton(this._currentSkeleton);
+        return this._getSkeleton(this._currentSkeletonSearchParam);
     }
 
     getUnitSkeleton(unitId: string, sheetId: string): Nullable<ISheetSkeletonManagerParam> {
@@ -109,7 +110,7 @@ export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
             });
         }
 
-        this._currentSkeleton = searchParam;
+        this._currentSkeletonSearchParam = searchParam;
 
         const nextParam = this.getCurrent();
         this._currentSkeletonBefore$.next(nextParam);
@@ -130,6 +131,10 @@ export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
             param.dirty = false;
         }
         param.skeleton.calculate();
+    }
+
+    makeDirtyCurrent(state: boolean = true) {
+        this.makeDirty(this._currentSkeletonSearchParam, state);
     }
 
     makeDirty(searchParm: ISheetSkeletonManagerSearch, state: boolean = true) {

@@ -22,10 +22,9 @@ import { ScrollManagerService } from '../../services/scroll-manager.service';
 
 export const SetScrollOperation: IOperation<IScrollManagerInsertParam> = {
     id: 'sheet.operation.set-scroll',
-
     type: CommandType.OPERATION,
 
-    handler: (accessor, params) => {
+    handler: (accessor, params: IScrollManagerInsertParam) => {
         if (params == null) {
             return false;
         }
@@ -36,7 +35,7 @@ export const SetScrollOperation: IOperation<IScrollManagerInsertParam> = {
         const worksheet = workbook!.getSheetBySheetId(params!.sheetId);
         const { xSplit, ySplit } = worksheet!.getConfig().freeze;
 
-        scrollManagerService.addOrReplaceByParam({
+        scrollManagerService.setScrollInfo({
             ...params,
             sheetViewStartRow: params.sheetViewStartRow - ySplit,
             sheetViewStartColumn: params.sheetViewStartColumn - xSplit,

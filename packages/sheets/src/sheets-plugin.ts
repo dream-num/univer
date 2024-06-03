@@ -15,10 +15,11 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
-import { ICommandService, IConfigService, LocaleService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, ICommandService, IConfigService, LocaleService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
 import { FeatureCalculationController } from './controllers/feature-calculation.controller';
@@ -56,6 +57,7 @@ export interface IUniverSheetsConfig {
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
  */
+@DependentOn(UniverFormulaEnginePlugin)
 export class UniverSheetsPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;

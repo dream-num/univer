@@ -20,7 +20,6 @@ export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './docs/data-model/subdocument
 export { type UnitType, UnitModel, UniverInstanceType } from './common/unit';
 export { Registry, RegistryAsMap } from './common/registry';
 export { Univer } from './univer';
-export { PluginHolder } from './services/plugin/plugin-holder';
 export { shallowEqual, isRangesEqual, isUnitRangesEqual } from './common/equal';
 export { isNumeric, isSafeNumeric } from './common/number';
 export { isBooleanString } from './common/boolean';
@@ -55,7 +54,7 @@ export type { JSONXActions, JSONXPath } from './docs/data-model/json-x/json-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
 export * from './observer';
 export { Plugin } from './services/plugin/plugin';
-export { PluginService } from './services/plugin/plugin.service';
+export { PluginService, DependentOn } from './services/plugin/plugin.service';
 export {
     type CommandListener,
     CommandService,

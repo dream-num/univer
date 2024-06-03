@@ -288,6 +288,8 @@ export class FUniver {
         });
     }
 
+    // #endregion
+
     /**
      * Execute command
      * @param id Command id
@@ -368,6 +370,4 @@ export class FUniver {
             );
         }, 10);
     }
-
-    // @endregion
 }

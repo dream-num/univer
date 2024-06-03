@@ -15,13 +15,14 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { IUniverInstanceService, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IUniverInstanceService, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { WorksheetProtectionRenderService } from '@univerjs/sheets';
+import { UniverSheetsPlugin, WorksheetProtectionRenderService } from '@univerjs/sheets';
+import { UniverUIPlugin } from '@univerjs/ui';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
@@ -84,6 +85,7 @@ import { SheetPermissionPanelModel } from './services/permission/sheet-permissio
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 import { PermissionRenderService } from './services/permission/permission-render.service';
 
+@DependentOn(UniverSheetsPlugin, UniverUIPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';
     static override type = UniverInstanceType.UNIVER_SHEET;

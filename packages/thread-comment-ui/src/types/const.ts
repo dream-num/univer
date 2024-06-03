@@ -18,4 +18,4 @@ export const THREAD_COMMENT_POPUP = 'thread-comment-popup';
 
 export const THREAD_COMMENT_PANEL = 'thread-comment-panel';
 
-export const PLUGIN_NAME = 'thread-comment-ui-plugin';
+export const PLUGIN_NAME = 'THREAD_COMMENT_UI_PLUGIN';

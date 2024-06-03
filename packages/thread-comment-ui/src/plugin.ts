@@ -16,7 +16,7 @@
 
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import type { DependencyOverride } from '@univerjs/core';
-import { ICommandService, mergeOverrideWithDependencies, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, ICommandService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { PLUGIN_NAME } from './types/const';
@@ -29,31 +29,25 @@ export interface IUniverThreadCommentUIConfig {
     overrides?: DependencyOverride;
 }
 
-export class UniverThreadCommentUIPlugin extends UniverThreadCommentPlugin {
+@DependentOn(UniverThreadCommentPlugin)
+export class UniverThreadCommentUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_UNKNOWN;
-    private _config1: IUniverThreadCommentUIConfig;
 
     constructor(
-        config: IUniverThreadCommentUIConfig,
+        private readonly _config: IUniverThreadCommentUIConfig | undefined,
         @Inject(Injector) protected override _injector: Injector,
-        @ICommandService protected override _commandService: ICommandService
+        @ICommandService protected _commandService: ICommandService
     ) {
-        super(
-            config,
-            _injector,
-            _commandService
-        );
-        this._config1 = config;
+        super();
     }
 
     override onStarting(injector: Injector): void {
-        super.onStarting(injector);
         (mergeOverrideWithDependencies([
             [ThreadCommentUIController],
             [ThreadCommentPanelService],
             [IThreadCommentMentionDataService, { useClass: ThreadCommentMentionDataService }],
-        ], this._config1.overrides) as Dependency[]).forEach((dep) => {
+        ], this._config?.overrides) as Dependency[]).forEach((dep) => {
             injector.add(dep);
         });
 

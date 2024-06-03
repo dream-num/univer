@@ -24,7 +24,7 @@ import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataVali
 import { DataValidationResourceController } from './controllers/dv-resource.controller';
 import { DataValidationSheetController } from './controllers/dv-sheet.controller';
 
-const PLUGIN_NAME = 'data-validation';
+const PLUGIN_NAME = 'UNIVER_DATA_VALIDATION_PLUGIN';
 
 export class UniverDataValidationPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

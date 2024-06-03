@@ -25,6 +25,7 @@ export class UniverSheetsDrawingPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
+        private readonly _config: unknown,
         @Inject(Injector) override readonly _injector: Injector
     ) {
         super();

@@ -178,7 +178,7 @@ export { DataValidationImeMode } from './types/enum/data-validation-ime-mode';
 export { DataValidationOperator } from './types/enum/data-validation-operator';
 export { DataValidationType } from './types/enum/data-validation-type';
 export { DataValidationStatus } from './types/enum/data-validation-status';
-export type { IPermissionTypes } from './services/permission/type';
+export type { IPermissionTypes, WorkbookPermissionPointConstructor } from './services/permission/type';
 
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';

@@ -484,7 +484,7 @@ export class FormulaEditorController extends RxDisposable {
             if (scrollBar == null) {
                 viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
             } else {
-                viewportMain?.resetSizeAndScrollBar();
+                viewportMain?.resetCanvasSizeAndUpdateScrollBar();
             }
         } else {
             scrollBar = null;

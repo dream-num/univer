@@ -23,13 +23,14 @@ import {
     RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
-import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderController, IScrollObserverParam } from '@univerjs/engine-render';
+import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';
-import { VIEWPORT_KEY } from '../../common/keys';
+// import { SHEET_VIEWPORT_KEY } from '../../common/keys';
+import type { IScrollManagerSearchParam } from '../../services/scroll-manager.service';
 import { ScrollManagerService } from '../../services/scroll-manager.service';
 import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
@@ -164,10 +165,11 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
             return;
         }
 
-        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         this.disposeWithMe(
             toDisposable(
-                viewportMain?.onScrollAfterObserver.add((param) => {
+                // set scrollInf, event triggered in viewport@_scrollToScrollbarPos
+                viewportMain?.onScrollAfterObserver.add((param: IScrollObserverParam) => {
                     const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                     if (skeleton == null || param.isTrigger === false) {
                         return;
@@ -178,21 +180,26 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
                         return;
                     }
 
-                    const { actualScrollX = 0, actualScrollY = 0 } = param;
+                    const { viewportScrollX = 0, viewportScrollY = 0 } = param;
 
                     // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
                     const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
-                        actualScrollX,
-                        actualScrollY
+                        viewportScrollX,
+                        viewportScrollY
                     );
 
-                    // update scroll infos in scroll manager service
-                    this._scrollManagerService.addOrReplaceNoRefresh({
+                    // update scroll infos in scrollManagerService again!
+                    // because raw param from scroll-command offsetX may be negative or over max value.
+                    const lastestScrollInfo = {
                         sheetViewStartRow: row,
                         sheetViewStartColumn: column,
                         offsetX: columnOffset,
                         offsetY: rowOffset,
-                    });
+                        scrollLeft: viewportScrollX,
+                        scrollTop: viewportScrollY,
+                    };
+                    this._scrollManagerService.setScrollInfoToCurrSheetWithoutNotify(lastestScrollInfo);
+                    this._scrollManagerService.setScrollInfoToSnapshot(lastestScrollInfo);
                 })
             )
         );
@@ -208,14 +215,13 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
                     if (skeleton == null || sheetObject == null) {
                         return;
                     }
-                    const { actualScrollX = 0, actualScrollY = 0 } = param;
+                    const { viewportScrollX = 0, viewportScrollY = 0 } = param;
 
                     const freeze = this._getFreeze();
 
-                    // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
                     const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
-                        actualScrollX,
-                        actualScrollY
+                        viewportScrollX,
+                        viewportScrollY
                     );
 
                     this._commandService.executeCommand(ScrollCommand.id, {
@@ -229,10 +235,11 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
         );
     }
 
-    // scroll command -> scroll manager service -> scrollInfo$ -> viewport scroll API
     private _scrollSubscribeBinding() {
         this.disposeWithMe(
             toDisposable(
+                // wheel event --> set-scroll.command('sheet.operation.set-scroll') --> scroll.operation.ts --> scrollManagerService.setScrollInfo(raw value, may be negative)  --> scrollInfo$.next --> current fn() --> viewport.scrollTo
+                // --> onScrollAfterObserver.notify ---> scrollManagerService.setScrollInfo again!(valid scroll value)
                 this._scrollManagerService.scrollInfo$.subscribe((param) => {
                     const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                     const sheetObject = this._getSheetObject();
@@ -242,9 +249,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
 
                     const scene = sheetObject.scene;
 
-                    const { scaleX, scaleY } = sheetObject.scene.getAncestorScale();
+                    // const { scaleX, scaleY } = sheetObject.scene.getAncestorScale();
 
-                    const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+                    const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
                     if (viewportMain == null) {
                         return;
@@ -258,17 +265,20 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
                         return;
                     }
 
-                    // 数据源 packages/sheets-ui/src/services/scroll-manager.service.ts@_addByParam
+                    // data source: scroll-manager.service.ts@_scrollInfo
                     const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = param;
 
                     const { startX, startY } = skeleton.getCellByIndexWithNoHeader(
                         sheetViewStartRow,
                         sheetViewStartColumn
                     );
-                    const x = startX + offsetX;
-                    const y = startY + offsetY;
 
-                    const config = viewportMain.getBarScroll(x, y);
+                    // viewportScrollXByEvent is not same as viewportScrollX, by event may be negative, or over max
+                    // so, before
+                    const viewportScrollXByEvent = startX + offsetX;
+                    const viewportScrollYByEvent = startY + offsetY;
+
+                    const config = viewportMain.transViewportScroll2ScrollValue(viewportScrollXByEvent, viewportScrollYByEvent);
                     viewportMain.scrollTo(config);
                 })
             )
@@ -277,26 +287,23 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
 
     private _initSkeletonListener() {
         this.disposeWithMe(toDisposable(
-            this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+            this._sheetSkeletonManagerService.currentSkeletonBefore$.subscribe((param) => {
                 if (param == null) {
                     return;
                 }
-
-                const { unitId, sheetId } = param;
-                const currentRender = this._renderManagerService.getRenderById(unitId);
-
-                if (currentRender == null) {
-                    return;
+                // this._scrollManagerService.setSearchParam(param as unknown as ISheetSkeletonManagerParam);
+                const sheetObject = this._getSheetObject();
+                if (!sheetObject) return;
+                const scene = sheetObject.scene;
+                const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+                const currScrollInfo = this._scrollManagerService.getScrollInfoByParam(param as unknown as IScrollManagerSearchParam);
+                if (viewportMain && currScrollInfo) {
+                    viewportMain.viewportScrollX = currScrollInfo.viewportScrollLeft || 0;
+                    viewportMain.viewportScrollY = currScrollInfo.viewportScrollTop || 0;
                 }
-
-                this._updateSceneSize(param);
-
-                this._scrollManagerService.setCurrentScroll({
-                    unitId,
-                    sheetId,
-                });
-            })
-        ));
+                // this function would call setSearchParam
+                this._updateSceneSize(param as unknown as ISheetSkeletonManagerParam);
+            })));
     }
 
     private _updateSceneSize(param: ISheetSkeletonManagerParam) {
@@ -313,7 +320,9 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
 
         const { rowTotalHeight, columnTotalWidth, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } =
             skeleton;
+        this._scrollManagerService.setSearchParam(param);
 
+        // would cause viewport.resetSizeAndScrollBar
         scene?.transformByState({
             width: rowHeaderWidthAndMarginLeft + columnTotalWidth,
             height: columnHeaderHeightAndMarginTop + rowTotalHeight,
@@ -379,7 +388,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
             return;
         }
 
-        const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        const viewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (viewport == null) {
             return;
         }
@@ -393,6 +402,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
         return skeleton.getRowColumnSegment(bounds);
     }
 
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _scrollToCell(row: number, column: number): boolean {
         const { rowHeightAccumulation, columnWidthAccumulation } = this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
 
@@ -401,7 +411,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
         const scene = this._getSheetObject()?.scene;
         if (scene == null) return false;
 
-        const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        const viewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (viewport == null) return false;
 
         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
@@ -467,12 +477,61 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
 
         if (startSheetViewRow === undefined && startSheetViewColumn === undefined) return false;
 
-        const { offsetX, offsetY } = this._scrollManagerService.getCurrentScroll() || {};
+        const { offsetX, offsetY } = this._scrollManagerService.getCurrentScrollInfo() || {};
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
             sheetViewStartRow: startSheetViewRow,
             sheetViewStartColumn: startSheetViewColumn,
             offsetX: startSheetViewColumn === undefined ? offsetX : 0,
             offsetY: startSheetViewRow === undefined ? offsetY : 0,
         });
+    }
+
+    private _getViewports() {
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
+            return;
+        }
+        const { scene } = sheetObject;
+
+        const viewColumnLeft = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT);
+        const viewColumnRight = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT);
+
+        // row header
+        const viewRowTop = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_TOP);
+        const viewRowBottom = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM);
+
+        const viewLeftTop = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP);
+
+        // skeleton
+        const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        const viewMainLeftTop = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
+        const viewMainLeft = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT);
+        const viewMainTop = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP);
+
+        if (
+            viewColumnLeft == null ||
+            viewColumnRight == null ||
+            viewRowTop == null ||
+            viewRowBottom == null ||
+            viewLeftTop == null ||
+            viewMain == null ||
+            viewMainLeftTop == null ||
+            viewMainLeft == null ||
+            viewMainTop == null
+        ) {
+            return;
+        }
+
+        return {
+            viewMain,
+            viewMainLeftTop,
+            viewMainLeft,
+            viewMainTop,
+            viewColumnLeft,
+            viewColumnRight,
+            viewRowTop,
+            viewRowBottom,
+            viewLeftTop,
+        };
     }
 }

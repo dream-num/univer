@@ -37,6 +37,7 @@ import {
     VIEWPORT_KEY,
 } from '@univerjs/docs';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import type { Viewport } from '@univerjs/engine-render';
 import { getEditorObject, IEditorBridgeService } from '@univerjs/sheets-ui';
 import type { IEditorBridgeServiceParam } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
@@ -307,9 +308,9 @@ export class ZenEditorController extends RxDisposable {
         docsComponent.translate(docsLeft, docsTop);
         docBackground.translate(docsLeft, docsTop);
 
-        const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN) as Viewport;
         if (scrollToX !== Number.POSITIVE_INFINITY && viewport != null) {
-            const actualX = viewport.getBarScroll(scrollToX, 0).x;
+            const actualX = viewport.transScroll2ViewportScrollValue(scrollToX, 0).x;
             viewport.scrollTo({
                 x: actualX,
             });

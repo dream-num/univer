@@ -366,7 +366,7 @@ export class StartEditController extends Disposable {
             if (scrollBar == null) {
                 viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
             } else {
-                viewportMain?.resetSizeAndScrollBar();
+                viewportMain?.resetCanvasSizeAndUpdateScrollBar();
             }
         } else {
             scrollBar = null;

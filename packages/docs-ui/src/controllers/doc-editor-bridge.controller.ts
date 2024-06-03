@@ -120,7 +120,7 @@ export class DocEditorBridgeController extends Disposable {
                 if (scrollBar == null) {
                     viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
                 } else {
-                    viewportMain?.resetSizeAndScrollBar();
+                    viewportMain?.resetCanvasSizeAndUpdateScrollBar();
                 }
             } else {
                 scrollBar = null;
@@ -132,7 +132,7 @@ export class DocEditorBridgeController extends Disposable {
                 if (scrollBar == null) {
                     viewportMain && new ScrollBar(viewportMain, { barSize: 8, enableVertical: false });
                 } else {
-                    viewportMain?.resetSizeAndScrollBar();
+                    viewportMain?.resetCanvasSizeAndUpdateScrollBar();
                 }
             } else {
                 scrollBar = null;

@@ -75,11 +75,13 @@ describe('Test commands used for change selections', () => {
     }
 
     const scrollTo = (startRow: number, startColumn: number, offsetX = 0, offsetY = 0) => {
-        scrollManagerService.addOrReplaceByParam({
+        scrollManagerService.setScrollInfoToCurrSheet({
             sheetViewStartRow: startRow,
             sheetViewStartColumn: startColumn,
             offsetX,
             offsetY,
+            scrollLeft: 0,
+            scrollTop: 0,
             ...currentInfo,
         });
     };
@@ -108,7 +110,7 @@ describe('Test commands used for change selections', () => {
             ...currentInfo,
         });
         scrollManagerService = get(ScrollManagerService);
-        scrollManagerService.setCurrentScroll({
+        scrollManagerService.setSearchParamAndRefresh({
             ...currentInfo,
         });
     }

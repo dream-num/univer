@@ -75,16 +75,16 @@ export enum ShowGridlinesState {
 }
 
 export enum SHEET_VIEWPORT_KEY {
-    VIEW_MAIN = 'viewMain',
-    VIEW_MAIN_LEFT_TOP = 'viewMainLeftTop',
-    VIEW_MAIN_TOP = 'viewMainTop',
-    VIEW_MAIN_LEFT = 'viewMainLeft',
+    VIEW_MAIN = 'sheetViewMain',
+    VIEW_MAIN_LEFT_TOP = 'sheetViewMainLeftTop',
+    VIEW_MAIN_TOP = 'sheetViewMainTop',
+    VIEW_MAIN_LEFT = 'sheetViewMainLeft',
 
-    VIEW_ROW_TOP = 'viewRowTop',
-    VIEW_ROW_BOTTOM = 'viewRowBottom',
-    VIEW_COLUMN_LEFT = 'viewColumnLeft',
-    VIEW_COLUMN_RIGHT = 'viewColumnRight',
-    VIEW_LEFT_TOP = 'viewLeftTop',
+    VIEW_ROW_TOP = 'sheetViewRowTop',
+    VIEW_ROW_BOTTOM = 'sheetViewRowBottom',
+    VIEW_COLUMN_LEFT = 'sheetViewColumnLeft',
+    VIEW_COLUMN_RIGHT = 'sheetViewColumnRight',
+    VIEW_LEFT_TOP = 'sheetViewLeftTop',
 }
 
 export interface IPaintForRefresh {

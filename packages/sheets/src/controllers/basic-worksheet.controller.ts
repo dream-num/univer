@@ -163,6 +163,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             RemoveSheetMutation,
             RemoveWorksheetMergeMutation,
             RemoveNumfmtMutation,
+            AddWorksheetMergeMutation,
             SetWorkbookNameMutation,
             SetWorksheetNameMutation,
             SetNumfmtMutation,
@@ -175,7 +176,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
         const onlyRegisterFormulaRelatedMutations = this._configService.getConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY) ?? false;
         if (!onlyRegisterFormulaRelatedMutations) {
             [
-                AddWorksheetMergeMutation,
                 ClearSelectionAllCommand,
                 ClearSelectionContentCommand,
                 ClearSelectionFormatCommand,
@@ -265,7 +265,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 AddRangeProtectionMutation,
                 DeleteRangeProtectionMutation,
                 SetRangeProtectionMutation,
-
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }
 

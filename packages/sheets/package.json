@@ -68,6 +68,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
+        "@univerjs/rpc": "workspace:*",
         "@wendellhu/redi": "0.15.2",
         "rxjs": ">=7.0.0"
     },
@@ -79,6 +80,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
+        "@univerjs/rpc": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@wendellhu/redi": "0.15.2",
         "rxjs": "^7.8.1",

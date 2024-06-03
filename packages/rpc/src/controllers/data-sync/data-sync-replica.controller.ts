@@ -53,10 +53,7 @@ export class DataSyncReplicaController extends Disposable {
 
         this._injector.add([
             IRemoteSyncService,
-            {
-                useFactory: () =>
-                    toModule<IRemoteSyncService>(this._rpcChannelService.requestChannel(RemoteSyncServiceName)),
-            },
+            { useFactory: () => toModule<IRemoteSyncService>(this._rpcChannelService.requestChannel(RemoteSyncServiceName)) },
         ]);
         this._remoteSyncService = this._injector.get(IRemoteSyncService);
     }

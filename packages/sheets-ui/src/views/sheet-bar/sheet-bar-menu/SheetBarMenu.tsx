@@ -164,9 +164,11 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
             visible={visible}
             onVisibleChange={onVisibleChange}
         >
-            <SheetBarButton>
-                <ConvertSingle />
-            </SheetBarButton>
+            <div>
+                <SheetBarButton>
+                    <ConvertSingle />
+                </SheetBarButton>
+            </div>
         </Dropdown>
     );
 }

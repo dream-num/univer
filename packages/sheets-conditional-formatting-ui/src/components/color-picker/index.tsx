@@ -41,11 +41,12 @@ export const ColorPicker = (props: IColorPickerProps) => {
 
     return Icon && (!disable
         ? (
-            <Dropdown overlay={(
-                <div className={`${styles.cfColorPicker} `}>
-                    <OriginColorPicker color={color} onChange={onChange} />
-                </div>
-            )}
+            <Dropdown
+                overlay={(
+                    <div className={`${styles.cfColorPicker} `}>
+                        <OriginColorPicker color={color} onChange={onChange} />
+                    </div>
+                )}
             >
                 <span className={`${styles.cfColorPickerIcon} ${className}`}>
                     <Icon extend={{ colorChannel1: colorKit.isValid ? color : 'rgb(var(--primary-color))' }} />

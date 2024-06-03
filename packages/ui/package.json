@@ -79,7 +79,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.55",
+        "@univerjs/icons": "^0.1.56",
         "localforage": "^1.10.0",
         "rc-notification": "^5.5.0",
         "rc-util": "^5.39.3"
@@ -90,8 +90,8 @@
     "devDependencies": {
         "@testing-library/react": "^14.2.2",
         "@testing-library/react-hooks": "^8.0.1",
-        "@types/react": "^18.2.79",
-        "@types/react-dom": "^18.2.25",
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.3.0",
         "@types/react-transition-group": "^4.4.10",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
@@ -101,8 +101,8 @@
         "@wendellhu/redi": "0.15.2",
         "clsx": "^2.1.1",
         "less": "^4.2.0",
-        "react": "18.2.0",
-        "react-dom": "18.2.0",
+        "react": "18.3.1",
+        "react-dom": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
         "vite": "^5.2.12",

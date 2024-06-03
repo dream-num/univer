@@ -16,7 +16,7 @@
 
 import type { IExecutionOptions, IMutationInfo, IWorkbookData } from '@univerjs/core';
 import { ICommandService, ILogService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
 
 export interface IRemoteSyncMutationOptions extends IExecutionOptions {
     /** If this mutation is executed after it was sent from the peer univer instance (e.g. in a web worker). */
@@ -66,7 +66,6 @@ export interface IRemoteInstanceService {
 
 export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService protected readonly _commandService: ICommandService,
         @ILogService protected readonly _logService: ILogService
@@ -113,11 +112,6 @@ export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
 
     protected _applyMutation(mutationInfo: IMutationInfo): boolean {
         const { id, params: mutationParams } = mutationInfo;
-        if (!this._commandService.hasCommand(id)) {
-            this._logService.debug('[RemoteInstanceReplicaService]', `command "${id}" not found. Skip sync mutation.`);
-            return true;
-        }
-
         return this._commandService.syncExecuteCommand(id, mutationParams, {
             onlyLocal: true,
             fromSync: true,

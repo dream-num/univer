@@ -21,7 +21,7 @@ import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/shee
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SPECIAL_PASTE_FORMULA } from '@univerjs/sheets-formula';
-import { SHEETS_HYPER_LINK_UI_PLUGIN } from '../types/const';
+import { SHEET_HYPER_LINK_UI_PLUGIN } from '../types/const';
 import { isLegalLink, serializeUrl } from '../common/util';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 
@@ -46,7 +46,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
     // eslint-disable-next-line max-lines-per-function
     private _initCopyPaste() {
         this._sheetClipboardService.addClipboardHook({
-            id: SHEETS_HYPER_LINK_UI_PLUGIN,
+            id: SHEET_HYPER_LINK_UI_PLUGIN,
             onBeforeCopy: (unitId, subUnitId, range) => this._collect(unitId, subUnitId, range),
             onPasteCells: (pasteFrom, pasteTo, data, payload) => {
                 const { copyType = COPY_TYPE.COPY, pasteType } = payload;

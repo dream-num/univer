@@ -34,6 +34,7 @@ export { RefAlias } from './ref-alias';
 export * from './row-col-iter';
 export * from './sequence';
 export * from './sort-rules';
+export * from './shape';
 export * from './tools';
 export * from './types';
 export * from './debounce';

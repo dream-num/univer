@@ -21,8 +21,20 @@ import type { ISetRangeValuesMutationParams, ISheetLocation } from '@univerjs/sh
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IBoundRectNoAngle, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { ICollaborator } from '@univerjs/protocol';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
 import { VIEWPORT_KEY } from './keys';
+
+export function getUserListEqual(userList1: ICollaborator[], userList2: ICollaborator[]) {
+    if (userList1.length !== userList2.length) return false;
+
+    const sorted1 = userList1.sort((a, b) => a.id.localeCompare(b.id));
+    const sorted2 = userList2.sort((a, b) => a.id.localeCompare(b.id));
+
+    return sorted1.every((user, index) => {
+        return user.subject?.userID === sorted2[index].subject?.userID && user.role === sorted2[index].role;
+    });
+}
 
 export function checkCellContentInRanges(worksheet: Worksheet, ranges: IRange[]): boolean {
     return ranges.some((range) => checkCellContentInRange(worksheet, range));

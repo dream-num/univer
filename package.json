@@ -1,7 +1,7 @@
 {
     "name": "univer",
     "type": "module",
-    "version": "0.1.12",
+    "version": "0.1.13",
     "private": true,
     "packageManager": "pnpm@9.0.5",
     "author": "DreamNum Inc. <developer@univer.ai>",
@@ -30,7 +30,7 @@
         "lint:types": "turbo lint:types",
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",
-        "build": "turbo build && pnpm --filter @univerjs/umd build:umd",
+        "build": "turbo build --filter=!./common/* && pnpm --filter @univerjs/umd build:umd",
         "build:demo": "turbo build:demo",
         "build:e2e": "pnpm --filter univer-examples build:e2e",
         "serve:e2e": "serve ./examples/local",

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, IImageIoServiceParam, Nullable } from '@univerjs/core';
-import { Disposable, DrawingTypeEnum, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IDrawingManagerService, IImageIoService, ImageUploadStatusType, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
+import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, getImageSize } from '@univerjs/drawing';
+import type { IImageIoServiceParam } from '@univerjs/drawing';
+import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
@@ -25,7 +26,7 @@ import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
 import { docDrawingPositionToTransform, transformToDocDrawingPosition } from '@univerjs/docs-ui';
 import type { Documents } from '@univerjs/engine-render';
-import { IRenderManagerService, ITextSelectionRenderManager, Liquid } from '@univerjs/engine-render';
+import { IRenderManagerService, Liquid } from '@univerjs/engine-render';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertDocImageOperation } from '../commands/operations/insert-image.operation';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
@@ -41,7 +42,6 @@ export class DocDrawingUpdateController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @IImageIoService private readonly _imageIoService: IImageIoService,
         @IDocDrawingService private readonly _sheetDrawingService: IDocDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,

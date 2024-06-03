@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam } from '@univerjs/core';
-import { ArrangeTypeEnum, ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { BottomSingle, MoveDownSingle, MoveUpSingle, TopmostSingle } from '@univerjs/icons';
 import { Button } from '@univerjs/design';
 import clsx from 'clsx';
+import type { IDrawingParam } from '@univerjs/drawing';
+import { ArrangeTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
 import styles from './index.module.less';
 
 export interface IDrawingArrangeProps {
@@ -31,7 +32,6 @@ export interface IDrawingArrangeProps {
 export const DrawingArrange = (props: IDrawingArrangeProps) => {
     const { arrangeShow, drawings: focusDrawings } = props;
 
-    const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
 
@@ -86,28 +86,40 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
                     <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.forward); }}>
-                        <div className={clsx(styles.imageCommonPanelInline)}><MoveUpSingle /></div>
-                        <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.arrange.forward')}</div>
+                        <span className={styles.imageCommonPanelInline}>
+                            <MoveUpSingle />
+                            {localeService.t('image-panel.arrange.forward')}
+                        </span>
+
                     </Button>
                 </div>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
                     <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.backward); }}>
-                        <div className={clsx(styles.imageCommonPanelInline)}><MoveDownSingle /></div>
-                        <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.arrange.backward')}</div>
+                        <span className={styles.imageCommonPanelInline}>
+                            <MoveDownSingle />
+                            {localeService.t('image-panel.arrange.backward')}
+                        </span>
+
                     </Button>
                 </div>
             </div>
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
                     <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.front); }}>
-                        <div className={clsx(styles.imageCommonPanelInline)}><TopmostSingle /></div>
-                        <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.arrange.front')}</div>
+                        <span className={styles.imageCommonPanelInline}>
+                            <TopmostSingle />
+                            {localeService.t('image-panel.arrange.front')}
+                        </span>
+
                     </Button>
                 </div>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
                     <Button size="small" onClick={() => { onArrangeBtnClick(ArrangeTypeEnum.back); }}>
-                        <div className={clsx(styles.imageCommonPanelInline)}><BottomSingle /></div>
-                        <div className={clsx(styles.imageCommonPanelInline)}>{localeService.t('image-panel.arrange.back')}</div>
+                        <span className={styles.imageCommonPanelInline}>
+                            <BottomSingle />
+                            {localeService.t('image-panel.arrange.back')}
+                        </span>
+
                     </Button>
                 </div>
             </div>

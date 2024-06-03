@@ -102,9 +102,9 @@ export class InputManager extends Disposable {
         super.dispose();
         this.detachControl();
         this._scene = null as unknown as ThinScene;
-        this._currentMouseEnterPicked?.dispose();
+        // this._currentMouseEnterPicked?.dispose();
         this._currentMouseEnterPicked = null;
-        this._currentObject?.dispose();
+        // this._currentObject?.dispose();
         this._currentObject = null;
         this._startingPosition = null as unknown as Vector2;
         clearTimeout(this._delayedTimeout);

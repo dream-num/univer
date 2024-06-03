@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDrawingGroupUpdateParam } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -22,7 +22,7 @@ import {
 } from '@univerjs/core';
 
 import type { IAccessor } from '@wendellhu/redi';
-import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+import type { IDrawingGroupUpdateParam, IDrawingJsonUndo1 } from '@univerjs/drawing';
 import { DocDrawingApplyType, IDocDrawingService, SetDocDrawingApplyMutation } from '@univerjs/docs-drawing';
 import { ClearDocDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import { ungroupToGroup } from './utils';

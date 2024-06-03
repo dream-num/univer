@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingParam, IMutationInfo, IRange, ITransformState, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
+import type { ICommandInfo, IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
-import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+import { type IDrawingJsonUndo1, IDrawingManagerService, type IDrawingParam, type ITransformState } from '@univerjs/drawing';
 import type { IInsertColCommandParams, IInsertRowCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
 import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetActiveOperation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';

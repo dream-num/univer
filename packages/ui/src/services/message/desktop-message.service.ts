@@ -20,11 +20,19 @@ import type { IDisposable } from '@wendellhu/redi';
 
 import type { IMessageService } from './message.service';
 
-export class DesktopMessageService implements IMessageService {
+export class DesktopMessageService implements IMessageService, IDisposable {
     protected _portalContainer: HTMLElement = document.body;
     protected _message?: Message;
 
+    dispose(): void {
+        this._message?.dispose();
+    }
+
     setContainer(container: HTMLElement): void {
+        if (this._message) {
+            return;
+        }
+
         this._portalContainer = container;
         this._message = new Message(container);
     }

@@ -25,6 +25,7 @@ import cs from 'clsx';
 import { deserializeListOptions, serializeListOptions } from '../../validators/util';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
 import type { ListValidator } from '../../validators';
+import { DataValidationFormulaController } from '../../controllers/dv-formula.controller';
 import styles from './index.module.less';
 
 const DEFAULT_COLOR_PRESET = [
@@ -151,6 +152,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     const localeService = useDependency(LocaleService);
     const dataValidatorRegistryService = useDependency(DataValidatorRegistryService);
     const dataValidationModel = useDependency(DataValidationModel);
+    const dataValidationFormulaController = useDependency(DataValidationFormulaController);
     const [refColors, setRefColors] = useState(() => formula2.split(','));
     const listValidator = dataValidatorRegistryService.getValidatorItem(DataValidationType.LIST) as ListValidator;
     const [refOptions, setRefOptions] = useState<string[]>([]);
@@ -285,11 +287,20 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                     });
                     return;
                 }
-
-                onChange?.({
-                    formula1: isFormulaString(str) ? str : '',
-                    formula2,
-                });
+                if (dataValidationFormulaController.getFormulaRefCheck(str)) {
+                    onChange?.({
+                        formula1: isFormulaString(str) ? str : '',
+                        formula2,
+                    });
+                    setLocalError('');
+                } else {
+                    onChange?.({
+                        formula1: '',
+                        formula2,
+                    });
+                    setFormulaStr('=');
+                    setLocalError(localeService.t('dataValidation.validFail.formulaError'));
+                }
             },
         [formula2, onChange]
     );

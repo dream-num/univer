@@ -27,8 +27,10 @@ import type { BORDER_TYPE } from '../../basics/const';
 import type { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext } from '../../context';
+import type { ISheetFontRenderExtension } from './extensions';
 
-export interface BorderCache {
+export
+interface BorderCache {
     [key: string]: BorderCacheItem | {};
 }
 
@@ -107,3 +109,20 @@ export interface IPaintForScrolling {
     scaleX: number;
     scaleY: number;
 }
+
+export type ISheetRenderExtension = ISheetFontRenderExtension
+    & ISheetBackgroundRenderExtension
+    & ISheetBorderRenderExtension;
+
+export interface ISheetBackgroundRenderExtension {
+    backgroundRenderExtension?: {
+        isSkip?: boolean;
+    };
+};
+
+export interface ISheetBorderRenderExtension {
+    borderRenderExtension?: {
+        isSkip?: boolean;
+    };
+};
+

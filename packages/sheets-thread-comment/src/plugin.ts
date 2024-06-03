@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ICommandService, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, ICommandService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import type { IUniverSheetsThreadCommentConfig } from './controllers/sheets-thread-comment.controller';
 import { DefaultSheetsThreadCommentConfig, SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
@@ -30,7 +30,8 @@ import { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thr
 import { SheetsThreadCommentHoverController } from './controllers/sheets-thread-comment-hover.controller';
 import { ThreadCommentRemoveSheetsController } from './controllers/sheets-thread-comment-remove.controller';
 
-export class UniverSheetsThreadCommentPlugin extends UniverThreadCommentUIPlugin {
+@DependentOn(UniverThreadCommentUIPlugin)
+export class UniverSheetsThreadCommentPlugin extends Plugin {
     static override pluginName = SHEETS_THREAD_COMMENT;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
@@ -39,15 +40,14 @@ export class UniverSheetsThreadCommentPlugin extends UniverThreadCommentUIPlugin
     constructor(
         config: Partial<IUniverSheetsThreadCommentConfig> = {},
         @Inject(Injector) protected override _injector: Injector,
-        @Inject(ICommandService) protected override _commandService: ICommandService
+        @Inject(ICommandService) protected _commandService: ICommandService
     ) {
-        super(config, _injector, _commandService);
+        super();
 
         this._pluginConfig = Tools.deepMerge({}, DefaultSheetsThreadCommentConfig, config);
     }
 
     override onStarting(injector: Injector): void {
-        super.onStarting(injector);
         ([
             [SheetsThreadCommentModel],
             [
@@ -63,7 +63,7 @@ export class UniverSheetsThreadCommentPlugin extends UniverThreadCommentUIPlugin
             [ThreadCommentRemoveSheetsController],
             [SheetsThreadCommentPopupService],
         ] as Dependency[]).forEach((dep) => {
-            this._injector.add(dep);
+            injector.add(dep);
         });
 
         [ShowAddSheetCommentModalOperation].forEach((command) => {

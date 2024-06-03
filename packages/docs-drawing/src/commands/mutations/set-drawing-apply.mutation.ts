@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDrawingGroupUpdateParam, IDrawingOrderMapParam, IDrawings, IDrawingSearch, IMutation } from '@univerjs/core';
-import { CommandType, IDrawingManagerService, IUniverInstanceService } from '@univerjs/core';
-import type { IDrawingJson1Type } from '@univerjs/drawing';
+import type { DocumentDataModel, IDrawings, IMutation } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { IDrawingGroupUpdateParam, IDrawingJson1Type, IDrawingOrderMapParam, IDrawingSearch } from '@univerjs/drawing';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { IDocDrawingService } from '../../services/doc-drawing.service';
 
 export enum DocDrawingApplyType {

@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export const SHEETS_HYPER_LINK_UI_PLUGIN = 'SHEETS_HYPER_LINK_UI_PLUGIN';
+export const SHEET_HYPER_LINK_UI_PLUGIN = 'SHEET_HYPER_LINK_UI_PLUGIN';

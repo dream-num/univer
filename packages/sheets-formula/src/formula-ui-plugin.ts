@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaDisplayController } from './controllers/array-formula-display.controller';
@@ -46,6 +47,7 @@ import { FormulaRenderController } from './controllers/formula-render.controller
 /**
  * The configuration of the formula UI plugin.
  */
+@DependentOn(UniverFormulaEnginePlugin)
 export class UniverSheetsFormulaPlugin extends Plugin {
     static override pluginName = FORMULA_UI_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;

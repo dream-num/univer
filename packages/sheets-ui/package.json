@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-ui",
-    "version": "0.1.12",
+    "version": "0.1.13",
     "private": false,
     "description": "UniverSheet normal ui-plugin-sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -76,7 +76,6 @@
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.15.2",
         "clsx": ">=2.0.0",
@@ -84,7 +83,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.46",
+        "@univerjs/icons": "^0.1.55",
         "@univerjs/protocol": "^0.1.34"
     },
     "devDependencies": {
@@ -92,7 +91,6 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
-        "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",

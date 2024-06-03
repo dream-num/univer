@@ -20,7 +20,7 @@ import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@
 import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
-import { SHEETS_HYPER_LINK_UI_PLUGIN } from '../types/const';
+import { SHEET_HYPER_LINK_UI_PLUGIN } from '../types/const';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkAutoFillController)
 export class SheetsHyperLinkAutoFillController extends Disposable {
@@ -145,7 +145,7 @@ export class SheetsHyperLinkAutoFillController extends Disposable {
             };
         };
         const hook: ISheetAutoFillHook = {
-            id: SHEETS_HYPER_LINK_UI_PLUGIN,
+            id: SHEET_HYPER_LINK_UI_PLUGIN,
             onFillData: (location, direction, applyType) => {
                 if (
                     applyType === APPLY_TYPE.COPY ||

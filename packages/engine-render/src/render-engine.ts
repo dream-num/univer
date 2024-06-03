@@ -25,7 +25,7 @@ import { IRenderManagerService, RenderManagerService } from './render-manager/re
  */
 export const IRenderingEngine = createIdentifier<Engine>('univer.render-engine');
 
-const PLUGIN_NAME = 'render-engine';
+const PLUGIN_NAME = 'RENDER_ENGINE_PLUGIN';
 
 export class UniverRenderEnginePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

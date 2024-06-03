@@ -15,18 +15,14 @@
  */
 
 import type { IMutationInfo, Workbook } from '@univerjs/core';
-import { createInterceptorKey, Disposable, InterceptorManager, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { ClearSelectionAllCommand, ClearSelectionFormatCommand, RangeMergeUtil, SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
-import type { IConditionalFormattingRuleConfig, IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
-
-export const CONDITIONAL_FORMATTING_PERMISSION_CHECK = createInterceptorKey<(IConditionFormattingRule<IConditionalFormattingRuleConfig> & { disable?: boolean })[], (IConditionFormattingRule<IConditionalFormattingRuleConfig> & { disable?: boolean })[]>('conditionalFormattingPermissionCheck');
+import type { IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
 
 @OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingClearController)
 export class ConditionalFormattingClearController extends Disposable {
-    public interceptor = new InterceptorManager({ CONDITIONAL_FORMATTING_PERMISSION_CHECK });
-
     constructor(
         @Inject(Injector) private _injector: Injector,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,

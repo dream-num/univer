@@ -107,6 +107,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 cellEditorManagerService.setRect({ left, top, width, height });
             }
         });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     useEffect(() => {

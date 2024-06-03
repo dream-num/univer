@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ISize } from '../../services/drawing/drawing-interfaces';
-import type { IDrawingParam } from '../../services/drawing/drawing-manager.service';
+import type { Nullable } from '../../common/type-util';
+import type { IAbsoluteTransform, ISize } from '../../shared/shape';
 import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
 import type { IExtraModelData } from './i-extra-model-data';
 import type { IColorStyle, IStyleBase } from './i-style-data';
@@ -881,3 +881,65 @@ export enum PageOrientType {
     PORTRAIT,
     LANDSCAPE,
 }
+
+// #region - tech dept
+
+// TODO@Jocs: these types are here because of drawing coupled into the core of the document's model, which
+// is an anti-pattern. After fixing the problem, these types should be removed.
+
+/** @deprecated */
+export enum ArrangeTypeEnum {
+    forward,
+    backward,
+    front,
+    back,
+}
+
+/** @deprecated */
+export enum DrawingTypeEnum {
+    UNRECOGNIZED = -1,
+    DRAWING_IMAGE = 0,
+    DRAWING_SHAPE = 1,
+    DRAWING_CHART = 2,
+    DRAWING_TABLE = 3,
+    DRAWING_SMART_ART = 4,
+    DRAWING_VIDEO = 5,
+    DRAWING_GROUP = 6,
+    DRAWING_UNIT = 7,
+    DRAWING_DOM = 8,
+}
+
+/** @deprecated */
+export type DrawingType = DrawingTypeEnum | number;
+
+/** @deprecated */
+export interface IDrawingSpace {
+    unitId: string;
+    subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
+}
+
+/** @deprecated */
+export interface IDrawingSearch extends IDrawingSpace {
+    drawingId: string;
+}
+
+/** @deprecated */
+export interface IRotationSkewFlipTransform {
+    angle?: number;
+    skewX?: number;
+    skewY?: number;
+    flipX?: boolean;
+    flipY?: boolean;
+}
+
+/** @deprecated */
+export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform {}
+
+/** @deprecated */
+export interface IDrawingParam extends IDrawingSearch {
+    drawingType: DrawingType;
+    transform?: Nullable<ITransformState>;
+    groupId?: string;
+}
+
+// #endregion

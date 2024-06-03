@@ -16,10 +16,10 @@
 
 import { installShims } from './common/shims';
 
+export { DEFAULT_DOCUMENT_SUB_COMPONENT_ID } from './docs/data-model/subdocument';
 export { type UnitType, UnitModel, UniverInstanceType } from './common/unit';
 export { Registry, RegistryAsMap } from './common/registry';
 export { Univer } from './univer';
-export { PluginHolder } from './services/plugin/plugin-holder';
 export { shallowEqual, isRangesEqual, isUnitRangesEqual } from './common/equal';
 export { isNumeric, isSafeNumeric } from './common/number';
 export { isBooleanString } from './common/boolean';
@@ -54,7 +54,7 @@ export type { JSONXActions, JSONXPath } from './docs/data-model/json-x/json-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
 export * from './observer';
 export { Plugin } from './services/plugin/plugin';
-export { PluginService } from './services/plugin/plugin.service';
+export { PluginService, DependentOn } from './services/plugin/plugin.service';
 export {
     type CommandListener,
     CommandService,
@@ -77,26 +77,6 @@ export { IConfigService } from './services/config/config.service';
 export * from './services/context/context';
 export { ContextService, IContextService } from './services/context/context.service';
 export { ErrorService, type IError } from './services/error/error.service';
-export type { IOffset, IScale, ISize, ITransformState, IRotationSkewFlipTransform, IAbsoluteTransform, ISrcRect } from './services/drawing/drawing-interfaces';
-export {
-    DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
-    type DrawingType,
-    DrawingTypeEnum,
-    type IDrawingSearch,
-    type IDrawingSpace,
-    type IDrawingParam,
-    IDrawingManagerService,
-    type IDrawingOrderUpdateParam,
-    type IUnitDrawingService,
-    type IDrawingMap,
-    type IDrawingSubunitMap,
-    type IDrawingOrderMapParam,
-    type IDrawingGroupUpdateParam,
-    type IDrawingVisibleParam,
-    type IDrawingMapItemData,
-    type IDrawingMapItem,
-    ArrangeTypeEnum,
-} from './services/drawing/drawing-manager.service';
 export { IUniverInstanceService } from './services/instance/instance.service';
 export { LifecycleStages, OnLifecycle, runOnLifecycle } from './services/lifecycle/lifecycle';
 export { LifecycleService } from './services/lifecycle/lifecycle.service';
@@ -197,7 +177,7 @@ export { DataValidationImeMode } from './types/enum/data-validation-ime-mode';
 export { DataValidationOperator } from './types/enum/data-validation-operator';
 export { DataValidationType } from './types/enum/data-validation-type';
 export { DataValidationStatus } from './types/enum/data-validation-status';
-export type { IPermissionTypes } from './services/permission/type';
+export type { IPermissionTypes, WorkbookPermissionPointConstructor } from './services/permission/type';
 
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';

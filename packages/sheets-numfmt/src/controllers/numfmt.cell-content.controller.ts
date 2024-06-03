@@ -100,6 +100,7 @@ export class NumfmtCellContent extends Disposable {
                     });
                     return next({ ...cell, ...res });
                 },
+                priority: 10,
             })
         );
         this.disposeWithMe(

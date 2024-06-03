@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '../common/type-util';
-import type { ITransformState } from '../services/drawing/drawing-interfaces';
+import type { ITransformState } from '../types/interfaces/i-document-data';
 
 export const MOVE_BUFFER_VALUE = 2;
 

@@ -366,6 +366,7 @@ export { RangeProtectionCanViewRenderExtension, RangeProtectionCanNotViewRenderE
 
 export { RangeProtectionRenderModel, type ICellPermission } from './model/range-protection-render.model';
 export { RangeProtectionRuleModel, type IObjectModel, type IRangeProtectionRule, type IModel } from './model/range-protection-rule.model';
+export type { IWorksheetProtectionRenderCellData } from './services/permission/worksheet-permission/type';
 
 export { RangeProtectionRefRangeService } from './services/permission/range-permission/range-protection.ref-range';
 export { RangeProtectionService } from './services/permission/range-permission/range-protection.service';

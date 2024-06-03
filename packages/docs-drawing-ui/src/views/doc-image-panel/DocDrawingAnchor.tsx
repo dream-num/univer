@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, Nullable } from '@univerjs/core';
-import { ICommandService, IDrawingManagerService, LocaleService } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import styles from '@univerjs/drawing-ui/views/panel/index.module.less';
 import type { BaseObject } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
+import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';
 import { SetDocDrawingCommand } from '../../commands/commands/set-doc-drawing.command';
+import styles from './index.module.less';
 
 export interface IDocDrawingAnchorProps {
     drawings: IDrawingParam[];

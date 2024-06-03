@@ -30,7 +30,7 @@ import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 const MARGIN_H = 6;
 
 export class CheckboxRender implements IBaseDataValidationWidget {
-    private _calc(cellInfo: { startX: number; endX: number; startY: number;endY: number }, style: Nullable<IStyleData>) {
+    private _calc(cellInfo: { startX: number; endX: number; startY: number; endY: number }, style: Nullable<IStyleData>) {
         const { vt, ht } = style || {};
         const width = cellInfo.endX - cellInfo.startX - (MARGIN_H * 2);
         const height = cellInfo.endY - cellInfo.startY;
@@ -102,6 +102,10 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             return;
         }
 
+        if (data.dataValidation?.isSkip) {
+            return;
+        }
+
         const colors = this._themeService.getCurrentTheme();
         if (!validator.skipDefaultFontRender(rule, value, { unitId, subUnitId })) {
             return;
@@ -151,7 +155,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         ctx.restore();
     }
 
-    isHit(evt: { x: number;y: number }, info: ICellRenderContext): boolean {
+    isHit(evt: { x: number; y: number }, info: ICellRenderContext): boolean {
         const cellBounding = info.primaryWithCoord.isMergedMainCell ? info.primaryWithCoord.mergeInfo : info.primaryWithCoord;
         const layout = this._calc(cellBounding, info.style);
         const startY = layout.top;

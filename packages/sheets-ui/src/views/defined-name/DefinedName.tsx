@@ -36,6 +36,7 @@ export function DefinedName({ disable }: { disable: boolean }) {
         return () => {
             subscription.unsubscribe();
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     return (

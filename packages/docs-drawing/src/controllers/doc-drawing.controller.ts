@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDrawingMapItem, IDrawingMapItemData, IDrawingSubunitMap } from '@univerjs/core';
-import { Disposable, ICommandService, IDrawingManagerService, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel } from '@univerjs/core';
+import { Disposable, ICommandService, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
+import type { IDrawingMapItem, IDrawingMapItemData, IDrawingSubunitMap } from '@univerjs/drawing';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { type IDocDrawing, IDocDrawingService } from '../services/doc-drawing.service';
 import { SetDocDrawingApplyMutation } from '../commands/mutations/set-drawing-apply.mutation';
 

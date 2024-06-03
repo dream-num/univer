@@ -204,18 +204,18 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         // viewMain.linkToViewport(viewLeft, LINK_VIEW_PORT_TYPE.Y);
         // viewMain.linkToViewport(viewTop, LINK_VIEW_PORT_TYPE.X);
         viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
-            const { scrollX, scrollY, viewportScrollX, viewportScrollY } = param;
+            const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
 
             viewTop
                 .updateScroll({
                     scrollX,
-                    viewportScrollX,
+                    actualScrollX,
                 });
 
             viewLeft
                 .updateScroll({
                     scrollY,
-                    viewportScrollY,
+                    actualScrollY,
                 });
         });
 

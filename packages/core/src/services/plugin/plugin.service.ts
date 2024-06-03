@@ -46,7 +46,7 @@ export class PluginService implements IDisposable {
     ) {
         this._pluginHolderForUniver = this._injector.createInstance(PluginHolder,
             this._checkPluginSeen.bind(this),
-            this._immediateRegisterPlugin.bind(this)
+            this._immediateInitPlugin.bind(this)
         );
 
         this._pluginHolderForUniver.start();
@@ -87,7 +87,7 @@ export class PluginService implements IDisposable {
         if (!this._pluginHoldersForTypes.has(type)) {
             const pluginHolder = this._injector.createInstance(PluginHolder,
                 this._checkPluginSeen.bind(this),
-                this._immediateRegisterPlugin.bind(this)
+                this._immediateInitPlugin.bind(this)
             );
             this._pluginHoldersForTypes.set(type, pluginHolder);
             return pluginHolder;
@@ -96,7 +96,7 @@ export class PluginService implements IDisposable {
         return this._pluginHoldersForTypes.get(type)!;
     }
 
-    private _immediateRegisterPlugin(ctor: PluginCtor): void {
+    private _immediateInitPlugin(ctor: PluginCtor): void {
         this._seenPlugins.add(ctor.pluginName);
 
         const holder = this._ensurePluginHolderForType(ctor.type);

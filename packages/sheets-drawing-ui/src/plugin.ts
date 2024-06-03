@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
+import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
+import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
+import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 import type { IUniverSheetsDrawingConfig } from './controllers/sheet-drawing.controller';
@@ -26,6 +29,7 @@ import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-m
 
 const PLUGIN_NAME = 'SHEETS_IMAGE_UI_PLUGIN';
 
+@DependentOn(UniverDrawingPlugin, UniverDrawingUIPlugin, UniverSheetsDrawingPlugin)
 export class UniverSheetsDrawingUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = PLUGIN_NAME;

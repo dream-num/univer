@@ -20,7 +20,6 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
@@ -39,12 +38,8 @@ import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
 import { FUniver } from '@univerjs/facade';
 import { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
-import { UniverDrawingPlugin } from '@univerjs/drawing';
-import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
-import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 
-import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { enUS, ruRU, zhCN } from '../locales';
 
@@ -74,8 +69,6 @@ univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
 });
 
-univer.registerPlugin(UniverDrawingPlugin);
-
 univer.registerPlugin(UniverDocsUIPlugin);
 
 univer.registerPlugin(UniverSheetsPlugin, {
@@ -98,7 +91,6 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
 
 // find replace
-univer.registerPlugin(UniverFindReplacePlugin);
 univer.registerPlugin(UniverSheetsFindReplacePlugin);
 
 // data validation
@@ -112,9 +104,6 @@ univer.registerPlugin(UniverSheetsFilterPlugin);
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // drawing
-univer.registerPlugin(UniverDocsDrawingPlugin);
-univer.registerPlugin(UniverSheetsDrawingPlugin);
-univer.registerPlugin(UniverDrawingUIPlugin);
 univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 
 // create univer sheet instance

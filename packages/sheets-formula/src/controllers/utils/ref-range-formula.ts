@@ -235,7 +235,8 @@ function processFormulaChanges(oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaD
             newCell = handleMove(type, from, to, oldCell);
         } else if (range !== undefined && range !== null) { // Handle inserts and deletes
             const result = handleInsertDelete(type, range, oldCell);
-            newCell = result.newCell;
+            // When removing a cell containing a formula, newCell is null, but the formula value of oldCell is required when undoing it.
+            newCell = result.newCell || oldCell;
             isReverse = result.isReverse;
         }
 

@@ -51,7 +51,7 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
         const currentSelection = selections[selections?.length - 1];
         const { range } = currentSelection;
         const scrollManagerService = accessor.get(ScrollManagerService);
-        const { sheetViewStartRow = 0, sheetViewStartColumn = 0 } = scrollManagerService.getCurrentScrollInfo() || {};
+        const { sheetViewStartRow = 0, sheetViewStartColumn = 0 } = scrollManagerService.getCurrentScroll() || {};
         let startRow;
         let startColumn;
         let ySplit;

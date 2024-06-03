@@ -30,12 +30,10 @@ export interface ISetScrollRelativeCommandParams {
 
 /**
  * This command is used to manage the scroll by relative offset
- * Usually triggered by wheel event.
  */
 export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams> = {
     id: 'sheet.command.set-scroll-relative',
     type: CommandType.COMMAND,
-    // offsetXY derived from mouse wheel event
     handler: async (accessor, params = { offsetX: 0, offsetY: 0 }) => {
         const commandService = accessor.get(ICommandService);
         const scrollManagerService = accessor.get(ScrollManagerService);
@@ -46,7 +44,7 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
 
         const { unitId, subUnitId, worksheet } = target;
         const { xSplit, ySplit } = worksheet.getConfig().freeze;
-        const currentScroll = scrollManagerService.getCurrentScrollInfo();
+        const currentScroll = scrollManagerService.getCurrentScroll();
         const { offsetX = 0, offsetY = 0 } = params || {};
         const {
             sheetViewStartRow = 0,
@@ -60,7 +58,7 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
             sheetId: subUnitId,
             sheetViewStartRow: sheetViewStartRow + ySplit,
             sheetViewStartColumn: sheetViewStartColumn + xSplit,
-            offsetX: currentOffsetX + offsetX, // currentOffsetX, offsetX 0, -179, offsetX may be negative or over max
+            offsetX: currentOffsetX + offsetX,
             offsetY: currentOffsetY + offsetY,
         });
     },
@@ -75,7 +73,6 @@ export interface IScrollCommandParams {
 
 /**
  * This command is used to manage the scroll position of the current view by specifying the cell index of the top left cell
- * Usually triggered by click scrollbar.
  */
 export const ScrollCommand: ICommand<IScrollCommandParams> = {
     id: 'sheet.command.scroll-view',
@@ -92,7 +89,7 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
         if (!target) return false;
 
         const { workbook, worksheet } = target;
-        const currentScroll = scrollManagerService.getCurrentScrollInfo();
+        const currentScroll = scrollManagerService.getCurrentScroll();
 
         if (!worksheet) {
             return false;
@@ -104,8 +101,6 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
             sheetViewStartRow: currentRow,
             offsetX: currentOffsetX,
             offsetY: currentOffsetY,
-            scrollLeft,
-            scrollTop,
         } = currentScroll || {};
 
         const { xSplit, ySplit } = worksheet.getConfig().freeze;
@@ -118,8 +113,6 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
             sheetViewStartColumn: sheetViewStartColumn ?? (currentColumn ?? 0) + xSplit,
             offsetX: offsetX ?? currentOffsetX,
             offsetY: offsetY ?? currentOffsetY,
-            scrollLeft,
-            scrollTop,
         });
     },
 };
@@ -162,8 +155,6 @@ export const ResetScrollCommand: ICommand = {
             sheetId: subUnitId,
             sheetViewStartRow: 0,
             sheetViewStartColumn: 0,
-            scrollLeft: 0,
-            scrollTop: 0,
         });
     },
 };

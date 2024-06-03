@@ -91,7 +91,7 @@ export class SheetsZoomRenderController extends Disposable implements IRenderCon
             const workbook = this._context.unit;
             const worksheet = workbook.getActiveSheet();
             const zoomRatio = worksheet.getZoomRatio() || 1;
-            // this._updateViewZoom(zoomRatio);
+            this._updateViewZoom(zoomRatio);
         }));
     }
 

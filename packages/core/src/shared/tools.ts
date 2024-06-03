@@ -671,4 +671,27 @@ export class Tools {
 
         return !containsInvalidChars && isValidLength;
     }
+
+    /**
+     * As lodash set, via a path string to set value to deep property
+     * set(obj, 'xx.yy', val)
+     * @param data
+     * @param propertyPath
+     * @param value
+     */
+    static set(data: Record<string, any>, propertyPath: string, value: any) {
+        const paths = propertyPath.split('.');
+        const key = paths.pop();
+
+        paths.forEach((prop) => {
+            if (!data[prop]) {
+                data[prop] = {};
+            }
+            data = data[prop];
+        });
+
+        if (key) {
+            data[key] = value;
+        }
+    }
 }

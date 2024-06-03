@@ -312,6 +312,7 @@ export class FormulaEditorController extends RxDisposable {
         this._autoScroll();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _commandExecutedListener() {
         const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 

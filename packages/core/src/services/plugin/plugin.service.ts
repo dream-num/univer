@@ -27,6 +27,18 @@ import { DependentOnSymbol, type Plugin, type PluginCtor, PluginRegistry, Plugin
 
 const INIT_LAZY_PLUGINS_TIMEOUT = 4;
 
+/**
+ * Use this decorator to declare dependencies among plugins. If a dependent plugin is not registered yet,
+ * Univer will automatically register it with no configuration.
+ *
+ * For example:
+ *
+ * ```ts
+ * ⁣@DependentOn(UniverDrawingPlugin, UniverDrawingUIPlugin, UniverSheetsDrawingPlugin)
+ * export class UniverSheetsDrawingUIPlugin extends Plugin {
+ * }
+ * ```
+ */
 export function DependentOn(...plugins: PluginCtor<Plugin>[]) {
     return function (target: PluginCtor<Plugin>) {
         target[DependentOnSymbol] = plugins;

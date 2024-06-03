@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-export const textEqual = (compareValue: string, expectedValue: string) => {
-    return compareValue === expectedValue;
+export const logicAnd = () => {
+
 };
 
-export const textNotEqual = (compareValue: string, expectedValue: string) => {
-    return compareValue !== expectedValue;
+export const logicOr = () => {
+
+};
+
+export const logicNot = () => {
+
 };

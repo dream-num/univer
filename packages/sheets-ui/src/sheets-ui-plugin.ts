@@ -21,7 +21,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { UniverSheetsPlugin, WorksheetProtectionRenderService } from '@univerjs/sheets';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -84,6 +84,7 @@ import { SheetPermissionInterceptorFormulaRenderController } from './controllers
 import { SheetPermissionPanelModel } from './services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 import { PermissionRenderService } from './services/permission/permission-render.service';
+import { WorksheetProtectionRenderService } from './services/permission/worksheet-permission-render.service';
 
 @DependentOn(UniverSheetsPlugin, UniverUIPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
@@ -147,7 +148,6 @@ export class UniverSheetsUIPlugin extends Plugin {
 
                 // permission
                 [SheetPermissionPanelModel],
-
                 [SheetPermissionUserManagerService],
                 [PermissionRenderService],
                 [WorksheetProtectionRenderService],

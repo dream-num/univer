@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
 import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
@@ -33,7 +33,8 @@ import { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.con
 import { SheetHyperLinkUrlController } from './controllers/url.controller';
 import { SheetsHyperLinkPermissionController } from './controllers/hyper-link-permission.controller';
 
-export class UniverSheetsHyperLinkUIPlugin extends UniverSheetsHyperLinkPlugin {
+@DependentOn(UniverSheetsHyperLinkPlugin)
+export class UniverSheetsHyperLinkUIPlugin extends Plugin {
     static override pluginName: string = SHEETS_HYPER_LINK_UI_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
@@ -41,11 +42,10 @@ export class UniverSheetsHyperLinkUIPlugin extends UniverSheetsHyperLinkPlugin {
         private _config: IUniverSheetsHyperLinkUIConfig,
         @Inject(Injector) protected override _injector: Injector
     ) {
-        super(_config, _injector);
+        super();
     }
 
     override onStarting(injector: Injector): void {
-        super.onStarting(injector);
         const dependencies: Dependency[] = [
             [SheetsHyperLinkResolverService],
             [SheetsHyperLinkPopupService],

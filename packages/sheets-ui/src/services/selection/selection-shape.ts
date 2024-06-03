@@ -387,6 +387,7 @@ export class SelectionShape extends Disposable {
      */
     // eslint-disable-next-line max-lines-per-function
     private _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
+        // startX startY shares same coordinate with viewport.(include row & colheader)
         const { startX, startY, endX, endY } = this._selectionModel;
         const defaultStyle = this._defaultStyle;
         if (style == null) {
@@ -483,16 +484,17 @@ export class SelectionShape extends Disposable {
             this.dashRect.hide();
             this._stopAntLineAnimation();
         } else {
-            const dashRectWidth = style.strokeWidth * 2 / scale;
+            const dashRectBorderWidth = style.strokeWidth * 2 / scale;
             this.dashRect.transformByState({
                 height: endY - startY,
                 width: endX - startX,
-                strokeWidth: dashRectWidth,
-                left: -dashRectWidth / 2 + fixOnePixelBlurOffset,
-                top: -dashRectWidth / 2 + fixOnePixelBlurOffset,
+                strokeWidth: dashRectBorderWidth,
+                left: -dashRectBorderWidth / 2 + fixOnePixelBlurOffset,
+                top: -dashRectBorderWidth / 2 + fixOnePixelBlurOffset,
             });
 
             this.dashRect.setProps({
+                startX, startY, endX, endY,
                 strokeDashArray: [0, strokeDash / scale],
             });
 
@@ -994,7 +996,7 @@ export class SelectionShape extends Disposable {
     private _startAntLineAnimation() {
         const scale = this._getScale();
         this._antLineOffset += 0.6 / scale;
-        if (this._antLineOffset > 16 / scale) {
+        if (this._antLineOffset > 160 / scale) {
             this._antLineOffset = 0;
         }
         this.dashRect.setProps({

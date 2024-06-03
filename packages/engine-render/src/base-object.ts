@@ -594,7 +594,7 @@ export abstract class BaseObject extends Disposable {
         this._makeDirtyMix();
     }
 
-    render(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
+    render(ctx: UniverRenderingContext, bounds: IViewportInfo) {
         /* abstract */
     }
 

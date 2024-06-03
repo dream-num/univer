@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IKeyValue } from '@univerjs/core';
+import { type IKeyValue, Rectangle } from '@univerjs/core';
 
 import type { UniverRenderingContext } from '../context';
+import type { IViewportInfo } from '../basics/vector2';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
@@ -92,7 +93,36 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         };
     }
 
-    protected override _draw(ctx: UniverRenderingContext) {
-        Rect.drawWith(ctx, this);
+    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
+        const m = this.transform.getMatrix();
+        const top = this.top;
+        const left = this.left;
+        let w = this.width;
+        let h = this.height;
+        const rect = { left, top, right: left + w, bottom: top + h };
+        if (bounds && bounds.viewportKey === 'viewMain' && Rectangle.hasIntersectionBetweenTwoRect(rect, bounds.cacheBound)) {
+            rect.left += bounds.viewBound.left;
+            rect.right += bounds.viewBound.left;
+            rect.top += bounds?.viewBound.top;
+            rect.bottom += bounds?.viewBound.top;
+            const intersectRect = Rectangle.getIntersectionBetweenTwoRect(rect, bounds.viewBound);
+            w = intersectRect?.width || 0;
+            h = intersectRect?.height || 0;
+        }
+        if (bounds && bounds?.viewBound.bottom > 200 && this.strokeDashArray) {
+            if (rect.left > 40 && w > 60 && h > 60 && top < 20) {
+                console.log('rect', rect, bounds?.viewBound, w, h);
+            }
+        }
+        // this.width = w;
+        // this.height = h;
+        const { radius, width, height, paintFirst, stroke, strokeWidth, fill, strokeScaleEnabled, fillRule, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, strokeDashArray } = this;
+        if (!strokeDashArray) {
+            Rect.drawWith(ctx, this);
+        } else {
+            console.log('rect dash w, h', w, h);
+            Rect.drawWith(ctx, { ...{ radius, width, height, paintFirst, stroke, strokeWidth, fill, strokeScaleEnabled, fillRule, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, strokeDashArray }, ...{ width: w, height: h } });
+        }
+        // Rect.drawWith(ctx, { ...this, width: w, height: h });
     }
 }

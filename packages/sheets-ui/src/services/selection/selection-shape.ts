@@ -483,7 +483,7 @@ export class SelectionShape extends Disposable {
             this.dashRect.hide();
             this._stopAntLineAnimation();
         } else {
-            const dashRectWidth = style.strokeWidth * 2 / scale;
+            const dashRectWidth = style.strokeWidth * 4 / scale;
             this.dashRect.transformByState({
                 height: endY - startY,
                 width: endX - startX,
@@ -589,6 +589,14 @@ export class SelectionShape extends Disposable {
             zIndex: zIndex + 2,
             evented: false,
             stroke: '#fff',
+        });
+
+        this._dashRect = new Proxy(this._dashRect, {
+            set(target, property, value, receiver) {
+                // console.log(`dashRect Setting ${property} to ${value}`);
+                target[property] = value;
+                return true;
+            },
         });
 
         const shapes = [this._fillControl, this._leftControl, this._rightControl, this._topControl,
@@ -994,7 +1002,7 @@ export class SelectionShape extends Disposable {
     private _startAntLineAnimation() {
         const scale = this._getScale();
         this._antLineOffset += 0.6 / scale;
-        if (this._antLineOffset > 16 / scale) {
+        if (this._antLineOffset > 160 / scale) {
             this._antLineOffset = 0;
         }
         this.dashRect.setProps({

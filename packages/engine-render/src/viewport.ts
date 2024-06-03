@@ -734,14 +734,14 @@ export class Viewport {
         }
         const mainCtx = parentCtx || (this._scene.getEngine()?.getCanvas().getContext() as UniverRenderingContext);
 
+        // this._scene.transform --> [scale, 0, 0, scale, - viewportScrollX * scaleX, - viewportScrollY * scaleY]
+        // see transform.ts@multiply
         const sceneTrans = this._scene.transform.clone();
         sceneTrans.multiply(Transform.create([1, 0, 0, 1, -this.viewportScrollX || 0, -this.viewportScrollY || 0]));
 
         // Logical translation & scaling, unrelated to dpr.
         const tm = sceneTrans.getMatrix();
-        const scrollbarTM = this.getScrollBarTransForm().getMatrix();
-
-        mainCtx.save();
+        mainCtx.save();// At this time, mainCtx transform is (dpr, 0, 0, dpr, 0, 0)
 
         if (this._renderClipState) {
             mainCtx.beginPath();
@@ -752,12 +752,13 @@ export class Viewport {
             mainCtx.clip();
         }
 
+        // set scrolling state for mainCtx,
         mainCtx.transform(tm[0], tm[1], tm[2], tm[3], tm[4], tm[5]);
         const viewPortInfo = this._calcViewportInfo();
 
-        objects.forEach((o) => {
-            o.render(mainCtx, viewPortInfo);
-        });
+        for (let i = 0, length = objects.length; i < length; i++) {
+            objects[i].render(mainCtx, viewPortInfo);
+        }
 
         this.markDirty(false);
         this.markForceDirty(false);
@@ -770,7 +771,7 @@ export class Viewport {
 
         if (this._scrollBar && isMaxLayer) {
             mainCtx.save();
-
+            const scrollbarTM = this.getScrollBarTransForm().getMatrix();
             mainCtx.transform(scrollbarTM[0], scrollbarTM[1], scrollbarTM[2], scrollbarTM[3], scrollbarTM[4], scrollbarTM[5]);
             this._drawScrollbar(mainCtx);
             mainCtx.restore();
@@ -1483,11 +1484,12 @@ export class Viewport {
                 right: Math.min(prevBound.right, currBound.right),
             });
         }
+        const expand = 10;//this.bufferEdgeX;
         for (const bound of additionalAreas) {
-            bound.left = bound.left - this.bufferEdgeX;
-            bound.right = bound.right + this.bufferEdgeX;
-            bound.top = bound.top - this.bufferEdgeY;
-            bound.bottom = bound.bottom + this.bufferEdgeY;
+            bound.left = bound.left - expand;
+            bound.right = bound.right + expand;
+            bound.top = bound.top - expand;
+            bound.bottom = bound.bottom + expand;
         }
 
         return additionalAreas;

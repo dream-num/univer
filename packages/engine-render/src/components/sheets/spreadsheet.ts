@@ -135,12 +135,14 @@ export class Spreadsheet extends SheetComponent {
         const extensions = this.getExtensionsByOrder();
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
         for (const extension of extensions) {
-            // const timeKey = `extension ${viewportInfo.viewPortKey}:${extension.constructor.name}`;
+            const timeKey = `extension ${viewportInfo.viewportKey}:${extension.constructor.name}`;
+            console.time(timeKey);
             extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges, {
                 viewRanges,
                 checkOutOfViewBound: true,
                 viewportKey: viewportInfo.viewportKey,
             });
+            console.timeEnd(timeKey);
         }
     }
 
@@ -233,6 +235,10 @@ export class Spreadsheet extends SheetComponent {
         super.makeDirty(state);
         if (state === false) {
             this._dirtyBounds = [];
+        }
+        if (state) {
+            console.log('spreadsheet makeDirty');
+            //console.trace();
         }
         return this;
     }

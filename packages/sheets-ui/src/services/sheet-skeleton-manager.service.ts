@@ -47,7 +47,7 @@ export interface ISheetSkeletonManagerSearch {
  * @todo RenderUnit - We should move this to RenderUnit as well after all dependents have been moved.
  */
 export class SheetSkeletonManagerService implements IDisposable {
-    private _currentSkeletonSearchParam: ISheetSkeletonManagerSearch = {
+    private _currentSkeleton: ISheetSkeletonManagerSearch = {
         unitId: '',
         sheetId: '',
     };
@@ -78,7 +78,7 @@ export class SheetSkeletonManagerService implements IDisposable {
 
     /** @deprecated */
     getCurrent(): Nullable<ISheetSkeletonManagerParam> {
-        return this._getSkeleton(this._currentSkeletonSearchParam);
+        return this._getSkeleton(this._currentSkeleton);
     }
 
     getUnitSkeleton(unitId: string, sheetId: string): Nullable<ISheetSkeletonManagerParam> {
@@ -136,7 +136,7 @@ export class SheetSkeletonManagerService implements IDisposable {
             });
         }
 
-        this._currentSkeletonSearchParam = searchParam;
+        this._currentSkeleton = searchParam;
 
         const nextParam = this.getCurrent();
         this._currentSkeletonBefore$.next(nextParam);
@@ -160,7 +160,7 @@ export class SheetSkeletonManagerService implements IDisposable {
     }
 
     makeDirtyCurrent(state: boolean = true) {
-        this.makeDirty(this._currentSkeletonSearchParam, state);
+        this.makeDirty(this._currentSkeleton, state);
     }
 
     makeDirty(searchParm: ISheetSkeletonManagerSearch, state: boolean = true) {

@@ -329,6 +329,13 @@ export class Worksheet {
         );
     }
 
+    getScrollLeftTopFromSnapshot() {
+        return {
+            scrollLeft: this._snapshot.scrollLeft,
+            scrollTop: this._snapshot.scrollTop,
+        };
+    }
+
     /**
      * Return WorkSheetZoomRatio
      * @return zoomRatio

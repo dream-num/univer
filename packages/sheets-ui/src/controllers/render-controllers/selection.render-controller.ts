@@ -42,7 +42,6 @@ import { Inject } from '@wendellhu/redi';
 import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
 import type { ISetZoomRatioOperationParams } from '../../commands/operations/set-zoom-ratio.operation';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
-import { SHEET_VIEWPORT_KEY } from '../../common/keys';
 import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import type { ISheetObjectParam } from '../utils/component-tools';

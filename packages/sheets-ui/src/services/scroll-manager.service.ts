@@ -55,6 +55,7 @@ export class ScrollManagerService {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
+        // init
     }
 
     dispose(): void {

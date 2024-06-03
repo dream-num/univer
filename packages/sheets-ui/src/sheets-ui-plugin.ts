@@ -200,6 +200,8 @@ export class UniverSheetsUIPlugin extends Plugin {
             HeaderFreezeRenderController,
             HeaderUnhideRenderController,
             HeaderResizeRenderController,
+            // Caution: ScrollRenderController should placed before ZoomRenderController
+            // because ZoomRenderController ---> viewport.resize --> setScrollInfo, but ScrollRenderController needs scrollInfo
             SheetsScrollRenderController,
             SheetsZoomRenderController,
             FormatPainterRenderController,

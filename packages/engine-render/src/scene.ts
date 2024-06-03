@@ -230,8 +230,19 @@ export class Scene extends ThinScene {
         return this;
     }
 
+    setScaleValue(scaleX: number, scaleY: number) {
+        if (scaleX !== undefined) {
+            this.scaleX = scaleX;
+        }
+
+        if (scaleY !== undefined) {
+            this.scaleY = scaleY;
+        }
+    }
+
     /**
      * scale to value, absolute
+     * setTransform ---> viewport._updateScrollBarPosByViewportScroll --->  scrollTo
      */
     scale(scaleX?: number, scaleY?: number) {
         const preScaleX = this.scaleX;
@@ -284,6 +295,13 @@ export class Scene extends ThinScene {
         return this;
     }
 
+    /**
+     * This sequence will initiate a series of updates:
+     * scene._setTransForm --> viewport@resetCanvasSizeAndUpdateScrollBar ---> scrollTo ---> limitedScroll ---> onScrollBeforeObserver ---> setScrollInfo
+     * scrollInfo needs accurate scene width & height, limitedScroll depends on scene & engine's width & height
+     * @param state
+     * @returns
+     */
     transformByState(state: ISceneTransformState) {
         const optionKeys = Object.keys(state);
         const preKeys: IObjectFullState = {};

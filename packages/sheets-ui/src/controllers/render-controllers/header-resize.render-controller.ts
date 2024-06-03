@@ -34,7 +34,7 @@ import type {
 import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY, SHEET_VIEWPORT_KEY } from '../../common/keys';
+import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {

@@ -108,6 +108,12 @@ export class Viewport {
     private _deltaViewportScrollX: number = 0;
     private _deltaViewportScrollY: number = 0;
 
+    /**
+     * physcal scene size (scene width * scale)
+     */
+    private _physicalSceneWidth: number = 0;
+    private _physicalSceneHeight: number = 0;
+
     onMouseWheelObserver = new Observable<IWheelEvent>();
 
     onScrollAfterObserver = new Observable<IScrollObserverParam>();
@@ -517,6 +523,9 @@ export class Viewport {
      * _currentSkeleton$ ---> selection.render-controller ---> formula@_autoScroll ---> viewport.resize ---> get scrollXY by viewportScrollXY ---> scrollTo
      * _currentSkeleton$ ---> selection.render-controller ---> setCurrentSelection ---> formula@_autoScroll ---> scrollTo
      * _currentSkeleton$ ---> freeze.render-controller@_refreshFreeze --> viewport.resize ---> scrollTo  ---> _scroll
+     *
+     * TODO: @lumix many side effects in scrollTo, it would update scrollXY & viewportScrollXY, and notify listeners of scrollInfo$
+     *
      * Debug
      * window.scene.getViewports()[0].scrollTo({x: 14.2, y: 1.8}, true)
      */
@@ -1156,12 +1165,22 @@ export class Viewport {
         this.markForceDirty(true);
     }
 
+    /**
+     * Call this method when the viewport has resized.
+     */
     private _updateScrollBarPosByViewportScroll() {
+        // zoom.render-controller ---> scene._setTransform --> _updateScrollBarPosByViewportScroll
+        // he width of scene's parent (engine) is zero at this time.
+        // viewport width is negative when canvas container has not been set to engine.
+        if (!this.width || this.width < 0) return;
+        if (!this.height || this.height < 0) return;
         const viewportScrollX = this.viewportScrollX;
         const viewportScrollY = this.viewportScrollY;
         const { width, height } = this._getViewPortSize();
         const contentWidth = (this._scene.width - this._paddingEndX) * this._scene.scaleX;
         const contentHeight = (this._scene.height - this._paddingEndY) * this._scene.scaleY;
+        this._physicalSceneWidth = contentWidth;
+        this._physicalSceneHeight = contentHeight;
 
         if (this._scrollBar) {
             this._scrollBar.resize(width, height, contentWidth, contentHeight);
@@ -1200,11 +1219,11 @@ export class Viewport {
         } else {
             height = (this._heightOrigin || 0) * scaleY;
         }
-        width = Math.max(0, width);
-        height = Math.max(0, height);
+        // width = Math.max(0, width);
+        // height = Math.max(0, height);
 
-        this._width = width;
-        this._height = height;
+        this.width = width;
+        this.height = height;
 
         // if (!forceCalculate && this._widthOrigin != null) {
         //     width = this._widthOrigin;
@@ -1245,7 +1264,7 @@ export class Viewport {
             y: number;
         },
         scollBarX?: number,
-        scrollBarY?: number,
+        scrollBarY?: number
     ) {
         clearTimeout(this._scrollStopNum);
         this._scrollStopNum = setTimeout(() => {
@@ -1259,7 +1278,7 @@ export class Viewport {
                 viewportScrollY: scroll.y,
                 limitX: this._scrollBar?.limitX,
                 limitY: this._scrollBar?.limitY,
-                isTrigger: false
+                isTrigger: false,
             });
         }, 2);
     }
@@ -1324,9 +1343,9 @@ export class Viewport {
         this.viewportScrollX = clampedViewportScroll.x;
         this.viewportScrollY = clampedViewportScroll.y;
 
-        // scroll.render-controller@onScrollAfterObserver ---> setScrollInfo but no notify
         // calc startRow & offset by viewportScrollXY, then update scrollInfo
         // other viewports, rowHeader & colHeader depend on this notify
+        // scroll.render-controller@onScrollAfterObserver ---> setScrollInfo but no notify
         this.onScrollAfterObserver.notifyObservers({
             isTrigger,
             viewport: this,

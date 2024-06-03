@@ -39,6 +39,7 @@ import { DataValidationRejectInputController } from './controllers/dv-reject-inp
 import { DataValidationPanelService } from './services/data-validation-panel.service';
 import { DataValidationFormulaController } from './controllers/dv-formula.controller';
 import { DataValidationPermissionController } from './controllers/dv-permission.controller';
+import { SheetsDataValidationValidatorService } from './services/dv-validator-service';
 
 @DependentOn(UniverDataValidationPlugin, UniverSheetsPlugin, UniverSheetsUIPlugin)
 export class UniverSheetsDataValidationPlugin extends Plugin {
@@ -64,6 +65,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [DataValidationFormulaService],
             [DataValidationCustomFormulaService],
             [DataValidationDropdownManagerService],
+            [SheetsDataValidationValidatorService],
 
             // controller
             [DataValidationModelController],

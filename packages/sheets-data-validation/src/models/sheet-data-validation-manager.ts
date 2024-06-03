@@ -18,7 +18,7 @@ import type { CellValue, ISheetDataValidationRule, Nullable } from '@univerjs/co
 import { DataValidationManager, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
 import { DataValidationStatus, DataValidationType, ObjectMatrix, Range } from '@univerjs/core';
 import type { IUpdateRulePayload } from '@univerjs/data-validation';
-import type { ISheetLocation } from '@univerjs/sheets';
+import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { isReferenceString } from '@univerjs/engine-formula';
 import type { IDataValidationResCache } from '../services/dv-cache.service';
@@ -138,7 +138,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         return this.getRuleById(ruleId);
     }
 
-    override validator(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocation, onCompete: (status: DataValidationStatus) => void): DataValidationStatus {
+    override validator(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocationBase, onCompete: (status: DataValidationStatus) => void): DataValidationStatus {
         const { col, row, unitId, subUnitId } = pos;
         const ruleId = rule.uid;
         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);

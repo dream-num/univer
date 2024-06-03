@@ -27,7 +27,6 @@ import { DataValidationModel, RemoveDataValidationMutation, removeDataValidation
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
-import { DataValidationCacheService } from '../services/dv-cache.service';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidationRefRangeController)
 export class DataValidationRefRangeController extends Disposable {
@@ -42,8 +41,7 @@ export class DataValidationRefRangeController extends Disposable {
         @Inject(DataValidationCustomFormulaService) private _dataValidationCustomFormulaService: DataValidationCustomFormulaService,
         @Inject(DataValidationFormulaService) private _dataValidationFormulaService: DataValidationFormulaService,
         @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
         this._initRefRange();

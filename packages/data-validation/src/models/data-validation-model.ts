@@ -185,4 +185,8 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
     deleteUnitRules(unitId: string) {
         this._model.delete(unitId);
     }
+
+    getSubUnitIds(unitId: string) {
+        return Array.from(this._model.get(unitId)?.keys() ?? []);
+    }
 }

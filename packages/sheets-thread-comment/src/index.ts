@@ -19,7 +19,6 @@ export { Inject, Injector } from '@wendellhu/redi';
 export { ICommandService, Plugin, UniverInstanceType } from '@univerjs/core';
 export { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 export { SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
-export { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
 export { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
 export { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 export { UniverSheetsThreadCommentPlugin } from './plugin';

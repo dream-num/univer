@@ -21,7 +21,6 @@ import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverSheetsThreadCommentBasePlugin } from '@univerjs/sheets-thread-comment-base';
 import type { IUniverSheetsThreadCommentConfig } from './controllers/sheets-thread-comment.controller';
 import { DefaultSheetsThreadCommentConfig, SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
-import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
 import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
 import { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 import { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
@@ -57,7 +56,6 @@ export class UniverSheetsThreadCommentPlugin extends Plugin {
                     useFactory: () => this._injector.createInstance(SheetsThreadCommentController, this._pluginConfig),
                 },
             ],
-            [SheetsThreadCommentRefRangeController],
             [SheetsThreadCommentRenderController],
             [SheetsThreadCommentCopyPasteController],
             [SheetsThreadCommentHoverController],

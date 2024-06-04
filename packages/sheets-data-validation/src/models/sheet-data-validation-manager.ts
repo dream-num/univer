@@ -161,8 +161,10 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
                 });
                 return DataValidationStatus.VALIDATING;
             }
+            onCompete(current.status);
             return current.status;
         } else {
+            onCompete(DataValidationStatus.VALID);
             return DataValidationStatus.VALID;
         }
     }

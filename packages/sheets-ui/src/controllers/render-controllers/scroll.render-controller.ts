@@ -19,7 +19,6 @@ import {
     Direction,
     Disposable,
     ICommandService,
-    IUniverInstanceService,
     RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
@@ -46,7 +45,6 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
@@ -276,28 +274,20 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     private _initSkeletonListener() {
-        this.disposeWithMe(toDisposable(
-            this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-                if (param == null) {
-                    return;
-                }
+        this.disposeWithMe(toDisposable(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+            if (param == null) {
+                return;
+            }
 
-                const { unitId } = this._context;
-                const { sheetId } = param;
-                const currentRender = this._renderManagerService.getRenderById(unitId);
+            const { unitId } = this._context;
+            const { sheetId } = param;
 
-                if (currentRender == null) {
-                    return;
-                }
-
-                this._updateSceneSize(param);
-
-                this._scrollManagerService.setCurrentScroll({
-                    unitId,
-                    sheetId,
-                });
-            })
-        ));
+            this._updateSceneSize(param);
+            this._scrollManagerService.setCurrentScroll({
+                unitId,
+                sheetId,
+            });
+        })));
     }
 
     private _updateSceneSize(param: ISheetSkeletonManagerParam) {

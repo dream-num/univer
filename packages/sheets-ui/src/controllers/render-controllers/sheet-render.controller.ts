@@ -31,15 +31,15 @@ import {
 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';
+import { SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 
 import {
     SHEET_COMPONENT_HEADER_LAYER_INDEX,
     SHEET_COMPONENT_MAIN_LAYER_INDEX,
     SHEET_VIEW_KEY,
-} from '../common/keys';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { SheetsRenderService } from '../services/sheets-render.service';
+} from '../../common/keys';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import { SheetsRenderService } from '../../services/sheets-render.service';
 
 interface ISetWorksheetMutationParams {
     unitId: string;

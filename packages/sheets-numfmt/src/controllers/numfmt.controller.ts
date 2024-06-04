@@ -45,6 +45,7 @@ import { Inject } from '@wendellhu/redi';
 import { combineLatest, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
 
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
 import { AddDecimalCommand } from '../commands/commands/add-decimal.command';
 import { SetCurrencyCommand } from '../commands/commands/set-currency.command';
@@ -165,9 +166,12 @@ export class NumfmtController extends Disposable implements INumfmtController {
     };
 
     private _forceUpdate(unitId?: string): void {
-        this._renderManagerService.getRenderById(
+        const renderUnit = this._renderManagerService.getRenderById(
             unitId ?? this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
-        )?.mainComponent?.makeDirty();
+        );
+
+        renderUnit?.with(SheetSkeletonManagerService).reCalculate();
+        renderUnit?.mainComponent?.makeDirty();
     }
 
     private _initCommands() {

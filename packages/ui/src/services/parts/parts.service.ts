@@ -67,6 +67,7 @@ export class UIPartsService extends Disposable implements IUIPartsService {
             if (components.size === 0) {
                 this._componentsByPart.delete(part);
             }
+            this._componentRegistered$.next(part);
         });
     }
 

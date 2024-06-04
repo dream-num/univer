@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, Workbook } from '@univerjs/core';
+import type { IMutation, IMutationInfo, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -44,7 +44,10 @@ import { fromModule, toModule } from '../../services/rpc/rpc.service';
 @OnLifecycle(LifecycleStages.Starting, DataSyncPrimaryController)
 export class DataSyncPrimaryController extends RxDisposable {
     private _remoteInstanceService!: IRemoteInstanceService;
+
     private readonly _syncingUnits = new Set<string>();
+
+    private readonly _syncingMutations = new Set<string>();
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -59,17 +62,19 @@ export class DataSyncPrimaryController extends RxDisposable {
         this._init();
     }
 
+    registerSyncingMutations(mutation: IMutation<object>): void {
+        this._syncingMutations.add(mutation.id);
+    }
+
     private _initRPCChannels(): void {
+        // for the worker to call
         this._rpcChannelService.registerChannel(RemoteSyncServiceName, fromModule(this._remoteSyncService));
 
+        // to call the worker
         this._injector.add([
             IRemoteInstanceService,
-            {
-                useFactory: () =>
-                    toModule<IRemoteInstanceService>(this._rpcChannelService.requestChannel(RemoteInstanceServiceName)),
-            },
+            { useFactory: () => toModule<IRemoteInstanceService>(this._rpcChannelService.requestChannel(RemoteInstanceServiceName)) },
         ]);
-
         this._remoteInstanceService = this._injector.get(IRemoteInstanceService);
     }
 
@@ -93,21 +98,20 @@ export class DataSyncPrimaryController extends RxDisposable {
             });
         });
 
-        this.disposeWithMe(
-            // Mutations executed on the main thread should be synced to the worker thread.
-            this._commandService.onCommandExecuted((commandInfo, options) => {
-                const { type, params } = commandInfo;
-                const unitID = (params as any)?.unitId || '';
-                if (
-                    // only sync mutations to the worker thread
-                    type === CommandType.MUTATION &&
-                    (!unitID || this._syncingUnits.has(unitID)) &&
-                    // do not sync mutations from the web worker back to the web worker
-                    !(options as IRemoteSyncMutationOptions)?.fromSync
-                ) {
-                    this._remoteInstanceService.syncMutation({ mutationInfo: commandInfo as IMutationInfo });
-                }
-            })
-        );
+        // Mutations executed on the main thread should be synced to the worker thread.
+        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo, options) => {
+            const { type, params, id } = commandInfo;
+            const unitId = (params as { unitId: string })?.unitId || '';
+            if (type === CommandType.MUTATION &&
+                // only sync mutations to the worker thread
+                (!unitId || this._syncingUnits.has(unitId)) &&
+                // do not sync mutations from the web worker back to the web worker
+                !(options as IRemoteSyncMutationOptions)?.fromSync &&
+                // do not sync mutations those are not meant to be synced
+                this._syncingMutations.has(id)
+            ) {
+                this._remoteInstanceService.syncMutation({ mutationInfo: commandInfo as IMutationInfo });
+            }
+        }));
     }
 }

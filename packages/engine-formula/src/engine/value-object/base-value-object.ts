@@ -177,7 +177,7 @@ export class BaseValueObject extends ObjectClassType {
         return ErrorValueObject.create(ErrorType.NAME);
     }
 
-    compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
+    compare(valueObject: BaseValueObject, operator: compareToken, isCaseSensitive: boolean = false): BaseValueObject {
         /** abstract */
         return ErrorValueObject.create(ErrorType.NAME);
     }

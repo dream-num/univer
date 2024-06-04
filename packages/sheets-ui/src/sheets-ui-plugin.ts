@@ -15,12 +15,14 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { IUniverInstanceService, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IUniverInstanceService, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverUIPlugin } from '@univerjs/ui';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
@@ -73,7 +75,18 @@ import { AutoFillController } from './controllers/auto-fill.controller';
 import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
 import { DragRenderController } from './controllers/drag-render.controller';
 import { DragManagerService } from './services/drag-manager.service';
+import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
+import { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';
+import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
+import { SheetPermissionRenderController } from './controllers/permission/sheet-permission-render.controller';
+import { SheetPermissionInterceptorCanvasRenderController } from './controllers/permission/sheet-permission-interceptor-canvas-render.controller';
+import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
+import { SheetPermissionPanelModel } from './services/permission/sheet-permission-panel.model';
+import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
+import { PermissionRenderService } from './services/permission/permission-render.service';
+import { WorksheetProtectionRenderService } from './services/permission/worksheet-permission-render.service';
 
+@DependentOn(UniverSheetsPlugin, UniverUIPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';
     static override type = UniverInstanceType.UNIVER_SHEET;
@@ -132,8 +145,27 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [EditingController],
                 [AutoFillController],
                 [FormatPainterController],
+
+                // permission
+                [SheetPermissionPanelModel],
+                [SheetPermissionUserManagerService],
+                [PermissionRenderService],
+                [WorksheetProtectionRenderService],
+                [SheetPermissionInterceptorClipboardController],
+                [SheetPermissionInterceptorBaseController],
+                [SheetPermissionInitController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
+
+        this._injector.add(
+            [
+                SheetPermissionRenderController,
+                {
+                    useFactory: () => this._injector.createInstance(SheetPermissionRenderController, this._config),
+                },
+            ]
+
+        );
     }
 
     override onReady(): void {
@@ -166,6 +198,10 @@ export class UniverSheetsUIPlugin extends Plugin {
             CellCustomRenderController,
             SheetContextMenuRenderController,
             EditorBridgeRenderController,
+
+            // permission
+            SheetPermissionInterceptorCanvasRenderController,
+            SheetPermissionInterceptorFormulaRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
         });

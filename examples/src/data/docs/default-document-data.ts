@@ -19,6 +19,7 @@ import {
     BaselineOffset,
     BooleanNumber,
     ColumnSeparatorType,
+    DrawingTypeEnum,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
@@ -31,10 +32,13 @@ export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
     id: 'd',
     drawings: {
         shapeTest1: {
-            objectId: 'shapeTest1',
+            unitId: 'd',
+            subUnitId: 'd',
+            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            drawingId: 'shapeTest1',
             title: 'test shape',
             description: 'test shape',
-            objectTransform: {
+            docTransform: {
                 size: {
                     width: 100,
                     height: 400,

@@ -514,7 +514,7 @@ export class BaseFunction extends Disposable {
             referenceObject = new RangeReferenceObject(range, sheetId, unitId);
         }
 
-        return this._setReferenceDefault(reference, referenceObject); ;
+        return this._setReferenceDefault(reference, referenceObject);
     }
 
     private _setReferenceDefault(reference: BaseReferenceObject, object: BaseReferenceObject) {

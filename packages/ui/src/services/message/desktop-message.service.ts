@@ -18,23 +18,37 @@ import type { IMessageOptions, IMessageProps } from '@univerjs/design';
 import { Message } from '@univerjs/design';
 import type { IDisposable } from '@wendellhu/redi';
 
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
 import type { IMessageService } from './message.service';
 
-export class DesktopMessageService implements IMessageService {
-    portalContainer: HTMLElement = document.body;
-    message?: Message;
+export class DesktopMessageService implements IMessageService, IDisposable {
+    // in node environment, document is undefined
+    protected _portalContainer: HTMLElement | undefined = canUseDom() ? document.body : undefined;
+
+    protected _message?: Message;
+
+    dispose(): void {
+        this._message?.dispose();
+    }
 
     setContainer(container: HTMLElement): void {
-        this.portalContainer = container;
-        this.message = new Message(container);
+        if (this._message) {
+            return;
+        }
+
+        this._portalContainer = container;
+        this._message = new Message(container);
     }
 
     show(options: IMessageOptions & Omit<IMessageProps, 'key'>): IDisposable {
-        if (!this.message) {
+        if (!this._portalContainer) {
+            throw new Error('[DesktopMessageService]: no container to show message!');
+        }
+        if (!this._message) {
             throw new Error('[DesktopMessageService]: no message implementation!');
         }
 
         const { type, ...rest } = options;
-        return this.message[type](rest);
+        return this._message[type](rest);
     }
 }

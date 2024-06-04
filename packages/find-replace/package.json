@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/find-replace",
-    "version": "0.1.12",
+    "version": "0.1.13",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -77,10 +77,10 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.52"
+        "@univerjs/icons": "^0.1.56"
     },
     "devDependencies": {
-        "@types/react": "^18.2.79",
+        "@types/react": "^18.3.3",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
@@ -89,10 +89,10 @@
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.15.2",
         "less": "^4.2.0",
-        "react": "18.2.0",
+        "react": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.11",
+        "vite": "^5.2.12",
         "vitest": "^1.6.0"
     }
 }

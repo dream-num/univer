@@ -515,8 +515,7 @@ export class StartEditController extends Disposable {
             const { skeleton } = docParam;
 
             this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
-
-                // move selection
+            // move selection
             if (
                 eventType === DeviceInputEventType.Keyboard ||
                 (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
@@ -535,7 +534,7 @@ export class StartEditController extends Disposable {
 
                 document.makeDirty();
 
-                    // @JOCS, Why calculate here?
+                // @JOCS, Why calculate here?
                 if (keycode === KeyCode.BACKSPACE || eventType === DeviceInputEventType.Dblclick) {
                     skeleton.calculate();
                     this._editorBridgeService.changeEditorDirty(true);

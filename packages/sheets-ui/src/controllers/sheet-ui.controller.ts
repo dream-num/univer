@@ -101,6 +101,10 @@ import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer
 import { SidebarDefinedNameOperation } from '../commands/operations/sidebar-defined-name.operation';
 import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
 
+import { SheetPermissionOpenPanelOperation } from '../commands/operations/sheet-permission-open-panel.operation';
+import { SheetPermissionOpenDialogOperation } from '../commands/operations/sheet-permission-open-dialog.operation';
+import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetProtectionCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../commands/commands/range-protection.command';
+import { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from '../commands/commands/worksheet-protection.command';
 import {
     ClearSelectionAllMenuItemFactory,
     ClearSelectionContentMenuItemFactory,
@@ -326,6 +330,23 @@ export class SheetUIController extends Disposable {
             SidebarDefinedNameOperation,
             AutoFillCommand,
             AutoClearContentCommand,
+
+            // permission
+            SheetPermissionOpenPanelOperation,
+            SheetPermissionOpenDialogOperation,
+            AddRangeProtectionFromToolbarCommand,
+            AddRangeProtectionFromContextMenuCommand,
+            ViewSheetPermissionFromContextMenuCommand,
+            AddRangeProtectionFromSheetBarCommand,
+            ViewSheetPermissionFromSheetBarCommand,
+            ChangeSheetProtectionFromSheetBarCommand,
+            DeleteRangeProtectionFromContextMenuCommand,
+            SetRangeProtectionFromContextMenuCommand,
+            AddWorksheetProtectionCommand,
+            DeleteWorksheetProtectionCommand,
+            SetWorksheetProtectionCommand,
+            DeleteWorksheetProtectionFormSheetBarCommand,
+            SetProtectionCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });

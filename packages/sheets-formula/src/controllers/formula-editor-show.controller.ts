@@ -186,6 +186,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderCo
 
                     return next(cell);
                 },
+                priority: 10,
             })
         );
     }
@@ -216,7 +217,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderCo
         };
 
         const { scene } = this._renderManagerService.getRenderById(unitId) || {};
-        const { rangeWithCoord, primaryWithCoord } = this._selectionRenderService.convertSelectionToCoord({
+        const { rangeWithCoord, primaryWithCoord } = this._selectionRenderService.attachSelectionWithCoord({
             range: arrayRange,
             primary: null,
             style,

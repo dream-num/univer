@@ -32,15 +32,15 @@ export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];
 
     for (const textRun of textRuns) {
-        const { st, ed, ts } = textRun;
+        const { ed, ts } = textRun;
 
         if (textRun.sId === undefined) {
             delete textRun.sId;
         }
 
-        if (st === ed) {
-            continue;
-        }
+        // if (st === ed) {
+        //     continue;
+        // }
 
         // Delete textRun if it has no style(ts is empty or has no sId)
         if (Tools.isEmptyObject(ts) && textRun.sId == null) {
@@ -96,8 +96,7 @@ export function insertTextRuns(
 
     const insertTextRuns = insertBody.textRuns ?? [];
     if (insertTextRuns.length) {
-        for (let i = 0, len = insertTextRuns.length; i < len; i++) {
-            const insertTextRun = insertTextRuns[i];
+        for (const insertTextRun of insertTextRuns) {
             insertTextRun.st += currentIndex;
             insertTextRun.ed += currentIndex;
         }
@@ -105,11 +104,20 @@ export function insertTextRuns(
 
     for (let i = 0; i < len; i++) {
         const textRun = textRuns[i];
+        const nextRun = textRuns[i + 1];
         const { st, ed } = textRun;
 
         if (ed < currentIndex) {
             newTextRuns.push(textRun);
         } else if (currentIndex >= st && currentIndex <= ed) {
+            // The inline format used to handle no selection will insert a textRun
+            // with `st` equal to `ed` at the current cursor,
+            // and when we insert text, the style should follow the new textRun.
+            if (nextRun && nextRun.st === nextRun.ed && currentIndex === nextRun.st) {
+                newTextRuns.push(textRun);
+                continue;
+            }
+
             if (!hasInserted) {
                 hasInserted = true;
                 textRun.ed += textLength;
@@ -123,7 +131,10 @@ export function insertTextRuns(
                         ed: insertTextRuns[0].st,
                     };
 
-                    pendingTextRuns.push(startSplitTextRun);
+                    if (startSplitTextRun.ed > startSplitTextRun.st) {
+                        pendingTextRuns.push(startSplitTextRun);
+                    }
+
                     pendingTextRuns.push(...insertTextRuns);
 
                     const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
@@ -134,7 +145,9 @@ export function insertTextRuns(
                         ed: ed + textLength,
                     };
 
-                    pendingTextRuns.push(endSplitTextRun);
+                    if (endSplitTextRun.ed > endSplitTextRun.st) {
+                        pendingTextRuns.push(endSplitTextRun);
+                    }
                 } else {
                     pendingTextRuns.push(textRun);
                 }
@@ -164,6 +177,8 @@ export function insertTextRuns(
         hasInserted = true;
         newTextRuns.push(...insertTextRuns);
     }
+
+    // console.log(JSON.stringify(newTextRuns, null, 2));
 
     body.textRuns = normalizeTextRuns(newTextRuns);
 }
@@ -385,6 +400,20 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
     const startIndex = currentIndex;
     const endIndex = currentIndex + textLength;
     const removeTextRuns: ITextRun[] = [];
+
+    // Handles special case where repeated set inline format style by cursor.
+    if (startIndex === endIndex && textRuns?.find((t) => t.st === currentIndex && t.ed === currentIndex)) {
+        const textRun = textRuns.find((t) => t.st === currentIndex && t.ed === currentIndex)!;
+        removeTextRuns.push({
+            ...textRun,
+            st: textRun.st - currentIndex,
+            ed: textRun.ed - currentIndex,
+        });
+
+        body.textRuns = body.textRuns?.filter((t) => t !== textRun);
+
+        return removeTextRuns;
+    }
 
     if (textRuns) {
         const newTextRuns = [];

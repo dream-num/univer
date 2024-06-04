@@ -19,6 +19,7 @@ import { DataValidationStatus, Disposable, IUniverInstanceService, LifecycleStag
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import type { BaseDataValidator } from '@univerjs/data-validation';
+import { debounceTime } from 'rxjs';
 
 const ALERT_KEY = 'SHEET_DATA_VALIDATION_ALERT';
 
@@ -39,13 +40,16 @@ export class DataValidationAlertController extends Disposable {
     }
 
     private _initCellAlertPopup() {
-        this.disposeWithMe(this._hoverManagerService.currentCell$.subscribe((cellPos) => {
+        this.disposeWithMe(this._hoverManagerService.currentCell$.pipe(debounceTime(100)).subscribe((cellPos) => {
             if (cellPos) {
                 const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 const worksheet = workbook.getActiveSheet();
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 
                 if (cellData?.dataValidation?.validStatus === DataValidationStatus.INVALID) {
+                    if (cellData.dataValidation?.isSkip) {
+                        return;
+                    }
                     const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
                     const currentLoc = currentAlert?.alert?.location;
                     if (

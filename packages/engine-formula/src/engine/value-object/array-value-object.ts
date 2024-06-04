@@ -101,8 +101,33 @@ export function transformToValue(array: Nullable<BaseValueObject>[][] = []) {
 }
 
 export class ArrayValueObject extends BaseValueObject {
+    /**
+     * Create an array value object based on the string or IArrayValueObject data.
+     * @param rawValue
+     * @returns
+     */
     static create(rawValue: string | IArrayValueObject) {
         return new ArrayValueObject(rawValue);
+    }
+
+    /**
+     * Create an array value object based on the array data.
+     * @param array
+     * @returns
+     */
+    static createByArray(array: Array<Array<number | string | boolean | null>>) {
+        const calculateValueList = transformToValueObject(array);
+        const arrayValueObjectData: IArrayValueObject = {
+            calculateValueList,
+            rowCount: array.length,
+            columnCount: array[0].length || 0,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        };
+
+        return new ArrayValueObject(arrayValueObjectData);
     }
 
     private _values: Nullable<BaseValueObject>[][] = [];
@@ -713,7 +738,8 @@ export class ArrayValueObject extends BaseValueObject {
     ) {
         const compareFunc = getCompare();
 
-        const value = valueObject.getValue().toString();
+        // case insensitive
+        const value = valueObject.getValue().toString().toLocaleLowerCase();
 
         let start = 0;
         let end = searchArray.length - 1;
@@ -730,7 +756,8 @@ export class ArrayValueObject extends BaseValueObject {
             } else {
                 const compareToValue = compareTo.getValue();
 
-                compare = compareFunc(compareToValue.toString(), value);
+                // case insensitive
+                compare = compareFunc(compareToValue.toString().toLocaleLowerCase(), value);
             }
 
             if (compare === 0) {
@@ -917,8 +944,8 @@ export class ArrayValueObject extends BaseValueObject {
         });
     }
 
-    override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
-        return this._batchOperator(valueObject, BatchOperatorType.COMPARE, operator);
+    override compare(valueObject: BaseValueObject, operator: compareToken, isCaseSensitive?: boolean): BaseValueObject {
+        return this._batchOperator(valueObject, BatchOperatorType.COMPARE, operator, isCaseSensitive);
     }
 
     override concatenateFront(valueObject: BaseValueObject): BaseValueObject {
@@ -1353,7 +1380,8 @@ export class ArrayValueObject extends BaseValueObject {
     private _batchOperator(
         valueObject: BaseValueObject,
         batchOperatorType: BatchOperatorType,
-        operator?: compareToken
+        operator?: compareToken,
+        isCaseSensitive?: boolean
     ): BaseValueObject {
         const valueList: BaseValueObject[] = [];
 
@@ -1381,7 +1409,7 @@ export class ArrayValueObject extends BaseValueObject {
                     valueList.push(list[0][c] as BaseValueObject);
                 }
             } else {
-                return this._batchOperatorArray(valueObject, batchOperatorType, operator);
+                return this._batchOperatorArray(valueObject, batchOperatorType, operator, isCaseSensitive);
             }
         } else {
             for (let c = 0; c < columnCount; c++) {
@@ -1393,7 +1421,7 @@ export class ArrayValueObject extends BaseValueObject {
 
         for (let c = 0; c < columnCount; c++) {
             const value = valueList[c];
-            this._batchOperatorValue(value, c, result, batchOperatorType, operator);
+            this._batchOperatorValue(value, c, result, batchOperatorType, operator, isCaseSensitive);
         }
 
         const newArray = this._createNewArray(result, rowCount, columnCount);
@@ -1408,7 +1436,8 @@ export class ArrayValueObject extends BaseValueObject {
         column: number,
         result: BaseValueObject[][],
         batchOperatorType: BatchOperatorType,
-        operator?: compareToken
+        operator?: compareToken,
+        isCaseSensitive?: boolean
     ) {
         const rowCount = this._rowCount;
 
@@ -1474,7 +1503,7 @@ export class ArrayValueObject extends BaseValueObject {
                                 currentValue = BooleanValueObject.create(rowValue);
                             }
 
-                            const matchResult = currentValue.compare(valueObject, operator as compareToken);
+                            const matchResult = currentValue.compare(valueObject, operator as compareToken, isCaseSensitive);
                             if ((matchResult as BooleanValueObject).getValue() === true) {
                                 rowPositions.forEach((index) => {
                                     if (index >= startRow && index <= startRow + rowCount - 1) {
@@ -1545,7 +1574,7 @@ export class ArrayValueObject extends BaseValueObject {
                             if (!operator) {
                                 result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
                             } else {
-                                result[r][column] = currentValue.compare(valueObject, operator as compareToken);
+                                result[r][column] = currentValue.compare(valueObject, operator as compareToken, isCaseSensitive);
                             }
                             break;
                         case BatchOperatorType.CONCATENATE_FRONT:
@@ -1614,7 +1643,8 @@ export class ArrayValueObject extends BaseValueObject {
     private _batchOperatorArray(
         valueObject: BaseValueObject,
         batchOperatorType: BatchOperatorType,
-        operator?: compareToken
+        operator?: compareToken,
+        isCaseSensitive?: boolean
     ) {
         let rowCount = (valueObject as ArrayValueObject).getRowCount();
         let columnCount = (valueObject as ArrayValueObject).getColumnCount();
@@ -1686,7 +1716,7 @@ export class ArrayValueObject extends BaseValueObject {
                                 if (!operator) {
                                     rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
                                 } else {
-                                    rowList[c] = currentValue.compare(opValue, operator as compareToken);
+                                    rowList[c] = currentValue.compare(opValue, operator as compareToken, isCaseSensitive);
                                 }
                                 break;
                             case BatchOperatorType.CONCATENATE_FRONT:

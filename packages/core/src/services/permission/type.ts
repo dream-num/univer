@@ -27,9 +27,9 @@ export enum PermissionStatus {
     DONE = 'done',
 }
 
-type WorkbookPermissionPointConstructor = new (unitId: string) => IPermissionPoint;
-type WorkSheetPermissionPointConstructor = new (unitId: string, subUnitId: string) => IPermissionPoint;
-type RangePermissionPointConstructor = new (unitId: string, subUnitId: string, permissionId: string) => IPermissionPoint;
+export type WorkbookPermissionPointConstructor = new (unitId: string) => IPermissionPoint;
+export type WorkSheetPermissionPointConstructor = new (unitId: string, subUnitId: string) => IPermissionPoint;
+export type RangePermissionPointConstructor = new (unitId: string, subUnitId: string, permissionId: string) => IPermissionPoint;
 
 export interface IPermissionTypes {
     rangeTypes?: RangePermissionPointConstructor[];

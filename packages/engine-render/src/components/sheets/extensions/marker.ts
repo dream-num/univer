@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { type IRange, type IScale, Range } from '@univerjs/core';
+import { Range } from '@univerjs/core';
+import type { IRange, IScale } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SpreadsheetExtensionRegistry } from '../../extension';
@@ -34,6 +35,7 @@ export class Marker extends SheetExtension {
 
     override uKey: string = UNIQUE_KEY;
 
+    // eslint-disable-next-line max-lines-per-function
     override draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: SpreadsheetSkeleton, diffRanges: IRange[]): void {
         const { worksheet, rowColumnSegment } = skeleton;
         if (!worksheet) {
@@ -42,6 +44,7 @@ export class Marker extends SheetExtension {
 
         const mergeCellRendered = new Set<string>();
 
+        // eslint-disable-next-line max-lines-per-function
         Range.foreach(rowColumnSegment, (row, col) => {
             let cellData = worksheet.getCell(row, col);
             const cellInfo = this.getCellIndex(
@@ -89,6 +92,10 @@ export class Marker extends SheetExtension {
             }
 
             if (!cellData) {
+                return;
+            }
+
+            if (cellData.markers?.isSkip) {
                 return;
             }
 

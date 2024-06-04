@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun } from '@univerjs/core';
+import type {
+    ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun,
+} from '@univerjs/core';
 import {
     BaselineOffset,
     BooleanNumber,
     CommandType,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -29,7 +29,6 @@ import {
     TextXActionType,
 } from '@univerjs/core';
 import type { TextRange } from '@univerjs/engine-render';
-
 import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
@@ -277,19 +276,12 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             return false;
         }
 
-        let docsModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!docsModel) {
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!documentDataModel) {
             return false;
         }
 
-        let unitId = docsModel.getUnitId();
-
-        // When setting the formula bar style, the effect will be displayed in the cell editor,
-        // and the formula bar only displays plain text.
-        if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-            docsModel = univerInstanceService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!;
-            unitId = docsModel.getUnitId();
-        }
+        const unitId = documentDataModel.getUnitId();
 
         let formatValue;
 
@@ -301,7 +293,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             case SetInlineFormatSubscriptCommand.id: // fallthrough
             case SetInlineFormatSuperscriptCommand.id: {
                 formatValue = getReverseFormatValueInSelection(
-                    docsModel.getBody()!.textRuns!,
+                    documentDataModel.getBody()!.textRuns!,
                     preCommandId,
                     selections
                 );
@@ -348,7 +340,6 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         const jsonX = JSONX.getInstance();
 
         const memoryCursor = new MemoryCursor();
-
         memoryCursor.reset();
 
         for (const selection of selections) {

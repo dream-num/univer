@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/debugger",
-    "version": "0.1.12",
+    "version": "0.1.13",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -58,6 +58,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.15.2",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
@@ -71,12 +72,13 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@vitejs/plugin-vue": "^5.0.4",
         "@wendellhu/redi": "0.15.2",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.11",
+        "vite": "^5.2.12",
         "vitest": "^1.6.0",
         "vue": "^3.4.27"
     }

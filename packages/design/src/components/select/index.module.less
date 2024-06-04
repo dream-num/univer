@@ -90,11 +90,19 @@
                 pointer-events: none;
 
                 position: absolute;
-                left: 10px;
+                left: 0;
                 height: 100%;
+                width: 100%;
+                padding: 0 18px 0 10px;
+                box-sizing: border-box;
+
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
 
                 font-size: var(--font-size-sm);
-                display: inline-flex;
+                line-height: 28px;
+                display: inline-block;
                 align-items: center;
             }
         }

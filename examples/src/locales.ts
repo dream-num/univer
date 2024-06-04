@@ -24,6 +24,9 @@ import DocsUIZhCN from '@univerjs/docs-ui/locale/zh-CN';
 import FindReplaceEnUS from '@univerjs/find-replace/locale/en-US';
 import FindReplaceRuRU from '@univerjs/find-replace/locale/ru-RU';
 import FindReplaceZhCN from '@univerjs/find-replace/locale/zh-CN';
+import SheetsFindReplaceEnUS from '@univerjs/sheets-find-replace/locale/en-US';
+import SheetsFindReplaceRuRU from '@univerjs/sheets-find-replace/locale/ru-RU';
+import SheetsFindReplaceZhCN from '@univerjs/sheets-find-replace/locale/zh-CN';
 import SheetsEnUS from '@univerjs/sheets/locale/en-US';
 import SheetsRuRU from '@univerjs/sheets/locale/ru-RU';
 import SheetsZhCN from '@univerjs/sheets/locale/zh-CN';
@@ -60,11 +63,24 @@ import SheetsNumfmtZhCN from '@univerjs/sheets-numfmt/locale/zh-CN';
 import UniscriptEnUS from '@univerjs/uniscript/locale/en-US';
 import UniscriptRuRU from '@univerjs/uniscript/locale/ru-RU';
 import UniscriptZhCN from '@univerjs/uniscript/locale/zh-CN';
+import SheetsHyperLinkUIEnUS from '@univerjs/sheets-hyper-link-ui/locale/en-US';
+import SheetsHyperLinkUIRuRU from '@univerjs/sheets-hyper-link-ui/locale/ru-RU';
+import SheetsHyperLinkUIZhCN from '@univerjs/sheets-hyper-link-ui/locale/zh-CN';
+import DrawingUIEnUS from '@univerjs/drawing-ui/locale/en-US';
+import DrawingUIRuRU from '@univerjs/drawing-ui/locale/ru-RU';
+import DrawingUIZhCN from '@univerjs/drawing-ui/locale/zh-CN';
+import SheetsDrawingUIEnUS from '@univerjs/sheets-drawing-ui/locale/en-US';
+import SheetsDrawingUIRuRU from '@univerjs/sheets-drawing-ui/locale/ru-RU';
+import SheetsDrawingUIZhCN from '@univerjs/sheets-drawing-ui/locale/zh-CN';
+import DocsDrawingUIEnUS from '@univerjs/docs-drawing-ui/locale/en-US';
+import DocsDrawingUIRuRU from '@univerjs/docs-drawing-ui/locale/ru-RU';
+import DocsDrawingUIZhCN from '@univerjs/docs-drawing-ui/locale/zh-CN';
 
 export const zhCN = Tools.deepMerge(
     SheetsZhCN,
     DocsUIZhCN,
     FindReplaceZhCN,
+    SheetsFindReplaceZhCN,
     SheetsUIZhCN,
     SheetsFormulaZhCN,
     SheetsDataValidationZhCN,
@@ -76,13 +92,18 @@ export const zhCN = Tools.deepMerge(
     SheetsThreadCommentZhCN,
     ThreadCommentUIZhCN,
     SheetsNumfmtZhCN,
-    UniscriptZhCN
+    UniscriptZhCN,
+    SheetsHyperLinkUIZhCN,
+    DrawingUIZhCN,
+    SheetsDrawingUIZhCN,
+    DocsDrawingUIZhCN
 );
 
 export const enUS = Tools.deepMerge(
     SheetsEnUS,
     DocsUIEnUS,
     FindReplaceEnUS,
+    SheetsFindReplaceEnUS,
     SheetsUIEnUS,
     SheetsFormulaEnUS,
     SheetsDataValidationEnUS,
@@ -94,13 +115,18 @@ export const enUS = Tools.deepMerge(
     SheetsThreadCommentEnUS,
     ThreadCommentUIEnUS,
     SheetsNumfmtEnUS,
-    UniscriptEnUS
+    UniscriptEnUS,
+    SheetsHyperLinkUIEnUS,
+    DrawingUIEnUS,
+    SheetsDrawingUIEnUS,
+    DocsDrawingUIEnUS
 );
 
 export const ruRU = Tools.deepMerge(
     SheetsRuRU,
     DocsUIRuRU,
     FindReplaceRuRU,
+    SheetsFindReplaceRuRU,
     SheetsUIRuRU,
     SheetsFormulaRuRU,
     SheetsDataValidationRuRU,
@@ -112,5 +138,9 @@ export const ruRU = Tools.deepMerge(
     SheetsThreadCommentRuRU,
     ThreadCommentUIRuRU,
     SheetsNumfmtRuRU,
-    UniscriptRuRU
+    UniscriptRuRU,
+    SheetsHyperLinkUIRuRU,
+    DrawingUIRuRU,
+    SheetsDrawingUIRuRU,
+    DocsDrawingUIRuRU
 );

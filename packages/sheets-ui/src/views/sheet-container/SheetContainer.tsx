@@ -52,6 +52,9 @@ export function RenderSheetHeader() {
     );
 }
 
+/**
+ * @deprecated We should not write into this component anymore.
+ */
 export function RenderSheetContent() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);

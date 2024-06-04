@@ -39,7 +39,6 @@ export interface IRichTextProps extends ITransformState, IStyleBase {
     text?: string;
     richText?: IDocumentData;
     zIndex: number;
-    isTransformer?: boolean;
     forceRender?: boolean;
 }
 

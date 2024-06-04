@@ -35,8 +35,6 @@ import type {
 } from '../basics/common';
 import { convertUnitDataToRuntime } from '../basics/runtime';
 
-export const DEFAULT_DOCUMENT_SUB_COMPONENT_ID = '__default_document_sub_component_id20231101__';
-
 export interface IFormulaCurrentConfigService {
     load(config: IFormulaDatasetConfig): void;
 

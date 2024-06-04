@@ -154,10 +154,15 @@ export enum RENDER_CLASS_TYPE {
     VIEWPORT = 'Viewport',
     LAYER = 'Layer',
     GROUP = 'Group',
+    IMAGE = 'Image',
+    SHAPE = 'Shape',
+    TEXT = 'Text',
 }
-
-export const DEFAULT_SELECTION_LAYER_INDEX = 1000;
 
 export const MAXIMUM_ROW_HEIGHT = 2000;
 
 export const FIX_ONE_PIXEL_BLUR_OFFSET = 0.5;
+
+export const DRAWING_OBJECT_LOWER_LAYER_INDEX = 3;
+export const DRAWING_OBJECT_LAYER_INDEX = 4;
+export const DRAWING_OBJECT_UPPER_LAYER_INDEX = 5;

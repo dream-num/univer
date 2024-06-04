@@ -22,4 +22,5 @@ export interface ICellValidationData {
     validStatus: DataValidationStatus;
     rule: IDataValidationRule;
     validator: any;
+    isSkip?: boolean;
 }

@@ -88,7 +88,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             const { style } = selection;
             const { scene } = this._renderManagerService.getRenderById(unitId) || {};
             const { rangeWithCoord, primaryWithCoord } =
-                this._selectionRenderService.convertSelectionToCoord(selection);
+                this._selectionRenderService.attachSelectionWithCoord(selection);
             const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
             if (!scene || !skeleton) return;
             const { rowHeaderWidth, columnHeaderHeight } = skeleton;

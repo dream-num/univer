@@ -93,7 +93,7 @@ export { BooleanValue } from './basics/common';
 export type { PrimitiveValueType } from './engine/value-object/primitive-object';
 export { NumberValueObject } from './engine/value-object/primitive-object';
 export { BooleanValueObject } from './engine/value-object/primitive-object';
-export { StringValueObject } from './engine/value-object/primitive-object';
+export { StringValueObject, NullValueObject } from './engine/value-object/primitive-object';
 export { functionArray } from './functions/array/function-map';
 export { FUNCTION_NAMES_ARRAY } from './functions/array/function-names';
 export { BaseFunction } from './functions/base-function';
@@ -150,3 +150,4 @@ export { IActiveDirtyManagerService } from './services/active-dirty-manager.serv
 
 export type { IRangeChange } from './models/formula-data.model';
 export { handleNumfmtInCell } from './engine/utils/numfmt-kit';
+export { AsyncArrayObject } from './engine/reference-object/base-reference-object';

@@ -21,7 +21,6 @@ import { LocaleType, LogLevel, Tools, Univer } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
@@ -63,7 +62,6 @@ function factory(id: string) {
 
         // sheet feature plugins
         univer.registerPlugin(UniverSheetsNumfmtPlugin);
-        univer.registerPlugin(UniverFormulaEnginePlugin);
         univer.registerPlugin(UniverSheetsFormulaPlugin);
 
         // create univer sheet instance

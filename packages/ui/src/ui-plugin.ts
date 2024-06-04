@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { IContextService, ILocalStorageService, LocaleService, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
+import { DependentOn, IContextService, ILocalStorageService, LocaleService, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
 import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
@@ -54,6 +55,7 @@ import { EditorService, IEditorService } from './services/editor/editor.service'
 import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 import { IProgressService, ProgressService } from './services/progress/progress.service';
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
+import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 
 const PLUGIN_NAME = 'ui';
 
@@ -64,6 +66,7 @@ export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
 /**
  * UI plugin provides basic interaction with users. Including workbench (menus, UI parts, notifications etc.), copy paste, shortcut.
  */
+@DependentOn(UniverRenderEnginePlugin)
 export class UniverUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
@@ -118,7 +121,7 @@ export class UniverUIPlugin extends Plugin {
             [IRangeSelectorService, { useClass: RangeSelectorService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
             [IProgressService, { useClass: ProgressService }],
-
+            [CanvasFloatDomService],
             // controllers
             [IUIController, { useClass: DesktopUIController }],
             [

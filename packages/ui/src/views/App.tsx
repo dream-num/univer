@@ -27,7 +27,6 @@ import { ComponentContainer } from './components/ComponentContainer';
 import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
-import { CanvasPopup } from './components/popup/CanvasPopup';
 import { builtInGlobalComponents } from './parts';
 import { ContextMenu } from './components/context-menu/ContextMenu';
 
@@ -53,26 +52,17 @@ export function App(props: IUniverAppProps) {
 
     const uiPartsService = useDependency(IUIPartsService);
 
-    const [updateTrigger, setUpdateTrigger] = useState(false);
-
-    useEffect(() => {
-        console.warn(
-            '\x1B[33m%s\x1B[0m',
-            '[Univer Warning]',
-            'We will remove the built-in language support in the next version (v0.1.13), please add the language support manually.',
-            'Please refer to the release notes for more information: https://github.com/dream-num/univer/releases/tag/v0.1.12'
-        );
-    }, []);
+    const [updateTrigger, setUpdateTrigger] = useState({});
 
     useEffect(() => {
         const updateSubscription = uiPartsService.componentRegistered$.subscribe(() => {
-            setUpdateTrigger((prev) => !prev);
+            setUpdateTrigger({});
         });
 
         return () => {
             updateSubscription.unsubscribe();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const { headerComponents, contentComponents, footerComponents, headerMenuComponents, leftSidebarComponents, globalComponents } = useMemo(() => ({
@@ -82,14 +72,14 @@ export function App(props: IUniverAppProps) {
         headerMenuComponents: uiPartsService.getComponents(BuiltInUIPart.HEADER_MENU),
         leftSidebarComponents: uiPartsService.getComponents(BuiltInUIPart.LEFT_SIDEBAR),
         globalComponents: uiPartsService.getComponents(BuiltInUIPart.GLOBAL),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }), [updateTrigger]);
 
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
             themeService.setTheme(defaultTheme);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -159,7 +149,6 @@ export function App(props: IUniverAppProps) {
                                 data-range-selector
                                 onContextMenu={(e) => e.preventDefault()}
                             >
-                                <CanvasPopup />
                                 <ComponentContainer components={contentComponents} />
                             </section>
                         </section>

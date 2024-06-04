@@ -43,6 +43,7 @@ import { ConditionalFormattingI18nController } from './controllers/cf.i18n.contr
 import { RefRangeController } from './controllers/cf.ref-range.controller';
 import { ConditionalFormattingEditorController } from './controllers/cf.editor.controller';
 import { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
+import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
 
 export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
     static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
@@ -83,6 +84,7 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
         this._injector.add([RefRangeController]);
         this._injector.add([ConditionalFormattingCopyPasteController]);
         this._injector.add([ConditionalFormattingAutoFillController]);
+        this._injector.add([ConditionalFormattingPermissionController]);
         this._injector.add([
             ConditionalFormattingMenuController,
             {

@@ -428,10 +428,14 @@ export class CanvasView extends RxDisposable {
         // SceneViewers
         const objects = this._objectProvider.convertToRenderObjects(pageElements, mainScene);
         if (!objects || !slide) return;
-        scene.openTransformer();
+
         this._addBackgroundRect(scene, pageBackgroundFill);
         // So finally SceneViewers are added to the scene as objects. How can we do optimizations on this?
         scene.addObjects(objects);
+
+        objects.forEach((object) => {
+            scene.attachTransformerTo(object);
+        });
 
         const transformer = scene.getTransformer();
 

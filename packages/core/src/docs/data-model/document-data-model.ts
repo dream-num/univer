@@ -21,6 +21,7 @@ import type {
     IDocumentData,
     IDocumentRenderConfig,
     IDocumentStyle,
+    IDrawings,
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import { UnitModel, UniverInstanceType } from '../../common/unit';
@@ -70,6 +71,11 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
 
     get zoomRatio() {
         return this.snapshot.settings?.zoomRatio || 1;
+    }
+
+    resetDrawing(drawings: IDrawings, drawingsOrder: string[]) {
+        this.snapshot.drawings = drawings;
+        this.snapshot.drawingsOrder = drawingsOrder;
     }
 
     getBody() {
@@ -172,7 +178,7 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
             return;
         }
 
-        const objectTransform = drawing.objectTransform;
+        const objectTransform = drawing.docTransform;
 
         objectTransform.size.width = width;
         objectTransform.size.height = height;
@@ -217,6 +223,14 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         this.footerModelMap.forEach((footer) => {
             footer.dispose();
         });
+    }
+
+    getDrawings() {
+        return this.snapshot.drawings;
+    }
+
+    getDrawingsOrder() {
+        return this.snapshot.drawingsOrder;
     }
 
     getRev(): number {
@@ -264,9 +278,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             return;
         }
 
-        const doc = this.snapshot;
-
-        return JSONX.apply(doc, actions);
+        return JSONX.apply(this.snapshot, actions);
     }
 
     sliceBody(startOffset: number, endOffset: number): Nullable<IDocumentBody> {

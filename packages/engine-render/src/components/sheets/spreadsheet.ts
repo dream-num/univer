@@ -145,7 +145,7 @@ export class Spreadsheet extends SheetComponent {
     }
 
     override isHit(coord: Vector2) {
-        const oCoord = this._getInverseCoord(coord);
+        const oCoord = this.getInverseCoord(coord);
         const skeleton = this.getSkeleton();
         if (!skeleton) {
             return false;

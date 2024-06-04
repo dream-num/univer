@@ -17,10 +17,11 @@
 /* eslint-disable react-refresh/only-export-components */
 
 import { ErrorSingle, Loading, SuccessSingle, WarningSingle } from '@univerjs/icons';
-import { render } from 'rc-util/lib/React/render';
+import { render, unmount } from 'rc-util/lib/React/render';
 import type { CSSProperties, ReactElement } from 'react';
 import React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
 import type { IDisposable } from '../../type';
 
 import styles from './index.module.less';
@@ -42,8 +43,13 @@ export interface IMessageProps {
 }
 
 export interface IMessageOptions extends
-    Partial<Pick<IMessageProps, 'key' | 'type' >>,
+    Partial<Pick<IMessageProps, 'key' | 'type'>>,
     Pick<IMessageProps, 'content'> {
+
+    /**
+     * After `duration` milliseconds, the message would be removed automatically. However, if `duration` is set to 0,
+     * the message would not be removed automatically.
+     */
     duration?: number;
 }
 
@@ -93,16 +99,25 @@ const MessageContainer = (props: { messages: IMessageProps[] }) => {
     );
 };
 
-export class Message {
+export class Message implements IDisposable {
     protected _container: HTMLDivElement;
 
     protected _messages: IMessageProps[] = [];
 
     constructor(container: HTMLElement) {
-        this._container = document.createElement('div');
-        container.appendChild(this._container);
+        if (canUseDom()) {
+            this._container = document.createElement('div');
+            container.appendChild(this._container);
+        } else {
+            this._container = container as HTMLDivElement;
+        }
 
         this.render();
+    }
+
+    dispose(): void {
+        unmount(this._container);
+        this._container.remove();
     }
 
     append(type: MessageType, options: IMessageOptions): IDisposable {
@@ -117,7 +132,10 @@ export class Message {
 
         this.render();
 
-        setTimeout(() => this.teardown(key), duration);
+        if (duration !== 0) {
+            setTimeout(() => this.teardown(key), duration);
+        }
+
         return { dispose: () => this.teardown(key) };
     }
 

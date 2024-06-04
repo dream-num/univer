@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { PageElementType, PageType, ShapeType } from '@univerjs/core';
+import { BasicShapes, PageElementType, PageType } from '@univerjs/core';
 
 export const DEFAULT_FIFTH_PAGE = {
     id: 'technology_1',
@@ -37,7 +37,7 @@ export const DEFAULT_FIFTH_PAGE = {
             description: '',
             type: PageElementType.SHAPE,
             shape: {
-                shapeType: ShapeType.RECTANGLE,
+                shapeType: BasicShapes.Rect,
                 text: '',
                 shapeProperties: {
                     shapeBackgroundFill: {

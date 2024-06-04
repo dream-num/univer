@@ -282,7 +282,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     return;
                 }
 
-                const { unitId, sheetId } = param;
+                const { unitId } = this._context;
+                const { sheetId } = param;
                 const currentRender = this._renderManagerService.getRenderById(unitId);
 
                 if (currentRender == null) {
@@ -304,7 +305,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             return;
         }
 
-        const { skeleton, unitId } = param;
+        const { unitId } = this._context;
+        const { skeleton } = param;
         const scene = this._renderManagerService.getRenderById(unitId)?.scene;
 
         if (skeleton == null || scene == null) {

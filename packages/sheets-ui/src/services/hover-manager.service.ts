@@ -22,6 +22,7 @@ import { distinctUntilChanged, Subject } from 'rxjs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getHoverCellPosition } from '../common/utils';
 import { ScrollManagerService } from './scroll-manager.service';
+import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IHoverCellPosition {
     position: IPosition;
@@ -79,9 +80,8 @@ export class HoverManagerService extends Disposable {
         }
 
         const worksheet = workbook.getActiveSheet();
-        const skeletonParam = this._sheetSkeletonManagerService.getCurrent();
         const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
-
+        const skeletonParam = currentRender?.with(SheetSkeletonManagerService).getUnitSkeleton(workbook.getUnitId(), worksheet.getSheetId());
         const scrollInfo = this._scrollManagerService.getCurrentScroll();
 
         if (!skeletonParam || !scrollInfo || !currentRender) return;

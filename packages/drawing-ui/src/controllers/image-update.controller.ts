@@ -15,21 +15,24 @@
  */
 
 import type { ICommandInfo, Nullable } from '@univerjs/core';
-import { Disposable,
+import {
+    Disposable,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
-import type { IImageProps, Scene } from '@univerjs/engine-render';
-import { CURSOR_TYPE, DRAWING_OBJECT_LAYER_INDEX, Image, IRenderManagerService } from '@univerjs/engine-render';
+import type { Scene } from '@univerjs/engine-render';
+import { CURSOR_TYPE, Image, IRenderManagerService } from '@univerjs/engine-render';
 import type { IDrawingSearch, IImageData } from '@univerjs/drawing';
-import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService, ImageSourceType } from '@univerjs/drawing';
+import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService } from '@univerjs/drawing';
 import { IDialogService } from '@univerjs/ui';
 import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
-import { getCurrentUnitInfo, insertGroupObject } from './utils';
+import { getCurrentUnitInfo, } from './utils';
+import { Inject } from '@wendellhu/redi';
+import { DrawingRenderService } from '../services/drawing-render.service';
 
 const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
@@ -41,7 +44,8 @@ export class ImageUpdateController extends Disposable {
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IDialogService private readonly _dialogService: IDialogService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @Inject(DrawingRenderService) private readonly _drawingRenderService: DrawingRenderService
     ) {
         super();
 
@@ -193,72 +197,21 @@ export class ImageUpdateController extends Disposable {
     private _insertImages(params: IDrawingSearch[]) {
         (params).forEach(async (param) => {
             const { unitId, subUnitId, drawingId } = param;
-            const imageParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
-            if (imageParam == null) {
-                return;
-            }
-
-            const { transform, drawingType, source, imageSourceType, srcRect, prstGeom, groupId } = imageParam;
-            if (drawingType !== DrawingTypeEnum.DRAWING_IMAGE) {
-                return;
-            }
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
 
             if (renderObject == null) {
                 return;
             }
-            const { scene, transformer } = renderObject;
-            if (transform == null) {
-                return true;
-            }
 
-            const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
-            const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
-            const imageShape = scene.getObject(imageShapeKey);
-
-            if (imageShape != null) {
-                imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
+            const imageParam = this._drawingManagerService.getDrawingByParam(param) as IImageData;
+            if (imageParam == null) {
                 return;
             }
 
-            const orders = this._drawingManagerService.getDrawingOrder(unitId, subUnitId);
-            const zIndex = orders.indexOf(drawingId);
-            const imageConfig: IImageProps = { ...transform, zIndex: zIndex === -1 ? (orders.length - 1) : zIndex };
-            const imageNativeCache = this._imageIoService.getImageSourceCache(source, imageSourceType);
-
-            let shouldBeCache = false;
-            if (imageNativeCache != null) {
-                imageConfig.image = imageNativeCache;
-            } else {
-                if (imageSourceType === ImageSourceType.UUID) {
-                    try {
-                        imageConfig.url = await this._imageIoService.getImage(source);
-                    } catch (error) {
-                        console.error(error);
-                        return;
-                    }
-                } else {
-                    imageConfig.url = source;
-                }
-                shouldBeCache = true;
+            const image = await this._drawingRenderService.renderImage(imageParam, renderObject.scene);
+            if (!image) {
+                return;
             }
-
-            const image = new Image(imageShapeKey, imageConfig);
-            if (shouldBeCache) {
-                this._imageIoService.addImageSourceCache(source, imageSourceType, image.getNative());
-            }
-
-            scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(image);
-
-            groupId && insertGroupObject({ drawingId: groupId, unitId, subUnitId }, image, scene, this._drawingManagerService);
-
-            if (prstGeom != null) {
-                image.setPrstGeom(prstGeom);
-            }
-            if (srcRect != null) {
-                image.setSrcRect(srcRect);
-            }
-
             this._addHoverForImage(image);
             this._addDialogForImage(image);
         });

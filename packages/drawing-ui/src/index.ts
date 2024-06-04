@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { DrawingRenderService } from './services/drawing-render.service';
 export { getUpdateParams } from './utils/get-update-params';
 export { ImageResetSizeOperation } from './commands/operations/image-reset-size.operation';
 export { CloseImageCropOperation, OpenImageCropOperation } from './commands/operations/image-crop.operation';

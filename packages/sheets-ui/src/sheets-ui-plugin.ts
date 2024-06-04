@@ -85,6 +85,7 @@ import { SheetPermissionPanelModel } from './services/permission/sheet-permissio
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 import { PermissionRenderService } from './services/permission/permission-render.service';
 import { WorksheetProtectionRenderService } from './services/permission/worksheet-permission-render.service';
+import { SheetPrintInterceptorService } from './services/print-interceptor.service';
 
 @DependentOn(UniverSheetsPlugin, UniverUIPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
@@ -115,6 +116,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [ICellEditorManagerService, { useClass: CellEditorManagerService }],
                 [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
                 [IAutoFillService, { useClass: AutoFillService }],
+                [SheetPrintInterceptorService],
 
                 [ScrollManagerService],
                 [SheetSkeletonManagerService],

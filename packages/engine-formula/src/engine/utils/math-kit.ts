@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-import Big from 'big.js';
+/**
+ * Since Excel follows the IEEE 754 specification, it only handles precision issues when displaying cells. For example, =0.1+0.2, the stored value in XML is 0.30000000000000004, and the displayed value is 0.3. The accuracy of the calculation process does not need to be considered. We only focus on the accuracy of the calculation results. Any result is processed within 15 digits.
+
+ Reference https://en.wikipedia.org/wiki/Numeric_precision_in_Microsoft_Excel
+ */
 
 export function plus(a: number, b: number): number {
-    return tolerateError(a + b);
+    return a + b;
 }
 
 export function minus(a: number, b: number): number {
-    return tolerateError(a - b);
+    return a - b;
 }
 
 export function multiply(a: number, b: number): number {
-    return tolerateError(a * b);
+    return a * b;
 }
 
 export function divide(a: number, b: number): number {
-    return tolerateError(a / b);
+    return a / b;
 }
 
 /**
@@ -72,19 +76,18 @@ export function ceil(base: number, precision: number): number {
  * @returns The remainder.
  */
 export function mod(base: number, divisor: number): number {
-    return tolerateError(base - divisor * Math.floor(base / divisor));
+    return base - divisor * Math.floor(base / divisor);
 }
 
 /**
  * Raises a base number to the power of the exponent.
  *
- * e.g. 0.2 ** 3 = 0.008000000000000002
  * @param base The base number.
  * @param exponent The exponent.
  * @returns The result of base raised to the power of exponent.
  */
 export function pow(base: number, exponent: number): number {
-    return tolerateError(base ** exponent);
+    return base ** exponent;
 }
 
 /**
@@ -149,74 +152,17 @@ export function lessThanOrEquals(a: number, b: number): boolean {
 /**
  * Complete the number to the specified accuracy and solve the accuracy error,
  *
- * e.g. strip(0.30000000000000004,16) => 0.3
+ * e.g. strip(0.30000000000000004,15) => 0.3
  *
- * Why precision is 16?
+ * Why precision is 15?
  *
- * Excel only saves 15 digits, in order to ensure that 15 digits can be intercepted normally, the accuracy is handled by 16 digits
+ * Excel only saves 15 digits
  *
   reference: https://stackoverflow.com/questions/1458633/how-to-deal-with-floating-point-number-precision-in-javascript
  * @param num
  * @param precision
  * @returns
  */
-export function strip(num: number, precision = 16) {
+export function strip(num: number, precision = 15) {
     return Number.parseFloat(num.toPrecision(precision));
-}
-
-/**
- * Set an error range for floating-point calculations. If the error is less than Number.EPSILON, we can consider the result reliable.
- * @param left
- * @param right
- * @returns
- */
-function withinErrorMargin(left: number, right: number, precision?: number) {
-    const epsilon = precision ? 1 * 10 ** -precision : Number.EPSILON;
-    return Math.abs(left - right) < epsilon;
-}
-
-/**
- * Tolerance for the results of accuracy issues to tolerate certain errors
- *
- * Why 12?
-   This is an empirical choice. Generally, choosing 12 can solve most of the 0001 and 0009 problems. e.g. 0.07/0.1 = 0.7000000000000001
- * @param num
- * @returns
- */
-export function tolerateError(num: number, precision = 12) {
-    const stripResult = strip(num, precision);
-    return withinErrorMargin(num, stripResult, precision) ? stripResult : num;
-}
-
-/**
- * Excel can display numbers with up to about 15 digits of precision. This includes the sum of the integer part and the decimal part
- * @param input
- * @returns
- */
-export function truncateNumber(input: number | string): number {
-    const num = new Big(input);
-    const numStr = num.toFixed(); // Convert to fixed-point notation
-
-    const parts = numStr.split('.');
-    let integerPart = parts[0];
-    let decimalPart = parts.length > 1 ? parts[1] : '';
-
-    // Handle integer part greater than 15 digits
-    if (integerPart.length > 15) {
-        integerPart = integerPart.slice(0, 15) + '0'.repeat(integerPart.length - 15);
-    }
-
-    // Handle decimal part for numbers with an integer part of '0' and leading zeros
-    if (integerPart === '0') {
-        const nonZeroIndex = decimalPart.search(/[1-9]/); // Find the first non-zero digit
-        if (nonZeroIndex !== -1 && nonZeroIndex + 15 < decimalPart.length) {
-            decimalPart = decimalPart.slice(0, nonZeroIndex + 15);
-        }
-    } else if (integerPart.length + decimalPart.length > 15) {
-        // Adjust decimal part if total length exceeds 15
-        decimalPart = decimalPart.slice(0, 15 - integerPart.length);
-    }
-
-    // Convert back to number, may cause precision loss for very large or small numbers
-    return Number.parseFloat(integerPart + (decimalPart ? `.${decimalPart}` : ''));
 }

@@ -15,43 +15,36 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt, truncateNumber } from '../math-kit';
+import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt, strip } from '../math-kit';
 
 describe('Test math kit', () => {
-    it('Function truncateNumber', () => {
-        expect(truncateNumber('1234567890123456')).toBe(1234567890123450);
-        expect(truncateNumber('123.4567890123456789')).toBe(123.456789012345);
-        expect(truncateNumber('0.1234567890123456789')).toBe(0.123456789012345);
-        expect(truncateNumber('1.234567890123456e+20')).toBe(123456789012345000000);
-        expect(truncateNumber('123456789012345')).toBe(123456789012345);
-    });
     it('Function plus', () => {
         expect(plus(1, 2)).toBe(3);
-        expect(plus(0.1, 0.2)).toBe(0.3);
-        expect(plus(0.7, 0.1)).toBe(0.8);
-        expect(plus(0.0000000000001, 0.0000000000002)).toBe(0.0000000000003);
+        expect(strip(plus(0.1, 0.2))).toBe(0.3);
+        expect(strip(plus(0.7, 0.1))).toBe(0.8);
+        expect(strip(plus(0.0000000000001, 0.0000000000002))).toBe(0.0000000000003);
     });
 
     it('Function minus', () => {
         expect(minus(2, 1)).toBe(1);
-        expect(minus(0.3, 0.1)).toBe(0.2);
-        expect(minus(0.8, 0.1)).toBe(0.7);
-        expect(minus(0.0000000000003, 0.0000000000002)).toBe(0.0000000000001);
+        expect(strip(minus(0.3, 0.1))).toBe(0.2);
+        expect(strip(minus(0.8, 0.1))).toBe(0.7);
+        expect(strip(minus(0.0000000000003, 0.0000000000002))).toBe(0.0000000000001);
     });
 
     it('Function multiply', () => {
         expect(multiply(2, 3)).toBe(6);
-        expect(multiply(0.1, 0.2)).toBe(0.02);
-        expect(multiply(0.7, 0.1)).toBe(0.07);
+        expect(strip(multiply(0.1, 0.2))).toBe(0.02);
+        expect(strip(multiply(0.7, 0.1))).toBe(0.07);
         expect(multiply(0.0000000000001, 0.0000000000002)).toBe(2e-26);
-        expect(multiply(0.6789, 10000)).toBe(6789);
+        expect(strip(multiply(0.6789, 10000))).toBe(6789);
     });
 
     it('Function divide', () => {
         expect(divide(6, 3)).toBe(2);
-        expect(divide(0.02, 0.1)).toBe(0.2);
-        expect(divide(0.07, 0.1)).toBe(0.7);
-        expect(divide(0.3, 0.1)).toBe(3);
+        expect(strip(divide(0.02, 0.1))).toBe(0.2);
+        expect(strip(divide(0.07, 0.1))).toBe(0.7);
+        expect(strip(divide(0.3, 0.1))).toBe(3);
         expect(divide(0.00000000000000002, 0.0000000000001)).toBe(0.0002);
     });
 
@@ -121,7 +114,7 @@ describe('Test math kit', () => {
         expect(pow(2, -1)).toBe(0.5);
         expect(pow(2, -2)).toBe(0.25);
         expect(pow(2, -3)).toBe(0.125);
-        expect(pow(0.2, 3)).toBe(0.008);
+        expect(strip(pow(0.2, 3))).toBe(0.008);
     });
     // test sqrt
     it('Function sqrt', () => {

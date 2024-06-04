@@ -72,6 +72,7 @@ describe('Test clipboard', () => {
             sheetOrder: [],
             styles: {},
         });
+
         univer = testBed.univer;
         get = testBed.get;
 
@@ -82,7 +83,8 @@ describe('Test clipboard', () => {
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(SetSelectionsOperation);
-        sheetSkeletonManagerService = get(SheetSkeletonManagerService);
+
+        sheetSkeletonManagerService = get(SheetSkeletonManagerService)!;
         sheetClipboardService = get(ISheetClipboardService);
 
         getValues = (
@@ -98,9 +100,7 @@ describe('Test clipboard', () => {
                 .getValues();
 
         getStyles = (key) => {
-            if (!key) return;
-            const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
-            return styles?.get(key);
+            return get(IUniverInstanceService).getUniverSheetInstance('test')!.getStyles().get(key);
         };
 
         convertColor = (color) => {
@@ -142,19 +142,19 @@ describe('Test clipboard', () => {
                 sheetId: 'sheet1',
             });
         });
+
         it('test font style paste from univer', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
-            if (!worksheet) return false;
+            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')!.getSheetBySheetId('sheet1')!;
             const res = await sheetClipboardService.legacyPaste(rotateSampleByUniver);
             expect(res).toBeTruthy();
+
             const cellData = worksheet.getCellMatrix();
-            expect(getStyles(cellData.getValue(1, 1)?.s)?.tr?.a).toBeFalsy();
-            expect(getStyles(cellData.getValue(2, 1)?.s)?.tr?.a).toBe(-45);
-            expect(getStyles(cellData.getValue(3, 1)?.s)?.tr?.a).toBe(45);
-            expect(getStyles(cellData.getValue(4, 1)?.s)?.tr).toStrictEqual(
-                { a: 0, v: 1 });
-            expect(getStyles(cellData.getValue(5, 1)?.s)?.tr?.a).toBe(-90);
-            expect(getStyles(cellData.getValue(6, 1)?.s)?.tr?.a).toBe(90);
+            expect(getStyles(cellData.getValue(1, 1)!.s)?.tr!.a).toBeFalsy();
+            expect(getStyles(cellData.getValue(2, 1)!.s)?.tr!.a).toBe(-45);
+            expect(getStyles(cellData.getValue(3, 1)!.s)?.tr!.a).toBe(45);
+            expect(getStyles(cellData.getValue(4, 1)!.s)?.tr).toStrictEqual({ a: 0, v: 1 });
+            expect(getStyles(cellData.getValue(5, 1)!.s)?.tr!.a).toBe(-90);
+            expect(getStyles(cellData.getValue(6, 1)!.s)?.tr!.a).toBe(90);
         });
     });
 });

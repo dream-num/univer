@@ -390,13 +390,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     private async _pasteHTML(html: string, pasteType: string): Promise<boolean> {
-        // this._logService.log('[SheetClipboardService]', 'pasting html content', html);
-
         const copyId = extractId(html);
-
         if (copyId && this._copyContentCache.get(copyId)) {
             return this._pasteInternal(copyId, pasteType);
         }
+
         return this._pasteExternal(html, pasteType);
     }
 

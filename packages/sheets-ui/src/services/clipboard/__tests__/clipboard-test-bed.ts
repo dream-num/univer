@@ -33,8 +33,8 @@ import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigServi
 import { SheetClipboardController } from '../../../controllers/clipboard/clipboard.controller';
 import { IMarkSelectionService } from '../../mark-selection/mark-selection.service';
 import { ISelectionRenderService, SelectionRenderService } from '../../selection/selection-render.service';
-import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService, SheetClipboardService } from '../clipboard.service';
+import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 
 const cellData = {
     0: {
@@ -517,6 +517,7 @@ export class testPlatformService {
     isLinux: boolean = false;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -537,7 +538,6 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([SheetSkeletonManagerService]);
             injector.add([SelectionManagerService]);
             injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }]);
             injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
@@ -552,8 +552,10 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
             injector.add([ISelectionRenderService, { useClass: SelectionRenderService }]);
             injector.add([INotificationService, { useClass: testNotificationService }]);
             injector.add([IPlatformService, { useClass: testPlatformService }]);
+
             // Because SheetClipboardController is initialized in the rendered life cycle, here we need to initialize it manually
             const sheetClipboardController = injector.createInstance(SheetClipboardController);
+
             injector.add([SheetClipboardController, { useValue: sheetClipboardController }]);
             injector.add([SheetInterceptorService]);
             injector.add([CalculateFormulaService]);
@@ -578,6 +580,23 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
+
+    injector.add(
+        [SheetSkeletonManagerService, { useValue: new SheetSkeletonManagerService({
+            unit: sheet,
+            unitId: 'test',
+            type: UniverInstanceType.UNIVER_SHEET,
+            // eslint-disable-next-line ts/no-explicit-any
+            engine: null as any,
+            // eslint-disable-next-line ts/no-explicit-any
+            scene: null as any,
+            // eslint-disable-next-line ts/no-explicit-any
+            mainComponent: null as any,
+            // eslint-disable-next-line ts/no-explicit-any
+            components: null as any,
+            isMainScene: true,
+        }, injector) }]
+    );
 
     return {
         univer,

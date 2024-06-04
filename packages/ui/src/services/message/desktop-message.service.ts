@@ -24,6 +24,7 @@ import type { IMessageService } from './message.service';
 export class DesktopMessageService implements IMessageService, IDisposable {
     // in node environment, document is undefined
     protected _portalContainer: HTMLElement | undefined = canUseDom() ? document.body : undefined;
+
     protected _message?: Message;
 
     dispose(): void {

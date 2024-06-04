@@ -21,7 +21,8 @@ import type { IDisposable } from '@wendellhu/redi';
 import type { IMessageService } from './message.service';
 
 export class DesktopMessageService implements IMessageService, IDisposable {
-    protected _portalContainer: HTMLElement = document.body;
+    // in node environment, document is undefined
+    protected _portalContainer: HTMLElement | undefined = document ? document.body : undefined;
     protected _message?: Message;
 
     dispose(): void {
@@ -38,6 +39,9 @@ export class DesktopMessageService implements IMessageService, IDisposable {
     }
 
     show(options: IMessageOptions & Omit<IMessageProps, 'key'>): IDisposable {
+        if (!this._portalContainer) {
+            throw new Error('[DesktopMessageService]: no container to show message!');
+        }
         if (!this._message) {
             throw new Error('[DesktopMessageService]: no message implementation!');
         }

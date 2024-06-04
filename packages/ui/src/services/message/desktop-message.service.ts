@@ -18,11 +18,13 @@ import type { IMessageOptions, IMessageProps } from '@univerjs/design';
 import { Message } from '@univerjs/design';
 import type { IDisposable } from '@wendellhu/redi';
 
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
 import type { IMessageService } from './message.service';
 
 export class DesktopMessageService implements IMessageService, IDisposable {
     // in node environment, document is undefined
-    protected _portalContainer: HTMLElement | undefined = document ? document.body : undefined;
+    protected _portalContainer: HTMLElement | undefined = canUseDom() ? document.body : undefined;
+
     protected _message?: Message;
 
     dispose(): void {

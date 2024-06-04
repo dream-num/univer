@@ -39,10 +39,7 @@ import {
     SHEET_VIEW_KEY,
 } from '../common/keys';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-
-        // TODO@wzhudev: sheet skeleton manager service should exist within RenderUnit.
-        // this._sheetSkeletonManagerService.setCurrent({ sheetId, unitId });
-// this._sheetSkeletonManagerService.removeSkeleton({ unitId });
+import { SheetRenderService } from '../services/sheet-render.service';
 
 interface ISetWorksheetMutationParams {
     unitId: string;
@@ -51,11 +48,11 @@ interface ISetWorksheetMutationParams {
 
 export class SheetCanvasView extends RxDisposable implements IRenderModule {
     // TODO@wzhudev: this is not hooked
-    private _skeletonChangeMutations = new Set<string>();
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @Inject(SheetRenderService) private readonly _sheetRenderService: SheetRenderService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -69,10 +66,11 @@ export class SheetCanvasView extends RxDisposable implements IRenderModule {
         scene.addLayer(new Layer(scene, [], 0), new Layer(scene, [], 2));
 
         this._addComponent(workbook);
-
         this._initRerenderScheduler();
         this._initCommandListener();
 
+        const sheetId = this._context.unit.getActiveSheet().getSheetId();
+        this._sheetSkeletonManagerService.setCurrent({ sheetId });
         const should = workbook.getShouldRenderLoopImmediately();
         if (should) {
             engine.runRenderLoop(() => scene.render());
@@ -275,7 +273,7 @@ export class SheetCanvasView extends RxDisposable implements IRenderModule {
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             const workbook = this._context.unit;
             const unitId = workbook.getUnitId();
-            if (COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id) || this._skeletonChangeMutations.has(command.id)) {
+            if (COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id) || this._sheetRenderService.checkMutationShouldTriggerRerender(command.id)) {
                 const worksheet = workbook.getActiveSheet();
                 const sheetId = worksheet.getSheetId();
                 const params = command.params;
@@ -287,7 +285,6 @@ export class SheetCanvasView extends RxDisposable implements IRenderModule {
 
                 if (command.id !== SetWorksheetActiveOperation.id) {
                     this._sheetSkeletonManagerService.makeDirty({
-                        unitId,
                         sheetId,
                         commandId: command.id,
                     }, true);
@@ -298,7 +295,6 @@ export class SheetCanvasView extends RxDisposable implements IRenderModule {
                 // setCurrent ---> currentSkeletonBefore$ ---> zoom.controller.subscribe ---> scene._setTransForm --->  viewports markDirty
                 // setCurrent ---> currentSkeleton$ ---> scroll.controller.subscribe ---> scene?.transformByState ---> scene._setTransFor
                 this._sheetSkeletonManagerService.setCurrent({
-                    unitId,
                     sheetId,
                     commandId: command.id,
                 });

@@ -38,7 +38,7 @@ import { HeaderResizeRenderController } from './controllers/render-controllers/h
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
 import { SelectionRenderController } from './controllers/render-controllers/selection.render-controller';
-import { SheetRenderController } from './controllers/sheet-render.controller';
+import { SheetRenderService } from './services/sheet-render.service';
 import type { IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
 import { DefaultSheetUiConfig, SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
@@ -132,7 +132,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [FormulaEditorController],
                 [HeaderFreezeRenderController],
                 [SheetClipboardController],
-                [SheetRenderController],
+                [SheetRenderService],
                 [
                     SheetUIController,
                     {

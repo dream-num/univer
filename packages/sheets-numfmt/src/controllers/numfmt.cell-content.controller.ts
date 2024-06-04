@@ -25,13 +25,10 @@ import {
     OnLifecycle,
     Range,
     ThemeService,
-    toDisposable,
 } from '@univerjs/core';
 import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import { INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SheetInterceptorService } from '@univerjs/sheets';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
-import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { getPatternPreview } from '../utils/pattern';
 
@@ -40,9 +37,7 @@ export class NumfmtCellContent extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(ThemeService) private _themeService: ThemeService,
-        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(ICommandService) private _commandService: ICommandService,
-
         @Inject(INumfmtService) private _numfmtService: INumfmtService,
         @Inject(LocaleService) private _localeService: LocaleService
     ) {
@@ -52,83 +47,78 @@ export class NumfmtCellContent extends Disposable {
 
     private _initInterceptorCellContent() {
         const renderCache = new ObjectMatrix<{ result: ICellData; parameters: string | number }>();
-        this.disposeWithMe(
-            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-                handler: (cell, location, next) => {
-                    const unitId = location.unitId;
-                    const sheetId = location.subUnitId;
-                    const numfmtValue = this._numfmtService.getValue(unitId, sheetId, location.row, location.col);
-                    if (!numfmtValue) {
-                        return next(cell);
+        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            handler: (cell, location, next) => {
+                const unitId = location.unitId;
+                const sheetId = location.subUnitId;
+                const numfmtValue = this._numfmtService.getValue(unitId, sheetId, location.row, location.col);
+                if (!numfmtValue) {
+                    return next(cell);
+                }
+                const originCellValue = cell;
+                if (!originCellValue) {
+                    return next(cell);
+                }
+
+                // just handle number
+                if (originCellValue.t !== CellValueType.NUMBER) {
+                    return next(cell);
+                }
+
+                let numfmtRes: string = '';
+                const cache = renderCache.getValue(location.row, location.col);
+                if (cache && cache.parameters === originCellValue.v) {
+                    return next({ ...cell, ...cache.result });
+                }
+
+                const info = getPatternPreview(numfmtValue.pattern, Number(originCellValue.v), this._localeService.getCurrentLocale());
+                numfmtRes = info.result;
+                if (!numfmtRes) {
+                    return next(cell);
+                }
+
+                const res: ICellDataForSheetInterceptor = { v: numfmtRes };
+                if (info.color) {
+                    const color = this._themeService.getCurrentTheme()[`${info.color}500`];
+
+                    if (color) {
+                        res.interceptorStyle = { cl: { rgb: color } };
                     }
-                    const originCellValue = cell;
-                    if (!originCellValue) {
-                        return next(cell);
-                    }
-                    // just handle number
-                    if (originCellValue.t !== CellValueType.NUMBER) {
-                        return next(cell);
-                    }
+                }
 
-                    let numfmtRes: string = '';
-                    const cache = renderCache.getValue(location.row, location.col);
-                    if (cache && cache.parameters === originCellValue.v) {
-                        return next({ ...cell, ...cache.result });
-                    }
+                renderCache.setValue(location.row, location.col, {
+                    result: res,
+                    parameters: originCellValue.v as number,
+                });
 
-                    const info = getPatternPreview(numfmtValue.pattern, Number(originCellValue.v), this._localeService.getCurrentLocale());
+                return next({ ...cell, ...res });
+            },
+            priority: 10,
+        }));
 
-                    numfmtRes = info.result;
-
-                    if (!numfmtRes) {
-                        return next(cell);
-                    }
-
-                    const res: ICellDataForSheetInterceptor = { v: numfmtRes };
-
-                    if (info.color) {
-                        const color = this._themeService.getCurrentTheme()[`${info.color}500`];
-
-                        if (color) {
-                            res.interceptorStyle = { cl: { rgb: color } };
-                        }
-                    }
-
-                    renderCache.setValue(location.row, location.col, {
-                        result: res,
-                        parameters: originCellValue.v as number,
-                    });
-                    return next({ ...cell, ...res });
-                },
-                priority: 10,
-            })
-        );
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === SetNumfmtMutation.id) {
-                    const params = commandInfo.params as ISetNumfmtMutationParams;
-                    Object.keys(params.values).forEach((key) => {
-                        const v = params.values[key];
-                        v.ranges.forEach((range) => {
-                            Range.foreach(range, (row, col) => {
-                                renderCache.realDeleteValue(row, col);
-                            });
+        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === SetNumfmtMutation.id) {
+                const params = commandInfo.params as ISetNumfmtMutationParams;
+                Object.keys(params.values).forEach((key) => {
+                    const v = params.values[key];
+                    v.ranges.forEach((range) => {
+                        Range.foreach(range, (row, col) => {
+                            renderCache.realDeleteValue(row, col);
                         });
                     });
-                }
-            })
-        );
-        this.disposeWithMe(
-            toDisposable(
-                this._sheetSkeletonManagerService.currentSkeleton$
-                    .pipe(
-                        map((skeleton) => skeleton?.sheetId),
-                        distinctUntilChanged()
-                    )
-                    .subscribe(() => {
-                        renderCache.reset();
-                    })
-            )
-        );
+                });
+            }
+        }));
+
+        // TODO@wzhudev: change it later
+        // this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$
+        //     .pipe(
+        //         map((skeleton) => skeleton?.sheetId),
+        //         distinctUntilChanged()
+        //     )
+        //     .subscribe(() => {
+        //         renderCache.reset();
+        //     })
+        // );
     }
 }

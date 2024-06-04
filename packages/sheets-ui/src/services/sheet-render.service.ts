@@ -21,16 +21,20 @@ import {
     LifecycleStages,
     OnLifecycle,
     RxDisposable,
+    toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet } from '@univerjs/engine-render';
+import type { IDisposable } from '@wendellhu/redi';
 import { distinctUntilChanged, takeUntil } from 'rxjs';
 
 /**
  * This controller is responsible for managing units of a specific kind to be rendered on the canvas.
  */
-@OnLifecycle(LifecycleStages.Ready, SheetRenderController)
-export class SheetRenderController extends RxDisposable {
+@OnLifecycle(LifecycleStages.Ready, SheetRenderService)
+export class SheetRenderService extends RxDisposable {
+    private _skeletonChangeMutations = new Set<string>();
+
     constructor(
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -42,20 +46,24 @@ export class SheetRenderController extends RxDisposable {
         Promise.resolve().then(() => this._init());
     }
 
-    // /**
-    //  * Register a mutation id that will trigger the skeleton change.
-    //  *
-    //  * @param mutationId the id of the mutation
-    //  * @returns a disposable to unregister the mutation
-    //  */
-    // registerSkeletonChangingMutations(mutationId: string): IDisposable {
-    //     if (this._skeletonChangeMutations.has(mutationId)) {
-    //         throw new Error(`[SheetRenderController]: the mutationId ${mutationId} has already been registered!`);
-    //     }
+    /**
+     * Register a mutation id that will trigger the skeleton change.
+     *
+     * @param mutationId the id of the mutation
+     * @returns a disposable to unregister the mutation
+     */
+    registerSkeletonChangingMutations(mutationId: string): IDisposable {
+        if (this._skeletonChangeMutations.has(mutationId)) {
+            throw new Error(`[SheetRenderController]: the mutationId ${mutationId} has already been registered!`);
+        }
 
-    //     this._skeletonChangeMutations.add(mutationId);
-    //     return toDisposable(() => this._skeletonChangeMutations.delete(mutationId));
-    // }
+        this._skeletonChangeMutations.add(mutationId);
+        return toDisposable(() => this._skeletonChangeMutations.delete(mutationId));
+    }
+
+    checkMutationShouldTriggerRerender(id: string): boolean {
+        return this._skeletonChangeMutations.has(id);
+    }
 
     private _init() {
         this._initWorkbookListener();

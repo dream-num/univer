@@ -22,7 +22,7 @@ import type { ISelectionStyle, ISheetCommandSharedParams } from '@univerjs/sheet
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import type { FilterModel } from '@univerjs/sheets-filter';
 import { FILTER_MUTATIONS, ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
-import { getCoordByCell, ISelectionRenderService, SelectionShape, SheetRenderController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { getCoordByCell, ISelectionRenderService, SelectionShape, SheetRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -54,7 +54,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         @Inject(SheetsFilterService) private readonly _sheetsFilterService: SheetsFilterService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetRenderController) private _sheetRenderController: SheetRenderController,
+        @Inject(SheetRenderService) private _sheetRenderService: SheetRenderService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
@@ -66,7 +66,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
             SetSheetsFilterCriteriaMutation,
             RemoveSheetsFilterMutation,
             ReCalcSheetsFilterMutation,
-        ].forEach((m) => this.disposeWithMe(this._sheetRenderController.registerSkeletonChangingMutations(m.id)));
+        ].forEach((m) => this.disposeWithMe(this._sheetRenderService.registerSkeletonChangingMutations(m.id)));
 
         this._initRenderer();
     }
@@ -82,9 +82,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                 switchMap(([_, skeletonParams]) => {
                     if (!skeletonParams) return of(null);
 
-                    const { unitId } = skeletonParams;
-
-                    const workbook = this._context.unit;
+                    const { unit: workbook, unitId } = this._context;
                     const worksheetId = workbook.getActiveSheet().getSheetId();
                     const filterModel = this._sheetsFilterService.getFilterModel(unitId, worksheetId) ?? undefined;
                     const getParams = (): ISheetsFilterRenderParams => ({

@@ -15,19 +15,15 @@
  */
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationType, Disposable, DisposableCollection, ICommandService, isRangesEqual, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { DataValidationType, Disposable, isRangesEqual, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { handleCommonDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
-import { merge, Observable } from 'rxjs';
-import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import { DataValidationModel, RemoveDataValidationMutation, removeDataValidationUndoFactory, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
-import { DataValidationCacheService } from '../services/dv-cache.service';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidationRefRangeController)
 export class DataValidationRefRangeController extends Disposable {
@@ -35,15 +31,11 @@ export class DataValidationRefRangeController extends Disposable {
 
     constructor(
         @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private _injector: Injector,
-        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(RefRangeService) private _refRangeService: RefRangeService,
         @Inject(DataValidationCustomFormulaService) private _dataValidationCustomFormulaService: DataValidationCustomFormulaService,
         @Inject(DataValidationFormulaService) private _dataValidationFormulaService: DataValidationFormulaService,
-        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
+        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService
     ) {
         super();
         this._initRefRange();

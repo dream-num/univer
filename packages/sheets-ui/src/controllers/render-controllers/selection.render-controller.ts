@@ -442,7 +442,8 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                 return;
             }
 
-            const { unitId, sheetId, skeleton } = param;
+            const unitId = this._context.unitId;
+            const { sheetId, skeleton } = param;
             const { scene } = this._context;
 
             const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);

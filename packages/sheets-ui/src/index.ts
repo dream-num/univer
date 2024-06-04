@@ -24,7 +24,7 @@ export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from '.
 export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 export { deriveStateFromActiveSheet$, getCurrentRangeDisable$, getCommentDisable$ } from './controllers/menu/menu-util';
-export { SheetRenderController } from './controllers/sheet-render.controller';
+export { SheetRenderService } from './services/sheet-render.service';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export {
     ResetScrollCommand,

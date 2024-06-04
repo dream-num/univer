@@ -25,16 +25,17 @@ import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, isRangesEqual, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
 import type { IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
 
-@OnLifecycle(LifecycleStages.Rendered, RefRangeController)
-export class RefRangeController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, SheetsRefRangeController)
+export class SheetsRefRangeController extends Disposable {
     constructor(
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private _injector: Injector,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
-
-        @Inject(RefRangeService) private _refRangeService: RefRangeService) {
+        @Inject(RefRangeService) private _refRangeService: RefRangeService
+    ) {
         super();
+
         this._initRefRange();
     }
 

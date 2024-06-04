@@ -67,7 +67,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingUpdateController],
             [DrawingPopupMenuController],
             [SheetDrawingTransformAffectedController],
-            [SheetDrawingPrintingController]
+            [SheetDrawingPrintingController],
 
         ];
 

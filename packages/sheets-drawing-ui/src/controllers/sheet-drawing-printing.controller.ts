@@ -1,9 +1,25 @@
-import { Disposable, LifecycleStages, OnLifecycle, Tools } from "@univerjs/core";
-import { IDrawingManagerService } from "@univerjs/drawing";
-import { DrawingRenderService } from "@univerjs/drawing-ui";
-import { IRenderManagerService } from "@univerjs/engine-render";
-import { SheetPrintInterceptorService, SheetSkeletonManagerService } from "@univerjs/sheets-ui";
-import { Inject } from "@wendellhu/redi";
+/**
+ * Copyright 2023-present DreamNum Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { Disposable, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { DrawingRenderService } from '@univerjs/drawing-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SheetPrintInterceptorService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { Inject } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingPrintingController)
 export class SheetDrawingPrintingController extends Disposable {
@@ -25,17 +41,17 @@ export class SheetDrawingPrintingController extends Disposable {
                 this._sheetPrintInterceptorService.interceptor.getInterceptPoints().PRINTING_COMPONENT_COLLECT,
                 {
                     handler: (_param, pos, next) => {
-                        const { unitId, scene, subUnitId } = pos
+                        const { unitId, scene, subUnitId } = pos;
                         const unitData = this._drawingManagerService.getDrawingDataForUnit(unitId);
                         const subUnitData = unitData[subUnitId];
                         if (subUnitData) {
-                            subUnitData.order.forEach(id => {
+                            subUnitData.order.forEach((id) => {
                                 this._drawingRenderService.renderDrawing(subUnitData.data[id], scene);
-                            })
+                            });
                         }
 
                         return next();
-                    }
+                    },
                 }
             )
         );
@@ -50,7 +66,7 @@ export class SheetDrawingPrintingController extends Disposable {
                         }
 
                         const { unitId, subUnitId } = pos;
-                        const skeleton = this._sheetSkeletonManagerService.getUnitSkeleton(unitId, subUnitId)
+                        const skeleton = this._sheetSkeletonManagerService.getUnitSkeleton(unitId, subUnitId);
                         if (!skeleton) {
                             return next(range);
                         }
@@ -66,7 +82,7 @@ export class SheetDrawingPrintingController extends Disposable {
                         }
                         const { scaleX, scaleY } = renderer.scene;
                         const newRange = { ...range };
-                        subUnitData.order.forEach(id => {
+                        subUnitData.order.forEach((id) => {
                             const param = subUnitData.data[id];
                             if (!param.groupId && param.transform && Tools.isDefine(param.transform.left) && Tools.isDefine(param.transform.top) && Tools.isDefine(param.transform.width) && Tools.isDefine(param.transform.height)) {
                                 const start = skeleton.skeleton.getCellPositionByOffset(param.transform.left, param.transform.top, scaleX, scaleY, { x: 0, y: 0 });
@@ -84,12 +100,12 @@ export class SheetDrawingPrintingController extends Disposable {
                                 }
 
                                 if (newRange.endColumn < end.column) {
-                                    newRange.endColumn = end.column
+                                    newRange.endColumn = end.column;
                                 }
                             }
-                        })
+                        });
                         return next(newRange);
-                    }
+                    },
                 }
             )
         );

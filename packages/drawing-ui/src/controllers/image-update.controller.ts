@@ -23,16 +23,16 @@ import {
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
-import type { Scene } from '@univerjs/engine-render';
-import { CURSOR_TYPE, Image, IRenderManagerService } from '@univerjs/engine-render';
+import type { Image, Scene } from '@univerjs/engine-render';
+import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
 import type { IDrawingSearch, IImageData } from '@univerjs/drawing';
 import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService } from '@univerjs/drawing';
 import { IDialogService } from '@univerjs/ui';
+import { Inject } from '@wendellhu/redi';
 import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
-import { getCurrentUnitInfo, } from './utils';
-import { Inject } from '@wendellhu/redi';
 import { DrawingRenderService } from '../services/drawing-render.service';
+import { getCurrentUnitInfo } from './utils';
 
 const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 

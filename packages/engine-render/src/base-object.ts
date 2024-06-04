@@ -48,7 +48,6 @@ export abstract class BaseObject extends Disposable {
     groupKey?: string;
     isInGroup: boolean = false;
 
-
     onTransformChangeObservable = new Observable<ITransformChangeState>();
     onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
     onPointerMoveObserver = new Observable<IPointerEvent | IMouseEvent>();

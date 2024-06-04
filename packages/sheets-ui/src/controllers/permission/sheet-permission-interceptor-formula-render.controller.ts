@@ -16,7 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
 import { DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { getSheetCommandTarget, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, WorksheetEditPermission } from '@univerjs/sheets';
+import { getSheetCommandTarget, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { debounceTime, filter } from 'rxjs/operators';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
@@ -91,7 +91,7 @@ export class SheetPermissionInterceptorFormulaRenderController extends RxDisposa
                         }
                         const { unitId, subUnitId } = target;
 
-                        const worksheetViewPermission = this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false;
+                        const worksheetViewPermission = this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id)?.value ?? false;
                         if (!worksheetViewPermission) {
                             return false;
                         }

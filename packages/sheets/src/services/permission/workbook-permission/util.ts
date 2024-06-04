@@ -35,9 +35,16 @@ export const getAllWorkbookPermissionPoint = () => [
 
 export const defaultWorkbookPermissionPoints = [
     UnitAction.Edit,
-    UnitAction.View,
-    UnitAction.Comment,
     UnitAction.Print,
+    UnitAction.Comment,
+    UnitAction.View,
     UnitAction.Copy,
+    UnitAction.Export,
     UnitAction.ManageCollaborator,
+    UnitAction.CreateSheet,
+    UnitAction.DeleteSheet,
+    UnitAction.RenameSheet,
+    UnitAction.HideSheet,
+    UnitAction.Duplicate,
+    UnitAction.Share,
 ];

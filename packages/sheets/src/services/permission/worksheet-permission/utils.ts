@@ -22,6 +22,7 @@ export const getAllWorksheetPermissionPoint = () => [
     WorksheetEditPermission,
 ];
 
+// Changes require synchronization of the following arrays
 export const getAllWorksheetPermissionPointByPointPanel = () => [
     WorksheetCopyPermission,
     WorksheetDeleteColumnPermission,
@@ -29,8 +30,8 @@ export const getAllWorksheetPermissionPointByPointPanel = () => [
     WorksheetEditExtraObjectPermission,
     WorksheetFilterPermission,
     WorksheetInsertColumnPermission,
-    WorksheetInsertHyperlinkPermission,
     WorksheetInsertRowPermission,
+    WorksheetInsertHyperlinkPermission,
     WorksheetPivotTablePermission,
     WorksheetSetCellStylePermission,
     WorksheetSetCellValuePermission,
@@ -41,18 +42,18 @@ export const getAllWorksheetPermissionPointByPointPanel = () => [
 
 export const defaultWorksheetPermissionPoint = [
     UnitAction.Copy,
+    UnitAction.DeleteColumn,
+    UnitAction.DeleteRow,
+    UnitAction.EditExtraObject,
+    UnitAction.Filter,
+    UnitAction.InsertColumn,
+    UnitAction.InsertRow,
+    UnitAction.InsertHyperlink,
+    UnitAction.PivotTable,
     UnitAction.SetCellStyle,
     UnitAction.SetCellValue,
-    UnitAction.SetRowStyle,
     UnitAction.SetColumnStyle,
-    UnitAction.InsertRow,
-    UnitAction.InsertColumn,
-    UnitAction.InsertHyperlink,
-    UnitAction.DeleteRow,
-    UnitAction.DeleteColumn,
+    UnitAction.SetRowStyle,
     UnitAction.Sort,
-    UnitAction.Filter,
-    UnitAction.PivotTable,
-    UnitAction.EditExtraObject,
 ];
 

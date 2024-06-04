@@ -16,10 +16,9 @@
 
 type debounceFn<T extends (...args: any[]) => any> = (this: ThisParameterType<T>, ...args: Parameters<T>) => void;
 
-export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): debounceFn<T> {
+export function debounce<T extends (...args: any[]) => any>(func: T, wait: number) {
     let timeout: NodeJS.Timeout | null;
-
-    return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+    function run(this: ThisParameterType<T>, ...args: Parameters<T>) {
         const context = this;
 
         const later = function () {
@@ -29,5 +28,13 @@ export function debounce<T extends (...args: any[]) => any>(func: T, wait: numbe
 
         clearTimeout(timeout as NodeJS.Timeout);
         timeout = setTimeout(later, wait);
-    };
+    }
+    Object.defineProperty(run, 'cancel', {
+        value: () => {
+            clearTimeout(timeout as NodeJS.Timeout);
+        },
+        enumerable: false,
+        writable: false,
+    });
+    return run as debounceFn<T> & { cancel: () => void };
 }

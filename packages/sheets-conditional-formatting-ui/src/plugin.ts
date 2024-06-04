@@ -40,7 +40,7 @@ import { ConditionalFormattingAutoFillController } from './controllers/cf.auto-f
 import type { IUniverSheetsConditionalFormattingUIConfig } from './controllers/cf.menu.controller';
 import { ConditionalFormattingMenuController, DefaultSheetConditionalFormattingUiConfig } from './controllers/cf.menu.controller';
 import { ConditionalFormattingI18nController } from './controllers/cf.i18n.controller';
-import { SheetsRefRangeController } from './controllers/cf.ref-range.controller';
+import { SheetsCfRefRangeController } from './controllers/cf.ref-range.controller';
 import { ConditionalFormattingEditorController } from './controllers/cf.editor.controller';
 import { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
 import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
@@ -81,7 +81,7 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
             this._injector.add(dependency);
         });
         this._injector.add([SheetsCfRenderController]);
-        this._injector.add([SheetsRefRangeController]);
+        this._injector.add([SheetsCfRefRangeController]);
         this._injector.add([ConditionalFormattingCopyPasteController]);
         this._injector.add([ConditionalFormattingAutoFillController]);
         this._injector.add([ConditionalFormattingPermissionController]);

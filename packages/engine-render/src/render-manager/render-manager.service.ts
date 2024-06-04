@@ -41,8 +41,12 @@ export interface IRenderManagerService extends IDisposable {
     getRenderAll(): Map<string, IRender>;
     defaultEngine: Engine;
     create(unitId: Nullable<string>): void;
+
+    /** @deprecated There will be multi units to render at the same time, so there is no *current*. */
     getCurrent(): Nullable<IRender>;
+    /** @deprecated There will be multi units to render at the same time, so there is no *first*. */
     getFirst(): Nullable<IRender>;
+
     has(unitId: string): boolean;
 
     withCurrentTypeOfUnit<T>(type: UniverInstanceType, id: DependencyIdentifier<T>): Nullable<T>;

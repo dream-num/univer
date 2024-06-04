@@ -20,24 +20,22 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-// import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-// import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-// import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
-// import { FUniver } from '@univerjs/facade';
 import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
+import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
+import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
+import { FUniver } from '@univerjs/facade';
 import { enUS, ruRU, zhCN } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 
@@ -89,14 +87,13 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
 
 // data validation
-// univer.registerPlugin(UniverDataValidationPlugin);
-// univer.registerPlugin(UniverSheetsDataValidationPlugin);
+univer.registerPlugin(UniverSheetsDataValidationPlugin);
 
 // // sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
-// // drawing
-// univer.registerPlugin(UniverSheetsDrawingUIPlugin);
+ // drawing
+univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {
@@ -147,7 +144,7 @@ userManagerService.currentUser = mockUser;
 declare global {
     interface Window {
         univer?: Univer;
-        // univerAPI?: ReturnType<typeof FUniver.newAPI>;
+        univerAPI?: ReturnType<typeof FUniver.newAPI>;
     }
 }
 
@@ -159,4 +156,4 @@ setTimeout(() => {
 }, LOAD_LAZY_PLUGINS_TIMEOUT);
 
 window.univer = univer;
-// window.univerAPI = FUniver.newAPI(univer);
+window.univerAPI = FUniver.newAPI(univer);

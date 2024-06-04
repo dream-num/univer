@@ -15,23 +15,19 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
-import { merge, Observable } from 'rxjs';
-import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, isRangesEqual, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
 import type { IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetsRefRangeController)
-export class SheetsRefRangeController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, SheetsCfRefRangeController)
+export class SheetsCfRefRangeController extends Disposable {
     constructor(
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private _injector: Injector,
-        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(RefRangeService) private _refRangeService: RefRangeService
     ) {
         super();
@@ -72,53 +68,31 @@ export class SheetsRefRangeController extends Disposable {
             disposableMap.set(getCfIdWithUnitId(unitId, subUnitId, rule.cfId), () => disposeList.forEach((dispose) => dispose()));
         };
 
-        this.disposeWithMe(
-            merge(
-                this._sheetSkeletonManagerService.currentSkeleton$.pipe(
-                    map((skeleton) => skeleton?.sheetId),
-                    distinctUntilChanged()
-                )
-            )
-                .pipe(
-                    switchMap(
-                        () =>
-                            new Observable<DisposableCollection>((subscribe) => {
-                                const disposableCollection = new DisposableCollection();
-                                subscribe.next(disposableCollection);
-                                return () => {
-                                    disposableCollection.dispose();
-                                };
-                            })
-                    )
-                ).subscribe((disposableCollection) => {
-                    disposableCollection.add(
-                        toDisposable(
-                            this._conditionalFormattingRuleModel.$ruleChange.subscribe((option) => {
-                                const { unitId, subUnitId, rule } = option;
-                                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                                const worksheet = workbook.getActiveSheet();
-                                if (option.unitId !== workbook.getUnitId() || option.subUnitId !== worksheet.getSheetId()) {
-                                    return;
-                                }
-                                switch (option.type) {
-                                    case 'add':{
-                                        register(option.unitId, option.subUnitId, option.rule);
-                                        break;
-                                    }
-                                    case 'delete':{
-                                        const dispose = disposableMap.get(getCfIdWithUnitId(unitId, subUnitId, rule.cfId));
-                                        dispose && dispose();
-                                        break;
-                                    }
-                                    case 'set':{
-                                        const dispose = disposableMap.get(getCfIdWithUnitId(unitId, subUnitId, rule.cfId));
-                                        dispose && dispose();
+        this.disposeWithMe(this._conditionalFormattingRuleModel.$ruleChange.subscribe((option) => {
+            const { unitId, subUnitId, rule } = option;
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const worksheet = workbook.getActiveSheet();
+            if (option.unitId !== workbook.getUnitId() || option.subUnitId !== worksheet.getSheetId()) {
+                return;
+            }
+            switch (option.type) {
+                case 'add':{
+                    register(option.unitId, option.subUnitId, option.rule);
+                    break;
+                }
+                case 'delete':{
+                    const dispose = disposableMap.get(getCfIdWithUnitId(unitId, subUnitId, rule.cfId));
+                    dispose && dispose();
+                    break;
+                }
+                case 'set':{
+                    const dispose = disposableMap.get(getCfIdWithUnitId(unitId, subUnitId, rule.cfId));
+                    dispose && dispose();
                             // and to add
-                                        register(option.unitId, option.subUnitId, option.rule);
-                                    }
-                                }
-                            })));
-                }));
+                    register(option.unitId, option.subUnitId, option.rule);
+                }
+            }
+        }));
 
         this.disposeWithMe(toDisposable(() => {
             disposableMap.forEach((item) => {

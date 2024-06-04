@@ -17,7 +17,7 @@
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { ComponentType } from 'react';
 import React, { useMemo, useRef } from 'react';
-import { filter, map } from 'rxjs';
+import { filter, map, startWith } from 'rxjs';
 import type { Injector } from '@wendellhu/redi';
 import { useObservable } from '../../components/hooks/observable';
 import { IUIPartsService } from '../../services/parts/parts.service';
@@ -50,7 +50,8 @@ export function useComponentsOfPart(part: string, injector?: Injector) {
     const componentPartUpdateCount = useObservable(
         () => uiPartsService.componentRegistered$.pipe(
             filter((key) => key === part),
-            map(() => updateCounterRef.current += 1)
+            map(() => updateCounterRef.current += 1),
+            startWith(updateCounterRef.current += 1) // trigger update when subscribe
         ),
         undefined,
         undefined,

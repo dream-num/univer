@@ -66,7 +66,7 @@ import {
 import { IMessageService, textTrim } from '@univerjs/ui';
 import { Inject, Injector, Optional } from '@wendellhu/redi';
 
-import { ITextSelectionRenderManager, ptToPx } from '@univerjs/engine-render';
+import { IRenderManagerService, ITextSelectionRenderManager, ptToPx } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
 import {
     SheetCopyCommand,
@@ -106,12 +106,12 @@ export class SheetClipboardController extends RxDisposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _currentUniverSheet: IUniverInstanceService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
         @IConfigService private readonly _configService: IConfigService,
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
         @IMessageService private readonly _messageService: IMessageService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(LocaleService) private readonly _localService: LocaleService,
         @Optional(ITextSelectionRenderManager) private readonly _textSelectionRenderManager?: ITextSelectionRenderManager
     ) {
@@ -523,7 +523,7 @@ export class SheetClipboardController extends RxDisposable {
     }
 
     private _generateDocumentDataModelSnapshot(snapshot: Partial<IDocumentData>) {
-        const currentSkeleton = this._sheetSkeletonManagerService.getCurrent();
+        const currentSkeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrent();
         if (currentSkeleton == null) {
             return null;
         }

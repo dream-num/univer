@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { Workbook, Worksheet } from '@univerjs/core';
-import { ICommandService, RxDisposable, toDisposable } from '@univerjs/core';
-import type { IRenderContext, IRenderController, IWheelEvent, Scene } from '@univerjs/engine-render';
+import type { ICommandInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
+import { CommandType, ICommandService, Rectangle, RxDisposable } from '@univerjs/core';
+import type { IRenderContext, IRenderController, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
-    IRenderManagerService,
     Layer,
     PointerInput,
     Rect,
@@ -31,9 +30,9 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
-import { BehaviorSubject } from 'rxjs';
-
+import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';
+
 import {
     SHEET_COMPONENT_HEADER_LAYER_INDEX,
     SHEET_COMPONENT_MAIN_LAYER_INDEX,
@@ -41,23 +40,27 @@ import {
 } from '../common/keys';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
+        // TODO@wzhudev: sheet skeleton manager service should exist within RenderUnit.
+        // this._sheetSkeletonManagerService.setCurrent({ sheetId, unitId });
+// this._sheetSkeletonManagerService.removeSkeleton({ unitId });
+
+interface ISetWorksheetMutationParams {
+    unitId: string;
+    subUnitId: string;
+}
+
 export class SheetCanvasView extends RxDisposable implements IRenderController {
-    private readonly _fps$ = new BehaviorSubject<string>('');
-    readonly fps$ = this._fps$.asObservable();
+    // TODO@wzhudev: this is not hooked
+    private _skeletonChangeMutations = new Set<string>();
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @ICommandService private readonly _commandService: ICommandService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
         this._addNewRender(this._context.unit);
-    }
-
-    override dispose(): void {
-        this._fps$.complete();
     }
 
     private _addNewRender(workbook: Workbook) {
@@ -67,12 +70,12 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
 
         this._addComponent(workbook);
 
+        this._initRerenderScheduler();
+        this._initCommandListener();
+
         const should = workbook.getShouldRenderLoopImmediately();
         if (should) {
-            engine.runRenderLoop(() => {
-                scene.render();
-                this._fps$.next(Math.round(engine.getFps()).toString());
-            });
+            engine.runRenderLoop(() => scene.render());
         }
     }
 
@@ -80,13 +83,9 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
         const { scene, components } = this._context;
 
         const worksheet = workbook.getActiveSheet();
-
-        const unitId = workbook.getUnitId();
-
-        const sheetId = worksheet.getSheetId();
-
         const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
-        const _viewMain = this._addViewport(worksheet);
+
+        this._addViewport(worksheet);
 
         const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW);
         const spreadsheetColumnHeader = new SpreadsheetColumnHeader(SHEET_VIEW_KEY.COLUMN);
@@ -239,42 +238,220 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
         const { viewMain } = this._initViewports(scene, rowHeader, columnHeader);
 
         this._initMouseWheel(scene, viewMain);
-
-        // create a scroll bar
-        const scrollBar = new ScrollBar(viewMain);
+        const _scrollBar = new ScrollBar(viewMain);
 
         scene.attachControl();
 
         return viewMain;
     }
 
+    private _initRerenderScheduler(): void {
+        this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+            if (!param) return null;
+
+            const { skeleton: spreadsheetSkeleton, sheetId } = param;
+            const workbook = this._context.unit;
+            const worksheet = workbook?.getSheetBySheetId(sheetId);
+            if (workbook == null || worksheet == null) return;
+
+            const { mainComponent, components } = this._context;
+            const spreadsheet = mainComponent as Spreadsheet;
+            const spreadsheetRowHeader = components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
+            const spreadsheetColumnHeader = components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+            const spreadsheetLeftTopPlaceholder = components.get(SHEET_VIEW_KEY.LEFT_TOP) as Rect;
+            const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+
+            spreadsheet?.updateSkeleton(spreadsheetSkeleton);
+            spreadsheetRowHeader?.updateSkeleton(spreadsheetSkeleton);
+            spreadsheetColumnHeader?.updateSkeleton(spreadsheetSkeleton);
+            spreadsheetLeftTopPlaceholder?.transformByState({
+                width: rowHeaderWidth,
+                height: columnHeaderHeight,
+            });
+        }));
+    }
+
+    private _initCommandListener(): void {
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            const workbook = this._context.unit;
+            const unitId = workbook.getUnitId();
+            if (COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id) || this._skeletonChangeMutations.has(command.id)) {
+                const worksheet = workbook.getActiveSheet();
+                const sheetId = worksheet.getSheetId();
+                const params = command.params;
+                const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
+
+                if ((unitId !== workbook.getUnitId() && subUnitId !== worksheet.getSheetId())) {
+                    return;
+                }
+
+                if (command.id !== SetWorksheetActiveOperation.id) {
+                    this._sheetSkeletonManagerService.makeDirty({
+                        unitId,
+                        sheetId,
+                        commandId: command.id,
+                    }, true);
+                }
+
+                // Change the skeleton to render when the sheet is changed.
+                // Should also check the init sheet.
+                // setCurrent ---> currentSkeletonBefore$ ---> zoom.controller.subscribe ---> scene._setTransForm --->  viewports markDirty
+                // setCurrent ---> currentSkeleton$ ---> scroll.controller.subscribe ---> scene?.transformByState ---> scene._setTransFor
+                this._sheetSkeletonManagerService.setCurrent({
+                    unitId,
+                    sheetId,
+                    commandId: command.id,
+                });
+            } else if (COMMAND_LISTENER_VALUE_CHANGE.includes(command.id)) {
+                this._sheetSkeletonManagerService.reCalculate();
+            }
+
+            if (command.type === CommandType.MUTATION) {
+                this._markUnitDirty(unitId, command);
+            }
+        }));
+    }
+
+    private _markUnitDirty(unitId: string, command: ICommandInfo) {
+        const { mainComponent: spreadsheet, scene } = this._context;
+        // 现在 spreadsheet.markDirty 会调用 vport.markDirty
+        // 因为其他 controller 中存在 mainComponent?.makeDirty() 的调用, 不止是 sheet-render.controller 在标脏
+        if (spreadsheet) {
+            spreadsheet.makeDirty(); // refresh spreadsheet
+        }
+
+        scene.makeDirty();
+        if (!command.params) return;
+
+        const cmdParams = command.params as Record<string, any>;
+        const viewports = this._spreadsheetViewports(scene);
+        if (command.id === SetRangeValuesMutation.id && cmdParams.cellValue) {
+            const dirtyRange: IRange = this._cellValueToRange(cmdParams.cellValue);
+            const dirtyBounds = this._rangeToBounds([dirtyRange]);
+            this._markViewportDirty(viewports, dirtyBounds);
+            (spreadsheet as unknown as Spreadsheet).setDirtyArea(dirtyBounds);
+        }
+
+        if (command.id === MoveRangeMutation.id && cmdParams.from && cmdParams.to) {
+            const fromRange = this._cellValueToRange(cmdParams.from.value);
+            const toRange = this._cellValueToRange(cmdParams.to.value);
+            const dirtyBounds = this._rangeToBounds([fromRange, toRange]);
+            this._markViewportDirty(viewports, dirtyBounds);
+            (spreadsheet as unknown as Spreadsheet).setDirtyArea(dirtyBounds);
+        }
+    }
+
+    /**
+     * cellValue data structure:
+     * {[row]: { [col]: value}}
+     * @param cellValue
+     * @returns
+     */
+    private _cellValueToRange(cellValue: Record<number, Record<number, object>>) {
+        const rows = Object.keys(cellValue).map(Number);
+        const columns = [];
+
+        for (const [_row, columnObj] of Object.entries(cellValue)) {
+            for (const column in columnObj) {
+                columns.push(Number(column));
+            }
+        }
+
+        const startRow = Math.min(...rows);
+        const endRow = Math.max(...rows);
+        const startColumn = Math.min(...columns);
+        const endColumn = Math.max(...columns);
+
+        return {
+            startRow,
+            endRow,
+            startColumn,
+            endColumn,
+        } as IRange;
+    }
+
+    private _rangeToBounds(ranges: IRange[]) {
+        const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+        const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = skeleton;
+
+        // rowHeightAccumulation 已经表示的是行底部的高度
+        const dirtyBounds: IViewportInfos[] = [];
+        for (const r of ranges) {
+            const { startRow, endRow, startColumn, endColumn } = r;
+            const top = startRow === 0 ? 0 : rowHeightAccumulation[startRow - 1] + columnHeaderHeight;
+            const bottom = rowHeightAccumulation[endRow] + columnHeaderHeight;
+            const left = startColumn === 0 ? 0 : columnWidthAccumulation[startColumn - 1] + rowHeaderWidth;
+            const right = columnWidthAccumulation[endColumn] + rowHeaderWidth;
+            dirtyBounds.push({ top, left, bottom, right, width: right - left, height: bottom - top });
+        }
+        return dirtyBounds;
+    }
+
+    private _markViewportDirty(viewports: Viewport[], dirtyBounds: IViewportInfos[]) {
+        const activeViewports = viewports.filter((vp) => vp.isActive && vp.cacheBound);
+        for (const vp of activeViewports) {
+            for (const b of dirtyBounds) {
+                if (Rectangle.hasIntersectionBetweenTwoBounds(vp.cacheBound!, b)) {
+                    vp.markDirty(true);
+                }
+            }
+        }
+    }
+
+    private _spreadsheetViewports(scene: Scene) {
+        return scene.getViewports().filter((v) => ['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(v.viewportKey));
+    }
+
     // mouse scroll
     private _initMouseWheel(scene: Scene, viewMain: Viewport) {
         this.disposeWithMe(
-            toDisposable(
-                scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
-                    if (evt.ctrlKey) {
-                        return;
-                    }
+            scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
+                if (evt.ctrlKey) {
+                    return;
+                }
 
-                    let offsetX = 0;
-                    let offsetY = 0;
+                let offsetX = 0;
+                let offsetY = 0;
 
-                    const isLimitedStore = viewMain.limitedScroll();
-                    if (evt.inputIndex === PointerInput.MouseWheelX) {
-                        const deltaFactor = Math.abs(evt.deltaX);
+                const isLimitedStore = viewMain.limitedScroll();
+                if (evt.inputIndex === PointerInput.MouseWheelX) {
+                    const deltaFactor = Math.abs(evt.deltaX);
                         // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
-                        const scrollNum = deltaFactor;
+                    const scrollNum = deltaFactor;
                         // 展示更多右侧内容，evt.deltaX > 0
                         // 展示更多左侧内容, evt.deltaX < 0
-                        if (evt.deltaX > 0) {
+                    if (evt.deltaX > 0) {
+                        offsetX = scrollNum;
+                    } else {
+                        offsetX = -scrollNum;
+                    }
+                    this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
+
+                        // 临界点时执行浏览器行为
+                    if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                        if (!isLimitedStore?.isLimitedX) {
+                            state.stopPropagation();
+                        }
+                    } else if (viewMain.isWheelPreventDefaultX) {
+                        evt.preventDefault();
+                    } else if (!isLimitedStore?.isLimitedX) {
+                        evt.preventDefault();
+                    }
+                }
+                if (evt.inputIndex === PointerInput.MouseWheelY) {
+                    const deltaFactor = Math.abs(evt.deltaY);
+                        // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+                    let scrollNum = deltaFactor;
+                    if (evt.shiftKey) {
+                        scrollNum *= 3;
+                        if (evt.deltaY > 0) {
                             offsetX = scrollNum;
                         } else {
                             offsetX = -scrollNum;
                         }
                         this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
 
-                        // 临界点时执行浏览器行为
+                            // 临界点时执行浏览器行为
                         if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
                             if (!isLimitedStore?.isLimitedX) {
                                 state.stopPropagation();
@@ -284,54 +461,29 @@ export class SheetCanvasView extends RxDisposable implements IRenderController {
                         } else if (!isLimitedStore?.isLimitedX) {
                             evt.preventDefault();
                         }
-                    }
-                    if (evt.inputIndex === PointerInput.MouseWheelY) {
-                        const deltaFactor = Math.abs(evt.deltaY);
-                        // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
-                        let scrollNum = deltaFactor;
-                        if (evt.shiftKey) {
-                            scrollNum *= 3;
-                            if (evt.deltaY > 0) {
-                                offsetX = scrollNum;
-                            } else {
-                                offsetX = -scrollNum;
-                            }
-                            this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
-
-                            // 临界点时执行浏览器行为
-                            if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                                if (!isLimitedStore?.isLimitedX) {
-                                    state.stopPropagation();
-                                }
-                            } else if (viewMain.isWheelPreventDefaultX) {
-                                evt.preventDefault();
-                            } else if (!isLimitedStore?.isLimitedX) {
-                                evt.preventDefault();
-                            }
+                    } else {
+                        if (evt.deltaY > 0) {
+                            offsetY = scrollNum;
                         } else {
-                            if (evt.deltaY > 0) {
-                                offsetY = scrollNum;
-                            } else {
-                                offsetY = -scrollNum;
-                            }
-                            this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY });
+                            offsetY = -scrollNum;
+                        }
+                        this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY });
 
                             // 临界点时执行浏览器行为
-                            if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                                if (!isLimitedStore?.isLimitedY) {
-                                    state.stopPropagation();
-                                }
-                            } else if (viewMain.isWheelPreventDefaultY) {
-                                evt.preventDefault();
-                            } else if (!isLimitedStore?.isLimitedY) {
-                                evt.preventDefault();
+                        if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                            if (!isLimitedStore?.isLimitedY) {
+                                state.stopPropagation();
                             }
+                        } else if (viewMain.isWheelPreventDefaultY) {
+                            evt.preventDefault();
+                        } else if (!isLimitedStore?.isLimitedY) {
+                            evt.preventDefault();
                         }
                     }
+                }
 
-                    this._context.scene.makeDirty(true);
-                })
-            )
+                this._context.scene.makeDirty(true);
+            })
         );
     }
 }

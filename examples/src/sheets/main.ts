@@ -18,27 +18,26 @@ import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } 
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+// import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
-import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
+// import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+// import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
+// import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
-import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
+// import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
+// import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+// import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
+// import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
-import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
+// import { UniverDataValidationPlugin } from '@univerjs/data-validation';
+// import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
+// import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
-import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
-import { FUniver } from '@univerjs/facade';
+// import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
+// import { FUniver } from '@univerjs/facade';
 import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { enUS, ruRU, zhCN } from '../locales';
@@ -46,7 +45,7 @@ import { enUS, ruRU, zhCN } from '../locales';
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
 
-const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
+// const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
 
 // univer
 const univer = new Univer({
@@ -78,33 +77,33 @@ univer.registerPlugin(UniverSheetsUIPlugin);
 
 // sheet feature plugins
 
-univer.registerPlugin(UniverSheetsNumfmtPlugin);
-univer.registerPlugin(UniverSheetsZenEditorPlugin);
-univer.registerPlugin(UniverFormulaEnginePlugin, {
-    notExecuteFormula: true,
-});
-univer.registerPlugin(UniverSheetsFormulaPlugin);
-univer.registerPlugin(UniverRPCMainThreadPlugin, {
-    workerURL: './worker.js',
-} as IUniverRPCMainThreadConfig);
+// univer.registerPlugin(UniverSheetsNumfmtPlugin);
+// univer.registerPlugin(UniverSheetsZenEditorPlugin);
+// univer.registerPlugin(UniverFormulaEnginePlugin, {
+//     notExecuteFormula: true,
+// });
+// univer.registerPlugin(UniverSheetsFormulaPlugin);
+// univer.registerPlugin(UniverRPCMainThreadPlugin, {
+//     workerURL: './worker.js',
+// } as IUniverRPCMainThreadConfig);
 
-univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
+// univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
 
-// find replace
-univer.registerPlugin(UniverSheetsFindReplacePlugin);
+// // find replace
+// univer.registerPlugin(UniverSheetsFindReplacePlugin);
 
-// data validation
-univer.registerPlugin(UniverDataValidationPlugin);
-univer.registerPlugin(UniverSheetsDataValidationPlugin);
+// // data validation
+// univer.registerPlugin(UniverDataValidationPlugin);
+// univer.registerPlugin(UniverSheetsDataValidationPlugin);
 
-// filter
-univer.registerPlugin(UniverSheetsFilterPlugin);
+// // filter
+// univer.registerPlugin(UniverSheetsFilterPlugin);
 
-// sheet condition formatting
-univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
+// // sheet condition formatting
+// univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
-// drawing
-univer.registerPlugin(UniverSheetsDrawingUIPlugin);
+// // drawing
+// univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {
@@ -155,16 +154,16 @@ userManagerService.currentUser = mockUser;
 declare global {
     interface Window {
         univer?: Univer;
-        univerAPI?: ReturnType<typeof FUniver.newAPI>;
+        // univerAPI?: ReturnType<typeof FUniver.newAPI>;
     }
 }
 
-setTimeout(() => {
-    import('./lazy').then((lazy) => {
-        const plugins = lazy.default();
-        plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
-    });
-}, LOAD_LAZY_PLUGINS_TIMEOUT);
+// setTimeout(() => {
+//     import('./lazy').then((lazy) => {
+//         const plugins = lazy.default();
+//         plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
+//     });
+// }, LOAD_LAZY_PLUGINS_TIMEOUT);
 
 window.univer = univer;
-window.univerAPI = FUniver.newAPI(univer);
+// window.univerAPI = FUniver.newAPI(univer);

@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { CellValueType, Disposable, isRealNum, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { CellValueType, Disposable, isRealNum, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 
 import { Inject } from '@wendellhu/redi';
 import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
@@ -30,7 +30,6 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
         private readonly _context: IRenderContext<Workbook>,
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();

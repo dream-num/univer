@@ -42,6 +42,7 @@ import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
 import { PastePluginLark, PastePluginUniver, PastePluginWord } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
@@ -120,17 +121,18 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @ICommandService private readonly _commandService: ICommandService,
         @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @INotificationService private readonly _notificationService: INotificationService,
         @IPlatformService private readonly _platformService: IPlatformService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(ErrorService) private readonly _errorService: ErrorService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
         this._htmlToUSM = new HtmlToUSMService({
-            getCurrentSkeleton: () => this._sheetSkeletonManagerService.getCurrent(),
+            getCurrentSkeleton: () => this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrent(),
         });
+
         this._usmToHtml = new USMToHtmlService();
         this._copyContentCache = new CopyContentCache();
 

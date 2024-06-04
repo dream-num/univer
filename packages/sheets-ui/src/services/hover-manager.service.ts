@@ -22,7 +22,6 @@ import { distinctUntilChanged, Subject } from 'rxjs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getHoverCellPosition } from '../common/utils';
 import { ScrollManagerService } from './scroll-manager.service';
-import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IHoverCellPosition {
     position: IPosition;
@@ -50,7 +49,6 @@ export class HoverManagerService extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();

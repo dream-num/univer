@@ -78,12 +78,11 @@ import { DragManagerService } from './services/drag-manager.service';
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';
 import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
-import { SheetPermissionRenderController } from './controllers/permission/sheet-permission-render.controller';
+import { SheetPermissionRenderController, SheetPermissionRenderManagerController } from './controllers/permission/sheet-permission-render.controller';
 import { SheetPermissionInterceptorCanvasRenderController } from './controllers/permission/sheet-permission-interceptor-canvas-render.controller';
 import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
 import { SheetPermissionPanelModel } from './services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
-import { PermissionRenderService } from './services/permission/permission-render.service';
 
 @DependentOn(UniverSheetsPlugin, UniverUIPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
@@ -116,7 +115,8 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [IAutoFillService, { useClass: AutoFillService }],
 
                 [ScrollManagerService],
-                [SheetSkeletonManagerService],
+                // This would be removed from global injector and moved into RenderUnit provider.
+                // [SheetSkeletonManagerService],
                 [ISelectionRenderService, { useClass: SelectionRenderService }],
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
@@ -149,7 +149,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [SheetPermissionPanelModel],
 
                 [SheetPermissionUserManagerService],
-                [PermissionRenderService],
                 [WorksheetProtectionRenderService],
                 [SheetPermissionInterceptorClipboardController],
                 [SheetPermissionInterceptorBaseController],
@@ -159,9 +158,9 @@ export class UniverSheetsUIPlugin extends Plugin {
 
         this._injector.add(
             [
-                SheetPermissionRenderController,
+                SheetPermissionRenderManagerController,
                 {
-                    useFactory: () => this._injector.createInstance(SheetPermissionRenderController, this._config),
+                    useFactory: () => this._injector.createInstance(SheetPermissionRenderManagerController, this._config),
                 },
             ]
 
@@ -175,9 +174,11 @@ export class UniverSheetsUIPlugin extends Plugin {
 
     private _registerRenderControllers(): void {
         ([
+            SheetSkeletonManagerService,
             SheetCanvasView,
+
             // https://github.com/dream-num/univer-pro/issues/669
-            // HeaderMoveRenderController must be initialized before SelectionRenderController.
+            // HeaderMoveRenderController(HMRC) must be initialized before SelectionRenderController(SRC).
             // Before HMRC expected selections remain unchanged when user clicks on the header. If we don't initialize HMRC before SRC,
             // the selections will be changed by SRC first. Maybe we should merge row/col header related render controllers to one class.
             HeaderMoveRenderController,
@@ -199,9 +200,9 @@ export class UniverSheetsUIPlugin extends Plugin {
             SheetContextMenuRenderController,
             EditorBridgeRenderController,
 
-            // permission
             SheetPermissionInterceptorCanvasRenderController,
             SheetPermissionInterceptorFormulaRenderController,
+            SheetPermissionRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
         });

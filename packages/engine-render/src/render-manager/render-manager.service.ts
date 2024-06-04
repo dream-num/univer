@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable, UnitModel, UnitType } from '@univerjs/core';
+import type { Nullable, UnitModel, UnitType, UniverInstanceType } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
+import type { DependencyIdentifier, IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
@@ -44,6 +44,8 @@ export interface IRenderManagerService extends IDisposable {
     getCurrent(): Nullable<IRender>;
     getFirst(): Nullable<IRender>;
     has(unitId: string): boolean;
+
+    withCurrentTypeOfUnit<T>(type: UniverInstanceType, id: DependencyIdentifier<T>): Nullable<T>;
 
     registerRenderController<T extends UnitModel>(type: UnitType, ctor: IRenderControllerCtor<T>): IDisposable;
 }
@@ -84,13 +86,9 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     override dispose() {
         super.dispose();
 
-        this._renderMap.forEach((item) => {
-            this._disposeItem(item);
-        });
-
+        this._renderMap.forEach((item) => this._disposeItem(item));
         this._renderControllers.clear();
         this._renderMap.clear();
-
         this._currentRender$.complete();
     }
 
@@ -116,16 +114,19 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return Array.from(this._renderControllers.get(type) ?? []);
     }
 
-    createRenderWithEngine(unitId: string, engine: Engine): IRender {
-        return this._createRender(unitId, engine, false);
-    }
-
     create(unitId: Nullable<string>) {
         this._createRender$.next(unitId);
     }
 
     createRender(unitId: string): IRender {
         return this._createRender(unitId, new Engine());
+    }
+
+    withCurrentTypeOfUnit<T>(type: UniverInstanceType, id: DependencyIdentifier<T>): Nullable<T> {
+        const current = this._univerInstanceService.getCurrentUnitForType(type);
+        if (!current) return null;
+
+        return this.getRenderById(current.getUnitId())?.with(id);
     }
 
     private _createRender(unitId: string, engine: Engine, isMainScene: boolean = true): IRender {

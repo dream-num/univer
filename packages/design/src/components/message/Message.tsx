@@ -21,6 +21,7 @@ import { render, unmount } from 'rc-util/lib/React/render';
 import type { CSSProperties, ReactElement } from 'react';
 import React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
 import type { IDisposable } from '../../type';
 
 import styles from './index.module.less';
@@ -104,7 +105,7 @@ export class Message implements IDisposable {
     protected _messages: IMessageProps[] = [];
 
     constructor(container: HTMLElement) {
-        if (document) {
+        if (canUseDom()) {
             this._container = document.createElement('div');
             container.appendChild(this._container);
         } else {

@@ -19,7 +19,7 @@ import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { CheckMarkSingle, DeleteSingle, LockSingle, ProtectSingle, WriteSingle } from '@univerjs/icons';
-import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY, RangeProtectionCanNotViewRenderExtension, RangeProtectionCanViewRenderExtension, RangeProtectionRuleModel } from '@univerjs/sheets';
+import { RangeProtectionRuleModel } from '@univerjs/sheets';
 import type { IRenderContext, Spreadsheet } from '@univerjs/engine-render';
 import { merge, throttleTime } from 'rxjs';
 import { sheetPermissionAddProtectContextMenuFactory, sheetPermissionChangeSheetPermissionSheetBarMenuFactory, sheetPermissionContextMenuFactory, sheetPermissionEditProtectContextMenuFactory, sheetPermissionProtectSheetInSheetBarMenuFactory, sheetPermissionRemoveProtectContextMenuFactory, sheetPermissionRemoveProtectionSheetBarMenuFactory, sheetPermissionToolbarMenuFactory, sheetPermissionViewAllProtectRuleContextMenuFactory, sheetPermissionViewAllProtectRuleSheetBarMenuFactory } from '../menu/permission.menu';
@@ -28,6 +28,7 @@ import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionPanelFooter
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../../views/permission/error-msg-dialog/interface';
 import { AlertDialog } from '../../views/permission/error-msg-dialog';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY, RangeProtectionCanNotViewRenderExtension, RangeProtectionCanViewRenderExtension } from '../../views/permission/extensions/range-protection.render';
 
 export interface IUniverSheetsPermissionMenuConfig {
     menu: MenuConfig;

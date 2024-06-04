@@ -22,9 +22,6 @@ import { Inject } from '@wendellhu/redi';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-/**
- * @todo RenderUnit
- */
 @OnLifecycle(LifecycleStages.Rendered, CellCustomRenderController)
 export class CellCustomRenderController extends Disposable implements IRenderModule {
     private _enterActiveRender: Nullable<{
@@ -53,7 +50,9 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
             if (!skeletonParam) {
                 return;
             }
-            const { unitId, skeleton } = skeletonParam;
+
+            const unitId = this._context.unitId;
+            const { skeleton } = skeletonParam;
             const currentRender = this._renderManagerService.getRenderById(unitId);
             if (currentRender && currentRender.mainComponent) {
                 const spreadsheet = currentRender.mainComponent as Spreadsheet;

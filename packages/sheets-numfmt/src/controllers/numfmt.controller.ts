@@ -125,9 +125,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
             onChange: (config) => {
                 if (config.type === 'change') {
                     this._previewPattern = config.value;
-                    // TODO@wzhudev: strange, should not call render to change by force
-                    // this._sheetSkeletonManagerService.reCalculate();
-                    // this._renderManagerService.getRenderById(workbook.getUnitId())?.mainComponent?.makeDirty();
+                    this._forceUpdate();
                 } else if (config.type === 'confirm') {
                     const selections = selectionManagerService.getSelectionRanges() || [];
                     const params: ISetNumfmtCommandParams = { values: [] };
@@ -158,15 +156,19 @@ export class NumfmtController extends Disposable implements INumfmtController {
                 ...(props as any), // need passthrough to react props.
             },
             onClose: () => {
-                // TODO@wzhudev: strange
-                // this._sheetSkeletonManagerService.reCalculate();
-                // this._renderManagerService.getRenderById(workbook.getUnitId())?.mainComponent?.makeDirty();
+                this._forceUpdate();
                 commandService.executeCommand(CloseNumfmtPanelOperator.id);
             },
         });
 
         return true;
     };
+
+    private _forceUpdate(unitId?: string): void {
+        this._renderManagerService.getRenderById(
+            unitId ?? this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
+        )?.mainComponent?.makeDirty();
+    }
 
     private _initCommands() {
         [
@@ -288,26 +290,17 @@ export class NumfmtController extends Disposable implements INumfmtController {
     }
 
     private _commandExecutedListener() {
-        // TODO@wzhudev: update to register refresh command
         const commandList = [RemoveNumfmtMutation.id, SetNumfmtMutation.id];
-        this.disposeWithMe(
-            toDisposable(
-                new Observable<string>((subscribe) => {
-                    const disposable = this._commandService.onCommandExecuted((command) => {
-                        if (commandList.includes(command.id)) {
-                            const params = command.params as ISetNumfmtMutationParams;
-                            subscribe.next(params.unitId);
-                        }
-                    });
-                    return () => {
-                        disposable.dispose();
-                    };
-                }).pipe(debounceTime(16))
-                    .subscribe((unitId) => {
-                        // this._sheetSkeletonManagerService.reCalculate();
-                        this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
-                    })
-            )
+        this.disposeWithMe(new Observable<string>((subscribe) => {
+            const disposable = this._commandService.onCommandExecuted((command) => {
+                if (commandList.includes(command.id)) {
+                    const params = command.params as ISetNumfmtMutationParams;
+                    subscribe.next(params.unitId);
+                }
+            });
+            return () => disposable.dispose();
+        }).pipe(debounceTime(16))
+            .subscribe((unitId) => this._forceUpdate(unitId))
         );
     }
 

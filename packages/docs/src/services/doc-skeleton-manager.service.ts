@@ -99,10 +99,6 @@ export class DocSkeletonManagerService extends RxDisposable {
         return this._docSkeletonMap;
     }
 
-    makeDirtyCurrent(state: boolean = true) {
-        this.makeDirty(this._currentSkeletonUnitId, state);
-    }
-
     makeDirty(unitId: string, state: boolean = true) {
         const param = this.getSkeletonByUnitId(unitId);
         if (param == null) {

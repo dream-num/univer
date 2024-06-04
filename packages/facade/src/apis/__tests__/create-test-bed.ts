@@ -47,7 +47,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { ISelectionRenderService, SelectionRenderService, SheetCanvasView, SheetRenderController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { ISelectionRenderService, SelectionRenderService, SheetRenderController, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/ui';
 import { SheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 
@@ -142,7 +142,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
             injector.add([ISelectionRenderService, { useClass: SelectionRenderService }]);
-            injector.add([SheetRenderController]);
+            injector.add([SheetsRenderService]);
             injector.add([IShortcutService, { useClass: DesktopShortcutService }]);
             injector.add([IPlatformService, { useClass: DesktopPlatformService }]);
             injector.add([SheetSkeletonManagerService]);
@@ -162,7 +162,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
 
             const renderManagerService = injector.get(IRenderManagerService);
             ([
-                SheetCanvasView,
+                SheetRenderController,
             ]).forEach((renderController) => renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, renderController));
         }
     }

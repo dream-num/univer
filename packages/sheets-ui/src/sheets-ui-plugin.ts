@@ -38,7 +38,7 @@ import { HeaderResizeRenderController } from './controllers/render-controllers/h
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
 import { SelectionRenderController } from './controllers/render-controllers/selection.render-controller';
-import { SheetRenderService } from './services/sheet-render.service';
+import { SheetsRenderService } from './services/sheets-render.service';
 import type { IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
 import { DefaultSheetUiConfig, SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
@@ -58,7 +58,7 @@ import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-ba
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
-import { SheetCanvasView } from './views/sheet-canvas-view';
+import { SheetRenderController } from './controllers/sheet-render.controller';
 import { HoverRenderController } from './controllers/hover-render.controller';
 import { HoverManagerService } from './services/hover-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
@@ -132,7 +132,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [FormulaEditorController],
                 [HeaderFreezeRenderController],
                 [SheetClipboardController],
-                [SheetRenderService],
+                [SheetsRenderService],
                 [
                     SheetUIController,
                     {
@@ -175,7 +175,7 @@ export class UniverSheetsUIPlugin extends Plugin {
     private _registerRenderControllers(): void {
         ([
             SheetSkeletonManagerService,
-            SheetCanvasView,
+            SheetRenderController,
 
             // https://github.com/dream-num/univer-pro/issues/669
             // HeaderMoveRenderController(HMRC) must be initialized before SelectionRenderController(SRC).

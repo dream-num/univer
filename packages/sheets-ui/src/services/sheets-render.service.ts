@@ -31,8 +31,8 @@ import { distinctUntilChanged, takeUntil } from 'rxjs';
 /**
  * This controller is responsible for managing units of a specific kind to be rendered on the canvas.
  */
-@OnLifecycle(LifecycleStages.Ready, SheetRenderService)
-export class SheetRenderService extends RxDisposable {
+@OnLifecycle(LifecycleStages.Ready, SheetsRenderService)
+export class SheetsRenderService extends RxDisposable {
     private _skeletonChangeMutations = new Set<string>();
 
     constructor(
@@ -54,7 +54,7 @@ export class SheetRenderService extends RxDisposable {
      */
     registerSkeletonChangingMutations(mutationId: string): IDisposable {
         if (this._skeletonChangeMutations.has(mutationId)) {
-            throw new Error(`[SheetRenderController]: the mutationId ${mutationId} has already been registered!`);
+            throw new Error(`[SheetsRenderService]: the mutationId ${mutationId} has already been registered!`);
         }
 
         this._skeletonChangeMutations.add(mutationId);

@@ -89,10 +89,10 @@ univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
 // data validation
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
 
-// // sheet condition formatting
+// sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
- // drawing
+// drawing
 univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 
 // create univer sheet instance
@@ -111,7 +111,7 @@ const mockUser = {
 class CustomMentionDataService implements IThreadCommentMentionDataService {
     trigger: string = '@';
 
-    async getMentions(search: string) {
+    async getMentions() {
         return [
             {
                 id: mockUser.userID,
@@ -142,6 +142,7 @@ const userManagerService = injector.get(UserManagerService);
 userManagerService.currentUser = mockUser;
 
 declare global {
+    // eslint-disable-next-line ts/naming-convention
     interface Window {
         univer?: Univer;
         univerAPI?: ReturnType<typeof FUniver.newAPI>;

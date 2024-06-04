@@ -23,10 +23,8 @@ import type { ISheetFontRenderExtension } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
 import type { IConditionalFormattingCellData } from '@univerjs/sheets-conditional-formatting';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
-/**
- * @todo RenderUnit
- */
 @OnLifecycle(LifecycleStages.Rendered, SheetsCfRenderController)
 export class SheetsCfRenderController extends Disposable {
     constructor(@Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
@@ -44,9 +42,8 @@ export class SheetsCfRenderController extends Disposable {
 
     private _initSkeleton() {
         const markDirtySkeleton = () => {
-            // TODO@wzhudev: may need to update this part to enable forcing rendering?
-            // this._sheetSkeletonManagerService.reCalculate();
             const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+            this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).reCalculate();
             this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
         };
 

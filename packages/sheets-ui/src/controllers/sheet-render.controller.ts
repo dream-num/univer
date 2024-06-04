@@ -39,20 +39,18 @@ import {
     SHEET_VIEW_KEY,
 } from '../common/keys';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { SheetRenderService } from '../services/sheet-render.service';
+import { SheetsRenderService } from '../services/sheets-render.service';
 
 interface ISetWorksheetMutationParams {
     unitId: string;
     subUnitId: string;
 }
 
-export class SheetCanvasView extends RxDisposable implements IRenderModule {
-    // TODO@wzhudev: this is not hooked
-
+export class SheetRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(SheetRenderService) private readonly _sheetRenderService: SheetRenderService,
+        @Inject(SheetsRenderService) private readonly _sheetRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();

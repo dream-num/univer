@@ -24,7 +24,7 @@ export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from '.
 export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 export { deriveStateFromActiveSheet$, getCurrentRangeDisable$, getCommentDisable$ } from './controllers/menu/menu-util';
-export { SheetRenderService } from './services/sheet-render.service';
+export { SheetsRenderService } from './services/sheets-render.service';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export {
     ResetScrollCommand,
@@ -77,7 +77,7 @@ export { SelectionShape } from './services/selection/selection-shape';
 export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manager.service';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 export { UniverSheetsUIPlugin } from './sheets-ui-plugin';
-export { SheetCanvasView } from './views/sheet-canvas-view';
+export { SheetRenderController } from './controllers/sheet-render.controller';
 export { HoverManagerService } from './services/hover-manager.service';
 export { DragManagerService } from './services/drag-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';

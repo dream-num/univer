@@ -132,10 +132,6 @@ export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
         param.skeleton.calculate();
     }
 
-    makeDirtyCurrent(state: boolean = true) {
-        this.makeDirty(this._currentSkeleton, state);
-    }
-
     makeDirty(searchParm: ISheetSkeletonManagerSearch, state: boolean = true) {
         const param = this._getSkeleton(searchParm);
         if (param == null) {

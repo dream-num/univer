@@ -21,9 +21,6 @@ import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-/**
- * @todo RenderUnit
- */
 @OnLifecycle(LifecycleStages.Rendered, ForceStringRenderController)
 export class ForceStringRenderController extends RxDisposable implements IRenderModule {
     constructor(

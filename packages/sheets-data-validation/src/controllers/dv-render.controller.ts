@@ -52,8 +52,8 @@ const INVALID_MARK = {
 /**
  * @todo RenderUnit
  */
-@OnLifecycle(LifecycleStages.Rendered, DataValidationRenderController)
-export class DataValidationRenderController extends RxDisposable {
+@OnLifecycle(LifecycleStages.Rendered, SheetsDataValidationRenderController)
+export class SheetsDataValidationRenderController extends RxDisposable {
     constructor(
         private readonly _config: Partial<IUniverSheetsDataValidation>,
         @ICommandService private readonly _commandService: ICommandService,

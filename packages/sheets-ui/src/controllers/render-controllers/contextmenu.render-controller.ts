@@ -31,11 +31,8 @@ import { SheetMenuPosition } from '../menu/menu';
 import { SHEET_VIEW_KEY } from '../../common/keys';
 
 /**
- * This controller subscribe to context menu events in
- * sheet rendering views and invoke context menu at a correct position
- * and with correct menu type.
- *
- * @todo RenderUnit
+ * This controller subscribe to context menu events in sheet rendering views and invoke context menu at a correct
+ * position and with correct menu type.
  */
 export class SheetContextMenuRenderController extends Disposable implements IRenderModule {
     constructor(

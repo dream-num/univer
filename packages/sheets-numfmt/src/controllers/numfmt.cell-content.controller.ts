@@ -14,27 +14,32 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICellDataForSheetInterceptor } from '@univerjs/core';
+import type { ICellData, ICellDataForSheetInterceptor,
+    Workbook } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
     ICommandService,
+    IUniverInstanceService,
     LifecycleStages,
     LocaleService,
     ObjectMatrix,
     OnLifecycle,
     Range,
     ThemeService,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import { INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
+import { of, skip, switchMap } from 'rxjs';
 import { getPatternPreview } from '../utils/pattern';
 
-@OnLifecycle(LifecycleStages.Rendered, NumfmtCellContent)
-export class NumfmtCellContent extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, SheetsNumfmtCellContentController)
+export class SheetsNumfmtCellContentController extends Disposable {
     constructor(
+        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(ThemeService) private _themeService: ThemeService,
         @Inject(ICommandService) private _commandService: ICommandService,
@@ -110,15 +115,13 @@ export class NumfmtCellContent extends Disposable {
             }
         }));
 
-        // TODO@wzhudev: change it later
-        // this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$
-        //     .pipe(
-        //         map((skeleton) => skeleton?.sheetId),
-        //         distinctUntilChanged()
-        //     )
-        //     .subscribe(() => {
-        //         renderCache.reset();
-        //     })
-        // );
+        this.disposeWithMe(
+            this._instanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+                .pipe(
+                    switchMap((workbook) => workbook?.activeSheet$ ?? of(null)),
+                    skip(1)
+                )
+                .subscribe(() => renderCache.reset())
+        );
     }
 }

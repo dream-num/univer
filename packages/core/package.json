@@ -67,7 +67,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "^0.1.35",
+        "@univerjs/protocol": "^0.1.36",
         "nanoid": "5.0.7",
         "numeral": "^2.0.6",
         "ot-json1": "^1.0.2"

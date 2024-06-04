@@ -52,11 +52,11 @@ export function App(props: IUniverAppProps) {
 
     const uiPartsService = useDependency(IUIPartsService);
 
-    const [updateTrigger, setUpdateTrigger] = useState(false);
+    const [updateTrigger, setUpdateTrigger] = useState({});
 
     useEffect(() => {
         const updateSubscription = uiPartsService.componentRegistered$.subscribe(() => {
-            setUpdateTrigger((prev) => !prev);
+            setUpdateTrigger({});
         });
 
         return () => {

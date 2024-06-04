@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -33,18 +33,17 @@ export interface ISheetSkeletonManagerSearch {
     commandId?: string; // WTF: why?
 }
 
-// TODO@wzhudev: this should be moved to a `RenderUnit` as well.
-
 /**
  * This service manages the drawing of the sheet's viewModel (skeleton).
+ *
  * Each time there is a content change, it will trigger the viewModel of the render to recalculate.
+ *
  * Each application and sub-table has its own viewModel (skeleton).
+ *
  * The viewModel is also a temporary storage variable, which does not need to be persisted,
  * so it is managed uniformly through the service.
- *
- * @todo RenderUnit - We should move this to RenderUnit as well after all dependents have been moved.
  */
-export class SheetSkeletonManagerService implements IDisposable, IRenderController {
+export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
     private _currentSkeleton: ISheetSkeletonManagerSearch = {
         sheetId: '',
     };

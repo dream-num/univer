@@ -16,7 +16,7 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 import { Disposable, DisposableCollection, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { HoverManagerService } from '../services/hover-manager.service';
@@ -25,7 +25,7 @@ import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.
 import { ScrollManagerService } from '../services/scroll-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, HoverRenderController)
-export class HoverRenderController extends Disposable implements IRenderController {
+export class HoverRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IRenderManagerService private _renderManagerService: IRenderManagerService,

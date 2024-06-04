@@ -16,7 +16,7 @@
 
 import type { ICommandInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
 import { CommandType, ICommandService, Rectangle, RxDisposable } from '@univerjs/core';
-import type { IRenderContext, IRenderController, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     Layer,
     PointerInput,
@@ -49,7 +49,7 @@ interface ISetWorksheetMutationParams {
     subUnitId: string;
 }
 
-export class SheetCanvasView extends RxDisposable implements IRenderController {
+export class SheetCanvasView extends RxDisposable implements IRenderModule {
     // TODO@wzhudev: this is not hooked
     private _skeletonChangeMutations = new Set<string>();
 

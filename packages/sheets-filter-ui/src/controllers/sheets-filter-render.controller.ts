@@ -16,7 +16,7 @@
 
 import type { IRange, Workbook } from '@univerjs/core';
 import { CommandType, fromCallback, ICommandService, RxDisposable, ThemeService } from '@univerjs/core';
-import type { IRenderContext, IRenderController, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
@@ -42,7 +42,7 @@ interface ISheetsFilterRenderParams {
     skeleton: SpreadsheetSkeleton;
 }
 
-export class SheetsFilterRenderController extends RxDisposable implements IRenderController {
+export class SheetsFilterRenderController extends RxDisposable implements IRenderModule {
     private _filterRangeShape: SelectionShape | null = null;
     private _buttonRenderDisposable: IDisposable | null = null;
     private _filterButtonShapes: SheetsFilterButtonShape[] = [];

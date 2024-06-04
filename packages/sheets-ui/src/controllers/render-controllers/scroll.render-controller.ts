@@ -23,7 +23,7 @@ import {
     RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
-import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
@@ -42,7 +42,7 @@ const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAn
 /**
  * This controller handles scroll logic in sheet interaction.
  */
-export class SheetsScrollRenderController extends Disposable implements IRenderController {
+export class SheetsScrollRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,

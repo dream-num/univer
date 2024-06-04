@@ -19,7 +19,7 @@ import { DisposableCollection, IPermissionService, IUniverInstanceService, Lifec
 import { getSheetCommandTarget, RangeProtectionRuleModel, SelectionManagerService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
-import type { IRenderContext, IRenderController, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 
 import { UnitAction } from '@univerjs/protocol';
 import { HeaderMoveRenderController } from '../render-controllers/header-move.render-controller';
@@ -32,7 +32,7 @@ type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?:
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
 @OnLifecycle(LifecycleStages.Steady, SheetPermissionInterceptorCanvasRenderController)
-export class SheetPermissionInterceptorCanvasRenderController extends RxDisposable implements IRenderController {
+export class SheetPermissionInterceptorCanvasRenderController extends RxDisposable implements IRenderModule {
     disposableCollection = new DisposableCollection();
 
     constructor(

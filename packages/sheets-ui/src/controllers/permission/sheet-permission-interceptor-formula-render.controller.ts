@@ -19,7 +19,7 @@ import { DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, IPermissionS
 import { getSheetCommandTarget, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, WorksheetEditPermission } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { debounceTime, filter } from 'rxjs/operators';
-import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
 import { NullValueObject } from '@univerjs/engine-formula';
 import { StatusBarController } from '../status-bar.controller';
@@ -30,7 +30,7 @@ type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?:
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
 @OnLifecycle(LifecycleStages.Steady, SheetPermissionInterceptorFormulaRenderController)
-export class SheetPermissionInterceptorFormulaRenderController extends RxDisposable implements IRenderController {
+export class SheetPermissionInterceptorFormulaRenderController extends RxDisposable implements IRenderModule {
     disposableCollection = new DisposableCollection();
 
     constructor(

@@ -22,7 +22,7 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { ScrollTimerType, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import {
@@ -48,7 +48,7 @@ import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manag
 import type { ISheetObjectParam } from '../utils/component-tools';
 import { getSheetObject } from '../utils/component-tools';
 
-export class SelectionRenderController extends Disposable implements IRenderController {
+export class SelectionRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,

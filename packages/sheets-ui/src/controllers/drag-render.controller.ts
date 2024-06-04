@@ -16,13 +16,13 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 import { Disposable, DisposableCollection } from '@univerjs/core';
-import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { DragManagerService } from '../services/drag-manager.service';
 import { type ISheetSkeletonManagerParam, SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-export class DragRenderController extends Disposable implements IRenderController, IRenderController {
+export class DragRenderController extends Disposable implements IRenderModule, IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IRenderManagerService private _renderManagerService: IRenderManagerService,

@@ -27,7 +27,7 @@ import type { SheetComponent } from '../components/sheets/sheet-component';
 import type { Slide } from '../components/slides/slide';
 import { Engine } from '../engine';
 import { Scene } from '../scene';
-import { type IRender, type IRenderControllerCtor, RenderUnit } from './render-unit';
+import { type IRender, type IRenderModuleCtor, RenderUnit } from './render-unit';
 
 export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;
 
@@ -47,7 +47,7 @@ export interface IRenderManagerService extends IDisposable {
 
     withCurrentTypeOfUnit<T>(type: UniverInstanceType, id: DependencyIdentifier<T>): Nullable<T>;
 
-    registerRenderController<T extends UnitModel>(type: UnitType, ctor: IRenderControllerCtor<T>): IDisposable;
+    registerRenderController<T extends UnitModel>(type: UnitType, ctor: IRenderModuleCtor<T>): IDisposable;
 }
 
 const DEFAULT_SCENE_SIZE = { width: 1500, height: 1000 };
@@ -74,7 +74,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return this._defaultEngine;
     }
 
-    private readonly _renderControllers = new Map<UnitType, Set<IRenderControllerCtor>>();
+    private readonly _renderControllers = new Map<UnitType, Set<IRenderModuleCtor>>();
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -92,7 +92,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         this._currentRender$.complete();
     }
 
-    registerRenderController(type: UnitType, ctor: IRenderControllerCtor): IDisposable {
+    registerRenderController(type: UnitType, ctor: IRenderModuleCtor): IDisposable {
         if (!this._renderControllers.has(type)) {
             this._renderControllers.set(type, new Set());
         }
@@ -110,7 +110,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return toDisposable(() => set.delete(ctor));
     }
 
-    private _getRenderControllersForType(type: UnitType): Array<IRenderControllerCtor> {
+    private _getRenderControllersForType(type: UnitType): Array<IRenderModuleCtor> {
         return Array.from(this._renderControllers.get(type) ?? []);
     }
 

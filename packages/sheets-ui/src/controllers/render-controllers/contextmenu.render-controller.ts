@@ -21,7 +21,7 @@ import {
     RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
-import type { IRenderContext, IRenderController, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { IContextMenuService, MenuPosition } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
@@ -37,7 +37,7 @@ import { SHEET_VIEW_KEY } from '../../common/keys';
  *
  * @todo RenderUnit
  */
-export class SheetContextMenuRenderController extends Disposable implements IRenderController {
+export class SheetContextMenuRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,

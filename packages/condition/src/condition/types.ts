@@ -301,3 +301,53 @@ export enum LogicCompareTypeEnum {
      */
     or = 'or',
 }
+
+/**
+ * @description Represents the expected date grouping by day.
+ */
+export interface IDateGroupByDayExpected {
+    year: number; // The year value.
+    month: number; // The month value.
+    day: number; // The day value.
+    dateGroupCompareType: DateGroupCompareTypeEnum.day; // The date grouping type.
+}
+
+/**
+ * @description Represents the expected date grouping by month.
+ */
+export interface IDateGroupByMonthExpected {
+    year: number; // The year value.
+    month: number; // The month value.
+    dateGroupCompareType: DateGroupCompareTypeEnum.month; // The date grouping type.
+}
+
+/**
+ * @description Represents the expected date grouping by hour.
+ */
+export interface IDateGroupByHourExpected {
+    year: number; // The year value.
+    month: number; // The month value.
+    day: number; // The day value.
+    hour: number; // The hour value.
+    dateGroupCompareType: DateGroupCompareTypeEnum.hour; // The date grouping type.
+}
+
+/**
+ * @description Represents the expected date grouping by minute.
+ */
+export interface IDateGroupByMinuteExpected {
+    year: number; // The year value.
+    month: number; // The month value.
+    day: number; // The day value.
+    hour: number; // The hour value.
+    minute: number; // The minute value.
+    dateGroupCompareType: DateGroupCompareTypeEnum.minute; // The date grouping type.
+}
+
+/**
+ * @description Represents the expected date grouping by year.
+ */
+export interface IDateGroupByYearExpected {
+    year: number; // The year value.
+    dateGroupCompareType: DateGroupCompareTypeEnum.year; // The date grouping type.
+}

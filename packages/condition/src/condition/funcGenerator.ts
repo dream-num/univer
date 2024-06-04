@@ -15,9 +15,10 @@
  */
 
 import { dateM1, dateM10, dateM11, dateM12, dateM2, dateM3, dateM4, dateM5, dateM6, dateM7, dateM8, dateM9, dateQ1, dateQ2, dateQ3, dateQ4 } from './dateGenerator';
+import { groupByDay, groupByHour, groupByMinute, groupByMonth, groupByYear } from './dateGroupGenerator';
 import { textEqual } from './textFuncGenerator';
 import type { CompareFunc, CompareType } from './types';
-import { DateCompareTypeEnum, TextCompareTypeEnum } from './types';
+import { DateCompareTypeEnum, DateGroupCompareTypeEnum, TextCompareTypeEnum } from './types';
 
 export const compareFunctionGenerator = (compareType: CompareType): CompareFunc => {
     switch (compareType) {
@@ -55,6 +56,17 @@ export const compareFunctionGenerator = (compareType: CompareType): CompareFunc 
             return dateM11;
         case DateCompareTypeEnum.M12:
             return dateM12;
+        case DateGroupCompareTypeEnum.year:
+            return groupByYear;
+        case DateGroupCompareTypeEnum.month:
+            return groupByMonth;
+        case DateGroupCompareTypeEnum.day:
+            return groupByDay;
+        case DateGroupCompareTypeEnum.hour:
+            return groupByHour;
+        case DateGroupCompareTypeEnum.minute:
+            return groupByMinute;
     }
     return () => true;
 };
+

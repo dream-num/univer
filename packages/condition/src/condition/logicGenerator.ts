@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-export const logicAnd = () => {
+type LogicFuncParams = (...args) => boolean;
+export const logicAnd = (...args: LogicFuncParams[]) => {
 
 };
 

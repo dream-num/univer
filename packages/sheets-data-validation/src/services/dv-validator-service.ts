@@ -46,7 +46,6 @@ export class SheetsDataValidationValidatorService {
         const cellRaw = worksheet.getCellRaw(row, col);
         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
         const rule = manager.getRuleByLocation(row, col);
-        // manager.validator()
         if (!rule) {
             return DataValidationStatus.VALID;
         }

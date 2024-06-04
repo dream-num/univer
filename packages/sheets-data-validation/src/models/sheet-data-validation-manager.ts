@@ -138,7 +138,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         return this.getRuleById(ruleId);
     }
 
-    override validator(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocationBase, onCompete: (status: DataValidationStatus) => void): DataValidationStatus {
+    override validator(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocationBase, onCompete: (status: DataValidationStatus, changed: boolean) => void): DataValidationStatus {
         const { col, row, unitId, subUnitId } = pos;
         const ruleId = rule.uid;
         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
@@ -157,14 +157,14 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
                         status: realStatus,
                         ruleId,
                     });
-                    onCompete(realStatus);
+                    onCompete(realStatus, true);
                 });
                 return DataValidationStatus.VALIDATING;
             }
-            onCompete(current.status);
+            onCompete(current.status, false);
             return current.status;
         } else {
-            onCompete(DataValidationStatus.VALID);
+            onCompete(DataValidationStatus.VALID, false);
             return DataValidationStatus.VALID;
         }
     }

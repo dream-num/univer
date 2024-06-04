@@ -16,8 +16,9 @@
 
 import type { Workbook } from '@univerjs/core';
 import { Disposable, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { IRangeProtectionRenderCellData, IRangeProtectionRule, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
+import type { IRangeProtectionRule, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
 import { INTERCEPTOR_POINT, RangeProtectionRenderModel, RangeProtectionRuleModel, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import type { IRangeProtectionRenderCellData } from '@univerjs/sheets-ui';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { bufferTime, filter } from 'rxjs/operators';

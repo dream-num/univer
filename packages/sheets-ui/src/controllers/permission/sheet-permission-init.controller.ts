@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import { Disposable, IAuthzIoService, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, UserManagerService } from '@univerjs/core';
 
-import type { IRangeProtectionRenderCellData, IRangeProtectionRule, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
+import type { IRangeProtectionRule, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
 import { defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, INTERCEPTOR_POINT, RangeProtectionRenderModel, RangeProtectionRuleModel, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
@@ -26,6 +26,7 @@ import { UnitAction, UnitObject, UniverType } from '@univerjs/protocol';
 
 import type { ISheetFontRenderExtension, ISheetRenderExtension } from '@univerjs/engine-render';
 import { changeRenderExtensionSkip } from '../menu/permission-menu-util';
+import type { IRangeProtectionRenderCellData } from '../../views/permission/extensions/range-protection.render';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetPermissionInitController)
 export class SheetPermissionInitController extends Disposable {
@@ -120,7 +121,7 @@ export class SheetPermissionInitController extends Disposable {
                             const unitActionName = instance.subType;
                             const action = actionList.find((item) => item.action === unitActionName);
                             if (action) {
-                                this._permissionService.updatePermissionPoint(instance.id, false);
+                                this._permissionService.updatePermissionPoint(instance.id, action.allowed);
                             }
                         });
                     });

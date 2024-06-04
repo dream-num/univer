@@ -20,9 +20,10 @@ import type { Spreadsheet } from '@univerjs/engine-render';
 import { throttleTime } from 'rxjs/operators';
 import type { Workbook } from '@univerjs/core';
 import { Disposable, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY, RangeProtectionCanNotViewRenderExtension, RangeProtectionCanViewRenderExtension, RangeProtectionRuleModel } from '@univerjs/sheets';
 import { merge } from 'rxjs';
+import { RangeProtectionRuleModel } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY, RangeProtectionCanNotViewRenderExtension, RangeProtectionCanViewRenderExtension } from '../../views/permission/extensions/range-protection.render';
 
 @OnLifecycle(LifecycleStages.Ready, PermissionRenderService)
 export class PermissionRenderService extends Disposable {

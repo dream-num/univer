@@ -34,6 +34,7 @@ export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseOb
 export interface IRenderManagerService extends IDisposable {
     currentRender$: Observable<Nullable<string>>;
     createRender$: Observable<Nullable<string>>;
+    addRender(unitId: string, renderer: IRender): void;
     createRender(unitId: string): IRender;
     removeRender(unitId: string): void;
     setCurrent(unitId: string): void;
@@ -185,6 +186,10 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
 
         this._addRenderUnit(unitId, renderUnit);
         return renderUnit;
+    }
+
+    addRender(unitId: string, item: IRender) {
+        this._addRenderUnit(unitId, item);
     }
 
     private _addRenderUnit(unitId: string, item: IRender) {

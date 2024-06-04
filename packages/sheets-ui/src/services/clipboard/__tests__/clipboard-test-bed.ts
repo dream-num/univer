@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+/* eslint-disable ts/no-explicit-any */
+
 import type { IWorkbookData } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, ILogService, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import {
@@ -581,22 +583,29 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
 
-    injector.add(
-        [SheetSkeletonManagerService, { useValue: new SheetSkeletonManagerService({
-            unit: sheet,
-            unitId: 'test',
-            type: UniverInstanceType.UNIVER_SHEET,
-            // eslint-disable-next-line ts/no-explicit-any
-            engine: null as any,
-            // eslint-disable-next-line ts/no-explicit-any
-            scene: null as any,
-            // eslint-disable-next-line ts/no-explicit-any
-            mainComponent: null as any,
-            // eslint-disable-next-line ts/no-explicit-any
-            components: null as any,
-            isMainScene: true,
-        }, injector) }]
-    );
+    // NOTE: This is pretty hack for the test. But with these hacks we can avoid to create
+    // real canvas-environment in univerjs/sheets-ui. If some we have to do that, this hack could be removed.
+    const fakeSheetSkeletonManagerService = new SheetSkeletonManagerService({
+        unit: sheet,
+        unitId: 'test',
+        type: UniverInstanceType.UNIVER_SHEET,
+        engine: null as any,
+        scene: null as any,
+        mainComponent: null as any,
+        components: null as any,
+        isMainScene: true,
+    }, injector);
+
+    injector.add([SheetSkeletonManagerService, { useValue: fakeSheetSkeletonManagerService }]);
+    injector.get(IRenderManagerService).addRender('test', {
+        unitId: 'test',
+        engine: new DisposableCollection() as any,
+        scene: new DisposableCollection() as any,
+        mainComponent: null as any,
+        components: new Map(),
+        isMainScene: true,
+        with: injector.get.bind(injector),
+    });
 
     return {
         univer,

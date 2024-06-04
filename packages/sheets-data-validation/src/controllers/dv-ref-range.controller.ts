@@ -208,49 +208,29 @@ export class DataValidationRefRangeController extends Disposable {
 
     private _initRefRange() {
         this.disposeWithMe(
-            merge(
-                this._sheetSkeletonManagerService.currentSkeleton$.pipe(
-                    map((skeleton) => skeleton?.sheetId),
-                    distinctUntilChanged()
-                )
-            )
-                .pipe(
-                    switchMap(
-                        () =>
-                            new Observable<DisposableCollection>((subscribe) => {
-                                const disposableCollection = new DisposableCollection();
-                                subscribe.next(disposableCollection);
-                                return () => {
-                                    disposableCollection.dispose();
-                                };
-                            })
-                    )
-                ).subscribe((disposableCollection) => {
-                    disposableCollection.add(
-                        toDisposable(
-                            this._dataValidationModel.ruleChange$.subscribe((option) => {
-                                const { unitId, subUnitId, rule } = option;
-                                switch (option.type) {
-                                    case 'add': {
-                                        const rule = option.rule!;
-                                        this.registerRule(option.unitId, option.subUnitId, rule);
-                                        break;
-                                    }
-                                    case 'remove': {
-                                        const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
-                                        disposeSet && disposeSet.forEach((dispose) => dispose());
-                                        break;
-                                    }
-                                    case 'update': {
-                                        const rule = option.rule!;
-                                        const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
-                                        disposeSet && disposeSet.forEach((dispose) => dispose());
-                                        this.registerRule(option.unitId, option.subUnitId, rule);
-                                        break;
-                                    }
-                                }
-                            })));
-                }));
+            this._dataValidationModel.ruleChange$.subscribe((option) => {
+                const { unitId, subUnitId, rule } = option;
+                switch (option.type) {
+                    case 'add': {
+                        const rule = option.rule!;
+                        this.registerRule(option.unitId, option.subUnitId, rule);
+                        break;
+                    }
+                    case 'remove': {
+                        const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
+                        disposeSet && disposeSet.forEach((dispose) => dispose());
+                        break;
+                    }
+                    case 'update': {
+                        const rule = option.rule!;
+                        const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
+                        disposeSet && disposeSet.forEach((dispose) => dispose());
+                        this.registerRule(option.unitId, option.subUnitId, rule);
+                        break;
+                    }
+                }
+            })
+        );
 
         this.disposeWithMe(toDisposable(() => {
             this._disposableMap.forEach((item) => {

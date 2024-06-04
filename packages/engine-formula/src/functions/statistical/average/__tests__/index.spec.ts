@@ -102,7 +102,7 @@ describe('Test average function', () => {
                 column: 0,
             });
             const result = textFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(14.795714285714284);
+            expect(result.getValue()).toBe(14.795714285714286);
         });
     });
 });

@@ -44,7 +44,8 @@ export function divide(a: number, b: number): number {
  */
 export function round(base: number, precision: number): number {
     const factor = 10 ** Math.floor(precision);
-    return Math.round(multiply(base, factor)) / factor;
+    const epsilon = baseEpsilon(base, factor);
+    return Math.round(multiply(base, factor) + epsilon) / factor;
 }
 
 /**
@@ -55,7 +56,8 @@ export function round(base: number, precision: number): number {
  */
 export function floor(base: number, precision: number): number {
     const factor = 10 ** Math.floor(precision);
-    return Math.floor(multiply(base, factor)) / factor;
+    const epsilon = baseEpsilon(base, factor);
+    return Math.floor(multiply(base, factor) + epsilon) / factor;
 }
 
 /**
@@ -66,7 +68,12 @@ export function floor(base: number, precision: number): number {
  */
 export function ceil(base: number, precision: number): number {
     const factor = 10 ** Math.floor(precision);
-    return Math.ceil(multiply(base, factor)) / factor;
+    const epsilon = baseEpsilon(base, factor);
+    return Math.ceil(multiply(base, factor) - epsilon) / factor;
+}
+
+export function baseEpsilon(base: number, factor: number) {
+    return Number.EPSILON * Math.max(1, Math.abs(multiply(base, factor)));
 }
 
 /**
@@ -165,4 +172,27 @@ export function lessThanOrEquals(a: number, b: number): boolean {
  */
 export function strip(num: number, precision = 15) {
     return Number.parseFloat(num.toPrecision(precision));
+}
+
+/**
+ * Set an error range for floating-point calculations. If the error is less than Number.EPSILON, we can consider the result reliable.
+ * @param left
+ * @param right
+ * @returns
+ */
+export function withinErrorMargin(left: number, right: number) {
+    return Math.abs(left - right) < Number.EPSILON;
+}
+
+/**
+ * Tolerance for the results of accuracy issues to tolerate certain errors
+ *
+ * Why 12?
+   This is an empirical choice. Generally, choosing 12 can solve most of the 0001 and 0009 problems. e.g. floor(5,1.23) = 0.0800000000000001
+ * @param num
+ * @returns
+ */
+export function stripErrorMargin(num: number, precision = 12) {
+    const stripResult = strip(num, precision);
+    return withinErrorMargin(num, stripResult) ? stripResult : strip(num);
 }

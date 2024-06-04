@@ -21,6 +21,7 @@ import { Mod } from '../index';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
+import { stripArrayValue } from '../../../__tests__/create-function-test-bed';
 
 describe('Test mod function', () => {
     const textFunction = new Mod(FUNCTION_NAMES_MATH.MOD);
@@ -66,7 +67,7 @@ describe('Test mod function', () => {
                 column: 0,
             });
             const result = textFunction.calculate(number, power);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+            expect(stripArrayValue(transformToValue(result.getArrayValue()))).toStrictEqual([
                 [0, ErrorType.VALUE, 0.08, 0, '#DIV/0!', '#DIV/0!'],
                 ['#DIV/0!', 5, 0.32, ErrorType.VALUE, -1, ErrorType.VALUE],
             ]);
@@ -87,7 +88,7 @@ describe('Test mod function', () => {
             });
             const power = NumberValueObject.create(2);
             const result = textFunction.calculate(number, power);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+            expect(stripArrayValue(transformToValue(result.getArrayValue()))).toStrictEqual([
                 [1, ErrorType.VALUE, 1.23, 1, 0, 0],
                 [0, 0, 0.34, ErrorType.VALUE, 1, ErrorType.VALUE],
             ]);
@@ -120,7 +121,7 @@ describe('Test mod function', () => {
                 column: 0,
             });
             const result = textFunction.calculate(number, power);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+            expect(stripArrayValue(transformToValue(result.getArrayValue()))).toStrictEqual([
                 [0, ErrorType.VALUE, 0.23, 0, 0, 0],
                 [0, 0, 0.34, ErrorType.VALUE, 1, ErrorType.VALUE],
                 [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA],

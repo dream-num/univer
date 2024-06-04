@@ -15,36 +15,36 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt, strip } from '../math-kit';
+import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt, stripErrorMargin } from '../math-kit';
 
 describe('Test math kit', () => {
     it('Function plus', () => {
         expect(plus(1, 2)).toBe(3);
-        expect(strip(plus(0.1, 0.2))).toBe(0.3);
-        expect(strip(plus(0.7, 0.1))).toBe(0.8);
-        expect(strip(plus(0.0000000000001, 0.0000000000002))).toBe(0.0000000000003);
+        expect(stripErrorMargin(plus(0.1, 0.2))).toBe(0.3);
+        expect(stripErrorMargin(plus(0.7, 0.1))).toBe(0.8);
+        expect(stripErrorMargin(plus(0.0000000000001, 0.0000000000002))).toBe(0.0000000000003);
     });
 
     it('Function minus', () => {
         expect(minus(2, 1)).toBe(1);
-        expect(strip(minus(0.3, 0.1))).toBe(0.2);
-        expect(strip(minus(0.8, 0.1))).toBe(0.7);
-        expect(strip(minus(0.0000000000003, 0.0000000000002))).toBe(0.0000000000001);
+        expect(stripErrorMargin(minus(0.3, 0.1))).toBe(0.2);
+        expect(stripErrorMargin(minus(0.8, 0.1))).toBe(0.7);
+        expect(stripErrorMargin(minus(0.0000000000003, 0.0000000000002))).toBe(0.0000000000001);
     });
 
     it('Function multiply', () => {
         expect(multiply(2, 3)).toBe(6);
-        expect(strip(multiply(0.1, 0.2))).toBe(0.02);
-        expect(strip(multiply(0.7, 0.1))).toBe(0.07);
+        expect(stripErrorMargin(multiply(0.1, 0.2))).toBe(0.02);
+        expect(stripErrorMargin(multiply(0.7, 0.1))).toBe(0.07);
         expect(multiply(0.0000000000001, 0.0000000000002)).toBe(2e-26);
-        expect(strip(multiply(0.6789, 10000))).toBe(6789);
+        expect(stripErrorMargin(multiply(0.6789, 10000))).toBe(6789);
     });
 
     it('Function divide', () => {
         expect(divide(6, 3)).toBe(2);
-        expect(strip(divide(0.02, 0.1))).toBe(0.2);
-        expect(strip(divide(0.07, 0.1))).toBe(0.7);
-        expect(strip(divide(0.3, 0.1))).toBe(3);
+        expect(stripErrorMargin(divide(0.02, 0.1))).toBe(0.2);
+        expect(stripErrorMargin(divide(0.07, 0.1))).toBe(0.7);
+        expect(stripErrorMargin(divide(0.3, 0.1))).toBe(3);
         expect(divide(0.00000000000000002, 0.0000000000001)).toBe(0.0002);
     });
 
@@ -73,6 +73,17 @@ describe('Test math kit', () => {
         expect(round(1.23456789, 3)).toBe(1.235);
         expect(round(1.23456789, 4)).toBe(1.2346);
         expect(round(1.23456789, 5)).toBe(1.23457);
+        expect(round(0.6789, 4)).toBe(0.6789);
+        expect(round(0.6789, 3)).toBe(0.679);
+        expect(round(0.6789, 2)).toBe(0.68);
+        expect(round(0.6789, 1)).toBe(0.7);
+        expect(round(0.6789, 0)).toBe(1);
+        expect(round(0.6749, 1)).toBe(0.7);
+        expect(round(0.6749, 2)).toBe(0.67);
+        expect(round(0.9999, 1)).toBe(1.0);
+        expect(round(0.99999, 1)).toBe(1.0);
+        expect(round(-0.9999, 1)).toBe(-1.0);
+        expect(round(9.9999, 0)).toBe(10);
     });
     // test floor
     it('Function floor', () => {
@@ -83,6 +94,23 @@ describe('Test math kit', () => {
         expect(floor(1.23456789, 3)).toBe(1.234);
         expect(floor(1.23456789, 4)).toBe(1.2345);
         expect(floor(1.23456789, 5)).toBe(1.23456);
+        expect(floor(0.6789, 0)).toBe(0);
+        expect(floor(0.6789, 1)).toBe(0.6);
+        expect(floor(0.6789, 2)).toBe(0.67);
+        expect(floor(0.6789, 3)).toBe(0.678);
+        expect(floor(0.6789, 4)).toBe(0.6789);
+        expect(floor(0.6789, 5)).toBe(0.6789);
+        expect(floor(0.9999, 1)).toBe(0.9);
+        expect(floor(0.9999, 2)).toBe(0.99);
+        expect(floor(0.9999, 3)).toBe(0.999);
+        expect(floor(0.9999, 4)).toBe(0.9999);
+        expect(floor(0.9999, 5)).toBe(0.9999);
+        expect(floor(0.9999, 1)).toBe(0.9);
+        expect(floor(0.99999, 1)).toBe(0.9);
+        expect(floor(1.9999, 1)).toBe(1.9);
+        expect(floor(9.9999, 1)).toBe(9.9);
+        expect(floor(0.0001, 1)).toBe(0);
+        expect(floor(-0.9999, 1)).toBe(-1);
     });
 
     // test ceil
@@ -94,6 +122,19 @@ describe('Test math kit', () => {
         expect(ceil(1.23456789, 3)).toBe(1.235);
         expect(ceil(1.23456789, 4)).toBe(1.2346);
         expect(ceil(1.23456789, 5)).toBe(1.23457);
+        expect(ceil(0.6789, 4)).toBe(0.6789);
+        expect(ceil(0.6789, 3)).toBe(0.679);
+        expect(ceil(0.6789, 2)).toBe(0.68);
+        expect(ceil(0.6789, 1)).toBe(0.7);
+        expect(ceil(0.6789, 0)).toBe(1);
+        expect(ceil(0.6709, 1)).toBe(0.7);
+        expect(ceil(0.6709, 2)).toBe(0.68);
+        expect(ceil(0.9999, 1)).toBe(1.0);
+        expect(ceil(0.99999, 1)).toBe(1.0);
+        expect(ceil(1.9999, 1)).toBe(2.0);
+        expect(ceil(9.9999, 1)).toBe(10.0);
+        expect(ceil(0.0001, 1)).toBe(0.1);
+        expect(ceil(-0.9999, 1)).toBe(-0.9);
     });
 
     // test mod
@@ -114,7 +155,7 @@ describe('Test math kit', () => {
         expect(pow(2, -1)).toBe(0.5);
         expect(pow(2, -2)).toBe(0.25);
         expect(pow(2, -3)).toBe(0.125);
-        expect(strip(pow(0.2, 3))).toBe(0.008);
+        expect(stripErrorMargin(pow(0.2, 3))).toBe(0.008);
     });
     // test sqrt
     it('Function sqrt', () => {

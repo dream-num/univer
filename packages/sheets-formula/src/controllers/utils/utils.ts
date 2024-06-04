@@ -17,7 +17,7 @@
 import type { ICellData, IContextService, Nullable } from '@univerjs/core';
 import { CellValueType, FOCUSING_DOC, FOCUSING_UNIVER_EDITOR, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, isFormulaId, isFormulaString } from '@univerjs/core';
 import type { ErrorType } from '@univerjs/engine-formula';
-import { ERROR_TYPE_SET, strip } from '@univerjs/engine-formula';
+import { ERROR_TYPE_SET, stripErrorMargin } from '@univerjs/engine-formula';
 
 export function whenEditorStandalone(contextService: IContextService) {
     return (
@@ -48,7 +48,7 @@ export function extractFormulaError(cell: Nullable<ICellData>) {
  */
 export function extractFormulaNumber(cell: Nullable<ICellData>) {
     if ((isFormulaString(cell?.f) || isFormulaId(cell?.si)) && cell?.t === CellValueType.NUMBER && typeof cell?.v === 'number') {
-        return strip(cell.v);
+        return stripErrorMargin(cell.v);
     }
     return null;
 }

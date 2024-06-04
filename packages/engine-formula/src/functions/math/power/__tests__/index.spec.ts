@@ -21,6 +21,7 @@ import { Power } from '../index';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
+import { stripArrayValue } from '../../../__tests__/create-function-test-bed';
 
 describe('Test power function', () => {
     const textFunction = new Power(FUNCTION_NAMES_MATH.POWER);
@@ -75,7 +76,7 @@ describe('Test power function', () => {
             });
             const power = NumberValueObject.create(2);
             const result = textFunction.calculate(number, power);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+            expect(stripArrayValue(transformToValue(result.getArrayValue()))).toStrictEqual([
                 [1, ErrorType.VALUE, 1.5129, 1, 0, 0],
                 [0, 10000, 5.4756, ErrorType.VALUE, 9, ErrorType.VALUE],
             ]);
@@ -108,7 +109,7 @@ describe('Test power function', () => {
                 column: 0,
             });
             const result = textFunction.calculate(number, power);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+            expect(stripArrayValue(transformToValue(result.getArrayValue()))).toStrictEqual([
                 [1, ErrorType.VALUE, 1.23, 1, 0, 0],
                 [0, 10000, 5.4756, ErrorType.VALUE, 9, ErrorType.VALUE],
                 [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA],

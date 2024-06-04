@@ -17,7 +17,7 @@
 import type { ICommandInfo } from '@univerjs/core';
 import { CellValueType, Disposable, ICommandService, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
-import { FormulaDataModel, SetArrayFormulaDataMutation, strip } from '@univerjs/engine-formula';
+import { FormulaDataModel, SetArrayFormulaDataMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
@@ -87,7 +87,7 @@ export class ArrayFormulaDisplayController extends Disposable {
                         return next({
                             ...cell,
                             ...cellData,
-                            v: strip(cell.v),
+                            v: stripErrorMargin(cell.v),
                         });
                     }
 

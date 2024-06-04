@@ -154,16 +154,15 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([IAuthzIoService, { useClass: AuthzIoLocalService }]);
             injector.add([WorksheetProtectionRuleModel]);
 
+            const renderManagerService = injector.get(IRenderManagerService);
+            renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService);
+            renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, SheetRenderController);
+
             SheetsConditionalFormattingPlugin.dependencyList.forEach((d) => {
                 injector.add(d);
             });
 
             dependencies?.forEach((d) => injector.add(d));
-
-            const renderManagerService = injector.get(IRenderManagerService);
-            ([
-                SheetRenderController,
-            ]).forEach((renderController) => renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, renderController));
         }
     }
 

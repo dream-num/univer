@@ -27,8 +27,8 @@ import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, Selection
 import { merge } from 'rxjs';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
-
 import { DefinedName } from '../defined-name/DefinedName';
+
 import styles from './index.module.less';
 
 enum ArrowDirection {

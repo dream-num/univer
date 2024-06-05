@@ -135,7 +135,7 @@ export class ImageUpdateController extends Disposable {
             if (renderObject == null) {
                 return;
             }
-            const { scene, transformer } = renderObject;
+            const { scene } = renderObject;
 
             const imageShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 

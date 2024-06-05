@@ -100,6 +100,7 @@ export class DocDrawingUpdateController extends Disposable {
         );
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private async _insertFloatImage(file: File) {
         let imageParam: Nullable<IImageIoServiceParam>;
 
@@ -169,7 +170,9 @@ export class DocDrawingUpdateController extends Disposable {
             source,
             transform: docDrawingPositionToTransform(docTransform),
             docTransform,
-            title: '', description: '', layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+            title: '',
+            description: '',
+            layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
         };
 
         this._commandService.executeCommand(InsertDocDrawingCommand.id, {
@@ -177,7 +180,7 @@ export class DocDrawingUpdateController extends Disposable {
             drawings: [docDrawingParam],
         } as IInsertDrawingCommandParams);
 
-        this._docSkeletonManagerService.getCurrent()?.skeleton.calculate();
+        // this._docSkeletonManagerService.getCurrent()?.skeleton.calculate();
     }
 
     private _getUnitInfo() {
@@ -195,7 +198,9 @@ export class DocDrawingUpdateController extends Disposable {
         };
     }
 
-    private _getImagePosition(imageWidth: number, imageHeight: number, sceneWidth: number, sceneHeight: number): Nullable<IDocDrawingPosition> {
+    private _getImagePosition(
+        imageWidth: number, imageHeight: number, _sceneWidth: number, _sceneHeight: number
+    ): Nullable<IDocDrawingPosition> {
         const activeTextRange = this._textSelectionManagerService.getActiveTextRange();
         const position = activeTextRange?.getAbsolutePosition() || {
             left: 0,

@@ -50,12 +50,12 @@ export const ShowAddSheetCommentModalOperation: ICommand = {
             worksheet,
             unitId,
             subUnitId: sheetId,
-            row: activeCell.actualRow,
+            row: activeCell.startRow,
             col: activeCell.startColumn,
         };
 
         sheetsThreadCommentPopupService.showPopup(location);
-        const rootId = model.getByLocation(unitId, sheetId, activeCell.actualRow, activeCell.startColumn);
+        const rootId = model.getByLocation(unitId, sheetId, activeCell.startRow, activeCell.startColumn);
         if (rootId) {
             threadCommentPanelService.setActiveComment({
                 unitId,

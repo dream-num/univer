@@ -15,17 +15,16 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
-
 import type { Injector } from '@wendellhu/redi';
 import { HTTPService } from '../../http.service';
 import { createHTTPTestBed, type MockHTTPImplementation } from '../../__testing__/http-testing-utils';
 import { IHTTPImplementation } from '../../implementations/implementation';
-import { HTTPResponse, HTTPResponseError } from '../../response';
-import { HTTPHeaders } from '../../headers';
-import { RetryInterceptorFactory } from '../retry-interceptor';
 import { __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION } from '../../request';
+import { HTTPHeaders } from '../../headers';
+import { HTTPResponse, HTTPResponseError } from '../../response';
+import { AuthInterceptorFactory } from '../auth-interceptor';
 
-describe('test "HTTPRetryInterceptor"', () => {
+describe('test "HTTPAuthInterceptor"', () => {
     let httpService: HTTPService;
     let httpImplementation: MockHTTPImplementation;
     let injector: Injector;
@@ -46,10 +45,10 @@ describe('test "HTTPRetryInterceptor"', () => {
         vitest.useRealTimers();
     });
 
-    function emitError(uid: number) {
+    function emitError(uid: number, errorCode: number) {
         httpImplementation.getHandler(uid).emitError(new HTTPResponseError({
             headers: new HTTPHeaders(),
-            status: 500,
+            status: errorCode,
             statusText: 'Internal Server Error',
             error: new Error('mocked error'),
         }));
@@ -66,51 +65,69 @@ describe('test "HTTPRetryInterceptor"', () => {
         }));
     }
 
-    it('should retry the request for 3 times until success', () => new Promise<void>((done) => {
+    it('should pass though on success', () => new Promise<void>((done) => {
+        let error = false;
+
         httpService.registerHTTPInterceptor({
-            priority: 0,
-            interceptor: RetryInterceptorFactory(),
-        });
-
-        const request = httpService.get('http://example.com');
-        request.then((response) => {
-            expect(response.body).toEqual({ text: 'Succeeded' });
-            done();
-        });
-
-        emitError(0);
-        vitest.advanceTimersByTime(1200);
-
-        emitError(0);
-        vitest.advanceTimersByTime(1200);
-
-        emitError(0);
-        vitest.advanceTimersByTime(1200);
-
-        emitSuccess(0);
-    }));
-
-    it('should throw error after attempt for 3 times', () => new Promise<void>((done) => {
-        httpService.registerHTTPInterceptor({
-            priority: 0,
-            interceptor: RetryInterceptorFactory(),
+            priority: 10,
+            interceptor: AuthInterceptorFactory({
+                errorStatusCodes: [401, 403],
+                onAuthError: () => {
+                    error = true;
+                },
+            }),
         });
 
         const request = httpService.get('http://example.com');
         request.then(() => {
-            // done();
-        }).catch((error: HTTPResponseError) => {
-            expect(error.status).toBe(500);
+            expect(error).toBeFalsy();
             done();
         });
 
-        emitError(0);
-        vitest.advanceTimersByTime(1200);
-        emitError(0);
-        vitest.advanceTimersByTime(1200);
-        emitError(0);
-        vitest.advanceTimersByTime(1200);
-        emitError(0);
-        vitest.advanceTimersByTime(1200);
+        emitSuccess(0);
+    }));
+
+    it('should pass though on other kind of errors', () => new Promise<void>((done) => {
+        let error = false;
+
+        httpService.registerHTTPInterceptor({
+            priority: 10,
+            interceptor: AuthInterceptorFactory({
+                errorStatusCodes: [401, 403],
+                onAuthError: () => {
+                    error = true;
+                },
+            }),
+        });
+
+        const request = httpService.get('http://example.com');
+        request.catch(() => {
+            expect(error).toBeFalsy();
+            done();
+        });
+
+        emitError(0, 500);
+    }));
+
+    it('should call "onAuthError" on error status codes', () => new Promise<void>((done) => {
+        let error = false;
+
+        httpService.registerHTTPInterceptor({
+            priority: 10,
+            interceptor: AuthInterceptorFactory({
+                errorStatusCodes: [401, 403],
+                onAuthError: () => {
+                    error = true;
+                },
+            }),
+        });
+
+        const request = httpService.get('http://example.com');
+        request.catch(() => {
+            expect(error).toBeTruthy();
+            done();
+        });
+
+        emitError(0, 401);
     }));
 });

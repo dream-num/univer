@@ -741,15 +741,6 @@ export function getFontCreateConfig(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
 ) {
-    const { startIndex } = paragraphNode;
-    const textRun = bodyModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
-    const { st, ed } = textRun;
-    let { ts: textStyle = {} } = textRun;
-    const cache = fontCreateConfigCache.getValue(st, ed);
-    if (cache) {
-        return cache;
-    }
-
     const {
         gridType = GridType.LINES,
         charSpace = 0,
@@ -762,7 +753,19 @@ export function getFontCreateConfig(
         marginRight = 0,
         marginLeft = 0,
         localeService,
+        renderConfig = {},
     } = sectionBreakConfig;
+    const { isRenderStyle } = renderConfig;
+    const { startIndex } = paragraphNode;
+    const textRun = isRenderStyle === BooleanNumber.FALSE
+        ? { ts: {}, st: 0, ed: 0 }
+        : bodyModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
+    const { st, ed } = textRun;
+    let { ts: textStyle = {} } = textRun;
+    const cache = fontCreateConfigCache.getValue(st, ed);
+    if (cache) {
+        return cache;
+    }
 
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 

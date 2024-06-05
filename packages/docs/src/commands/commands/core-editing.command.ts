@@ -37,11 +37,13 @@ export interface IInsertCommandParams {
     segmentId?: string;
 }
 
+export const EditorInsertTextCommandId = 'doc.command.insert-text';
+
 /**
  * The command to insert text. The changed range could be non-collapsed, mainly use in line break and normal input.
  */
 export const InsertCommand: ICommand<IInsertCommandParams> = {
-    id: 'doc.command.insert-text',
+    id: EditorInsertTextCommandId,
 
     type: CommandType.COMMAND,
 

@@ -18,8 +18,8 @@ import type { IRange, IScale } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import { SheetExtension } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
-import type { IWorksheetProtectionRenderCellData } from '../../services/permission/worksheet-permission/type';
-import { base64 } from '../image/protect-background-img';
+import type { IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
+import { base64 } from './protect-background-img';
 
 export const worksheetProtectionKey = 'worksheet-protection';
 const EXTENSION_CAN_VIEW_Z_INDEX = 25;

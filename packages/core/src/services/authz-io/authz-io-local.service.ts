@@ -152,6 +152,8 @@ export class AuthzIoLocalService implements IAuthzIoService {
                     name: rule!.name,
                     shareOn: false,
                     shareRole: UnitRole.Owner,
+                    // TODO: @gggpound
+                    shareScope: -1,
                     creator: createDefaultUser(UnitRole.Owner),
                     strategies: [],
                     actions: config.actions.map((a) => {

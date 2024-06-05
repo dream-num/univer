@@ -35,7 +35,7 @@ exports.buildPkg = function buildPkg() {
             const pkg = require(pkgPath);
 
             pkg.author = 'DreamNum <developer@univer.ai>';
-            pkg.license = 'Apache-2.0';
+            // pkg.license = 'Apache-2.0';
             pkg.funding = {
                 type: 'opencollective',
                 url: 'https://opencollective.com/univer',

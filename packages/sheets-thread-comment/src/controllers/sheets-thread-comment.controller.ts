@@ -22,10 +22,11 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { CommentSingle } from '@univerjs/icons';
 import { SetActiveCommentOperation, THREAD_COMMENT_PANEL, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { ScrollToCellOperation, SelectionMoveType, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { SelectionMoveType, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
 import { DeleteCommentMutation } from '@univerjs/thread-comment';
+import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
@@ -156,12 +157,13 @@ export class SheetsThreadCommentController extends Disposable {
                 }
 
                 const location = singleReferenceToGrid(comment.ref);
-                await this._commandService.executeCommand(ScrollToCellOperation.id, {
+                const GAP = 5;
+                await this._commandService.executeCommand(ScrollToRangeOperation.id, {
                     range: {
-                        startColumn: location.column,
-                        endColumn: location.column,
-                        startRow: location.row,
-                        endRow: location.row,
+                        startRow: Math.max(location.row - GAP, 0),
+                        endRow: location.row + GAP,
+                        startColumn: Math.max(location.column - GAP, 0),
+                        endColumn: location.column + GAP,
                     },
                 });
                 this._sheetsThreadCommentPopupService.showPopup({

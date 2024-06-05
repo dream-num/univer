@@ -21,6 +21,7 @@ import { deserializeRangeWithSheet, IDefinedNamesService, serializeRangeWithShee
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { NORMAL_SELECTION_PLUGIN_NAME, ScrollToCellOperation, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { ERROR_RANGE } from '@univerjs/sheets-hyper-link';
+import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
@@ -181,7 +182,7 @@ export class SheetsHyperLinkResolverService {
                     }],
                 } as ISetSelectionsOperationParams
             );
-            await this._commandService.executeCommand(ScrollToCellOperation.id, {
+            await this._commandService.executeCommand(ScrollToRangeOperation.id, {
                 range: realRange,
             });
         }

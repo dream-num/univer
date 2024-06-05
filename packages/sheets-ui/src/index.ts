@@ -105,3 +105,4 @@ export { FormulaEditorController } from './controllers/editor/formula-editor.con
 export { StatusBarController } from './controllers/status-bar.controller';
 export { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';
+export { ScrollToRangeOperation } from './commands/operations/scroll-to-range.operation';

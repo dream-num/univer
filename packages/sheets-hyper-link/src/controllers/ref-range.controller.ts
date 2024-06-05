@@ -232,6 +232,8 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
 
                 links.forEach((link) => {
                     this._registerPosition(unitId, subUnitId, link);
+                    this._watchPosition(unitId, subUnitId, link);
+                    this._registerRange(unitId, link.id, link.payload);
                 });
             });
         });

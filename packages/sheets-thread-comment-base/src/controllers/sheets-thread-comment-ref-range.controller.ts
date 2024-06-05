@@ -124,7 +124,9 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
                     };
                 }
 
-                return this._handleRangeChange(unitId, subUnitId, comment, resultRange, false);
+                const res = this._handleRangeChange(unitId, subUnitId, comment, resultRange, false);
+
+                return res;
             }, unitId, subUnitId)
         );
     }
@@ -137,7 +139,6 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
             startRow: comment.row,
             endRow: comment.row,
         };
-
         this._watcherMap.set(
             this._getIdWithUnitId(unitId, subUnitId, commentId),
             this._refRangeService.watchRange(unitId, subUnitId, oldRange, (before, after) => {
@@ -162,10 +163,12 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
                     const comment = subUnitMap[id];
                     const ref = comment.ref;
                     const pos = singleReferenceToGrid(ref);
-                    this._register(unitId, subUnitId, {
+                    const sheetComment = {
                         ...comment,
                         ...pos,
-                    });
+                    };
+                    this._register(unitId, subUnitId, sheetComment);
+                    this._watch(unitId, subUnitId, sheetComment);
                 }
             }
         }

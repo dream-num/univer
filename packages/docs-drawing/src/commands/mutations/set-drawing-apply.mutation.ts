@@ -35,7 +35,9 @@ export interface ISetDrawingApplyMutationParams extends IDrawingJson1Type {
 
 export const SetDocDrawingApplyMutation: IMutation<ISetDrawingApplyMutationParams> = {
     id: 'doc.mutation.set-drawing-apply',
+
     type: CommandType.MUTATION,
+
     handler: (accessor, params) => {
         const drawingManagerService = accessor.get(IDrawingManagerService);
         const docDrawingService = accessor.get(IDocDrawingService);

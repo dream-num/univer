@@ -235,12 +235,12 @@ function processFormulaChanges(oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaD
             newCell = handleMove(type, from, to, oldCell);
         } else if (range !== undefined && range !== null) { // Handle inserts and deletes
             const result = handleInsertDelete(type, range, oldCell);
-            // When removing a cell containing a formula, newCell is null, but the formula value of oldCell is required when undoing it.
-            newCell = result.newCell || oldCell;
+            // When removing a cell containing a formula, newCell is null, but the formula value of oldCell is required when undoing it, newCell can be null
+            newCell = result.newCell;
             isReverse = result.isReverse;
         }
 
-        if (newCell == null) return;
+        // Don't intercept newCell null here
 
         // Note: The formula may only update the reference and not offset the position. The situation where the position is not shifted cannot be intercepted here.
         isReverse ? rangeList.unshift({ oldCell, newCell }) : rangeList.push({ oldCell, newCell });
@@ -454,13 +454,17 @@ function getRedoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
         const { oldCell, newCell } = item;
 
         const { startRow: oldStartRow, startColumn: oldStartColumn } = oldCell;
-        const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
 
         const newFormula = newFormulaMatrix.getValue(oldStartRow, oldStartColumn) || oldFormulaMatrix.getValue(oldStartRow, oldStartColumn);
-        const newValue = formulaDataItemToCellData(newFormula);
+        // Use the formula result value to update the data to ensure accuracy, otherwise the new formula cannot be inferred from #REF
+        const newValue = formulaDataItemToCellDataFormula(newFormula);
 
         redoFormulaData.setValue(oldStartRow, oldStartColumn, { f: null, si: null });
-        redoFormulaData.setValue(newStartRow, newStartColumn, newValue);
+
+        if (newCell) {
+            const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
+            redoFormulaData.setValue(newStartRow, newStartColumn, newValue);
+        }
     });
 
     return redoFormulaData.clone();
@@ -480,12 +484,15 @@ function getUndoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
         const { oldCell, newCell } = item;
 
         const { startRow: oldStartRow, startColumn: oldStartColumn } = oldCell;
-        const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
 
         const oldFormula = oldFormulaMatrix.getValue(oldStartRow, oldStartColumn);
         const oldValue = formulaDataItemToCellData(oldFormula);
 
-        undoFormulaData.setValue(newStartRow, newStartColumn, { f: null, si: null });
+        if (newCell) {
+            const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
+            undoFormulaData.setValue(newStartRow, newStartColumn, { f: null, si: null });
+        }
+
         undoFormulaData.setValue(oldStartRow, oldStartColumn, oldValue);
     });
 
@@ -529,6 +536,50 @@ export function formulaDataItemToCellData(formulaDataItem: Nullable<IFormulaData
 
     if (checkFormulaString && x === 0 && y === 0) {
         cellData.f = f;
+    }
+
+    return cellData;
+}
+
+/**
+ * Transfer the formulaDataItem to the cellData, contains formula
+ * ┌────────────────────────────────┬─────────────────┐
+ * │        IFormulaDataItem        │     ICellData   │
+ * ├──────────────────┬─────┬───┬───┼───────────┬─────┤
+ * │ f                │ si  │ x │ y │ f         │ si  │
+ * ├──────────────────┼─────┼───┼───┼───────────┼─────┤
+ * │ =SUM(1)          │     │   │   │ =SUM(1)   │     │
+ * │                  │ id1 │   │   │           │ id1 │
+ * │ =SUM(1)          │ id1 │   │   │ =SUM(1)   │     │
+ * │ =SUM(1)          │ id1 │ 0 │ 0 │ =SUM(1)   │     │
+ * │ =SUM(1)          │ id1 │ 0 │ 1 │ =SUM(1)   │     │
+ * └──────────────────┴─────┴───┴───┴───────────┴─────┘
+ *
+ * The fifth case: The value f of the formula is already the result value. If the formula content of si contains #REF, it cannot be obtained from the formula offset of si, and the result value must be stored directly
+ */
+export function formulaDataItemToCellDataFormula(formulaDataItem: Nullable<IFormulaDataItem>): Nullable<ICellData> {
+    if (formulaDataItem == null) {
+        return;
+    }
+    const { f, si } = formulaDataItem;
+    const checkFormulaString = isFormulaString(f);
+    const checkFormulaId = isFormulaId(si);
+
+    if (!checkFormulaString && !checkFormulaId) {
+        return {
+            f: null,
+            si: null,
+        };
+    }
+
+    const cellData: ICellData = {};
+
+    if (checkFormulaString) {
+        cellData.f = f;
+    }
+
+    if (checkFormulaId && !checkFormulaString) {
+        cellData.si = si;
     }
 
     return cellData;

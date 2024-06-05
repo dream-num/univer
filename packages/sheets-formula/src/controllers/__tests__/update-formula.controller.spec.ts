@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import { CellValueType, Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
 import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, NORMAL_SELECTION_PLUGIN_NAME, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SelectionManagerService, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation } from '@univerjs/sheets';
@@ -89,6 +89,16 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
                     5: {
                         f: '=SUM(C8)',
                     },
+                    7: {
+                        f: '=SUM(A8:C10)',
+                    },
+                    8: {
+                        f: '=SUM(B8:D10)',
+                        si: 'CarNau',
+                    },
+                    9: {
+                        f: 'CarNau',
+                    },
                 },
                 8: {
                     0: {
@@ -112,6 +122,16 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
                     5: {
                         f: '=SUM(C9)',
                     },
+                    7: {
+                        f: '=SUM(A9:C11)',
+                        si: 'y0gLJX',
+                    },
+                    8: {
+                        si: 'y0gLJX',
+                    },
+                    9: {
+                        f: 'y0gLJX',
+                    },
                 },
                 9: {
                     0: {
@@ -134,6 +154,15 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
                     },
                     5: {
                         f: '=SUM(C10)',
+                    },
+                    7: {
+                        si: 'y0gLJX',
+                    },
+                    8: {
+                        si: 'y0gLJX',
+                    },
+                    9: {
+                        f: 'y0gLJX',
                     },
                 },
                 10: {
@@ -203,6 +232,7 @@ describe('Test insert function operation', () => {
         endRow: number,
         endColumn: number
     ) => Array<Array<Nullable<ICellData>>> | undefined;
+    let getCellData: () => IObjectMatrixPrimitiveType<Nullable<ICellData>> | undefined;
 
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA_DEMO(), [
@@ -259,6 +289,11 @@ describe('Test insert function operation', () => {
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();
+
+        getCellData = () => {
+            return get(IUniverInstanceService).getUniverSheetInstance('test')
+                ?.getSheetBySheetId('sheet1')?.getCellMatrix().clone();
+        };
     });
 
     afterEach(() => {

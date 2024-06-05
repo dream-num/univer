@@ -83,5 +83,5 @@ export {
     SetTextSelectionsOperation,
     type ISetTextSelectionsOperationParams,
 } from './commands/operations/text-selection.operation';
-
+export { getRetainAndDeleteFromReplace } from './basics/retain-delete-params';
 // #endregion

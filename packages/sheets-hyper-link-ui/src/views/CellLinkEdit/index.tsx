@@ -21,7 +21,7 @@ import type { ICellData, Nullable, Workbook } from '@univerjs/core';
 import { createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, ICommandService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { RangeSelector, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { AddHyperLinkCommand, HyperLinkModel, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
+import { AddHyperLinkCommand, ERROR_RANGE, HyperLinkModel, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { ScrollToCellOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
@@ -103,7 +103,12 @@ export const CellLinkEdit = () => {
                             ?? ''
                             : '';
                         setType(LinkType.range);
-                        setPayload(serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(params.range).range));
+                        if (params.range === ERROR_RANGE) {
+                            setPayload('');
+                        } else {
+                            setPayload(serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(params.range).range));
+                        }
+
                         return;
                     }
 

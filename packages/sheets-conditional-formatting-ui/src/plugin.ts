@@ -34,13 +34,13 @@ import { SetCfCommand } from './commands/commands/set-cf.command';
 import { moveCfCommand } from './commands/commands/move-cf.command';
 import { AddCfCommand } from './commands/commands/add-cf.command';
 
-import { RenderController } from './controllers/cf.render.controller';
+import { SheetsCfRenderController } from './controllers/cf.render.controller';
 import { ConditionalFormattingCopyPasteController } from './controllers/cf.copy-paste.controller';
 import { ConditionalFormattingAutoFillController } from './controllers/cf.auto-fill.controller';
 import type { IUniverSheetsConditionalFormattingUIConfig } from './controllers/cf.menu.controller';
 import { ConditionalFormattingMenuController, DefaultSheetConditionalFormattingUiConfig } from './controllers/cf.menu.controller';
 import { ConditionalFormattingI18nController } from './controllers/cf.i18n.controller';
-import { RefRangeController } from './controllers/cf.ref-range.controller';
+import { SheetsCfRefRangeController } from './controllers/cf.ref-range.controller';
 import { ConditionalFormattingEditorController } from './controllers/cf.editor.controller';
 import { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
 import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
@@ -80,8 +80,8 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
         SheetsConditionalFormattingPlugin.dependencyList.forEach((dependency) => {
             this._injector.add(dependency);
         });
-        this._injector.add([RenderController]);
-        this._injector.add([RefRangeController]);
+        this._injector.add([SheetsCfRenderController]);
+        this._injector.add([SheetsCfRefRangeController]);
         this._injector.add([ConditionalFormattingCopyPasteController]);
         this._injector.add([ConditionalFormattingAutoFillController]);
         this._injector.add([ConditionalFormattingPermissionController]);

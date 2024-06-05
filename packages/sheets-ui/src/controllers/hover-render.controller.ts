@@ -15,20 +15,17 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { Disposable, DisposableCollection } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { HoverManagerService } from '../services/hover-manager.service';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import { ScrollManagerService } from '../services/scroll-manager.service';
 
-@OnLifecycle(LifecycleStages.Rendered, HoverRenderController)
-export class HoverRenderController extends Disposable implements IRenderController {
+export class HoverRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @IRenderManagerService private _renderManagerService: IRenderManagerService,
         @Inject(HoverManagerService) private _hoverManagerService: HoverManagerService,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(ScrollManagerService) private _scrollManagerService: ScrollManagerService
@@ -43,26 +40,17 @@ export class HoverRenderController extends Disposable implements IRenderControll
         const disposeSet = new DisposableCollection();
         const handleSkeletonChange = (skeletonParam: Nullable<ISheetSkeletonManagerParam>) => {
             disposeSet.dispose();
+
             if (!skeletonParam) {
                 return;
             }
 
-            const currentRender = this._renderManagerService.getRenderById(skeletonParam.unitId);
-
-            if (!currentRender) {
-                return;
-            }
-
-            const { mainComponent } = currentRender;
+            const { mainComponent } = this._context;
             const observer = mainComponent?.onPointerMoveObserver.add((evt) => {
                 this._hoverManagerService.onMouseMove(evt.offsetX, evt.offsetY);
             });
 
-            disposeSet.add({
-                dispose() {
-                    observer?.dispose();
-                },
-            });
+            disposeSet.add(observer);
         };
 
         handleSkeletonChange(this._sheetSkeletonManagerService.getCurrent());
@@ -72,10 +60,6 @@ export class HoverRenderController extends Disposable implements IRenderControll
     }
 
     private _initScrollEvent() {
-        this.disposeWithMe(
-            this._scrollManagerService.scrollInfo$.subscribe(() => {
-                this._hoverManagerService.onScroll();
-            })
-        );
+        this.disposeWithMe(this._scrollManagerService.scrollInfo$.subscribe(() => this._hoverManagerService.onScroll()));
     }
 }

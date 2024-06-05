@@ -94,15 +94,5 @@ export class PerformanceMonitorController extends RxDisposable {
                     container.innerText = `FPS: ${fps}`;
                 });
         }
-        // TODO@wzhudev: restore fps monitor
-        // else if (this._documentType === UniverInstanceType.UNIVER_SHEET) {
-        //     this._injector
-        //         .get(SheetCanvasView)
-        //         .fps$.pipe(takeUntil(this.dispose$))
-        //         .pipe(throttle(() => interval(THROTTLE_TIME)))
-        //         .subscribe((fps) => {
-        //             container.innerText = `FPS: ${fps}`;
-        //         });
-        // }
     }
 }

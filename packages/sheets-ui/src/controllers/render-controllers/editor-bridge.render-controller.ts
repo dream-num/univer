@@ -16,7 +16,7 @@
 
 import type { ICommandInfo, IExecutionOptions, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import { ICommandService, IContextService, RxDisposable } from '@univerjs/core';
-import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
@@ -35,7 +35,7 @@ import type { ICurrentEditCellParam } from '../../services/editor-bridge.service
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { getSheetObject } from '../utils/component-tools';
 
-export class EditorBridgeRenderController extends RxDisposable implements IRenderController {
+export class EditorBridgeRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(Injector) private readonly _injector: Injector,

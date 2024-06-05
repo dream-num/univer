@@ -39,13 +39,13 @@ import {
     SetNumfmtMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
-import { combineLatest, merge, Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
 
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
 import { AddDecimalCommand } from '../commands/commands/add-decimal.command';
 import { SetCurrencyCommand } from '../commands/commands/set-currency.command';
@@ -73,7 +73,6 @@ export class NumfmtController extends Disposable implements INumfmtController {
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(ThemeService) private _themeService: ThemeService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private _commandService: ICommandService,
         @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
         @IRenderManagerService private _renderManagerService: IRenderManagerService,
@@ -127,8 +126,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
             onChange: (config) => {
                 if (config.type === 'change') {
                     this._previewPattern = config.value;
-                    this._sheetSkeletonManagerService.reCalculate();
-                    this._renderManagerService.getRenderById(workbook.getUnitId())?.mainComponent?.makeDirty();
+                    this._forceUpdate();
                 } else if (config.type === 'confirm') {
                     const selections = selectionManagerService.getSelectionRanges() || [];
                     const params: ISetNumfmtCommandParams = { values: [] };
@@ -159,14 +157,22 @@ export class NumfmtController extends Disposable implements INumfmtController {
                 ...(props as any), // need passthrough to react props.
             },
             onClose: () => {
-                this._sheetSkeletonManagerService.reCalculate();
-                this._renderManagerService.getRenderById(workbook.getUnitId())?.mainComponent?.makeDirty();
+                this._forceUpdate();
                 commandService.executeCommand(CloseNumfmtPanelOperator.id);
             },
         });
 
         return true;
     };
+
+    private _forceUpdate(unitId?: string): void {
+        const renderUnit = this._renderManagerService.getRenderById(
+            unitId ?? this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
+        );
+
+        renderUnit?.with(SheetSkeletonManagerService).reCalculate();
+        renderUnit?.mainComponent?.makeDirty();
+    }
 
     private _initCommands() {
         [
@@ -289,27 +295,16 @@ export class NumfmtController extends Disposable implements INumfmtController {
 
     private _commandExecutedListener() {
         const commandList = [RemoveNumfmtMutation.id, SetNumfmtMutation.id];
-        this.disposeWithMe(
-            toDisposable(
-                merge(
-                    new Observable<string>((subscribe) => {
-                        const disposable = this._commandService.onCommandExecuted((command) => {
-                            if (commandList.includes(command.id)) {
-                                const params = command.params as ISetNumfmtMutationParams;
-                                subscribe.next(params.unitId);
-                            }
-                        });
-                        return () => {
-                            disposable.dispose();
-                        };
-                    })
-                )
-                    .pipe(debounceTime(16))
-                    .subscribe((unitId) => {
-                        this._sheetSkeletonManagerService.reCalculate();
-                        this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
-                    })
-            )
+        this.disposeWithMe(new Observable<string>((subscribe) => {
+            const disposable = this._commandService.onCommandExecuted((command) => {
+                if (commandList.includes(command.id)) {
+                    const params = command.params as ISetNumfmtMutationParams;
+                    subscribe.next(params.unitId);
+                }
+            });
+            return () => disposable.dispose();
+        }).pipe(debounceTime(16))
+            .subscribe((unitId) => this._forceUpdate(unitId))
         );
     }
 

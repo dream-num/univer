@@ -28,9 +28,9 @@ import type {
     Nullable,
     Observer,
 } from '@univerjs/core';
-import { createInterceptorKey, InterceptorManager, makeCellToSelection, RANGE_TYPE, ThemeService } from '@univerjs/core';
+import { createInterceptorKey, InterceptorManager, IUniverInstanceService, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import { ScrollTimer, ScrollTimerType, Vector2 } from '@univerjs/engine-render';
+import { IRenderManagerService, ScrollTimer, ScrollTimerType, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import { getNormalSelectionStyle } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
@@ -221,7 +221,8 @@ export class SelectionRenderService implements ISelectionRenderService {
     constructor(
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
@@ -408,7 +409,8 @@ export class SelectionRenderService implements ISelectionRenderService {
     }
 
     private _getFreeze() {
-        const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+        const freeze = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)
+            ?.getCurrent()?.skeleton.getWorksheetConfig().freeze;
         return freeze;
     }
 
@@ -796,7 +798,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             let scrollOffsetY = newMoveOffsetY;
 
             const currentSelection = this.getActiveSelection();
-            const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+            const freeze = this._getFreeze();
 
             const selection = currentSelection?.model;
             const endViewport =
@@ -1020,7 +1022,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             return;
         }
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrent()?.skeleton;
         if (skeleton == null) {
             return;
         }
@@ -1088,7 +1090,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             return false;
         }
 
-        const { rangeWithCoord: moveRangeWithCoord, primaryWithCoord: movePrimaryWithCoord } = selectionData;
+        const { rangeWithCoord: moveRangeWithCoord } = selectionData;
 
         const {
             startRow: moveStartRow,
@@ -1173,19 +1175,16 @@ export class SelectionRenderService implements ISelectionRenderService {
         if (scene == null) {
             return;
         }
+
         const mainScene = scene.getEngine()?.activeScene;
         if (mainScene == null || mainScene === scene) {
             return;
         }
+
         mainScene.onPointerDownObserver.remove(this._cancelDownObserver);
         mainScene.onPointerUpObserver.remove(this._cancelUpObserver);
-        this._cancelDownObserver = mainScene.onPointerDownObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-            this._endSelection();
-        });
-
-        this._cancelUpObserver = mainScene.onPointerUpObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-            this._endSelection();
-        });
+        this._cancelDownObserver = mainScene.onPointerDownObserver.add(() => this._endSelection());
+        this._cancelUpObserver = mainScene.onPointerUpObserver.add(() => this._endSelection());
     }
 
     private _getSelectedRangeWithMerge(

@@ -25,7 +25,7 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, IScrollObserverParam, Viewport } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, Viewport } from '@univerjs/engine-render';
 import { CURSOR_TYPE, Rect, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
 import type {
     IInsertColCommandParams,
@@ -98,7 +98,7 @@ const AUXILIARY_CLICK_HIDDEN_OBJECT_TRANSPARENCY = 0.01;
 
 export const FREEZE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('freezePermissionCheck');
 
-export class HeaderFreezeRenderController extends Disposable implements IRenderController {
+export class HeaderFreezeRenderController extends Disposable implements IRenderModule {
     private _rowFreezeHeaderRect: Nullable<Rect>;
 
     private _rowFreezeMainRect: Nullable<Rect>;

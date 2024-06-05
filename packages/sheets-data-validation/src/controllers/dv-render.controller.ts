@@ -52,30 +52,25 @@ const INVALID_MARK = {
 /**
  * @todo RenderUnit
  */
-@OnLifecycle(LifecycleStages.Rendered, DataValidationRenderController)
-export class DataValidationRenderController extends RxDisposable {
+@OnLifecycle(LifecycleStages.Rendered, SheetsDataValidationRenderController)
+export class SheetsDataValidationRenderController extends RxDisposable {
     constructor(
         private readonly _config: Partial<IUniverSheetsDataValidation>,
-        @Inject(ComponentManager) private _componentManager: ComponentManager,
+        @ICommandService private readonly _commandService: ICommandService,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @IMenuService private _menuService: IMenuService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
-        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(DataValidationDropdownManagerService) private readonly _dropdownManagerService: DataValidationDropdownManagerService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(AutoHeightController) private readonly _autoHeightController: AutoHeightController,
-        @ICommandService private readonly _commandService: ICommandService
+        @Inject(ComponentManager) private _componentManager: ComponentManager,
+        @Inject(DataValidationDropdownManagerService) private readonly _dropdownManagerService: DataValidationDropdownManagerService,
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
+        @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
     ) {
         super();
 
-        this._init();
-    }
-
-    private _init() {
         this._initComponents();
         this._initMenu();
         this._initSkeletonChange();
@@ -190,7 +185,9 @@ export class DataValidationRenderController extends RxDisposable {
 
             const unitId = workbook.getUnitId();
             const subUnitId = workbook.getActiveSheet().getSheetId();
-            const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({ unitId, sheetId: subUnitId });
+            const skeleton = this._renderManagerService.getRenderById(unitId)
+                ?.with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId)
+                ?.skeleton;
             const currentRender = this._renderManagerService.getRenderById(unitId);
 
             skeleton?.makeDirty(true);
@@ -201,13 +198,8 @@ export class DataValidationRenderController extends RxDisposable {
             }
         };
 
-        this.disposeWithMe(this._dataValidationModel.ruleChange$.subscribe(() => {
-            markSkeletonDirty();
-        }));
-
-        this.disposeWithMe(this._dataValidationModel.validStatusChange$.subscribe(() => {
-            markSkeletonDirty();
-        }));
+        this.disposeWithMe(this._dataValidationModel.ruleChange$.subscribe(() => markSkeletonDirty()));
+        this.disposeWithMe(this._dataValidationModel.validStatusChange$.subscribe(() => markSkeletonDirty()));
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -217,14 +209,21 @@ export class DataValidationRenderController extends RxDisposable {
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
                     priority: 200,
-                    // eslint-disable-next-line max-lines-per-function, complexity
+                    // eslint-disable-next-line max-lines-per-function
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId } = pos;
                         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
-                        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                        if (!manager || !skeleton) {
+                        if (!manager) {
                             return next(cell);
                         }
+
+                        const skeleton = this._renderManagerService.getRenderById(unitId)
+                            ?.with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId)
+                            ?.skeleton;
+                        if (!skeleton) {
+                            return next(cell);
+                        }
+
                         const styleMap = pos.workbook.getStyles();
                         const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
                         const ruleId = manager.getRuleIdByLocation(row, col);

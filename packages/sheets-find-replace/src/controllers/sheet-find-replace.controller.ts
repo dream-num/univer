@@ -120,14 +120,13 @@ export class SheetFindModel extends FindModel {
 
     constructor(
         private readonly _workbook: Workbook,
+        private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(SheetsFindReplaceController) private readonly _findReplaceController: SheetsFindReplaceController
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
     }
@@ -918,6 +917,7 @@ class SheetsFindReplaceProvider extends Disposable implements IFindReplaceProvid
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -926,11 +926,13 @@ class SheetsFindReplaceProvider extends Disposable implements IFindReplaceProvid
     async find(query: IFindQuery): Promise<SheetFindModel[]> {
         this._terminate();
 
-        // NOTE: If there are multi Workbook instances then we should create `SheetFindModel` for each of them.
+        // TODO: If there are multi Workbook instances then we should create `SheetFindModel` for each of them.
         // But we don't need to implement that in the foreseeable future.
         const currentWorkbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const skeletonManagerService = this._renderManagerService.getRenderById(currentWorkbook.getUnitId())!.with(SheetSkeletonManagerService);
+
         if (currentWorkbook) {
-            const sheetFind = this._injector.createInstance(SheetFindModel, currentWorkbook);
+            const sheetFind = this._injector.createInstance(SheetFindModel, currentWorkbook, skeletonManagerService);
             this._findModelsByUnitId.set(currentWorkbook.getUnitId(), sheetFind);
             const parsedQuery = this._preprocessQuery(query);
             sheetFind.start(parsedQuery);

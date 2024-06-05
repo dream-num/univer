@@ -16,7 +16,6 @@
 
 import type { Plugin, PluginCtor } from '@univerjs/core';
 import { UniverSheetsFilterUIPlugin } from '@univerjs/sheets-filter-ui';
-import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 
 export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> {
@@ -34,6 +33,5 @@ export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCt
             },
         ],
         [UniverSheetsFilterUIPlugin],
-        [UniverSheetsFindReplacePlugin],
     ];
 }

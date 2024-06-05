@@ -38,7 +38,7 @@ import { HeaderResizeRenderController } from './controllers/render-controllers/h
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
 import { SelectionRenderController } from './controllers/render-controllers/selection.render-controller';
-import { SheetRenderController } from './controllers/sheet-render.controller';
+import { SheetsRenderService } from './services/sheets-render.service';
 import type { IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
 import { DefaultSheetUiConfig, SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
@@ -58,7 +58,7 @@ import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-ba
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
-import { SheetCanvasView } from './views/sheet-canvas-view';
+import { SheetRenderController } from './controllers/render-controllers/sheet-render.controller';
 import { HoverRenderController } from './controllers/hover-render.controller';
 import { HoverManagerService } from './services/hover-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
@@ -78,12 +78,11 @@ import { DragManagerService } from './services/drag-manager.service';
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';
 import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
-import { SheetPermissionRenderController } from './controllers/permission/sheet-permission-render.controller';
+import { SheetPermissionRenderController, SheetPermissionRenderManagerController } from './controllers/permission/sheet-permission-render.controller';
 import { SheetPermissionInterceptorCanvasRenderController } from './controllers/permission/sheet-permission-interceptor-canvas-render.controller';
 import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
 import { SheetPermissionPanelModel } from './services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
-import { PermissionRenderService } from './services/permission/permission-render.service';
 import { WorksheetProtectionRenderService } from './services/permission/worksheet-permission-render.service';
 
 @DependentOn(UniverSheetsPlugin, UniverUIPlugin)
@@ -117,7 +116,8 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [IAutoFillService, { useClass: AutoFillService }],
 
                 [ScrollManagerService],
-                [SheetSkeletonManagerService],
+                // This would be removed from global injector and moved into RenderUnit provider.
+                // [SheetSkeletonManagerService],
                 [ISelectionRenderService, { useClass: SelectionRenderService }],
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
@@ -133,7 +133,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [FormulaEditorController],
                 [HeaderFreezeRenderController],
                 [SheetClipboardController],
-                [SheetRenderController],
+                [SheetsRenderService],
                 [
                     SheetUIController,
                     {
@@ -149,7 +149,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 // permission
                 [SheetPermissionPanelModel],
                 [SheetPermissionUserManagerService],
-                [PermissionRenderService],
                 [WorksheetProtectionRenderService],
                 [SheetPermissionInterceptorClipboardController],
                 [SheetPermissionInterceptorBaseController],
@@ -159,9 +158,9 @@ export class UniverSheetsUIPlugin extends Plugin {
 
         this._injector.add(
             [
-                SheetPermissionRenderController,
+                SheetPermissionRenderManagerController,
                 {
-                    useFactory: () => this._injector.createInstance(SheetPermissionRenderController, this._config),
+                    useFactory: () => this._injector.createInstance(SheetPermissionRenderManagerController, this._config),
                 },
             ]
 
@@ -170,14 +169,28 @@ export class UniverSheetsUIPlugin extends Plugin {
 
     override onReady(): void {
         this._markSheetAsFocused();
+        this._registerRenderBasics();
+    }
+
+    override onRendered(): void {
         this._registerRenderControllers();
     }
 
+    private _registerRenderBasics(): void {
+        ([
+            SheetSkeletonManagerService,
+            SheetRenderController,
+        ]).forEach((controller) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
+        });
+    }
+
+    // We have to let render basics get bootstrapped before. Because some render controllers relies on
+    // a correct skeleton when they get loaded.
     private _registerRenderControllers(): void {
         ([
-            SheetCanvasView,
             // https://github.com/dream-num/univer-pro/issues/669
-            // HeaderMoveRenderController must be initialized before SelectionRenderController.
+            // HeaderMoveRenderController(HMRC) must be initialized before SelectionRenderController(SRC).
             // Before HMRC expected selections remain unchanged when user clicks on the header. If we don't initialize HMRC before SRC,
             // the selections will be changed by SRC first. Maybe we should merge row/col header related render controllers to one class.
             HeaderMoveRenderController,
@@ -199,9 +212,9 @@ export class UniverSheetsUIPlugin extends Plugin {
             SheetContextMenuRenderController,
             EditorBridgeRenderController,
 
-            // permission
             SheetPermissionInterceptorCanvasRenderController,
             SheetPermissionInterceptorFormulaRenderController,
+            SheetPermissionRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
         });

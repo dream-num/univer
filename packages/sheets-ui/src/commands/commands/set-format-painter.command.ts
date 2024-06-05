@@ -100,6 +100,7 @@ export interface IApplyFormatPainterCommandParams {
 export const ApplyFormatPainterCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.apply-format-painter',
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IApplyFormatPainterCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

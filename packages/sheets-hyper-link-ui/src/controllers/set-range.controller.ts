@@ -145,9 +145,9 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     if (params.cellValue) {
                         // eslint-disable-next-line max-lines-per-function
                         new ObjectMatrix(params.cellValue).forValue((row, col, cell) => {
-                            const cellValue = (cell?.v ?? cell?.p?.body?.dataStream.slice(0, -2) ?? '').toString();
+                            const cellValueRaw = cell?.v ?? cell?.p?.body?.dataStream.slice(0, -2);
+                            const cellValue = (cellValueRaw ?? '').toString();
                             const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
-
                             if (!link) {
                                 if (isLegalLink(cellValue)) {
                                     const id = Tools.generateRandomId();
@@ -181,7 +181,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                 return;
                             }
 
-                            if (!cellValue) {
+                            if (cellValueRaw === '') {
                                 redos.push({
                                     id: RemoveHyperLinkMutation.id,
                                     params: {
@@ -198,6 +198,8 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                         link,
                                     },
                                 });
+
+                                return;
                             }
 
                             const redoParams: IUpdateHyperLinkMutationParams = {

@@ -22,8 +22,7 @@ import { createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, ICommandService, 
 import { RangeSelector, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { AddHyperLinkCommand, HyperLinkModel, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
-import { SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { ScrollToCellCommand } from '@univerjs/sheets-ui';
+import { ScrollToCellOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
@@ -212,7 +211,7 @@ export const CellLinkEdit = () => {
                 subUnitId: editing.subUnitId,
             });
 
-            await commandService.executeCommand(ScrollToCellCommand.id, {
+            await commandService.executeCommand(ScrollToCellOperation.id, {
                 range: {
                     startRow: editing.row,
                     endRow: editing.row,

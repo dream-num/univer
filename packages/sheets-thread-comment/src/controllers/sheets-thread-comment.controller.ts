@@ -22,9 +22,8 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { CommentSingle } from '@univerjs/icons';
 import { SetActiveCommentOperation, THREAD_COMMENT_PANEL, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { SelectionMoveType, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { ScrollToCellOperation, SelectionMoveType, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
-import { ScrollToCellCommand } from '@univerjs/sheets-ui';
 import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
 import { DeleteCommentMutation } from '@univerjs/thread-comment';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
@@ -157,7 +156,7 @@ export class SheetsThreadCommentController extends Disposable {
                 }
 
                 const location = singleReferenceToGrid(comment.ref);
-                await this._commandService.executeCommand(ScrollToCellCommand.id, {
+                await this._commandService.executeCommand(ScrollToCellOperation.id, {
                     range: {
                         startColumn: location.column,
                         endColumn: location.column,

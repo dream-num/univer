@@ -17,9 +17,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import type { ICellData, Nullable, Workbook } from '@univerjs/core';
+import type { ICellData, IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
 import { createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, ICommandService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
-import { RangeSelector, useObservable } from '@univerjs/ui';
+import { RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { AddHyperLinkCommand, ERROR_RANGE, HyperLinkModel, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
@@ -27,7 +27,7 @@ import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
-import { hasProtocol, isLegalLink } from '../../common/util';
+import { getCellValueOrigin, hasProtocol, isLegalLink } from '../../common/util';
 import styles from './index.module.less';
 
 enum LinkType {
@@ -35,28 +35,6 @@ enum LinkType {
     range = 'range',
     sheet = 'gid',
     definedName = 'rangeid',
-}
-
-function getCellValueOrigin(cell: Nullable<ICellData>) {
-    if (cell === null) {
-        return '';
-    }
-
-    if (cell?.p) {
-        const body = cell?.p.body;
-
-        if (body == null) {
-            return '';
-        }
-
-        const data = body.dataStream;
-        const lastString = data.substring(data.length - 2, data.length);
-        const newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
-
-        return newDataStream;
-    }
-
-    return cell?.v;
 }
 
 export const CellLinkEdit = () => {
@@ -86,12 +64,16 @@ export const CellLinkEdit = () => {
                 if (linkInfo.type === 'outer') {
                     setType(LinkType.link);
                     setPayload(linkInfo.url);
+                    if (linkInfo.url === link.display) {
+                        setByPayload.current = true;
+                    }
                     return;
                 } else {
                     const params = linkInfo.searchObj;
                     if (params.rangeid) {
                         setType(LinkType.definedName);
                         setPayload(params.rangeid);
+
                         return;
                     }
 
@@ -107,7 +89,11 @@ export const CellLinkEdit = () => {
                         if (params.range === ERROR_RANGE) {
                             setPayload('');
                         } else {
-                            setPayload(serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(params.range).range));
+                            const payload = (serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(params.range).range));
+                            setPayload(payload);
+                            if (payload === link.display) {
+                                setByPayload.current = true;
+                            }
                         }
 
                         return;
@@ -184,6 +170,23 @@ export const CellLinkEdit = () => {
 
         return `#${type}=${payload}`;
     };
+
+    const handleRangeChange = useEvent((newValue: IUnitRangeWithName[]) => {
+        const range = newValue[0];
+        if (!range || !isValidRange(range.range)) {
+            return;
+        }
+        if (!range.sheetName) {
+            range.sheetName = workbook.getActiveSheet().getName();
+        }
+        const newPayload = serializeRangeToRefString(range);
+        setPayload(newPayload);
+
+        if (newPayload && (setByPayload.current || !display)) {
+            setDisplay(newPayload);
+            setByPayload.current = true;
+        }
+    });
 
     const handleSubmit = async () => {
         if (editing) {
@@ -264,7 +267,7 @@ export const CellLinkEdit = () => {
                         value={payload}
                         onChange={(newLink) => {
                             setPayload(newLink);
-                            if (newLink && (setByPayload.current || !display)) {
+                            if (newLink && (setByPayload.current || !display || display === payload)) {
                                 setDisplay(newLink);
                                 setByPayload.current = true;
                             }
@@ -280,23 +283,7 @@ export const CellLinkEdit = () => {
                         id={createInternalEditorID('hyper-link-edit')}
                         isSingleChoice
                         value={payloadInitial}
-                        onChange={(newValue) => {
-                            const range = newValue[0];
-                            if (!range || !isValidRange(range.range)) {
-                                return;
-                            }
-                            if (!range.sheetName) {
-                                range.sheetName = workbook.getActiveSheet().getName();
-                            }
-                            const newPayload = serializeRangeToRefString(range);
-                            setPayload(newPayload);
-
-                            if (newPayload && (setByPayload.current || !display)) {
-                                setDisplay(newPayload);
-                                setByPayload.current = true;
-                            }
-                        }}
-
+                        onChange={handleRangeChange}
                     />
                 </FormLayout>
             )}
@@ -308,7 +295,8 @@ export const CellLinkEdit = () => {
                         onChange={(newPayload) => {
                             setPayload(newPayload);
                             const label = sheetsOption.find((i) => i.value === newPayload)?.label;
-                            if (label && (setByPayload.current || !display)) {
+                            const oldLabel = sheetsOption.find((i) => i.value === payload)?.label;
+                            if (label && (setByPayload.current || !display || display === oldLabel)) {
                                 setDisplay(label);
                                 setByPayload.current = true;
                             }
@@ -324,7 +312,8 @@ export const CellLinkEdit = () => {
                         onChange={(newValue) => {
                             setPayload(newValue);
                             const label = definedNames.find((i) => i.value === newValue)?.label;
-                            if (label && (setByPayload.current || !display)) {
+                            const oldLabel = definedNames.find((i) => i.value === payload)?.label;
+                            if (label && (setByPayload.current || !display || display === oldLabel)) {
                                 setDisplay(label);
                                 setByPayload.current = true;
                             }

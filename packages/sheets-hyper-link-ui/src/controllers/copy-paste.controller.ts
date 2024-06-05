@@ -58,7 +58,6 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
                 if (isLegalLink(clipText)) {
                     let text = serializeUrl(clipText);
                     const url = new URL(text);
-                    const name = clipText;
                     if (
                         url.hostname === location.hostname &&
                         url.port === location.port &&

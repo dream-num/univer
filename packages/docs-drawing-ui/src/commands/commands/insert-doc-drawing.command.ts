@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { ICommand, IDrawingSearch, IMutationInfo, JSONXActions } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -26,6 +26,9 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { getRetainAndDeleteFromReplace, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+import { IDrawingManagerService } from '@univerjs/drawing';
+import { IDocDrawingService } from '@univerjs/docs-drawing';
 import type { IInsertDrawingCommandParams } from './interfaces';
 
 /**
@@ -42,6 +45,8 @@ export const InsertDocDrawingCommand: ICommand = {
             return false;
         }
 
+        const drawingManagerService = accessor.get(IDrawingManagerService);
+        const docDrawingService = accessor.get(IDocDrawingService);
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -52,7 +57,6 @@ export const InsertDocDrawingCommand: ICommand = {
             return false;
         }
 
-        // const { drawingParam, imageParam } = params;
         const unitId = documentDataModel.getUnitId();
         const { drawings } = params;
         const { collapsed, startOffset, endOffset, segmentId, style } = activeTextRange;
@@ -61,6 +65,16 @@ export const InsertDocDrawingCommand: ICommand = {
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
         const drawingOrderLength = documentDataModel.getSnapshot().drawingsOrder?.length ?? 0;
+
+        const jsonOp = docDrawingService.getBatchAddOp(drawings) as IDrawingJsonUndo1;
+
+        const { subUnitId, redo: op, objects } = jsonOp;
+
+        drawingManagerService.applyJson1(unitId, subUnitId, op);
+        docDrawingService.applyJson1(unitId, subUnitId, op);
+
+        drawingManagerService.addNotification(objects as IDrawingSearch[]);
+        docDrawingService.addNotification(objects as IDrawingSearch[]);
 
         // Step 1: Insert placeholder `\b` in dataStream and add drawing to customBlocks.
         if (collapsed) {
@@ -93,6 +107,7 @@ export const InsertDocDrawingCommand: ICommand = {
 
         rawActions.push(placeHolderAction!);
 
+        // Step 2: add drawing to drawings and drawingsOrder fields.
         for (const drawing of drawings) {
             const { drawingId } = drawing;
             const addDrawingAction = jsonX.insertOp(['drawings', drawingId], drawing);

@@ -119,7 +119,6 @@ export class DocFloatingObjectRenderController extends Disposable implements IRe
             // cumPageLeft + = pageWidth + documents.pageMarginLeft;
 
             this._liquid.translatePagePadding(page);
-
             skeDrawings.forEach((drawing) => {
                 const { aLeft, aTop, height, width, drawingId, drawingOrigin } = drawing;
                 const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;

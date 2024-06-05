@@ -33,9 +33,9 @@ export function mergeMenuConfigs<T = MenuConfig>(baseConfig: T, additionalConfig
     });
 
     // Update reactive properties
-    const observableProperties = ['hidden$', 'disabled$', 'activated$'];
+    const observableProperties = ['hidden', 'disabled', 'activated'];
     observableProperties.forEach((prop) => {
-        updateReactiveProperty(baseConfig, prop as keyof typeof baseConfig, (additionalConfig as any)[prop]);
+        updateReactiveProperty(baseConfig, `${prop}$` as keyof typeof baseConfig, (additionalConfig as any)[prop]);
     });
 
     return baseConfig;

@@ -193,10 +193,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             return;
         }
 
-        if (data.dataValidation?.isSkip) {
-            return;
-        }
-
         const cellBounding = {
             startX: _cellBounding.startX + leftOffset,
             endX: _cellBounding.endX - rightOffset,

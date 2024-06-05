@@ -23,7 +23,6 @@ export interface IDataBarRenderParams {
     startPoint: number; //0-100
     isGradient: boolean;
     isShowValue: boolean;
-    isSkip?: boolean;
 
 }
 export interface IDataBarCellData extends ICellData {
@@ -34,7 +33,6 @@ export interface IIconSetRenderParams {
     iconId: string;
     iconType: IIconType;
     isShowValue: boolean;
-    isSkip?: boolean;
 }
 
 export interface IIconSetCellData extends ICellData {

@@ -186,7 +186,7 @@ export function DataValidationDetail() {
     };
 
     const FormulaInput = componentManager.get(validator.formulaInput);
-    const rangeStr = localRanges.map((i) => serializeRange(i.range)).join(',');
+    const rangeStr = useMemo(() => localRanges.map((i) => serializeRange(i.range)).join(','), []);
 
     const options: IDataValidationRuleOptions = getRuleOptions(localRule);
 
@@ -276,7 +276,7 @@ export function DataValidationDetail() {
                             });
                         }}
                         showError={showError}
-                        validResult={validator.validatorFormula(localRule)}
+                        validResult={validator.validatorFormula(localRule, unitId, subUnitId)}
                         unitId={unitId}
                         subUnitId={subUnitId}
                         ruleId={ruleId}

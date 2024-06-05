@@ -231,13 +231,12 @@ export const UpdateDataValidationSettingCommand: ICommand<IUpdateDataValidationS
         if (!validator) {
             return false;
         }
-
-        if (!validator.validatorFormula(setting).success) {
+        const rule = dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
+        if (!rule) {
             return false;
         }
 
-        const rule = dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
-        if (!rule) {
+        if (!validator.validatorFormula({ ...rule, ...setting }, unitId, subUnitId).success) {
             return false;
         }
 

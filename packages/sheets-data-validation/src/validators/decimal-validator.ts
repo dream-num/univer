@@ -15,7 +15,7 @@
  */
 
 import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
-import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
@@ -95,7 +95,7 @@ export class DecimalValidator extends BaseDataValidator<number> {
         return info;
     }
 
-    override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
+    override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
         const operator = rule.operator;
         if (!operator) {
             return {

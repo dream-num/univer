@@ -17,8 +17,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import type { ICellData, IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
-import { createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, ICommandService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
+import type { IUnitRangeWithName, Workbook } from '@univerjs/core';
+import { createInternalEditorID, ICommandService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { AddHyperLinkCommand, ERROR_RANGE, HyperLinkModel, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
@@ -27,7 +27,7 @@ import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
-import { getCellValueOrigin, hasProtocol, isLegalLink } from '../../common/util';
+import { getCellValueOrigin, isLegalLink, serializeUrl } from '../../common/util';
 import styles from './index.module.less';
 
 enum LinkType {
@@ -157,7 +157,7 @@ export const CellLinkEdit = () => {
 
     const formatUrl = (type: LinkType, payload: string) => {
         if (type === LinkType.link) {
-            return hasProtocol(payload) ? payload : `http://${payload}`;
+            return serializeUrl(payload);
         }
 
         if (type === LinkType.range) {

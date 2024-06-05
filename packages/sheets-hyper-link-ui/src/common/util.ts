@@ -41,9 +41,21 @@ export function isEmail(url: string) {
     return pattern.test(url);
 }
 
-export function serializeUrl(url: string) {
-    if (isLegalLink(url)) {
-        return hasProtocol(url) ? url : isEmail(url) ? `mailto://${url}` : `http://${url}`;
+export function serializeUrl(urlStr: string) {
+    if (isLegalLink(urlStr)) {
+        return hasProtocol(urlStr) ? urlStr : isEmail(urlStr) ? `mailto://${urlStr}` : `http://${urlStr}`;
+    }
+
+    const url = new URL(urlStr);
+    if (
+        url.hostname === location.hostname &&
+        url.port === location.port &&
+        url.protocol === location.protocol &&
+        url.pathname === location.pathname &&
+        url.hash &&
+        !url.search
+    ) {
+        return url.hash;
     }
 
     return url;

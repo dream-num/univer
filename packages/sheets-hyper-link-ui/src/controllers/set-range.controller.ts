@@ -143,7 +143,6 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     const redos: IMutationInfo[] = [];
                     const undos: IMutationInfo[] = [];
                     if (params.cellValue) {
-                        // eslint-disable-next-line max-lines-per-function
                         new ObjectMatrix(params.cellValue).forValue((row, col, cell) => {
                             const cellValueRaw = cell?.v ?? cell?.p?.body?.dataStream.slice(0, -2);
                             const cellValue = (cellValueRaw ?? '').toString();
@@ -176,10 +175,6 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                 }
                                 return;
                             }
-
-                            // if (link.display === cellValue) {
-                            //     return;
-                            // }
 
                             if (cellValueRaw === '') {
                                 redos.push({

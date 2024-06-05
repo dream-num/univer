@@ -25,7 +25,6 @@ import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import { DataValidationModel, RemoveDataValidationMutation, removeDataValidationUndoFactory, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
-import { serializeRange } from '@univerjs/engine-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DataValidationCacheService } from '../services/dv-cache.service';

@@ -157,7 +157,7 @@ export function getAddPermissionDisableBase$(accessor: IAccessor) {
     const userManagerService = accessor.get(UserManagerService);
     const permissionService = accessor.get(IPermissionService);
     const contextService = accessor.get(IContextService);
-    const focusingDrawing$ = contextService.subscribeContextValue$(FOCUSING_COMMON_DRAWINGS);
+    const focusingDrawing$ = contextService.subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false));
 
     return combineLatest([workbook.activeSheet$, userManagerService.currentUser$, focusingDrawing$]).pipe(
         switchMap(([sheet, _, focusOnDrawing]) => {

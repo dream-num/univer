@@ -19,16 +19,17 @@ import { ObjectMatrix, Tools } from '../shared';
 import { DEFAULT_STYLES } from '../types/const';
 import type { HorizontalAlign, VerticalAlign, WrapStrategy } from '../types/enum';
 import { BooleanNumber, FontItalic, FontWeight } from '../types/enum';
-import type {
-    IBorderData,
-    ICellData,
-    IDocumentBody,
-    IDocumentData,
-    IRange,
-    IStyleBase,
-    IStyleData,
-    ITextDecoration,
-    ITextRotation,
+import {
+    type IBorderData,
+    type ICellData,
+    type IDocumentBody,
+    type IDocumentData,
+    type IRange,
+    type IStyleBase,
+    type IStyleData,
+    type ITextDecoration,
+    type ITextRotation,
+    RANGE_TYPE,
 } from '../types/interfaces';
 import type { Styles } from './styles';
 import type { Worksheet } from './worksheet';
@@ -121,6 +122,37 @@ export class Range {
             }
         }
     }
+
+    static transformRange = (range: IRange, worksheet: Worksheet): IRange => {
+        if (range.rangeType === RANGE_TYPE.ALL) {
+            return {
+                startColumn: 0,
+                startRow: 0,
+                endColumn: worksheet.getMaxColumns() - 1,
+                endRow: worksheet.getMaxRows() - 1,
+            };
+        }
+
+        if (range.rangeType === RANGE_TYPE.COLUMN) {
+            return {
+                startRow: 0,
+                endRow: worksheet.getMaxRows() - 1,
+                startColumn: range.startColumn,
+                endColumn: range.endColumn,
+            };
+        }
+
+        if (range.rangeType === RANGE_TYPE.ROW) {
+            return {
+                startColumn: 0,
+                endColumn: worksheet.getMaxColumns() - 1,
+                startRow: range.startRow,
+                endRow: range.endRow,
+            };
+        }
+
+        return range;
+    };
 
     /**
      * get current range data

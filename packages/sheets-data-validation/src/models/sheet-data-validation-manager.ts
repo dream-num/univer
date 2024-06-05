@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { CellValue, ISheetDataValidationRule, Nullable } from '@univerjs/core';
+import type { CellValue, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
 import { DataValidationManager, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
-import { DataValidationStatus, DataValidationType, ObjectMatrix, Range } from '@univerjs/core';
+import { DataValidationStatus, DataValidationType, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
 import type { IUpdateRulePayload } from '@univerjs/data-validation';
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
@@ -53,7 +53,8 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         this._dataValidationCustomFormulaService = this._injector.get(DataValidationCustomFormulaService);
         this._dataValidationRefRangeController = this._injector.get(DataValidationRefRangeController);
         this._cache = this._dataValidationCacheService.ensureCache(unitId, subUnitId);
-
+        const univerInstanceService = this._injector.get(IUniverInstanceService);
+        const worksheet = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)!.getSheetBySheetId(subUnitId)!;
         const matrix = new ObjectMatrix<string>();
         rules?.forEach((rule) => {
             const ruleId = rule.uid;
@@ -67,7 +68,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         rules?.forEach((rule) => {
             this._dataValidationRefRangeController.register(unitId, subUnitId, rule);
         });
-        this._ruleMatrix = new RuleMatrix(matrix);
+        this._ruleMatrix = new RuleMatrix(matrix, worksheet);
     }
 
     private _addRuleSideEffect(rule: ISheetDataValidationRule) {

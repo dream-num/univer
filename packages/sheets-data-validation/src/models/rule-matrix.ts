@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { type IRange, type ISheetDataValidationRule, ObjectMatrix, Range, Rectangle } from '@univerjs/core';
-import { queryObjectMatrix } from '@univerjs/core';
+import type { IRange, ISheetDataValidationRule, Worksheet } from '@univerjs/core';
+import { ObjectMatrix, queryObjectMatrix, Range, Rectangle } from '@univerjs/core';
 
 export type RangeMutation = {
     type: 'update';
@@ -34,22 +34,28 @@ export type RangeMutation = {
 export class RuleMatrix {
     readonly value: ObjectMatrix<string>;
 
-    constructor(value: ObjectMatrix<string>) {
+    constructor(
+        value: ObjectMatrix<string>,
+        private _worksheet: Worksheet
+    ) {
         this.value = value;
     }
 
     addRule(rule: ISheetDataValidationRule) {
         const ruleId = rule.uid;
         rule.ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                this.value.setValue(row, col, ruleId);
-            });
+            Range.foreach(
+                Range.transformRange(range, this._worksheet),
+                (row, col) => {
+                    this.value.setValue(row, col, ruleId);
+                }
+            );
         });
     }
 
     removeRange(ranges: IRange[]) {
         ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
+            Range.foreach(Range.transformRange(range, this._worksheet), (row, col) => {
                 this.value.realDeleteValue(row, col);
             });
         });
@@ -57,14 +63,17 @@ export class RuleMatrix {
 
     removeRule(rule: ISheetDataValidationRule) {
         rule.ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
+            Range.foreach(Range.transformRange(range, this._worksheet), (row, col) => {
                 this.value.setValue(row, col, '');
             });
         });
     }
 
-    updateRange(ruleId: string, oldRanges: IRange[], newRanges: IRange[]) {
+    updateRange(ruleId: string, _oldRanges: IRange[], _newRanges: IRange[]) {
         const tempRuleId = `${ruleId}$`;
+        const oldRanges = _oldRanges.map((range) => Range.transformRange(range, this._worksheet));
+        const newRanges = _newRanges.map((range) => Range.transformRange(range, this._worksheet));
+
         oldRanges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 if (this.value.getValue(row, col) === ruleId) {
@@ -159,7 +168,7 @@ export class RuleMatrix {
     }
 
     clone() {
-        return new RuleMatrix(new ObjectMatrix(this.value.clone()));
+        return new RuleMatrix(new ObjectMatrix(this.value.clone()), this._worksheet);
     }
 
     getValue(row: number, col: number) {

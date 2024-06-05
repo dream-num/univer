@@ -96,7 +96,6 @@ export function DataValidationDetail() {
         }
         setLocalRanges(unitRanges);
         const ranges = unitRanges.filter((i) => (!i.unitId || i.unitId === unitId) && (!i.sheetId || i.sheetId === subUnitId)).map((i) => i.range);
-
         setLocalRule({
             ...localRule,
             ranges,

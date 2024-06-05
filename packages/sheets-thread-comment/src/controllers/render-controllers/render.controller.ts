@@ -29,7 +29,6 @@ export class SheetsThreadCommentRenderController extends Disposable {
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
@@ -72,8 +71,8 @@ export class SheetsThreadCommentRenderController extends Disposable {
 
             const unitId = workbook.getUnitId();
             const subUnitId = workbook.getActiveSheet().getSheetId();
-            const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({ unitId, sheetId: subUnitId });
             const currentRender = this._renderManagerService.getRenderById(unitId);
+            const skeleton = currentRender?.with(SheetSkeletonManagerService).getOrCreateSkeleton({ sheetId: subUnitId });
 
             skeleton?.makeDirty(true);
             skeleton?.calculate();

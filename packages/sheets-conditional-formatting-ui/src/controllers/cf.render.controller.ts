@@ -18,44 +18,41 @@ import type { Workbook } from '@univerjs/core';
 import { Disposable, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IRangeProtectionRule, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
 import { INTERCEPTOR_POINT, RangeProtectionRenderModel, RangeProtectionRuleModel, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
-import type { IRangeProtectionRenderCellData } from '@univerjs/sheets-ui';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { bufferTime, filter } from 'rxjs/operators';
 import type { ISheetFontRenderExtension, ISheetRenderExtension } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-
 import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
-
 import type { IConditionalFormattingCellData, IDataBarCellData, IIconSetCellData } from '@univerjs/sheets-conditional-formatting';
+import type { IRangeProtectionRenderCellData } from '@univerjs/sheets-ui';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { UnitAction } from '@univerjs/protocol';
 
-/**
- * @todo RenderUnit
- */
-@OnLifecycle(LifecycleStages.Rendered, RenderController)
-export class RenderController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, SheetsCfRenderController)
+export class SheetsCfRenderController extends Disposable {
     constructor(@Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(ConditionalFormattingService) private _conditionalFormattingService: ConditionalFormattingService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
-        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(RangeProtectionRenderModel) private _selectionProtectionRenderModel: RangeProtectionRenderModel,
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
         @IPermissionService private _permissionService: IPermissionService
     ) {
         super();
+
         this._initViewModelInterceptor();
         this._initSkeleton();
+        this._initViewModelByRangeInterceptor();
+        this._initViewModelBySheetInterceptor();
     }
 
-    _initSkeleton() {
+    private _initSkeleton() {
         const markDirtySkeleton = () => {
-            this._sheetSkeletonManagerService.reCalculate();
             const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+            this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).reCalculate();
             this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
         };
 
@@ -88,7 +85,7 @@ export class RenderController extends Disposable {
         })).subscribe(markDirtySkeleton));
     }
 
-    _initViewModelInterceptor() {
+    private _initViewModelInterceptor() {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             handler: (cell, context, next) => {
                 const result = this._conditionalFormattingService.composeStyle(context.unitId, context.subUnitId, context.row, context.col);

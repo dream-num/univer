@@ -20,7 +20,7 @@ import {
     ICommandService,
     RANGE_TYPE,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import { CURSOR_TYPE, Rect } from '@univerjs/engine-render';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
@@ -48,7 +48,7 @@ enum HEADER_HOVER_TYPE {
  * header highlight
  * column menu: show, hover and mousedown event
  */
-export class HeaderMenuRenderController extends Disposable implements IRenderController {
+export class HeaderMenuRenderController extends Disposable implements IRenderModule {
     private _hoverRect: Nullable<Rect>;
 
     private _hoverMenu: Nullable<HeaderMenuShape>;

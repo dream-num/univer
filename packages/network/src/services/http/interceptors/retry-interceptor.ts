@@ -14,28 +14,21 @@
  * limitations under the License.
  */
 
-import { delay, of, throwError } from 'rxjs';
-import { concatMap, retryWhen } from 'rxjs/operators';
-import type { HTTPInterceptorFn } from '../interceptor';
+import { retry } from 'rxjs/operators';
+import type { Nullable } from '@univerjs/core';
+import type { HTTPInterceptorFnFactory } from '../interceptor';
 
-const MAX_RETRY_ATTEMPTS = 2;
+const DEFAULT_MAX_RETRY_ATTEMPTS = 3;
 const DELAY_INTERVAL = 1000;
 
-// TODO@wzhudev: should fix these deprecated warning here
+export interface IRetryInterceptorFactoryParams {
+    maxRetryAttempts?: number;
+    delayInterval?: number;
+}
 
-export const retryInterceptor: HTTPInterceptorFn = (request, next) => {
-    return next(request).pipe(
-        retryWhen((errors) => {
-            return errors.pipe(
-                concatMap((error, index) => {
-                    if (index > MAX_RETRY_ATTEMPTS) {
-                        return throwError(error);
-                    }
-
-                    return of(error);
-                }),
-                delay(DELAY_INTERVAL)
-            );
-        })
-    );
+export const RetryInterceptorFactory: HTTPInterceptorFnFactory<[Nullable<undefined>, Nullable<IRetryInterceptorFactoryParams>]> = (_accessor, params) => {
+    const maxRetryAttempts = params?.maxRetryAttempts ?? DEFAULT_MAX_RETRY_ATTEMPTS;
+    const delayInterval = params?.delayInterval ?? DELAY_INTERVAL;
+    return (request, next) => next(request).pipe(retry({ delay: delayInterval, count: maxRetryAttempts }));
 };
+

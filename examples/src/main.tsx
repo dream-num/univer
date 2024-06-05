@@ -52,6 +52,9 @@ function Examples() {
     }, {
         title: '📚 Docs Uniscript',
         href: './docs-uniscript/',
+    }, {
+        title: '🌌 Universe',
+        href: './uni/',
     }];
 
     return (

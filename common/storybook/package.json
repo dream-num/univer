@@ -12,8 +12,8 @@
     },
     "keywords": [],
     "scripts": {
-        "dev": "storybook dev -p 6006 --no-open",
-        "build": "storybook build"
+        "dev:storybook": "storybook dev -p 6006 --no-open",
+        "build:storybook": "storybook build"
     },
     "dependencies": {
         "@chromatic-com/storybook": "^1.5.0",

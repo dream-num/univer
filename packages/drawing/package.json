@@ -49,10 +49,6 @@
     "files": [
         "lib"
     ],
-    "engines": {
-        "node": ">=16.0.0",
-        "npm": ">=8.0.0"
-    },
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
@@ -81,5 +77,18 @@
         "typescript": "^5.4.5",
         "vite": "^5.2.12",
         "vitest": "^1.6.0"
+    },
+    "univerSpace": {
+        ".": {
+            "import": "./lib/es/index.js",
+            "require": "./lib/cjs/index.js",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./*": {
+            "import": "./lib/es/*",
+            "require": "./lib/cjs/*",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./lib/*": "./lib/*"
     }
 }

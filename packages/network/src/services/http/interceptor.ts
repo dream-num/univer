@@ -16,7 +16,6 @@
 
 import type { Observable } from 'rxjs';
 
-import type { IAccessor } from '@wendellhu/redi';
 import type { HTTPRequest } from './request';
 import type { HTTPEvent } from './response';
 
@@ -45,5 +44,4 @@ export type HTTPInterceptorFn = (request: HTTPRequest, next: HTTPHandlerFn) => O
 
 export type RequestPipe<T> = (req: HTTPRequest, finalHandlerFn: HTTPHandlerFn) => Observable<HTTPEvent<T>>;
 
-// eslint-disable-next-line ts/no-explicit-any
-export type HTTPInterceptorFnFactory = (accessor: IAccessor, params?: any) => HTTPInterceptorFn;
+export type HTTPInterceptorFnFactory<T extends unknown[] = []> = (...args: T) => HTTPInterceptorFn;

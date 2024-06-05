@@ -66,7 +66,11 @@ export class DesktopUIController extends Disposable {
                     }
                 });
 
-                this._lifecycleService.lifecycle$.pipe(filter((lifecycle) => lifecycle === LifecycleStages.Ready), delay(300), take(1)).subscribe(() => {
+                this._lifecycleService.lifecycle$.pipe(
+                    filter((lifecycle) => lifecycle === LifecycleStages.Ready),
+                    delay(300),
+                    take(1)
+                ).subscribe(() => {
                     const engine = this._renderManagerService.getFirst()?.engine;
                     engine?.setContainer(canvasElement);
                     this._lifecycleService.stage = LifecycleStages.Rendered;

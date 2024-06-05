@@ -139,7 +139,6 @@ describe('Test clipboard', () => {
             ]);
 
             sheetSkeletonManagerService.setCurrent({
-                unitId: 'test',
                 sheetId: 'sheet1',
             });
         });

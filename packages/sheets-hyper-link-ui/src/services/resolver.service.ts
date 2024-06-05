@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import { ICommandService, isValidRange, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
@@ -32,6 +32,10 @@ interface ISheetUrlParams {
 }
 
 function getContainRange(range: IRange, mergedCells: IRange[]) {
+    if (range.rangeType === RANGE_TYPE.COLUMN || RANGE_TYPE.ROW) {
+        return range;
+    }
+
     const relativeCells: IRange[] = [];
     mergedCells.forEach((cell) => {
         if (Rectangle.intersects(range, cell)) {

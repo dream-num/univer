@@ -57,9 +57,9 @@ export const InsertSheetCommand: ICommand = {
 
         const { unitId, workbook } = target;
         let index = workbook.getSheets().length;
-        const sheet = params?.sheet
-        const sheetId = sheet?.id
-        let sheetConfig = mergeWorksheetSnapshotWithDefault(sheet || {});
+        const sheet = params?.sheet;
+        const sheetId = sheet?.id;
+        const sheetConfig = mergeWorksheetSnapshotWithDefault(sheet || {});
 
         if (params) {
             index = params.index ?? index;

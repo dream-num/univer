@@ -98,7 +98,6 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
                                     id: newId,
                                     row,
                                     column,
-                                    display: name,
                                     payload: text,
                                 },
                             },

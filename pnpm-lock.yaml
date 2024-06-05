@@ -1842,9 +1842,6 @@ importers:
       '@univerjs/protocol':
         specifier: ^0.1.36
         version: 0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
-      tilg:
-        specifier: 0.1.1
-        version: 0.1.1(react@18.3.1)
     devDependencies:
       '@types/react':
         specifier: ^18.3.3
@@ -2131,9 +2128,6 @@ importers:
       rc-util:
         specifier: ^5.41.0
         version: 5.41.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      tilg:
-        specifier: 0.1.1
-        version: 0.1.1(react@18.3.1)
     optionalDependencies:
       vue:
         specifier: '>=3.0.0'
@@ -10116,11 +10110,6 @@ packages:
 
   through@2.3.8:
     resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
-
-  tilg@0.1.1:
-    resolution: {integrity: sha512-0uHyTAUM0tJL792LeviRPFkJtCbF6Za3/hbbnRmWGUaicOhbJ0IpvBViXiXTF7nk6R0L6vve2XLesQzn5jEVng==}
-    peerDependencies:
-      react: ^18.0.0 || ^17.0.0
 
   tiny-inflate@1.0.3:
     resolution: {integrity: sha512-pkY1fj1cKHb2seWDy0B16HeWyczlJA9/WW3u3c4z/NiWDsO3DOU5D7nhTLE9CF0yXv/QZFY7sEJmj24dK+Rrqw==}
@@ -19961,10 +19950,6 @@ snapshots:
       xtend: 4.0.2
 
   through@2.3.8: {}
-
-  tilg@0.1.1(react@18.3.1):
-    dependencies:
-      react: 18.3.1
 
   tiny-inflate@1.0.3: {}
 

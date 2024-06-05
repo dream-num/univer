@@ -102,11 +102,6 @@ export class SheetsSortUIService extends Disposable {
         }
         // open customize dialog
         this.showCustomSortPanel(location);
-        // if (!sortOption) {
-        //     return false;
-        // }
-        // this._sheetsSortService.applySort(sortOption, location.unitId, location.subUnitId);
-        // return true;
         return true;
     }
 

@@ -25,5 +25,5 @@ export {
     ReorderRangeCommand,
 } from './commands/sheets-reorder.command';
 
-export { SheetsSortService } from './services/sheet-sort.service';
+export { SheetsSortService } from './services/sheets-sort.service';
 export { type ISortOption, SortType, type IOrderRule } from './services/interface';

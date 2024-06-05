@@ -23,7 +23,7 @@ import { getPrimaryForRange, type ISheetCommandSharedParams, NORMAL_SELECTION_PL
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IOrderRule, SortType } from '../services/interface';
-import { SheetsSortService } from '../services/sheet-sort.service';
+import { SheetsSortService } from '../services/sheets-sort.service';
 import type { IReorderRangeMutationParams } from './sheets-reorder.mutation';
 import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from './sheets-reorder.mutation';
 

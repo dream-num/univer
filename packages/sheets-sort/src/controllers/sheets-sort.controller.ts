@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable, UniverInstanceService } from '@univerjs/core';
-import { CellValueType, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { ICellData, Nullable } from '@univerjs/core';
+import { CellValueType, Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 
-
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 import { SheetRenderController } from '@univerjs/sheets-ui';
-import { IMenuService } from '@univerjs/ui';
 import type { ICellValueCompareFn } from '../commands/sheets-reorder.command';
 import { ReorderRangeCommand } from '../commands/sheets-reorder.command';
 import { ReorderRangeMutation } from '../commands/sheets-reorder.mutation';
-import { SheetsSortService } from '../services/sheet-sort.service';
+import { SheetsSortService } from '../services/sheets-sort.service';
 import { compareNull, compareNumber, compareString } from './utils';
-
 
 export type ICommonComparableCellValue = number | string | null;
 
@@ -34,10 +31,7 @@ export type ICommonComparableCellValue = number | string | null;
 export class SheetsSortController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IUniverInstanceService private readonly _instanceService: UniverInstanceService,
-        @IMenuService private readonly _menuService: IMenuService,
         @Inject(SheetRenderController) private _sheetRenderController: SheetRenderController,
-        @Inject(Injector) private _injector: Injector,
         @Inject(SheetsSortService) private readonly _sortService: SheetsSortService
     ) {
         super();
@@ -47,7 +41,6 @@ export class SheetsSortController extends Disposable {
         this._initCommands();
         this._registerCompareFns();
     }
-
 
     private _initCommands(): void {
         [

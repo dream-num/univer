@@ -19,7 +19,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SheetsSortController } from './controllers/sheets-sort.controller';
-import { SheetsSortService } from './services/sheet-sort.service';
+import { SheetsSortService } from './services/sheets-sort.service';
 import { enUS, zhCN } from './locale';
 
 const NAME = 'UNIVER_SHEETS_SORT_PLUGIN';

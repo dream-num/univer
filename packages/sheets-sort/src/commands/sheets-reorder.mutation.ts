@@ -21,7 +21,6 @@ import { CommandType, IUniverInstanceService, ObjectMatrix, Range, Tools } from 
 import type { ICellData, IMutation, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 
-
 export interface IReorderRangeMutationParams extends ISheetCommandSharedParams {
     range: IRange;
     order: { [key: number]: number };

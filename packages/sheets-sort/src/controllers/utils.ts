@@ -17,7 +17,6 @@
 import { SortType } from '../services/interface';
 import type { ICommonComparableCellValue } from './sheets-sort.controller';
 
-
 export enum ORDER {
     POSITIVE = 1,
     NEGATIVE = -1,
@@ -77,7 +76,6 @@ export const compareNumber = (
 export const compareString = (a1: ICommonComparableCellValue, a2: ICommonComparableCellValue, type: SortType) => {
     const isA1Str = typeof a1 === 'string';
     const isA2Str = typeof a2 === 'string';
-
 
     if (isA1Str) {
         a1 = removeStringSymbol((a1 as string).toLocaleLowerCase()) as string;

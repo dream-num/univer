@@ -30,5 +30,6 @@ export {
 } from './services/web-socket/web-socket.service';
 export type { IRequestParams, IPostRequestParams } from './services/http/http.service';
 export type { HTTPHandlerFn, HTTPInterceptorFn, HTTPInterceptorFnFactory } from './services/http/interceptor';
-export { retryInterceptor } from './services/http/interceptors/retry-interceptor';
+export { RetryInterceptorFactory, type IRetryInterceptorFactoryParams } from './services/http/interceptors/retry-interceptor';
 export { ThresholdInterceptorFactory } from './services/http/interceptors/threshold-interceptor';
+export { AuthInterceptorFactory, type IAuthInterceptorParams } from './services/http/interceptors/auth-interceptor';

@@ -18,12 +18,12 @@ import type { ICommandInfo, Workbook } from '@univerjs/core';
 import { Disposable, ICommandService } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { IMarkSelectionService } from '../services/mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-export class MarkSelectionRenderController extends Disposable implements IRenderController {
+export class MarkSelectionRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(IMarkSelectionService) private _markSelectionService: IMarkSelectionService,

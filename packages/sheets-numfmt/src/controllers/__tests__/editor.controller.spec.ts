@@ -21,7 +21,7 @@ import { SetNumfmtMutation } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { NumfmtCellContent } from '../numfmt.cell-content.controller';
+import { SheetsNumfmtCellContentController } from '../numfmt.cell-content.controller';
 import { NumfmtEditorController } from '../numfmt.editor.controller';
 import { createTestBed } from './test.util';
 
@@ -44,7 +44,7 @@ describe('test editor', () => {
     beforeEach(() => {
         testBed = createTestBed([
             [NumfmtEditorController],
-            [NumfmtCellContent],
+            [SheetsNumfmtCellContentController],
             [IEditorBridgeService, { useClass: MockEditorBridgeService }],
         ]);
         unitId = testBed.unitId;
@@ -52,7 +52,7 @@ describe('test editor', () => {
         commandService = testBed.get(ICommandService);
         const univerInstanceService = testBed.get(IUniverInstanceService);
         testBed.get(NumfmtEditorController);
-        testBed.get(NumfmtCellContent);
+        testBed.get(SheetsNumfmtCellContentController);
         workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         worksheet = workbook.getActiveSheet();
     });

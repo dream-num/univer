@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
+import type { Nullable } from '@univerjs/core';
 import { remove } from '@univerjs/core';
 import type { HTTPInterceptorFnFactory } from '../interceptor';
 
@@ -24,7 +24,8 @@ export interface IThresholdInterceptorFactoryParams {
 }
 
 type HandlerFn = () => void;
-export const ThresholdInterceptorFactory: HTTPInterceptorFnFactory = (_accessor: IAccessor, params?: IThresholdInterceptorFactoryParams) => {
+
+export const ThresholdInterceptorFactory: HTTPInterceptorFnFactory<[Nullable<IThresholdInterceptorFactoryParams>]> = (params) => {
     /**
      * The local variable to store handles.
      */

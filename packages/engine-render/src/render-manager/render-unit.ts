@@ -33,8 +33,8 @@ export interface IRender {
 }
 
 // eslint-disable-next-line ts/no-explicit-any
-export interface IRenderControllerCtor<T extends UnitModel = UnitModel> { new(unit: IRenderContext<T>, ...args: any[]): IRenderController }
-export interface IRenderController extends IDisposable {}
+export interface IRenderModuleCtor<T extends UnitModel = UnitModel> { new(unit: IRenderContext<T>, ...args: any[]): IRenderModule }
+export interface IRenderModule extends IDisposable {}
 
 /**
  * This object encapsulates methods or properties to render each element.
@@ -100,11 +100,11 @@ export class RenderUnit extends Disposable implements IRender {
         return this._injector.get(dependency);
     }
 
-    addRenderControllers(ctors: IRenderControllerCtor[]) {
+    addRenderControllers(ctors: IRenderModuleCtor[]) {
         this._initControllers(ctors);
     }
 
-    private _initControllers(ctors: IRenderControllerCtor[]): void {
+    private _initControllers(ctors: IRenderModuleCtor[]): void {
         const j = this._injector;
 
         ctors.forEach((ctor) => j.add([ctor, { useFactory: () => j.createInstance(ctor, this._renderContext) }]));

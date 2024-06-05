@@ -88,6 +88,8 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
         // slides
         './src/slides/main.ts',
 
+        // uni
+        './src/uni/main.ts',
     ],
     outdir: './local',
 

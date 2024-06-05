@@ -42,7 +42,7 @@ import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
 import { RegisterOtherFormulaService } from './services/register-other-formula.service';
 import { FormulaAlertController } from './controllers/formula-alert.controller';
-import { FormulaRenderController } from './controllers/formula-render.controller';
+import { FormulaRenderManagerController } from './controllers/formula-render.controller';
 
 /**
  * The configuration of the formula UI plugin.
@@ -98,7 +98,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [FormulaEditorShowController],
             [ActiveDirtyController],
             [DefinedNameController],
-            [FormulaRenderController],
+            [FormulaRenderManagerController],
             [FormulaAlertController],
         ];
 

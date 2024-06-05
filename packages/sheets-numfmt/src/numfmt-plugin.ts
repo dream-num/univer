@@ -20,7 +20,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { SHEET_NUMFMT_PLUGIN } from './base/const/PLUGIN_NAME';
-import { NumfmtCellContent } from './controllers/numfmt.cell-content.controller';
+import { SheetsNumfmtCellContentController } from './controllers/numfmt.cell-content.controller';
 import { NumfmtController } from './controllers/numfmt.controller';
 import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
 import { NumfmtI18nController } from './controllers/numfmt.i18n.controller';
@@ -46,7 +46,7 @@ export class UniverSheetsNumfmtPlugin extends Plugin {
         this._injector.add([INumfmtController, { useClass: NumfmtController, lazy: false }]);
         this._injector.add([NumfmtEditorController]);
         this._injector.add([UserHabitController]);
-        this._injector.add([NumfmtCellContent]);
+        this._injector.add([SheetsNumfmtCellContentController]);
         this._injector.add([NumfmtI18nController]);
         this._injector.add(
             [

@@ -18,9 +18,10 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
 import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
-import { SheetsHyperLinkRenderController } from './controllers/render-controllers/render.controller';
+import { SheetsHyperLinkRenderController, SheetsHyperLinkRenderManagerController } from './controllers/render-controllers/render.controller';
 import { SheetsHyperLinkPopupService } from './services/popup.service';
 import { SheetsHyperLinkResolverService } from './services/resolver.service';
 import { SheetHyperLinkSetRangeController } from './controllers/set-range.controller';
@@ -40,7 +41,8 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
 
     constructor(
         private _config: IUniverSheetsHyperLinkUIConfig,
-        @Inject(Injector) protected override _injector: Injector
+        @Inject(Injector) protected override _injector: Injector,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
     }
@@ -52,7 +54,7 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
 
             [SheetsHyperLinkRemoveSheetController],
             [SheetsHyperLinkRefRangeController],
-            [SheetsHyperLinkRenderController],
+            [SheetsHyperLinkRenderManagerController],
             [SheetHyperLinkSetRangeController],
             [SheetsHyperLinkPopupController],
             [
@@ -67,8 +69,8 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
             [SheetHyperLinkUrlController],
         ];
 
-        dependencies.forEach((dep) => {
-            injector.add(dep);
-        });
+        dependencies.forEach((dep) => injector.add(dep));
+
+        this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, SheetsHyperLinkRenderController);
     }
 }

@@ -16,17 +16,14 @@
 
 import type { ICellCustomRender, ICellRenderContext, Nullable, UniverInstanceService, Workbook } from '@univerjs/core';
 import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, sortRules } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, RenderManagerService, Spreadsheet } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderManagerService, Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-/**
- * @todo RenderUnit
- */
 @OnLifecycle(LifecycleStages.Rendered, CellCustomRenderController)
-export class CellCustomRenderController extends Disposable implements IRenderController {
+export class CellCustomRenderController extends Disposable implements IRenderModule {
     private _enterActiveRender: Nullable<{
         render: ICellCustomRender;
         cellContext: ICellRenderContext;
@@ -53,7 +50,9 @@ export class CellCustomRenderController extends Disposable implements IRenderCon
             if (!skeletonParam) {
                 return;
             }
-            const { unitId, skeleton } = skeletonParam;
+
+            const unitId = this._context.unitId;
+            const { skeleton } = skeletonParam;
             const currentRender = this._renderManagerService.getRenderById(unitId);
             if (currentRender && currentRender.mainComponent) {
                 const spreadsheet = currentRender.mainComponent as Spreadsheet;

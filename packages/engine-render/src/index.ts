@@ -25,7 +25,7 @@ export * from './group';
 export * from './layer';
 export { IRenderingEngine, UniverRenderEnginePlugin } from './render-engine';
 export { type RenderComponentType, IRenderManagerService, RenderManagerService } from './render-manager/render-manager.service';
-export { RenderUnit, type IRender, type IRenderControllerCtor, type IRenderController, type IRenderContext } from './render-manager/render-unit';
+export { RenderUnit, type IRender, type IRenderModuleCtor, type IRenderModule, type IRenderContext } from './render-manager/render-unit';
 export * from './scene';
 export * from './scene-viewer';
 export * from './scroll-timer';

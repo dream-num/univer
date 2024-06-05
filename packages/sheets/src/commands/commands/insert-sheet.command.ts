@@ -57,14 +57,14 @@ export const InsertSheetCommand: ICommand = {
 
         const { unitId, workbook } = target;
         let index = workbook.getSheets().length;
-        const sheet=params?.sheet
-        const sheetId=sheet?.id
-        let sheetConfig = mergeWorksheetSnapshotWithDefault(sheet||{});
-        
+        const sheet = params?.sheet
+        const sheetId = sheet?.id
+        let sheetConfig = mergeWorksheetSnapshotWithDefault(sheet || {});
+
         if (params) {
             index = params.index ?? index;
-            sheetConfig.id = sheetId||Tools.generateRandomId();
-            sheetConfig.name = sheet?.name||workbook.generateNewSheetName(`${localeService.t('sheets.tabs.sheet')}`);
+            sheetConfig.id = sheetId || Tools.generateRandomId();
+            sheetConfig.name = sheet?.name || workbook.generateNewSheetName(`${localeService.t('sheets.tabs.sheet')}`);
         } else {
             sheetConfig.id = Tools.generateRandomId();
             sheetConfig.name = workbook.generateNewSheetName(`${localeService.t('sheets.tabs.sheet')}`);

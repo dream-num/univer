@@ -23,7 +23,7 @@ import { useObservable } from '../../components/hooks/observable';
 import { IUIPartsService } from '../../services/parts/parts.service';
 
 export interface IComponentContainerProps {
-    components?: Set<() => ComponentType>;
+    components?: Set<ComponentType>;
     fallback?: React.ReactNode;
     sharedProps?: Record<string, unknown>;
 }
@@ -32,9 +32,9 @@ export function ComponentContainer(props: IComponentContainerProps) {
     const { components, fallback, sharedProps } = props;
     if (!components || components.size === 0) return fallback ?? null;
 
-    return Array.from(components.values()).map((component, index) =>
-        React.createElement(component(), { key: `${index}`, ...sharedProps })
-    );
+    return Array.from(components.values()).map((component, index) => {
+        return React.createElement(component, { key: `${component.displayName ?? index}`, ...sharedProps });
+    });
 }
 
 /**
@@ -55,9 +55,9 @@ export function useComponentsOfPart(part: string, injector?: Injector) {
         ),
         undefined,
         undefined,
-        [uiPartsService]
+        [uiPartsService, part]
     );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     return useMemo(() => uiPartsService.getComponents(part), [componentPartUpdateCount]);
 }

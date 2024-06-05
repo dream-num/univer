@@ -18,6 +18,4 @@ import type { ComponentType } from 'react';
 
 import { GlobalZone } from './components/global-zone/GlobalZone';
 
-export const builtInGlobalComponents: Set<() => ComponentType> = new Set([
-    () => GlobalZone,
-]);
+export const builtInGlobalComponents: Set<ComponentType> = new Set([GlobalZone]);

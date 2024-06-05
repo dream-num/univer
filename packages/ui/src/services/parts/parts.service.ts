@@ -36,14 +36,14 @@ export enum BuiltInUIPart {
 export interface IUIPartsService {
     componentRegistered$: Observable<ComponentPartKey>;
 
-    registerComponent(part: ComponentPartKey, component: () => ComponentType): IDisposable;
+    registerComponent(part: ComponentPartKey, componentFactory: () => ComponentType): IDisposable;
     getComponents(part: ComponentPartKey): Set<ComponentRenderer>;
 }
 
 export const IUIPartsService = createIdentifier<IUIPartsService>('ui.parts.service');
 
 export class UIPartsService extends Disposable implements IUIPartsService {
-    private _componentsByPart: Map<ComponentPartKey, Set<ComponentRenderer>> = new Map();
+    private _componentsByPart: Map<ComponentPartKey, Set<ComponentType>> = new Map();
 
     private readonly _componentRegistered$ = new Subject<ComponentPartKey>();
     readonly componentRegistered$ = this._componentRegistered$.asObservable();
@@ -54,16 +54,17 @@ export class UIPartsService extends Disposable implements IUIPartsService {
         this._componentRegistered$.complete();
     }
 
-    registerComponent(part: ComponentPartKey, component: () => React.ComponentType): IDisposable {
+    registerComponent(part: ComponentPartKey, componentFactory: () => React.ComponentType): IDisposable {
+        const componentType = componentFactory();
         const components = (
             this._componentsByPart.get(part)
             || this._componentsByPart.set(part, new Set()).get(part)!
-        ).add(component);
+        ).add(componentType);
 
         this._componentRegistered$.next(part);
 
         return toDisposable(() => {
-            components.delete(component);
+            components.delete(componentType);
             if (components.size === 0) {
                 this._componentsByPart.delete(part);
             }
@@ -71,7 +72,7 @@ export class UIPartsService extends Disposable implements IUIPartsService {
         });
     }
 
-    getComponents(part: ComponentPartKey): Set<ComponentRenderer> {
+    getComponents(part: ComponentPartKey): Set<ComponentType> {
         return new Set([...(this._componentsByPart.get(part) || new Set())]);
     }
 }

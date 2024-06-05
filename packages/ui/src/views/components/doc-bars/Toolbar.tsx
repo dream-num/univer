@@ -39,7 +39,7 @@ const MENU_POSITIONS = [
 ];
 
 export interface IToolbarProps {
-    headerMenuComponents?: Set<() => ComponentType>;
+    headerMenuComponents?: Set<ComponentType>;
 }
 
 /**

@@ -119,6 +119,7 @@ export class HtmlToUSMService {
         hideIframe(this.htmlElement);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     convert(html: string): IUniverSheetCopyDataModel {
         if (this.htmlElement.contentDocument) {
             this.htmlElement.contentDocument.open();
@@ -190,13 +191,23 @@ export class HtmlToUSMService {
                     textRuns,
                     paragraphs: generateParagraphs(singleDataStream),
                 };
-                const p = this._generateDocumentDataModelSnapshot({
-                    body: singleDocBody,
-                });
-                valueMatrix.setValue(0, 0, {
-                    v: dataStream,
-                    p,
-                });
+
+                const dataStreamLength = dataStream.length;
+                const textRunsLength = textRuns?.length ?? 0;
+                if (!textRunsLength || (textRunsLength === 1 && textRuns![0].st === 0 && textRuns![0].ed === dataStreamLength)) {
+                    valueMatrix.setValue(0, 0, {
+                        v: dataStream,
+                    });
+                } else {
+                    const p = this._generateDocumentDataModelSnapshot({
+                        body: singleDocBody,
+                    });
+                    valueMatrix.setValue(0, 0, {
+                        v: dataStream,
+                        p,
+                    });
+                }
+
                 rowProperties.push({}); // TODO@yuhongz
             }
         }

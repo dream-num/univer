@@ -190,9 +190,18 @@ export enum NumberCompareTypeEnum {
 }
 
 export enum DynamicCompareTypeEnum {
-    above,
-    below,
-    top10,
+    /**
+     * @description the value is above the average value
+     */
+    above = 'above',
+    /**
+     * @description the value is below the average value
+     */
+    below = 'below',
+    /**
+     * @description  the value is in the top 10
+     */
+    top10 = 'top10',
     /**
      *@description day after today
      */

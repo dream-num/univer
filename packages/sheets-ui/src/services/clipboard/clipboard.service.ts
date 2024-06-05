@@ -1060,8 +1060,7 @@ function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithSpanInfo>) {
 }
 
 function getCellTextForClipboard(cell: ICellDataWithSpanInfo) {
-    const formatValue = extractPureTextFromCell(cell);
-    return escapeSpecialCode(formatValue?.toString() || '');
+    return extractPureTextFromCell(cell);
 }
 
 export const escapeSpecialCode = (cellStr: string) =>

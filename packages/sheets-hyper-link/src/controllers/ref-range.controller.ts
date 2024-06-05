@@ -115,7 +115,8 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                 };
             }
 
-            return this._handlePositionChange(unitId, subUnitId, link, resultRange, false);
+            const res = this._handlePositionChange(unitId, subUnitId, link, resultRange, false);
+            return res;
         };
         this._disposableMap.set(id, this._refRangeService.registerRefRange(oldRange, handleRefRangeChange, unitId, subUnitId));
     }

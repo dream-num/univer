@@ -188,13 +188,22 @@ const dv2 = [
     },
 ];
 
-const hyperLink = [{
-    row: 20,
-    column: 12,
-    id: '123',
-    display: 'linkTest哈哈哈哈',
-    payload: '#gid=sheet-0011&range=1:1',
-}] as ICellHyperLink[];
+const hyperLink = [
+    {
+        row: 20,
+        column: 8,
+        id: '321',
+        display: 'linkTest',
+        payload: '#gid=sheet-0011&range=1:1',
+    },
+    {
+        row: 20,
+        column: 12,
+        id: '123',
+        display: 'linkTest哈哈哈哈',
+        payload: '#gid=sheet-0011&range=1:1',
+    },
+] as ICellHyperLink[];
 
 export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'workbook-01',
@@ -14095,6 +14104,10 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     5: {
                         v: 345,
                         t: 2,
+                    },
+                    8: {
+                        v: 'linkTest',
+                        t: 1,
                     },
                     12: {
                         v: 'linkTest哈哈哈哈',

@@ -108,6 +108,7 @@ interface ILine {
 /**
  * see docs/tldr/ref-range/move-rows-cols.tldr
  */
+// eslint-disable-next-line max-lines-per-function, complexity
 export const handleBaseMoveRowsCols = (
     fromRange: ILine,
     toRange: ILine,
@@ -1012,6 +1013,7 @@ export function adjustRangeOnMutation(range: Readonly<IRange>, mutation: IMutati
                 { start: (params as IMoveColumnsMutationParams).targetRange.startColumn, end: (params as IMoveColumnsMutationParams).targetRange.endColumn },
                 { start: range.startColumn, end: range.endColumn }
             );
+            baseRangeOperator.type = OperatorType.HorizontalMove;
             break;
         case RemoveColMutation.id:
             baseRangeOperator = handleBaseRemoveRange((params as IRemoveColMutationParams).range, range);
@@ -1059,11 +1061,25 @@ export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: 
     switch (command.id) {
         case EffectRefRangId.MoveColsCommandId: {
             const params = command.params!;
-            return [params.fromRange, params.toRange];
+            return [
+                params.fromRange,
+                {
+                    ...params.toRange,
+                    startColumn: params.toRange.startColumn - 0.5,
+                    endColumn: params.toRange.endColumn - 0.5,
+                },
+            ];
         }
         case EffectRefRangId.MoveRowsCommandId: {
             const params = command.params!;
-            return [params.fromRange, params.toRange];
+            return [
+                params.fromRange,
+                {
+                    ...params.toRange,
+                    startRow: params.toRange.startRow - 0.5,
+                    endRow: params.toRange.startRow - 0.5,
+                },
+            ];
         }
         case EffectRefRangId.MoveRangeCommandId: {
             const params = command;
@@ -1114,11 +1130,25 @@ export function getEffectedRangesOnMutation(mutation: IMutationInfo<MutationsAff
     switch (mutation.id) {
         case MoveColsMutation.id: {
             const params = mutation.params as IMoveColumnsMutationParams;
-            return [params.sourceRange, params.targetRange];
+            return [
+                params.sourceRange,
+                {
+                    ...params.targetRange,
+                    startColumn: params.targetRange.startColumn - 0.5,
+                    endColumn: params.targetRange.endColumn - 0.5,
+                },
+            ];
         }
         case MoveRowsMutation.id: {
             const params = mutation.params as IMoveRowsMutationParams;
-            return [params.sourceRange, params.targetRange];
+            return [
+                params.sourceRange,
+                {
+                    ...params.targetRange,
+                    startRow: params.targetRange.startRow - 0.5,
+                    endRow: params.targetRange.startRow - 0.5,
+                },
+            ];
         }
 
         case MoveRangeMutation.id: {

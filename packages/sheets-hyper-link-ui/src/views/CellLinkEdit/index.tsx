@@ -77,7 +77,7 @@ export const CellLinkEdit = () => {
 
     useEffect(() => {
         if (editing?.row !== undefined && editing.column !== undefined) {
-            const link = hyperLinkModel.getHyperLinkByLocation(editing.unitId, editing.subUnitId, editing.row, editing.column);
+            const link = hyperLinkModel.getHyperLinkByLocationSync(editing.unitId, editing.subUnitId, editing.row, editing.column);
             if (link) {
                 const linkInfo = resolverService.parseHyperLink(link.payload);
                 setId(link.id);

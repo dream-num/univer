@@ -19,8 +19,8 @@ import { CellValueType, Disposable, IUniverInstanceService, LifecycleStages, Obj
 import { Inject, Injector } from '@wendellhu/redi';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, getSheetCommandTarget, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
-import type { IAddHyperLinkCommandParams, IUpdateHyperLinkCommandParams, IUpdateHyperLinkMutationParams } from '@univerjs/sheets-hyper-link';
-import { AddHyperLinkCommand, AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkCommand, UpdateHyperLinkMutation } from '@univerjs/sheets-hyper-link';
+import type { IAddHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link';
+import { AddHyperLinkCommand, AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { isLegalLink, serializeUrl } from '../common/util';
 
 @OnLifecycle(LifecycleStages.Starting, SheetHyperLinkSetRangeController)
@@ -177,9 +177,9 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                 return;
                             }
 
-                            if (link.display === cellValue) {
-                                return;
-                            }
+                            // if (link.display === cellValue) {
+                            //     return;
+                            // }
 
                             if (cellValueRaw === '') {
                                 redos.push({
@@ -198,36 +198,34 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                         link,
                                     },
                                 });
-
-                                return;
                             }
 
-                            const redoParams: IUpdateHyperLinkMutationParams = {
-                                unitId,
-                                subUnitId,
-                                id: link.id,
-                                payload: {
-                                    payload: link.payload,
-                                    display: cellValue,
-                                },
-                            };
-                            const undoParams: IUpdateHyperLinkMutationParams = {
-                                unitId,
-                                subUnitId,
-                                id: link.id,
-                                payload: {
-                                    payload: link.payload,
-                                    display: link.display,
-                                },
-                            };
-                            redos.push({
-                                id: UpdateHyperLinkMutation.id,
-                                params: redoParams,
-                            });
-                            undos.push({
-                                id: UpdateHyperLinkMutation.id,
-                                params: undoParams,
-                            });
+                            // const redoParams: IUpdateHyperLinkMutationParams = {
+                            //     unitId,
+                            //     subUnitId,
+                            //     id: link.id,
+                            //     payload: {
+                            //         payload: link.payload,
+                            //         display: cellValue,
+                            //     },
+                            // };
+                            // const undoParams: IUpdateHyperLinkMutationParams = {
+                            //     unitId,
+                            //     subUnitId,
+                            //     id: link.id,
+                            //     payload: {
+                            //         payload: link.payload,
+                            //         display: link.display,
+                            //     },
+                            // };
+                            // redos.push({
+                            //     id: UpdateHyperLinkMutation.id,
+                            //     params: redoParams,
+                            // });
+                            // undos.push({
+                            //     id: UpdateHyperLinkMutation.id,
+                            //     params: undoParams,
+                            // });
                         });
                     }
 

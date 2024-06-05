@@ -23,7 +23,7 @@ export interface ICellLinkContent {
      * file: file://a.xlsx
      */
     payload: string;
-    display: string;
+    display?: string;
 }
 
 export interface ICellHyperLink extends ICellLinkContent {

@@ -80,7 +80,12 @@ const ColorSelect = (props: IColorSelectProps) => {
             className={styles.dataValidationFormulaColorSelect}
             value={value}
             onChange={onChange}
-            labelRender={(item) => <div className={styles.dataValidationFormulaColorItem} style={{ background: item.value }} />}
+            labelRender={(item) => (
+                <div
+                    className={styles.dataValidationFormulaColorItem}
+                    style={{ background: item.value, marginTop: 5 }}
+                />
+            )}
             dropdownRender={() => {
                 return (
                     <div className={styles.dataValidationFormulaColorSelectPanel}>

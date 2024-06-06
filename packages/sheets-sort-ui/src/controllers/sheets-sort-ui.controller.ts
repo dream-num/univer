@@ -114,7 +114,7 @@ export class SheetsSortUIController extends RxDisposable {
         this._sheetsSortUIService.customSortState$.pipe(takeUntil(this.dispose$)).subscribe((newState) => {
             if (newState && newState.show && newState.range) {
                 this._openCustomSortPanel(newState.range);
-            } else if (!newState?.show) {
+            } else if (newState && !newState?.show) {
                 this._closePanel();
             }
         });

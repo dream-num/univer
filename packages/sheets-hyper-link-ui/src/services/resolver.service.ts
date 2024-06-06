@@ -35,11 +35,11 @@ function getContainRange(range: IRange, worksheet: Worksheet) {
     const mergedCells = worksheet.getMergeData();
     const maxCol = worksheet.getMaxColumns() - 1;
     const maxRow = worksheet.getMaxRows() - 1;
-    if (maxCol > range.endColumn) {
+    if (maxCol < range.endColumn) {
         range.endColumn = maxCol;
     }
 
-    if (maxRow > range.endRow) {
+    if (maxRow < range.endRow) {
         range.endRow = maxRow;
     }
 

@@ -22,6 +22,7 @@ import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObje
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { stripErrorMargin } from '../../../../engine/utils/math-kit';
 
 describe('Test sum function', () => {
     const textFunction = new Sum(FUNCTION_NAMES_MATH.SUM);
@@ -102,7 +103,7 @@ describe('Test sum function', () => {
                 column: 0,
             });
             const result = textFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(103.57);
+            expect(stripErrorMargin(Number(result.getValue()))).toBe(103.57);
         });
     });
 });

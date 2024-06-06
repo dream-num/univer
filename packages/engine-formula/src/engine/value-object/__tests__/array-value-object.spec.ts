@@ -22,6 +22,7 @@ import { BooleanValueObject, NumberValueObject } from '../primitive-object';
 import type { BaseValueObject } from '../base-value-object';
 import { ErrorValueObject } from '../base-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { stripErrorMargin } from '../../utils/math-kit';
 
 describe('arrayValueObject test', () => {
     const originArrayValueObject = ArrayValueObject.create({
@@ -219,7 +220,7 @@ describe('arrayValueObject test', () => {
                 column: 0,
             });
 
-            expect(originValueObject.sum().getValue()).toStrictEqual(101.57);
+            expect(stripErrorMargin(Number(originValueObject.sum().getValue()))).toStrictEqual(101.57);
         });
     });
 

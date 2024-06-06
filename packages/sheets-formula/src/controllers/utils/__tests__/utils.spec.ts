@@ -17,7 +17,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { ErrorType } from '@univerjs/engine-formula';
-import { extractFormulaError } from '../utils';
+import { CellValueType } from '@univerjs/core';
+import { extractFormulaError, extractFormulaNumber } from '../utils';
 
 describe('Test utils', () => {
     it('Function extractFormulaError', () => {
@@ -46,5 +47,12 @@ describe('Test utils', () => {
         expect(extractFormulaError({})).toBeNull();
         expect(extractFormulaError(null)).toBeNull();
         expect(extractFormulaError(undefined)).toBeNull();
+    });
+
+    it('Function extractFormulaNumber', () => {
+        const v = 0.07 / 0.1;
+        expect(extractFormulaNumber({ v })).toBeNull();
+        expect(extractFormulaNumber({ v, f: '=SUM(A1)' })).toBeNull();
+        expect(extractFormulaNumber({ v, si: 'id1', f: '=SUM(A1)', t: CellValueType.NUMBER })).toBe(0.7);
     });
 });

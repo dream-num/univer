@@ -20,6 +20,8 @@ import type { Nullable } from '../../shared';
 import type { ISelectionCellWithCoord } from './i-selection-data';
 import type { IStyleData } from './i-style-data';
 import type { ICellDataForSheetInterceptor } from './i-cell-data';
+import { Worksheet } from '../../sheets/worksheet';
+import { Workbook } from '../../sheets/workbook';
 
 export interface ICellRenderContext {
     data: ICellDataForSheetInterceptor;
@@ -29,6 +31,8 @@ export interface ICellRenderContext {
     subUnitId: string;
     row: number;
     col: number;
+    worksheet: Worksheet;
+    workbook?: Workbook;
 }
 
 /**

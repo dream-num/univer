@@ -17,15 +17,15 @@
 import type { Workbook } from '@univerjs/core';
 import { Disposable, IAuthzIoService, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, UserManagerService } from '@univerjs/core';
 
-import type { IRangeProtectionRenderCellData, IRangeProtectionRule, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
+import type { IRangeProtectionRule, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
 import { defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, INTERCEPTOR_POINT, RangeProtectionRenderModel, RangeProtectionRuleModel, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
 
 import { UnitAction, UnitObject, UniverType } from '@univerjs/protocol';
 
-import type { ISheetFontRenderExtension, ISheetRenderExtension } from '@univerjs/engine-render';
-import { changeRenderExtensionSkip } from '../menu/permission-menu-util';
+import type { ISheetFontRenderExtension } from '@univerjs/engine-render';
+import type { IRangeProtectionRenderCellData } from '../../views/permission/extensions/range-protection.render';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetPermissionInitController)
 export class SheetPermissionInitController extends Disposable {
@@ -120,7 +120,7 @@ export class SheetPermissionInitController extends Disposable {
                             const unitActionName = instance.subType;
                             const action = actionList.find((item) => item.action === unitActionName);
                             if (action) {
-                                this._permissionService.updatePermissionPoint(instance.id, false);
+                                this._permissionService.updatePermissionPoint(instance.id, action.allowed);
                             }
                         });
                     });
@@ -306,6 +306,8 @@ export class SheetPermissionInitController extends Disposable {
 
     private _initViewModelByRangeInterceptor() {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            // permissions are placed at a high level to prioritize whether to filter subsequent renderings.
+            priority: 999,
             handler: (cell = {}, context, next) => {
                 const { unitId, subUnitId, row, col } = context;
 
@@ -320,26 +322,26 @@ export class SheetPermissionInitController extends Disposable {
                     .filter((p) => !!p.ranges);
                 if (permissionList.length) {
                     const isSkipRender = permissionList.some((p) => !p?.[UnitAction.View]);
-                    const _cellData: IRangeProtectionRenderCellData & ISheetRenderExtension = { ...cell, selectionProtection: permissionList };
-                    const { markers, dataValidation } = _cellData;
+                    const _cellData: IRangeProtectionRenderCellData = { ...cell, selectionProtection: permissionList };
                     if (isSkipRender) {
-                        markers && (markers.isSkip = true);
-                        dataValidation && (dataValidation.isSkip = true);
-                        changeRenderExtensionSkip(_cellData, 'fontRenderExtension', true);
-                        changeRenderExtensionSkip(_cellData, 'backgroundRenderExtension', true);
-                        changeRenderExtensionSkip(_cellData, 'borderRenderExtension', true);
+                        delete _cellData.s;
+                        delete _cellData.v;
+                        delete _cellData.p;
+                        return _cellData;
                     }
-
                     return next(_cellData);
                 }
                 return next(cell);
             },
+
         }
         ));
     }
 
     private _initViewModelBySheetInterceptor() {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            // permissions are placed at a high level to prioritize whether to filter subsequent renderings.
+            priority: 999,
             handler: (cell = {}, context, next) => {
                 const { unitId, subUnitId } = context;
                 const worksheetRule = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
@@ -350,13 +352,11 @@ export class SheetPermissionInitController extends Disposable {
                     }];
                     const isSkipRender = !selectionProtection[0]?.[UnitAction.View];
                     const _cellData: IWorksheetProtectionRenderCellData & ISheetFontRenderExtension = { ...cell, hasWorksheetRule: true, selectionProtection };
-                    const { markers, dataValidation } = _cellData;
                     if (isSkipRender) {
-                        markers && (markers.isSkip = true);
-                        dataValidation && (dataValidation.isSkip = true);
-                        changeRenderExtensionSkip(_cellData, 'fontRenderExtension', true);
-                        changeRenderExtensionSkip(_cellData, 'backgroundRenderExtension', true);
-                        changeRenderExtensionSkip(_cellData, 'borderRenderExtension', true);
+                        delete _cellData.s;
+                        delete _cellData.v;
+                        delete _cellData.p;
+                        return _cellData;
                     }
                     return next(_cellData);
                 }

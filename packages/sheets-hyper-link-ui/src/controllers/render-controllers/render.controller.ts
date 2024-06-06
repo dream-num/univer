@@ -15,27 +15,57 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { BooleanNumber, Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, Disposable, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import type { Spreadsheet } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
 
-@OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkRenderController)
-export class SheetsHyperLinkRenderController extends Disposable {
+export class SheetsHyperLinkRenderController extends Disposable implements IRenderModule {
+    constructor(
+        private readonly _context: IRenderContext<Workbook>,
+        @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+    ) {
+        super();
+        this._initSkeletonChange();
+    }
+
+    private _initSkeletonChange() {
+        const markSkeletonDirty = () => {
+            const workbook = this._context.unit;
+            const unitId = workbook.getUnitId();
+            const subUnitId = workbook.getActiveSheet().getSheetId();
+            const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({ sheetId: subUnitId });
+            const currentRender = this._renderManagerService.getRenderById(unitId);
+
+            skeleton?.makeDirty(true);
+            skeleton?.calculate();
+
+            if (currentRender) {
+                (currentRender.mainComponent as Spreadsheet).makeForceDirty();
+            }
+        };
+
+        this.disposeWithMe(this._hyperLinkModel.linkUpdate$.subscribe(() => {
+            markSkeletonDirty();
+        }));
+    }
+}
+
+@OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkRenderManagerController)
+export class SheetsHyperLinkRenderManagerController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
+
         this._initViewModelIntercept();
-        this._initSkeletonChange();
     }
 
     private _initViewModelIntercept() {
@@ -68,28 +98,5 @@ export class SheetsHyperLinkRenderController extends Disposable {
                 }
             )
         );
-    }
-
-    private _initSkeletonChange() {
-        const markSkeletonDirty = () => {
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            if (!workbook) return;
-
-            const unitId = workbook.getUnitId();
-            const subUnitId = workbook.getActiveSheet().getSheetId();
-            const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({ unitId, sheetId: subUnitId });
-            const currentRender = this._renderManagerService.getRenderById(unitId);
-
-            skeleton?.makeDirty(true);
-            skeleton?.calculate();
-
-            if (currentRender) {
-                (currentRender.mainComponent as Spreadsheet).makeForceDirty();
-            }
-        };
-
-        this.disposeWithMe(this._hyperLinkModel.linkUpdate$.subscribe(() => {
-            markSkeletonDirty();
-        }));
     }
 }

@@ -44,6 +44,7 @@ describe('Test FRange', () => {
     beforeEach(() => {
         const testBed = createFacadeTestBed();
         get = testBed.get;
+
         univerAPI = testBed.univerAPI;
 
         commandService = get(ICommandService);

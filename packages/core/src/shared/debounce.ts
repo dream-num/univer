@@ -16,10 +16,16 @@
 
 type debounceFn<T extends (...args: any[]) => any> = (this: ThisParameterType<T>, ...args: Parameters<T>) => void;
 
-export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): debounceFn<T> {
+/**
+ * Creates a debounced function that delays invoking the provided function until after `wait` milliseconds have elapsed since the last time the debounced function was invoked.
+ * @template T - The type of the function to be debounced.
+ * @param {T} func - The function to be debounced.
+ * @param {number} wait - The number of milliseconds to wait before invoking the function.
+ * @returns {debounceFn<T> & { cancel: () => void }} - The debounced function, which also has a `cancel` method to cancel the scheduled function call.
+ */
+export function debounce<T extends (...args: any[]) => any>(func: T, wait: number) {
     let timeout: NodeJS.Timeout | null;
-
-    return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+    function run(this: ThisParameterType<T>, ...args: Parameters<T>) {
         const context = this;
 
         const later = function () {
@@ -29,5 +35,13 @@ export function debounce<T extends (...args: any[]) => any>(func: T, wait: numbe
 
         clearTimeout(timeout as NodeJS.Timeout);
         timeout = setTimeout(later, wait);
-    };
+    }
+    Object.defineProperty(run, 'cancel', {
+        value: () => {
+            clearTimeout(timeout as NodeJS.Timeout);
+        },
+        enumerable: false,
+        writable: false,
+    });
+    return run as debounceFn<T> & { cancel: () => void };
 }

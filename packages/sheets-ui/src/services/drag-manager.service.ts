@@ -46,7 +46,6 @@ export class DragManagerService extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
@@ -76,9 +75,8 @@ export class DragManagerService extends Disposable {
         }
 
         const worksheet = workbook.getActiveSheet();
-        const skeletonParam = this._sheetSkeletonManagerService.getCurrent();
         const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
-
+        const skeletonParam = currentRender?.with(SheetSkeletonManagerService)?.getCurrent();
         const scrollInfo = this._scrollManagerService.getCurrentScroll();
 
         if (!skeletonParam || !scrollInfo || !currentRender) return;

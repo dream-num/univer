@@ -21,7 +21,7 @@ import { FIX_ONE_PIXEL_BLUR_OFFSET, SheetExtension, SpreadsheetExtensionRegistry
 import type { IDataBarCellData } from './type';
 
 export const dataBarUKey = 'sheet-conditional-rule-data-bar';
-const EXTENSION_Z_INDEX = 35;
+const EXTENSION_Z_INDEX = 34;
 
 export class DataBar extends SheetExtension {
     private _paddingRightAndLeft = 2;
@@ -47,10 +47,6 @@ export class DataBar extends SheetExtension {
             const cellData = worksheet.getCell(row, col) as IDataBarCellData;
             if (cellData && cellData.dataBar) {
                 if (!worksheet.getColVisible(col) || !worksheet.getRowRawVisible(row)) {
-                    return;
-                }
-
-                if (cellData?.dataBar?.isSkip) {
                     return;
                 }
 

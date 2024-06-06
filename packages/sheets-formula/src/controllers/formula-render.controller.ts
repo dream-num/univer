@@ -16,58 +16,56 @@
 
 import { LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { extractFormulaError } from './utils/utils';
+import { extractFormulaError, extractFormulaNumber } from './utils/utils';
 
-@OnLifecycle(LifecycleStages.Rendered, FormulaRenderController)
-export class FormulaRenderController extends RxDisposable {
+const FORMULA_ERROR_MARK = {
+    tl: {
+        size: 6,
+        color: '#409f11',
+    },
+};
+
+@OnLifecycle(LifecycleStages.Rendered, FormulaRenderManagerController)
+export class FormulaRenderManagerController extends RxDisposable {
     constructor(
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService) {
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
+    ) {
         super();
+
         this._init();
     }
 
     private _init() {
-        this._initViewModelIntercept();
-    }
-
-    private _initViewModelIntercept() {
-        const FORMULA_ERROR_MARK = {
-            tl: {
-                size: 6,
-                color: '#409f11',
-            },
-        };
-
-        this.disposeWithMe(
-            this._sheetInterceptorService.intercept(
-                INTERCEPTOR_POINT.CELL_CONTENT,
-                {
-                    handler: (cell, pos, next) => {
-                        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                        if (!skeleton) {
-                            return next(cell);
-                        }
-
-                        const errorType = extractFormulaError(cell);
-
-                        if (!errorType) {
-                            return next(cell);
-                        }
-
+        this.disposeWithMe(this._sheetInterceptorService.intercept(
+            INTERCEPTOR_POINT.CELL_CONTENT,
+            {
+                handler: (cell, pos, next) => {
+                    // Dealing with precision issues
+                    const formulaNumber = extractFormulaNumber(cell);
+                    if (formulaNumber !== null) {
                         return next({
                             ...cell,
-                            markers: {
-                                ...cell?.markers,
-                                ...FORMULA_ERROR_MARK,
-                            },
+                            v: formulaNumber,
                         });
-                    },
-                    priority: 10,
-                }
-            )
-        );
+                    }
+
+                    const errorType = extractFormulaError(cell);
+                    if (!errorType) {
+                        return next(cell);
+                    }
+
+                    return next({
+                        ...cell,
+                        markers: {
+                            ...cell?.markers,
+                            ...FORMULA_ERROR_MARK,
+                        },
+                    });
+                },
+                priority: 10,
+            }
+        ));
     }
 }
+

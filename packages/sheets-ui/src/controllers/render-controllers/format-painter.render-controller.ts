@@ -19,12 +19,12 @@ import {
     Disposable,
     toDisposable,
 } from '@univerjs/core';
-import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { CURSOR_TYPE } from '@univerjs/engine-render';
 
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 
-export class FormatPainterRenderController extends Disposable implements IRenderController {
+export class FormatPainterRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IFormatPainterService private readonly _formatPainterService: IFormatPainterService

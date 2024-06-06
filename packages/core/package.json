@@ -51,10 +51,6 @@
     "files": [
         "lib"
     ],
-    "engines": {
-        "node": ">=16.0.0",
-        "npm": ">=8.0.0"
-    },
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
@@ -67,7 +63,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "^0.1.35",
+        "@univerjs/protocol": "^0.1.36",
         "nanoid": "5.0.7",
         "numeral": "^2.0.6",
         "ot-json1": "^1.0.2"
@@ -80,5 +76,18 @@
         "typescript": "^5.4.5",
         "vite": "^5.2.12",
         "vitest": "^1.6.0"
+    },
+    "univerSpace": {
+        ".": {
+            "import": "./lib/es/index.js",
+            "require": "./lib/cjs/index.js",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./*": {
+            "import": "./lib/es/*",
+            "require": "./lib/cjs/*",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./lib/*": "./lib/*"
     }
 }

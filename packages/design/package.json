@@ -46,8 +46,8 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./locale/*": "./lib/locale/*.json",
-            "./lib/*": "./lib/*"
+            "./lib/*": "./lib/*",
+            "./locale/*": "./lib/locale/*.json"
         }
     },
     "directories": {
@@ -56,10 +56,6 @@
     "files": [
         "lib"
     ],
-    "engines": {
-        "node": ">=16.0.0",
-        "npm": ">=8.0.0"
-    },
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
@@ -78,7 +74,7 @@
         "@rc-component/trigger": "^2.2.0",
         "@types/react-mentions": "^4.1.13",
         "@univerjs/icons": "^0.1.56",
-        "rc-dialog": "^9.5.0",
+        "rc-dialog": "^9.5.1",
         "rc-dropdown": "^4.2.0",
         "rc-input": "^1.5.1",
         "rc-input-number": "^9.1.0",
@@ -95,7 +91,7 @@
         "react-transition-group": "^4.4.5"
     },
     "devDependencies": {
-        "@testing-library/react": "^14.2.2",
+        "@testing-library/react": "^16.0.0",
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
         "@types/react-grid-layout": "^1.3.5",
@@ -109,5 +105,19 @@
         "typescript": "^5.4.5",
         "vite": "^5.2.12",
         "vitest": "^1.6.0"
+    },
+    "univerSpace": {
+        ".": {
+            "import": "./lib/es/index.js",
+            "require": "./lib/cjs/index.js",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./*": {
+            "import": "./lib/es/*",
+            "require": "./lib/cjs/*",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./lib/*": "./lib/*",
+        "./locale/*": "./lib/locale/*.json"
     }
 }

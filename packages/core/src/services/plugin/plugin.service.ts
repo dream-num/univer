@@ -131,7 +131,7 @@ export class PluginService implements IDisposable {
         }
 
         if (this._seenPlugins.has(pluginName)) {
-            throw new Error(`[PluginService]: duplicate plugin name for "${pluginName}".`);
+            throw new Error(`[PluginService]: duplicated plugin name for "${pluginName}". Maybe a plugin that dependents on "${pluginName} has already registered it. In that case please register "${pluginName}" before the that plugin.`);
         }
 
         this._seenPlugins.add(ctor.pluginName);

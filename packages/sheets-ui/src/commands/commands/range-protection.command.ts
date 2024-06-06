@@ -358,7 +358,7 @@ export const SetProtectionCommand: ICommand<ISetProtectionParams> = {
             if (oldRule) {
                 if (oldRule.unitType === UnitObject.Worksheet) {
                     redoMutations.push({ id: DeleteWorksheetProtectionMutation.id, params: { unitId, subUnitId } });
-                    undoMutations.push({ id: AddWorksheetProtectionMutation.id, params: { unitId, rule: oldRule } });
+                    undoMutations.push({ id: AddWorksheetProtectionMutation.id, params: { unitId, rule: oldRule, subUnitId: oldRule.subUnitId } });
                 } else if (oldRule.unitType === UnitObject.SelectRange) {
                     redoMutations.push({ id: DeleteRangeProtectionMutation.id, params: { unitId, subUnitId, ruleIds: [(oldRule as IRangeProtectionRule).id] } });
                     undoMutations.push({ id: AddRangeProtectionMutation.id, params: { unitId, subUnitId, rules: [oldRule] } });
@@ -366,7 +366,7 @@ export const SetProtectionCommand: ICommand<ISetProtectionParams> = {
             }
 
             if (rule.unitType === UnitObject.Worksheet) {
-                redoMutations.push({ id: AddWorksheetProtectionMutation.id, params: { unitId, rule } });
+                redoMutations.push({ id: AddWorksheetProtectionMutation.id, params: { unitId, rule, subUnitId: rule.subUnitId } });
                 undoMutations.unshift({ id: DeleteWorksheetProtectionMutation.id, params: { unitId, subUnitId } });
             } else if (rule.unitType === UnitObject.SelectRange) {
                 (rule as IRangeProtectionRule).id = rangeProtectionRuleModel.createRuleId(unitId, subUnitId);

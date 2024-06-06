@@ -20,7 +20,7 @@ import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import type { IUniverSheetsDataValidation } from './controllers/dv-render.controller';
-import { DataValidationRenderController, DefaultSheetsDataValidation } from './controllers/dv-render.controller';
+import { DefaultSheetsDataValidation, SheetsDataValidationRenderController } from './controllers/dv-render.controller';
 import { DataValidationController } from './controllers/dv.controller';
 import { SheetDataValidationService } from './services/dv.service';
 import { DataValidationAlertController } from './controllers/dv-alert.controller';
@@ -71,9 +71,9 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [DataValidationModelController],
             [DataValidationController],
             [
-                DataValidationRenderController,
+                SheetsDataValidationRenderController,
                 {
-                    useFactory: () => this._injector.createInstance(DataValidationRenderController, this._config),
+                    useFactory: () => this._injector.createInstance(SheetsDataValidationRenderController, this._config),
                 },
             ],
             [DataValidationAlertController],

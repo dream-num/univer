@@ -308,7 +308,7 @@ export { getMoveRangeUndoRedoMutations } from './commands/commands/move-range.co
 // permission
 export { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './services/permission';
 export type { IWorksheetProtectionRule } from './services/permission/type';
-export { WorksheetProtectionRuleModel, WorksheetProtectionPointModel, WorksheetProtectionRenderService } from './services/permission/worksheet-permission';
+export { WorksheetProtectionRuleModel, WorksheetProtectionPointModel } from './services/permission/worksheet-permission';
 export { AddWorksheetProtectionMutation } from './commands/mutations/add-worksheet-protection.mutation';
 export { SetWorksheetProtectionMutation } from './commands/mutations/set-worksheet-protection.mutation';
 export { DeleteWorksheetProtectionMutation } from './commands/mutations/delete-worksheet-protection.mutation';
@@ -361,8 +361,6 @@ export { AddRangeProtectionMutation, FactoryAddRangeProtectionMutation, type IAd
 export { DeleteRangeProtectionMutation, FactoryDeleteRangeProtectionMutation, type IDeleteSelectionProtectionMutationParams } from './commands/mutations/delete-range-protection.mutation';
 export { SetRangeProtectionMutation, FactorySetRangeProtectionMutation, type ISetRangeProtectionMutationParams } from './commands/mutations/set-range-protection.mutation';
 
-export { RangeProtectionCanViewRenderExtension, RangeProtectionCanNotViewRenderExtension, type IRangeProtectionRenderCellData, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY } from './render/range-protection/range-protection.render';
-
 export { RangeProtectionRenderModel, type ICellPermission } from './model/range-protection-render.model';
 export { RangeProtectionRuleModel, type IObjectModel, type IRangeProtectionRule, type IModel } from './model/range-protection-rule.model';
 export type { IWorksheetProtectionRenderCellData } from './services/permission/worksheet-permission/type';
@@ -377,3 +375,5 @@ export {
 
 export { RangeProtectionPermissionEditPoint } from './services/permission/permission-point/range/edit';
 export { RangeProtectionPermissionViewPoint } from './services/permission/permission-point/range/view';
+
+export type { IAddWorksheetProtectionParams } from './commands/mutations/add-worksheet-protection.mutation';

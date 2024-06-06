@@ -28,7 +28,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
-import { convertTextRotation, DeviceInputEventType, getCanvasOffsetByEngine } from '@univerjs/engine-render';
+import { convertTextRotation, DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { IEditorService } from '@univerjs/ui';
 import type { KeyCode } from '@univerjs/ui';
@@ -119,14 +119,14 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     private readonly _afterVisible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
     readonly afterVisible$ = this._afterVisible$.asObservable();
 
-    interceptor = new InterceptorManager({
+    readonly interceptor = new InterceptorManager({
         BEFORE_CELL_EDIT,
         AFTER_CELL_EDIT,
         AFTER_CELL_EDIT_ASYNC,
     });
 
     constructor(
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -182,13 +182,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             return;
         }
 
-        const currentSkeleton = this._sheetSkeletonManagerService.getCurrent();
-
-        if (currentSkeleton == null) {
+        const skeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentSkeleton();
+        if (skeleton == null) {
             return;
         }
-
-        const { skeleton } = currentSkeleton;
 
         const { primary, unitId, sheetId, scene, engine } = currentEditCell;
         const { startRow, startColumn } = primary;

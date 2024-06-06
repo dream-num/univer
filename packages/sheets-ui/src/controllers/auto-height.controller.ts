@@ -32,17 +32,18 @@ import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
-
+import type { RenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, AutoHeightController)
 export class AutoHeightController extends Disposable {
     constructor(
-        @Inject(Injector) private _injector: Injector,
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._initialize();
@@ -51,16 +52,16 @@ export class AutoHeightController extends Disposable {
     getUndoRedoParamsOfAutoHeight(ranges: IRange[]) {
         const {
             _univerInstanceService: univerInstanceService,
-            _sheetSkeletonManagerService: sheetSkeletonService,
             _injector: injector,
         } = this;
-
-        const { skeleton } = sheetSkeletonService.getCurrent()!;
-        const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
 
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const unitId = workbook.getUnitId();
         const subUnitId = workbook.getActiveSheet().getSheetId();
+
+        const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)!.with(SheetSkeletonManagerService);
+        const { skeleton } = sheetSkeletonService.getCurrent()!;
+        const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
 
         const redoParams: ISetWorksheetRowAutoHeightMutationParams = {
             subUnitId,

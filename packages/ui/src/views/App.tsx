@@ -21,9 +21,9 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';
-import { BuiltInUIPart, IUIPartsService } from '../services/parts/parts.service';
+import { BuiltInUIPart } from '../services/parts/parts.service';
 import styles from './app.module.less';
-import { ComponentContainer } from './components/ComponentContainer';
+import { ComponentContainer, useComponentsOfPart } from './components/ComponentContainer';
 import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
@@ -50,30 +50,12 @@ export function App(props: IUniverAppProps) {
     const messageService = useDependency(IMessageService);
     const contentRef = useRef<HTMLDivElement>(null);
 
-    const uiPartsService = useDependency(IUIPartsService);
-
-    const [updateTrigger, setUpdateTrigger] = useState(false);
-
-    useEffect(() => {
-        const updateSubscription = uiPartsService.componentRegistered$.subscribe(() => {
-            setUpdateTrigger((prev) => !prev);
-        });
-
-        return () => {
-            updateSubscription.unsubscribe();
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const { headerComponents, contentComponents, footerComponents, headerMenuComponents, leftSidebarComponents, globalComponents } = useMemo(() => ({
-        headerComponents: uiPartsService.getComponents(BuiltInUIPart.HEADER),
-        contentComponents: uiPartsService.getComponents(BuiltInUIPart.CONTENT),
-        footerComponents: uiPartsService.getComponents(BuiltInUIPart.FOOTER),
-        headerMenuComponents: uiPartsService.getComponents(BuiltInUIPart.HEADER_MENU),
-        leftSidebarComponents: uiPartsService.getComponents(BuiltInUIPart.LEFT_SIDEBAR),
-        globalComponents: uiPartsService.getComponents(BuiltInUIPart.GLOBAL),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }), [updateTrigger]);
+    const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
+    const headerComponents = useComponentsOfPart(BuiltInUIPart.HEADER);
+    const headerMenuComponents = useComponentsOfPart(BuiltInUIPart.HEADER_MENU);
+    const contentComponents = useComponentsOfPart(BuiltInUIPart.CONTENT);
+    const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
+    const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
 
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
@@ -135,12 +117,12 @@ export function App(props: IUniverAppProps) {
                 <section className={styles.appContainer}>
                     <div className={styles.appContainerWrapper}>
                         <aside className={styles.appContainerLeftSidebar}>
-                            <ComponentContainer components={leftSidebarComponents} />
+                            <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
                         </aside>
 
                         <section className={styles.appContainerContent}>
                             <header>
-                                {header && <ComponentContainer components={headerComponents} />}
+                                {header && <ComponentContainer key="header" components={headerComponents} />}
                             </header>
 
                             <section
@@ -149,7 +131,7 @@ export function App(props: IUniverAppProps) {
                                 data-range-selector
                                 onContextMenu={(e) => e.preventDefault()}
                             >
-                                <ComponentContainer components={contentComponents} />
+                                <ComponentContainer key="content" components={contentComponents} />
                             </section>
                         </section>
 
@@ -161,15 +143,15 @@ export function App(props: IUniverAppProps) {
                     {/* footer */}
                     {footer && (
                         <footer className={styles.appFooter}>
-                            <ComponentContainer components={footerComponents} />
+                            <ComponentContainer key="footer" components={footerComponents} />
                         </footer>
                     )}
 
                     <ZenZone />
                 </section>
             </div>
-            <ComponentContainer components={globalComponents} />
-            <ComponentContainer components={builtInGlobalComponents} />
+            <ComponentContainer key="global" components={globalComponents} />
+            <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
             {contextMenu && <ContextMenu />}
         </ConfigProvider>
     );

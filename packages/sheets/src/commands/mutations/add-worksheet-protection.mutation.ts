@@ -21,6 +21,7 @@ import type { IWorksheetProtectionRule } from '../../services/permission/type';
 
 export interface IAddWorksheetProtectionParams {
     unitId: string;
+    subUnitId: string;
     rule: IWorksheetProtectionRule;
 }
 

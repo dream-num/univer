@@ -37,6 +37,10 @@ export class Marker extends SheetExtension {
 
     // eslint-disable-next-line max-lines-per-function
     override draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: SpreadsheetSkeleton, diffRanges: IRange[]): void {
+        if (ctx.__mode === 'printing') {
+            return;
+        }
+
         const { worksheet, rowColumnSegment } = skeleton;
         if (!worksheet) {
             return;
@@ -92,10 +96,6 @@ export class Marker extends SheetExtension {
             }
 
             if (!cellData) {
-                return;
-            }
-
-            if (cellData.markers?.isSkip) {
                 return;
             }
 

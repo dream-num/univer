@@ -374,8 +374,8 @@ importers:
   packages/core:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.35
-        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.36
+        version: 0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       nanoid:
         specifier: 5.0.7
         version: 5.0.7
@@ -411,8 +411,8 @@ importers:
   packages/data-validation:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.35
-        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.36
+        version: 0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -504,8 +504,8 @@ importers:
         specifier: ^0.1.56
         version: 0.1.56(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-dialog:
-        specifier: ^9.5.0
-        version: 9.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^9.5.1
+        version: 9.5.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-dropdown:
         specifier: ^4.2.0
         version: 4.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -550,8 +550,8 @@ importers:
         version: 4.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@testing-library/react':
-        specifier: ^14.2.2
-        version: 14.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^16.0.0
+        version: 16.0.0(@testing-library/dom@9.3.4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
@@ -1103,8 +1103,8 @@ importers:
   packages/sheets:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.35
-        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.36
+        version: 0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1143,8 +1143,8 @@ importers:
   packages/sheets-conditional-formatting:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.35
-        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.36
+        version: 0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1192,8 +1192,8 @@ importers:
         specifier: ^0.1.56
         version: 0.1.56(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: ^0.1.35
-        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.36
+        version: 0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../sheets-conditional-formatting
@@ -1280,8 +1280,8 @@ importers:
         specifier: ^0.1.56
         version: 0.1.56(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: ^0.1.35
-        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.36
+        version: 0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1523,8 +1523,8 @@ importers:
   packages/sheets-find-replace:
     dependencies:
       '@univerjs/protocol':
-        specifier: 0.1.34
-        version: 0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: 0.1.36
+        version: 0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1633,8 +1633,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@univerjs/protocol':
-        specifier: ^0.1.35
-        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.36
+        version: 0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -1840,8 +1840,8 @@ importers:
         specifier: ^0.1.56
         version: 0.1.56(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: ^0.1.35
-        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.36
+        version: 0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@types/react':
         specifier: ^18.3.3
@@ -2031,8 +2031,8 @@ importers:
   packages/thread-comment:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.35
-        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.36
+        version: 0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2068,8 +2068,8 @@ importers:
         specifier: ^0.1.56
         version: 0.1.56(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: ^0.1.35
-        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.36
+        version: 0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -2123,19 +2123,19 @@ importers:
         specifier: ^1.10.0
         version: 1.10.0
       rc-notification:
-        specifier: ^5.5.0
-        version: 5.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^5.6.0
+        version: 5.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-util:
-        specifier: ^5.39.3
-        version: 5.39.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^5.41.0
+        version: 5.41.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     optionalDependencies:
       vue:
         specifier: '>=3.0.0'
         version: 3.4.24(typescript@5.4.5)
     devDependencies:
       '@testing-library/react':
-        specifier: ^14.2.2
-        version: 14.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^16.0.0
+        version: 16.0.0(@testing-library/dom@9.3.4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@testing-library/react-hooks':
         specifier: ^8.0.1
         version: 8.0.1(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2239,8 +2239,8 @@ importers:
         specifier: workspace:*
         version: link:../network
       '@univerjs/protocol':
-        specifier: ^0.1.35
-        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.36
+        version: 0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -2338,8 +2338,8 @@ importers:
   packages/uniscript:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.35
-        version: 0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
+        specifier: ^0.1.36
+        version: 0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -4664,12 +4664,20 @@ packages:
       react-test-renderer:
         optional: true
 
-  '@testing-library/react@14.2.2':
-    resolution: {integrity: sha512-SOUuM2ysCvjUWBXTNfQ/ztmnKDmqaiPV3SvoIuyxMUca45rbSWWAT/qB8CUs/JQ/ux/8JFs9DNdFQ3f6jH3crA==}
-    engines: {node: '>=14'}
+  '@testing-library/react@16.0.0':
+    resolution: {integrity: sha512-guuxUKRWQ+FgNX0h0NS0FIq3Q3uLtWVpBzcLOggmfMoUpgBnzBzvLLd4fbm6yS8ydJd94cIfY4yP9qUQjM2KwQ==}
+    engines: {node: '>=18'}
     peerDependencies:
+      '@testing-library/dom': ^10.0.0
+      '@types/react': ^18.0.0
+      '@types/react-dom': ^18.0.0
       react: ^18.0.0
       react-dom: ^18.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
 
   '@testing-library/user-event@14.5.2':
     resolution: {integrity: sha512-YAh82Wh4TIrxYLmfGcixwD18oIjyC1pFQC2Y01F2lzV2HTMiYrI0nze0FD0ocB//CKS/7jIUgae+adPqxK5yCQ==}
@@ -4978,15 +4986,8 @@ packages:
       react: '*'
       react-dom: '*'
 
-  '@univerjs/protocol@0.1.34':
-    resolution: {integrity: sha512-GD/bgjFmnaySkCTgZkPxhNAnkYOLaIOrn7lc+iqE6XgSdjUhkmd8yqSK7cu/nCUHa9wIBHyrk0i+ZkHegaPQgA==}
-    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
-    peerDependencies:
-      '@grpc/grpc-js': ^1.9.14
-      rxjs: '>=7.0.0'
-
-  '@univerjs/protocol@0.1.35':
-    resolution: {integrity: sha512-dVzx6XiVO7UVoBwx4K/mP3QFRgqfu+xaS/Hw2U/SmyUWmdGpwckbH0Xl4fUWhRuJIxSqZZKTLfgGSI58Qj5i2g==}
+  '@univerjs/protocol@0.1.36':
+    resolution: {integrity: sha512-MYQ3g3mYSoFuDprgPFAa+dyb0L6NqrIg1dyr8s+NsHj3rncwbXFD3PYba30dALP9cqiSs6GXVbeXURYG5ZGWFg==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
       '@grpc/grpc-js': ^1.9.14
@@ -9101,8 +9102,8 @@ packages:
     resolution: {integrity: sha512-8zGqypfENjCIqGhgXToC8aB2r7YrBX+AQAfIPs/Mlk+BtPTztOvTS01NRW/3Eh60J+a48lt8qsCzirQ6loCVfA==}
     engines: {node: '>= 0.8'}
 
-  rc-dialog@9.5.0:
-    resolution: {integrity: sha512-pe/PsTkhRLQPozbq0gPSMe+BPuMUrG92f7TL+Rm8WOTXfgaZzYumqJUoP+LB6pnX0GEa3JAGrGusuibn43cMUA==}
+  rc-dialog@9.5.1:
+    resolution: {integrity: sha512-vDcY1ww0STZKs4twKjPhcvyMY1fCjfscm+ihtpUqumdQ6YGGaPdmpurhRAnqAcw2SuZgzengj18j9JrQxoRQoQ==}
     peerDependencies:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
@@ -9137,8 +9138,8 @@ packages:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
 
-  rc-notification@5.5.0:
-    resolution: {integrity: sha512-iLOOlWaHvVJQGrPa6VorHPE9oeHUN5VizshZhTTecpX9wIfb7gdlcLr34YgKGuINbmLcG+41KO+PImdgf3R6Ew==}
+  rc-notification@5.6.0:
+    resolution: {integrity: sha512-TGQW5T7waOxLwgJG7fXcw8l7AQiFOjaZ7ISF5PrU526nunHRNcTMuzKihQHaF4E/h/KfOCDk3Mv8eqzbu2e28w==}
     engines: {node: '>=8.x'}
     peerDependencies:
       react: '>=16.9.0'
@@ -9197,12 +9198,6 @@ packages:
 
   rc-tooltip@6.2.0:
     resolution: {integrity: sha512-iS/3iOAvtDh9GIx1ulY7EFUXUtktFccNLsARo3NPgLf0QW9oT0w3dA9cYWlhqAKmD+uriEwdWz1kH0Qs4zk2Aw==}
-    peerDependencies:
-      react: '>=16.9.0'
-      react-dom: '>=16.9.0'
-
-  rc-util@5.39.3:
-    resolution: {integrity: sha512-j9wOELkLQ8gC/NkUg3qg9mHZcJf+5mYYv40JrDHqnaf8VSycji4pCf7kJ5fdTXQPDIF0vr5zpb/T2HdrMs9rWA==}
     peerDependencies:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
@@ -13808,13 +13803,15 @@ snapshots:
       '@types/react': 18.3.3
       react-dom: 18.3.1(react@18.3.1)
 
-  '@testing-library/react@14.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@testing-library/react@16.0.0(@testing-library/dom@9.3.4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.24.1
       '@testing-library/dom': 9.3.4
-      '@types/react-dom': 18.3.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+    optionalDependencies:
+      '@types/react': 18.3.3
+      '@types/react-dom': 18.3.0
 
   '@testing-library/user-event@14.5.2(@testing-library/dom@9.3.4)':
     dependencies:
@@ -14158,12 +14155,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@univerjs/protocol@0.1.34(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)':
-    dependencies:
-      '@grpc/grpc-js': 1.10.6
-      rxjs: 7.8.1
-
-  '@univerjs/protocol@0.1.35(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)':
+  '@univerjs/protocol@0.1.36(@grpc/grpc-js@1.10.6)(rxjs@7.8.1)':
     dependencies:
       '@grpc/grpc-js': 1.10.6
       rxjs: 7.8.1
@@ -18721,7 +18713,7 @@ snapshots:
       iconv-lite: 0.4.24
       unpipe: 1.0.0
 
-  rc-dialog@9.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  rc-dialog@9.5.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.24.1
       '@rc-component/portal': 1.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -18777,7 +18769,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  rc-notification@5.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  rc-notification@5.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.24.1
       classnames: 2.5.1
@@ -18855,13 +18847,6 @@ snapshots:
       classnames: 2.5.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-
-  rc-util@5.39.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
-    dependencies:
-      '@babel/runtime': 7.24.1
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      react-is: 18.2.0
 
   rc-util@5.41.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:

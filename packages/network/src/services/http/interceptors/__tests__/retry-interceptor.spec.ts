@@ -22,7 +22,7 @@ import { createHTTPTestBed, type MockHTTPImplementation } from '../../__testing_
 import { IHTTPImplementation } from '../../implementations/implementation';
 import { HTTPResponse, HTTPResponseError } from '../../response';
 import { HTTPHeaders } from '../../headers';
-import { retryInterceptor } from '../retry-interceptor';
+import { RetryInterceptorFactory } from '../retry-interceptor';
 import { __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION } from '../../request';
 
 describe('test "HTTPRetryInterceptor"', () => {
@@ -69,7 +69,7 @@ describe('test "HTTPRetryInterceptor"', () => {
     it('should retry the request for 3 times until success', () => new Promise<void>((done) => {
         httpService.registerHTTPInterceptor({
             priority: 0,
-            interceptor: retryInterceptor,
+            interceptor: RetryInterceptorFactory(),
         });
 
         const request = httpService.get('http://example.com');
@@ -93,7 +93,7 @@ describe('test "HTTPRetryInterceptor"', () => {
     it('should throw error after attempt for 3 times', () => new Promise<void>((done) => {
         httpService.registerHTTPInterceptor({
             priority: 0,
-            interceptor: retryInterceptor,
+            interceptor: RetryInterceptorFactory(),
         });
 
         const request = httpService.get('http://example.com');

@@ -20,7 +20,7 @@ import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import { SetNumfmtMutation } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { NumfmtCellContent } from '../numfmt.cell-content.controller';
+import { SheetsNumfmtCellContentController } from '../numfmt.cell-content.controller';
 import { createTestBed } from './test.util';
 
 describe('test cell-content', () => {
@@ -30,7 +30,7 @@ describe('test cell-content', () => {
     let testBed: any;
     let commandService: ICommandService;
     beforeEach(() => {
-        testBed = createTestBed([[NumfmtCellContent]]);
+        testBed = createTestBed([[SheetsNumfmtCellContentController]]);
         unitId = testBed.unitId;
         subUnitId = testBed.subUnitId;
         commandService = testBed.get(ICommandService);
@@ -54,7 +54,7 @@ describe('test cell-content', () => {
         };
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
-        testBed.get(NumfmtCellContent);
+        testBed.get(SheetsNumfmtCellContentController);
         const value = worksheet.getCell(0, 0);
         expect(value).toEqual({ v: 0, t: 2 });
         commandService.syncExecuteCommand(SetNumfmtMutation.id, params);

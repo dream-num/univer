@@ -46,6 +46,7 @@ import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import { covertCellValue,
     covertCellValues,
@@ -67,8 +68,8 @@ export class FRange {
         private readonly _range: IRange,
         @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         // empty
     }
@@ -102,7 +103,10 @@ export class FRange {
      * @returns The cell information
      */
     getCell(): ISelectionCellWithCoord {
-        const { skeleton } = this._sheetSkeletonManagerService.getUnitSkeleton(this._workbook.getUnitId(), this._worksheet.getSheetId())!;
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const skeleton = this._renderManagerService.getRenderById(unitId)!
+            .with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId)!.skeleton;
         return skeleton.getCellByIndex(this._range.startRow, this._range.startColumn);
     }
 

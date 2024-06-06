@@ -19,7 +19,7 @@ import type { ISheetLocation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
-import { SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IZenZoneService } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -54,7 +54,6 @@ export class DataValidationDropdownManagerService extends Disposable {
     constructor(
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopupManagerService: SheetCanvasPopManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -130,23 +129,18 @@ export class DataValidationDropdownManagerService extends Disposable {
         if (!workbook) {
             return;
         }
+
         const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) {
             return;
         }
+
         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
         const rule = manager.getRuleByLocation(row, col);
-        const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({
-            unitId,
-            sheetId: subUnitId,
-        });
-
-        if (!skeleton) {
-            return;
-        }
         if (!rule) {
             return;
         }
+
         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
         if (!validator || !validator.dropdown) {
             this.hideDropdown();

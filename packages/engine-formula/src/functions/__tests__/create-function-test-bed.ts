@@ -57,6 +57,7 @@ import { ISuperTableService, SuperTableService } from '../../services/super-tabl
 import type { BaseValueObject, ErrorValueObject } from '../../engine/value-object/base-value-object';
 import type { BaseReferenceObject, FunctionVariantType } from '../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../engine/value-object/array-value-object';
+import { stripErrorMargin } from '../../engine/utils/math-kit';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -246,4 +247,13 @@ export function getObjectValue(result: FunctionVariantType) {
         return (result as ArrayValueObject).toValue();
     }
     return (result as BaseValueObject).getValue();
+}
+
+export function stripArrayValue(array: (string | number | boolean | null)[][]) {
+    return array.map((row) => row.map((cell) => {
+        if (typeof cell === 'number') {
+            return stripErrorMargin(cell);
+        }
+        return cell;
+    }));
 }

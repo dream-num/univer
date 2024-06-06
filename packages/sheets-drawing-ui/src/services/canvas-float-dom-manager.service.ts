@@ -164,7 +164,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     constructor(
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(ICommandService) private _commandService: ICommandService,
         @IDrawingManagerService private _drawingManagerService: IDrawingManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
@@ -223,7 +222,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     const { unitId, subUnitId, drawingId } = param;
                     const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
                     const floatDomParam = this._drawingManagerService.getDrawingByParam(param) as IFloatDomData;
-                    const skeleton = this._sheetSkeletonManagerService.getUnitSkeleton(unitId, subUnitId);
+                    const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId);
                     if (floatDomParam == null || target == null || skeleton == null) {
                         return;
                     }
@@ -321,7 +320,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 const map = this._ensureMap(unitId, subUnitId);
                 const ids = Array.from(map.keys());
                 const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
-                const skeleton = this._sheetSkeletonManagerService.getUnitSkeleton(unitId, subUnitId);
+                const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId);
                 if (!renderObject || !target || !skeleton) {
                     return;
                 }

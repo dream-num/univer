@@ -22,7 +22,7 @@ const { default: dts } = require('vite-plugin-dts');
 const react = require('@vitejs/plugin-react');
 const { autoExternalizeDependency } = require('./auto-externalize-dependency-plugin');
 const { obfuscator } = require('./obfuscator');
-const { buildLocale } = require('./build-locale');
+const { buildPkg } = require('./build-pkg');
 const { convertLibNameFromPackageName } = require('./utils');
 
 /**
@@ -64,10 +64,7 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
                 outDir: 'lib/types',
             }),
             obfuscator(),
-            buildLocale({
-                entryRoot: 'src/locale',
-                outDir: 'lib/locale',
-            }),
+            buildPkg(),
         ],
         define: {
             'process.env.NODE_ENV': JSON.stringify(mode),

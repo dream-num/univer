@@ -33,10 +33,6 @@
     "files": [
         "lib"
     ],
-    "engines": {
-        "node": ">=16.0.0",
-        "npm": ">=8.0.0"
-    },
     "scripts": {
         "build:umd": "node ./scripts/index.mjs"
     },
@@ -56,7 +52,7 @@
         "@univerjs/facade": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/network": "workspace:*",
-        "@univerjs/protocol": "^0.1.35",
+        "@univerjs/protocol": "^0.1.36",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",

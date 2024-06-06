@@ -15,21 +15,19 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
+import { Disposable, DisposableCollection } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { DragManagerService } from '../services/drag-manager.service';
-import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
+import { type ISheetSkeletonManagerParam, SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-@OnLifecycle(LifecycleStages.Rendered, DragRenderController)
-export class DragRenderController extends Disposable implements IRenderController {
+export class DragRenderController extends Disposable implements IRenderModule, IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IRenderManagerService private _renderManagerService: IRenderManagerService,
         @Inject(DragManagerService) private _dragManagerService: DragManagerService,
-        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
 
@@ -44,13 +42,7 @@ export class DragRenderController extends Disposable implements IRenderControlle
                 return;
             }
 
-            const currentRender = this._renderManagerService.getRenderById(skeletonParam.unitId);
-
-            if (!currentRender) {
-                return;
-            }
-
-            const { scene } = currentRender;
+            const { scene } = this._context;
             const dragOverObserver = scene.onDragOverObserver.add((evt) => {
                 this._dragManagerService.onDragOver(evt);
             });

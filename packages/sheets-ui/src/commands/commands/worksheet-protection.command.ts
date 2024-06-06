@@ -54,10 +54,11 @@ export const AddWorksheetProtectionCommand: ICommand<IAddWorksheetProtectionPara
         const result = await commandService.executeCommand(AddWorksheetProtectionMutation.id, {
             unitId,
             rule,
+            subUnitId: rule.subUnitId,
         });
 
         if (result) {
-            const redoMutations = [{ id: AddWorksheetProtectionMutation.id, params: { unitId, rule } }];
+            const redoMutations = [{ id: AddWorksheetProtectionMutation.id, params: { unitId, rule, subUnitId: rule.subUnitId } }];
             const undoMutations = [{ id: DeleteWorksheetProtectionMutation.id, params: { unitId, subUnitId } }];
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
@@ -87,7 +88,7 @@ export const DeleteWorksheetProtectionCommand: ICommand<IDeleteWorksheetProtecti
         });
 
         const redoMutations = [{ id: DeleteWorksheetProtectionMutation.id, params: { unitId, subUnitId } }];
-        const undoMutations = [{ id: AddWorksheetProtectionMutation.id, params: { unitId, rule } }];
+        const undoMutations = [{ id: AddWorksheetProtectionMutation.id, params: { unitId, rule, subUnitId: rule.subUnitId } }];
         undoRedoService.pushUndoRedo({
             unitID: unitId,
             redoMutations,

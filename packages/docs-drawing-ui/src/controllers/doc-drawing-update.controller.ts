@@ -43,7 +43,7 @@ export class DocDrawingUpdateController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
-        @IDocDrawingService private readonly _sheetDrawingService: IDocDrawingService,
+        @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
@@ -251,20 +251,20 @@ export class DocDrawingUpdateController extends Disposable {
             // const { pageMarginCache, docsLeft, docsTop } = offsetInfo;
 
             (params as IDocDrawing[]).forEach((param) => {
-                const { unitId, subUnitId, drawingId, drawingType, transform } = param;
+                const { unitId, subUnitId, drawingId, transform } = param;
                 if (transform == null) {
                     return;
                 }
 
-                const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
+                const docDrawing = this._docDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
 
-                if (sheetDrawing == null) {
+                if (docDrawing == null) {
                     return;
                 }
 
                 // const { marginLeft, marginTop } = pageMarginCache.get(drawingId) || { marginLeft: 0, marginTop: 0 };
 
-                const docTransform = transformToDocDrawingPosition({ ...sheetDrawing.transform, ...transform });
+                const docTransform = transformToDocDrawingPosition({ ...docDrawing.transform, ...transform });
 
                 if (docTransform == null) {
                     return;
@@ -399,10 +399,10 @@ export class DocDrawingUpdateController extends Disposable {
             this._drawingManagerService.focus$.subscribe((params) => {
                 if (params == null || params.length === 0) {
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
-                    this._sheetDrawingService.focusDrawing([]);
+                    this._docDrawingService.focusDrawing([]);
                 } else {
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
-                    this._sheetDrawingService.focusDrawing(params);
+                    this._docDrawingService.focusDrawing(params);
                 }
             })
         );

@@ -27,6 +27,8 @@ interface IHyperLinkPopup {
     subUnitId: string;
     id: string;
     disposable?: IDisposable;
+    row: number;
+    col: number;
 }
 
 interface IHyperLinkEditing {
@@ -35,6 +37,10 @@ interface IHyperLinkEditing {
     row: number;
     column: number;
 }
+
+const isEqualLink = (a: ISheetLocationBase, b: ISheetLocationBase) => {
+    return a.unitId === b.unitId && a.subUnitId === b.subUnitId && a.row === b.row && a.col === b.col;
+};
 
 export class SheetsHyperLinkPopupService {
     private _currentPopup: IHyperLinkPopup | null = null;
@@ -58,8 +64,13 @@ export class SheetsHyperLinkPopupService {
     ) {}
 
     showPopup(location: ISheetLocationBase) {
+        if (this._currentPopup && isEqualLink(location, this._currentPopup)) {
+            return;
+        }
+
         this.hideCurrentPopup();
         const { unitId, subUnitId, row, col } = location;
+
         const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
         if (!link) {
             return;
@@ -76,6 +87,8 @@ export class SheetsHyperLinkPopupService {
                 subUnitId,
                 id: link.id,
                 disposable,
+                row,
+                col,
             };
             this._currentPopup$.next(this._currentPopup);
         }

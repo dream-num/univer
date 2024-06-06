@@ -18,7 +18,7 @@ import type { ICellData, Nullable } from '@univerjs/core';
 import { CellValueType, Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 
 import { Inject } from '@wendellhu/redi';
-import { SheetRenderController } from '@univerjs/sheets-ui';
+import { SheetsRenderService } from '@univerjs/sheets-ui';
 import type { ICellValueCompareFn } from '../commands/sheets-reorder.command';
 import { ReorderRangeCommand } from '../commands/sheets-reorder.command';
 import { ReorderRangeMutation } from '../commands/sheets-reorder.mutation';
@@ -31,13 +31,13 @@ export type ICommonComparableCellValue = number | string | null;
 export class SheetsSortController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SheetRenderController) private _sheetRenderController: SheetRenderController,
+        @Inject(SheetsRenderService) private _sheetRenderService: SheetsRenderService,
         @Inject(SheetsSortService) private readonly _sortService: SheetsSortService
     ) {
         super();
         [
             ReorderRangeMutation,
-        ].forEach((m) => this.disposeWithMe(this._sheetRenderController.registerSkeletonChangingMutations(m.id)));
+        ].forEach((m) => this.disposeWithMe(this._sheetRenderService.registerSkeletonChangingMutations(m.id)));
         this._initCommands();
         this._registerCompareFns();
     }

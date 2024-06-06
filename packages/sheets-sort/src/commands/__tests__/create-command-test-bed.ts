@@ -17,7 +17,7 @@
 import { BooleanNumber, ILogService, IUniverInstanceService, type IWorkbookData, LocaleService, LocaleType, LogLevel, Plugin, Tools, Univer, UniverInstanceType, type Workbook } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { SheetRenderController } from '@univerjs/sheets-ui';
+import { SheetsRenderService } from '@univerjs/sheets-ui';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { enUS } from '../../locale';
 import { SheetsSortService } from '../../services/sheets-sort.service';
@@ -143,8 +143,8 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
         override onStarting(injector: Injector): void {
             injector.add([SheetsSortService]);
             injector.add([SheetsSortController]);
-            injector.add([SheetRenderController, { useClass: mockSheetRenderController }]);
-            injector.add([SelectionManagerService, { useClass: mockSelectionManagerService }]);
+            injector.add([SheetsRenderService, { useClass: mockSheetsRenderService }]);
+            injector.add([SelectionManagerService, { useClass: mockSelectionManagerService as any }]);
 
             dependencies?.forEach((d) => injector.add(d));
         }
@@ -169,7 +169,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     };
 }
 
-class mockSheetRenderController {
+class mockSheetsRenderService {
     registerSkeletonChangingMutations(id: string) {
     }
 }

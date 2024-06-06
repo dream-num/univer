@@ -19,6 +19,7 @@ import { fixLineWidthByScale, getColor } from './basics/tools';
 import { Transform } from './basics';
 
 export class UniverRenderingContext2D implements CanvasRenderingContext2D {
+    __mode = 'rendering';
     readonly canvas: HTMLCanvasElement;
 
     _context: CanvasRenderingContext2D;

@@ -25,7 +25,6 @@ import { type IShowDataValidationDropdownParams, ShowDataValidationDropdown } fr
 import { DROP_DOWN_DEFAULT_COLOR } from '../common/const';
 import type { ListValidator } from '../validators';
 
-
 const PADDING_H = 4;
 const ICON_SIZE = 6;
 const ICON_PLACE = 14;
@@ -142,8 +141,8 @@ function calcPadding(cellWidth: number, cellHeight: number, fontWidth: number, f
 
     return {
         paddingLeft,
-        paddingTop
-    }
+        paddingTop,
+    };
 }
 
 export interface IDropdownInfo {
@@ -210,10 +209,9 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         ctx.restore();
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line max-lines-per-function
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton): void {
-        const { primaryWithCoord, row, col, style, data, subUnitId, worksheet } = info;
-        console.log('===', worksheet.getSnapshot().defaultRowHeight);
+        const { primaryWithCoord, row, col, style, data, subUnitId } = info;
         const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
         const rule = data.dataValidation?.rule;
         const validator = data.dataValidation?.validator as ListValidator;
@@ -250,7 +248,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         const valueStr = `${value ?? ''}`;
         const activeItem = list.find((i) => i.label === valueStr);
         let { tb, vt, ht } = style || {};
-        console.log('===vt', vt);
         tb = tb ?? WrapStrategy.WRAP;
         vt = vt ?? VerticalAlign.BOTTOM;
         ht = ht ?? HorizontalAlign.LEFT;

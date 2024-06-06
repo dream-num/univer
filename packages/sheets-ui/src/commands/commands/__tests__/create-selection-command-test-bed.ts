@@ -19,8 +19,8 @@ import { ICommandService, LocaleType } from '@univerjs/core';
 import { SetFrozenMutation, SetSelectionsOperation } from '@univerjs/sheets';
 // FIXME: should not import from the inside of the package
 
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ScrollManagerService } from '../../../services/scroll-manager.service';
-import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from '../../../services/shortcut-experience.service';
 import {
     CancelFrozenCommand,
@@ -52,7 +52,7 @@ export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
     const { univer, get, sheet } = createCommandTestBed(workbookData || SIMPLE_SELECTION_WORKBOOK_DATA, [
         [ShortcutExperienceService],
         [ScrollManagerService],
-        [SheetSkeletonManagerService],
+        [IRenderManagerService, { useClass: RenderManagerService }],
     ]);
 
     const commandService = get(ICommandService);

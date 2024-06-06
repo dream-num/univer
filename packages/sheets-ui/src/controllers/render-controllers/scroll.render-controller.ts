@@ -22,7 +22,7 @@ import {
     RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
@@ -282,7 +282,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 if (param == null) {
                     return;
                 }
-                this._scrollManagerService.setSearchParam(param as unknown as ISheetSkeletonManagerParam);
+                this._scrollManagerService.setSearchParam(param as unknown as IScrollManagerSearchParam);
                 const sheetObject = this._getSheetObject();
                 if (!sheetObject) return;
                 const scene = sheetObject.scene;

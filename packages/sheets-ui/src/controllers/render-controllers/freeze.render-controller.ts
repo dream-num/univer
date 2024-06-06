@@ -758,21 +758,21 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             viewLeftTop,
         } = viewports;
 
-        viewColumnRight.resize({
+        viewColumnRight.resizeWhenFreezeChange({
             left: rowHeaderWidthAndMarginLeft,
             top: 0,
             height: columnHeaderHeightAndMarginTop,
             right: 0,
         });
 
-        viewRowBottom.resize({
+        viewRowBottom.resizeWhenFreezeChange({
             left: 0,
             top: columnHeaderHeightAndMarginTop,
             bottom: 0,
             width: rowHeaderWidthAndMarginLeft,
         });
 
-        viewLeftTop.resize({
+        viewLeftTop.resizeWhenFreezeChange({
             left: 0,
             top: 0,
             width: rowHeaderWidthAndMarginLeft,
@@ -812,7 +812,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         // cancel freeze
         if (isTopView === false && isLeftView === false) {
-            viewMain.resize({
+            viewMain.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,
                 bottom: 0,
@@ -822,7 +822,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         } else if (isTopView === true && isLeftView === false) {
             // freeze row
             const topGap = endSheetView.startY - startSheetView.startY;
-            viewMain.resize({
+            viewMain.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop + topGap,
                 bottom: 0,
@@ -842,7 +842,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 });
             }
 
-            viewMainTop.resize({
+            viewMainTop.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,
                 height: topGap,
@@ -854,7 +854,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                     x: viewMain.scrollX,
                     viewportScrollX: viewMain.viewportScrollX,
                 });
-            viewRowTop.resize({
+            viewRowTop.resizeWhenFreezeChange({
                 left: 0,
                 top: columnHeaderHeightAndMarginTop,
                 width: rowHeaderWidthAndMarginLeft,
@@ -864,7 +864,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 .updateScroll({
                     viewportScrollY: startSheetView.startY,
                 });
-            viewRowBottom.resize({
+            viewRowBottom.resizeWhenFreezeChange({
                 left: 0,
                 top: columnHeaderHeightAndMarginTop + topGap,
                 bottom: 0,
@@ -876,7 +876,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         } else if (isTopView === false && isLeftView === true) {
             // freeze column
             const leftGap = endSheetView.startX - startSheetView.startX;
-            viewMain.resize({
+            viewMain.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft + leftGap,
                 top: columnHeaderHeightAndMarginTop,
                 bottom: 0,
@@ -896,7 +896,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 });
             }
 
-            viewMainLeft.resize({
+            viewMainLeft.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,
                 width: leftGap,
@@ -909,7 +909,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                     y: viewMain.scrollY,
                     viewportScrollY: viewMain.viewportScrollY,
                 });
-            viewColumnLeft.resize({
+            viewColumnLeft.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft,
                 top: 0,
                 width: leftGap,
@@ -919,7 +919,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 .updateScroll({
                     viewportScrollX: startSheetView.startX,
                 });
-            viewColumnRight.resize({
+            viewColumnRight.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft + leftGap,
                 top: 0,
                 height: columnHeaderHeightAndMarginTop,
@@ -931,7 +931,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         } else {
             const leftGap = endSheetView.startX - startSheetView.startX;
             const topGap = endSheetView.startY - startSheetView.startY;
-            viewMain.resize({
+            viewMain.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft + leftGap,
                 top: columnHeaderHeightAndMarginTop + topGap,
                 bottom: 0,
@@ -961,7 +961,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 });
             }
 
-            viewMainLeft.resize({
+            viewMainLeft.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop + topGap,
                 width: leftGap,
@@ -973,7 +973,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                     y: viewMain.scrollY,
                     viewportScrollY: viewMain.viewportScrollY,
                 });
-            viewMainTop.resize({
+            viewMainTop.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft + leftGap,
                 top: columnHeaderHeightAndMarginTop,
                 height: topGap,
@@ -985,7 +985,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                     x: viewMain.scrollX,
                     viewportScrollX: viewMain.viewportScrollX,
                 });
-            viewMainLeftTop.resize({
+            viewMainLeftTop.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,
                 width: leftGap,
@@ -998,7 +998,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                     viewportScrollY: startSheetView.startY,
                 });
 
-            viewRowTop.resize({
+            viewRowTop.resizeWhenFreezeChange({
                 left: 0,
                 top: columnHeaderHeightAndMarginTop,
                 width: rowHeaderWidthAndMarginLeft,
@@ -1010,14 +1010,14 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                     viewportScrollY: startSheetView.startY,
                 });
 
-            viewRowBottom.resize({
+            viewRowBottom.resizeWhenFreezeChange({
                 left: 0,
                 top: columnHeaderHeightAndMarginTop + topGap,
                 bottom: 0,
                 width: rowHeaderWidthAndMarginLeft,
             });
 
-            viewColumnLeft.resize({
+            viewColumnLeft.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft,
                 top: 0,
                 width: leftGap,
@@ -1029,7 +1029,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                     viewportScrollX: startSheetView.startX,
                 });
 
-            viewColumnRight.resize({
+            viewColumnRight.resizeWhenFreezeChange({
                 left: rowHeaderWidthAndMarginLeft + leftGap,
                 top: 0,
                 height: columnHeaderHeightAndMarginTop,

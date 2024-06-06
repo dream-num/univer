@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, type Nullable } from '@univerjs/core';
+import { IUniverInstanceService, type Nullable, UniverInstanceType } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
-import { Inject } from '@wendellhu/redi';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IScrollManagerParam {
@@ -53,7 +53,8 @@ export class ScrollManagerService {
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        // @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         // init
     }
@@ -163,7 +164,9 @@ export class ScrollManagerService {
         let { sheetViewStartColumn, sheetViewStartRow, offsetX, offsetY } = scrollInfo;
         sheetViewStartRow = sheetViewStartRow || 0;
         offsetY = offsetY || 0;
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+
+        // const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentSkeleton();
         const rowAcc = skeleton?.rowHeightAccumulation[sheetViewStartRow - 1] || 0;
         const colAcc = skeleton?.columnWidthAccumulation[sheetViewStartColumn - 1] || 0;
         const viewportScrollX = colAcc + offsetX;

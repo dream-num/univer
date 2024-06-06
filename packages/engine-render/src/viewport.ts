@@ -446,7 +446,8 @@ export class Viewport {
     }
 
     /**
-     * call when canvas element size change
+     * invoked when canvas element size change
+     * engineResizeObserver --> engine.resizeBySize --> scene._setTransForm
      */
     resetCanvasSizeAndUpdateScrollBar() {
         this._resizeCacheCanvas();
@@ -463,15 +464,16 @@ export class Viewport {
     }
 
     /**
-     * 和 resetCanvasSizeAndScrollbar 不同
-     * 此方法是调整冻结行列设置时 & 初始化时触发, resize window 时并不会触发
+     * NOT same as resetCanvasSizeAndScrollbar
+     * This method is triggered when adjusting the frozen row & col settings, and during initialization,
+     * it is not triggered when resizing the window.
      *
-     * 注意参数 position 不一定有 height & width  对于 viewMain 只有 left top bottom right
-     * this.width this.height 也有可能是 undefined
-     * 因此应通过 _getViewPortSize 获取宽高
+     * Note that the 'position' parameter may not always have 'height' and 'width' properties. For the 'viewMain' element, it only has 'left', 'top', 'bottom', and 'right' properties.
+     * Additionally, 'this.width' and 'this.height' may also be 'undefined'.
+     * Therefore, you should use the '_getViewPortSize' method to retrieve the width and height.
      * @param position
      */
-    resize(position: IViewPosition) {
+    resizeWhenFreezeChange(position: IViewPosition) {
         const positionKeys = Object.keys(position);
         if (positionKeys.length === 0) {
             return;
@@ -1039,7 +1041,6 @@ export class Viewport {
         this._scene.makeDirty(true);
     }
 
-    // 自己是否被选中
     isHit(coord: Vector2) {
         if (this.isActive === false) {
             return;
@@ -1166,11 +1167,10 @@ export class Viewport {
     }
 
     /**
-     * Call this method when the viewport has resized.
+     * This method will be invoked whenever the viewport is resized.
      */
     private _updateScrollBarPosByViewportScroll() {
         // zoom.render-controller ---> scene._setTransform --> _updateScrollBarPosByViewportScroll
-        // he width of scene's parent (engine) is zero at this time.
         // viewport width is negative when canvas container has not been set to engine.
         if (!this.width || this.width < 0) return;
         if (!this.height || this.height < 0) return;

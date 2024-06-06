@@ -27,7 +27,7 @@ const PRINTING_RANGE = createInterceptorKey<IRange, ISheetPos>('PRINTING_RANGE')
 const PRINTING_COMPONENT_COLLECT = createInterceptorKey<undefined, ISheetPos & { scene: Scene }>('PRINTING_COMPONENT_COLLECT');
 
 export class SheetPrintInterceptorService extends Disposable {
-    interceptor = new InterceptorManager({
+    readonly interceptor = new InterceptorManager({
         PRINTING_RANGE,
         PRINTING_COMPONENT_COLLECT,
     });

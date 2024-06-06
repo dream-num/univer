@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, IRange, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
+import { Disposable, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { DrawingTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
 import { DrawingRenderService } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -78,7 +79,7 @@ export class SheetDrawingPrintingController extends Disposable {
 
                         const { scaleX, scaleY } = renderer.scene;
                         const newRange: IRange = range ? { ...range } : { startColumn: 0, endColumn: 0, endRow: 0, startRow: 0 };
-                        const data = subUnitData.order.map(key => subUnitData.data[key]).filter(item => item.drawingType !== DrawingTypeEnum.DRAWING_DOM);
+                        const data = subUnitData.order.map((key) => subUnitData.data[key]).filter((item) => item.drawingType !== DrawingTypeEnum.DRAWING_DOM);
                         if (data.length) {
                             data.forEach((param) => {
                                 if (!param.groupId && param.transform && Tools.isDefine(param.transform.left) && Tools.isDefine(param.transform.top) && Tools.isDefine(param.transform.width) && Tools.isDefine(param.transform.height)) {

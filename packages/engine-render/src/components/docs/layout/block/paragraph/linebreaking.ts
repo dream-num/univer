@@ -163,10 +163,11 @@ export function lineBreaking(
 
         const { blockId } = customBlock;
         const drawingOrigin = drawings[blockId];
-        if (drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE) {
-            paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
-        } else {
+
+        if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
             paragraphInlineSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
+        } else {
+            paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
         }
     }
 

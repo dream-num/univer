@@ -59,7 +59,7 @@ export const InsertDocDrawingCommand: ICommand = {
 
         const unitId = documentDataModel.getUnitId();
         const { drawings } = params;
-        const { collapsed, startOffset, endOffset, segmentId, style } = activeTextRange;
+        const { collapsed, startOffset, segmentId, style } = activeTextRange;
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
@@ -94,7 +94,7 @@ export const InsertDocDrawingCommand: ICommand = {
             body: {
                 dataStream: '\b'.repeat(drawings.length),
                 customBlocks: drawings.map((drawing, i) => ({
-                    startIndex: endOffset + i,
+                    startIndex: i,
                     blockId: drawing.drawingId,
                 })),
             },

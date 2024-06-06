@@ -152,3 +152,4 @@ export type { IRangeChange } from './models/formula-data.model';
 export { handleNumfmtInCell } from './engine/utils/numfmt-kit';
 export { AsyncArrayObject } from './engine/reference-object/base-reference-object';
 export { strip, stripErrorMargin } from './engine/utils/math-kit';
+export { AsyncObject } from './engine/reference-object/base-reference-object';

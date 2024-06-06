@@ -147,7 +147,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             docTransform,
             title: '',
             description: '',
-            layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+            layoutType: PositionedObjectLayoutType.INLINE,
         };
 
         this._commandService.executeCommand(InsertDocDrawingCommand.id, {

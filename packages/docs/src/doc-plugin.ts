@@ -25,7 +25,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { BreakLineCommand } from './commands/commands/break-line.command';
 import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
-import { DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';
+import { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';
 import { IMEInputCommand } from './commands/commands/ime-input.command';
 import {
     ResetInlineFormatTextBackgroundColorCommand,
@@ -101,6 +101,7 @@ export class UniverDocsPlugin extends Plugin {
                 BreakLineCommand,
                 InsertCommand,
                 DeleteCommand,
+                DeleteCustomBlockCommand,
                 UpdateCommand,
                 IMEInputCommand,
                 MergeTwoParagraphCommand,

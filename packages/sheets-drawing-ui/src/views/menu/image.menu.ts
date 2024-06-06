@@ -17,6 +17,8 @@
 import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { UniverInstanceType } from '@univerjs/core';
+import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
+import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { COMPONENT_UPLOAD_FILE_MENU, UploadFileType } from '../upload-component/component-name';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../../commands/operations/insert-image.operation';
 
@@ -32,6 +34,7 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
         icon: IMAGE_UPLOAD_ICON,
         tooltip: 'sheetImage.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }
 
@@ -47,7 +50,6 @@ export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
             },
         },
         positions: [IMAGE_MENU_ID],
-        // disabled$: getCurrentSheetDisabled$(_accessor),
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -64,7 +66,6 @@ export function UploadCellImageMenuFactory(_accessor: IAccessor): IMenuItem {
             },
         },
         positions: [IMAGE_MENU_ID],
-        // disabled$: getCurrentSheetDisabled$(_accessor),
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

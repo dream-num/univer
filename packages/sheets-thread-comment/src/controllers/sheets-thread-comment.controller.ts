@@ -27,11 +27,11 @@ import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
 import { DeleteCommentMutation } from '@univerjs/thread-comment';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
-import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
 import { AddCommentShortcut, threadCommentMenuFactory, threadPanelMenuFactory } from './menu';
 
 export interface IUniverSheetsThreadCommentConfig {

@@ -123,9 +123,7 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
                         redos: [],
                     };
                 }
-
                 const res = this._handleRangeChange(unitId, subUnitId, comment, resultRange, false);
-
                 return res;
             }, unitId, subUnitId)
         );

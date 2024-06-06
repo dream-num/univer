@@ -14243,6 +14243,10 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         v: '1',
                         t: 2,
                     },
+                    2: {
+                        v: '12',
+                        t: 2,
+                    },
                 },
                 6: {
                     1: {
@@ -23647,6 +23651,21 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             data: JSON.stringify({
                 'sheet-0011': [{ text: { textRuns: [], paragraphs: [{ startIndex: 3, paragraphStyle: {} }], sectionBreaks: [{ startIndex: 4 }], dataStream: '123\\n\\r', customRanges: [] }, dT: '2024/05/17 21:16', id: 'jwV0QtHwUbhG3o--iy1qa', ref: 'H9', personId: 'mockId', unitId: 'workbook-01', subUnitId: 'sheet-0011' }],
                 'dv-test': [
+                    {
+                        text: {
+                            textRuns: [],
+                            paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
+                            sectionBreaks: [{ startIndex: 4 }],
+                            dataStream: '1\\n\\r',
+                            customRanges: [],
+                        },
+                        dT: '2024/05/17 21:16',
+                        id: '12',
+                        ref: 'C6',
+                        personId: 'mockId',
+                        unitId: 'workbook-01',
+                        subUnitId: 'sheet-0011',
+                    },
                     {
                         text: {
                             textRuns: [],

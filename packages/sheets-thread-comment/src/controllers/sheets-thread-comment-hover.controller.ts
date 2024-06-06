@@ -18,8 +18,8 @@ import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { HoverManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { debounceTime } from 'rxjs';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
-import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetsThreadCommentHoverController)
 export class SheetsThreadCommentHoverController extends Disposable {

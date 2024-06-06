@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import type { ISheetRenderExtension } from '@univerjs/engine-render';
 import { RangeProtectionRuleModel, SelectionManagerService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import { combineLatest, map, merge, of, startWith, switchMap } from 'rxjs';
@@ -385,9 +384,3 @@ export function getViewPermissionDisable$(accessor: IAccessor) {
     );
 }
 
-export const changeRenderExtensionSkip = (cellData: ICellData & ISheetRenderExtension, key: keyof ISheetRenderExtension, value: boolean) => {
-    if (!cellData[key]) {
-        cellData[key] = {};
-    }
-    cellData[key]!.isSkip = value;
-};

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, IScale, ObjectMatrix } from '@univerjs/core';
+import type { IRange, IScale, ObjectMatrix } from '@univerjs/core';
 import { BorderStyleTypes } from '@univerjs/core';
 
 import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { drawDiagonalLineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
 import type { UniverRenderingContext } from '../../../context';
 import { SpreadsheetExtensionRegistry } from '../../extension';
-import type { BorderCacheItem, ISheetRenderExtension } from '../interfaces';
+import type { BorderCacheItem } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
 
@@ -75,12 +75,6 @@ export class Border extends SheetExtension {
         // eslint-disable-next-line max-lines-per-function
         border?.forValue((rowIndex, columnIndex, borderCaches) => {
             if (!borderCaches) {
-                return true;
-            }
-
-            const cellData = worksheet.getCell(rowIndex, columnIndex) as ICellData & ISheetRenderExtension;
-
-            if (cellData.borderRenderExtension?.isSkip) {
                 return true;
             }
 

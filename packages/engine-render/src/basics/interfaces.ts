@@ -49,6 +49,7 @@ export interface IObjectFullState extends ITransformState {
     forceRender?: boolean;
     debounceParentDirty?: boolean;
     transformerConfig?: ITransformerConfig;
+    printable?: boolean;
 }
 
 export interface IRect extends ISize, IOffset {

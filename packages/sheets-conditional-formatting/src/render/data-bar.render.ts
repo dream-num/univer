@@ -50,10 +50,6 @@ export class DataBar extends SheetExtension {
                     return;
                 }
 
-                if (cellData?.dataBar?.isSkip) {
-                    return;
-                }
-
                 const { color, value, startPoint, isGradient } = cellData.dataBar;
                 const cellInfo = this.getCellIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
                 let { isMerged, isMergedMainCell, mergeInfo, startY, endY, startX, endX } = cellInfo;

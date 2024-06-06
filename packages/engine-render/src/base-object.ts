@@ -79,6 +79,8 @@ export abstract class BaseObject extends Disposable {
     protected _dirty: boolean = true;
     protected _forceDirty: boolean = true;
 
+    private _printable: boolean = false;
+
     private _top: number = 0;
     private _topOrigin: number | string = 0;
 
@@ -153,6 +155,10 @@ export abstract class BaseObject extends Disposable {
         }
 
         return transform;
+    }
+
+    get printable() {
+        return this._printable;
     }
 
     get topOrigin() {

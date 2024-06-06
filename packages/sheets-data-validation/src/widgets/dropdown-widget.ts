@@ -17,7 +17,7 @@
 import { BooleanNumber, DataValidationRenderMode, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_WORKSHEET_ROW_HEIGHT, DocumentDataModel, HorizontalAlign, ICommandService, LocaleService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import type { ICellRenderContext, IDocumentData, IPaddingData, IStyleData, Nullable } from '@univerjs/core';
 import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, Rect } from '@univerjs/engine-render';
-import type { IMouseEvent, IPointerEvent, ISheetFontRenderExtension, SpreadsheetSkeleton, UniverRenderingContext2D } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, ISheetFontRenderExtension, SpreadsheetSkeleton, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
@@ -227,10 +227,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             return;
         }
 
-        if (data.dataValidation?.isSkip) {
-            return;
-        }
-
         const cellBounding = {
             startX: _cellBounding.startX + leftOffset,
             endX: _cellBounding.endX - rightOffset,
@@ -281,7 +277,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             ctx.beginPath();
             ctx.rect(0, 0, realWidth, fontHeight);
             ctx.clip();
-            documents.render(ctx);
+            documents.render(ctx as UniverRenderingContext);
             ctx.translateWithPrecision(paddingLeft, 0);
             ctx.restore();
 
@@ -315,7 +311,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             ctx.translate(MARGIN_H, paddingTop);
             const rectWidth = Math.max(cellWidth - MARGIN_H * 2, 1);
             const rectHeight = fontHeight;
-            Rect.drawWith(ctx, {
+            Rect.drawWith(ctx as UniverRenderingContext, {
                 width: rectWidth,
                 height: rectHeight,
                 fill: activeItem?.color || DROP_DOWN_DEFAULT_COLOR,
@@ -327,7 +323,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             ctx.rect(0, 0, realWidth, fontHeight);
             ctx.clip();
             ctx.translateWithPrecision(paddingLeft, 0);
-            documents.render(ctx);
+            documents.render(ctx as UniverRenderingContext);
             ctx.restore();
             ctx.translate(realWidth + PADDING_H + 4, (fontHeight - ICON_SIZE) / 2);
             ctx.fillStyle = DROP_DOWN_ICON_COLOR;

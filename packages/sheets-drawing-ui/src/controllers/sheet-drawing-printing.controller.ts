@@ -42,7 +42,7 @@ export class SheetDrawingPrintingController extends Disposable {
                     handler: (_param, pos, next) => {
                         const { unitId, scene, subUnitId } = pos;
                         const unitData = this._drawingManagerService.getDrawingDataForUnit(unitId);
-                        const subUnitData = unitData[subUnitId];
+                        const subUnitData = unitData?.[subUnitId];
                         if (subUnitData) {
                             subUnitData.order.forEach((id) => {
                                 this._drawingRenderService.renderDrawing(subUnitData.data[id], scene);
@@ -71,7 +71,7 @@ export class SheetDrawingPrintingController extends Disposable {
                             return next(range);
                         }
                         const unitData = this._drawingManagerService.getDrawingDataForUnit(unitId);
-                        const subUnitData = unitData[pos.subUnitId];
+                        const subUnitData = unitData?.[pos.subUnitId];
                         if (!subUnitData) {
                             return next(range);
                         }

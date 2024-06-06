@@ -21,6 +21,7 @@ import { DrawingUpdateController } from './controllers/drawing-update.controller
 import { DrawingUIController } from './controllers/drawing-ui.controller';
 import { ImageCropperController } from './controllers/image-cropper.controller';
 import { ImageUpdateController } from './controllers/image-update.controller';
+import { DrawingRenderService } from './services/drawing-render.service';
 
 const PLUGIN_NAME = 'DRAWING_UI_PLUGIN';
 
@@ -43,7 +44,7 @@ export class UniverDrawingUIPlugin extends Plugin {
         const dependencies: Dependency[] = [
 
             // services
-
+            [DrawingRenderService],
             // controllers
             [DrawingUpdateController],
             [DrawingUIController],

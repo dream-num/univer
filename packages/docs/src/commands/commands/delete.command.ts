@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentBody, IMutationInfo, IParagraph, ITextRun } from '@univerjs/core';
+import type { ICommand, IDocumentBody, IMutationInfo, IParagraph, ITextRun, JSONXActions } from '@univerjs/core';
 import {
     CommandType,
     getCustomDecorationSlice,
@@ -37,6 +37,97 @@ import { getDeleteSelection, getInsertSelection } from '../../basics/selection';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, DeleteDirection, UpdateCommand } from './core-editing.command';
+
+export interface IDeleteCustomBlockParams {
+    direction: DeleteDirection;
+    range: IActiveTextRange;
+    unitId: string;
+    drawingId: string;
+}
+
+// The activeRange need collapsed.
+export const DeleteCustomBlockCommand: ICommand<IDeleteCustomBlockParams> = {
+    id: 'doc.command.delete-custom-block',
+    type: CommandType.COMMAND,
+    handler: async (accessor, params: IDeleteCustomBlockParams) => {
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+
+        const activeRange = textSelectionManagerService.getActiveRange();
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+
+        if (activeRange == null || documentDataModel == null) {
+            return false;
+        }
+
+        const { direction, range, unitId, drawingId } = params;
+
+        const { startOffset, segmentId, style } = activeRange;
+
+        const cursor = direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset;
+
+        const textRanges = [
+            {
+                startOffset: cursor,
+                endOffset: cursor,
+                style,
+            },
+        ] as ITextRangeWithStyle[];
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges,
+                prevTextRanges: [range],
+            },
+        };
+
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+        const rawActions: JSONXActions = [];
+
+        if (startOffset > 0) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset,
+                segmentId,
+            });
+        }
+
+        textX.push({
+            t: TextXActionType.DELETE,
+            len: 1,
+            line: 0,
+            segmentId,
+        });
+
+        rawActions.push(jsonX.editOp(textX.serialize())!);
+
+        const drawing = (documentDataModel.getDrawings() ?? {})[drawingId];
+        const drawingOrder = documentDataModel.getDrawingsOrder();
+        const drawingIndex = drawingOrder!.indexOf(drawingId);
+
+        const removeDrawingAction = jsonX.removeOp(['drawings', drawingId], drawing);
+        const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], drawingId);
+
+        rawActions.push(removeDrawingAction!);
+        rawActions.push(removeDrawingOrderAction!);
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
+    },
+};
 
 interface IMergeTwoParagraphParams {
     direction: DeleteDirection;
@@ -151,7 +242,6 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
     type: CommandType.COMMAND,
-
     // eslint-disable-next-line max-lines-per-function, complexity
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
@@ -266,13 +356,18 @@ export const DeleteLeftCommand: ICommand = {
                     return true;
                 }
                 if (preGlyph.content === '\r') {
-                    result = await commandService.executeCommand(
-                        MergeTwoParagraphCommand.id,
-                        {
-                            direction: DeleteDirection.LEFT,
-                            range: actualRange,
-                        }
-                    );
+                    result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
+                        direction: DeleteDirection.LEFT,
+                        range: actualRange,
+                    });
+                } else if (preGlyph.streamType === '\b') {
+                    const unitId = docDataModel.getUnitId();
+                    result = await commandService.executeCommand(DeleteCustomBlockCommand.id, {
+                        direction: DeleteDirection.LEFT,
+                        range: activeRange,
+                        unitId,
+                        drawingId: preGlyph.drawingId,
+                    });
                 } else {
                     cursor -= preGlyph.count;
                     result = await commandService.executeCommand(DeleteCommand.id, {

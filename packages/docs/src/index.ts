@@ -28,7 +28,7 @@ export {
     UpdateCommand,
     EditorInsertTextCommandId,
 } from './commands/commands/core-editing.command';
-export { DeleteLeftCommand, DeleteRightCommand } from './commands/commands/delete.command';
+export { DeleteLeftCommand, DeleteRightCommand, DeleteCustomBlockCommand, type IDeleteCustomBlockParams } from './commands/commands/delete.command';
 export { type IIMEInputCommandParams, IMEInputCommand } from './commands/commands/ime-input.command';
 export {
     SetInlineFormatBoldCommand,

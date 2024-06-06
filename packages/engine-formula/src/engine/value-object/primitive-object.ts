@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import Big from 'big.js';
-
 import { isRealNum } from '@univerjs/core';
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { compareToken, operatorToken } from '../../basics/token';
 import { compareWithWildcard, isWildcard } from '../utils/compare';
-import { ceil, floor, mod, pow, round } from '../utils/math-kit';
+import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt } from '../utils/math-kit';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { comparePatternPriority } from '../utils/numfmt-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
@@ -596,7 +594,7 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = Big(currentValue).plus(value).toNumber();
+            const result = plus(currentValue, value);
 
             if (!Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -606,9 +604,7 @@ export class NumberValueObject extends BaseValueObject {
         }
         if (typeof value === 'boolean') {
             return NumberValueObject.create(
-                Big(currentValue)
-                    .plus(value ? 1 : 0)
-                    .toNumber()
+                plus(currentValue, value ? 1 : 0)
             );
         }
         return this;
@@ -624,7 +620,7 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = Big(currentValue).minus(value).toNumber();
+            const result = minus(currentValue, value);
 
             if (!Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -634,9 +630,7 @@ export class NumberValueObject extends BaseValueObject {
         }
         if (typeof value === 'boolean') {
             return NumberValueObject.create(
-                Big(currentValue)
-                    .minus(value ? 1 : 0)
-                    .toNumber()
+                minus(currentValue, value ? 1 : 0)
             );
         }
         return this;
@@ -652,7 +646,7 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = Big(currentValue).times(value).toNumber();
+            const result = multiply(currentValue, value);
 
             if (!Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -661,9 +655,7 @@ export class NumberValueObject extends BaseValueObject {
         }
         if (typeof value === 'boolean') {
             return NumberValueObject.create(
-                Big(currentValue)
-                    .times(value ? 1 : 0)
-                    .toNumber()
+                multiply(currentValue, value ? 1 : 0)
             );
         }
         return this;
@@ -682,7 +674,7 @@ export class NumberValueObject extends BaseValueObject {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = Big(currentValue).div(value).toNumber();
+            const result = divide(currentValue, value);
 
             if (!Number.isFinite(result)) {
                 return ErrorValueObject.create(ErrorType.NUM);
@@ -694,7 +686,7 @@ export class NumberValueObject extends BaseValueObject {
             if (value === false) {
                 return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
-            return NumberValueObject.create(Big(currentValue).div(1).toNumber());
+            return NumberValueObject.create(divide(currentValue, 1));
         }
         return this;
     }
@@ -738,17 +730,17 @@ export class NumberValueObject extends BaseValueObject {
     private _compareFiniteNumber(currentValue: number, value: number, operator: compareToken): boolean {
         switch (operator) {
             case compareToken.EQUALS:
-                return Big(currentValue).eq(value);
+                return equals(currentValue, value);
             case compareToken.GREATER_THAN:
-                return Big(currentValue).gt(value);
+                return greaterThan(currentValue, value);
             case compareToken.GREATER_THAN_OR_EQUAL:
-                return Big(currentValue).gte(value);
+                return greaterThanOrEquals(currentValue, value);
             case compareToken.LESS_THAN:
-                return Big(currentValue).lt(value);
+                return lessThan(currentValue, value);
             case compareToken.LESS_THAN_OR_EQUAL:
-                return Big(currentValue).lte(value);
+                return lessThanOrEquals(currentValue, value);
             case compareToken.NOT_EQUAL:
-                return !Big(currentValue).eq(value);
+                return !equals(currentValue, value);
         }
     }
 
@@ -803,7 +795,7 @@ export class NumberValueObject extends BaseValueObject {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = Big(currentValue).sqrt().toNumber();
+        const result = sqrt(currentValue);
 
         if (!Number.isFinite(result)) {
             return ErrorValueObject.create(ErrorType.NUM);

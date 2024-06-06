@@ -110,7 +110,7 @@ describe('Test stdev.p function', () => {
                 column: 0,
             });
             const result = textFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(34.82321961694231);
+            expect(result.getValue()).toBe(34.82321961694232);
         });
     });
 });

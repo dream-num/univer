@@ -22,7 +22,7 @@ import type { ICellPermission } from '@univerjs/sheets';
 import { RangeProtectionRuleModel, SelectionManagerService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
-import { combineLatest, map, of, switchMap } from 'rxjs';
+import { combineLatest, map, of, startWith, switchMap } from 'rxjs';
 
 interface IActive {
     workbook: Workbook;
@@ -54,13 +54,13 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const userManagerService = accessor.get(UserManagerService);
     const contextService = accessor.get(IContextService);
-    const focusedOnDrawing$ = contextService.subscribeContextValue$(FOCUSING_COMMON_DRAWINGS);
+    const focusedOnDrawing$ = contextService.subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false));
     if (!workbook) {
         return of(true);
     }
 
     return combineLatest([userManagerService.currentUser$, workbook.activeSheet$, selectionManagerService.selectionMoveEnd$, focusedOnDrawing$]).pipe(
-        switchMap(([_, __, ___, focusOnDrawings]) => {
+        switchMap(([_, __, selection, focusOnDrawings]) => {
             if (focusOnDrawings) {
                 return of(true);
             }
@@ -91,7 +91,7 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
                 }));
             }
 
-            const selectionRanges = selectionManagerService.getSelections()?.map((selection) => selection.range);
+            const selectionRanges = selection?.map((selection) => selection.range);
             const rules = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
                 return selectionRanges?.some((range) => {
                     return rule.ranges.some((ruleRange) => Rectangle.intersects(range, ruleRange));

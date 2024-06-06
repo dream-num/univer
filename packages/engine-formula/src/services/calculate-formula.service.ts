@@ -241,12 +241,15 @@ export class CalculateFormulaService extends Disposable {
 
         this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
 
+        let pendingTasks: (() => void)[] = [];
+
         for (let i = 0, len = treeList.length; i < len; i++) {
             /**
              * For every functions, execute a setTimeout to wait for external command input.
              */
             await new Promise((resolve) => {
-                requestImmediateMacroTask(resolve);
+                const calcelTask = requestImmediateMacroTask(resolve);
+                pendingTasks.push(calcelTask);
             });
 
             if (this._runtimeService.isStopExecution()) {
@@ -313,6 +316,10 @@ export class CalculateFormulaService extends Disposable {
 
             this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
         }
+
+        // clear all pending tasks
+        pendingTasks.forEach((cancel) => cancel());
+        pendingTasks = [];
 
         if (treeList.length > 0) {
             this._runtimeService.markedAsSuccessfullyExecuted();

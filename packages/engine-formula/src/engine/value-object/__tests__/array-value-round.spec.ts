@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 import { NumberValueObject } from '../primitive-object';
+import { stripArrayValue } from '../../../functions/__tests__/create-function-test-bed';
 
 describe('arrayValueObject round method test', () => {
     const originArrayValueObject = ArrayValueObject.create({
@@ -191,7 +192,7 @@ describe('arrayValueObject round method test', () => {
                 column: 0,
             });
 
-            expect((originValueObject.round(roundArrayValueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(stripArrayValue((originValueObject.round(roundArrayValueObject) as ArrayValueObject).toValue())).toStrictEqual([
                 [1, '#VALUE!', 1, 1, 1],
                 [1, 1, 1, '#VALUE!', 0],
             ]);

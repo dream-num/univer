@@ -15,9 +15,9 @@
  */
 
 import type { ICellData, IContextService, Nullable } from '@univerjs/core';
-import { FOCUSING_DOC, FOCUSING_UNIVER_EDITOR, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, isFormulaId, isFormulaString } from '@univerjs/core';
+import { CellValueType, FOCUSING_DOC, FOCUSING_UNIVER_EDITOR, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, isFormulaId, isFormulaString } from '@univerjs/core';
 import type { ErrorType } from '@univerjs/engine-formula';
-import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
+import { ERROR_TYPE_SET, stripErrorMargin } from '@univerjs/engine-formula';
 
 export function whenEditorStandalone(contextService: IContextService) {
     return (
@@ -34,9 +34,21 @@ export function whenEditorStandalone(contextService: IContextService) {
  */
 export function extractFormulaError(cell: Nullable<ICellData>) {
     // Must contain a formula
-    if (typeof cell?.v === 'string' && (isFormulaString(cell.f) || isFormulaId(cell.si)) && ERROR_TYPE_SET.has(cell.v as ErrorType)) {
+    if ((isFormulaString(cell?.f) || isFormulaId(cell?.si)) && typeof cell?.v === 'string' && ERROR_TYPE_SET.has(cell.v as ErrorType)) {
         return cell.v as ErrorType;
     }
 
+    return null;
+}
+
+/**
+ * Extract the formula number from the cell, handle the precision issue
+ * @param cell
+ * @returns
+ */
+export function extractFormulaNumber(cell: Nullable<ICellData>) {
+    if ((isFormulaString(cell?.f) || isFormulaId(cell?.si)) && cell?.t === CellValueType.NUMBER && typeof cell?.v === 'number') {
+        return stripErrorMargin(cell.v);
+    }
     return null;
 }

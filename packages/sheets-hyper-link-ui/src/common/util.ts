@@ -43,22 +43,22 @@ export function isEmail(url: string) {
 
 export function serializeUrl(urlStr: string) {
     if (isLegalLink(urlStr)) {
-        return hasProtocol(urlStr) ? urlStr : isEmail(urlStr) ? `mailto://${urlStr}` : `http://${urlStr}`;
+        const transformedUrl = hasProtocol(urlStr) ? urlStr : isEmail(urlStr) ? `mailto://${urlStr}` : `http://${urlStr}`;
+
+        const url = new URL(transformedUrl);
+        if (
+            url.hostname === location.hostname &&
+            url.port === location.port &&
+            url.protocol === location.protocol &&
+            url.pathname === location.pathname &&
+            url.hash &&
+            !url.search
+        ) {
+            return url.hash;
+        }
     }
 
-    const url = new URL(urlStr);
-    if (
-        url.hostname === location.hostname &&
-        url.port === location.port &&
-        url.protocol === location.protocol &&
-        url.pathname === location.pathname &&
-        url.hash &&
-        !url.search
-    ) {
-        return url.hash;
-    }
-
-    return url;
+    return urlStr;
 }
 
 export function getCellValueOrigin(cell: Nullable<ICellData>) {

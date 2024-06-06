@@ -376,3 +376,5 @@ export {
 
 export { RangeProtectionPermissionEditPoint } from './services/permission/permission-point/range/edit';
 export { RangeProtectionPermissionViewPoint } from './services/permission/permission-point/range/view';
+
+export type { IAddWorksheetProtectionParams } from './commands/mutations/add-worksheet-protection.mutation';

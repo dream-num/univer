@@ -14237,7 +14237,32 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             rowCount: 1000,
             columnCount: 20,
             zoomRatio: 1,
-            cellData: {},
+            cellData: {
+                5: {
+                    1: {
+                        v: '1',
+                        t: 2,
+                    },
+                },
+                6: {
+                    1: {
+                        v: '2',
+                        t: 2,
+                    },
+                },
+                7: {
+                    1: {
+                        v: '3',
+                        t: 2,
+                    },
+                },
+                8: {
+                    1: {
+                        v: '4',
+                        t: 2,
+                    },
+                },
+            },
         },
         'sheet-0010': {
             name: 'sheet-0010',
@@ -23619,7 +23644,71 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
         },
         {
             name: 'SHEET_THREAD_COMMENT_PLUGIN',
-            data: '{"sheet-0011":[{"text":{"textRuns":[],"paragraphs":[{"startIndex":3,"paragraphStyle":{}}],"sectionBreaks":[{"startIndex":4}],"dataStream":"123\\n\\r","customRanges":[]},"dT":"2024/05/17 21:16","id":"jwV0QtHwUbhG3o--iy1qa","ref":"H9","personId":"mockId","unitId":"workbook-01","subUnitId":"sheet-0011"}]}',
+            data: JSON.stringify({
+                'sheet-0011': [{ text: { textRuns: [], paragraphs: [{ startIndex: 3, paragraphStyle: {} }], sectionBreaks: [{ startIndex: 4 }], dataStream: '123\\n\\r', customRanges: [] }, dT: '2024/05/17 21:16', id: 'jwV0QtHwUbhG3o--iy1qa', ref: 'H9', personId: 'mockId', unitId: 'workbook-01', subUnitId: 'sheet-0011' }],
+                'dv-test': [
+                    {
+                        text: {
+                            textRuns: [],
+                            paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
+                            sectionBreaks: [{ startIndex: 4 }],
+                            dataStream: '1\\n\\r',
+                            customRanges: [],
+                        },
+                        dT: '2024/05/17 21:16',
+                        id: '1',
+                        ref: 'B6',
+                        personId: 'mockId',
+                        unitId: 'workbook-01',
+                        subUnitId: 'sheet-0011',
+                    },
+                    {
+                        text: {
+                            textRuns: [],
+                            paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
+                            sectionBreaks: [{ startIndex: 4 }],
+                            dataStream: '2\\n\\r',
+                            customRanges: [],
+                        },
+                        dT: '2024/05/17 21:16',
+                        id: '2',
+                        ref: 'B7',
+                        personId: 'mockId',
+                        unitId: 'workbook-01',
+                        subUnitId: 'sheet-0011',
+                    },
+                    {
+                        text: {
+                            textRuns: [],
+                            paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
+                            sectionBreaks: [{ startIndex: 4 }],
+                            dataStream: '3\\n\\r',
+                            customRanges: [],
+                        },
+                        dT: '2024/05/17 21:16',
+                        id: '3',
+                        ref: 'B8',
+                        personId: 'mockId',
+                        unitId: 'workbook-01',
+                        subUnitId: 'sheet-0011',
+                    },
+                    {
+                        text: {
+                            textRuns: [],
+                            paragraphs: [{ startIndex: 3, paragraphStyle: {} }],
+                            sectionBreaks: [{ startIndex: 4 }],
+                            dataStream: '4\\n\\r',
+                            customRanges: [],
+                        },
+                        dT: '2024/05/17 21:16',
+                        id: '4',
+                        ref: 'B9',
+                        personId: 'mockId',
+                        unitId: 'workbook-01',
+                        subUnitId: 'sheet-0011',
+                    },
+                ],
+            }),
         },
         {
             name: 'SHEET_DRAWING_PLUGIN',

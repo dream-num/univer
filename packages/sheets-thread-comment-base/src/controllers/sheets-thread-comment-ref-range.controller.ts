@@ -149,7 +149,15 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
     }
 
     private _unwatch(unitId: string, subUnitId: string, commentId: string) {
-        this._watcherMap.delete(this._getIdWithUnitId(unitId, subUnitId, commentId));
+        const id = this._getIdWithUnitId(unitId, subUnitId, commentId);
+        this._watcherMap.get(id)?.dispose();
+        this._watcherMap.delete(id);
+    }
+
+    private _unregister(unitId: string, subUnitId: string, commentId: string) {
+        const id = this._getIdWithUnitId(unitId, subUnitId, commentId);
+        this._disposableMap.get(id)?.dispose();
+        this._disposableMap.delete(id);
     }
 
     private _initData() {
@@ -191,8 +199,7 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
                         break;
                     }
                     case 'delete': {
-                        const disposable = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, option.payload.commentId));
-                        disposable?.dispose();
+                        this._unregister(unitId, subUnitId, option.payload.commentId);
                         this._unwatch(unitId, subUnitId, option.payload.commentId);
                         break;
                     }
@@ -202,9 +209,7 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
                             return;
                         }
 
-                        const disposable = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, comment.id));
-                        disposable?.dispose();
-
+                        this._unregister(unitId, subUnitId, option.payload.commentId);
                         const sheetComment = {
                             ...comment,
                             row: option.row,

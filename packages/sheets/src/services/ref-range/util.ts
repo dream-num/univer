@@ -1056,6 +1056,7 @@ export function adjustRangeOnMutation(range: Readonly<IRange>, mutation: IMutati
     }
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: { selectionManagerService: SelectionManagerService }) {
     const { selectionManagerService } = deps;
     switch (command.id) {
@@ -1088,12 +1089,24 @@ export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: 
         case EffectRefRangId.InsertRowCommandId: {
             const params = command;
             const range: IRange = params.params!.range;
-            return [range];
+            return [
+                {
+                    ...range,
+                    startRow: range.startRow - 0.5,
+                    endRow: range.endRow - 0.5,
+                },
+            ];
         }
         case EffectRefRangId.InsertColCommandId: {
             const params = command;
             const range: IRange = params.params!.range;
-            return [range];
+            return [
+                {
+                    ...range,
+                    startColumn: range.startColumn - 0.5,
+                    endColumn: range.endColumn - 0.5,
+                },
+            ];
         }
         case EffectRefRangId.RemoveRowCommandId: {
             const params = command;
@@ -1158,12 +1171,24 @@ export function getEffectedRangesOnMutation(mutation: IMutationInfo<MutationsAff
         case InsertColMutation.id: {
             const params = mutation.params as IInsertColMutationParams;
             const range: IRange = params.range;
-            return [range];
+            return [
+                {
+                    ...range,
+                    startColumn: range.startColumn - 0.5,
+                    endColumn: range.endColumn - 0.5,
+                },
+            ];
         }
         case InsertRowMutation.id: {
             const params = mutation.params as IInsertRowMutationParams;
             const range: IRange = params.range;
-            return [range];
+            return [
+                {
+                    ...range,
+                    startRow: range.startRow - 0.5,
+                    endRow: range.endRow - 0.5,
+                },
+            ];
         }
         case RemoveColMutation.id: {
             const params = mutation.params as IRemoveColMutationParams;

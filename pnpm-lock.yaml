@@ -1820,13 +1820,13 @@ importers:
         version: link:../engine-formula
       '@univerjs/icons':
         specifier: ^0.1.56
-        version: 0.1.56(react-dom@18.3.1(react@18.2.0))(react@18.2.0)
+        version: 0.1.56(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-virtual-list:
         specifier: ^3.11.5
-        version: 3.11.5(react-dom@18.3.1(react@18.2.0))(react@18.2.0)
+        version: 3.11.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-dom:
         specifier: 18.3.1
-        version: 18.3.1(react@18.2.0)
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1862,8 +1862,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       react:
-        specifier: 18.2.0
-        version: 18.2.0
+        specifier: 18.3.1
+        version: 18.3.1
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -14170,11 +14170,6 @@ snapshots:
 
   '@univerjs/icons-svg@0.1.55': {}
 
-  '@univerjs/icons@0.1.56(react-dom@18.3.1(react@18.2.0))(react@18.2.0)':
-    dependencies:
-      react: 18.2.0
-      react-dom: 18.3.1(react@18.2.0)
-
   '@univerjs/icons@0.1.56(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
@@ -18825,15 +18820,6 @@ snapshots:
     optionalDependencies:
       dayjs: 1.11.11
 
-  rc-resize-observer@1.4.0(react-dom@18.3.1(react@18.2.0))(react@18.2.0):
-    dependencies:
-      '@babel/runtime': 7.24.1
-      classnames: 2.5.1
-      rc-util: 5.41.0(react-dom@18.3.1(react@18.2.0))(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.3.1(react@18.2.0)
-      resize-observer-polyfill: 1.5.1
-
   rc-resize-observer@1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.24.1
@@ -18882,28 +18868,12 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  rc-util@5.41.0(react-dom@18.3.1(react@18.2.0))(react@18.2.0):
-    dependencies:
-      '@babel/runtime': 7.24.1
-      react: 18.2.0
-      react-dom: 18.3.1(react@18.2.0)
-      react-is: 18.2.0
-
   rc-util@5.41.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.24.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-is: 18.2.0
-
-  rc-virtual-list@3.11.5(react-dom@18.3.1(react@18.2.0))(react@18.2.0):
-    dependencies:
-      '@babel/runtime': 7.24.1
-      classnames: 2.5.1
-      rc-resize-observer: 1.4.0(react-dom@18.3.1(react@18.2.0))(react@18.2.0)
-      rc-util: 5.41.0(react-dom@18.3.1(react@18.2.0))(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.3.1(react@18.2.0)
 
   rc-virtual-list@3.11.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
@@ -18992,12 +18962,6 @@ snapshots:
       strip-indent: 4.0.0
     transitivePeerDependencies:
       - supports-color
-
-  react-dom@18.3.1(react@18.2.0):
-    dependencies:
-      loose-envify: 1.4.0
-      react: 18.2.0
-      scheduler: 0.23.2
 
   react-dom@18.3.1(react@18.3.1):
     dependencies:

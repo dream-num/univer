@@ -332,7 +332,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                                     row,
                                     col,
                                     workbook,
-                                    worksheet
+                                    worksheet,
                                 };
                                 return validator?.canvasRender?.calcCellAutoHeight?.(info);
                             },

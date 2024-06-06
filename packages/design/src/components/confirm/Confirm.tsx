@@ -77,7 +77,7 @@ function Footer(props: { locale: ILocale['design']; cancelText?: string; confirm
 }
 
 export function Confirm(props: IConfirmProps) {
-    const { children, visible = false, title, cancelText, confirmText, width, height, onClose, onConfirm } = props;
+    const { children, visible = false, title, cancelText, confirmText, width, onClose, onConfirm } = props;
 
     const { locale } = useContext(ConfigContext);
 

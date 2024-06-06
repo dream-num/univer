@@ -20,7 +20,6 @@ import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { getCellDataByInput } from '../end-edit.controller';
 import { createTestBed } from './create-test-bed';
 

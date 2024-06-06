@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { debounce, type IDocumentData, isInternalEditorID, LocaleService, type Nullable } from '@univerjs/core';
+import type { IDocumentData, Nullable } from '@univerjs/core';
+import { debounce, isInternalEditorID, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 import { Popup } from '@univerjs/design';

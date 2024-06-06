@@ -19,10 +19,10 @@ import {
     Direction,
     Disposable,
     ICommandService,
-    IUniverInstanceService,
+    RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
-import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
@@ -41,11 +41,10 @@ const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAn
 /**
  * This controller handles scroll logic in sheet interaction.
  */
-export class SheetsScrollRenderController extends Disposable implements IRenderController {
+export class SheetsScrollRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
@@ -57,8 +56,23 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
     }
 
     scrollToRange(range: IRange): boolean {
-        const { startRow, startColumn } = range;
-        return this._scrollToCell(startRow, startColumn);
+        let { endRow, endColumn, startColumn, startRow } = range;
+        const bounding = this._getViewportBounding();
+        if (range.rangeType === RANGE_TYPE.ROW) {
+            startColumn = 0;
+            endColumn = 0;
+        } else if (range.rangeType === RANGE_TYPE.COLUMN) {
+            startRow = 0;
+            endRow = 0;
+        }
+
+        if (bounding) {
+            const row = bounding.startRow > endRow ? startRow : endRow;
+            const col = bounding.startColumn > endColumn ? startColumn : endColumn;
+            return this._scrollToCell(row, col);
+        } else {
+            return this._scrollToCell(startRow, startColumn);
+        }
     }
 
     private _init() {
@@ -260,27 +274,20 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
     }
 
     private _initSkeletonListener() {
-        this.disposeWithMe(toDisposable(
-            this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-                if (param == null) {
-                    return;
-                }
+        this.disposeWithMe(toDisposable(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+            if (param == null) {
+                return;
+            }
 
-                const { unitId, sheetId } = param;
-                const currentRender = this._renderManagerService.getRenderById(unitId);
+            const { unitId } = this._context;
+            const { sheetId } = param;
 
-                if (currentRender == null) {
-                    return;
-                }
-
-                this._updateSceneSize(param);
-
-                this._scrollManagerService.setCurrentScroll({
-                    unitId,
-                    sheetId,
-                });
-            })
-        ));
+            this._updateSceneSize(param);
+            this._scrollManagerService.setCurrentScroll({
+                unitId,
+                sheetId,
+            });
+        })));
     }
 
     private _updateSceneSize(param: ISheetSkeletonManagerParam) {
@@ -288,7 +295,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderC
             return;
         }
 
-        const { skeleton, unitId } = param;
+        const { unitId } = this._context;
+        const { skeleton } = param;
         const scene = this._renderManagerService.getRenderById(unitId)?.scene;
 
         if (skeleton == null || scene == null) {

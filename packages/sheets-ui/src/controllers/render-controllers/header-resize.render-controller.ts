@@ -24,7 +24,7 @@ import {
     InterceptorManager,
     toDisposable,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import { CURSOR_TYPE, DeviceInputEventType, Rect, Vector2 } from '@univerjs/engine-render';
 import type {
     IDeltaColumnWidthCommandParams,
@@ -63,7 +63,7 @@ enum HEADER_RESIZE_TYPE {
 
 export const HEADER_RESIZE_PERMISSION_CHECK = createInterceptorKey<boolean, { row?: number; col?: number }>('headerResizePermissionCheck');
 
-export class HeaderResizeRenderController extends Disposable implements IRenderController {
+export class HeaderResizeRenderController extends Disposable implements IRenderModule {
     private _currentRow: number = 0;
 
     private _currentColumn: number = 0;

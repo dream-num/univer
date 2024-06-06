@@ -17,5 +17,4 @@
 export { WorksheetPermissionService } from './worksheet-permission.service';
 export { WorksheetProtectionRuleModel } from './worksheet-permission-rule.model';
 export { WorksheetProtectionPointModel } from './worksheet-permission-point.model';
-export { WorksheetProtectionRenderService } from './worksheet-permission-render.service';
 

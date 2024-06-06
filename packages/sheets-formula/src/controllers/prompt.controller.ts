@@ -164,7 +164,6 @@ export class PromptController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(ISelectionRenderService) private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
@@ -248,8 +247,7 @@ export class PromptController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._textSelectionManagerService.textSelection$.subscribe((params) => {
-                    if (params?.unitId == null
-                    ) {
+                    if (params?.unitId == null) {
                         return;
                     }
 
@@ -1138,22 +1136,13 @@ export class PromptController extends Disposable {
     }
 
     private _getCurrentUnitIdAndSheetId() {
-        const current = this._sheetSkeletonManagerService.getCurrent();
-
-        if (current == null) {
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-            const worksheet = workbook.getActiveSheet();
-            return {
-                unitId: workbook.getUnitId(),
-                sheetId: worksheet.getSheetId(),
-            };
-        }
-
-        const { unitId, sheetId, skeleton } = current;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const worksheet = workbook.getActiveSheet();
+        const skeleton = this._renderManagerService.getRenderById(workbook.getUnitId())?.with(SheetSkeletonManagerService)?.getCurrentSkeleton();
 
         return {
-            unitId,
-            sheetId,
+            unitId: workbook.getUnitId(),
+            sheetId: worksheet.getSheetId(),
             skeleton,
         };
     }
@@ -1660,7 +1649,7 @@ export class PromptController extends Disposable {
 
         this._syncToEditor(sequenceNodes, node.endIndex + 1);
 
-        controlSelection.update(toRange, undefined, undefined, undefined, this._selectionRenderService.convertCellRangeToInfo(primary));
+        controlSelection.update(toRange, undefined, undefined, undefined, this._selectionRenderService.attachPrimaryWithCoord(primary));
     }
 
     private _refreshFormulaAndCellEditor(unitIds: string[]) {

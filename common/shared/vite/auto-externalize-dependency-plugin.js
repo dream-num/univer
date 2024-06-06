@@ -138,6 +138,9 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
 
             Array.from(externals)
                 .sort()
+                .filter((ext) => {
+                    return !ext.endsWith('.less');
+                })
                 .forEach((ext) => {
                     const { version, name, optional } = externalMap[ext] ?? {};
 

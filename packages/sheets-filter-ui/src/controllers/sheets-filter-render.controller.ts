@@ -16,13 +16,13 @@
 
 import type { IRange, Workbook } from '@univerjs/core';
 import { CommandType, fromCallback, ICommandService, RxDisposable, ThemeService } from '@univerjs/core';
-import type { IRenderContext, IRenderController, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import type { FilterModel } from '@univerjs/sheets-filter';
 import { FILTER_MUTATIONS, ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
-import { getCoordByCell, ISelectionRenderService, SelectionShape, SheetRenderController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { getCoordByCell, ISelectionRenderService, SelectionShape, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -42,7 +42,7 @@ interface ISheetsFilterRenderParams {
     skeleton: SpreadsheetSkeleton;
 }
 
-export class SheetsFilterRenderController extends RxDisposable implements IRenderController {
+export class SheetsFilterRenderController extends RxDisposable implements IRenderModule {
     private _filterRangeShape: SelectionShape | null = null;
     private _buttonRenderDisposable: IDisposable | null = null;
     private _filterButtonShapes: SheetsFilterButtonShape[] = [];
@@ -54,7 +54,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         @Inject(SheetsFilterService) private readonly _sheetsFilterService: SheetsFilterService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetRenderController) private _sheetRenderController: SheetRenderController,
+        @Inject(SheetsRenderService) private _sheetsRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
@@ -66,7 +66,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
             SetSheetsFilterCriteriaMutation,
             RemoveSheetsFilterMutation,
             ReCalcSheetsFilterMutation,
-        ].forEach((m) => this.disposeWithMe(this._sheetRenderController.registerSkeletonChangingMutations(m.id)));
+        ].forEach((m) => this.disposeWithMe(this._sheetsRenderService.registerSkeletonChangingMutations(m.id)));
 
         this._initRenderer();
     }
@@ -82,9 +82,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                 switchMap(([_, skeletonParams]) => {
                     if (!skeletonParams) return of(null);
 
-                    const { unitId } = skeletonParams;
-
-                    const workbook = this._context.unit;
+                    const { unit: workbook, unitId } = this._context;
                     const worksheetId = workbook.getActiveSheet().getSheetId();
                     const filterModel = this._sheetsFilterService.getFilterModel(unitId, worksheetId) ?? undefined;
                     const getParams = (): ISheetsFilterRenderParams => ({
@@ -128,7 +126,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         }
 
         const { scene } = renderer;
-        const { rangeWithCoord, style } = this._selectionRenderService.convertSelectionToCoord({
+        const { rangeWithCoord, style } = this._selectionRenderService.attachSelectionWithCoord({
             range,
             primary: null,
             style: null,
@@ -181,6 +179,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                 top: iconStartY,
                 height: FILTER_ICON_SIZE,
                 width: FILTER_ICON_SIZE,
+                zIndex: SHEETS_FILTER_BUTTON_Z_INDEX,
                 cellHeight,
                 cellWidth,
                 filterParams: { unitId, subUnitId: worksheetId, col, hasCriteria },
@@ -190,7 +189,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
             this._filterButtonShapes.push(buttonShape);
         }
 
-        scene.addObjects(this._filterButtonShapes, SHEETS_FILTER_BUTTON_Z_INDEX);
+        scene.addObjects(this._filterButtonShapes);
         scene.makeDirty();
     }
 
@@ -213,6 +212,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                     },
                 });
             },
+            priority: 10,
         });
     }
 

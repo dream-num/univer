@@ -101,8 +101,33 @@ export function transformToValue(array: Nullable<BaseValueObject>[][] = []) {
 }
 
 export class ArrayValueObject extends BaseValueObject {
+    /**
+     * Create an array value object based on the string or IArrayValueObject data.
+     * @param rawValue
+     * @returns
+     */
     static create(rawValue: string | IArrayValueObject) {
         return new ArrayValueObject(rawValue);
+    }
+
+    /**
+     * Create an array value object based on the array data.
+     * @param array
+     * @returns
+     */
+    static createByArray(array: Array<Array<number | string | boolean | null>>) {
+        const calculateValueList = transformToValueObject(array);
+        const arrayValueObjectData: IArrayValueObject = {
+            calculateValueList,
+            rowCount: array.length,
+            columnCount: array[0].length || 0,
+            unitId: '',
+            sheetId: '',
+            row: -1,
+            column: -1,
+        };
+
+        return new ArrayValueObject(arrayValueObjectData);
     }
 
     private _values: Nullable<BaseValueObject>[][] = [];

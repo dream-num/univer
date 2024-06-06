@@ -112,7 +112,6 @@ export class Layer extends Disposable {
         this._objects.push(o);
         this.scene.setObjectBehavior(o);
         this._layerBehavior(o);
-        this.scene.applyTransformer(o);
 
         return this;
     }

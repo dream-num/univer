@@ -24,8 +24,11 @@ import {
     SetWorksheetHideCommand,
     SetWorksheetHideMutation,
     SetWorksheetShowCommand,
-    WorkbookPermissionService,
-    WorksheetProtectionRuleModel,
+    WorkbookCreateSheetPermission,
+    WorkbookDeleteSheetPermission,
+    WorkbookEditablePermission,
+    WorkbookHideSheetPermission,
+    WorkbookRenameSheetPermission,
 } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { MenuItemType } from '@univerjs/ui';
@@ -42,10 +45,6 @@ import { getWorkbookPermissionDisable$ } from './menu-util';
 export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
-    const workbookPermissionService = accessor.get(WorkbookPermissionService);
-    const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-    const unitId = workbook.getUnitId();
     const defaultDisable$ = new Observable<boolean>((subscriber) => {
         const disposable = commandService.onCommandExecuted((c) => {
             const id = c.id;
@@ -66,7 +65,7 @@ export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         subscriber.next(false);
         return disposable.dispose;
     });
-    const permissionDisable$ = getWorkbookPermissionDisable$(accessor);
+    const permissionDisable$ = getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookDeleteSheetPermission]);
 
     return {
         id: RemoveSheetConfirmCommand.id,
@@ -87,7 +86,7 @@ export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.copy',
-        disabled$: getWorkbookPermissionDisable$(accessor),
+        disabled$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookCreateSheetPermission]),
     };
 }
 
@@ -97,7 +96,7 @@ export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.rename',
-        disabled$: getWorkbookPermissionDisable$(accessor),
+        disabled$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookRenameSheetPermission]),
     };
 }
 
@@ -115,7 +114,7 @@ export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelec
                 },
             },
         ],
-        hidden$: getWorkbookPermissionDisable$(accessor),
+        hidden$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission]),
     };
 }
 
@@ -148,7 +147,7 @@ export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             subscriber.next(false);
             return disposable.dispose;
         }).pipe(
-            combineLatestWith(getWorkbookPermissionDisable$(accessor)),
+            combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookHideSheetPermission])),
             map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled)
         ),
     };
@@ -182,7 +181,7 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',
         disabled$: defaultDisable$.pipe(
-            combineLatestWith(getWorkbookPermissionDisable$(accessor)),
+            combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookHideSheetPermission])),
             map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled)
         ),
         selections: new Observable((subscriber) => {
@@ -229,7 +228,7 @@ export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             subscriber.next(false);
             return disposable.dispose;
         }).pipe(
-            combineLatestWith(getWorkbookPermissionDisable$(accessor)),
+            combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission])),
             map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled
             )),
     };

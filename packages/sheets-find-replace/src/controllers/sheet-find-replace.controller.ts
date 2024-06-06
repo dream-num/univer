@@ -14,31 +14,28 @@
  * limitations under the License.
  */
 
-import { ColorKit, CommandType, createInterceptorKey, Disposable, EDITOR_ACTIVATED, fromCallback, groupBy, ICommandService, IContextService, InterceptorManager, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, replaceInDocumentBody, rotate, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
-import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { ColorKit, CommandType, Disposable, EDITOR_ACTIVATED, fromCallback, groupBy, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, replaceInDocumentBody, rotate, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
+import type { ICellData, ICellDataForSheetInterceptor, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
 import type { IFindComplete, IFindMatch, IFindMoveParams, IFindQuery, IFindReplaceProvider, IReplaceAllResult } from '@univerjs/find-replace';
 import { FindBy, FindDirection, FindModel, FindReplaceController, FindScope, IFindReplaceService } from '@univerjs/find-replace';
-import type { ISelectionWithStyle, ISetRangeValuesCommandParams, ISetSelectionsOperationParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { ICellPermission, ISelectionWithStyle, ISetRangeValuesCommandParams, ISetSelectionsOperationParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { SelectionManagerService, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import type { IScrollToCellCommandParams } from '@univerjs/sheets-ui';
 import { getCoordByCell, getSheetObject, ScrollToCellCommand, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { type IDisposable, Inject, Injector } from '@wendellhu/redi';
 import { debounceTime, filter, merge, skip, Subject, throttleTime } from 'rxjs';
 
+import { UnitAction } from '@univerjs/protocol';
 import type { ISheetFindReplaceHighlightShapeProps } from '../views/shapes/find-replace-highlight.shape';
 import { SheetFindReplaceHighlightShape } from '../views/shapes/find-replace-highlight.shape';
 import type { ISheetReplaceCommandParams, ISheetReplacement } from '../commands/commands/sheet-replace.command';
 import { SheetReplaceCommand } from '../commands/commands/sheet-replace.command';
 import { isBeforePositionWithColumnPriority, isBeforePositionWithRowPriority, isBehindPositionWithColumnPriority, isBehindPositionWithRowPriority, isSamePosition, isSelectionSingleCell } from './utils';
 
-export const FIND_PERMISSION_CHECK = createInterceptorKey<boolean, { row: number; col: number; unitId: string; subUnitId: string }>('findPermissionCheck');
-
 @OnLifecycle(LifecycleStages.Steady, SheetsFindReplaceController)
 export class SheetsFindReplaceController extends Disposable implements IDisposable {
     private _provider!: SheetsFindReplaceProvider;
-
-    public interceptor = new InterceptorManager({ FIND_PERMISSION_CHECK });
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -123,14 +120,13 @@ export class SheetFindModel extends FindModel {
 
     constructor(
         private readonly _workbook: Workbook,
+        private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(SheetsFindReplaceController) private readonly _findReplaceController: SheetsFindReplaceController
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
     }
@@ -371,7 +367,7 @@ export class SheetFindModel extends FindModel {
         for (const value of iter) {
             const { row, col, colSpan, rowSpan, value: cellData } = value;
 
-            const permissionCheck = this._findReplaceController.interceptor.fetchThroughInterceptors(FIND_PERMISSION_CHECK)(false, { row, col, unitId, subUnitId });
+            const permissionCheck = this._getFindReplacePermissionCheck({ row, col, unitId, subUnitId });
 
             if (!permissionCheck) {
                 continue;
@@ -509,12 +505,13 @@ export class SheetFindModel extends FindModel {
                 height,
                 evented: false,
                 inHiddenRange,
+                zIndex: FIND_REPLACE_Z_INDEX,
             };
 
             return new SheetFindReplaceHighlightShape(`find-highlight-${index}`, props);
         });
 
-        scene.addObjects(highlightShapes, FIND_REPLACE_Z_INDEX);
+        scene.addObjects(highlightShapes);
         this._highlightShapes = highlightShapes;
 
         scene.makeDirty();
@@ -887,6 +884,21 @@ export class SheetFindModel extends FindModel {
         const newContent = currentContent.v!.toString().replace(new RegExp(escapeRegExp(findString), replaceFlag), replaceString!);
         return { v: newContent };
     }
+
+    private _getFindReplacePermissionCheck(_cellInfo: { row: number; col: number; unitId: string; subUnitId: string }) {
+        const { row, col, subUnitId } = _cellInfo;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return false;
+        }
+        const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
+        const viewPermission = permission?.[UnitAction.View];
+        if (viewPermission === false) {
+            return false;
+        }
+        return true;
+    }
 }
 
 function escapeRegExp(text: string) {
@@ -905,6 +917,7 @@ class SheetsFindReplaceProvider extends Disposable implements IFindReplaceProvid
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -913,11 +926,13 @@ class SheetsFindReplaceProvider extends Disposable implements IFindReplaceProvid
     async find(query: IFindQuery): Promise<SheetFindModel[]> {
         this._terminate();
 
-        // NOTE: If there are multi Workbook instances then we should create `SheetFindModel` for each of them.
+        // TODO: If there are multi Workbook instances then we should create `SheetFindModel` for each of them.
         // But we don't need to implement that in the foreseeable future.
         const currentWorkbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const skeletonManagerService = this._renderManagerService.getRenderById(currentWorkbook.getUnitId())!.with(SheetSkeletonManagerService);
+
         if (currentWorkbook) {
-            const sheetFind = this._injector.createInstance(SheetFindModel, currentWorkbook);
+            const sheetFind = this._injector.createInstance(SheetFindModel, currentWorkbook, skeletonManagerService);
             this._findModelsByUnitId.set(currentWorkbook.getUnitId(), sheetFind);
             const parsedQuery = this._preprocessQuery(query);
             sheetFind.start(parsedQuery);

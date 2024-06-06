@@ -59,7 +59,7 @@ describe('test "HTTPThresholdInterceptor"', () => {
     it('should control parallel requests', () => {
         httpService.registerHTTPInterceptor({
             priority: 20,
-            interceptor: injector.invoke(ThresholdInterceptorFactory),
+            interceptor: ThresholdInterceptorFactory(),
         });
 
         const _request1 = httpService.get('http://example.com');
@@ -85,7 +85,7 @@ describe('test "HTTPThresholdInterceptor"', () => {
     it('should support threshold params', () => {
         httpService.registerHTTPInterceptor({
             priority: 20,
-            interceptor: injector.invoke(ThresholdInterceptorFactory, { maxParallel: 2 }),
+            interceptor: ThresholdInterceptorFactory({ maxParallel: 2 }),
         });
 
         const _request1 = httpService.get('http://example.com');

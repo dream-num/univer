@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IParagraph, ITextRun, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, IParagraph, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
 import {
+    BooleanNumber,
+    createInterceptorKey,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
@@ -24,6 +26,7 @@ import {
     HorizontalAlign,
     ICommandService,
     IContextService,
+    InterceptorManager,
     IUndoRedoService,
     IUniverInstanceService,
     LifecycleStages,
@@ -54,9 +57,13 @@ import { IFormulaEditorManagerService } from '../../services/editor/formula-edit
 import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
-@OnLifecycle(LifecycleStages.Steady, FormulaEditorController)
+export const FORMULA_EDIT_PERMISSION_CHECK = createInterceptorKey<boolean, { row: number; col: number }>('formulaEditPermissionCheck');
+
+@OnLifecycle(LifecycleStages.Rendered, FormulaEditorController)
 export class FormulaEditorController extends RxDisposable {
     private _loadedMap = new WeakSet<RenderComponentType>();
+
+    public interceptor = new InterceptorManager({ FORMULA_EDIT_PERMISSION_CHECK });
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -250,6 +257,12 @@ export class FormulaEditorController extends RxDisposable {
                 return;
             }
 
+            const permissionCheck = this.interceptor.fetchThroughInterceptors(FORMULA_EDIT_PERMISSION_CHECK)(null, { row: editCellState.row, col: editCellState.column });
+            if (!permissionCheck) {
+                this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, '', [{ startIndex: 0 }], []);
+                return;
+            }
+
             this._editorSyncHandler(editCellState);
         });
 
@@ -268,12 +281,13 @@ export class FormulaEditorController extends RxDisposable {
         });
     }
 
+    // Sync cell content to formula editor bar when sheet selection changed or visible changed.
     private _editorSyncHandler(param: IEditorBridgeServiceParam) {
         const body = param.documentLayoutObject.documentModel?.getBody();
 
         let dataStream = body?.dataStream;
         let paragraphs = body?.paragraphs;
-        let textRuns: ITextRun[] = [];
+        let textRuns = body?.textRuns;
 
         if (dataStream == null || paragraphs == null) {
             return;
@@ -289,8 +303,7 @@ export class FormulaEditorController extends RxDisposable {
                     startIndex: 0,
                 },
             ];
-        } else if (param.isInArrayFormulaRange === true) {
-            textRuns = body?.textRuns || [];
+            textRuns = [];
         }
 
         this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns);
@@ -299,37 +312,76 @@ export class FormulaEditorController extends RxDisposable {
         this._autoScroll();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _commandExecutedListener() {
-        const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
-
         const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (updateCommandList.includes(command.id)) {
-                    const params = command.params as IRichTextEditingMutationParams;
-                    const { unitId } = params;
+                if (command.id !== RichTextEditingMutation.id) {
+                    return;
+                }
+                const params = command.params as IRichTextEditingMutationParams;
+                const { unitId, actions } = params;
 
-                    if (INCLUDE_LIST.includes(unitId)) {
-                        // sync cell content to formula editor bar when edit cell editor and vice verse.
-                        const editorDocDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
-                        const dataStream = editorDocDataModel?.getBody()?.dataStream;
-                        const paragraphs = editorDocDataModel?.getBody()?.paragraphs;
+                if (INCLUDE_LIST.includes(unitId)) {
+                    // sync cell content to formula editor bar when edit cell editor and vice verse.
+                    const editorDocDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+                    const dataStream = editorDocDataModel?.getBody()?.dataStream;
+                    const paragraphs = editorDocDataModel?.getBody()?.paragraphs;
+                    const textRuns = editorDocDataModel?.getBody()?.textRuns;
 
-                        const syncId =
-                            unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
-                                ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
-                                : DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+                    const syncId =
+                        unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+                            ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
+                            : DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
 
-                        if (dataStream == null || paragraphs == null) {
-                            return;
-                        }
-
-                        this._syncContentAndRender(syncId, dataStream, paragraphs);
-
-                        // handle weather need to show scroll bar.
-                        this._autoScroll();
+                    if (dataStream == null || paragraphs == null) {
+                        return;
                     }
+
+                    if (syncId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                        this._checkAndSetRenderStyleConfig(editorDocDataModel!);
+                        this._syncActionsAndRender(syncId, actions);
+                    } else {
+                        this._syncContentAndRender(syncId, dataStream, paragraphs, textRuns);
+                    }
+
+                    // handle weather need to show scroll bar.
+                    this._autoScroll();
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== SetEditorResizeOperation.id) {
+                    return;
+                }
+
+                const params = command.params as IRichTextEditingMutationParams;
+                const { unitId } = params;
+
+                if (INCLUDE_LIST.includes(unitId)) {
+                    // sync cell content to formula editor bar when edit cell editor and vice verse.
+                    const editorDocDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+                    const dataStream = editorDocDataModel?.getBody()?.dataStream;
+                    const paragraphs = editorDocDataModel?.getBody()?.paragraphs;
+                    const textRuns = editorDocDataModel?.getBody()?.textRuns;
+
+                    const syncId =
+                        unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
+                            ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
+                            : DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+
+                    if (dataStream == null || paragraphs == null) {
+                        return;
+                    }
+
+                    this._syncContentAndRender(syncId, dataStream, paragraphs, textRuns);
+
+                    // handle weather need to show scroll bar.
+                    this._autoScroll();
                 }
             })
         );
@@ -377,6 +429,43 @@ export class FormulaEditorController extends RxDisposable {
         );
     }
 
+    // Sync actions between cell editor and formula editor, and make `dataStream` and `paragraph` is the same.
+    private _syncActionsAndRender(
+        unitId: string,
+        actions: JSONXActions
+    ) {
+        const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
+
+        const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
+        const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+        const docViewModel = this._docViewModelManagerService.getViewModel(unitId);
+
+        if (docDataModel == null || docViewModel == null || docsSkeletonObject == null) {
+            return;
+        }
+
+        // Update document data model.
+        docDataModel.apply(actions);
+
+        this._checkAndSetRenderStyleConfig(docDataModel);
+
+        docViewModel.reset(docDataModel);
+
+        const { skeleton } = docsSkeletonObject;
+
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+
+        if (currentRender == null) {
+            return;
+        }
+
+        skeleton.calculate();
+
+        if (INCLUDE_LIST.includes(unitId)) {
+            currentRender.mainComponent?.makeDirty();
+        }
+    }
+
     private _syncContentAndRender(
         unitId: string,
         dataStream: string,
@@ -396,14 +485,11 @@ export class FormulaEditorController extends RxDisposable {
         docDataModel.getBody()!.dataStream = dataStream;
         docDataModel.getBody()!.paragraphs = this._clearParagraph(paragraphs);
 
-        // Need to empty textRuns(previous formula highlight) every time when sync content(change selection or edit cell or edit formula bar).
-        if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-            docDataModel.getBody()!.textRuns = [];
-        }
-
         if (textRuns.length > 0) {
             docDataModel.getBody()!.textRuns = textRuns;
         }
+
+        this._checkAndSetRenderStyleConfig(docDataModel);
 
         docViewModel.reset(docDataModel);
 
@@ -419,6 +505,28 @@ export class FormulaEditorController extends RxDisposable {
 
         if (INCLUDE_LIST.includes(unitId)) {
             currentRender.mainComponent?.makeDirty();
+        }
+    }
+
+    private _checkAndSetRenderStyleConfig(documentDataModel: DocumentDataModel) {
+        const snapshot = documentDataModel.getSnapshot();
+        const { body } = snapshot;
+
+        if (snapshot.id !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            return;
+        }
+
+        let renderConfig = snapshot.documentStyle.renderConfig;
+
+        if (renderConfig == null) {
+            renderConfig = {};
+            snapshot.documentStyle.renderConfig = renderConfig;
+        }
+
+        if ((body?.dataStream ?? '').startsWith('=')) {
+            renderConfig.isRenderStyle = BooleanNumber.TRUE;
+        } else {
+            renderConfig.isRenderStyle = BooleanNumber.FALSE;
         }
     }
 

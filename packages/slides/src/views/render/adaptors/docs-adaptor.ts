@@ -22,9 +22,9 @@ import {
     DocumentSkeleton,
     DocumentViewModel,
     EVENT_TYPE,
+    Image,
     Liquid,
     PageLayoutType,
-    Picture,
     Rect,
     Scene,
     SceneViewer,
@@ -106,7 +106,6 @@ export class DocsAdaptor extends ObjectAdaptor {
             skewY,
             flipX,
             flipY,
-            isTransformer: true,
         });
         const scene = new Scene(DOCS_VIEW_KEY.SCENE + id, sv);
 
@@ -205,19 +204,18 @@ export class DocsAdaptor extends ObjectAdaptor {
             skeDrawings.forEach((drawing: IDocumentSkeletonDrawing) => {
                 const { aLeft, aTop, height, width, drawingOrigin } = drawing;
 
-                const { objectTransform } = drawingOrigin;
+                const { docTransform } = drawingOrigin;
 
-                const rect = new Picture(drawing.objectId, {
-                    // url: objectTransform.imageProperties?.contentUrl || '',
+                const rect = new Image(drawing.drawingId, {
+                    // url: docTransform.imageProperties?.contentUrl || '',
                     left: aLeft + docsLeft + this._liquid.x,
                     top: aTop + docsTop + this._liquid.y,
                     width,
                     height,
                     zIndex: 11,
-                    isTransformer: true,
                 });
 
-                pageMarginCache.set(drawing.objectId, {
+                pageMarginCache.set(drawing.drawingId, {
                     marginLeft: this._liquid.x,
                     marginTop: this._liquid.y,
                 });
@@ -232,8 +230,12 @@ export class DocsAdaptor extends ObjectAdaptor {
                 documents.pageMarginTop
             );
         }
-        scene.openTransformer();
+
         scene.addObjects(objectList);
+        objectList.forEach((object) => {
+            scene.attachTransformerTo(object);
+        });
+
         scene.getTransformer()?.onChangingObservable.add((state) => {
             const { objects } = state;
 
@@ -258,8 +260,6 @@ export class DocsAdaptor extends ObjectAdaptor {
 
             documentSkeleton?.calculate();
         });
-        scene.closeTransformer();
-
         this._calculatePagePosition(documents, scene, viewMain);
 
         return sv;

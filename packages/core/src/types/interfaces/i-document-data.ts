@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { ISize } from '../../services/floating-object/floating-object-interfaces';
+import type { Nullable } from '../../common/type-util';
+import type { IAbsoluteTransform, ISize } from '../../shared/shape';
 import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
 import type { IExtraModelData } from './i-extra-model-data';
 import type { IColorStyle, IStyleBase } from './i-style-data';
@@ -43,6 +44,7 @@ export interface IReferenceSource {
     headers?: IHeaders;
     lists?: ILists;
     drawings?: IDrawings;
+    drawingsOrder?: string[];
 }
 
 export interface IDocumentSettings {
@@ -74,7 +76,7 @@ export interface ILists {
  * Set of Drawings
  */
 export interface IDrawings {
-    [objectId: string]: IDrawing;
+    [drawingId: string]: IDocDrawingBase;
 }
 
 /**
@@ -376,6 +378,7 @@ export interface IDocumentRenderConfig {
     background?: IColorStyle; // background
     wrapStrategy?: WrapStrategy; // wrap to the next line, for sheet cell
     cellValueType?: CellValueType; // sheet cell type, In a spreadsheet cell, without any alignment settings applied, text should be left-aligned, numbers should be right-aligned, and Boolean values should be center-aligned.
+    isRenderStyle?: BooleanNumber; // Whether to render the style(textRuns), used in formula bar editor. the default value is TRUE.
 }
 
 export interface ISectionBreakBase {
@@ -436,7 +439,7 @@ export interface IParagraph {
     startIndex: number;
     paragraphStyle?: IParagraphStyle; // paragraphStyle
     bullet?: IBullet; // bullet
-    // dIds?: string[]; // drawingIds objectId
+    // dIds?: string[]; // drawingIds drawingId
 }
 
 // export interface IElementsOrder {
@@ -507,8 +510,8 @@ export interface IBullet {
  * 20.4.2.19 wrapTight (Tight Wrapping)
  * 20.4.2.20 wrapTopAndBottom (Top and Bottom Wrapping)
  */
-export interface IDrawing {
-    objectId: string;
+export interface IDocDrawingBase extends IDrawingParam {
+    drawingId: string;
 
     title: string;
 
@@ -516,7 +519,7 @@ export interface IDrawing {
 
     // embeddedObjectBorder?: IDocsBorder;
 
-    objectTransform: IObjectTransform;
+    docTransform: IDocDrawingPosition;
 
     layoutType: PositionedObjectLayoutType;
 
@@ -556,7 +559,7 @@ export enum PositionedObjectLayoutType {
 /**
  * Properties of a draw object
  */
-export interface IObjectTransform {
+export interface IDocDrawingPosition {
     size: ISize;
     positionH: IObjectPositionH;
     positionV: IObjectPositionV;
@@ -879,3 +882,65 @@ export enum PageOrientType {
     PORTRAIT,
     LANDSCAPE,
 }
+
+// #region - tech dept
+
+// TODO@Jocs: these types are here because of drawing coupled into the core of the document's model, which
+// is an anti-pattern. After fixing the problem, these types should be removed.
+
+/** @deprecated */
+export enum ArrangeTypeEnum {
+    forward,
+    backward,
+    front,
+    back,
+}
+
+/** @deprecated */
+export enum DrawingTypeEnum {
+    UNRECOGNIZED = -1,
+    DRAWING_IMAGE = 0,
+    DRAWING_SHAPE = 1,
+    DRAWING_CHART = 2,
+    DRAWING_TABLE = 3,
+    DRAWING_SMART_ART = 4,
+    DRAWING_VIDEO = 5,
+    DRAWING_GROUP = 6,
+    DRAWING_UNIT = 7,
+    DRAWING_DOM = 8,
+}
+
+/** @deprecated */
+export type DrawingType = DrawingTypeEnum | number;
+
+/** @deprecated */
+export interface IDrawingSpace {
+    unitId: string;
+    subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
+}
+
+/** @deprecated */
+export interface IDrawingSearch extends IDrawingSpace {
+    drawingId: string;
+}
+
+/** @deprecated */
+export interface IRotationSkewFlipTransform {
+    angle?: number;
+    skewX?: number;
+    skewY?: number;
+    flipX?: boolean;
+    flipY?: boolean;
+}
+
+/** @deprecated */
+export interface ITransformState extends IAbsoluteTransform, IRotationSkewFlipTransform {}
+
+/** @deprecated */
+export interface IDrawingParam extends IDrawingSearch {
+    drawingType: DrawingType;
+    transform?: Nullable<ITransformState>;
+    groupId?: string;
+}
+
+// #endregion

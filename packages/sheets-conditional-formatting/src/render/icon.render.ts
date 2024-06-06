@@ -23,7 +23,7 @@ import { EMPTY_ICON_TYPE, iconMap } from '../models/icon-map';
 import type { IIconSetCellData } from './type';
 
 export const IconUKey = 'sheet-conditional-rule-icon';
-const EXTENSION_Z_INDEX = 34;
+const EXTENSION_Z_INDEX = 35;
 export const DEFAULT_WIDTH = 15;
 export const DEFAULT_PADDING = 2;
 
@@ -59,6 +59,10 @@ export class ConditionalFormattingIcon extends SheetExtension {
             const cellData = worksheet.getCell(row, col) as IIconSetCellData;
             if (cellData?.iconSet) {
                 if (!worksheet.getColVisible(col) || !worksheet.getRowRawVisible(row)) {
+                    return;
+                }
+
+                if (cellData.iconSet?.isSkip) {
                     return;
                 }
 

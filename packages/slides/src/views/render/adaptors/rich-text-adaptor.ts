@@ -72,7 +72,6 @@ export class RichTextAdaptor extends ObjectAdaptor {
             skewY,
             flipX,
             flipY,
-            isTransformer: true,
             forceRender: true,
         };
         let isNotNull = false;

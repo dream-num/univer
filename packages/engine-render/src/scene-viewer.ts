@@ -130,8 +130,7 @@ export class SceneViewer extends BaseObject {
             return;
         }
 
-        const trans = this.transform.clone().invert();
-        const tCoord = trans.applyPoint(coord);
+        const tCoord = this.transform.invert().applyPoint(coord);
 
         return this._activeSubScene?.pick(tCoord);
     }

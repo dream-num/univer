@@ -31,7 +31,7 @@ import {
     SetArrayFormulaDataMutation,
     SetFormulaCalculationResultMutation,
 } from '@univerjs/engine-formula';
-import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import {
@@ -42,7 +42,7 @@ import {
 } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 
-export class FormulaEditorShowController extends Disposable implements IRenderController {
+export class FormulaEditorShowController extends Disposable implements IRenderModule {
     private _previousShape: Nullable<SelectionShape>;
 
     constructor(
@@ -186,6 +186,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderCo
 
                     return next(cell);
                 },
+                priority: 10,
             })
         );
     }
@@ -216,7 +217,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderCo
         };
 
         const { scene } = this._renderManagerService.getRenderById(unitId) || {};
-        const { rangeWithCoord, primaryWithCoord } = this._selectionRenderService.convertSelectionToCoord({
+        const { rangeWithCoord, primaryWithCoord } = this._selectionRenderService.attachSelectionWithCoord({
             range: arrayRange,
             primary: null,
             style,

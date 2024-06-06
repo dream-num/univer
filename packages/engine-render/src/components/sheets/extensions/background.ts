@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale } from '@univerjs/core';
+import type { ICellData, IRange, IScale } from '@univerjs/core';
 
 import { fixLineWidthByScale, getColor, inViewRanges, mergeRangeIfIntersects } from '../../../basics/tools';
 import type { UniverRenderingContext } from '../../../context';
@@ -22,13 +22,14 @@ import type { IDrawInfo } from '../../extension';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import type { Spreadsheet } from '../spreadsheet';
+import type { ISheetRenderExtension } from '../interfaces';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 
 /**
- * in prev version background ext is higer than font ext. now turing back lower than font ext.
- * font ext zindex is 30.
+ * in prev version background ext is higher than font ext. now turing back lower than font ext.
+ * font ext z-index is 30.
  */
 const DOC_EXTENSION_Z_INDEX = 21;
 const PRINTING_Z_INDEX = 21;
@@ -44,6 +45,7 @@ export class Background extends SheetExtension {
         return (this.parent as Spreadsheet)?.isPrinting ? this.PRINTING_Z_INDEX : this.Z_INDEX;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     override draw(
         ctx: UniverRenderingContext,
         parentScale: IScale,
@@ -54,6 +56,11 @@ export class Background extends SheetExtension {
         const { stylesCache } = spreadsheetSkeleton;
         const { background, backgroundPositions } = stylesCache;
         if (!spreadsheetSkeleton) {
+            return;
+        }
+
+        const { worksheet } = spreadsheetSkeleton;
+        if (!worksheet) {
             return;
         }
 
@@ -79,6 +86,12 @@ export class Background extends SheetExtension {
                 const backgroundPaths = new Path2D();
                 backgroundCache.forValue((rowIndex, columnIndex) => {
                     if (!checkOutOfViewBound && !inViewRanges(viewRanges, rowIndex, columnIndex)) {
+                        return true;
+                    }
+
+                    const cellData = worksheet.getCell(rowIndex, columnIndex) as ICellData & ISheetRenderExtension;
+
+                    if (cellData.backgroundRenderExtension?.isSkip) {
                         return true;
                     }
 

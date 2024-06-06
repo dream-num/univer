@@ -18,7 +18,13 @@ import type { Ctor, Injector } from '@wendellhu/redi';
 import { Disposable } from '../../shared';
 import { UniverInstanceType } from '../../common/unit';
 
-export type PluginCtor<T extends Plugin> = Ctor<T> & { type: UniverInstanceType; pluginName: string };
+export const DependentOnSymbol = Symbol('DependentOn');
+
+export type PluginCtor<T extends Plugin = Plugin> = Ctor<T> & {
+    type: UniverInstanceType;
+    pluginName: string;
+    [DependentOnSymbol]?: PluginCtor[];
+};
 
 /**
  * Plug-in base class, all plug-ins must inherit from this base class. Provide basic methods.
@@ -30,7 +36,8 @@ export abstract class Plugin extends Disposable {
 
     protected abstract _injector: Injector;
 
-    onStarting(_injector: Injector): void {
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    onStarting(injector: Injector): void {
         // empty
     }
 

@@ -18,7 +18,7 @@ export * from './circle';
 export * from './control';
 export * from './drawing';
 export * from './path';
-export * from './picture';
+export * from './image';
 export * from './rect';
 export * from './regular-polygon';
 export * from './rich-text';

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-zen-editor",
-    "version": "0.1.12",
+    "version": "0.1.13",
     "private": false,
     "description": "Zen Editor plugin for Univer Sheets.",
     "author": "DreamNum <developer@univer.ai>",
@@ -46,8 +46,8 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./locale/*": "./lib/locale/*.json",
-            "./lib/*": "./lib/*"
+            "./lib/*": "./lib/*",
+            "./locale/*": "./lib/locale/*.json"
         }
     },
     "directories": {
@@ -56,10 +56,6 @@
     "files": [
         "lib"
     ],
-    "engines": {
-        "node": ">=16.0.0",
-        "npm": ">=8.0.0"
-    },
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
@@ -80,7 +76,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.52",
+        "@univerjs/icons": "^0.1.56",
         "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {
@@ -95,10 +91,24 @@
         "@wendellhu/redi": "0.15.2",
         "clsx": "^2.1.1",
         "less": "^4.2.0",
-        "react": "18.2.0",
+        "react": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.11",
+        "vite": "^5.2.12",
         "vitest": "^1.6.0"
+    },
+    "univerSpace": {
+        ".": {
+            "import": "./lib/es/index.js",
+            "require": "./lib/cjs/index.js",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./*": {
+            "import": "./lib/es/*",
+            "require": "./lib/cjs/*",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./lib/*": "./lib/*",
+        "./locale/*": "./lib/locale/*.json"
     }
 }

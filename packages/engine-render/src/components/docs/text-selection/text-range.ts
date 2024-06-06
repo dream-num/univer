@@ -15,7 +15,7 @@
  */
 
 import type { ITextRange, Nullable } from '@univerjs/core';
-import { COLORS, Tools } from '@univerjs/core';
+import { BooleanNumber, COLORS, Tools } from '@univerjs/core';
 
 import type { INodePosition } from '../../../basics/interfaces';
 import type { ISuccinctTextRangeParam, ITextSelectionStyle } from '../../../basics/range';
@@ -28,6 +28,7 @@ import { RegularPolygon } from '../../../shape/regular-polygon';
 import type { ThinScene } from '../../../thin-scene';
 import type { DocumentSkeleton } from '../layout/doc-skeleton';
 import type { Documents } from '../document';
+import type { IDocumentSkeletonGlyph } from '../../../basics';
 import {
     compareNodePosition,
     compareNodePositionLogic,
@@ -37,11 +38,9 @@ import {
 } from './convert-cursor';
 
 const TEXT_RANGE_KEY_PREFIX = '__TestSelectionRange__';
-
 const TEXT_ANCHOR_KEY_PREFIX = '__TestSelectionAnchor__';
 
 const ID_LENGTH = 6;
-
 const BLINK_ON = 500;
 const BLINK_OFF = 500;
 
@@ -201,6 +200,53 @@ export class TextRange {
         return compare ? RANGE_DIRECTION.FORWARD : RANGE_DIRECTION.BACKWARD;
     }
 
+    getAbsolutePosition() {
+        const anchor = this.anchorNodePosition;
+        const focus = this.focusNodePosition;
+        if (this._isEmpty()) {
+            return;
+        }
+
+        const documentOffsetConfig = this._document.getOffsetConfig();
+
+        const { docsLeft, docsTop } = documentOffsetConfig;
+
+        const convertor = new NodePositionConvertToCursor(documentOffsetConfig, this._docSkeleton);
+
+        if (this._isCollapsed()) {
+            const { contentBoxPointGroup, cursorList } = convertor.getRangePointData(anchor, anchor);
+
+            this._setCursorList(cursorList);
+            if (contentBoxPointGroup.length === 0) {
+                return;
+            }
+
+            const pos = getAnchorBounding(contentBoxPointGroup);
+
+            return {
+                ...pos,
+                left: pos.left + docsLeft,
+                top: pos.top + docsTop,
+            };
+        }
+
+        const { borderBoxPointGroup, cursorList } = convertor.getRangePointData(anchor, focus);
+
+        this._setCursorList(cursorList);
+
+        if (borderBoxPointGroup.length === 0) {
+            return;
+        }
+
+        const pos = getAnchorBounding(borderBoxPointGroup);
+
+        return {
+            ...pos,
+            left: pos.left + docsLeft,
+            top: pos.top + docsTop,
+        };
+    }
+
     getAnchor() {
         return this._anchorShape;
     }
@@ -274,7 +320,11 @@ export class TextRange {
             const { contentBoxPointGroup, cursorList } = convertor.getRangePointData(anchor, anchor);
 
             this._setCursorList(cursorList);
-            contentBoxPointGroup.length > 0 && this._createOrUpdateAnchor(contentBoxPointGroup, docsLeft, docsTop);
+
+            if (contentBoxPointGroup.length > 0) {
+                const glyphAtCursor = _docSkeleton.findGlyphByPosition(anchor);
+                this._createOrUpdateAnchor(contentBoxPointGroup, docsLeft, docsTop, glyphAtCursor);
+            }
 
             return;
         }
@@ -344,25 +394,43 @@ export class TextRange {
         this._scene.addObject(polygon, TEXT_RANGE_LAYER_INDEX);
     }
 
-    private _createOrUpdateAnchor(pointsGroup: IPoint[][], docsLeft: number, docsTop: number) {
+    private _createOrUpdateAnchor(pointsGroup: IPoint[][], docsLeft: number, docsTop: number, glyph: Nullable<IDocumentSkeletonGlyph>) {
         const bounding = getAnchorBounding(pointsGroup);
-        const { left, top, height } = bounding;
+        const { left: boundingLeft, top: boundingTop, height } = bounding;
+        const ITALIC_DEGREE = 12;
+        let left = boundingLeft + docsLeft;
+        const top = boundingTop + docsTop;
+        const isItalic = glyph?.ts?.it === BooleanNumber.TRUE;
+
+        if (isItalic) {
+            left += height * Math.tan((ITALIC_DEGREE * Math.PI) / 180) / 2;
+        }
 
         if (this._anchorShape) {
-            this._anchorShape.transformByState({ left: left + docsLeft, top: top + docsTop, height });
+            this._anchorShape.transformByState({ left, top, height });
             this._anchorShape.show();
+
+            if (isItalic) {
+                this._anchorShape.skew(-ITALIC_DEGREE, 0);
+            } else {
+                this._anchorShape.skew(0, 0);
+            }
 
             return;
         }
 
         const anchor = new Rect(TEXT_ANCHOR_KEY_PREFIX + Tools.generateRandomId(ID_LENGTH), {
-            left: left + docsLeft,
-            top: top + docsTop,
+            left,
+            top,
             height,
-            strokeWidth: this.style?.strokeWidth || 1,
+            strokeWidth: this.style?.strokeWidth || 1.5,
             stroke: this.style?.strokeActive || getColor(COLORS.black, 1),
             evented: false,
         });
+
+        if (isItalic) {
+            anchor.skew(-ITALIC_DEGREE, 0);
+        }
 
         this._anchorShape = anchor;
 

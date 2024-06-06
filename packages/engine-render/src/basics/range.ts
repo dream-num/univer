@@ -24,7 +24,7 @@ export interface ITextSelectionStyle {
 }
 
 export const NORMAL_TEXT_SELECTION_PLUGIN_STYLE: ITextSelectionStyle = {
-    strokeWidth: 1,
+    strokeWidth: 1.5,
     stroke: 'rgba(0, 0, 0, 0)',
     strokeActive: 'rgba(0, 0, 0, 1)',
     fill: 'rgba(0, 0, 0, 0.2)',

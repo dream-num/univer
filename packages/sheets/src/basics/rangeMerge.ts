@@ -74,8 +74,9 @@ const findMaximalRectangle = (topMatrix: ObjectMatrix<number>) => {
             endColumn: col,
         };
         for (let k = col - 1; k >= 0; k--) {
-            if (!topMatrix.getValue(row, k)) break;
-            else {
+            if (!topMatrix.getValue(row, k)) {
+                break;
+            } else {
                 rows = Math.min(topMatrix.getValue(row, k) || 0, rows);
                 cols++;
                 const area = rows * cols;

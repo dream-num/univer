@@ -21,8 +21,6 @@ import {
     BaselineOffset,
     BooleanNumber,
     CommandType,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -278,19 +276,12 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             return false;
         }
 
-        let documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
         if (!documentDataModel) {
             return false;
         }
 
-        let unitId = documentDataModel.getUnitId();
-
-        // When setting the formula bar style, the effect will be displayed in the cell editor,
-        // and the formula bar only displays plain text.
-        if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-            documentDataModel = univerInstanceService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!;
-            unitId = documentDataModel.getUnitId();
-        }
+        const unitId = documentDataModel.getUnitId();
 
         let formatValue;
 

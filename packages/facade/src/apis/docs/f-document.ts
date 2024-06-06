@@ -43,7 +43,7 @@ export class FDocument {
     }
 
     getSnapshot(): IDocumentData {
-        return this._documentDataModel.getSnapshot();
+        return this._documentDataModel.getSnapshot() as IDocumentData;
     }
 
     undo(): Promise<boolean> {

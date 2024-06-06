@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import { Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { SHEET_NUMFMT_PLUGIN } from './base/const/PLUGIN_NAME';
-import { NumfmtCellContent } from './controllers/numfmt.cell-content.controller';
+import { SheetsNumfmtCellContentController } from './controllers/numfmt.cell-content.controller';
 import { NumfmtController } from './controllers/numfmt.controller';
 import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
 import { NumfmtI18nController } from './controllers/numfmt.i18n.controller';
@@ -27,6 +29,7 @@ import { DefaultSheetNumfmtConfig, NumfmtMenuController } from './controllers/nu
 import { INumfmtController } from './controllers/type';
 import { UserHabitController } from './controllers/user-habit.controller';
 
+@DependentOn(UniverSheetsPlugin, UniverSheetsUIPlugin)
 export class UniverSheetsNumfmtPlugin extends Plugin {
     static override pluginName = SHEET_NUMFMT_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;
@@ -43,7 +46,7 @@ export class UniverSheetsNumfmtPlugin extends Plugin {
         this._injector.add([INumfmtController, { useClass: NumfmtController, lazy: false }]);
         this._injector.add([NumfmtEditorController]);
         this._injector.add([UserHabitController]);
-        this._injector.add([NumfmtCellContent]);
+        this._injector.add([SheetsNumfmtCellContentController]);
         this._injector.add([NumfmtI18nController]);
         this._injector.add(
             [

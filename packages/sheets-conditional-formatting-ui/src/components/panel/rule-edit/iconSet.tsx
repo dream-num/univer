@@ -232,7 +232,6 @@ const IconSetRuleEdit = (props: {
                                     {icon ? <img src={icon} className={styles.icon} /> : <SlashSingle className={styles.icon} />}
                                     <MoreDownSingle />
                                 </div>
-
                             </Dropdown>
 
                         </div>

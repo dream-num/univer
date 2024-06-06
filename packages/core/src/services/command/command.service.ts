@@ -94,7 +94,6 @@ export interface IOperation<P extends object = object, R = boolean> extends ICom
 /**
  * The command info, only a command id and responsible params
  */
-// TODO: change object to serializable interface type
 export interface ICommandInfo<T extends object = object> {
     id: string;
 

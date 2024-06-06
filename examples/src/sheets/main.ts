@@ -18,7 +18,6 @@ import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } 
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
@@ -27,23 +26,22 @@ import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
-import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
-import { UniverSheetsPermissionUIPlugin } from '@univerjs/sheets-permission-ui';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
-
+import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
+import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
+import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
+import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
+import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { FUniver } from '@univerjs/facade';
-import { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { enUS, ruRU, zhCN } from '../locales';
+import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -73,7 +71,9 @@ univer.registerPlugin(UniverUIPlugin, {
 
 univer.registerPlugin(UniverDocsUIPlugin);
 
-univer.registerPlugin(UniverSheetsPlugin);
+univer.registerPlugin(UniverSheetsPlugin, {
+    notExecuteFormula: true,
+});
 univer.registerPlugin(UniverSheetsUIPlugin);
 
 // sheet feature plugins
@@ -88,12 +88,9 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',
 } as IUniverRPCMainThreadConfig);
 
-// find replace
-univer.registerPlugin(UniverFindReplacePlugin);
-univer.registerPlugin(UniverSheetsFindReplacePlugin);
+univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
 
 // data validation
-univer.registerPlugin(UniverDataValidationPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
 
 // filter
@@ -106,8 +103,8 @@ univer.registerPlugin(UniverSheetsSortUIPlugin);
 // sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
-// sheet permission
-univer.registerPlugin(UniverSheetsPermissionUIPlugin);
+// drawing
+univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {
@@ -125,7 +122,7 @@ const mockUser = {
 class CustomMentionDataService implements IThreadCommentMentionDataService {
     trigger: string = '@';
 
-    async getMentions(search: string) {
+    async getMentions() {
         return [
             {
                 id: mockUser.userID,
@@ -143,9 +140,10 @@ class CustomMentionDataService implements IThreadCommentMentionDataService {
     }
 }
 
-univer.registerPlugin(UniverSheetsThreadCommentPlugin, {
+univer.registerPlugin(UniverThreadCommentUIPlugin, {
     overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
 });
+univer.registerPlugin(UniverSheetsThreadCommentPlugin);
 
 // debugger plugin
 univer.registerPlugin(UniverDebuggerPlugin);
@@ -155,6 +153,7 @@ const userManagerService = injector.get(UserManagerService);
 userManagerService.currentUser = mockUser;
 
 declare global {
+    // eslint-disable-next-line ts/naming-convention
     interface Window {
         univer?: Univer;
         univerAPI?: ReturnType<typeof FUniver.newAPI>;

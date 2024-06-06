@@ -22,7 +22,7 @@ import {
     InterceptorManager,
     RANGE_TYPE,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import {
     CURSOR_TYPE,
     Rect,
@@ -61,7 +61,7 @@ enum HEADER_MOVE_TYPE {
 
 export const HEADER_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, IRange>('headerMovePermissionCheck');
 
-export class HeaderMoveRenderController extends Disposable implements IRenderController {
+export class HeaderMoveRenderController extends Disposable implements IRenderModule {
     private _startOffsetX: number = Number.NEGATIVE_INFINITY;
 
     private _startOffsetY: number = Number.NEGATIVE_INFINITY;
@@ -390,7 +390,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderCon
 
         const { startX: cellStartX, startY: cellStartY, endX: cellEndX, endY: cellEndY } = startCell;
 
-        const selectionWithCoord = this._selectionRenderService.convertRangeDataToSelection(matchSelectionData.range);
+        const selectionWithCoord = this._selectionRenderService.attachRangeWithCoord(matchSelectionData.range);
 
         if (selectionWithCoord == null) {
             return;

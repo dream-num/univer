@@ -122,6 +122,16 @@ export class TextSelectionManagerService extends RxDisposable {
         return this._getTextRanges(this._currentSelection)?.textRanges;
     }
 
+    getActiveTextRange(): Nullable<TextRange> {
+        const selectionInfo = this._getTextRanges(this._currentSelection);
+        if (selectionInfo == null) {
+            return;
+        }
+
+        const { textRanges } = selectionInfo;
+        return textRanges.find((textRange) => textRange.isActive());
+    }
+
     getActiveRange(): Nullable<ITextActiveRange> {
         const selectionInfo = this._getTextRanges(this._currentSelection);
         if (selectionInfo == null) {

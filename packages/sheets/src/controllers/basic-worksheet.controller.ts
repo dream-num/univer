@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IStyleData } from '@univerjs/core';
+import type { IMutation, IStyleData } from '@univerjs/core';
 import { Disposable, ICommandService, IConfigService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
+import { type IDisposable, Optional } from '@wendellhu/redi';
+import { DataSyncPrimaryController } from '@univerjs/rpc';
 
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../commands/commands/clear-selection-content.command';
@@ -83,7 +84,6 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
-import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
@@ -128,7 +128,9 @@ import { SetRangeProtectionCommand } from '../commands/commands/set-range-protec
 import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
 import { DeleteRangeProtectionMutation } from '../commands/mutations/delete-range-protection.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
+import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
+import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './config';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -143,118 +145,128 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     // eslint-disable-next-line max-lines-per-function
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService private readonly _configService: IConfigService,
+        @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController?: DataSyncPrimaryController
     ) {
         super();
 
-        [
-            AddWorksheetMergeMutation,
-            ClearSelectionAllCommand,
-            ClearSelectionContentCommand,
-            ClearSelectionFormatCommand,
-            CopySheetCommand,
-            DeleteRangeMoveLeftCommand,
-            DeleteRangeMoveUpCommand,
-            DeltaColumnWidthCommand,
-            DeltaRowHeightCommand,
-            InsertColAfterCommand,
-            InsertColBeforeCommand,
-            InsertColCommand,
-            InsertColMutation,
-            InsertRangeMoveDownCommand,
-            InsertRangeMoveRightCommand,
-            InsertRowAfterCommand,
-            InsertRowBeforeCommand,
-            InsertRowCommand,
-            InsertRowMutation,
-            InsertSheetCommand,
-            InsertSheetMutation,
-            MoveColsCommand,
-            MoveColsMutation,
-            MoveRangeCommand,
-            MoveRangeMutation,
-            MoveRowsCommand,
-            MoveRowsMutation,
-            RemoveColCommand,
-            RemoveColMutation,
-            RemoveRowCommand,
-            RemoveRowMutation,
-            RemoveSheetCommand,
-            RemoveSheetMutation,
-            RemoveWorksheetMergeCommand,
-            RemoveWorksheetMergeMutation,
-            ResetBackgroundColorCommand,
-            ResetTextColorCommand,
-            SetBackgroundColorCommand,
-            SetBorderBasicCommand,
-            SetBorderColorCommand,
-            SetBorderCommand,
-            SetBorderPositionCommand,
-            SetBorderStyleCommand,
-            SetColHiddenCommand,
-            SetColHiddenMutation,
-            SetColVisibleMutation,
-            SetColWidthCommand,
-            SetFrozenCancelCommand,
-            SetFrozenCommand,
-            SetFrozenMutation,
-            SetHorizontalTextAlignCommand,
-            SetRangeValuesCommand,
+        ([
             SetRangeValuesMutation,
-            SetRowHeightCommand,
-            SetRowHiddenCommand,
-            SetRowHiddenMutation,
-            SetRowVisibleMutation,
-            SetSelectedColsVisibleCommand,
-            SetSelectedRowsVisibleCommand,
-            SetSpecificColsVisibleCommand,
-            SetSpecificRowsVisibleCommand,
-            SetStyleCommand,
-            SetTabColorCommand,
-            SetTabColorMutation,
-            SetTextColorCommand,
-            SetTextRotationCommand,
-            SetTextWrapCommand,
-            SetVerticalTextAlignCommand,
-            SetWorkbookNameCommand,
-            SetWorkbookNameMutation,
-            SetWorksheetActivateCommand,
-            SetWorksheetActiveOperation,
-            SetWorksheetColWidthMutation,
-            SetWorksheetHideCommand,
-            SetWorksheetHideMutation,
-            SetWorksheetNameCommand,
-            SetWorksheetNameMutation,
-            SetWorksheetOrderCommand,
-            SetWorksheetOrderMutation,
-            SetWorksheetRowAutoHeightMutation,
-            SetWorksheetRowHeightMutation,
-            SetWorksheetRowIsAutoHeightCommand,
-            SetWorksheetRowIsAutoHeightMutation,
-            SetWorksheetShowCommand,
-            SetNumfmtMutation,
-            SetSelectionsOperation,
+            InsertColMutation,
+            InsertRowMutation,
+            InsertSheetMutation,
+            MoveRangeMutation,
+            MoveRowsMutation,
+            MoveColsMutation,
+            RemoveColMutation,
+            RemoveRowMutation,
+            RemoveSheetMutation,
+            RemoveWorksheetMergeMutation,
             RemoveNumfmtMutation,
+            AddWorksheetMergeMutation,
+            SetWorkbookNameMutation,
+            SetWorksheetNameMutation,
+            SetNumfmtMutation,
             EmptyMutation,
-            InsertDefinedNameCommand,
-            RemoveDefinedNameCommand,
-            SetDefinedNameCommand,
-            ScrollToCellOperation,
+        ] as IMutation<object>[]).forEach((mutation) => {
+            this._commandService.registerCommand(mutation);
+            this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
+        });
 
-            SetWorksheetPermissionPointsCommand,
-            AddWorksheetProtectionMutation,
-            SetWorksheetProtectionMutation,
-            DeleteWorksheetProtectionMutation,
-            SetWorksheetPermissionPointsMutation,
+        const onlyRegisterFormulaRelatedMutations = this._configService.getConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY) ?? false;
+        if (!onlyRegisterFormulaRelatedMutations) {
+            [
+                ClearSelectionAllCommand,
+                ClearSelectionContentCommand,
+                ClearSelectionFormatCommand,
+                CopySheetCommand,
+                DeleteRangeMoveLeftCommand,
+                DeleteRangeMoveUpCommand,
+                DeltaColumnWidthCommand,
+                DeltaRowHeightCommand,
+                InsertColAfterCommand,
+                InsertColBeforeCommand,
+                InsertColCommand,
+                InsertRangeMoveDownCommand,
+                InsertRangeMoveRightCommand,
+                InsertRowAfterCommand,
+                InsertRowBeforeCommand,
+                InsertRowCommand,
+                InsertSheetCommand,
+                MoveColsCommand,
+                MoveRangeCommand,
+                MoveRowsCommand,
+                RemoveColCommand,
+                RemoveRowCommand,
+                RemoveSheetCommand,
 
-            // range protection
-            AddRangeProtectionCommand,
-            DeleteRangeProtectionCommand,
-            SetRangeProtectionCommand,
-            AddRangeProtectionMutation,
-            DeleteRangeProtectionMutation,
-            SetRangeProtectionMutation,
-        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+                RemoveWorksheetMergeCommand,
+                ResetBackgroundColorCommand,
+                ResetTextColorCommand,
+                SetBackgroundColorCommand,
+                SetBorderBasicCommand,
+                SetBorderColorCommand,
+                SetBorderCommand,
+                SetBorderPositionCommand,
+                SetBorderStyleCommand,
+                SetColHiddenCommand,
+                SetColHiddenMutation,
+                SetColVisibleMutation,
+                SetColWidthCommand,
+                SetFrozenCancelCommand,
+                SetFrozenCommand,
+                SetFrozenMutation,
+                SetHorizontalTextAlignCommand,
+                SetRangeValuesCommand,
+                SetRowHeightCommand,
+                SetRowHiddenCommand,
+                SetRowHiddenMutation,
+                SetRowVisibleMutation,
+                SetSelectedColsVisibleCommand,
+                SetSelectedRowsVisibleCommand,
+                SetSpecificColsVisibleCommand,
+                SetSpecificRowsVisibleCommand,
+                SetStyleCommand,
+                SetTabColorCommand,
+                SetTabColorMutation,
+                SetTextColorCommand,
+                SetTextRotationCommand,
+                SetTextWrapCommand,
+                SetVerticalTextAlignCommand,
+                SetWorkbookNameCommand,
+                SetWorksheetActivateCommand,
+                SetWorksheetActiveOperation,
+                SetWorksheetColWidthMutation,
+                SetWorksheetHideCommand,
+                SetWorksheetHideMutation,
+                SetWorksheetNameCommand,
+                SetWorksheetOrderCommand,
+                SetWorksheetOrderMutation,
+                SetWorksheetRowAutoHeightMutation,
+                SetWorksheetRowHeightMutation,
+                SetWorksheetRowIsAutoHeightCommand,
+                SetWorksheetRowIsAutoHeightMutation,
+                SetSelectionsOperation,
+                ScrollToCellOperation,
+                InsertDefinedNameCommand,
+                RemoveDefinedNameCommand,
+                SetDefinedNameCommand,
+                SetWorksheetShowCommand,
+
+                // permissions range protection
+                SetWorksheetPermissionPointsCommand,
+                AddWorksheetProtectionMutation,
+                SetWorksheetProtectionMutation,
+                DeleteWorksheetProtectionMutation,
+                SetWorksheetPermissionPointsMutation,
+                AddRangeProtectionCommand,
+                DeleteRangeProtectionCommand,
+                SetRangeProtectionCommand,
+                AddRangeProtectionMutation,
+                DeleteRangeProtectionMutation,
+                SetRangeProtectionMutation,
+            ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        }
 
         this._configService.setConfig(MAX_CELL_PER_SHEET_KEY, MAX_CELL_PER_SHEET_DEFAULT);
     }

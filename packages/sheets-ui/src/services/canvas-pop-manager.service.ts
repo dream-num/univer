@@ -42,7 +42,6 @@ export class SheetCanvasPopManagerService extends Disposable {
         @Inject(ICanvasPopupService) private readonly _globalPopupManagerService: ICanvasPopupService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
@@ -107,10 +106,10 @@ export class SheetCanvasPopManagerService extends Disposable {
         const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({
-            unitId,
+        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getOrCreateSkeleton({
             sheetId: subUnitId,
         });
+
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender || !skeleton) {
             return {
@@ -156,8 +155,7 @@ export class SheetCanvasPopManagerService extends Disposable {
         const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({
-            unitId,
+        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getOrCreateSkeleton({
             sheetId: subUnitId,
         });
 

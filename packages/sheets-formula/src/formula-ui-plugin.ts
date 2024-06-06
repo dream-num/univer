@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaDisplayController } from './controllers/array-formula-display.controller';
@@ -41,11 +42,12 @@ import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
 import { RegisterOtherFormulaService } from './services/register-other-formula.service';
 import { FormulaAlertController } from './controllers/formula-alert.controller';
-import { FormulaRenderController } from './controllers/formula-render.controller';
+import { FormulaRenderManagerController } from './controllers/formula-render.controller';
 
 /**
  * The configuration of the formula UI plugin.
  */
+@DependentOn(UniverFormulaEnginePlugin)
 export class UniverSheetsFormulaPlugin extends Plugin {
     static override pluginName = FORMULA_UI_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;
@@ -96,7 +98,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [FormulaEditorShowController],
             [ActiveDirtyController],
             [DefinedNameController],
-            [FormulaRenderController],
+            [FormulaRenderManagerController],
             [FormulaAlertController],
         ];
 

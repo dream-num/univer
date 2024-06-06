@@ -337,6 +337,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                     let preDivideStartIndex = lineStartIndex;
                     let actualWidth = 0;
                     let maxLineAsc = 0;
+                    let macLineDsc = 0;
                     columnHeight += lineHeight;
                     const divideLength = divides.length;
 
@@ -353,9 +354,10 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                             divEndIndex += increaseValue;
 
                             const bBox = glyph.bBox;
-                            const { ba } = bBox;
+                            const { ba, bd } = bBox;
 
                             maxLineAsc = Math.max(maxLineAsc, ba);
+                            macLineDsc = Math.max(macLineDsc, bd);
 
                             if (i === divideLength - 1) {
                                 actualWidth += glyph.width;
@@ -393,6 +395,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                     line.ed = preDivideStartIndex >= line.st ? preDivideStartIndex : line.st;
                     line.width = actualWidth;
                     line.asc = maxLineAsc;
+                    line.dsc = macLineDsc;
                     maxColumnWidth = Math.max(maxColumnWidth, actualWidth);
                     // Please do not use pre line's top and height to calculate the current's top,
                     // because of float objects will between lines.
@@ -738,15 +741,6 @@ export function getFontCreateConfig(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
 ) {
-    const { startIndex } = paragraphNode;
-    const textRun = bodyModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
-    const { st, ed } = textRun;
-    let { ts: textStyle = {} } = textRun;
-    const cache = fontCreateConfigCache.getValue(st, ed);
-    if (cache) {
-        return cache;
-    }
-
     const {
         gridType = GridType.LINES,
         charSpace = 0,
@@ -759,7 +753,19 @@ export function getFontCreateConfig(
         marginRight = 0,
         marginLeft = 0,
         localeService,
+        renderConfig = {},
     } = sectionBreakConfig;
+    const { isRenderStyle } = renderConfig;
+    const { startIndex } = paragraphNode;
+    const textRun = isRenderStyle === BooleanNumber.FALSE
+        ? { ts: {}, st: 0, ed: 0 }
+        : bodyModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
+    const { st, ed } = textRun;
+    let { ts: textStyle = {} } = textRun;
+    const cache = fontCreateConfigCache.getValue(st, ed);
+    if (cache) {
+        return cache;
+    }
 
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 

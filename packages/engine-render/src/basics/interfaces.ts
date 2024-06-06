@@ -41,13 +41,14 @@ import type {
     IDocumentSkeletonHeader,
 } from './i-document-skeleton-cached';
 import type { Vector2 } from './vector2';
+import type { ITransformerConfig } from './transformer-config';
 
 export interface IObjectFullState extends ITransformState {
     strokeWidth?: number;
     zIndex?: number;
-    isTransformer?: boolean;
     forceRender?: boolean;
     debounceParentDirty?: boolean;
+    transformerConfig?: ITransformerConfig;
 }
 
 export interface IRect extends ISize, IOffset {
@@ -67,19 +68,9 @@ export enum TRANSFORM_CHANGE_OBSERVABLE_TYPE {
 
 export interface ITransformChangeState {
     type: TRANSFORM_CHANGE_OBSERVABLE_TYPE;
-    value:
-        | number
-        | string
-        | boolean
-        | { x: number | string | boolean; y: number | string | boolean }
-        | IObjectFullState
+    value: IObjectFullState
         | ISceneTransformState;
-    preValue:
-        | number
-        | string
-        | boolean
-        | { x: number | string | boolean; y: number | string | boolean }
-        | IObjectFullState
+    preValue: IObjectFullState
         | ISceneTransformState;
 }
 

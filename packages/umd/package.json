@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/umd",
-    "version": "0.1.12",
+    "version": "0.1.13",
     "private": false,
     "description": "UMD bundle for Univer",
     "author": "DreamNum <developer@univer.ai>",
@@ -33,10 +33,6 @@
     "files": [
         "lib"
     ],
-    "engines": {
-        "node": ">=16.0.0",
-        "npm": ">=8.0.0"
-    },
     "scripts": {
         "build:umd": "node ./scripts/index.mjs"
     },
@@ -45,24 +41,31 @@
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
+        "@univerjs/docs-drawing": "workspace:*",
+        "@univerjs/docs-drawing-ui": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
+        "@univerjs/drawing": "workspace:*",
+        "@univerjs/drawing-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/facade": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/image": "workspace:*",
         "@univerjs/network": "workspace:*",
-        "@univerjs/protocol": "^0.1.34",
+        "@univerjs/protocol": "^0.1.36",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
         "@univerjs/sheets-conditional-formatting-ui": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",
+        "@univerjs/sheets-drawing": "workspace:*",
+        "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-filter-ui": "workspace:*",
         "@univerjs/sheets-find-replace": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
+        "@univerjs/sheets-hyper-link": "workspace:*",
+        "@univerjs/sheets-hyper-link-ui": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
@@ -77,9 +80,9 @@
         "clsx": "^2.1.1",
         "dayjs": "^1.11.11",
         "lodash": "^4.17.21",
-        "monaco-editor": "0.48.0",
-        "react": "18.2.0",
-        "react-dom": "18.2.0",
+        "monaco-editor": "0.49.0",
+        "react": "18.3.1",
+        "react-dom": "18.3.1",
         "rxjs": "^7.8.1"
     }
 }

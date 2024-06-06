@@ -44,6 +44,7 @@ describe('Test FRange', () => {
     beforeEach(() => {
         const testBed = createFacadeTestBed();
         get = testBed.get;
+
         univerAPI = testBed.univerAPI;
 
         commandService = get(ICommandService);
@@ -182,6 +183,37 @@ describe('Test FRange', () => {
         activeSheet?.getRange(0, 0)?.setValue(1);
         const range = activeSheet?.getRange(0, 0);
         expect(range?.getCellData()?.v).toBe(1);
+    });
+
+    it('Range getCell', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const range = activeSheet?.getRange(2, 3);
+        const cell = range?.getCell()!;
+        expect(cell.actualColumn).toBe(3);
+        expect(cell.actualRow).toBe(2);
+    });
+
+    it('Range getCellRect', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet();
+        const range = activeSheet?.getRange(0, 0);
+        const cell = range?.getCell()!;
+        const rect = range?.getCellRect()!;
+        expect(rect.x).toBe(cell.startX);
+        expect(rect.y).toBe(cell.startY);
+        expect(rect.width).toBe(cell.endX - cell.startX);
+        expect(rect.height).toBe(cell.endY - cell.startY);
+        expect(rect.toJSON()).toContain(rect.height);
+    });
+
+    it('Range isMerged', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()!.getActiveSheet()!;
+        const range = activeSheet!.getRange(2, 3);
+        const isMerged = range?.isMerged()!;
+        expect(isMerged).toBe(false);
+
+        const range2 = activeSheet!.getRange(2, 3, 3, 3)!;
+        const isMerged2 = range2.isMerged()!;
+        expect(isMerged2).toBe(false);
     });
 
     it('Range getCellStyleData', () => {

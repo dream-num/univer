@@ -16,13 +16,13 @@
 
 import type { Workbook } from '@univerjs/core';
 import { Disposable, ICommandService } from '@univerjs/core';
-import type { IRenderContext, IRenderController, IWheelEvent } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 
-export class SheetsZoomRenderController extends Disposable implements IRenderController {
+export class SheetsZoomRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,

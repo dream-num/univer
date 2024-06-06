@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { checkIfMove, MOVE_BUFFER_VALUE, ROTATE_BUFFER_VALUE } from './check-if-move';
 export * from './array-search';
 export * from './blob';
 export * from './color/color';
@@ -33,6 +34,7 @@ export { RefAlias } from './ref-alias';
 export * from './row-col-iter';
 export * from './sequence';
 export * from './sort-rules';
+export * from './shape';
 export * from './tools';
 export * from './types';
 export * from './debounce';

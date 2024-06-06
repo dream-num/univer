@@ -18,14 +18,11 @@ import { CellValueType, isRealNum, LifecycleStages, OnLifecycle, RxDisposable } 
 import type { Workbook } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-/**
- * @todo RenderUnit
- */
 @OnLifecycle(LifecycleStages.Rendered, ForceStringRenderController)
-export class ForceStringRenderController extends RxDisposable implements IRenderController {
+export class ForceStringRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
@@ -50,7 +47,7 @@ export class ForceStringRenderController extends RxDisposable implements IRender
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
-
+                    priority: 10,
                     handler: (cell, pos, next) => {
                         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                         if (!skeleton) {

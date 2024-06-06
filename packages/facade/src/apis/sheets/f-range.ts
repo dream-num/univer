@@ -19,7 +19,7 @@ import type {
     ICellData,
     IColorStyle,
     IObjectMatrixPrimitiveType,
-    IRange,
+    IRange, ISelectionCellWithCoord,
     IStyleData,
     ITextDecoration,
     Workbook,
@@ -45,11 +45,12 @@ import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ISheetClipboardService } from '@univerjs/sheets-ui';
+import { ISheetClipboardService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
-import {
-    covertCellValue,
+import { covertCellValue,
     covertCellValues,
+    isCellMerged,
     transformCoreHorizontalAlignment,
     transformCoreVerticalAlignment,
     transformFacadeHorizontalAlignment,
@@ -67,6 +68,7 @@ export class FRange {
         private readonly _range: IRange,
         @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         // empty
@@ -94,6 +96,36 @@ export class FRange {
      */
     getCellData(): ICellData | null {
         return this._worksheet.getCell(this._range.startRow, this._range.startColumn) ?? null;
+    }
+
+    /**
+     * Return this cell information, including whether it is merged and cell coordinates
+     * @returns The cell information
+     */
+    getCell(): ISelectionCellWithCoord {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const skeleton = this._renderManagerService.getRenderById(unitId)!
+            .with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId)!.skeleton;
+        return skeleton.getCellByIndex(this._range.startRow, this._range.startColumn);
+    }
+
+    /**
+     * Return range whether this range is merged
+     * @returns if true is merged
+     */
+    isMerged() {
+        return isCellMerged(this.getCell().mergeInfo, this._range);
+    }
+
+    /**
+     * Returns the coordinates of this cell,does not include units
+     * @returns coordinates of the cell， top, right, bottom, left
+     */
+    getCellRect(): DOMRect {
+        const { startX: x, startY: y, endX: x2, endY: y2 } = this.getCell();
+        const data = { x, y, width: x2 - x, height: y2 - y, top: y, left: x, bottom: y2, right: x2 };
+        return { ...data, toJSON: () => JSON.stringify(data) };
     }
 
     /**

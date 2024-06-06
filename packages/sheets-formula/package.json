@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-formula",
-    "version": "0.1.12",
+    "version": "0.1.13",
     "private": false,
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -16,6 +16,9 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
+    "keywords": [
+        "univer"
+    ],
     "sideEffects": [
         "**/*.css"
     ],
@@ -42,8 +45,8 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./locale/*": "./lib/locale/*.json",
-            "./lib/*": "./lib/*"
+            "./lib/*": "./lib/*",
+            "./locale/*": "./lib/locale/*.json"
         }
     },
     "directories": {
@@ -52,10 +55,6 @@
     "files": [
         "lib"
     ],
-    "engines": {
-        "node": ">=16.0.0",
-        "npm": ">=8.0.0"
-    },
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",
@@ -77,10 +76,10 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.52"
+        "@univerjs/icons": "^0.1.56"
     },
     "devDependencies": {
-        "@types/react": "^18.2.79",
+        "@types/react": "^18.3.3",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
@@ -94,10 +93,24 @@
         "@vitejs/plugin-react": "^4.2.1",
         "@wendellhu/redi": "0.15.2",
         "less": "^4.2.0",
-        "react": "18.2.0",
+        "react": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.11",
+        "vite": "^5.2.12",
         "vitest": "^1.6.0"
+    },
+    "univerSpace": {
+        ".": {
+            "import": "./lib/es/index.js",
+            "require": "./lib/cjs/index.js",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./*": {
+            "import": "./lib/es/*",
+            "require": "./lib/cjs/*",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./lib/*": "./lib/*",
+        "./locale/*": "./lib/locale/*.json"
     }
 }

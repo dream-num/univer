@@ -39,7 +39,7 @@ const MENU_POSITIONS = [
 ];
 
 export interface IToolbarProps {
-    headerMenuComponents?: Set<() => ComponentType>;
+    headerMenuComponents?: Set<ComponentType>;
 }
 
 /**
@@ -103,28 +103,32 @@ export function Toolbar(props: IToolbarProps) {
 
                     {collapsedId.length > 0 && (
                         <Tooltip title={localeService.t('more')} placement="bottom">
-                            <Dropdown
-                                forceRender
-                                className={styles.toolbarMore}
-                                overlay={(
-                                    <div className={styles.toolbarMoreContainer} onClick={(e) => e.stopPropagation()}>
-                                        {Object.entries(groupsByKey).map(([key, item]) => (
-                                            <div key={key} className={styles.toolbarGroup}>
-                                                {item.map(
-                                                    (subItem) =>
-                                                        collapsedId.includes(subItem.id) && (
-                                                            <ToolbarItem key={subItem.id} {...subItem} />
-                                                        )
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            >
-                                <ToolbarButton className={styles.toolbarItemTextButton}>
-                                    <MoreFunctionSingle />
-                                </ToolbarButton>
-                            </Dropdown>
+                            <div>
+                                <Dropdown
+                                    forceRender
+                                    className={styles.toolbarMore}
+                                    overlay={(
+                                        <div className={styles.toolbarMoreContainer} onClick={(e) => e.stopPropagation()}>
+                                            {Object.entries(groupsByKey).map(([key, item]) => (
+                                                <div key={key} className={styles.toolbarGroup}>
+                                                    {item.map(
+                                                        (subItem) =>
+                                                            collapsedId.includes(subItem.id) && (
+                                                                <ToolbarItem key={subItem.id} {...subItem} />
+                                                            )
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                >
+                                    <span>
+                                        <ToolbarButton className={styles.toolbarItemTextButton}>
+                                            <MoreFunctionSingle />
+                                        </ToolbarButton>
+                                    </span>
+                                </Dropdown>
+                            </div>
                         </Tooltip>
                     )}
                 </div>

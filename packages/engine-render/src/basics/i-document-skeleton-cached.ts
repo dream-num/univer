@@ -18,8 +18,8 @@ import type {
     BulletAlignment,
     ColumnSeparatorType,
     DataStreamTreeTokenType,
+    IDocDrawingBase,
     IDocumentRenderConfig,
-    IDrawing,
     IIndentStart,
     INestingLevel,
     ITextStyle,
@@ -130,7 +130,8 @@ export interface IDocumentSkeletonLine {
     lineHeight: number; // 行总体高度 lineHeight =max(glyph.fontBoundingBoxAscent + glyph.fontBoundingBoxDescent, glyph2.....) + space
     contentHeight: number; // contentHeight 行内容高度，contentHeight,=max(glyph.fontBoundingBoxAscent + glyph.fontBoundingBoxDescent, glyph2.....)
     top: number; // top paragraph(spaceAbove, spaceBelow, lineSpacing*PreLineHeight)
-    asc: number; //  =max(glyph.textMetrics.asc) alphabet对齐，需要校准
+    asc: number; //  =max(glyph.textMetrics.ba) alphabet 对齐，需要校准
+    dsc: number; //  =max(glyph.textMetrics.bd) alphabet 对齐，需要校准
     paddingTop: number; // paddingTop 内容到顶部的距离
     paddingBottom: number; // paddingBottom 内容到底部的距离
     marginTop: number; // marginTop 针对段落的spaceAbove
@@ -187,7 +188,7 @@ export interface IDocumentSkeletonGlyph {
     parent?: IDocumentSkeletonDivide;
     url?: string; // image url
     featureId?: string; // support interaction for feature ,eg. hyperLine person
-    objectId?: string; // drawing.objectId
+    drawingId?: string; // drawing.drawingId
 }
 
 export interface IDocumentSkeletonBullet extends IIndentStart {
@@ -206,14 +207,14 @@ export interface IDocumentSkeletonBullet extends IIndentStart {
 }
 
 export interface IDocumentSkeletonDrawing {
-    objectId: string;
+    drawingId: string;
     aLeft: number; // 相对于 page 的左方
     aTop: number; // 相对于 page 的上方
     width: number;
     height: number;
     angle: number; // 旋转
     initialState: boolean; // 是否初始化
-    drawingOrigin: IDrawing;
+    drawingOrigin: IDocDrawingBase;
 }
 
 export interface IDocumentSkeletonFontStyle {

@@ -57,15 +57,32 @@ export class Rectangle {
     }
 
     static intersects(src: IRange, target: IRange): boolean {
-        const currentStartRow = src.startRow;
-        const currentEndRow = src.endRow;
-        const currentStartColumn = src.startColumn;
-        const currentEndColumn = src.endColumn;
+        if (src.rangeType === RANGE_TYPE.ROW && target.rangeType === RANGE_TYPE.COLUMN) {
+            return true;
+        }
 
-        const incomingStartRow = target.startRow;
-        const incomingEndRow = target.endRow;
-        const incomingStartColumn = target.startColumn;
-        const incomingEndColumn = target.endColumn;
+        if (src.rangeType === RANGE_TYPE.COLUMN && target.rangeType === RANGE_TYPE.ROW) {
+            return true;
+        }
+
+        if (src.rangeType === RANGE_TYPE.ROW && target.rangeType === RANGE_TYPE.ROW) {
+            return src.startRow <= target.endRow && src.endRow >= target.startRow;
+        }
+
+        if (src.rangeType === RANGE_TYPE.COLUMN && target.rangeType === RANGE_TYPE.COLUMN) {
+            return src.startColumn <= target.endColumn && src.endColumn >= target.startColumn;
+        }
+
+        const MAX = Math.floor(Number.MAX_SAFE_INTEGER / 10);
+        const currentStartRow = Number.isNaN(src.startRow) ? 0 : src.startRow;
+        const currentEndRow = Number.isNaN(src.endRow) ? MAX : src.endRow;
+        const currentStartColumn = Number.isNaN(src.startColumn) ? 0 : src.startColumn;
+        const currentEndColumn = Number.isNaN(src.endColumn) ? MAX : src.endColumn;
+
+        const incomingStartRow = Number.isNaN(target.startRow) ? 0 : target.startRow;
+        const incomingEndRow = Number.isNaN(target.endRow) ? MAX : target.endRow;
+        const incomingStartColumn = Number.isNaN(target.startColumn) ? 0 : target.startColumn;
+        const incomingEndColumn = Number.isNaN(target.endColumn) ? MAX : target.endColumn;
 
         const zx = Math.abs(currentStartColumn + currentEndColumn - incomingStartColumn - incomingEndColumn);
         const x = Math.abs(currentStartColumn - currentEndColumn) + Math.abs(incomingStartColumn - incomingEndColumn);
@@ -183,6 +200,19 @@ export class Rectangle {
             }),
             ranges[0]
         );
+    }
+
+    static realUnion(...ranges: IRange[]): IRange {
+        const hasColRange = ranges.some((range) => range.rangeType === RANGE_TYPE.COLUMN);
+        const hasRowRange = ranges.some((range) => range.rangeType === RANGE_TYPE.ROW);
+        const res = Rectangle.union(...ranges);
+        return {
+            startColumn: hasRowRange ? Number.NaN : res.startColumn,
+            endColumn: hasRowRange ? Number.NaN : res.endColumn,
+            startRow: hasColRange ? Number.NaN : res.startRow,
+            endRow: hasColRange ? Number.NaN : res.endRow,
+            rangeType: hasRowRange ? RANGE_TYPE.ROW : hasColRange ? RANGE_TYPE.COLUMN : RANGE_TYPE.NORMAL,
+        };
     }
 
     static getRelativeRange = (range: IRange, originRange: IRange) =>

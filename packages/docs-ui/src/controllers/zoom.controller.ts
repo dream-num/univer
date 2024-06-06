@@ -186,7 +186,7 @@ export class ZoomController extends Disposable {
             this._textSelectionManagerService.refreshSelection();
         }
 
-        docObject.scene.getTransformer()?.hideControl();
+        docObject.scene.getTransformer()?.clearSelectedObjects();
     }
 
     private _calculatePagePosition(currentRender: IDocObjectParam, zoomRatio: number) {

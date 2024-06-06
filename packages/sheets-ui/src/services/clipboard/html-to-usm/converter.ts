@@ -101,36 +101,37 @@ export class HtmlToUSMService {
         this.pluginList.push(plugin);
     }
 
-    private styleCache: Map<ChildNode, ITextStyle> = new Map();
+    private _styleCache: Map<ChildNode, ITextStyle> = new Map();
 
-    private styleRules: IStyleRule[] = [];
+    private _styleRules: IStyleRule[] = [];
 
-    private afterProcessRules: IAfterProcessRule[] = [];
+    private _afterProcessRules: IAfterProcessRule[] = [];
 
-    private htmlElement: HTMLIFrameElement;
+    private _htmlElement: HTMLIFrameElement;
 
-    private getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
+    private _getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
 
     constructor(props: IHtmlToUSMServiceProps) {
-        this.getCurrentSkeleton = props.getCurrentSkeleton;
-        this.htmlElement = document.createElement('iframe');
-        this.htmlElement.style.display = 'none';
-        document.body.appendChild(this.htmlElement);
-        hideIframe(this.htmlElement);
+        this._getCurrentSkeleton = props.getCurrentSkeleton;
+        this._htmlElement = document.createElement('iframe');
+        this._htmlElement.style.display = 'none';
+        document.body.appendChild(this._htmlElement);
+        hideIframe(this._htmlElement);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     convert(html: string): IUniverSheetCopyDataModel {
-        if (this.htmlElement.contentDocument) {
-            this.htmlElement.contentDocument.open();
-            this.htmlElement.contentDocument.write(html);
-            this.htmlElement.contentDocument.close();
+        if (this._htmlElement.contentDocument) {
+            this._htmlElement.contentDocument.open();
+            this._htmlElement.contentDocument.write(html);
+            this._htmlElement.contentDocument.close();
         }
         html = html.replace(/<!--[\s\S]*?-->/g, '').replace(/<style[\s\S]*?<\/style>/g, '');
 
         const pastePlugin = HtmlToUSMService.pluginList.find((plugin) => plugin.checkPasteType(html));
         if (pastePlugin) {
-            this.styleRules = [...pastePlugin.stylesRules];
-            this.afterProcessRules = [...pastePlugin.afterProcessRules];
+            this._styleRules = [...pastePlugin.stylesRules];
+            this._afterProcessRules = [...pastePlugin.afterProcessRules];
         }
         const valueMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
         const dom = parseToDom(html);
@@ -190,13 +191,23 @@ export class HtmlToUSMService {
                     textRuns,
                     paragraphs: generateParagraphs(singleDataStream),
                 };
-                const p = this._generateDocumentDataModelSnapshot({
-                    body: singleDocBody,
-                });
-                valueMatrix.setValue(0, 0, {
-                    v: dataStream,
-                    p,
-                });
+
+                const dataStreamLength = dataStream.length;
+                const textRunsLength = textRuns?.length ?? 0;
+                if (!textRunsLength || (textRunsLength === 1 && textRuns![0].st === 0 && textRuns![0].ed === dataStreamLength)) {
+                    valueMatrix.setValue(0, 0, {
+                        v: dataStream,
+                    });
+                } else {
+                    const p = this._generateDocumentDataModelSnapshot({
+                        body: singleDocBody,
+                    });
+                    valueMatrix.setValue(0, 0, {
+                        v: dataStream,
+                        p,
+                    });
+                }
+
                 rowProperties.push({}); // TODO@yuhongz
             }
         }
@@ -226,7 +237,7 @@ export class HtmlToUSMService {
         const valueMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
         const colProperties = parseColGroup(html) ?? [];
         const { rowProperties = [] } = parseTableRows(html);
-        const parsedCellMatrix = parseTableByHtml(this.htmlElement, this.getCurrentSkeleton()?.skeleton);
+        const parsedCellMatrix = parseTableByHtml(this._htmlElement, this._getCurrentSkeleton()?.skeleton);
         parsedCellMatrix &&
             parsedCellMatrix.forValue((row, col, value) => {
                 let style = handleStringToStyle(undefined, value.style);
@@ -270,7 +281,7 @@ export class HtmlToUSMService {
     }
 
     private _generateDocumentDataModelSnapshot(snapshot: Partial<IDocumentData>) {
-        const currentSkeleton = this.getCurrentSkeleton();
+        const currentSkeleton = this._getCurrentSkeleton();
         if (currentSkeleton == null) {
             return null;
         }
@@ -298,8 +309,8 @@ export class HtmlToUSMService {
                 const text = node.nodeValue?.replace(/[\r\n]/g, '');
                 let style;
 
-                if (parent && this.styleCache.has(parent)) {
-                    style = this.styleCache.get(parent);
+                if (parent && this._styleCache.has(parent)) {
+                    style = this._styleCache.get(parent);
                 }
                 const newDoc: IDocumentBody = {
                     dataStream: '',
@@ -324,19 +335,19 @@ export class HtmlToUSMService {
                 if (node.nodeName === 'STYLE') {
                     continue;
                 }
-                const parentStyles = parent ? this.styleCache.get(parent) : {};
-                const styleRule = this.styleRules.find(({ filter }) => matchFilter(node as HTMLElement, filter));
+                const parentStyles = parent ? this._styleCache.get(parent) : {};
+                const styleRule = this._styleRules.find(({ filter }) => matchFilter(node as HTMLElement, filter));
                 const nodeStyles = styleRule
                     ? styleRule.getStyle(node as HTMLElement)
                     : extractNodeStyle(node as HTMLElement);
 
-                this.styleCache.set(node, { ...parentStyles, ...nodeStyles });
+                this._styleCache.set(node, { ...parentStyles, ...nodeStyles });
 
                 const { childNodes } = node;
 
                 this.process(node, childNodes, doc, tables);
 
-                const afterProcessRule = this.afterProcessRules.find(({ filter }) =>
+                const afterProcessRule = this._afterProcessRules.find(({ filter }) =>
                     matchFilter(node as HTMLElement, filter)
                 );
 
@@ -348,7 +359,7 @@ export class HtmlToUSMService {
     }
 
     dispose() {
-        document.body.removeChild(this.htmlElement);
+        document.body.removeChild(this._htmlElement);
     }
 }
 

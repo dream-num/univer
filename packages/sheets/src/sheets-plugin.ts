@@ -15,10 +15,11 @@
  */
 
 import type { DependencyOverride } from '@univerjs/core';
-import { ICommandService, LocaleService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, ICommandService, IConfigService, LocaleService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
 import { FeatureCalculationController } from './controllers/feature-calculation.controller';
@@ -38,36 +39,52 @@ import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
 
 import { RangeProtectionRefRangeService } from './services/permission/range-permission/range-protection.ref-range';
 import { RangeProtectionService } from './services/permission/range-permission/range-protection.service';
+import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 
 export interface IUniverSheetsConfig {
     notExecuteFormula?: boolean;
     override?: DependencyOverride;
+
+    /**
+     * Only register the mutations related to the formula calculation. Especially useful for the
+     * web worker environment or server-side-calculation.
+     */
+    onlyRegisterFormulaRelatedMutations?: true;
 }
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
  */
+@DependentOn(UniverFormulaEnginePlugin)
 export class UniverSheetsPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private _config: IUniverSheetsConfig,
+        private _config: IUniverSheetsConfig | undefined,
         @ICommandService private readonly _commandService: ICommandService,
+        @IConfigService private readonly _configService: IConfigService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector
     ) {
         super();
 
-        this._initializeDependencies(_injector);
+        this._initConfig();
+        this._initDependencies(_injector);
     }
 
     override onRendered(): void {
     }
 
-    private _initializeDependencies(sheetInjector: Injector) {
+    private _initConfig(): void {
+        if (this._config?.onlyRegisterFormulaRelatedMutations) {
+            this._configService.setConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY, true);
+        }
+    }
+
+    private _initDependencies(sheetInjector: Injector) {
         const dependencies: Dependency[] = [
             // services
             [BorderStyleManagerService],
@@ -95,6 +112,7 @@ export class UniverSheetsPlugin extends Plugin {
         ];
 
         if (!this._config?.notExecuteFormula) {
+            // Should execute formula.
             dependencies.push(
                 [CalculateResultApplyController],
                 [FeatureCalculationController]

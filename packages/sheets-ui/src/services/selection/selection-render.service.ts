@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/* eslint-disable complexity */
+/* eslint-disable max-lines-per-function */
+
 import type {
     IInterceptor,
     IRange,
@@ -25,9 +28,9 @@ import type {
     Nullable,
     Observer,
 } from '@univerjs/core';
-import { createInterceptorKey, InterceptorManager, makeCellToSelection, RANGE_TYPE, ThemeService } from '@univerjs/core';
+import { createInterceptorKey, InterceptorManager, IUniverInstanceService, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import { ScrollTimer, ScrollTimerType, Vector2 } from '@univerjs/engine-render';
+import { IRenderManagerService, ScrollTimer, ScrollTimerType, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import { getNormalSelectionStyle } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
@@ -84,9 +87,10 @@ export interface ISelectionRenderService {
     getActiveRange(): Nullable<IRange>;
     getActiveSelection(): Nullable<SelectionShape>;
     getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[];
-    convertSelectionToCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
-    convertRangeDataToSelection(range: IRange): Nullable<IRangeWithCoord>;
-    convertCellRangeToInfo(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
+    attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
+    attachRangeWithCoord(range: IRange): Nullable<IRangeWithCoord>;
+    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
+    getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithCoord>;
     eventTrigger(
         evt: IPointerEvent | IMouseEvent,
         zIndex: number,
@@ -217,7 +221,8 @@ export class SelectionRenderService implements ISelectionRenderService {
     constructor(
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
@@ -306,7 +311,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         const skeleton = this._skeleton;
 
-        let style = data.style;
+        let { style } = data;
 
         if (style == null) {
             style = getNormalSelectionStyle(this._themeService);
@@ -320,6 +325,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         const control = new SelectionShape(scene, currentControls.length, this._isHeaderHighlight, this._themeService);
 
+        // eslint-disable-next-line no-new
         new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
@@ -335,12 +341,6 @@ export class SelectionRenderService implements ISelectionRenderService {
         currentControls.push(control);
     }
 
-    /**
-     * update selection
-     * @param selectionRange
-     * @param curCellRange
-     * @returns
-     */
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]) {
         const currentControls = this.getCurrentControls();
         if (!currentControls) {
@@ -409,7 +409,8 @@ export class SelectionRenderService implements ISelectionRenderService {
     }
 
     private _getFreeze() {
-        const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+        const freeze = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)
+            ?.getCurrent()?.skeleton.getWorksheetConfig().freeze;
         return freeze;
     }
 
@@ -536,7 +537,6 @@ export class SelectionRenderService implements ISelectionRenderService {
      * @param style selection style, Styles for user-customized selectors
      * @param zIndex Stacking order of the selection object
      * @param rangeType Determines whether the selection is made normally according to the range or by rows and columns
-     * @returns
      */
     eventTrigger(
         evt: IPointerEvent | IMouseEvent,
@@ -774,6 +774,8 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         this._addCancelObserver();
 
+        scene.getTransformer()?.clearSelectedObjects();
+
         if (rangeType === RANGE_TYPE.ROW || rangeType === RANGE_TYPE.COLUMN) {
             this._moving(newEvtOffsetX, newEvtOffsetY, selectionControl, rangeType);
         }
@@ -796,7 +798,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             let scrollOffsetY = newMoveOffsetY;
 
             const currentSelection = this.getActiveSelection();
-            const freeze = this._sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+            const freeze = this._getFreeze();
 
             const selection = currentSelection?.model;
             const endViewport =
@@ -926,9 +928,9 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._shortcutService.setDisable(true);
     }
 
-    convertSelectionToCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle {
+    attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle {
         const { range, primary, style } = selectionWithStyle;
-        let rangeWithCoord = this.convertRangeDataToSelection(range);
+        let rangeWithCoord = this.attachRangeWithCoord(range);
         if (rangeWithCoord == null) {
             rangeWithCoord = {
                 startRow: -1,
@@ -944,12 +946,12 @@ export class SelectionRenderService implements ISelectionRenderService {
         }
         return {
             rangeWithCoord,
-            primaryWithCoord: this.convertCellRangeToInfo(primary),
+            primaryWithCoord: this.attachPrimaryWithCoord(primary),
             style,
         };
     }
 
-    convertRangeDataToSelection(range: IRange): Nullable<IRangeWithCoord> {
+    attachRangeWithCoord(range: IRange): Nullable<IRangeWithCoord> {
         const { startRow, startColumn, endRow, endColumn, rangeType } = range;
         const scene = this._scene;
         const skeleton = this._skeleton;
@@ -973,7 +975,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         };
     }
 
-    convertCellRangeToInfo(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord> {
+    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord> {
         if (primary == null) {
             return;
         }
@@ -1011,6 +1013,31 @@ export class SelectionRenderService implements ISelectionRenderService {
                 endX: endCell?.endX || 0,
             },
         };
+    }
+
+    getSelectionCellByPosition(x: number, y: number) {
+        const scene = this._scene;
+
+        if (scene == null) {
+            return;
+        }
+
+        const skeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrent()?.skeleton;
+        if (skeleton == null) {
+            return;
+        }
+
+        // const scrollXY = scene.getScrollXYByRelativeCoords(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
+        const scrollXY = scene.getScrollXY(scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!);
+        const { scaleX, scaleY } = scene.getAncestorScale();
+
+        return skeleton.calculateCellIndexByPosition(
+            x,
+            y,
+            scaleX,
+            scaleY,
+            scrollXY
+        );
     }
 
     /**
@@ -1063,7 +1090,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             return false;
         }
 
-        const { rangeWithCoord: moveRangeWithCoord, primaryWithCoord: movePrimaryWithCoord } = selectionData;
+        const { rangeWithCoord: moveRangeWithCoord } = selectionData;
 
         const {
             startRow: moveStartRow,
@@ -1148,19 +1175,16 @@ export class SelectionRenderService implements ISelectionRenderService {
         if (scene == null) {
             return;
         }
+
         const mainScene = scene.getEngine()?.activeScene;
         if (mainScene == null || mainScene === scene) {
             return;
         }
+
         mainScene.onPointerDownObserver.remove(this._cancelDownObserver);
         mainScene.onPointerUpObserver.remove(this._cancelUpObserver);
-        this._cancelDownObserver = mainScene.onPointerDownObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-            this._endSelection();
-        });
-
-        this._cancelUpObserver = mainScene.onPointerUpObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-            this._endSelection();
-        });
+        this._cancelDownObserver = mainScene.onPointerDownObserver.add(() => this._endSelection());
+        this._cancelUpObserver = mainScene.onPointerUpObserver.add(() => this._endSelection());
     }
 
     private _getSelectedRangeWithMerge(
@@ -1240,5 +1264,5 @@ export class SelectionRenderService implements ISelectionRenderService {
  * @deprecated Should be refactored to RenderUnit.
  */
 export const ISelectionRenderService = createIdentifier<SelectionRenderService>(
-    'deprecated.univer.sheet.selection-render-service'
+    'univer.sheet.selection-render-service'
 );

@@ -130,11 +130,9 @@ export class SheetHyperLinkSetRangeController extends Disposable {
         }));
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initSetRangeValuesCommandInterceptor() {
         this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
 
-            // eslint-disable-next-line max-lines-per-function
             getMutations: (command) => {
                 if (command.id === SetRangeValuesCommand.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
@@ -194,33 +192,6 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                                     },
                                 });
                             }
-
-                            // const redoParams: IUpdateHyperLinkMutationParams = {
-                            //     unitId,
-                            //     subUnitId,
-                            //     id: link.id,
-                            //     payload: {
-                            //         payload: link.payload,
-                            //         display: cellValue,
-                            //     },
-                            // };
-                            // const undoParams: IUpdateHyperLinkMutationParams = {
-                            //     unitId,
-                            //     subUnitId,
-                            //     id: link.id,
-                            //     payload: {
-                            //         payload: link.payload,
-                            //         display: link.display,
-                            //     },
-                            // };
-                            // redos.push({
-                            //     id: UpdateHyperLinkMutation.id,
-                            //     params: redoParams,
-                            // });
-                            // undos.push({
-                            //     id: UpdateHyperLinkMutation.id,
-                            //     params: undoParams,
-                            // });
                         });
                     }
 

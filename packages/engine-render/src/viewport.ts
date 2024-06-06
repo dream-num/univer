@@ -1484,12 +1484,13 @@ export class Viewport {
                 right: Math.min(prevBound.right, currBound.right),
             });
         }
-        const expand = 10;//this.bufferEdgeX;
+        const expandX = this.bufferEdgeX;
+        const expandY = this.bufferEdgeY;
         for (const bound of additionalAreas) {
-            bound.left = bound.left - expand;
-            bound.right = bound.right + expand;
-            bound.top = bound.top - expand;
-            bound.bottom = bound.bottom + expand;
+            bound.left = bound.left - expandX;
+            bound.right = bound.right + expandX;
+            bound.top = bound.top - expandY;
+            bound.bottom = bound.bottom + expandY;
         }
 
         return additionalAreas;

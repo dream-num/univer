@@ -347,6 +347,6 @@ export class Rectangle {
             bottom,
             width: right - left,
             height: bottom - top,
-        } as IRectLTRB;
+        } as Required<IRectLTRB>;
     }
 }

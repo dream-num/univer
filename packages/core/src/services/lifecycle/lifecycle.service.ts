@@ -78,7 +78,7 @@ export class LifecycleService extends Disposable {
         return new Observable<LifecycleStages>((subscriber) => {
             // Before subscribe, emit the current stage and all previous stages.
             // Since `this._lifecycle$` is a BehaviorSubject, it will emit the current stage immediately.
-        // So we just need to manually next all previous stages.
+            // So we just need to manually next all previous stages.
             if (this.stage === LifecycleStages.Starting) {
                 // do nothing
             } else if (this.stage === LifecycleStages.Ready) {

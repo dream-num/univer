@@ -24,6 +24,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocDrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { DocDrawingUIController } from './controllers/doc-drawing.controller';
 import { DocDrawingUpdateRenderController } from './controllers/render-controllers/doc-drawing-update.render-controller';
+import { DocDrawingTransformUpdateController } from './controllers/doc-drawing-transform-update.controller';
 
 const PLUGIN_NAME = 'DOCS_DRAWING_UI_PLUGIN';
 
@@ -44,6 +45,7 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
         const dependencies: Dependency[] = [
             [DocDrawingUIController],
             [DocDrawingPopupMenuController],
+            [DocDrawingTransformUpdateController],
         ];
 
         dependencies.forEach((dependency) => injector.add(dependency));

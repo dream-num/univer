@@ -95,10 +95,6 @@ export class Marker extends SheetExtension {
                 return;
             }
 
-            if (cellData.markers?.isSkip) {
-                return;
-            }
-
             if (cellData.markers?.tr) {
                 ctx.save();
                 const marker = cellData.markers.tr;

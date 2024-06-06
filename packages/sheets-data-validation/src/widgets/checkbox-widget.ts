@@ -102,10 +102,6 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             return;
         }
 
-        if (data.dataValidation?.isSkip) {
-            return;
-        }
-
         const colors = this._themeService.getCurrentTheme();
         if (!validator.skipDefaultFontRender(rule, value, { unitId, subUnitId })) {
             return;

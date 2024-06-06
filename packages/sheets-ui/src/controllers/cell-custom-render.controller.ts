@@ -134,9 +134,6 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                     const activeRenderInfo = getActiveRender(evt);
                     if (activeRenderInfo) {
                         const [activeRender, cellContext] = activeRenderInfo;
-                        if (cellContext.data.dataValidation?.isSkip) {
-                            return;
-                        }
                         activeRender.onPointerDown?.(cellContext, evt);
                     }
                 });

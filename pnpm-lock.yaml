@@ -1819,13 +1819,13 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/icons':
-        specifier: ^0.1.55
+        specifier: ^0.1.56
         version: 0.1.56(react-dom@18.3.1(react@18.2.0))(react@18.2.0)
       rc-virtual-list:
         specifier: ^3.11.5
         version: 3.11.5(react-dom@18.3.1(react@18.2.0))(react@18.2.0)
       react-dom:
-        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
+        specifier: 18.3.1
         version: 18.3.1(react@18.2.0)
     devDependencies:
       '@univerjs/core':

@@ -20,6 +20,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { DocDrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { DocDrawingUIController } from './controllers/doc-drawing.controller';
 import { DocDrawingUpdateController } from './controllers/doc-drawing-update.controller';
+import { DocDrawingTransformUpdateController } from './controllers/doc-drawing-transform-update.controller';
 
 const PLUGIN_NAME = 'Docs_Drawing_UI_PLUGIN';
 
@@ -47,6 +48,7 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
             [DocDrawingUIController],
             [DocDrawingUpdateController],
             [DocDrawingPopupMenuController],
+            [DocDrawingTransformUpdateController],
         ];
 
         dependencies.forEach((dependency) => injector.add(dependency));

@@ -17,7 +17,6 @@
 import type { ICommandInfo } from '@univerjs/core';
 import {
     BooleanNumber,
-    DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
     Disposable,
     ICommandService,
     LifecycleStages,
@@ -26,13 +25,14 @@ import {
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation, SetDocZoomRatioOperation } from '@univerjs/docs';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import type { Documents, DocumentSkeleton, IRender } from '@univerjs/engine-render';
 import { IRenderManagerService, Liquid } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
-@OnLifecycle(LifecycleStages.Steady, DocFloatingObjectController)
-export class DocFloatingObjectController extends Disposable {
+@OnLifecycle(LifecycleStages.Steady, DocDrawingTransformUpdateController)
+export class DocDrawingTransformUpdateController extends Disposable {
     private _liquid = new Liquid();
 
     private _pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
@@ -41,7 +41,8 @@ export class DocFloatingObjectController extends Disposable {
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IEditorService private readonly _editorService: IEditorService
+        @IEditorService private readonly _editorService: IEditorService,
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService
     ) {
         super();
 
@@ -162,8 +163,6 @@ export class DocFloatingObjectController extends Disposable {
                     }
 
                     this._refreshDrawing(unitId, skeleton, currentRender);
-
-                    // this.calculatePagePosition(currentRender);
                 }
             })
         );
@@ -184,7 +183,7 @@ export class DocFloatingObjectController extends Disposable {
 
         const { pages } = skeletonData;
 
-        const floatObjects: any[] = []; // IFloatingObjectManagerParam
+        const updateDrawings: any[] = []; // IFloatingObjectManagerParam
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
@@ -210,12 +209,12 @@ export class DocFloatingObjectController extends Disposable {
                 const { aLeft, aTop, height, width, drawingId, drawingOrigin } = drawing;
                 const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;
 
-                floatObjects.push({
+                updateDrawings.push({
                     unitId,
-                    subUnitId: DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
-                    floatingObjectId: drawingId,
+                    subUnitId: unitId,
+                    drawingId,
                     behindText,
-                    floatingObject: {
+                    transform: {
                         left: aLeft + docsLeft + this._liquid.x,
                         top: aTop + docsTop + this._liquid.y,
                         width,
@@ -234,6 +233,8 @@ export class DocFloatingObjectController extends Disposable {
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        // this._floatingObjectManagerService.batchAddOrUpdate(floatObjects);
+        if (updateDrawings.length > 0) {
+            this._drawingManagerService.refreshTransform(updateDrawings);
+        }
     }
 }

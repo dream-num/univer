@@ -41,7 +41,6 @@ export class FormulaRenderManagerController extends RxDisposable {
             INTERCEPTOR_POINT.CELL_CONTENT,
             {
                 handler: (cell, pos, next) => {
-
                     // Dealing with precision issues
                     const formulaNumber = extractFormulaNumber(cell);
                     if (formulaNumber !== null) {
@@ -50,7 +49,7 @@ export class FormulaRenderManagerController extends RxDisposable {
                             v: formulaNumber,
                         });
                     }
-                    
+
                     const errorType = extractFormulaError(cell);
                     if (!errorType) {
                         return next(cell);

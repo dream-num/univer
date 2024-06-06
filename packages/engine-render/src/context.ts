@@ -967,11 +967,10 @@ export class UniverRenderingContextWebGL { }
 export class UniverRenderingContextWebGPU { }
 
 export class UniverRenderingContext extends UniverRenderingContext2D {
-    __mode = 'rendering';
 }
 
 export class UniverPrintingContext extends UniverRenderingContext2D {
-    __mode = 'printing';
+    override __mode = 'printing';
 
     private __getScale() {
         const m = this.getTransform();

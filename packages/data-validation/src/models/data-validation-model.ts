@@ -158,13 +158,15 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
     validator(content: Nullable<CellValue>, rule: T, pos: any) {
         const { unitId, subUnitId } = pos;
         const manager = this.ensureManager(unitId, subUnitId);
-        return manager.validator(content, rule, pos, (status: DataValidationStatus) => {
-            this._validStatusChange$.next({
-                unitId,
-                subUnitId,
-                ruleId: rule.uid,
-                status,
-            });
+        return manager.validator(content, rule, pos, (status, changed) => {
+            if (changed) {
+                this._validStatusChange$.next({
+                    unitId,
+                    subUnitId,
+                    ruleId: rule.uid,
+                    status,
+                });
+            }
         });
     }
 
@@ -184,5 +186,9 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
 
     deleteUnitRules(unitId: string) {
         this._model.delete(unitId);
+    }
+
+    getSubUnitIds(unitId: string) {
+        return Array.from(this._model.get(unitId)?.keys() ?? []);
     }
 }

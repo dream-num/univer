@@ -61,8 +61,8 @@ export function docDrawingPositionToTransform(position: IDocDrawingPosition): Nu
     // };
 
     return {
-        left: position.positionH.posOffset,
-        top: position.positionV.posOffset,
+        left: -1000, // position.positionH.posOffset,
+        top: -1000, // position.positionV.posOffset,
         width: position.size.width,
         height: position.size.height,
     };

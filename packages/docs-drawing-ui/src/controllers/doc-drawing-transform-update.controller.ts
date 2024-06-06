@@ -19,27 +19,20 @@ import {
     BooleanNumber,
     Disposable,
     ICommandService,
+    LifecycleStages,
+    OnLifecycle,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation, SetDocZoomRatioOperation } from '@univerjs/docs';
-<<<<<<<< HEAD:packages/docs-ui/src/controllers/render-controllers/doc-floating-object.render-controller.ts
-import type { Documents, DocumentSkeleton, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Liquid } from '@univerjs/engine-render';
-import { IEditorService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
-
-export class DocFloatingObjectRenderController extends Disposable implements IRenderModule {
-========
 import { IDrawingManagerService } from '@univerjs/drawing';
-import type { Documents, DocumentSkeleton, IRender } from '@univerjs/engine-render';
+import type { Documents, DocumentSkeleton, IRender, IRenderContext } from '@univerjs/engine-render';
 import { IRenderManagerService, Liquid } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Steady, DocDrawingTransformUpdateController)
 export class DocDrawingTransformUpdateController extends Disposable {
->>>>>>>> 6e99f640f (feat: insert inline image):packages/docs-drawing-ui/src/controllers/doc-drawing-transform-update.controller.ts
     private _liquid = new Liquid();
 
     private _pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
@@ -47,6 +40,7 @@ export class DocDrawingTransformUpdateController extends Disposable {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorService private readonly _editorService: IEditorService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService
@@ -59,12 +53,81 @@ export class DocDrawingTransformUpdateController extends Disposable {
     }
 
     private _initialize() {
-        this._docSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
-            if (skeleton == null) {
+        this._initialRenderRefresh();
+
+        this._updateOnPluginChange();
+    }
+
+    private _updateOnPluginChange() {
+        // this._drawingManagerService.pluginUpdate$.subscribe((params) => {
+        //     const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
+
+        //     if (docsSkeletonObject == null) {
+        //         return;
+        //     }
+
+        //     const { unitId, skeleton } = docsSkeletonObject;
+
+        //     const currentRender = this._renderManagerService.getRenderById(unitId);
+
+        //     if (currentRender == null) {
+        //         return;
+        //     }
+
+        //     const { mainComponent, components, scene } = currentRender;
+
+        //     const docsComponent = mainComponent as Documents;
+
+        //     const { left: docsLeft, top: docsTop } = docsComponent;
+
+        //     params.forEach((param) => {
+        //         const { unitId, subUnitId, drawingId, drawing } = param;
+
+        //         const { left = 0, top = 0, width = 0, height = 0, angle, flipX, flipY, skewX, skewY } = drawing;
+
+        //         const cache = this._pageMarginCache.get(drawingId);
+
+        //         const marginLeft = cache?.marginLeft || 0;
+        //         const marginTop = cache?.marginTop || 0;
+
+        //         skeleton
+        //             ?.getViewModel()
+        //             .getDataModel()
+        //             .updateDrawing(drawingId, {
+        //                 left: left - docsLeft - marginLeft,
+        //                 top: top - docsTop - marginTop,
+        //                 height,
+        //                 width,
+        //             });
+        //     });
+
+        //     skeleton?.calculate();
+        //     mainComponent?.makeDirty();
+        // });
+    }
+
+    private _initialRenderRefresh() {
+        this._docSkeletonManagerService.currentSkeleton$.subscribe((documentSkeleton) => {
+            if (documentSkeleton == null) {
                 return;
             }
 
-            this._refreshDrawing(skeleton);
+            const { unitId } = this._context;
+
+            const currentRender = this._renderManagerService.getRenderById(unitId);
+
+            if (currentRender == null) {
+                return;
+            }
+
+            const { mainComponent } = currentRender;
+
+            const docsComponent = mainComponent as Documents;
+
+            // TODO: @Jocs, Why NEED change skeleton here?
+            docsComponent.changeSkeleton(documentSkeleton);
+
+            this._refreshDrawing(unitId, documentSkeleton, currentRender);
         });
     }
 
@@ -75,33 +138,36 @@ export class DocDrawingTransformUpdateController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
                     const params = command.params as IRichTextEditingMutationParams;
-                    const { unitId } = params;
+                    const { unitId: commandUnitId } = params;
 
                     const skeleton = this._docSkeletonManagerService.getSkeleton();
-                    if (!skeleton) {
+
+                    const { unitId } = this._context;
+
+                    if (commandUnitId !== unitId) {
+                        return;
+                    }
+
+                    const currentRender = this._renderManagerService.getRenderById(unitId);
+
+                    if (currentRender == null) {
                         return;
                     }
 
                     if (this._editorService.isEditor(unitId)) {
-                        this._context.mainComponent?.makeDirty();
+                        currentRender.mainComponent?.makeDirty();
                         return;
                     }
 
-<<<<<<<< HEAD:packages/docs-ui/src/controllers/render-controllers/doc-floating-object.render-controller.ts
-                    this._refreshDrawing(skeleton);
-========
                     this._refreshDrawing(unitId, skeleton, currentRender);
->>>>>>>> 6e99f640f (feat: insert inline image):packages/docs-drawing-ui/src/controllers/doc-drawing-transform-update.controller.ts
                 }
             })
         );
     }
 
-    private _refreshDrawing(skeleton: DocumentSkeleton) {
+    private _refreshDrawing(unitId: string, skeleton: DocumentSkeleton, currentRender: IRender) {
         const skeletonData = skeleton?.getSkeletonData();
-
-        const { mainComponent, scene, unitId } = this._context;
-
+        const { mainComponent, scene } = currentRender;
         const documentComponent = mainComponent as Documents;
 
         if (!skeletonData) {
@@ -109,15 +175,11 @@ export class DocDrawingTransformUpdateController extends Disposable {
         }
 
         const { left: docsLeft, top: docsTop, pageLayoutType, pageMarginLeft, pageMarginTop } = documentComponent;
-
         const { pages } = skeletonData;
-
         const updateDrawings: any[] = []; // IFloatingObjectManagerParam
-
         const { scaleX, scaleY } = scene.getAncestorScale();
 
         this._liquid.reset();
-
         this._pageMarginCache.clear();
 
         // const objectList: BaseObject[] = [];
@@ -135,7 +197,7 @@ export class DocDrawingTransformUpdateController extends Disposable {
 
             this._liquid.translatePagePadding(page);
             skeDrawings.forEach((drawing) => {
-                const { aLeft, aTop, height, width, drawingId, drawingOrigin } = drawing;
+                const { aLeft, aTop, height, width, angle, drawingId, drawingOrigin } = drawing;
                 const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;
 
                 updateDrawings.push({
@@ -148,6 +210,7 @@ export class DocDrawingTransformUpdateController extends Disposable {
                         top: aTop + docsTop + this._liquid.y,
                         width,
                         height,
+                        angle,
                     },
                 });
 

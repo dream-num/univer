@@ -60,7 +60,7 @@ export const SheetPermissionPanelAddFooter = () => {
                 onClick={() => {
                     sheetPermissionPanelModel.resetRule();
                     const sidebarProps = {
-                        header: { title: '保护行列' },
+                        header: { title: `${localeService.t('permission.panel.title')}` },
                         children: {
                             label: UNIVER_SHEET_PERMISSION_PANEL,
                             showDetail: true,

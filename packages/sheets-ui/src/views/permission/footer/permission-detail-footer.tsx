@@ -136,7 +136,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                     sheetPermissionPanelModel.resetRule();
                     sheetPermissionUserManagerService.setSelectUserList([]);
                     const sidebarProps = {
-                        header: { title: '保护行列' },
+                        header: { title: `${localeService.t('permission.panel.title')}` },
                         children: {
                             label: UNIVER_SHEET_PERMISSION_PANEL,
                             showDetail: false,

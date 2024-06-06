@@ -44,6 +44,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IDocDrawingService private readonly _sheetDrawingService: IDocDrawingService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
+        @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
@@ -211,12 +212,16 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                     return;
                 }
 
-                const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
-                if (sheetDrawing == null) {
+                const docDrawing = this._docDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
+
+                if (docDrawing == null) {
                     return;
                 }
 
-                const docTransform = transformToDocDrawingPosition({ ...sheetDrawing.transform, ...transform });
+                // const { marginLeft, marginTop } = pageMarginCache.get(drawingId) || { marginLeft: 0, marginTop: 0 };
+
+                const docTransform = transformToDocDrawingPosition({ ...docDrawing.transform, ...transform });
+
                 if (docTransform == null) {
                     return;
                 }
@@ -264,10 +269,10 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             this._drawingManagerService.focus$.subscribe((params) => {
                 if (params == null || params.length === 0) {
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
-                    this._sheetDrawingService.focusDrawing([]);
+                    this._docDrawingService.focusDrawing([]);
                 } else {
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
-                    this._sheetDrawingService.focusDrawing(params);
+                    this._docDrawingService.focusDrawing(params);
                 }
             })
         );

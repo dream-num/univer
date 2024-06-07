@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-hyper-link",
-    "version": "0.1.13",
+    "version": "0.1.14",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -58,12 +58,17 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@wendellhu/redi": "0.15.2",
         "rxjs": ">=7.0.0"
     },
+    "dependencies": {
+
+    },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/protocol": "^0.1.36",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",

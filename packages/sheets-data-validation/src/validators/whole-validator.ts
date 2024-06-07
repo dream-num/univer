@@ -82,7 +82,7 @@ export class WholeValidator extends BaseDataValidator<number> {
         return info;
     }
 
-    override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
+    override validatorFormula(rule: IDataValidationRuleBase, unitId: string, subUnitId: string): IFormulaValidResult {
         const operator = rule.operator;
         if (!operator) {
             return {

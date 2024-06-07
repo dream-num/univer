@@ -1,5 +1,46 @@
 
 
+## [0.1.14](https://github.com/dream-num/univer/compare/v0.1.13...v0.1.14) (2024-06-07)
+
+
+### Bug Fixes
+
+* build error ([#2436](https://github.com/dream-num/univer/issues/2436)) ([d497b03](https://github.com/dream-num/univer/commit/d497b03a5b8894589401034da340fce3c8f105c3))
+* **drawing:** plugin name ([#2402](https://github.com/dream-num/univer/issues/2402)) ([296f399](https://github.com/dream-num/univer/commit/296f399408e3d6d4293c43e5acf064d5717f7de9))
+* fix findDOMNode deprecation issue under React 18.3.1 ([#2403](https://github.com/dream-num/univer/issues/2403)) ([41d21c3](https://github.com/dream-num/univer/commit/41d21c31ebe133a436e811ba42787b438a29f319))
+* fix layer ([#2421](https://github.com/dream-num/univer/issues/2421)) ([ad7b3b5](https://github.com/dream-num/univer/commit/ad7b3b5bc15e307f9ab70bbab89b6522b655660d))
+* fix list lint ([#2406](https://github.com/dream-num/univer/issues/2406)) ([eb8737c](https://github.com/dream-num/univer/commit/eb8737c972d80d9613f8b6a6af8f2dea6a95fe72))
+* fix menu status is incorrect because focusedOnDrawing$ have not initial value  ([#2431](https://github.com/dream-num/univer/issues/2431)) ([5b7bc17](https://github.com/dream-num/univer/commit/5b7bc17b89abf81d39a07f5873af3261a436f81e))
+* fix permissions wrong reference render-engine in sheets package ([#2396](https://github.com/dream-num/univer/issues/2396)) ([10387e4](https://github.com/dream-num/univer/commit/10387e48b92ad0134f0bf17e82dd28e938b4465d))
+* **formula:** export AsyncObject ([#2438](https://github.com/dream-num/univer/issues/2438)) ([08df397](https://github.com/dream-num/univer/commit/08df397e136754a89525bf2d3bb3926f300d7d2f))
+* **formula:** js precision problem ([#2371](https://github.com/dream-num/univer/issues/2371)) ([d2c9eeb](https://github.com/dream-num/univer/commit/d2c9eebc19f233e8ce422c8467a66b394c5f7b2d))
+* **meesage:** fix in node env, the document not exist ([#2415](https://github.com/dream-num/univer/issues/2415)) ([8657cc4](https://github.com/dream-num/univer/commit/8657cc40841c80b66ce4a9880abc6db992c40b52))
+* message node env ([#2417](https://github.com/dream-num/univer/issues/2417)) ([3dd2d6a](https://github.com/dream-num/univer/commit/3dd2d6a1b6e3f1730514057c6a5e3c75a82f31ec))
+* not escape when copy content ([#2354](https://github.com/dream-num/univer/issues/2354)) ([c10e4d9](https://github.com/dream-num/univer/commit/c10e4d93e3995cb799ca796856f5d09b8801364b))
+* sync actions between formula editor and cell editor ([#2380](https://github.com/dream-num/univer/issues/2380)) ([bdf033c](https://github.com/dream-num/univer/commit/bdf033c2ed5bb40cb5dc3a2aac8f7d8cd7332317))
+* **ui:** fix findDOMNode is deprecated warning when collapsing the toolbar ([#2413](https://github.com/dream-num/univer/issues/2413)) ([754fad2](https://github.com/dream-num/univer/commit/754fad23005fae3df58682f1a9fc81aab8181bc0))
+* **ui:** fix flickering on register ui parts ([#2430](https://github.com/dream-num/univer/issues/2430)) ([2d036a3](https://github.com/dream-num/univer/commit/2d036a3bd50134906195fdd40df48e97a5bb7501))
+* **ui:** fix ineffective `hidden` property in menu configurations ([#2420](https://github.com/dream-num/univer/issues/2420)) ([c2b0019](https://github.com/dream-num/univer/commit/c2b0019ef394389d103adcd5645445da38c80723))
+* **ui:** fix possible race conditions for ComponentContainer ([29af7c2](https://github.com/dream-num/univer/commit/29af7c2abc3d247f422aa3d071e0ccc02615ff5e))
+
+
+### Features
+
+* add scrollLeftTop for sheet snapshot ([#2348](https://github.com/dream-num/univer/issues/2348)) ([38d8003](https://github.com/dream-num/univer/commit/38d8003af71c13c319a54dc3e7fe948984375218))
+* add Tools.set method ([#2399](https://github.com/dream-num/univer/issues/2399)) ([ea8f50c](https://github.com/dream-num/univer/commit/ea8f50cb63193fd6f90e8a4e68500b809c075800))
+* add workbook permission ([#2391](https://github.com/dream-num/univer/issues/2391)) ([0a9a980](https://github.com/dream-num/univer/commit/0a9a980c091060596678130b6a3039c17a08a194))
+* **InsertSheetCommand:** allow using partial sheet from params as sheetconfig ([#2429](https://github.com/dream-num/univer/issues/2429)) ([ce85854](https://github.com/dream-num/univer/commit/ce858541eec01cadd18b16f395a4d5195be18e86))
+* **network:** add http auth interceptor ([#2424](https://github.com/dream-num/univer/issues/2424)) ([066941a](https://github.com/dream-num/univer/commit/066941a50d9e545a7271118bc0b815c9a141626a))
+* **permission-share:** support permission share ([#2416](https://github.com/dream-num/univer/issues/2416)) ([0332000](https://github.com/dream-num/univer/commit/0332000ecb5b89ee5a53c1af92530d63341b2942))
+* **sheets-data-validation:** add validator service allowing developer to get status of data-validation ([#2412](https://github.com/dream-num/univer/issues/2412)) ([12d531d](https://github.com/dream-num/univer/commit/12d531dc16a64918e2e91b7ee364924ddfd978a9))
+* **sheets-ui:** support drawing print ([#2418](https://github.com/dream-num/univer/issues/2418)) ([f24cace](https://github.com/dream-num/univer/commit/f24cacef51e6c49d54267a5a16df355bf05676f8))
+* **ui:** enhance component container ([#2395](https://github.com/dream-num/univer/issues/2395)) ([54460f9](https://github.com/dream-num/univer/commit/54460f9a8b0f20c5be357476ae490d6367747681))
+
+
+### Reverts
+
+* Revert "feat: add scrollLeftTop for sheet snapshot (#2348)" (#2398) ([1e5c40c](https://github.com/dream-num/univer/commit/1e5c40c974246e93c06c794a104aa0f6716138e3)), closes [#2348](https://github.com/dream-num/univer/issues/2348) [#2398](https://github.com/dream-num/univer/issues/2398)
+
 ## [0.1.13](https://github.com/dream-num/univer/compare/v0.1.12...v0.1.13) (2024-06-03)
 
 

@@ -89,7 +89,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     this._scrollToSelection();
                 } else if (command.id === ScrollToCellOperation.id) {
                     const param = command.params as IRange;
-                    this._scrollToSelectionByDirection(param);
+                    this.scrollToRange(param);
                 } else if (command.id === ExpandSelectionCommand.id) {
                     const param = command.params as IExpandSelectionCommandParams;
                     this._scrollToSelectionForExpand(param);

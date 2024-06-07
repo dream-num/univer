@@ -31,7 +31,7 @@ export class CustomFormulaValidator extends BaseDataValidator {
 
     private _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
 
-    override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
+    override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
         const success = isFormulaString(rule.formula1);
         return {
             success,

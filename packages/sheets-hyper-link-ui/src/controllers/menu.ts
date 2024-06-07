@@ -49,7 +49,7 @@ export const insertLinkMenuToolbarFactory = (accessor: IAccessor) => {
 };
 
 export const InsertLinkShortcut: IShortcutItem = {
-    id: InsertHyperLinkOperation.id,
+    id: InsertHyperLinkToolbarOperation.id,
     binding: KeyCode.K | MetaKeys.CTRL_COMMAND,
     preconditions: whenSheetEditorFocused,
 };

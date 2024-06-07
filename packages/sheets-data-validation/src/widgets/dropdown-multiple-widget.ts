@@ -17,7 +17,7 @@
 import { HorizontalAlign, ICommandService, VerticalAlign } from '@univerjs/core';
 import type { ICellRenderContext } from '@univerjs/core';
 import { getFontStyleString } from '@univerjs/engine-render';
-import type { IMouseEvent, IPointerEvent, Spreadsheet, SpreadsheetSkeleton, UniverRenderingContext2D } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, Spreadsheet, SpreadsheetSkeleton, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import type { ListMultipleValidator } from '../validators/list-multiple-validator';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
@@ -147,7 +147,7 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
             items.forEach((item) => {
                 ctx.save();
                 ctx.translateWithPrecision(item.left, 0);
-                Dropdown.drawWith(ctx, {
+                Dropdown.drawWith(ctx as UniverRenderingContext, {
                     ...fontStyle,
                     info: item,
                     color,

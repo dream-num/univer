@@ -18,10 +18,9 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DependentOn, ICommandService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+import { UniverSheetsThreadCommentBasePlugin } from '@univerjs/sheets-thread-comment-base';
 import type { IUniverSheetsThreadCommentConfig } from './controllers/sheets-thread-comment.controller';
 import { DefaultSheetsThreadCommentConfig, SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
-import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
-import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
 import { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 import { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
 import { SheetsThreadCommentRenderController } from './controllers/render-controllers/render.controller';
@@ -30,7 +29,7 @@ import { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thr
 import { SheetsThreadCommentHoverController } from './controllers/sheets-thread-comment-hover.controller';
 import { ThreadCommentRemoveSheetsController } from './controllers/sheets-thread-comment-remove.controller';
 
-@DependentOn(UniverThreadCommentUIPlugin)
+@DependentOn(UniverThreadCommentUIPlugin, UniverSheetsThreadCommentBasePlugin)
 export class UniverSheetsThreadCommentPlugin extends Plugin {
     static override pluginName = SHEETS_THREAD_COMMENT;
     static override type = UniverInstanceType.UNIVER_SHEET;
@@ -49,14 +48,12 @@ export class UniverSheetsThreadCommentPlugin extends Plugin {
 
     override onStarting(injector: Injector): void {
         ([
-            [SheetsThreadCommentModel],
             [
                 SheetsThreadCommentController,
                 {
                     useFactory: () => this._injector.createInstance(SheetsThreadCommentController, this._pluginConfig),
                 },
             ],
-            [SheetsThreadCommentRefRangeController],
             [SheetsThreadCommentRenderController],
             [SheetsThreadCommentCopyPasteController],
             [SheetsThreadCommentHoverController],

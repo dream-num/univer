@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMouseEvent, IPointerEvent, UniverRenderingContext2D } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-render';
 import { HorizontalAlign, ICommandService, isFormulaString, ThemeService, VerticalAlign } from '@univerjs/core';
 import type { ICellRenderContext, IDataValidationRule, IStyleData, Nullable } from '@univerjs/core';
@@ -141,7 +141,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         const checked = String(value) === String(formula1);
         const defaultColor = colors.hyacinth500;
 
-        Checkbox.drawWith(ctx, {
+        Checkbox.drawWith(ctx as UniverRenderingContext, {
             checked,
             width: size,
             height: size,

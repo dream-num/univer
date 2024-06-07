@@ -550,6 +550,18 @@ export function isValidRange(range: IRange): boolean {
         return false;
     }
 
+    if (
+        rangeType !== RANGE_TYPE.ROW &&
+        rangeType !== RANGE_TYPE.COLUMN && (
+            Number.isNaN(startColumn) ||
+            Number.isNaN(startRow) ||
+            Number.isNaN(endColumn) ||
+            Number.isNaN(endRow)
+        )
+    ) {
+        return false;
+    }
+
     return true;
 }
 

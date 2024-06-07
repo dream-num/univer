@@ -193,9 +193,10 @@ export class HyperLinkModel extends Disposable {
         this._linkUpdate$.next({
             unitId,
             subUnitId,
-            payload: link,
+            payload: position.link,
             type: 'remove',
         });
+
         return true;
     }
 

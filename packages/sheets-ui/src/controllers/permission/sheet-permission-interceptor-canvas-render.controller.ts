@@ -17,8 +17,7 @@
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
 import { DisposableCollection, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { getSheetCommandTarget, RangeProtectionRuleModel, SelectionManagerService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
-import { IDialogService } from '@univerjs/ui';
+import { Inject, Optional } from '@wendellhu/redi';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 
 import { UnitAction } from '@univerjs/protocol';
@@ -40,12 +39,11 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @IDialogService private readonly _dialogService: IDialogService,
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(HeaderMoveRenderController) private _headerMoveRenderController: HeaderMoveRenderController,
-        @Inject(HeaderResizeRenderController) private _headerResizeRenderController: HeaderResizeRenderController,
         @ISelectionRenderService private _selectionRenderService: ISelectionRenderService,
-        @Inject(HeaderFreezeRenderController) private _headerFreezeRenderController: HeaderFreezeRenderController
+        @Inject(HeaderFreezeRenderController) private _headerFreezeRenderController: HeaderFreezeRenderController,
+        @Optional(HeaderResizeRenderController) private _headerResizeRenderController?: HeaderResizeRenderController
     ) {
         super();
         this._initHeaderMovePermissionInterceptor();
@@ -100,6 +98,10 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
     }
 
     private _initHeaderResizePermissionInterceptor() {
+        if (!this._headerResizeRenderController) {
+            return;
+        }
+
         this.disposeWithMe(
             this._headerResizeRenderController.interceptor.intercept(this._headerResizeRenderController.interceptor.getInterceptPoints().HEADER_RESIZE_PERMISSION_CHECK, {
                 handler: (defaultValue: Nullable<boolean>, rangeParams: { row?: number; col?: number }) => {

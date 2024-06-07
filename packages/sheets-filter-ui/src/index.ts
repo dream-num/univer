@@ -15,6 +15,7 @@
  */
 
 export { UniverSheetsFilterUIPlugin } from './plugin';
+export { UniverSheetsFilterMobileUIPlugin } from './mobile-plugin';
 export * as zhCN from './locale/zh-CN';
 export * as enUS from './locale/en-US';
 export * as ruRU from './locale/ru-RU';

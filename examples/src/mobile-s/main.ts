@@ -24,6 +24,8 @@ import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import type { FUniver } from '@univerjs/facade';
+import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import { UniverSheetsFilterMobileUIPlugin } from '@univerjs/sheets-filter-ui';
 import { enUS } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 
@@ -60,6 +62,8 @@ univer.registerPlugin(UniverSheetsPlugin, {
 univer.registerPlugin(UniverSheetsMobileUIPlugin);
 
 // sheet feature plugins
+univer.registerPlugin(UniverSheetsFilterPlugin);
+univer.registerPlugin(UniverSheetsFilterMobileUIPlugin);
 
 // univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin, {

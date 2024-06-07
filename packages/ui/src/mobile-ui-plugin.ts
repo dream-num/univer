@@ -107,7 +107,7 @@ export class UniverMobileUIPlugin extends Plugin {
             [
                 SharedController,
                 {
-                    useFactory: () => this._injector.createInstance(SharedController),
+                    useFactory: () => this._injector.createInstance(SharedController, this._config),
                 },
             ],
             [ErrorController],

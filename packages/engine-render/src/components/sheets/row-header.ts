@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import { SheetRowHeaderExtensionRegistry } from '../extension';
-import type { RowHeaderLayout } from './extensions/row-header-layout';
+import type { IRowsHeaderCfgParam, RowHeaderLayout } from './extensions/row-header-layout';
 import { SpreadsheetHeader } from './sheet-component';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
 
@@ -79,7 +79,7 @@ export class SpreadsheetRowHeader extends SpreadsheetHeader {
     }
 
     override isHit(coord: Vector2) {
-        const oCoord = this.getInverseCoord(coord);
+        const oCoord = this._getInverseCoord(coord);
         const skeleton = this.getSkeleton();
         if (!skeleton) {
             return false;
@@ -96,5 +96,10 @@ export class SpreadsheetRowHeader extends SpreadsheetHeader {
             this.register(extension);
         });
         this._rowHeaderLayoutExtension = this.getExtensionByKey('DefaultRowHeaderLayoutExtension') as RowHeaderLayout;
+    }
+
+    setCustomHeader(cfg: IRowsHeaderCfgParam) {
+        this.makeDirty(true);
+        this._rowHeaderLayoutExtension.configHeaderRow(cfg);
     }
 }

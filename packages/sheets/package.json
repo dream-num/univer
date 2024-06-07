@@ -69,7 +69,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "^0.1.36"
+        "@univerjs/protocol": "^0.1.37"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

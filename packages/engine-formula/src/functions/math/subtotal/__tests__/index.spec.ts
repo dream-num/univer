@@ -275,12 +275,16 @@ describe('Test subtotal', () => {
             expect(result).toBe(11.157);
         });
         it('Count, Var1 is array, var2 is array', async () => {
-            const result = await calculate('=SUBTOTAL(2,A1:B2,A3:F4)');
+            let result = await calculate('=SUBTOTAL(2,A1:B2,A3:F4)');
             expect(result).toBe(10);
+            result = await calculate('=SUBTOTAL(2,B1:C1)');
+            expect(result).toBe(1);
         });
         it('Counta, Var1 is array, var2 is array', async () => {
-            const result = await calculate('=SUBTOTAL(3,A1:B2,A3:F4)');
+            let result = await calculate('=SUBTOTAL(3,A1:B2,A3:F4)');
             expect(result).toBe(14);
+            result = await calculate('=SUBTOTAL(3,B1:C1)');
+            expect(result).toBe(2);
         });
         it('Max, Var1 is array, var2 is array', async () => {
             const result = await calculate('=SUBTOTAL(4,A1:B2,A3:F4)');

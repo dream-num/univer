@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
-    IUndoRedoService,
+    IUniverInstanceService,
+    JSONX,
+    MemoryCursor,
+    TextX,
+    TextXActionType,
 } from '@univerjs/core';
-import { DocDrawingApplyType, IDocDrawingService, SetDocDrawingApplyMutation } from '@univerjs/docs-drawing';
 import type { IAccessor } from '@wendellhu/redi';
-import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { ClearDocDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import { RichTextEditingMutation } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IDeleteDrawingCommandParams } from './interfaces';
 
 /**
@@ -32,46 +36,97 @@ import type { IDeleteDrawingCommandParams } from './interfaces';
 export const RemoveDocDrawingCommand: ICommand = {
     id: 'doc.command.remove-doc-image',
     type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params?: IDeleteDrawingCommandParams) => {
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
 
-        const docDrawingService = accessor.get(IDocDrawingService);
-
-        if (!params) return false;
-
-        const { drawings } = params;
-
-        const unitIds: string[] = [];
-
-        drawings.forEach((param) => {
-            const { unitId } = param;
-            unitIds.push(unitId);
-        });
-
-        const jsonOp = docDrawingService.getBatchRemoveOp(drawings) as IDrawingJsonUndo1;
-
-        const { unitId, subUnitId, undo, redo, objects } = jsonOp;
-
-        // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.syncExecuteCommand(SetDocDrawingApplyMutation.id, { unitId, subUnitId, op: redo, objects, type: DocDrawingApplyType.REMOVE });
-
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: [
-                    { id: SetDocDrawingApplyMutation.id, params: { unitId, subUnitId, op: undo, objects, type: DocDrawingApplyType.INSERT } },
-                    { id: ClearDocDrawingTransformerOperation.id, params: unitIds },
-                ],
-                redoMutations: [
-                    { id: SetDocDrawingApplyMutation.id, params: { unitId, subUnitId, op: redo, objects, type: DocDrawingApplyType.REMOVE } },
-                    { id: ClearDocDrawingTransformerOperation.id, params: unitIds },
-                ],
-            });
-
-            return true;
+        if (params == null || documentDataModel == null) {
+            return false;
         }
 
-        return false;
+        const { drawings: removeDrawings } = params;
+
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+        const customBlocks = documentDataModel.getBody()?.customBlocks ?? [];
+        const removeCustomBlocks = removeDrawings
+            .map((drawing) => customBlocks.find((customBlock) => customBlock.blockId === drawing.drawingId))
+            .filter((block) => !!block)
+            .sort((a, b) => a!.startIndex > b!.startIndex ? 1 : -1);
+
+        const unitId = removeDrawings[0].unitId;
+
+        const memoryCursor = new MemoryCursor();
+
+        memoryCursor.reset();
+
+        const cursorIndex = removeCustomBlocks[0]!.startIndex;
+        const textRanges = [
+            {
+                startOffset: cursorIndex,
+                endOffset: cursorIndex,
+            },
+        ] as ITextRangeWithStyle[];
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges,
+            },
+        };
+
+        const rawActions: JSONXActions = [];
+
+        for (const block of removeCustomBlocks) {
+            const { startIndex } = block!;
+
+            if (startIndex > memoryCursor.cursor) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: startIndex - memoryCursor.cursor,
+                    segmentId: '',
+                });
+            }
+
+            textX.push({
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+                segmentId: '',
+            });
+
+            memoryCursor.moveCursorTo(startIndex + 1);
+        }
+
+        rawActions.push(jsonX.editOp(textX.serialize())!);
+
+        for (const block of removeCustomBlocks) {
+            const { blockId } = block!;
+
+            const drawing = (documentDataModel.getDrawings() ?? {})[blockId];
+            const drawingOrder = documentDataModel.getDrawingsOrder();
+            const drawingIndex = drawingOrder!.indexOf(blockId);
+
+            const removeDrawingAction = jsonX.removeOp(['drawings', blockId], drawing);
+            const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], blockId);
+
+            rawActions.push(removeDrawingAction!);
+            rawActions.push(removeDrawingOrderAction!);
+        }
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
     },
 };

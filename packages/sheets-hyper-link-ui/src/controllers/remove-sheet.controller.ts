@@ -19,7 +19,7 @@ import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Unive
 import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
 import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-import { AddHyperLinkCommand, HyperLinkModel, RemoveHyperLinkCommand } from '@univerjs/sheets-hyper-link';
+import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkRemoveSheetController)
 export class SheetsHyperLinkRemoveSheetController extends Disposable {
@@ -47,7 +47,7 @@ export class SheetsHyperLinkRemoveSheetController extends Disposable {
                         const links = this._hyperLinkModel.getSubUnit(unitId, subUnitId);
 
                         const redos = links.map((link) => ({
-                            id: RemoveHyperLinkCommand.id,
+                            id: RemoveHyperLinkMutation.id,
                             params: {
                                 unitId,
                                 subUnitId,
@@ -56,14 +56,13 @@ export class SheetsHyperLinkRemoveSheetController extends Disposable {
                         }));
 
                         const undos = links.map((link) => ({
-                            id: AddHyperLinkCommand.id,
+                            id: AddHyperLinkMutation.id,
                             params: {
                                 unitId,
                                 subUnitId,
                                 link,
                             },
                         }));
-
                         return { redos, undos };
                     }
                     return { redos: [], undos: [] };

@@ -92,20 +92,18 @@ export class DocDrawingUpdateController extends Disposable {
 
                     this._imageIoService.setWaitCount(fileLength);
 
-                    params.files.forEach(async (file) => {
-                        await this._insertFloatImage(file);
-                    });
+                    await this._insertFloatImages(params.files);
                 }
             })
         );
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private async _insertFloatImage(file: File) {
-        let imageParam: Nullable<IImageIoServiceParam>;
+    private async _insertFloatImages(files: File[]) {
+        let imageParams: Nullable<IImageIoServiceParam>[] = [];
 
         try {
-            imageParam = await this._imageIoService.saveImage(file);
+            imageParams = await Promise.all(files.map((file) => this._imageIoService.saveImage(file)));
         } catch (error) {
             const type = (error as Error).message;
             if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
@@ -126,7 +124,7 @@ export class DocDrawingUpdateController extends Disposable {
             }
         }
 
-        if (imageParam == null) {
+        if (imageParams.length === 0) {
             return;
         }
 
@@ -134,50 +132,60 @@ export class DocDrawingUpdateController extends Disposable {
         if (info == null) {
             return;
         }
+
         const { unitId, subUnitId } = info;
-        const { imageId, imageSourceType, source, base64Cache } = imageParam;
-        const { width, height, image } = await getImageSize(base64Cache || '');
+        const docDrawingParams: IDocDrawing[] = [];
 
-        const renderObject = this._renderManagerService.getRenderById(unitId);
+        for (const imageParam of imageParams) {
+            if (imageParam == null) {
+                continue;
+            }
+            const { imageId, imageSourceType, source, base64Cache } = imageParam;
+            const { width, height, image } = await getImageSize(base64Cache || '');
 
-        if (renderObject == null) {
-            return;
+            const renderObject = this._renderManagerService.getRenderById(unitId);
+
+            if (renderObject == null) {
+                return;
+            }
+
+            const { width: sceneWidth, height: sceneHeight } = renderObject.scene;
+
+            this._imageIoService.addImageSourceCache(imageId, imageSourceType, image);
+
+            let scale = 1;
+            if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
+                const scaleWidth = DRAWING_IMAGE_WIDTH_LIMIT / width;
+                const scaleHeight = DRAWING_IMAGE_HEIGHT_LIMIT / height;
+                scale = Math.max(scaleWidth, scaleHeight);
+            }
+
+            const docTransform = this._getImagePosition(width * scale, height * scale, sceneWidth, sceneHeight);
+
+            if (docTransform == null) {
+                return;
+            }
+
+            const docDrawingParam: IDocDrawing = {
+                unitId,
+                subUnitId,
+                drawingId: imageId,
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                imageSourceType,
+                source,
+                transform: docDrawingPositionToTransform(docTransform),
+                docTransform,
+                title: '',
+                description: '',
+                layoutType: PositionedObjectLayoutType.INLINE,
+            };
+
+            docDrawingParams.push(docDrawingParam);
         }
-
-        const { width: sceneWidth, height: sceneHeight } = renderObject.scene;
-
-        this._imageIoService.addImageSourceCache(imageId, imageSourceType, image);
-
-        let scale = 1;
-        if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
-            const scaleWidth = DRAWING_IMAGE_WIDTH_LIMIT / width;
-            const scaleHeight = DRAWING_IMAGE_HEIGHT_LIMIT / height;
-            scale = Math.max(scaleWidth, scaleHeight);
-        }
-
-        const docTransform = this._getImagePosition(width * scale, height * scale, sceneWidth, sceneHeight);
-
-        if (docTransform == null) {
-            return;
-        }
-
-        const docDrawingParam: IDocDrawing = {
-            unitId,
-            subUnitId,
-            drawingId: imageId,
-            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-            imageSourceType,
-            source,
-            transform: docDrawingPositionToTransform(docTransform),
-            docTransform,
-            title: '',
-            description: '',
-            layoutType: PositionedObjectLayoutType.INLINE,
-        };
 
         this._commandService.executeCommand(InsertDocDrawingCommand.id, {
             unitId,
-            drawings: [docDrawingParam],
+            drawings: docDrawingParams,
         } as IInsertDrawingCommandParams);
 
         // this._docSkeletonManagerService.getCurrent()?.skeleton.calculate();

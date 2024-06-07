@@ -241,12 +241,14 @@ export class TextSelectionController extends Disposable {
 
                 // The initial cursor is set at the beginning of the document,
                 // and can be set to the previous cursor position in the future.
-                this._textSelectionManagerService.replaceTextRanges([
-                    {
-                        startOffset: 0,
-                        endOffset: 0,
-                    },
-                ], false);
+                if (!this._editorService.isEditor(unitId)) {
+                    this._textSelectionManagerService.replaceTextRanges([
+                        {
+                            startOffset: 0,
+                            endOffset: 0,
+                        },
+                    ], false);
+                }
             })
         );
     }

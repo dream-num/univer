@@ -25,7 +25,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
-import { CURSOR_TYPE, DeviceInputEventType, Rect, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, Rect, Vector2 } from '@univerjs/engine-render';
 import type {
     IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommand,
@@ -35,7 +35,6 @@ import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHe
 import { Inject } from '@wendellhu/redi';
 
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY, VIEWPORT_KEY } from '../../common/keys';
-import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
     HEADER_MENU_SHAPE_THUMB_SIZE,
@@ -89,8 +88,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -375,10 +373,11 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
                     scene.disableEvent();
 
-                    this._editorBridgeService.changeVisible({
-                        visible: false,
-                        eventType: DeviceInputEventType.PointerDown,
-                    });
+                    // TODO: do it in another way
+                    // this._editorBridgeService.changeVisible({
+                    //     visible: false,
+                    //     eventType: DeviceInputEventType.PointerDown,
+                    // });
 
                     this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                         const relativeCoords = scene.getRelativeCoord(

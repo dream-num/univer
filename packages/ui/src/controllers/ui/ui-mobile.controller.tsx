@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleService, LifecycleStages, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Optional } from '@wendellhu/redi';
@@ -23,16 +23,15 @@ import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import React from 'react';
 
 import { ILayoutService } from '../../services/layout/layout.service';
-import { DesktopApp } from '../../views/DesktopApp';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { FloatDom } from '../../views/components/dom/FloatDom';
-import type { IUniverUIConfig, IWorkbenchOptions } from './ui.controller';
+import { MobileApp } from '../../views/MobileApp';
+import type { IUIController, IUniverUIConfig, IWorkbenchOptions } from './ui.controller';
 
 const STEADY_TIMEOUT = 3000;
 
-@OnLifecycle(LifecycleStages.Ready, DesktopUIController)
-export class DesktopUIController extends Disposable {
+export class MobileUIController extends Disposable implements IUIController {
     constructor(
         private readonly _config: IUniverUIConfig,
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
@@ -57,7 +56,6 @@ export class DesktopUIController extends Disposable {
                     this.disposeWithMe(this._layoutService.registerCanvasElement(canvasElement as HTMLCanvasElement));
                 }
 
-                // TODO: this is subject to change in the future
                 this._renderManagerService.currentRender$.subscribe((renderId) => {
                     if (renderId) {
                         const render = this._renderManagerService.getRenderById(renderId)!;
@@ -107,7 +105,7 @@ function bootstrap(
         mountContainer = createContainer('univer');
     }
 
-    const ConnectedApp = connectInjector(DesktopApp, injector);
+    const ConnectedApp = connectInjector(MobileApp, injector);
     const onRendered = (canvasElement: HTMLElement) => callback(canvasElement, mountContainer);
 
     function render() {

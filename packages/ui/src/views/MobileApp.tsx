@@ -22,9 +22,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';
 import { BuiltInUIPart } from '../services/parts/parts.service';
-import styles from './app.module.less';
+import styles from './mobile-app.module.less';
 import { ComponentContainer, useComponentsOfPart } from './components/ComponentContainer';
-import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
 import { builtInGlobalComponents } from './parts';
@@ -36,7 +35,7 @@ export interface IUniverAppProps extends IWorkbenchOptions {
     onRendered?: (container: HTMLElement) => void;
 }
 
-export function App(props: IUniverAppProps) {
+export function MobileApp(props: IUniverAppProps) {
     const {
         header = true,
         footer = true,
@@ -109,7 +108,7 @@ export function App(props: IUniverAppProps) {
                 {/* header */}
                 {header && (
                     <header className={styles.appContainerHeader}>
-                        <Toolbar headerMenuComponents={headerMenuComponents} />
+                        {/* <Toolbar headerMenuComponents={headerMenuComponents} /> */}
                     </header>
                 )}
 

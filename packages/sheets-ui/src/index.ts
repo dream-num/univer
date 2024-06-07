@@ -106,3 +106,4 @@ export { StatusBarController } from './controllers/status-bar.controller';
 export { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';
+export { UniverSheetsMobileUIPlugin } from './mobile-sheets-ui-plugin';

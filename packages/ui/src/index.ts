@@ -78,6 +78,7 @@ export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.servic
 export { ISidebarService } from './services/sidebar/sidebar.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';
 export { UniverUIPlugin, DISABLE_AUTO_FOCUS_KEY } from './ui-plugin';
+export { UniverMobileUIPlugin } from './mobile-ui-plugin';
 export * from './utils';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
 export { ComponentContainer, useComponentsOfPart, type IComponentContainerProps } from './views/components/ComponentContainer';

@@ -22,13 +22,10 @@ import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverMobileUIPlugin } from '@univerjs/ui';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
-import { EditingController } from './controllers/editor/editing.controller';
-import { EndEditController } from './controllers/editor/end-edit.controller';
-import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
-import { StartEditController } from './controllers/editor/start-edit.controller';
 import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
 import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 import { HeaderMenuRenderController } from './controllers/render-controllers/header-menu.render-controller';
@@ -39,16 +36,10 @@ import { MarkSelectionRenderController } from './controllers/mark-selection.cont
 import { SelectionRenderController } from './controllers/render-controllers/selection.render-controller';
 import { SheetsRenderService } from './services/sheets-render.service';
 import type { IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
-import { DefaultSheetUiConfig, SheetUIController } from './controllers/sheet-ui.controller';
+import { DefaultSheetUiConfig } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
-import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
-import {
-    FormulaEditorManagerService,
-    IFormulaEditorManagerService,
-} from './services/editor/formula-editor-manager.service';
-import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
@@ -69,9 +60,6 @@ import { ForceStringAlertRenderController } from './controllers/force-string-ale
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
-import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
-import { AutoFillController } from './controllers/auto-fill.controller';
-import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
 import { DragRenderController } from './controllers/drag-render.controller';
 import { DragManagerService } from './services/drag-manager.service';
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
@@ -84,9 +72,10 @@ import { SheetPermissionPanelModel } from './services/permission/sheet-permissio
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 import { WorksheetProtectionRenderService } from './services/permission/worksheet-permission-render.service';
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
+import { SheetUIMobileController } from './controllers/mobile-sheet-ui.controller';
 
-@DependentOn(UniverSheetsPlugin)
-export class UniverSheetsUIPlugin extends Plugin {
+@DependentOn(UniverSheetsPlugin, UniverMobileUIPlugin)
+export class UniverSheetsMobileUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';
     static override type = UniverInstanceType.UNIVER_SHEET;
 
@@ -107,12 +96,9 @@ export class UniverSheetsUIPlugin extends Plugin {
             [
                 // services
                 [ShortcutExperienceService],
-                [IEditorBridgeService, { useClass: EditorBridgeService }],
                 [ISheetClipboardService, { useClass: SheetClipboardService }],
                 [ISheetBarService, { useClass: SheetBarService }],
                 [IFormatPainterService, { useClass: FormatPainterService }],
-                [ICellEditorManagerService, { useClass: CellEditorManagerService }],
-                [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
                 [IAutoFillService, { useClass: AutoFillService }],
                 [SheetPrintInterceptorService],
 
@@ -130,22 +116,18 @@ export class UniverSheetsUIPlugin extends Plugin {
                 // controllers
                 [ActiveWorksheetController],
                 [AutoHeightController],
-                [EndEditController],
-                [FormulaEditorController],
                 [HeaderFreezeRenderController],
                 [SheetClipboardController],
                 [SheetsRenderService],
                 [
-                    SheetUIController,
+                    SheetUIMobileController,
                     {
-                        useFactory: () => this._injector.createInstance(SheetUIController, this._config),
+                        useFactory: () => this._injector.createInstance(SheetUIMobileController, this._config),
                     },
                 ],
-                [StartEditController],
                 [StatusBarController],
-                [EditingController],
-                [AutoFillController],
-                [FormatPainterController],
+                // [AutoFillController],
+                // [FormatPainterController],
 
                 // permission
                 [SheetPermissionPanelModel],
@@ -211,7 +193,6 @@ export class UniverSheetsUIPlugin extends Plugin {
             ForceStringRenderController,
             CellCustomRenderController,
             SheetContextMenuRenderController,
-            EditorBridgeRenderController,
 
             SheetPermissionInterceptorCanvasRenderController,
             SheetPermissionInterceptorFormulaRenderController,

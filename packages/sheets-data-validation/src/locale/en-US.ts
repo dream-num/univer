@@ -35,7 +35,7 @@ const locale: typeof zhCN = {
             title: 'Data validation management',
             addTitle: 'Create new data validation',
             removeAll: 'Remove All',
-            add: 'Create Data validation',
+            add: 'Add Rule',
             range: 'Ranges',
             type: 'Type',
             options: 'Advance options',

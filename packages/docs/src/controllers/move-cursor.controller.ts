@@ -90,6 +90,7 @@ export class MoveCursorController extends Disposable {
         );
     }
 
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _handleShiftMoveSelection(direction: Direction) {
         const activeRange = this._textSelectionManagerService.getActiveRange();
         const allRanges = this._textSelectionManagerService.getSelections()!;

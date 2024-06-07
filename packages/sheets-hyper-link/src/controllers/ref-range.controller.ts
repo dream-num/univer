@@ -183,6 +183,7 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                                     payload: {
                                         payload: `#gid=${subUnitId}&range=${resultRange ? serializeRange(resultRange) : 'err'}`,
                                     },
+                                    skipError: true,
                                 } as IUpdateHyperLinkMutationParams,
                             }],
                             undos: [{
@@ -194,11 +195,13 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                                     payload: {
                                         payload,
                                     },
+                                    skipError: true,
                                 } as IUpdateHyperLinkMutationParams,
                             }],
                         };
                     };
                     this._rangeDisableMap.set(id, this._refRangeService.registerRefRange(range, handleRangeChange, unitId, subUnitId));
+
                     if (!silent) {
                         this._rangeWatcherMap.set(id, this._refRangeService.watchRange(unitId, subUnitId, range, (before, after) => {
                             this._hyperLinkModel.updateHyperLink(unitId, subUnitId, id, {

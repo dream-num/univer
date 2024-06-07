@@ -27,8 +27,8 @@ import { IDocDrawingService } from '@univerjs/docs-drawing';
 import type { IDrawingJsonUndo1, IDrawingSearch } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
 
-@OnLifecycle(LifecycleStages.Steady, DocDrawingRemoveController)
-export class DocDrawingRemoveController extends Disposable {
+@OnLifecycle(LifecycleStages.Steady, DocDrawingAddRemoveController)
+export class DocDrawingAddRemoveController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
@@ -54,9 +54,27 @@ export class DocDrawingRemoveController extends Disposable {
 
                 const { unitId, drawingId } = params;
 
+                this._addDrawing();
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== DeleteCustomBlockCommand.id) {
+                    return;
+                }
+
+                const params = command.params as IDeleteCustomBlockParams;
+
+                const { unitId, drawingId } = params;
+
                 this._removeDrawing(unitId, drawingId);
             })
         );
+    }
+
+    private _addDrawing() {
+        // TODO
     }
 
     private _removeDrawing(unitId: string, drawingId: string) {

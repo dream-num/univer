@@ -63,37 +63,37 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
      * Upload image to cell or float image
      */
     private _initCommandListeners() {
-        this.disposeWithMe(this._commandService.onCommandExecuted(async (command: ICommandInfo) => {
-            if (command.id === InsertDocImageOperation.id) {
-                const params = command.params as IInsertImageOperationParams;
-                if (params.files == null) {
-                    return;
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted(async (command: ICommandInfo) => {
+                if (command.id === InsertDocImageOperation.id) {
+                    const params = command.params as IInsertImageOperationParams;
+                    if (params.files == null) {
+                        return;
+                    }
+
+                    const fileLength = params.files.length;
+
+                    if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
+                        this._messageService.show({
+                            type: MessageType.Error,
+                            content: this._localeService.t('update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
+                        });
+                        return;
+                    }
+
+                    this._imageIoService.setWaitCount(fileLength);
+
+                    await this._insertFloatImages(params.files);
                 }
-
-                const fileLength = params.files.length;
-
-                if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
-                    this._messageService.show({
-                        type: MessageType.Error,
-                        content: this._localeService.t('update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
-                    });
-                    return;
-                }
-
-                this._imageIoService.setWaitCount(fileLength);
-
-                params.files.forEach(async (file) => {
-                    await this._insertFloatImage(file);
-                });
-            }
-        }));
+            })
+        );
     }
 
-    private async _insertFloatImage(file: File) {
-        let imageParam: Nullable<IImageIoServiceParam>;
+    private async _insertFloatImages(files: File[]) {
+        let imageParams: Nullable<IImageIoServiceParam>[] = [];
 
         try {
-            imageParam = await this._imageIoService.saveImage(file);
+            imageParams = await Promise.all(files.map((file) => this._imageIoService.saveImage(file)));
         } catch (error) {
             const type = (error as Error).message;
             if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
@@ -114,46 +114,55 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             }
         }
 
-        if (imageParam == null) {
+        if (imageParams.length === 0) {
             return;
         }
 
         const { unitId } = this._context;
-        const { imageId, imageSourceType, source, base64Cache } = imageParam;
-        const { width, height, image } = await getImageSize(base64Cache || '');
+        const docDrawingParams: IDocDrawing[] = [];
 
-        this._imageIoService.addImageSourceCache(imageId, imageSourceType, image);
+        for (const imageParam of imageParams) {
+            if (imageParam == null) {
+                continue;
+            }
+            const { imageId, imageSourceType, source, base64Cache } = imageParam;
+            const { width, height, image } = await getImageSize(base64Cache || '');
 
-        let scale = 1;
-        if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
-            const scaleWidth = DRAWING_IMAGE_WIDTH_LIMIT / width;
-            const scaleHeight = DRAWING_IMAGE_HEIGHT_LIMIT / height;
-            scale = Math.max(scaleWidth, scaleHeight);
+            this._imageIoService.addImageSourceCache(imageId, imageSourceType, image);
+
+            let scale = 1;
+            if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
+                const scaleWidth = DRAWING_IMAGE_WIDTH_LIMIT / width;
+                const scaleHeight = DRAWING_IMAGE_HEIGHT_LIMIT / height;
+                scale = Math.max(scaleWidth, scaleHeight);
+            }
+
+            const docTransform = this._getImagePosition(width * scale, height * scale);
+
+            if (docTransform == null) {
+                return;
+            }
+
+            const docDrawingParam: IDocDrawing = {
+                unitId,
+                subUnitId: unitId,
+                drawingId: imageId,
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                imageSourceType,
+                source,
+                transform: docDrawingPositionToTransform(docTransform),
+                docTransform,
+                title: '',
+                description: '',
+                layoutType: PositionedObjectLayoutType.INLINE,
+            };
+
+            docDrawingParams.push(docDrawingParam);
         }
-
-        const docTransform = this._getImagePosition(width * scale, height * scale);
-
-        if (docTransform == null) {
-            return;
-        }
-
-        const docDrawingParam: IDocDrawing = {
-            unitId,
-            subUnitId: unitId,
-            drawingId: imageId,
-            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-            imageSourceType,
-            source,
-            transform: docDrawingPositionToTransform(docTransform),
-            docTransform,
-            title: '',
-            description: '',
-            layoutType: PositionedObjectLayoutType.INLINE,
-        };
 
         this._commandService.executeCommand(InsertDocDrawingCommand.id, {
             unitId,
-            drawings: [docDrawingParam],
+            drawings: docDrawingParams,
         } as IInsertDrawingCommandParams);
 
         // this._docSkeletonManagerService.getCurrent()?.skeleton.calculate();

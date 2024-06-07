@@ -74,7 +74,7 @@
         "@rc-component/trigger": "^2.2.0",
         "@types/react-mentions": "^4.1.13",
         "@univerjs/icons": "^0.1.56",
-        "rc-dialog": "^9.5.1",
+        "rc-dialog": "^9.5.2",
         "rc-dropdown": "^4.2.0",
         "rc-input": "^1.5.1",
         "rc-input-number": "^9.1.0",

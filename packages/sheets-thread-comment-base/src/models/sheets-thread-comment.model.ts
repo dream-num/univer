@@ -147,7 +147,10 @@ export class SheetsThreadCommentModel extends Disposable {
                     if (isRoot) {
                         const { row, column } = location;
                         if (row >= 0 && column >= 0) {
-                            matrix.realDeleteValue(row, column);
+                            const current = matrix.getValue(row, column);
+                            if (current === comment.id) {
+                                matrix.realDeleteValue(row, column);
+                            }
                         }
                     }
                     this._commentUpdate$.next({
@@ -186,7 +189,6 @@ export class SheetsThreadCommentModel extends Disposable {
                         matrix.setValue(location.row, location.column, commentId);
                         locationMap.set(commentId, { row: location.row, column: location.column });
                     }
-
                     this._commentUpdate$.next({
                         ...update,
                         ...location,

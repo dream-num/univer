@@ -23,7 +23,10 @@ export interface ICellLinkContent {
      * file: file://a.xlsx
      */
     payload: string;
-    display: string;
+    /**
+     * only for notify, if you wan't to read the display of text, use cell-value of cell-matrix instead
+     */
+    display?: string;
 }
 
 export interface ICellHyperLink extends ICellLinkContent {

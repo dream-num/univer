@@ -49,7 +49,7 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         return !Tools.isBlank(formula) && (isFormulaString(formula) || (!Number.isNaN(+formula) && Number.isInteger(+formula)));
     }
 
-    override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
+    override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
         const operator = rule.operator;
         if (!operator) {
             return {

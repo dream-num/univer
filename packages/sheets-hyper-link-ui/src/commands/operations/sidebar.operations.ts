@@ -82,8 +82,8 @@ export const InsertHyperLinkOperation: ICommand = {
         if (!selection?.primary) {
             return false;
         }
-        const row = selection.primary.actualRow;
-        const column = selection.primary.actualColumn;
+        const row = selection.primary.startRow;
+        const column = selection.primary.startColumn;
         return commandService.executeCommand(OpenHyperLinkSidebarOperation.id, {
             unitId: target.unitId,
             subUnitId: target.subUnitId,

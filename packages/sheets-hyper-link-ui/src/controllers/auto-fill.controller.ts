@@ -102,7 +102,7 @@ export class SheetsHyperLinkAutoFillController extends Disposable {
                                 },
                             });
                         }
-                        if (APPLY_TYPE.COPY === applyType) {
+                        if (APPLY_TYPE.COPY === applyType || APPLY_TYPE.SERIES === applyType) {
                             redos.push({
                                 id: AddHyperLinkMutation.id,
                                 params: {
@@ -138,7 +138,6 @@ export class SheetsHyperLinkAutoFillController extends Disposable {
                     }
                 });
             });
-
             return {
                 undos,
                 redos,

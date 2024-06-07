@@ -39,7 +39,7 @@ export class SheetsHyperLinkResourceController extends Disposable {
             const resultMap: UnitHyperLinkJSON = {};
             if (map) {
                 map.forEach((info) => {
-                    resultMap[info.subUnitId] = info.links;
+                    resultMap[info.subUnitId] = info.links.map(({ display, ...link }) => link);
                 });
 
                 return JSON.stringify(resultMap);

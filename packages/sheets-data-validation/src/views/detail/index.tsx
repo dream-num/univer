@@ -83,7 +83,7 @@ export function DataValidationDetail() {
     const isTwoFormula = localRule.operator ? TWO_FORMULA_OPERATOR_COUNT.includes(localRule.operator) : false;
 
     const handleOk = () => {
-        if (validator.validatorFormula(localRule).success) {
+        if (validator.validatorFormula(localRule, unitId, subUnitId).success) {
             dataValidationPanelService.setActiveRule(null);
         } else {
             setShowError(true);
@@ -96,7 +96,6 @@ export function DataValidationDetail() {
         }
         setLocalRanges(unitRanges);
         const ranges = unitRanges.filter((i) => (!i.unitId || i.unitId === unitId) && (!i.sheetId || i.sheetId === subUnitId)).map((i) => i.range);
-
         setLocalRule({
             ...localRule,
             ranges,
@@ -186,7 +185,7 @@ export function DataValidationDetail() {
     };
 
     const FormulaInput = componentManager.get(validator.formulaInput);
-    const rangeStr = localRanges.map((i) => serializeRange(i.range)).join(',');
+    const rangeStr = useMemo(() => localRanges.map((i) => serializeRange(i.range)).join(','), []);
 
     const options: IDataValidationRuleOptions = getRuleOptions(localRule);
 
@@ -276,7 +275,7 @@ export function DataValidationDetail() {
                             });
                         }}
                         showError={showError}
-                        validResult={validator.validatorFormula(localRule)}
+                        validResult={validator.validatorFormula(localRule, unitId, subUnitId)}
                         unitId={unitId}
                         subUnitId={subUnitId}
                         ruleId={ruleId}

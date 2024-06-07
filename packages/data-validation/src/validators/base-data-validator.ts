@@ -125,7 +125,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
 
     abstract parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult>;
 
-    abstract validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult;
+    abstract validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult;
 
     async isValidType(cellInfo: IValidatorCellInfo, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
         return true;

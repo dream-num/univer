@@ -116,6 +116,8 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                         subUnitId,
                         row,
                         col,
+                        workbook,
+                        worksheet,
                     };
 
                     const position = {

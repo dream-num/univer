@@ -27,6 +27,7 @@ const locale = {
             listInvalid: '列表源必须是分隔列表或对单行或列的引用。',
             checkboxEqual: '为勾选和未勾选的单元格内容输入不同的值。',
             formulaError: '引用范围内包含不可见的数据，请重新调整范围',
+            listIntersects: '所选范围不能和规则范围相交',
         },
         panel: {
             title: '管理数据验证',

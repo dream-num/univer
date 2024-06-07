@@ -28,10 +28,7 @@ import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
 import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
 import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
-import { HeaderMenuRenderController } from './controllers/render-controllers/header-menu.render-controller';
 import { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
-import { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
-import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
 import { SelectionRenderController } from './controllers/render-controllers/selection.render-controller';
 import { SheetsRenderService } from './services/sheets-render.service';
@@ -179,12 +176,12 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             HeaderMoveRenderController,
             SelectionRenderController,
             HeaderFreezeRenderController,
-            HeaderUnhideRenderController,
-            HeaderResizeRenderController,
+            // HeaderUnhideRenderController,
+            // HeaderResizeRenderController,
             SheetsZoomRenderController,
             SheetsScrollRenderController,
             FormatPainterRenderController,
-            HeaderMenuRenderController,
+            // HeaderMenuRenderController,
             CellAlertRenderController,
             ForceStringAlertRenderController,
             MarkSelectionRenderController,

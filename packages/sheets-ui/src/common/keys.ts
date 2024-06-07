@@ -21,7 +21,7 @@ export enum SHEET_VIEW_KEY {
     LEFT_TOP = '__SpreadsheetLeftTopPlaceholder__',
 }
 
-export enum VIEWPORT_KEY {
+export enum SHEET_VIEWPORT_KEY {
     VIEW_MAIN = 'viewMain',
     VIEW_MAIN_LEFT_TOP = 'viewMainLeftTop',
     VIEW_MAIN_TOP = 'viewMainTop',

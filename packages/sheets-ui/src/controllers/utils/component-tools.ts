@@ -28,9 +28,9 @@ import type {
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/engine-render';
-import { Vector2 } from '@univerjs/engine-render';
+import { SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 
-import { SHEET_VIEW_KEY, VIEWPORT_KEY } from '../../common/keys';
+import { SHEET_VIEW_KEY } from '../../common/keys';
 
 export interface ISheetObjectParam {
     spreadsheet: Spreadsheet;
@@ -145,7 +145,7 @@ export function getCoordByOffset(
 export function getTransformCoord(evtOffsetX: number, evtOffsetY: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
     const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
-    const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+    const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
     const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords, viewMain);
     const { scaleX, scaleY } = scene.getAncestorScale();

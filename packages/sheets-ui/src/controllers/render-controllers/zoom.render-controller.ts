@@ -91,6 +91,7 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
             const workbook = this._context.unit;
             const worksheet = workbook.getActiveSheet();
             const zoomRatio = worksheet.getZoomRatio() || 1;
+            // viewport.resize --> setScrollInfo
             this._updateViewZoom(zoomRatio);
         }));
     }

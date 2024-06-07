@@ -28,6 +28,7 @@ import {
     Rect,
     ScrollTimer,
     ScrollTimerType,
+    SHEET_VIEWPORT_KEY,
     Vector2,
 } from '@univerjs/engine-render';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle } from '@univerjs/sheets';
@@ -39,7 +40,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY, VIEWPORT_KEY } from '../../common/keys';
+import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset } from '../utils/component-tools';
@@ -253,7 +254,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
                     scrollTimer = ScrollTimer.create(scene, scrollType);
 
-                    const mainViewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+                    const mainViewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
                     scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, mainViewport);
 
@@ -373,7 +374,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         const { rowHeaderWidth, columnHeaderHeight, rowTotalHeight, columnTotalWidth } = skeleton;
 
         // const scrollXY = scene.getScrollXYByRelativeCoords(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
-        const scrollXY = scene.getScrollXY(scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!);
+        const scrollXY = scene.getScrollXY(scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!);
         const { scaleX, scaleY } = scene.getAncestorScale();
 
         const moveActualSelection = skeleton.getCellPositionByOffset(

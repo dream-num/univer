@@ -224,7 +224,9 @@ export class Spreadsheet extends SheetComponent {
     }
 
     /**
+     * Since multiple controllers, not just the sheet-render.controller, invoke spreadsheet.makeDirty() — for instance, the cf.render-controller — it's essential to also call viewport.markDirty() whenever spreadsheet.makeDirty() is triggered.
      * @param state
+     * @returns
      */
     override makeDirty(state: boolean = true) {
         (this.getParent() as Scene)?.getViewports().forEach((vp) => vp.markDirty(state));
@@ -705,10 +707,6 @@ export class Spreadsheet extends SheetComponent {
         const spreadsheetSkeleton = this.getSkeleton()!;
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
         const { left, top, right, bottom } = cacheBound;
-        // left -= rowHeaderWidth;
-        // top -= columnHeaderHeight;
-        // right -= rowHeaderWidth;
-        // bottom -= columnHeaderHeight;
         const findClosestHundred = (number: number) => {
             const remainder = number % 100;
             return number + (100 - remainder);

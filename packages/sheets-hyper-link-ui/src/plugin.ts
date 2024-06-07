@@ -20,7 +20,6 @@ import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
-import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
 import { SheetsHyperLinkRenderController, SheetsHyperLinkRenderManagerController } from './controllers/render-controllers/render.controller';
 import { SheetsHyperLinkPopupService } from './services/popup.service';
 import { SheetsHyperLinkResolverService } from './services/resolver.service';
@@ -53,7 +52,6 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
             [SheetsHyperLinkPopupService],
 
             [SheetsHyperLinkRemoveSheetController],
-            [SheetsHyperLinkRefRangeController],
             [SheetsHyperLinkRenderManagerController],
             [SheetHyperLinkSetRangeController],
             [SheetsHyperLinkPopupController],

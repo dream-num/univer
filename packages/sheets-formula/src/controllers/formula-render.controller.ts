@@ -17,7 +17,7 @@
 import { LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { extractFormulaError } from './utils/utils';
+import { extractFormulaError, extractFormulaNumber } from './utils/utils';
 
 const FORMULA_ERROR_MARK = {
     tl: {
@@ -41,6 +41,15 @@ export class FormulaRenderManagerController extends RxDisposable {
             INTERCEPTOR_POINT.CELL_CONTENT,
             {
                 handler: (cell, pos, next) => {
+                    // Dealing with precision issues
+                    const formulaNumber = extractFormulaNumber(cell);
+                    if (formulaNumber !== null) {
+                        return next({
+                            ...cell,
+                            v: formulaNumber,
+                        });
+                    }
+
                     const errorType = extractFormulaError(cell);
                     if (!errorType) {
                         return next(cell);

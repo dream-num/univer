@@ -50,6 +50,7 @@ export interface IUpdateCommentMutationParams {
     unitId: string;
     subUnitId: string;
     payload: IUpdateCommentPayload;
+    silent?: boolean;
 }
 
 export const UpdateCommentMutation: ICommand<IUpdateCommentMutationParams> = {
@@ -60,8 +61,8 @@ export const UpdateCommentMutation: ICommand<IUpdateCommentMutationParams> = {
             return false;
         }
         const threadCommentModel = accessor.get(ThreadCommentModel);
-        const { unitId, subUnitId, payload } = params;
-        return threadCommentModel.updateComment(unitId, subUnitId, payload);
+        const { unitId, subUnitId, payload, silent } = params;
+        return threadCommentModel.updateComment(unitId, subUnitId, payload, silent);
     },
 };
 
@@ -74,6 +75,7 @@ export interface IUpdateCommentRefMutationParams {
     unitId: string;
     subUnitId: string;
     payload: IUpdateCommentRefPayload;
+    silent?: boolean;
 }
 
 export const UpdateCommentRefMutation: ICommand<IUpdateCommentRefMutationParams> = {
@@ -84,8 +86,8 @@ export const UpdateCommentRefMutation: ICommand<IUpdateCommentRefMutationParams>
             return false;
         }
         const threadCommentModel = accessor.get(ThreadCommentModel);
-        const { unitId, subUnitId, payload } = params;
-        return threadCommentModel.updateCommentRef(unitId, subUnitId, payload);
+        const { unitId, subUnitId, payload, silent } = params;
+        return threadCommentModel.updateCommentRef(unitId, subUnitId, payload, silent);
     },
 };
 

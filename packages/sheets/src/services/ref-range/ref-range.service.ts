@@ -24,6 +24,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    RANGE_TYPE,
     Rectangle,
     toDisposable,
     UniverInstanceType,
@@ -36,7 +37,7 @@ import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.
 import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
 import type { EffectRefRangeParams } from './type';
 import { EffectRefRangId } from './type';
-import { adjustRangeOnMutation } from './util';
+import { adjustRangeOnMutation, getEffectedRangesOnMutation } from './util';
 
 type RefRangCallback = (params: EffectRefRangeParams) => {
     redos: IMutationInfo[];
@@ -49,6 +50,8 @@ export type WatchRangeCallback = (before: IRange, after: Nullable<IRange>) => vo
 
 const MERGE_REDO = createInterceptorKey<IMutationInfo[], null>('MERGE_REDO');
 const MERGE_UNDO = createInterceptorKey<IMutationInfo[], null>('MERGE_UNDO');
+
+const MAX_ROW_COL = Math.floor(Number.MAX_SAFE_INTEGER / 10);
 
 class WatchRange extends Disposable {
     constructor(
@@ -69,6 +72,13 @@ class WatchRange extends Disposable {
         if (!this._range) {
             return;
         }
+        if (this._skipIntersects) {
+            const effectRanges = getEffectedRangesOnMutation(mutation);
+            if (effectRanges?.some((effectRange) => Rectangle.intersects(effectRange, this._range!))) {
+                return false;
+            }
+        }
+
         const afterRange: Nullable<IRange> = adjustRangeOnMutation(this._range, mutation);
         if (afterRange && Rectangle.equals(afterRange, this._range)) {
             return false;
@@ -189,6 +199,7 @@ export class RefRangeService extends Disposable {
                                 endRow: worksheet.getRowCount() - 1,
                                 startColumn: 0,
                                 endColumn: worksheet.getColumnCount() - 1,
+                                rangeType: RANGE_TYPE.ROW,
                             };
                             return this._checkRange([range], unitId, subUnitId);
                         }
@@ -200,6 +211,7 @@ export class RefRangeService extends Disposable {
                                 endRow: worksheet.getRowCount() - 1,
                                 startColumn: colStart,
                                 endColumn: worksheet.getColumnCount() - 1,
+                                rangeType: RANGE_TYPE.COLUMN,
                             };
                             return this._checkRange([range], unitId, subUnitId);
                         }
@@ -212,6 +224,7 @@ export class RefRangeService extends Disposable {
                                 endRow: worksheet.getRowCount() - 1,
                                 startColumn: 0,
                                 endColumn: worksheet.getColumnCount() - 1,
+                                rangeType: RANGE_TYPE.ROW,
                             };
                             return this._checkRange([range], unitId, subUnitId);
                         }
@@ -223,6 +236,7 @@ export class RefRangeService extends Disposable {
                                 endRow: worksheet.getRowCount() - 1,
                                 startColumn: colStart,
                                 endColumn: worksheet.getColumnCount() - 1,
+                                rangeType: RANGE_TYPE.COLUMN,
                             };
                             return this._checkRange([range], unitId, subUnitId);
                         }
@@ -234,7 +248,7 @@ export class RefRangeService extends Disposable {
                                 startRow: range.startRow,
                                 startColumn: range.startColumn,
                                 endColumn: range.endColumn,
-                                endRow: worksheet.getRowCount() - 1,
+                                endRow: MAX_ROW_COL,
                             };
                             return this._checkRange([effectRange], unitId, subUnitId);
                         }
@@ -245,7 +259,7 @@ export class RefRangeService extends Disposable {
                             const effectRange = {
                                 startRow: range.startRow,
                                 startColumn: range.startColumn,
-                                endColumn: worksheet.getColumnCount() - 1,
+                                endColumn: MAX_ROW_COL,
                                 endRow: range.endRow,
                             };
                             return this._checkRange([effectRange], unitId, subUnitId);
@@ -318,9 +332,12 @@ export class RefRangeService extends Disposable {
                     endRow: +range.endRow,
                     startColumn: +range.startColumn,
                     endColumn: +range.endColumn,
+                    rangeType: range.rangeType && +range.rangeType,
                 };
                 // Todo@Gggpound : How to reduce this calculation
-                if (effectRanges.some((item) => Rectangle.intersects(item, realRange))) {
+                if (
+                    effectRanges.some((item) => Rectangle.intersects(item, realRange))
+                ) {
                     cbList &&
                         cbList.forEach((callback) => {
                             callbackSet.add(callback);

@@ -28,5 +28,9 @@ export function requestImmediateMacroTask(callback: (value?: unknown) => void): 
 
     return () => {
         cancelled = true;
+        // dispose
+        channel.port1.onmessage = null;
+        channel.port1.close();
+        channel.port2.close();
     };
 }

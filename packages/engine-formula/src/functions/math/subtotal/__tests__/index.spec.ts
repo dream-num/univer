@@ -33,6 +33,7 @@ import { Subtotal } from '../index';
 import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
+import { stripErrorMargin } from '../../../../engine/utils/math-kit';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -295,7 +296,7 @@ describe('Test subtotal', () => {
         });
         it('Stdev.s, Var1 is array, var2 is array', async () => {
             const result = await calculate('=SUBTOTAL(7,A1:B2,A3:F4)');
-            expect(result).toBe(31.27335040502625);
+            expect(result).toBe(31.273350405026253);
         });
         it('Stdev.p, Var1 is array, var2 is array', async () => {
             const result = await calculate('=SUBTOTAL(8,A1:B2,A3:F4)');
@@ -303,7 +304,7 @@ describe('Test subtotal', () => {
         });
         it('sum, Var1 is array, var2 is array', async () => {
             const result = await calculate('=SUBTOTAL(9,A1:B2,A3:F4)');
-            expect(result).toBe(111.57);
+            expect(stripErrorMargin(Number(result))).toBe(111.57);
         });
         it('Var.s, Var1 is array, var2 is array', async () => {
             const result = await calculate('=SUBTOTAL(10,A1:B2,A3:F4)');
@@ -311,7 +312,7 @@ describe('Test subtotal', () => {
         });
         it('Var.p, Var1 is array, var2 is array', async () => {
             const result = await calculate('=SUBTOTAL(11,A1:B2,A3:F4)');
-            expect(result).toBe(880.220201);
+            expect(stripErrorMargin(Number(result))).toBe(880.220201);
         });
     });
 
@@ -345,16 +346,16 @@ describe('Test subtotal', () => {
             expect(result).toBeCloseTo(0.16263456, 7);
 
             result = await calculate('=SUBTOTAL(108,A3:F4)');
-            expect(result).toBe(0.115);
+            expect(stripErrorMargin(Number(result))).toBe(0.115);
 
             result = await calculate('=SUBTOTAL(109,A3:F4)');
             expect(result).toBe(2.23);
 
             result = await calculate('=SUBTOTAL(110,A3:F4)');
-            expect(result).toBe(0.02645);
+            expect(stripErrorMargin(Number(result))).toBe(0.02645);
 
             result = await calculate('=SUBTOTAL(111,A3:F4)');
-            expect(result).toBe(0.013225);
+            expect(stripErrorMargin(Number(result))).toBe(0.013225);
         });
     });
 });

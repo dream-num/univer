@@ -211,7 +211,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                     priority: 200,
                     // eslint-disable-next-line max-lines-per-function
                     handler: (cell, pos, next) => {
-                        const { row, col, unitId, subUnitId } = pos;
+                        const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
                         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
                         if (!manager) {
                             return next(cell);
@@ -235,7 +235,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                         if (!rule) {
                             return next(cell);
                         }
-                        const cellRaw = pos.worksheet.getCellRaw(pos.row, pos.col);
+                        const cellRaw = worksheet.getCellRaw(pos.row, pos.col);
                         const validStatus = this._dataValidationModel.validator(getCellValueOrigin(cellRaw), rule, pos);
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                         const cellValue = getCellValueOrigin(cell);
@@ -331,6 +331,8 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                                     subUnitId,
                                     row,
                                     col,
+                                    workbook,
+                                    worksheet,
                                 };
                                 return validator?.canvasRender?.calcCellAutoHeight?.(info);
                             },

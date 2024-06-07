@@ -17,7 +17,7 @@
 import type { ICommandInfo } from '@univerjs/core';
 import { CellValueType, Disposable, ICommandService, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
-import { FormulaDataModel, SetArrayFormulaDataMutation } from '@univerjs/engine-formula';
+import { FormulaDataModel, SetArrayFormulaDataMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
@@ -73,43 +73,21 @@ export class ArrayFormulaDisplayController extends Disposable {
                         return next(cell);
                     }
 
-                    // const numfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
-                    // const numfmtItem = numfmtItemMap[unitId]?.[subUnitId]?.[row]?.[col];
-
-                    // if (numfmtItem) {
-                    //     const value = cellData?.v;
-                    //     const type = cellData?.t;
-
-                    //     if (value == null || type !== CellValueType.NUMBER) {
-                    //         return next(cell);
-                    //     }
-
-                    //     const info = getPatternPreview(numfmtItem, value as number);
-
-                    //     if (info.color) {
-                    //         const colorMap = this._themeService.getCurrentTheme();
-                    //         const color = colorMap[`${info.color}500`];
-                    //         return {
-                    //             ...cell,
-                    //             v: info.result,
-                    //             t: CellValueType.STRING,
-                    //             s: { cl: { rgb: color } },
-                    //         };
-                    //     }
-
-                    //     return {
-                    //         ...cell,
-                    //         v: info.result,
-                    //         t: CellValueType.STRING,
-                    //     };
-                    // }
-
                     // The cell in the upper left corner of the array formula also triggers the default value determination
                     if (cellData.v == null && cellData.t == null) {
                         return next({ ...cell,
                                       ...cellData,
                                       v: 0, // Default value for empty cell
                                       t: CellValueType.NUMBER,
+                        });
+                    }
+
+                    // Dealing with precision issues
+                    if (cell?.t === CellValueType.NUMBER && typeof cell?.v === 'number') {
+                        return next({
+                            ...cell,
+                            ...cellData,
+                            v: stripErrorMargin(cell.v),
                         });
                     }
 

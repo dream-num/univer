@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-thread-comment",
-    "version": "0.1.13",
+    "version": "0.1.14",
     "private": false,
     "description": "Univer thread comment plugin",
     "author": "DreamNum <developer@univer.ai>",
@@ -73,6 +73,7 @@
     },
     "dependencies": {
         "@univerjs/icons": "^0.1.56",
+        "@univerjs/sheets-thread-comment-base": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*"
     },

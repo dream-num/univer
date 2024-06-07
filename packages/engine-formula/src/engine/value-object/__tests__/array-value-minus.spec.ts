@@ -19,6 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 import { NumberValueObject } from '../primitive-object';
 import { ErrorType } from '../../../basics/error-type';
+import { stripArrayValue } from '../../../functions/__tests__/create-function-test-bed';
 
 describe('ArrayValueObject minus method test', () => {
     describe('Minus', () => {
@@ -38,7 +39,7 @@ describe('ArrayValueObject minus method test', () => {
 
             const valueObject = new NumberValueObject(1);
 
-            expect((arrayValueObject.minus(valueObject) as ArrayValueObject).toValue()).toStrictEqual([
+            expect(stripArrayValue((arrayValueObject.minus(valueObject) as ArrayValueObject).toValue())).toStrictEqual([
                 [0, ErrorType.VALUE, 0.23, 0, -1, -1],
                 [-1, 99, 1.34, ErrorType.VALUE, -4, ErrorType.VALUE],
             ]);

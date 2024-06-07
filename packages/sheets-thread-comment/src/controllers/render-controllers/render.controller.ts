@@ -21,7 +21,7 @@ import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SheetsThreadCommentModel } from '../../models/sheets-thread-comment.model';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsThreadCommentRenderController)
 export class SheetsThreadCommentRenderController extends Disposable {

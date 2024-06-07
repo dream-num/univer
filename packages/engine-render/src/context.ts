@@ -19,6 +19,7 @@ import { fixLineWidthByScale, getColor } from './basics/tools';
 import { Transform } from './basics';
 
 export class UniverRenderingContext2D implements CanvasRenderingContext2D {
+    __mode = 'rendering';
     readonly canvas: HTMLCanvasElement;
 
     _context: CanvasRenderingContext2D;
@@ -965,9 +966,12 @@ export class UniverRenderingContextWebGL { }
  */
 export class UniverRenderingContextWebGPU { }
 
-export class UniverRenderingContext extends UniverRenderingContext2D { }
+export class UniverRenderingContext extends UniverRenderingContext2D {
+}
 
 export class UniverPrintingContext extends UniverRenderingContext2D {
+    override __mode = 'printing';
+
     private __getScale() {
         const m = this.getTransform();
         return {

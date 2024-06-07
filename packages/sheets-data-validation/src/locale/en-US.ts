@@ -29,6 +29,7 @@ const locale: typeof zhCN = {
             listInvalid: 'The list source must be a delimited list or a reference to a single row or column',
             checkboxEqual: 'Enter different values for ticked and unticked cell contents.',
             formulaError: 'The reference range contains invisible data, please readjust the range',
+            listIntersects: 'The selected range cannot intersect with the scope of the rules',
         },
         panel: {
             title: 'Data validation management',

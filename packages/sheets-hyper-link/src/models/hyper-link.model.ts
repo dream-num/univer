@@ -15,7 +15,8 @@
  */
 
 import { Subject } from 'rxjs';
-import { Disposable, ObjectMatrix } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { ICellHyperLink, ICellLinkContent } from '../types/interfaces/i-hyper-link';
 
 type LinkUpdate = {
@@ -23,23 +24,27 @@ type LinkUpdate = {
     payload: ICellHyperLink;
     unitId: string;
     subUnitId: string;
+    silent?: boolean;
 } | {
     type: 'remove';
     payload: ICellHyperLink;
     unitId: string;
     subUnitId: string;
+    silent?: boolean;
 } | {
     type: 'update';
     unitId: string;
     subUnitId: string;
     payload: ICellLinkContent;
     id: string;
+    silent?: boolean;
 } | {
     type: 'updateRef';
     unitId: string;
     subUnitId: string;
     id: string;
     payload: { row: number; column: number };
+    silent?: boolean;
 } | {
     type: 'unload';
     unitId: string;
@@ -48,6 +53,7 @@ type LinkUpdate = {
         subUnitId: string;
         links: ICellHyperLink[];
     }[];
+    silent?: boolean;
 };
 
 export class HyperLinkModel extends Disposable {
@@ -57,7 +63,9 @@ export class HyperLinkModel extends Disposable {
     private _linkMap: Map<string, Map<string, ObjectMatrix<ICellHyperLink>>> = new Map();
     private _linkPositionMap: Map<string, Map<string, Map<string, { row: number; column: number; link: ICellHyperLink }>>> = new Map();
 
-    constructor() {
+    constructor(
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+    ) {
         super();
         this.disposeWithMe({
             dispose: () => {
@@ -121,22 +129,22 @@ export class HyperLinkModel extends Disposable {
             return false;
         }
         Object.assign(link, payload);
-        if (!silent) {
-            this._linkUpdate$.next({
-                unitId,
-                subUnitId,
-                payload: {
-                    display: link.display,
-                    payload: link.payload,
-                },
-                id,
-                type: 'update',
-            });
-        }
+
+        this._linkUpdate$.next({
+            unitId,
+            subUnitId,
+            payload: {
+                display: link.display,
+                payload: link.payload,
+            },
+            id,
+            type: 'update',
+            silent,
+        });
         return true;
     }
 
-    updateHyperLinkRef(unitId: string, subUnitId: string, id: string, payload: { row: number; column: number }) {
+    updateHyperLinkRef(unitId: string, subUnitId: string, id: string, payload: { row: number; column: number }, silent = false) {
         const { matrix, positionMap } = this._ensureMap(unitId, subUnitId);
         // const current = matrix.getValue();
         const position = positionMap.get(id);
@@ -159,6 +167,7 @@ export class HyperLinkModel extends Disposable {
             payload,
             id,
             type: 'updateRef',
+            silent,
         });
         return true;
     }
@@ -195,8 +204,23 @@ export class HyperLinkModel extends Disposable {
 
     getHyperLinkByLocation(unitId: string, subUnitId: string, row: number, column: number): ICellHyperLink | undefined {
         const { matrix } = this._ensureMap(unitId, subUnitId);
-
         return matrix.getValue(row, column);
+    }
+
+    getHyperLinkByLocationSync(unitId: string, subUnitId: string, row: number, column: number) {
+        const { matrix } = this._ensureMap(unitId, subUnitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+        const cell = workbook?.getSheetBySheetId(subUnitId)?.getCellRaw(row, column);
+        const cellValueStr = (cell?.v ?? cell?.p?.body?.dataStream.slice(0, -2) ?? '').toString();
+        const link = matrix.getValue(row, column);
+
+        if (!link) {
+            return undefined;
+        }
+        return {
+            ...link,
+            display: cellValueStr,
+        };
     }
 
     getSubUnit(unitId: string, subUnitId: string) {

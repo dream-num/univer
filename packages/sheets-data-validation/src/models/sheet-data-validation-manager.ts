@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { CellValue, ISheetDataValidationRule, Nullable } from '@univerjs/core';
+import type { CellValue, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
 import { DataValidationManager, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
-import { DataValidationStatus, DataValidationType, ObjectMatrix, Range } from '@univerjs/core';
+import { DataValidationStatus, DataValidationType, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
 import type { IUpdateRulePayload } from '@univerjs/data-validation';
-import type { ISheetLocation } from '@univerjs/sheets';
+import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { isReferenceString } from '@univerjs/engine-formula';
 import type { IDataValidationResCache } from '../services/dv-cache.service';
@@ -53,7 +53,8 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         this._dataValidationCustomFormulaService = this._injector.get(DataValidationCustomFormulaService);
         this._dataValidationRefRangeController = this._injector.get(DataValidationRefRangeController);
         this._cache = this._dataValidationCacheService.ensureCache(unitId, subUnitId);
-
+        const univerInstanceService = this._injector.get(IUniverInstanceService);
+        const worksheet = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)!.getSheetBySheetId(subUnitId)!;
         const matrix = new ObjectMatrix<string>();
         rules?.forEach((rule) => {
             const ruleId = rule.uid;
@@ -67,7 +68,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         rules?.forEach((rule) => {
             this._dataValidationRefRangeController.register(unitId, subUnitId, rule);
         });
-        this._ruleMatrix = new RuleMatrix(matrix);
+        this._ruleMatrix = new RuleMatrix(matrix, worksheet);
     }
 
     private _addRuleSideEffect(rule: ISheetDataValidationRule) {
@@ -138,7 +139,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         return this.getRuleById(ruleId);
     }
 
-    override validator(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocation, onCompete: (status: DataValidationStatus) => void): DataValidationStatus {
+    override validator(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocationBase, onCompete: (status: DataValidationStatus, changed: boolean) => void): DataValidationStatus {
         const { col, row, unitId, subUnitId } = pos;
         const ruleId = rule.uid;
         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
@@ -157,12 +158,14 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
                         status: realStatus,
                         ruleId,
                     });
-                    onCompete(realStatus);
+                    onCompete(realStatus, true);
                 });
                 return DataValidationStatus.VALIDATING;
             }
+            onCompete(current.status, false);
             return current.status;
         } else {
+            onCompete(DataValidationStatus.VALID, false);
             return DataValidationStatus.VALID;
         }
     }

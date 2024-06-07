@@ -30,6 +30,7 @@ export interface IUpdateSheetDataValidationRangeCommandParams {
     ranges: IRange[];
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function getDataValidationDiffMutations(unitId: string, subUnitId: string, diffs: RangeMutation[]) {
     const redoMutations: IMutationInfo[] = [];
 

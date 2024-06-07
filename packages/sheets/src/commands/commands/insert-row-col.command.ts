@@ -23,6 +23,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     Range,
+    RANGE_TYPE,
     sequenceExecute,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -241,6 +242,7 @@ export const InsertRowAfterCommand: ICommand = {
                 endRow: range.endRow + count,
                 startColumn: 0,
                 endColumn: worksheet.getColumnCount() - 1,
+                rangeType: RANGE_TYPE.ROW,
             },
         };
 
@@ -377,6 +379,7 @@ export const InsertColBeforeCommand: ICommand = {
                 endColumn: range.startColumn + count - 1,
                 startRow: 0,
                 endRow: worksheet.getLastRowWithContent(),
+                rangeType: RANGE_TYPE.COLUMN,
             },
             cellValue,
         };

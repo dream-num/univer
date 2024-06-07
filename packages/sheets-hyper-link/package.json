@@ -65,6 +65,9 @@
         "@wendellhu/redi": "0.15.4",
         "rxjs": ">=7.0.0"
     },
+    "dependencies": {
+
+    },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",

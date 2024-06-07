@@ -26,6 +26,7 @@ import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
 import { ErrorController } from './controllers/error/error.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
+import { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 import type { IUniverUIConfig } from './controllers/ui/ui.controller';
 import { IUIController } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
@@ -45,6 +46,11 @@ import { DesktopNotificationService } from './services/notification/desktop-noti
 import { INotificationService } from './services/notification/notification.service';
 import { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
 import { DesktopShortcutService, IShortcutService } from './services/shortcut/shortcut.service';
+import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
+import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
+import { ISidebarService } from './services/sidebar/sidebar.service';
+import { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
+import { IZenZoneService } from './services/zen-zone/zen-zone.service';
 import { EditorService, IEditorService } from './services/editor/editor.service';
 import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 import { IProgressService, ProgressService } from './services/progress/progress.service';
@@ -85,6 +91,7 @@ export class UniverUIPlugin extends Plugin {
             [ZIndexManager],
 
             // services
+            [ShortcutPanelService],
             [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
             [IShortcutService, { useClass: DesktopShortcutService }],
@@ -95,6 +102,8 @@ export class UniverUIPlugin extends Plugin {
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
             [IDialogService, { useClass: DesktopDialogService, lazy: true }],
             [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
+            [ISidebarService, { useClass: DesktopSidebarService, lazy: true }],
+            [IZenZoneService, { useClass: DesktopZenZoneService, lazy: true }],
             [IGlobalZoneService, { useClass: DesktopGlobalZoneService, lazy: true }],
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
@@ -109,7 +118,8 @@ export class UniverUIPlugin extends Plugin {
             [
                 IUIController, {
                     useFactory: (injector: Injector) => injector.createInstance(DesktopUIController, this._config),
-                    deps: [Injector] },
+                    deps: [Injector],
+                },
             ],
             [
                 SharedController,
@@ -118,6 +128,12 @@ export class UniverUIPlugin extends Plugin {
                 },
             ],
             [ErrorController],
+            [
+                ShortcutPanelController,
+                {
+                    useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config),
+                },
+            ],
         ], this._config.override);
 
         dependencies.forEach((dependency) => injector.add(dependency));

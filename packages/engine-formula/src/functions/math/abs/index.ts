@@ -17,6 +17,7 @@
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Abs extends BaseFunction {
@@ -30,9 +31,12 @@ export class Abs extends BaseFunction {
         }
 
         if (variant.isError()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return variant;
         }
 
-        return variant.abs();
+        const value = variant.getValue();
+        const result = Math.abs(Number(value));
+
+        return NumberValueObject.create(result);
     }
 }

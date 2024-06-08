@@ -17,6 +17,7 @@
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Acos extends BaseFunction {
@@ -30,9 +31,21 @@ export class Acos extends BaseFunction {
         }
 
         if (variant.isError()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return variant;
         }
 
-        return variant.acos();
+        const value = variant.getValue();
+
+        if (typeof value === 'number' && (value < -1 || value > 1)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        const result = Math.acos(Number(value));
+
+        if (Number.isNaN(result)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        return NumberValueObject.create(result);
     }
 }

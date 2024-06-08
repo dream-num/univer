@@ -20,7 +20,7 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Acosh extends BaseFunction {
+export class Asin extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
@@ -34,18 +34,35 @@ export class Acosh extends BaseFunction {
             return variant;
         }
 
-        const value = variant.getValue();
-
-        if (typeof value === 'number' && value < 1) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+        if ((variant as BaseValueObject).isArray()) {
+            return (variant as BaseValueObject).map((currentValue) => {
+                if (currentValue.isError()) {
+                    return currentValue;
+                }
+                return asin(currentValue as BaseValueObject);
+            });
         }
 
-        const result = Math.acosh(Number(value));
-
-        if (Number.isNaN(result)) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        return NumberValueObject.create(result);
+        return asin(variant as BaseValueObject);
     }
+}
+
+function asin(num: BaseValueObject) {
+    let currentValue = num.getValue();
+
+    if (num.isBoolean()) {
+        currentValue = currentValue ? 1 : 0;
+    }
+
+    if (!Number.isFinite(currentValue) || Number(currentValue) < -1 || Number(currentValue) > 1) {
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    const result = Math.asin(Number(currentValue));
+
+    if (Number.isNaN(result)) {
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    return NumberValueObject.create(result);
 }

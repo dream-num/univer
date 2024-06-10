@@ -17,18 +17,18 @@
 import type { Nullable } from '@univerjs/core';
 import { Disposable, remove, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
-import type { Observable } from 'rxjs';
-import { firstValueFrom, of } from 'rxjs';
-import { concatMap, map } from 'rxjs/operators';
+import { firstValueFrom, Observable, of } from 'rxjs';
+import { catchError, concatMap, map, mergeMap } from 'rxjs/operators';
 
+import { fromFetch } from 'rxjs/fetch';
 import { HTTPHeaders } from './headers';
 import type { HTTPResponseType } from './http';
 import { IHTTPImplementation } from './implementations/implementation';
 import { HTTPParams } from './params';
 import type { HTTPRequestMethod } from './request';
 import { HTTPRequest } from './request';
-import type { HTTPEvent } from './response';
-import { HTTPResponse, HTTPResponseError } from './response';
+import type { HTTPEvent, HTTPResponseError } from './response';
+import { HTTPResponse } from './response';
 import type { HTTPHandlerFn, HTTPInterceptorFn, RequestPipe } from './interceptor';
 
 export interface IRequestParams {
@@ -114,11 +114,11 @@ export class HTTPService extends Disposable {
         return this._request<T>('PATCH', url, options);
     }
 
-    getSSE<T>(
+    getSSE(
         method: HTTPRequestMethod,
         url: string,
         options?: IPostRequestParams
-    ): Observable<HTTPResponse<T>> {
+    ): Observable<string[]> {
         // Things to do when sending a HTTP request:
         // 1. Generate HTTPRequest/HTTPHeader object
         // 2. Call interceptors and finally the HTTP implementation.
@@ -132,16 +132,53 @@ export class HTTPService extends Disposable {
             body: (['GET', 'DELETE'].includes(method)) ? undefined : (options as IPostRequestParams)?.body,
         });
 
-        return of(request).pipe(
-            concatMap((request) => this._runInterceptorsAndImplementation(request)),
-            map((response) => {
-                if (response instanceof HTTPResponseError) {
-                    throw response;
-                }
+        const fetchParams = this._parseFetchParamsFromRequest(request);
 
-                return response;
+        return fromFetch(
+            request.getUrlWithParams(), {
+                ...fetchParams,
+            }
+        ).pipe(
+            mergeMap((response) => {
+                if (!response.body) {
+                    throw new Error('Response body is empty');
+                }
+                const reader = response.body.getReader();
+                return new Observable((observer) => {
+                    function push() {
+                        reader.read().then(({ done, value }) => {
+                            if (done) {
+                                observer.complete();
+                                return;
+                            }
+                            observer.next(new TextDecoder().decode(value));
+                            push();
+                        }).catch((err) => observer.error(err as Error));
+                    }
+                    push();
+                });
+            }),
+            map(
+                (data) => {
+                    const events = (data as string).split('\n');
+                    return events;
+                }
+            ),
+            catchError((error) => {
+                throw new Error(`Failed to fetch SSE: ${error}`);
             })
         );
+    }
+
+    private _parseFetchParamsFromRequest(request: HTTPRequest): RequestInit {
+        const fetchParams: RequestInit = {
+            method: request.method,
+            headers: request.getHeadersInit(),
+            body: request.getBody(),
+            credentials: request.withCredentials ? 'include' : undefined,
+        };
+
+        return fetchParams;
     }
 
     /** The HTTP request implementations */

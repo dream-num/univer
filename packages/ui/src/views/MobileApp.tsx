@@ -27,7 +27,7 @@ import { ComponentContainer, useComponentsOfPart } from './components/ComponentC
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
 import { builtInGlobalComponents } from './parts';
-import { ContextMenu } from './components/context-menu/ContextMenu';
+import { MobileContextMenu } from './components/context-menu/MobileContextMenu';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -149,7 +149,7 @@ export function MobileApp(props: IUniverAppProps) {
             </div>
             <ComponentContainer key="global" components={globalComponents} />
             <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
-            {contextMenu && <ContextMenu />}
+            {contextMenu && <MobileContextMenu />}
         </ConfigProvider>
     );
 }

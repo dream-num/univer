@@ -15,16 +15,15 @@
  */
 
 import { ICommandService } from '@univerjs/core';
+import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
+import React, { useEffect, useState } from 'react';
 import { Popup } from '@univerjs/design';
 import type { IMouseEvent } from '@univerjs/engine-render';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
-import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
-import React, { useEffect, useState } from 'react';
-
-import { Menu } from '../../../components/menu/desktop/Menu';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
+import { Menu } from '../../../components/menu/desktop/Menu';
 
-export function DesktopContextMenu() {
+export function MobileContextMenu() {
     const [visible, setVisible] = useState(false);
     const [menuType, setMenuType] = useState('');
     const [offset, setOffset] = useState<[number, number]>([0, 0]);
@@ -61,14 +60,13 @@ export function DesktopContextMenu() {
     return (
         <Popup visible={visible} offset={offset}>
             <section onPointerDown={(e) => e.stopPropagation()}>
+                {/* TODO@wzhudev: maybe we should add another component for mobile devices. */}
                 {menuType && (
                     <Menu
                         menuType={[menuType]}
                         onOptionSelect={(params) => {
                             const { label: commandId, value } = params;
                             commandService && commandService.executeCommand(commandId as string, { value });
-                            const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
-                            textSelectionRenderManager.focus();
                             setVisible(false);
                         }}
                     />

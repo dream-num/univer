@@ -64,12 +64,7 @@ export function MobileSheetBar() {
         tabMapRef.current.clear();
     }, [workbook]);
 
-    useEffect(() => {
-        updateSheetItems();
-
-        // const subscriptions = [setupSubscribeRenameId(), setupSubscribeAddSheet()];
-        // return () => subscriptions.forEach((subscribe) => subscribe.unsubscribe());
-    }, [updateSheetItems]);
+    useEffect(() => updateSheetItems(), [updateSheetItems]);
 
     const onTabClick = useCallback((sheetId: string) => {
         commandService.executeCommand(SetWorksheetActiveOperation.id, {

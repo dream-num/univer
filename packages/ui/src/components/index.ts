@@ -17,4 +17,3 @@
 export * from './custom-label';
 export * from './font-family';
 export * from './font-size';
-export * from './menu';

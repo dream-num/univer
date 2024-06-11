@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { DependentOn, IUniverInstanceService, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IUniverInstanceService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
@@ -56,7 +56,7 @@ import { ForceStringRenderController } from './controllers/force-string-render.c
 import { ForceStringAlertRenderController } from './controllers/force-string-alert-render.controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
-import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
+// import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 import { DragRenderController } from './controllers/drag-render.controller';
 import { DragManagerService } from './services/drag-manager.service';
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
@@ -70,6 +70,7 @@ import { SheetPermissionUserManagerService } from './services/permission/sheet-p
 import { WorksheetProtectionRenderService } from './services/permission/worksheet-permission-render.service';
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
 import { SheetUIMobileController } from './controllers/mobile/mobile-sheet-ui.controller';
+import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
 
 /**
  * @ignore
@@ -82,7 +83,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverSheetsUIConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
@@ -192,7 +192,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             DragRenderController,
             ForceStringRenderController,
             CellCustomRenderController,
-            SheetContextMenuRenderController,
+            SheetContextMenuMobileRenderController,
 
             SheetPermissionInterceptorCanvasRenderController,
             SheetPermissionInterceptorFormulaRenderController,

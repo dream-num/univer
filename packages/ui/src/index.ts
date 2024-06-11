@@ -80,6 +80,7 @@ export { IZenZoneService } from './services/zen-zone/zen-zone.service';
 export { UniverUIPlugin, DISABLE_AUTO_FOCUS_KEY } from './ui-plugin';
 export { UniverMobileUIPlugin } from './mobile-ui-plugin';
 export * from './utils';
+export { Menu } from './components/menu/desktop/Menu';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
 export { ComponentContainer, useComponentsOfPart, type IComponentContainerProps } from './views/components/ComponentContainer';
 export { IEditorService, EditorService } from './services/editor/editor.service';
@@ -99,7 +100,7 @@ export type { IProgressStep } from './services/progress/progress.service';
 
 export { GlobalZone } from './views/components/global-zone/GlobalZone';
 export { builtInGlobalComponents } from './views/parts';
-export { ContextMenu } from './views/components/context-menu/ContextMenu';
+export { DesktopContextMenu as ContextMenu } from './views/components/context-menu/ContextMenu';
 export { Sidebar } from './views/components/sidebar/Sidebar';
 export { ZenZone } from './views/components/zen-zone/ZenZone';
 export { CanvasPopup } from './views/components/popup/CanvasPopup';

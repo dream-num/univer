@@ -14,4 +14,8 @@
  * limitations under the License.
  */
 
-export * from './Menu';
+import type { IBaseMenuProps } from '../desktop/Menu';
+
+export function MobileMenu(props: IBaseMenuProps) {
+
+}

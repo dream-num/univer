@@ -35,13 +35,13 @@ import type {
     IMenuSelectorItem,
     IValueOption,
     MenuItemDefaultValueType,
-} from '../../services/menu/menu';
-import { MenuGroup, MenuItemType } from '../../services/menu/menu';
-import { IMenuService } from '../../services/menu/menu.service';
-import { CustomLabel } from '../custom-label/CustomLabel';
-import { useObservable } from '../hooks/observable';
-import { useScrollYOverContainer } from '../hooks/layout.ts';
-import { ILayoutService } from '../../services/layout/layout.service';
+} from '../../../services/menu/menu.ts';
+import { MenuGroup, MenuItemType } from '../../../services/menu/menu.ts';
+import { IMenuService } from '../../../services/menu/menu.service.ts';
+import { CustomLabel } from '../../custom-label/CustomLabel.tsx';
+import { useObservable } from '../../hooks/observable.ts';
+import { useScrollYOverContainer } from '../../hooks/layout.ts';
+import { ILayoutService } from '../../../services/layout/layout.service.ts';
 import styles from './index.module.less';
 
 // TODO: @jikkai disabled and hidden are not working

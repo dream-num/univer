@@ -52,7 +52,7 @@ univer.registerPlugin(UniverDocsPlugin, {
     hasScroll: false,
 });
 univer.registerPlugin(UniverRenderEnginePlugin);
-univer.registerPlugin(UniverMobileUIPlugin, { container: 'app' });
+univer.registerPlugin(UniverMobileUIPlugin, { container: 'app', contextMenu: true });
 univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',
 } as IUniverRPCMainThreadConfig);

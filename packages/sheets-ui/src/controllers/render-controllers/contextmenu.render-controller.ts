@@ -38,16 +38,18 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
-        @Inject(SelectionManagerService)
-        private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
-        this._addListeners();
+
+        this._init();
     }
 
-    private _addListeners(): void {
+    private _init(): void {
         const spreadsheetPointerDownObserver = (this._context?.mainComponent as Spreadsheet)?.onPointerDownObserver;
+
+        // Content range context menu
         const spreadsheetObserver = spreadsheetPointerDownObserver.add((event) => {
             if (event.button === 2) {
                 const selections = this._selectionManagerService.getSelections();
@@ -89,6 +91,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         });
         this.disposeWithMe(toDisposable(() => spreadsheetPointerDownObserver.remove(spreadsheetObserver)));
 
+        // Row header context menu
         const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
         const rowHeaderPointerDownObserver = spreadsheetRowHeader.onPointerDownObserver;
@@ -99,6 +102,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         });
         this.disposeWithMe(toDisposable(() => spreadsheetPointerDownObserver.remove(rowHeaderObserver)));
 
+        // Col header context menu
         const colHeaderPointerDownObserver = spreadsheetColumnHeader.onPointerDownObserver;
         const colHeaderObserver = colHeaderPointerDownObserver.add((event) => {
             if (event.button === 2) {

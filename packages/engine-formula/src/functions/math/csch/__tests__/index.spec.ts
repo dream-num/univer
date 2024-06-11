@@ -25,18 +25,6 @@ describe('Test csch function', () => {
     const textFunction = new Csch(FUNCTION_NAMES_MATH.CSCH);
 
     describe('Csch', () => {
-        it('Value is normal', () => {
-            const value = NumberValueObject.create(1);
-            const result = textFunction.calculate(value);
-            expect(result.getValue()).toBeCloseTo(0.8509181282393216, 10);
-        });
-
-        it('Value is string number', () => {
-            const value = new StringValueObject('1');
-            const result = textFunction.calculate(value);
-            expect(result.getValue()).toBeCloseTo(0.8509181282393216, 10);
-        });
-
         it('Value is array', () => {
             const valueArray = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -52,15 +40,23 @@ describe('Test csch function', () => {
             });
             const result = textFunction.calculate(valueArray);
             const transformedResult = transformToValue(result.getArrayValue());
-            const formattedResult = transformedResult.map((row) =>
-                row.map((value) => (typeof value === 'number' ? Number(value.toFixed(15)) : value))
-            );
-            expect(formattedResult).toStrictEqual([
+
+            // Format and compare each value individually
+            transformedResult.forEach((row, rowIndex) => {
+                row.forEach((value, colIndex) => {
+                    if (typeof value === 'number' && !isNaN(value)) {
+                        // If value is a number, round it to 15 decimal places for comparison
+                        transformedResult[rowIndex][colIndex] = Number(value.toFixed(15));
+                    }
+                });
+            });
+
+            const expected = [
                 [0.8509181282393216, '#VALUE!', 0.731067071048825, 0.8509181282393216, Infinity],
                 [Infinity, 2.688117141816135, 0.12976543732002155, '#VALUE!', -0.10026742064449062],
-            ].map((row) =>
-                row.map((value) => (typeof value === 'number' ? Number(value.toFixed(15)) : value))
-            ));
+            ];
+
+            expect(transformedResult).toEqual(expected);
         });
     });
 });

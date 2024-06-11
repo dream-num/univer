@@ -30,6 +30,7 @@ import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsFormulaMobilePlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsDataValidationMobilePlugin } from '@univerjs/sheets-data-validation';
 import { enUS } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 
@@ -66,9 +67,10 @@ univer.registerPlugin(UniverSheetsMobileUIPlugin);
 // sheet feature plugins
 univer.registerPlugin(UniverSheetsFilterPlugin);
 univer.registerPlugin(UniverSheetsFilterMobileUIPlugin);
-
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverSheetsFormulaMobilePlugin);
+
+univer.registerPlugin(UniverSheetsDataValidationMobilePlugin);
 
 const mockUser = {
     userID: 'Owner_qxVnhPbQ',

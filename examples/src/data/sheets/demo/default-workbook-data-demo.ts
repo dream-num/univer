@@ -178,13 +178,30 @@ const dataValidation = [
 const dv2 = [
     {
         uid: 'xxx-2',
-        type: DataValidationType.CHECKBOX,
-        ranges: [{
-            startRow: 1,
-            endRow: 2,
-            startColumn: 1,
-            endColumn: 2,
-        }],
+        type: 'checkbox',
+        ranges: [
+            {
+                startRow: 1,
+                endRow: 2,
+                startColumn: 1,
+                endColumn: 2,
+            },
+        ],
+    },
+    {
+        uid: 'adN9-O',
+        type: 'list',
+        formula1: "='sheet-0005'!F4:F8",
+        ranges: [
+            {
+                startRow: 4,
+                startColumn: 5,
+                endRow: 14,
+                endColumn: 8,
+                rangeType: 0,
+            },
+        ],
+        formula2: '',
     },
 ];
 
@@ -23664,7 +23681,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         ref: 'C6',
                         personId: 'mockId',
                         unitId: 'workbook-01',
-                        subUnitId: 'sheet-0011',
+                        subUnitId: 'dv-test',
                     },
                     {
                         text: {
@@ -23679,7 +23696,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         ref: 'B6',
                         personId: 'mockId',
                         unitId: 'workbook-01',
-                        subUnitId: 'sheet-0011',
+                        subUnitId: 'dv-test',
                     },
                     {
                         text: {
@@ -23694,7 +23711,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         ref: 'B7',
                         personId: 'mockId',
                         unitId: 'workbook-01',
-                        subUnitId: 'sheet-0011',
+                        subUnitId: 'dv-test',
                     },
                     {
                         text: {
@@ -23709,7 +23726,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         ref: 'B8',
                         personId: 'mockId',
                         unitId: 'workbook-01',
-                        subUnitId: 'sheet-0011',
+                        subUnitId: 'dv-test',
                     },
                     {
                         text: {
@@ -23724,7 +23741,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         ref: 'B9',
                         personId: 'mockId',
                         unitId: 'workbook-01',
-                        subUnitId: 'sheet-0011',
+                        subUnitId: 'dv-test',
                     },
                 ],
             }),

@@ -34,23 +34,6 @@ export const RECT_OBJECT_ARRAY = ['radius'];
 export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
     private _radius: number = 0;
 
-    /**
-     * the X value of rect topleft position in scene (same cordinate as viewport)
-     */
-    private _startX: number = 0;
-    /**
-     * the Y of rect topleft position in scene (same cordinate as viewport)
-     */
-    private _startY: number = 0;
-    /**
-     * the X value of rect bottomright position in scene (same cordinate as viewport)
-     */
-    private _endX: number = 0;
-    /**
-     * the Y value of rect bottomright position in scene (same cordinate as viewport)
-     */
-    private _endY: number = 0;
-
     constructor(key?: string, props?: T) {
         super(key, props);
         if (props?.radius) {
@@ -60,34 +43,6 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
 
     get radius() {
         return this._radius;
-    }
-
-    /**
-     * the X value of rect topleft position in scene (same cordinate as viewport)
-     */
-    get startX() {
-        return this._startX;
-    }
-
-    /**
-     * the Y of rect topleft position in scene (same cordinate as viewport)
-     */
-    get startY() {
-        return this._startY;
-    }
-
-    /**
-     * the X value of rect bottomright position in scene (same cordinate as viewport)
-     */
-    get endX() {
-        return this._endX;
-    }
-
-    /**
-     * the Y value of rect bottomright position in scene (same cordinate as viewport)
-     */
-    get endY() {
-        return this._endY;
     }
 
     static override drawWith(ctx: UniverRenderingContext, props: IRectProps | Rect) {
@@ -148,11 +103,17 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         };
     }
 
+    /**
+     * invoked by viewport@render --> group@render --> shape@render
+     * @param ctx
+     * @param viewportInfo
+     */
     protected override _draw(ctx: UniverRenderingContext, viewportInfo?: IViewportInfo) {
         const { radius, paintFirst, stroke, strokeWidth, fill, strokeScaleEnabled, fillRule, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, strokeDashArray } = this;
         if (!strokeDashArray) {
             Rect.drawWith(ctx, this);
         } else {
+            // use parent trasnform to get startXY, and add width&height to get endXY
             const { startX, startY, endX, endY } = this;
             const rect = { left: startX, top: startY, right: endX, bottom: endY };
             let { left, top, right, bottom } = rect;

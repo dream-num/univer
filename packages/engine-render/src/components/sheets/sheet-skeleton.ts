@@ -49,7 +49,7 @@ import type {
     IRange,
     IRowAutoHeightInfo,
     IRowData,
-    ISelectionCellWithCoord,
+    ISelectionCellWithMergeInfo,
     IStyleBase,
     IStyleData,
     ITextRotation,
@@ -229,7 +229,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _overflowCache: ObjectMatrix<IRange> = new ObjectMatrix();
     private _stylesCache: IStylesCache = {
         background: {},
-        backgroundPositions: new ObjectMatrix<ISelectionCellWithCoord>(),
+        backgroundPositions: new ObjectMatrix<ISelectionCellWithMergeInfo>(),
         font: {},
         border: new ObjectMatrix<BorderCache>(),
     };
@@ -807,7 +807,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         scaleX: number,
         scaleY: number,
         scrollXY: { x: number; y: number }
-    ): Nullable<ISelectionCellWithCoord> {
+    ): Nullable<ISelectionCellWithMergeInfo> {
         const { row, column } = this.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
 
         return this.getCellByIndex(row, column);
@@ -977,7 +977,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param row Specified Row Coordinate
      * @param column Specified Column Coordinate
      */
-    getCellByIndex(row: number, column: number): ISelectionCellWithCoord {
+    getCellByIndex(row: number, column: number): ISelectionCellWithMergeInfo {
         const {
             rowHeightAccumulation,
             columnWidthAccumulation,
@@ -1657,7 +1657,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _resetCache() {
         this._stylesCache = {
             background: {},
-            backgroundPositions: new ObjectMatrix<ISelectionCellWithCoord>(),
+            backgroundPositions: new ObjectMatrix<ISelectionCellWithMergeInfo>(),
             font: {},
             border: new ObjectMatrix<BorderCache>(),
         };

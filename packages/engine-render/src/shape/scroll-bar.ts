@@ -347,6 +347,7 @@ export class ScrollBar extends BaseScrollBar {
         });
 
         // 垂直滚动条的拖拽事件
+        // scene.input-manager@_onPointerDown --> base-object@triggerPointerDown!
         this.verticalThumbRect?.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             const srcElement = this.verticalThumbRect;
@@ -361,7 +362,7 @@ export class ScrollBar extends BaseScrollBar {
             this.makeViewDirty(true);
             state.stopPropagation();
         });
-        this._verticalPointerMoveObserver = mainScene.onPointerMoveObserver.add((evt: unknown, state: EventState) => {
+        this._verticalPointerMoveObserver = mainScene.onPointerMoveObserver.add((evt: unknown, _state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             if (!this._isVerticalMove) {
                 return;
@@ -369,11 +370,11 @@ export class ScrollBar extends BaseScrollBar {
             this._view.scrollByBar({
                 y: e.offsetY - this._lastY,
             });
+
             this._lastY = e.offsetY;
             mainScene.getEngine()?.setRemainCapture();
         });
-        this._verticalPointerUpObserver = mainScene.onPointerUpObserver.add((evt: unknown, state: EventState) => {
-            const e = evt as IPointerEvent | IMouseEvent;
+        this._verticalPointerUpObserver = mainScene.onPointerUpObserver.add((evt: unknown, _state: EventState) => {
             const srcElement = this.verticalThumbRect;
             this._isVerticalMove = false;
             // srcElement.fill = this._thumbBackgroundColor!;

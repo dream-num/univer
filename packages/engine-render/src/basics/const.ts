@@ -42,6 +42,7 @@ export enum EVENT_TYPE {
     PointerLeave = 'PointerLeave',
     PointerOver = 'PointerOver',
     PointerEnter = 'PointerEnter',
+    PointerCancel = 'PointerCancel',
     wheel = 'MouseWheel',
     KeyDown = 'KeyDown',
     KeyUp = 'KeyUp',

@@ -694,4 +694,8 @@ export class Tools {
             data[key] = value;
         }
     }
+
+    static clamp(value: number, min: number, max: number) {
+        return Math.max(min, Math.min(max, value));
+    }
 }

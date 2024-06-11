@@ -80,6 +80,11 @@ interface IScrollBarPosition {
     y?: number;
 }
 
+interface IViewportScrollPos {
+    viewportScrollX?: number;
+    viewportScrollY?: number;
+}
+
 enum SCROLL_TYPE {
     scrollTo,
     scrollBy,
@@ -514,9 +519,12 @@ export class Viewport {
      * only viewMain would call scrollTo, other views did not call scroll, see scroll.render-controller
      * @param pos
      *
-     * when scrolling:
-     *
+     * when scrolling by trackpad:
+     * scene.input-manager@_onMouseWheel --> scene@triggerMouseWheel --> sheet-render.controller@scene.onMouseWheelObserver.add --> scrollManagerService.setScrollInfo -->
      * scroll.render-controller@_scrollManagerService.scrollInfo$.subscribe --> scrollTo
+     * scroll-manager.service@_scrollInfo$.next -->scroll.render-controller@_scrollManagerService.scrollInfo$.subscribe -->
+     * viewportMain.scrollTo(config);
+     *
      *
      * when change skelenton:
      * _currentSkeletonBefore$ ---> scroll.render-controller@_updateSceneSize --> setSearchParam --> scene@_setTransForm ---> viewport.resetCanvasSizeAndUpdateScrollBar ---> scrollTo ---> _scroll
@@ -526,26 +534,39 @@ export class Viewport {
      * _currentSkeleton$ ---> selection.render-controller ---> setCurrentSelection ---> formula@_autoScroll ---> scrollTo
      * _currentSkeleton$ ---> freeze.render-controller@_refreshFreeze --> viewport.resize ---> scrollTo  ---> _scroll
      *
+     *
+     *
      * TODO: @lumix many side effects in scrollTo, it would update scrollXY & viewportScrollXY, and notify listeners of scrollInfo$
      *
      * Debug
      * window.scene.getViewports()[0].scrollTo({x: 14.2, y: 1.8}, true)
      */
     scrollTo(pos: IScrollBarPosition) {
+        // console.trace();
         return this._scrollToScrollbarPos(SCROLL_TYPE.scrollTo, pos);
     }
 
     /**
      * current position plus offset, relative
+     * normally triggered by scroll-timer(in sheet)
      * @param pos
      * @returns isLimited
      */
     scrollBy(pos: IScrollBarPosition, isTrigger = true) {
-        return this._scrollToScrollbarPos(SCROLL_TYPE.scrollBy, pos, isTrigger);
+        pos.x = this.scrollX + (pos.x || 0);
+        pos.y = this.scrollY + (pos.y || 0);
+        return this._scrollToScrollbarPos(SCROLL_TYPE.scrollTo, pos, isTrigger);
     }
 
+    /**
+     *
+     * @param pos
+     * @param isTrigger
+     */
     scrollByBar(pos: IScrollBarPosition, isTrigger = true) {
-        this._scrollToScrollbarPos(SCROLL_TYPE.scrollBy, pos, isTrigger);
+        pos.x = this.scrollX + (pos.x || 0);
+        pos.y = this.scrollY + (pos.y || 0);
+        this._scrollToScrollbarPos(SCROLL_TYPE.scrollTo, pos, isTrigger);
         const { x, y } = pos;
         this.onScrollByBarObserver.notifyObservers({
             viewport: this,
@@ -559,6 +580,18 @@ export class Viewport {
             limitY: this._scrollBar?.limitY,
             isTrigger,
         });
+    }
+
+    scrollByViewportScroll({ deltaX = 0, deltaY = 0 }) {
+        if (!this._scrollBar || this.isActive === false) {
+            return;
+        }
+        const x = deltaX + this.viewportScrollX;
+        const y = deltaY + this.viewportScrollY;
+        // console.log('before', y, viewportScrollY, this.viewportScrollY);
+        const param = this.transViewportScroll2ScrollValue(x, y);
+        this._scrollToScrollbarPos(SCROLL_TYPE.scrollTo, param, false);
+        // console.log('after', y, this.viewportScrollY);
     }
 
     /**
@@ -861,8 +894,8 @@ export class Viewport {
         const yTo: number = ((height || 0) + this.top);
 
         // this.getRelativeVector 加上了 scroll 后的坐标
-        const topLeft = this.getRelativeVector(Vector2.FromArray([xFrom, yFrom]));
-        const bottomRight = this.getRelativeVector(Vector2.FromArray([xTo, yTo]));
+        const topLeft = this.transformVector2SceneCoord(Vector2.FromArray([xFrom, yFrom]));
+        const bottomRight = this.transformVector2SceneCoord(Vector2.FromArray([xTo, yTo]));
 
         const viewBound = {
             left: topLeft.x,
@@ -936,15 +969,20 @@ export class Viewport {
         return this._calcViewportInfo();
     }
 
-    getRelativeVector(coord: Vector2) {
+    /**
+     * convert vector to scene coordinate, include row & col
+     * @param vec
+     * @returns Vector2
+     */
+    transformVector2SceneCoord(vec: Vector2): Vector2 {
         const sceneTrans = this.scene.transform.clone().invert();
         const scroll = this.getViewportScrollByScroll();
 
-        const svCoord = sceneTrans.applyPoint(coord).add(Vector2.FromArray([scroll.x, scroll.y]));
+        const svCoord = sceneTrans.applyPoint(vec).add(Vector2.FromArray([scroll.x, scroll.y]));
         return svCoord;
     }
 
-    getAbsoluteVector(coord: Vector2) {
+    getAbsoluteVector(coord: Vector2): Vector2 {
         const sceneTrans = this.scene.transform.clone();
         const scroll = this.getViewportScrollByScroll();
 
@@ -952,6 +990,12 @@ export class Viewport {
         return svCoord;
     }
 
+    /**
+     * At f7140a7c11, only doc need this method.
+     * In sheet, wheel event is handled by scroll-manager.service@setScrollInfo
+     * @param evt
+     * @param state
+     */
     // eslint-disable-next-line complexity, max-lines-per-function
     onMouseWheel(evt: IWheelEvent, state: EventState) {
         if (!this._scrollBar || this.isActive === false) {

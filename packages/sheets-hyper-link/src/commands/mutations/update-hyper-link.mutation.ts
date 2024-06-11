@@ -36,7 +36,7 @@ export const UpdateHyperLinkMutation: ICommand<IUpdateHyperLinkMutationParams> =
 
         const model = accessor.get(HyperLinkModel);
         const { unitId, subUnitId, payload, id } = params;
-        return model.updateHyperLink(unitId, subUnitId, id, payload);
+        return model.updateHyperLink(unitId, subUnitId, id, payload, false);
     },
 };
 

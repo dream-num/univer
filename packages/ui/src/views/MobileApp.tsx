@@ -118,7 +118,7 @@ export function MobileApp(props: IUniverAppProps) {
                         </aside>
 
                         <section className={styles.appContainerContent}>
-                            <header>
+                            <header className={styles.appHeader}>
                                 {header && <ComponentContainer key="header" components={headerComponents} />}
                             </header>
 

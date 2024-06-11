@@ -225,7 +225,7 @@ import {
 } from '../shortcuts/view.shortcut';
 import { CellBorderSelectorMenuItemFactory } from '../menu/border.menu';
 import { CellMergeAllMenuItemFactory, CellMergeCancelMenuItemFactory, CellMergeHorizontalMenuItemFactory, CellMergeMenuItemFactory, CellMergeVerticalMenuItemFactory } from '../menu/merge.menu';
-import { MobileHeader } from '../../views/mobile/header/MobileHeader';
+import { MobileSheetBar } from '../../views/mobile/sheet-bar/MobileSheetBar';
 
 export interface IUniverSheetsUIConfig {
     menu: MenuConfig;
@@ -492,7 +492,7 @@ export class SheetUIMobileController extends Disposable {
     }
 
     private _initWorkbenchParts(): void {
-        this._uiPartsService.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(MobileHeader, this._injector));
+        this._uiPartsService.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(MobileSheetBar, this._injector));
     }
 
     private _initFocusHandler(): void {

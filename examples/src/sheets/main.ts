@@ -145,6 +145,7 @@ univer.registerPlugin(UniverDebuggerPlugin);
 const injector = univer.__getInjector();
 const userManagerService = injector.get(UserManagerService);
 userManagerService.currentUser = mockUser;
+userManagerService.addUser(mockUser);
 
 declare global {
     // eslint-disable-next-line ts/naming-convention

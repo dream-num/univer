@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import type { Viewport } from '../viewport';
+
 export function getCurrentScrollXY(scrollTimer: any) {
     const scene = scrollTimer.getScene();
-    const viewport = scrollTimer.getViewportByCoord(scene);
+    const viewport = scrollTimer.getViewportByCoord(scene) as Viewport;
     const scrollX = 0;
     const scrollY = 0;
     if (!viewport) {
@@ -25,7 +27,7 @@ export function getCurrentScrollXY(scrollTimer: any) {
             scrollY,
         };
     }
-    const actualScroll = viewport.getActualScroll(viewport.scrollX, viewport.scrollY);
+    const actualScroll = viewport.transScroll2ViewportScrollValue(viewport.scrollX, viewport.scrollY);
     return {
         scrollX: actualScroll.x,
         scrollY: actualScroll.y,

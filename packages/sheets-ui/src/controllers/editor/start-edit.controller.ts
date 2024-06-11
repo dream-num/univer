@@ -38,12 +38,12 @@ import {
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import {
+    VIEWPORT_KEY as DOC_VIEWPORT_KEY,
     DOCS_COMPONENT_MAIN_LAYER_INDEX,
     DocSkeletonManagerService,
     DocViewModelManagerService,
     RichTextEditingMutation,
     TextSelectionManagerService,
-    VIEWPORT_KEY,
 } from '@univerjs/docs';
 import type { DocumentSkeleton, IDocumentLayoutObject, IEditorInputConfig, Scene } from '@univerjs/engine-render';
 import {
@@ -59,12 +59,12 @@ import {
 import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
-import { filter } from 'rxjs';
 import { ClearSelectionFormatCommand } from '@univerjs/sheets';
+import { filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
-import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import styles from '../../views/sheet-container/index.module.less';
 
 const HIDDEN_EDITOR_POSITION = -1000;
@@ -345,7 +345,7 @@ export class StartEditController extends Disposable {
 
         const { document: documentComponent, scene, engine } = editorObject;
 
-        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        const viewportMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
 
         const clientHeight =
             document.body.clientHeight -
@@ -366,7 +366,7 @@ export class StartEditController extends Disposable {
             if (scrollBar == null) {
                 viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
             } else {
-                viewportMain?.resetSizeAndScrollBar();
+                viewportMain?.resetCanvasSizeAndUpdateScrollBar();
             }
         } else {
             scrollBar = null;
@@ -550,7 +550,7 @@ export class StartEditController extends Disposable {
                     // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
                 const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
 
-                scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.scrollTo({
+                scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollTo({
                     y: Number.POSITIVE_INFINITY,
                 });
 

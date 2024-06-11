@@ -117,16 +117,22 @@ export class HyperLinkModel extends Disposable {
         return true;
     }
 
-    updateHyperLink(unitId: string, subUnitId: string, id: string, payload: Partial<ICellLinkContent>, silent?: boolean) {
+    updateHyperLink(
+        unitId: string,
+        subUnitId: string,
+        id: string,
+        payload: Partial<ICellLinkContent>,
+        silent = false
+    ) {
         const { matrix, positionMap } = this._ensureMap(unitId, subUnitId);
-        // const current = matrix.getValue();
         const position = positionMap.get(id);
         if (!position) {
-            return false;
+            return true;
         }
+
         const link = matrix.getValue(position.row, position.column);
         if (!link) {
-            return false;
+            return true;
         }
         Object.assign(link, payload);
 
@@ -146,10 +152,9 @@ export class HyperLinkModel extends Disposable {
 
     updateHyperLinkRef(unitId: string, subUnitId: string, id: string, payload: { row: number; column: number }, silent = false) {
         const { matrix, positionMap } = this._ensureMap(unitId, subUnitId);
-        // const current = matrix.getValue();
         const position = positionMap.get(id);
         if (!position) {
-            return false;
+            return true;
         }
 
         let link = matrix.getValue(position.row, position.column);
@@ -187,9 +192,10 @@ export class HyperLinkModel extends Disposable {
         this._linkUpdate$.next({
             unitId,
             subUnitId,
-            payload: link,
+            payload: position.link,
             type: 'remove',
         });
+
         return true;
     }
 

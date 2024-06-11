@@ -351,7 +351,7 @@ export class DocsAdaptor extends ObjectAdaptor {
         docsComponent.translate(docsLeft, docsTop);
 
         if (scrollToX !== Number.POSITIVE_INFINITY && viewport != null) {
-            const actualX = viewport.getBarScroll(scrollToX, 0).x;
+            const actualX = viewport.transScroll2ViewportScrollValue(scrollToX, 0).x;
             viewport.scrollTo({
                 x: actualX,
             });

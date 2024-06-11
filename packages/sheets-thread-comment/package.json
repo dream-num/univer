@@ -63,6 +63,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-thread-comment-base": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",

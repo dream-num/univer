@@ -23,6 +23,7 @@ import {
     LocaleType,
     LogLevel,
     Plugin,
+    Tools,
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -112,7 +113,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookData || getTestWorkbookDataDemo());
+    const sheet = univer.createUniverSheet(Tools.deepClone(workbookData || getTestWorkbookDataDemo()));
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

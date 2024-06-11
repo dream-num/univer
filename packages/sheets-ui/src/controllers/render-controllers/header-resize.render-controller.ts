@@ -25,7 +25,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
-import { CURSOR_TYPE, DeviceInputEventType, Rect, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, DeviceInputEventType, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type {
     IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommand,
@@ -34,7 +34,7 @@ import type {
 import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY, VIEWPORT_KEY } from '../../common/keys';
+import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
@@ -316,7 +316,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                     const engine = scene.getEngine();
                     const canvasMaxHeight = engine?.height || 0;
                     const canvasMaxWidth = engine?.width || 0;
-                    const viewPort = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+                    const viewPort = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
                     const scrollBarHorizontalHeight = (viewPort?.getScrollBar()?.horizonBarRect?.height || 0) + 10;
                     const scrollBarVerticalWidth = (viewPort?.getScrollBar()?.verticalBarRect?.width || 0) + 10;

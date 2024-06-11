@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import { IUniverInstanceService, type Nullable, UniverInstanceType } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IScrollManagerParam {
     offsetX: number;
     offsetY: number;
     sheetViewStartRow: number;
     sheetViewStartColumn: number;
+    viewportScrollX?: number;
+    viewportScrollY?: number;
 }
 
 export interface IScrollManagerSearchParam {
@@ -45,60 +49,96 @@ export class ScrollManagerService {
     private readonly _scrollInfo$ = new BehaviorSubject<Nullable<IScrollManagerParam>>(null);
     readonly scrollInfo$ = this._scrollInfo$.asObservable();
 
-    private _currentScroll: Nullable<IScrollManagerSearchParam> = null;
+    private _searchParamForScroll: Nullable<IScrollManagerSearchParam> = null;
+
+    constructor(
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        // @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+    ) {
+        // init
+    }
 
     dispose(): void {
         this._scrollInfo$.complete();
     }
 
-    setCurrentScroll(param: IScrollManagerSearchParam) {
-        this._currentScroll = param;
-
-        this._refresh(param);
+    setSearchParam(param: IScrollManagerSearchParam) {
+        this._searchParamForScroll = param;
     }
 
-    getScrollByParam(param: IScrollManagerSearchParam): Readonly<Nullable<IScrollManagerParam>> {
+    setSearchParamAndRefresh(param: IScrollManagerSearchParam) {
+        this._searchParamForScroll = param;
+        this._notifyCurrentScrollInfo(param);
+    }
+
+    getScrollInfoByParam(param: IScrollManagerSearchParam): Readonly<Nullable<IScrollManagerParam>> {
         return this._getCurrentScroll(param);
     }
 
-    getCurrentScroll(): Readonly<Nullable<IScrollManagerParam>> {
-        return this._getCurrentScroll(this._currentScroll);
+    getCurrentScrollInfo(): Readonly<Nullable<IScrollManagerParam>> {
+        return this._getCurrentScroll(this._searchParamForScroll);
     }
 
-    addOrReplace(scroll: IScrollManagerParam) {
-        if (this._currentScroll == null) {
+    setScrollInfoToSnapshot(scrollInfo: IScrollManagerParam) {
+        if (this._searchParamForScroll == null) {
+            return;
+        }
+        const { unitId, sheetId } = this._searchParamForScroll;
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const worksheet = workbook?.getSheetBySheetId(sheetId);
+        const snapshot = worksheet?.getConfig();
+        if (snapshot) {
+            snapshot.scrollLeft = scrollInfo.viewportScrollX || 0;
+            snapshot.scrollTop = scrollInfo.viewportScrollY || 0;
+        }
+    }
+
+    /**
+     * set scrollInfo by cmd,
+     * call _setScrollInfo twice after one scrolling.
+     * first time set scrollInfo bt scrollOperation, but offsetXY is derived from scroll event.
+     * second time set scrollInfo by viewport.scrollTo(scrol.render-controller --> onScrollAfterObserver), this time offsetXY has been limited.
+     *
+     * wheelevent --> sheetCanvasView -->  set-scroll.command('sheet.command.set-scroll-relative') --> scrollOperation --> this.setScrollInfo  --> scrollInfo$.next --> scroll.render-controller@viewportMain.scrollTo & notify -->
+     * scroll.render-controller@onScrollAfterObserver --> this.setScrollInfoToCurrSheetWithoutNotify --> this._setScrollInfo({}, false)
+     * call _setScrollInfo again, a loop!, so we should call setScrollInfoToCurrSheetWithoutNotify
+     * @param param
+     */
+    setScrollInfo(param: IScrollManagerInsertParam) {
+        this._setScrollInfo(param);
+    }
+
+    setScrollInfoToCurrSheet(scrollInfo: IScrollManagerParam) {
+        if (this._searchParamForScroll == null) {
             return;
         }
 
-        this._addByParam({
-            ...this._currentScroll,
-            ...scroll,
+        this._setScrollInfo({
+            ...this._searchParamForScroll,
+            ...scrollInfo,
         });
     }
 
-    addOrReplaceNoRefresh(scroll: IScrollManagerParam) {
-        if (this._currentScroll == null) {
+    setScrollInfoToCurrSheetWithoutNotify(scroll: IScrollManagerParam) {
+        if (this._searchParamForScroll == null) {
             return;
         }
 
-        this._addByParam(
+        this._setScrollInfo(
             {
-                ...this._currentScroll,
+                ...this._searchParamForScroll,
                 ...scroll,
             },
             false
         );
     }
 
-    addOrReplaceByParam(param: IScrollManagerInsertParam) {
-        this._addByParam(param);
-    }
-
     clear(): void {
-        if (this._currentScroll == null) {
+        if (this._searchParamForScroll == null) {
             return;
         }
-        this._clearByParam(this._currentScroll);
+        this._clearByParam(this._searchParamForScroll);
     }
 
     // scrollToCell(startRow: number, startColumn: number) {
@@ -111,29 +151,58 @@ export class ScrollManagerService {
     //     const {} = skeleton.getCellByIndex(startRow, startColumn);
     // }
 
-    private _addByParam(insertParam: IScrollManagerInsertParam, isRefresh = true): void {
-        const { unitId, sheetId, sheetViewStartColumn, sheetViewStartRow, offsetX, offsetY } = insertParam;
+    calcViewportScrollFromOffset(scrollInfo: IScrollManagerInsertParam) {
+        const { unitId } = scrollInfo;
+        const workbookScrollInfo = this._scrollInfo.get(unitId);
+        if (workbookScrollInfo == null) {
+            return {
+                scrollTop: 0,
+                scrollLeft: 0,
+            };
+        }
+        // const scrollInfo = workbookScrollInfo.get(param.sheetId);
+        let { sheetViewStartColumn, sheetViewStartRow, offsetX, offsetY } = scrollInfo;
+        sheetViewStartRow = sheetViewStartRow || 0;
+        offsetY = offsetY || 0;
+
+        // const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentSkeleton();
+        const rowAcc = skeleton?.rowHeightAccumulation[sheetViewStartRow - 1] || 0;
+        const colAcc = skeleton?.columnWidthAccumulation[sheetViewStartColumn - 1] || 0;
+        const viewportScrollX = colAcc + offsetX;
+        const viewportScrollY = rowAcc + offsetY;
+
+        return {
+            viewportScrollX,
+            viewportScrollY,
+        };
+    }
+
+    private _setScrollInfo(newScrollInfo: IScrollManagerInsertParam, notifyScrollInfo = true): void {
+        const { unitId, sheetId, sheetViewStartColumn, sheetViewStartRow, offsetX, offsetY } = newScrollInfo;
 
         if (!this._scrollInfo.has(unitId)) {
             this._scrollInfo.set(unitId, new Map());
         }
 
-        const sheetScroll = this._scrollInfo.get(unitId)!;
-
-        sheetScroll.set(sheetId, {
+        const worksheetScrollInfoMap = this._scrollInfo.get(unitId)!;
+        const scrollLeftTopByRowColOffset = this.calcViewportScrollFromOffset(newScrollInfo);
+        const scrollInfo: IScrollManagerParam = {
             sheetViewStartRow,
             sheetViewStartColumn,
             offsetX,
             offsetY,
-        });
-
-        if (isRefresh === true) {
-            this._refresh({ unitId, sheetId });
+            viewportScrollX: scrollLeftTopByRowColOffset.viewportScrollX,
+            viewportScrollY: scrollLeftTopByRowColOffset.viewportScrollY,
+        };
+        worksheetScrollInfoMap.set(sheetId, scrollInfo);
+        if (notifyScrollInfo === true) {
+            this._notifyCurrentScrollInfo({ unitId, sheetId });
         }
     }
 
     private _clearByParam(param: IScrollManagerSearchParam): void {
-        this._addByParam({
+        this._setScrollInfo({
             ...param,
             sheetViewStartRow: 0,
             sheetViewStartColumn: 0,
@@ -141,7 +210,7 @@ export class ScrollManagerService {
             offsetY: 0,
         });
 
-        this._refresh(param);
+        this._notifyCurrentScrollInfo(param);
     }
 
     private _getCurrentScroll(param: Nullable<IScrollManagerSearchParam>) {
@@ -152,7 +221,10 @@ export class ScrollManagerService {
         return this._scrollInfo.get(unitId)?.get(sheetId);
     }
 
-    private _refresh(param: IScrollManagerSearchParam): void {
-        this._scrollInfo$.next(this._getCurrentScroll(param));
+    private _notifyCurrentScrollInfo(param: IScrollManagerSearchParam): void {
+        const scrollInfo = this._getCurrentScroll(param);
+
+        // subscribe this._scrollManagerService.scrollInfo$ in scroll.render-controller
+        this._scrollInfo$.next(scrollInfo);
     }
 }

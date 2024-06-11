@@ -55,7 +55,7 @@ function calculateAsin(variant: BaseValueObject) {
     }
 
     if (typeof value !== 'number' || !Number.isFinite(value) || value < -1 || value > 1) {
-        return ErrorValueObject.create(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.NUM); // Return #NUM! error if value is out of range
     }
 
     const result = Math.asin(value);

@@ -34,9 +34,35 @@ export class Abs extends BaseFunction {
             return variant;
         }
 
-        const value = variant.getValue();
-        const result = Math.abs(Number(value));
+        if (variant.isArray()) {
+            return variant.map((currentValue) => {
+                if (currentValue.isError()) {
+                    return currentValue;
+                }
+                return calculateAbs(currentValue);
+            });
+        }
 
-        return NumberValueObject.create(result);
+        return calculateAbs(variant);
     }
+}
+
+function calculateAbs(variant: BaseValueObject) {
+    let value = variant.getValue();
+
+    if (variant.isBoolean()) {
+        value = value ? 1 : 0;
+    }
+
+    if (typeof value !== 'number') {
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    const result = Math.abs(value);
+
+    if (Number.isNaN(result)) {
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    return NumberValueObject.create(result);
 }

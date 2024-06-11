@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { UniverSheetsConditionalFormattingMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsConditionalFormattingUIPlugin } from './plugin';
 export { AddCfCommand } from './commands/commands/add-cf.command';
 export type { IAddCfCommandParams } from './commands/commands/add-cf.command';

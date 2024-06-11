@@ -31,10 +31,9 @@ import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsFormulaMobilePlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsDataValidationMobilePlugin } from '@univerjs/sheets-data-validation';
+import { UniverSheetsConditionalFormattingMobileUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 import { enUS } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
-
-const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
 
 // univer
 const univer = new Univer({
@@ -70,6 +69,7 @@ univer.registerPlugin(UniverSheetsFilterMobileUIPlugin);
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverSheetsFormulaMobilePlugin);
 
+univer.registerPlugin(UniverSheetsConditionalFormattingMobileUIPlugin);
 univer.registerPlugin(UniverSheetsDataValidationMobilePlugin);
 
 const mockUser = {

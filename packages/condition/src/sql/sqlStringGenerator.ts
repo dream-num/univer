@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CompareType, SqlFunc } from './types';
+import type { CompareType, SqlFunc } from '../condition/types';
 
 export const compareFunctionGenerator = (compareType: CompareType): SqlFunc => {
     return () => {

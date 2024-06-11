@@ -15,7 +15,20 @@
  */
 
 /**
- * Represents a heap data structure.
+ * @description Represents a heap data structure.
+ * A heap is a complete binary tree that satisfies the heap property.
+ * The heap property states that the parent node is always smaller or bigger than its children.
+ * The root node is the smallest or biggest element in the heap.
+ * The heap is used to find the kth largest or smallest element in a list.
+ * A array can be used to represent a heap.
+ * The root node is at index 0, and the left child of a node at index i is at index 2i + 1.
+ * The right child of a node at index i is at index 2i + 2.
+ * The parent node of a node at index i is at index (i - 1) / 2.
+ * @example
+ * const maxHeap = [5, 3, 4, 1, 2];
+ * // const minHeap = [6, 8, 7, 10, 9];
+ *  // the root node in maxHeap is 5
+ *  // the root child is 3, 4, then the child of 3 is 1, 2
  */
 class Heap {
     heap: number[];
@@ -92,7 +105,10 @@ class Heap {
 }
 
 /**
- * Represents a min heap data structure.
+ * @description Represents a min heap data structure.
+ * in MinHeap, the parent node is always smaller than its children.
+ * The root node is the smallest element in the heap.
+ * The min heap is used to find the kth largest element in a list.
  */
 class MinHeap extends Heap {
     /**
@@ -220,14 +236,14 @@ class MaxHeap extends Heap {
  * @returns The kth largest element.
  */
 export const getLargestK = (list: number[], k: number) => {
-    const min = new MinHeap();
-    list.forEach((n) => {
-        min.insert(n);
-        if (min.size() > k) {
-            min.pop();
+    const minHeap = new MinHeap();
+    for (const item of list) {
+        minHeap.insert(item);
+        if (minHeap.size() > k) {
+            minHeap.pop();
         }
-    });
-    return min;
+    }
+    return minHeap.heap;
 };
 
 /**
@@ -238,12 +254,12 @@ export const getLargestK = (list: number[], k: number) => {
  */
 export const getSmallestK = (list: number[], k: number) => {
     const max = new MaxHeap();
-    list.forEach((n) => {
-        max.insert(n);
+    for (const item of list) {
+        max.insert(item);
         if (max.size() > k) {
             max.pop();
         }
-    });
-    return max;
+    }
+    return max.heap;
 };
 

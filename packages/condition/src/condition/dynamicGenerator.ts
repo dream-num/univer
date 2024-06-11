@@ -45,7 +45,7 @@ export const below = (value: number, average: number): boolean => {
  */
 export const getTopN = (list: number[], top: number, expectedValue: number): boolean => {
     const heap = getLargestK(list, top);
-    return heap.include(expectedValue);
+    return heap.includes(expectedValue);
 };
 
 /**
@@ -57,7 +57,7 @@ export const getTopN = (list: number[], top: number, expectedValue: number): boo
  */
 export const getBottomN = (list: number[], bottom: number, expectedValue: number): boolean => {
     const heap = getSmallestK(list, bottom);
-    return heap.include(expectedValue);
+    return heap.includes(expectedValue);
 };
 
 /**

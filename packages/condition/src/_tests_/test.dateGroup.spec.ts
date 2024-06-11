@@ -102,6 +102,7 @@ describe('dateGroup test', () => {
                 hour: 1,
                 dateGroupCompareType: DateGroupCompareTypeEnum.hour,
             };
+
             expect(groupByHour(input1[0], expected1)).toEqual(true);
             expect(groupByHour(input1[1], expected1)).toEqual(false);
             expect(groupByHour(input1[2], expected1)).toEqual(false);

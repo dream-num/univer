@@ -16,3 +16,5 @@
 
 export * from './condition/types';
 export * from './condition/funcGenerator';
+export * from './condition/topN';
+export * from './condition/dateGenerator';

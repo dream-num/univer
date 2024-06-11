@@ -24,23 +24,50 @@ describe('heap test', () => {
         const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         const small = getSmallestK(arr, 5);
         const large = getLargestK(arr, 5);
-        expect(small).toEqual([5, 3, 4, 1, 2]); // large heap
-        expect(large).toEqual([6, 8, 7, 9, 10]); // small heap
+        expect(small.sort()).toMatchObject([5, 3, 4, 1, 2].sort()); // large heap
+        expect(large.sort()).toMatchObject([6, 8, 7, 10, 9].sort()); // small heap
     });
 
     it('topN test2', () => {
         const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         const small = getSmallestK(arr, 4);
         const large = getLargestK(arr, 4);
-        expect(small).toEqual([4]);
-        expect(large).toEqual([10, 9, 8, 7]);
+        expect(small.sort()).toMatchObject([4, 2, 3, 1].sort());
+        expect(large.sort()).toMatchObject([10, 9, 8, 7].sort());
     });
 
     it('topN test randomSort  arr', () => {
         const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].sort(randomSort);
         const small = getSmallestK(arr, 4);
         const large = getLargestK(arr, 4);
-        expect(small).toEqual([4]);
-        expect(large).toEqual([10, 9, 8, 7]);
+        expect(small.sort()).toMatchObject([4, 2, 3, 1].sort());
+        expect(large.sort()).toMatchObject([10, 9, 8, 7].sort());
+    });
+
+    it('topN test randomSort  arr2', () => {
+        const arr = [1, -2, 3, 4, -5, 6, 7, 8, 9, -10].sort(randomSort);
+        const small = getSmallestK(arr, 5);
+        const large = getLargestK(arr, 5);
+        expect(small.sort()).toMatchObject([3, -2, 1, -10, -5].sort());
+        expect(large.sort()).toMatchObject([4, 7, 6, 9, 8].sort());
+    });
+
+    it('topN test compare with array sort', () => {
+        const arr: number[] = [];
+        for (let i = 0; i < 100; i++) {
+            arr.push(Math.floor(Math.random() * 1000));
+        }
+        const compare = (a: number, b: number) => a - b;
+
+        const small = getSmallestK(arr, 5);
+        const large = getLargestK(arr, 5);
+
+        arr.sort(compare);
+        const rs = arr.slice(0, 5);
+        expect(rs).toMatchObject(small.sort(compare));
+
+        arr.reverse();
+        const rs2 = arr.slice(0, 5);
+        expect(rs2.sort(compare)).toMatchObject(large.sort(compare));
     });
 });

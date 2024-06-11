@@ -51,10 +51,16 @@ describe('Test csch function', () => {
                 column: 0,
             });
             const result = textFunction.calculate(valueArray);
-            expect(transformToValue(result.getArrayValue()).map((row) => row.map((value) => typeof value === 'number' ? Number(value.toFixed(15)) : value))).toStrictEqual([
+            const transformedResult = transformToValue(result.getArrayValue());
+            const formattedResult = transformedResult.map((row) =>
+                row.map((value) => (typeof value === 'number' ? Number(value.toFixed(15)) : value))
+            );
+            expect(formattedResult).toStrictEqual([
                 [0.8509181282393216, '#VALUE!', 0.731067071048825, 0.8509181282393216, Infinity],
                 [Infinity, 2.688117141816135, 0.12976543732002155, '#VALUE!', -0.10026742064449062],
-            ].map((row) => row.map((value) => typeof value === 'number' ? Number(value.toFixed(15)) : value)));
+            ].map((row) =>
+                row.map((value) => (typeof value === 'number' ? Number(value.toFixed(15)) : value))
+            ));
         });
     });
 });

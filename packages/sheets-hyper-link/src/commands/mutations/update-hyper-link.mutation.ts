@@ -24,7 +24,6 @@ export interface IUpdateHyperLinkMutationParams {
     subUnitId: string;
     id: string;
     payload: ICellLinkContent;
-    skipError?: boolean;
 }
 
 export const UpdateHyperLinkMutation: ICommand<IUpdateHyperLinkMutationParams> = {
@@ -36,8 +35,8 @@ export const UpdateHyperLinkMutation: ICommand<IUpdateHyperLinkMutationParams> =
         }
 
         const model = accessor.get(HyperLinkModel);
-        const { unitId, subUnitId, payload, id, skipError } = params;
-        return model.updateHyperLink(unitId, subUnitId, id, payload, false, skipError);
+        const { unitId, subUnitId, payload, id } = params;
+        return model.updateHyperLink(unitId, subUnitId, id, payload, false);
     },
 };
 
@@ -48,7 +47,6 @@ export interface IUpdateHyperLinkRefMutationParams {
     row: number;
     column: number;
     silent?: boolean;
-    skipError?: boolean;
 }
 
 export const UpdateHyperLinkRefMutation: ICommand<IUpdateHyperLinkRefMutationParams> = {
@@ -60,7 +58,7 @@ export const UpdateHyperLinkRefMutation: ICommand<IUpdateHyperLinkRefMutationPar
         }
 
         const model = accessor.get(HyperLinkModel);
-        const { unitId, subUnitId, id, row, column, silent, skipError } = params;
-        return model.updateHyperLinkRef(unitId, subUnitId, id, { row, column }, silent, skipError);
+        const { unitId, subUnitId, id, row, column, silent } = params;
+        return model.updateHyperLinkRef(unitId, subUnitId, id, { row, column }, silent);
     },
 };

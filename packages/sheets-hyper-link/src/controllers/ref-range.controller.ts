@@ -183,7 +183,6 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                                     payload: {
                                         payload: `#gid=${subUnitId}&range=${resultRange ? serializeRange(resultRange) : 'err'}`,
                                     },
-                                    skipError: true,
                                 } as IUpdateHyperLinkMutationParams,
                             }],
                             undos: [{
@@ -195,7 +194,6 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                                     payload: {
                                         payload,
                                     },
-                                    skipError: true,
                                 } as IUpdateHyperLinkMutationParams,
                             }],
                         };

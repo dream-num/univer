@@ -122,18 +122,17 @@ export class HyperLinkModel extends Disposable {
         subUnitId: string,
         id: string,
         payload: Partial<ICellLinkContent>,
-        silent = false,
-        skipError = false
+        silent = false
     ) {
         const { matrix, positionMap } = this._ensureMap(unitId, subUnitId);
         const position = positionMap.get(id);
         if (!position) {
-            return skipError;
+            return true;
         }
 
         const link = matrix.getValue(position.row, position.column);
         if (!link) {
-            return skipError;
+            return true;
         }
         Object.assign(link, payload);
 
@@ -151,11 +150,11 @@ export class HyperLinkModel extends Disposable {
         return true;
     }
 
-    updateHyperLinkRef(unitId: string, subUnitId: string, id: string, payload: { row: number; column: number }, silent = false, skipError = false) {
+    updateHyperLinkRef(unitId: string, subUnitId: string, id: string, payload: { row: number; column: number }, silent = false) {
         const { matrix, positionMap } = this._ensureMap(unitId, subUnitId);
         const position = positionMap.get(id);
         if (!position) {
-            return skipError;
+            return true;
         }
 
         let link = matrix.getValue(position.row, position.column);

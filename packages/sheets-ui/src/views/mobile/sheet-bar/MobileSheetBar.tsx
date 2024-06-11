@@ -29,6 +29,7 @@ import styles from './index.module.less';
 export function MobileSheetBar() {
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
     const [activeKey, setActiveKey] = useState('');
+    const tabMapRef = React.useRef<Map<string, HTMLElement | null>>(new Map());
 
     const commandService = useDependency(ICommandService);
 
@@ -36,7 +37,6 @@ export function MobileSheetBar() {
 
     const updateSheetItems = useCallback(() => {
         const currentSubUnitId = workbook.getActiveSheet().getSheetId();
-
         const sheets = workbook.getSheets();
         const activeSheet = workbook.getActiveSheet();
         const sheetListItems = sheets
@@ -53,6 +53,15 @@ export function MobileSheetBar() {
 
         setSheetList(sheetListItems);
         setActiveKey(currentSubUnitId);
+
+        if (tabMapRef.current.has(currentSubUnitId)) {
+            const element = tabMapRef.current.get(currentSubUnitId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        tabMapRef.current.clear();
     }, [workbook]);
 
     useEffect(() => {
@@ -101,6 +110,7 @@ export function MobileSheetBar() {
                         )}
                         key={sheet.sheetId}
                         onClick={() => onTabClick(sheet.sheetId!)}
+                        ref={(element) => tabMapRef.current.set(sheet.sheetId!, element)}
                     >
                         {sheet.label}
                     </div>

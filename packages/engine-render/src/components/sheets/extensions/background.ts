@@ -108,11 +108,6 @@ export class Background extends SheetExtension {
                         return true;
                     }
 
-                    const cellData = worksheet.getCell(rowIndex, columnIndex) as ICellData & ISheetRenderExtension;
-
-                    if (cellData.backgroundRenderExtension?.isSkip) {
-                        return true;
-                    }
                     // For merged cells, and the current cell is the top-left cell in the merged region.
                     if (isMergedMainCell) {
                         startY = mergeInfo.startY;

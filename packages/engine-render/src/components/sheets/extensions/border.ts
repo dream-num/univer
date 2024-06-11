@@ -100,12 +100,6 @@ export class Border extends SheetExtension {
             //     return true;
             // }
 
-            const cellData = worksheet.getCell(rowIndex, columnIndex) as ICellData & ISheetRenderExtension;
-
-            if (cellData.borderRenderExtension?.isSkip) {
-                return true;
-            }
-
             for (const key in borderCaches) {
                 const { type, style, color } = borderCaches[key] as BorderCacheItem;
 

@@ -26,6 +26,10 @@ export class Acos extends BaseFunction {
     override maxParams = 1;
 
     override calculate(variant: BaseValueObject) {
+        if (!variant) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
         if (variant.isString()) {
             variant = variant.convertToNumberObjectValue();
         }
@@ -49,6 +53,10 @@ export class Acos extends BaseFunction {
 
 function calculateAcos(variant: BaseValueObject) {
     let value = variant.getValue();
+
+    if (value === null || value === undefined || Number.isNaN(value)) {
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
 
     if (variant.isBoolean()) {
         value = value ? 1 : 0;

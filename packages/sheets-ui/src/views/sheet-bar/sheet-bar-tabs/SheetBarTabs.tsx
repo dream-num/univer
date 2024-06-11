@@ -38,6 +38,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { LockSingle } from '@univerjs/icons';
 import { merge } from 'rxjs';
+import { Quantity } from '@wendellhu/redi';
 import { SheetMenuPosition } from '../../../controllers/menu/menu';
 import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
@@ -65,7 +66,7 @@ export function SheetBarTabs() {
     const localeService = useDependency(LocaleService);
     const confirmService = useDependency(IConfirmService);
     const selectionRenderService = useDependency(ISelectionRenderService);
-    const editorBridgeService = useDependency(IEditorBridgeService);
+    const editorBridgeService = useDependency(IEditorBridgeService, Quantity.OPTIONAL);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
     const resetOrder = useObservable(worksheetProtectionRuleModel.resetOrder$);
@@ -354,9 +355,10 @@ export function SheetBarTabs() {
     };
 
     const onVisibleChange = (visible: boolean) => {
-        if (editorBridgeService.isForceKeepVisible()) {
+        if (editorBridgeService?.isForceKeepVisible()) {
             return;
         }
+
         if (visible) {
             const { left: containerLeft } = slideTabBarContainerRef.current?.getBoundingClientRect() ?? {};
             // current active tab position

@@ -69,7 +69,7 @@ import { SheetPermissionPanelModel } from './services/permission/sheet-permissio
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 import { WorksheetProtectionRenderService } from './services/permission/worksheet-permission-render.service';
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
-import { SheetUIMobileController } from './controllers/mobile-sheet-ui.controller';
+import { SheetUIMobileController } from './controllers/mobile/mobile-sheet-ui.controller';
 
 @DependentOn(UniverSheetsPlugin, UniverMobileUIPlugin)
 export class UniverSheetsMobileUIPlugin extends Plugin {

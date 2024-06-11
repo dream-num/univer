@@ -24,18 +24,19 @@ import {
     SetUnderlineCommand,
 } from '@univerjs/sheets';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
-import { ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { connectInjector } from '@wendellhu/redi/react-bindings';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
-} from '../commands/commands/add-worksheet-merge.command';
-import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-range-move-left-confirm.command ';
-import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
-import { HideColConfirmCommand, HideRowConfirmCommand } from '../commands/commands/hide-row-col-confirm.command';
+} from '../../commands/commands/add-worksheet-merge.command';
+import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command ';
+import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-up-confirm.command';
+import { HideColConfirmCommand, HideRowConfirmCommand } from '../../commands/commands/hide-row-col-confirm.command';
 import {
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
@@ -46,75 +47,75 @@ import {
     SetRangeSuperscriptCommand,
     SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
-} from '../commands/commands/inline-format.command';
-import { InsertRangeMoveDownConfirmCommand } from '../commands/commands/insert-range-move-down-confirm.command';
-import { InsertRangeMoveRightConfirmCommand } from '../commands/commands/insert-range-move-right-confirm.command';
-import { RefillCommand } from '../commands/commands/refill.command';
-import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/commands/remove-row-col-confirm.command';
-import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
+} from '../../commands/commands/inline-format.command';
+import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-down-confirm.command';
+import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/insert-range-move-right-confirm.command';
+import { RefillCommand } from '../../commands/commands/refill.command';
+import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../../commands/commands/remove-row-col-confirm.command';
+import { RemoveSheetConfirmCommand } from '../../commands/commands/remove-sheet-confirm.command';
 import {
     ApplyFormatPainterCommand,
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
-} from '../commands/commands/set-format-painter.command';
+} from '../../commands/commands/set-format-painter.command';
 import {
     CancelFrozenCommand,
     SetColumnFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
-} from '../commands/commands/set-frozen.command';
-import { ScrollCommand, ScrollToCellCommand, SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';
+} from '../../commands/commands/set-frozen.command';
+import { ScrollCommand, ScrollToCellCommand, SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 import {
     ExpandSelectionCommand,
     MoveSelectionCommand,
     MoveSelectionEnterAndTabCommand,
     SelectAllCommand,
-} from '../commands/commands/set-selection.command';
-import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
-import { ShowMenuListCommand } from '../commands/commands/unhide.command';
-import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
+} from '../../commands/commands/set-selection.command';
+import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
+import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
+import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
 import {
     SetCellEditVisibleArrowOperation,
     SetCellEditVisibleOperation,
     SetCellEditVisibleWithF2Operation,
-} from '../commands/operations/cell-edit.operation';
-import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
-import { SetScrollOperation } from '../commands/operations/scroll.operation';
-import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
-import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
-import { BorderPanel } from '../components/border-panel/BorderPanel';
-import { BORDER_PANEL_COMPONENT } from '../components/border-panel/interface';
-import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
+} from '../../commands/operations/cell-edit.operation';
+import { RenameSheetOperation } from '../../commands/operations/rename-sheet.operation';
+import { SetScrollOperation } from '../../commands/operations/scroll.operation';
+import { SetFormatPainterOperation } from '../../commands/operations/set-format-painter.operation';
+import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
+import { BorderPanel } from '../../components/border-panel/BorderPanel';
+import { BORDER_PANEL_COMPONENT } from '../../components/border-panel/interface';
+import { COLOR_PICKER_COMPONENT, ColorPicker } from '../../components/color-picker';
 import {
     FONT_FAMILY_COMPONENT,
     FONT_FAMILY_ITEM_COMPONENT,
     FontFamily,
     FontFamilyItem,
-} from '../components/font-family';
-import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
-import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-item-input';
-import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
-import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
-import { SidebarDefinedNameOperation } from '../commands/operations/sidebar-defined-name.operation';
-import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
+} from '../../components/font-family';
+import { FONT_SIZE_COMPONENT, FontSize } from '../../components/font-size';
+import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../../components/menu-item-input';
+import { DEFINED_NAME_CONTAINER } from '../../views/defined-name/component-name';
+import { DefinedNameContainer } from '../../views/defined-name/DefinedNameContainer';
+import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
+import { AutoClearContentCommand, AutoFillCommand } from '../../commands/commands/auto-fill.command';
 
-import { SheetPermissionOpenPanelOperation } from '../commands/operations/sheet-permission-open-panel.operation';
-import { SheetPermissionOpenDialogOperation } from '../commands/operations/sheet-permission-open-dialog.operation';
-import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetProtectionCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../commands/commands/range-protection.command';
-import { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from '../commands/commands/worksheet-protection.command';
+import { SheetPermissionOpenPanelOperation } from '../../commands/operations/sheet-permission-open-panel.operation';
+import { SheetPermissionOpenDialogOperation } from '../../commands/operations/sheet-permission-open-dialog.operation';
+import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetProtectionCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../../commands/commands/range-protection.command';
+import { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from '../../commands/commands/worksheet-protection.command';
 import {
     ClearSelectionAllMenuItemFactory,
     ClearSelectionContentMenuItemFactory,
     ClearSelectionFormatMenuItemFactory,
     ClearSelectionMenuItemFactory,
-} from './menu/clear.menu';
+} from '../menu/clear.menu';
 import {
     DeleteRangeMenuItemFactory,
     DeleteRangeMoveLeftMenuItemFactory,
     DeleteRangeMoveUpMenuItemFactory,
     RemoveColMenuItemFactory,
     RemoveRowMenuItemFactory,
-} from './menu/delete.menu';
+} from '../menu/delete.menu';
 import {
     CellInsertMenuItemFactory,
     ColInsertMenuItemFactory,
@@ -125,7 +126,7 @@ import {
     InsertRowAfterMenuItemFactory,
     InsertRowBeforeMenuItemFactory,
     RowInsertMenuItemFactory,
-} from './menu/insert.menu';
+} from '../menu/insert.menu';
 import {
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
@@ -162,7 +163,7 @@ import {
     UnderlineMenuItemFactory,
     VerticalAlignMenuItemFactory,
     WrapTextMenuItemFactory,
-} from './menu/menu';
+} from '../menu/menu';
 
 import {
     ChangeColorSheetMenuItemFactory,
@@ -171,7 +172,7 @@ import {
     HideSheetMenuItemFactory,
     RenameSheetMenuItemFactory,
     ShowMenuItemFactory,
-} from './menu/sheet.menu';
+} from '../menu/sheet.menu';
 import {
     EditorBreakLineShortcut,
     EditorCursorEnterShortcut,
@@ -181,8 +182,8 @@ import {
     EditorDeleteLeftShortcutInActive,
     generateArrowSelectionShortCutItem,
     StartEditWithF2Shortcut,
-} from './shortcuts/editor.shortcut';
-import { SetColHiddenShortcutItem, SetRowHiddenShortcutItem } from './shortcuts/operation.shortcut';
+} from '../shortcuts/editor.shortcut';
+import { SetColHiddenShortcutItem, SetRowHiddenShortcutItem } from '../shortcuts/operation.shortcut';
 import {
     ExpandSelectionDownShortcutItem,
     ExpandSelectionEndDownShortcutItem,
@@ -206,14 +207,14 @@ import {
     MoveSelectionTabShortcutItem,
     MoveSelectionUpShortcutItem,
     SelectAllShortcutItem,
-} from './shortcuts/selection.shortcut';
+} from '../shortcuts/selection.shortcut';
 import {
     SetBoldShortcutItem,
     SetItalicShortcutItem,
     SetStrikeThroughShortcutItem,
     SetUnderlineShortcutItem,
-} from './shortcuts/style.shortcut';
-import { ClearSelectionValueShortcutItem } from './shortcuts/value.shortcut';
+} from '../shortcuts/style.shortcut';
+import { ClearSelectionValueShortcutItem } from '../shortcuts/value.shortcut';
 import {
     PreventDefaultResetZoomShortcutItem,
     PreventDefaultZoomInShortcutItem,
@@ -221,9 +222,10 @@ import {
     ResetZoomShortcutItem,
     ZoomInShortcutItem,
     ZoomOutShortcutItem,
-} from './shortcuts/view.shortcut';
-import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
-import { CellMergeAllMenuItemFactory, CellMergeCancelMenuItemFactory, CellMergeHorizontalMenuItemFactory, CellMergeMenuItemFactory, CellMergeVerticalMenuItemFactory } from './menu/merge.menu';
+} from '../shortcuts/view.shortcut';
+import { CellBorderSelectorMenuItemFactory } from '../menu/border.menu';
+import { CellMergeAllMenuItemFactory, CellMergeCancelMenuItemFactory, CellMergeHorizontalMenuItemFactory, CellMergeMenuItemFactory, CellMergeVerticalMenuItemFactory } from '../menu/merge.menu';
+import { MobileHeader } from '../../views/mobile/header/MobileHeader';
 
 export interface IUniverSheetsUIConfig {
     menu: MenuConfig;
@@ -490,6 +492,7 @@ export class SheetUIMobileController extends Disposable {
     }
 
     private _initWorkbenchParts(): void {
+        this._uiPartsService.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(MobileHeader, this._injector));
     }
 
     private _initFocusHandler(): void {

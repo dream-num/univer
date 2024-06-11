@@ -195,6 +195,7 @@ export class MoveCursorController extends Disposable {
         }
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _handleMoveCursor(direction: Direction) {
         const activeRange = this._textSelectionManagerService.getActiveRange();
         const allRanges = this._textSelectionManagerService.getSelections();

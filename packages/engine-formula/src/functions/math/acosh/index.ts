@@ -34,18 +34,35 @@ export class Acosh extends BaseFunction {
             return variant;
         }
 
-        const value = variant.getValue();
-
-        if (typeof value === 'number' && value < 1) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+        if (variant.isArray()) {
+            return variant.map((currentValue) => {
+                if (currentValue.isError()) {
+                    return currentValue;
+                }
+                return calculateAcosh(currentValue);
+            });
         }
 
-        const result = Math.acosh(Number(value));
-
-        if (Number.isNaN(result)) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        return NumberValueObject.create(result);
+        return calculateAcosh(variant);
     }
+}
+
+function calculateAcosh(variant: BaseValueObject) {
+    let value = variant.getValue();
+
+    if (variant.isBoolean()) {
+        value = value ? 1 : 0;
+    }
+
+    if (typeof value !== 'number' || value < 1) {
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    const result = Math.acosh(value);
+
+    if (Number.isNaN(result)) {
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    return NumberValueObject.create(result);
 }

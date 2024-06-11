@@ -34,18 +34,35 @@ export class Acos extends BaseFunction {
             return variant;
         }
 
-        const value = variant.getValue();
-
-        if (typeof value === 'number' && (value < -1 || value > 1)) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+        if (variant.isArray()) {
+            return variant.map((currentValue) => {
+                if (currentValue.isError()) {
+                    return currentValue;
+                }
+                return calculateAcos(currentValue);
+            });
         }
 
-        const result = Math.acos(Number(value));
-
-        if (Number.isNaN(result)) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        return NumberValueObject.create(result);
+        return calculateAcos(variant);
     }
+}
+
+function calculateAcos(variant: BaseValueObject) {
+    let value = variant.getValue();
+
+    if (variant.isBoolean()) {
+        value = value ? 1 : 0;
+    }
+
+    if (typeof value !== 'number' || value < -1 || value > 1) {
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    const result = Math.acos(value);
+
+    if (Number.isNaN(result)) {
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    return NumberValueObject.create(result);
 }

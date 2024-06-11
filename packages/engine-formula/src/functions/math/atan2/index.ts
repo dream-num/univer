@@ -25,7 +25,7 @@ export class Atan2 extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(variant1: BaseValueObject, variant2: BaseValueObject) {
+    override calculate(variant1: any, variant2: BaseValueObject) {
         if (variant1.isString()) {
             variant1 = variant1.convertToNumberObjectValue();
         }
@@ -42,8 +42,42 @@ export class Atan2 extends BaseFunction {
             return variant2;
         }
 
-        return atan2(variant1 as BaseValueObject, variant2 as BaseValueObject);
+        // Assuming variant1 and variant2 can be arrays of different lengths
+        let array1 = Array.isArray(variant1) ? variant1 : [variant1];
+        let array2 = Array.isArray(variant2) ? variant2 : [variant2];
+
+        const length1 = array1.length;
+        const length2 = array2.length;
+
+        if (length1 !== length2) {
+            if (length1 < length2) {
+                array1 = expandArray(array1, length2);
+            } else {
+                array2 = expandArray(array2, length1);
+            }
+        }
+
+        const results = [];
+        for (let i = 0; i < array1.length; i++) {
+            const result = atan2(array1[i] as BaseValueObject, array2[i] as BaseValueObject);
+            if (result.isError()) {
+                return result;
+            }
+            results.push(result);
+        }
+
+        return results.length === 1 ? results[0] : results;
     }
+}
+
+function expandArray(arr: BaseValueObject[], targetLength: number): BaseValueObject[] {
+    const result = [];
+    while (result.length < targetLength) {
+        for (let i = 0; i < arr.length && result.length < targetLength; i++) {
+            result.push(arr[i]);
+        }
+    }
+    return result;
 }
 
 function atan2(num1: BaseValueObject, num2: BaseValueObject) {

@@ -71,6 +71,9 @@ import { WorksheetProtectionRenderService } from './services/permission/workshee
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
 import { SheetUIMobileController } from './controllers/mobile/mobile-sheet-ui.controller';
 
+/**
+ * @ignore
+ */
 @DependentOn(UniverSheetsPlugin, UniverMobileUIPlugin)
 export class UniverSheetsMobileUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';

@@ -57,6 +57,9 @@ import { MobileUIController } from './controllers/ui/ui-mobile.controller';
 
 export const UNIVER_MOBILE_UI_PLUGIN_NAME = 'UNIVER_MOBILE_UI_PLUGIN';
 
+/**
+ * @ignore
+ */
 @DependentOn(UniverRenderEnginePlugin)
 export class UniverMobileUIPlugin extends Plugin {
     static override pluginName = UNIVER_MOBILE_UI_PLUGIN_NAME;

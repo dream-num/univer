@@ -34,31 +34,31 @@ export class Asin extends BaseFunction {
             return variant;
         }
 
-        if ((variant as BaseValueObject).isArray()) {
-            return (variant as BaseValueObject).map((currentValue) => {
+        if (variant.isArray()) {
+            return variant.map((currentValue) => {
                 if (currentValue.isError()) {
                     return currentValue;
                 }
-                return asin(currentValue as BaseValueObject);
+                return calculateAsin(currentValue);
             });
         }
 
-        return asin(variant as BaseValueObject);
+        return calculateAsin(variant);
     }
 }
 
-function asin(num: BaseValueObject) {
-    let currentValue = num.getValue();
+function calculateAsin(variant: BaseValueObject) {
+    let value = variant.getValue();
 
-    if (num.isBoolean()) {
-        currentValue = currentValue ? 1 : 0;
+    if (variant.isBoolean()) {
+        value = value ? 1 : 0;
     }
 
-    if (!Number.isFinite(currentValue) || Number(currentValue) < -1 || Number(currentValue) > 1) {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < -1 || value > 1) {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
-    const result = Math.asin(Number(currentValue));
+    const result = Math.asin(value);
 
     if (Number.isNaN(result)) {
         return ErrorValueObject.create(ErrorType.VALUE);

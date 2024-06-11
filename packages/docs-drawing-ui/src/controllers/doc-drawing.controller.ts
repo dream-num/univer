@@ -31,7 +31,7 @@ import { ClearDocDrawingTransformerOperation } from '../commands/operations/clea
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 import { SidebarDocDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
 import { MoveDocDrawingsCommand } from '../commands/commands/move-drawings.command';
-import { DeleteDocDrawingsCommand } from '../commands/commands/delete-drawings.command';
+import { DeleteDocDrawingsCommand } from '../commands/commands/delete-doc-drawings.command';
 import { SetDocDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { SetDocDrawingCommand } from '../commands/commands/set-doc-drawing.command';
 import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';

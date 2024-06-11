@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import clsx from 'clsx';
-import type { BaseObject } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';
@@ -27,11 +25,11 @@ import { Radio, RadioGroup } from '@univerjs/design';
 import { SetDocDrawingCommand } from '../../commands/commands/set-doc-drawing.command';
 import styles from './index.module.less';
 
-export interface IDocDrawingAnchorProps {
+export interface IDocDrawingPositionProps {
     drawings: IDrawingParam[];
 }
 
-export const DocDrawingAnchor = (props: IDocDrawingAnchorProps) => {
+export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
@@ -52,51 +50,8 @@ export const DocDrawingAnchor = (props: IDocDrawingAnchorProps) => {
     if (scene == null) {
         return;
     }
-    const transformer = scene.getTransformerByCreate();
 
-    const [anchorShow, setAnchorShow] = useState(true);
-
-    // const type = drawingParam.anchorType ?? SheetDrawingAnchorType.Position;
     const [value, setValue] = useState('');
-
-    function getUpdateParams(objects: Map<string, BaseObject>, drawingManagerService: IDrawingManagerService): Nullable<IDocDrawing>[] {
-        const params: Nullable<IDocDrawing>[] = [];
-        objects.forEach((object) => {
-            const { oKey } = object;
-
-            const searchParam = drawingManagerService.getDrawingOKey(oKey);
-
-            if (searchParam == null) {
-                params.push(null);
-                return true;
-            }
-
-            // const { unitId, subUnitId, drawingId, drawingType, anchorType, docTransform } = searchParam as IDocDrawing;
-
-            // params.push({
-            //     unitId,
-            //     subUnitId,
-            //     drawingId,
-            //     anchorType,
-            //     sheetTransform,
-            //     drawingType,
-            // });
-        });
-
-        return params;
-    }
-
-    useEffect(() => {
-        const clearControlSub = transformer.clearControl$.subscribe((changeSelf) => {
-            if (changeSelf === true) {
-                setAnchorShow(false);
-            }
-        });
-
-        return () => {
-            clearControlSub.unsubscribe();
-        };
-    }, []);
 
     function handleChange(value: string | number | boolean) {
         setValue((value as string));
@@ -121,15 +76,11 @@ export const DocDrawingAnchor = (props: IDocDrawingAnchorProps) => {
         });
     }
 
-    const gridDisplay = (isShow: boolean) => {
-        return isShow ? 'block' : 'none';
-    };
-
     return (
-        <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)} style={{ display: gridDisplay(anchorShow) }}>
+        <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)}>
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelTitle)}>
-                    <div>{localeService.t('drawing-anchor.title')}</div>
+                    <div>{localeService.t('image-position.title')}</div>
                 </div>
             </div>
             <div className={clsx(styles.imageCommonPanelRow)}>

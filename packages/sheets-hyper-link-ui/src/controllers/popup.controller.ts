@@ -15,10 +15,11 @@
  */
 
 import { Disposable, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
-import { HoverManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { HoverManagerService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { debounceTime } from 'rxjs';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission } from '@univerjs/sheets';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetsHyperLinkPopupController)
@@ -26,7 +27,8 @@ export class SheetsHyperLinkPopupController extends Disposable {
     constructor(
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(SheetsHyperLinkPopupService) private readonly _sheetsHyperLinkPopupService: SheetsHyperLinkPopupService,
-        @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService
+        @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
+        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController
     ) {
         super();
 
@@ -58,6 +60,16 @@ export class SheetsHyperLinkPopupController extends Disposable {
                             targetCol = col;
                         }
                     });
+                }
+
+                const permission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+                    workbookTypes: [WorkbookEditablePermission],
+                    worksheetTypes: [WorksheetEditPermission, WorksheetInsertHyperlinkPermission],
+                    rangeTypes: [RangeProtectionPermissionEditPoint],
+                }, [{ startRow: currentCol, startColumn: currentRow, endRow: currentCol, endColumn: currentRow }]);
+                if (!permission) {
+                    this._sheetsHyperLinkPopupService.hideCurrentPopup();
+                    return;
                 }
 
                 this._sheetsHyperLinkPopupService.showPopup({

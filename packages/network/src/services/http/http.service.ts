@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import { Disposable, remove, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { firstValueFrom, Observable, of } from 'rxjs';
-import { catchError, concatMap, map, mergeMap } from 'rxjs/operators';
+import { catchError, concatMap, map, mergeMap, takeUntil } from 'rxjs/operators';
 
 import { fromFetch } from 'rxjs/fetch';
 import { HTTPHeaders } from './headers';
@@ -117,6 +117,7 @@ export class HTTPService extends Disposable {
     getSSE(
         method: HTTPRequestMethod,
         url: string,
+        stopSignal: Observable<void>,
         options?: IPostRequestParams
     ): Observable<string[]> {
         // Things to do when sending a HTTP request:
@@ -156,7 +157,7 @@ export class HTTPService extends Disposable {
                         }).catch((err) => observer.error(err as Error));
                     }
                     push();
-                });
+                }).pipe(takeUntil(stopSignal));
             }),
             map(
                 (data) => {

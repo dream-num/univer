@@ -794,6 +794,7 @@ export function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveTy
                     p: null,
                     f: null,
                     si: null,
+                    custom: null,
                 });
             }
         }

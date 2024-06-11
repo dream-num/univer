@@ -65,27 +65,31 @@ export class Engine extends ThinEngine<Scene> {
 
     private _performanceMonitor = new PerformanceMonitor();
 
-    private _pointerMoveEvent!: (evt: any) => void;
+    private _pointerMoveEvent!: (evt: Event) => void;
 
-    private _pointerDownEvent!: (evt: any) => void;
+    private _pointerDownEvent!: (evt: Event) => void;
 
     private _pointerUpEvent!: (evt: Event) => void;
 
-    private _pointerBlurEvent!: (evt: any) => void;
+    private _pointerOutEvent!: (evt: Event) => void;
 
-    private _pointerWheelEvent!: (evt: any) => void;
+    private _pointerCancelEvent!: (evt: Event) => void;
 
-    private _pointerEnterEvent!: (evt: any) => void;
+    private _pointerBlurEvent!: (evt: Event) => void;
 
-    private _pointerLeaveEvent!: (evt: any) => void;
+    private _pointerWheelEvent!: (evt: Event) => void;
 
-    private _dragEnterEvent!: (evt: any) => void;
+    private _pointerEnterEvent!: (evt: Event) => void;
 
-    private _dragLeaveEvent!: (evt: any) => void;
+    private _pointerLeaveEvent!: (evt: Event) => void;
 
-    private _dragOverEvent!: (evt: any) => void;
+    private _dragEnterEvent!: (evt: Event) => void;
 
-    private _dropEvent!: (evt: any) => void;
+    private _dragLeaveEvent!: (evt: Event) => void;
+
+    private _dragOverEvent!: (evt: Event) => void;
+
+    private _dropEvent!: (evt: Event) => void;
 
     private _remainCapture: number = -1;
 
@@ -242,6 +246,8 @@ export class Engine extends ThinEngine<Scene> {
         canvasEle.removeEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
         canvasEle.removeEventListener(`${eventPrefix}down`, this._pointerDownEvent);
         canvasEle.removeEventListener(`${eventPrefix}up`, this._pointerUpEvent);
+        canvasEle.removeEventListener(`${eventPrefix}out`, this._pointerOutEvent);
+        canvasEle.removeEventListener(`${eventPrefix}cancel`, this._pointerCancelEvent);
         canvasEle.removeEventListener('blur', this._pointerBlurEvent);
         canvasEle.removeEventListener('dragenter', this._dragEnterEvent);
         canvasEle.removeEventListener('dragleave', this._dragLeaveEvent);
@@ -441,35 +447,35 @@ export class Engine extends ThinEngine<Scene> {
             // console.log('pointerMoveEvent_1', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this._pointer);
             const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
+            deviceEvent.inputIndex = PointerInput.Horizontal;
+            this.onInputChangedObservable.notifyObservers(deviceEvent);
+            // TODO @lumixraku trigger onInputChangedObservable 4 times when pointermove!!
+            // why do this? scene.input-manager only handle inputIndex
+            // if (previousHorizontal !== evt.clientX) {
+            //     deviceEvent.inputIndex = PointerInput.Horizontal;
+            //     deviceEvent.previousState = previousHorizontal;
+            //     deviceEvent.currentState = this.pointer[PointerInput.Horizontal];
 
-            if (previousHorizontal !== evt.clientX) {
-                deviceEvent.inputIndex = PointerInput.Horizontal;
-                deviceEvent.previousState = previousHorizontal;
-                deviceEvent.currentState = this.pointer[PointerInput.Horizontal];
+            //     this.onInputChangedObservable.notifyObservers(deviceEvent);
+            // } else if (previousVertical !== evt.clientY) {
+            //     deviceEvent.inputIndex = PointerInput.Vertical;
+            //     deviceEvent.previousState = previousVertical;
+            //     deviceEvent.currentState = this.pointer[PointerInput.Vertical];
 
-                this.onInputChangedObservable.notifyObservers(deviceEvent);
-            }
-            if (previousVertical !== evt.clientY) {
-                deviceEvent.inputIndex = PointerInput.Vertical;
-                deviceEvent.previousState = previousVertical;
-                deviceEvent.currentState = this.pointer[PointerInput.Vertical];
+            //     this.onInputChangedObservable.notifyObservers(deviceEvent);
+            // } else if (this.pointer[PointerInput.DeltaHorizontal] !== 0) {
+            //     deviceEvent.inputIndex = PointerInput.DeltaHorizontal;
+            //     deviceEvent.previousState = previousDeltaHorizontal;
+            //     deviceEvent.currentState = this.pointer[PointerInput.DeltaHorizontal];
 
-                this.onInputChangedObservable.notifyObservers(deviceEvent);
-            }
-            if (this.pointer[PointerInput.DeltaHorizontal] !== 0) {
-                deviceEvent.inputIndex = PointerInput.DeltaHorizontal;
-                deviceEvent.previousState = previousDeltaHorizontal;
-                deviceEvent.currentState = this.pointer[PointerInput.DeltaHorizontal];
+            //     this.onInputChangedObservable.notifyObservers(deviceEvent);
+            // } else if (this.pointer[PointerInput.DeltaVertical] !== 0) {
+            //     deviceEvent.inputIndex = PointerInput.DeltaVertical;
+            //     deviceEvent.previousState = previousDeltaVertical;
+            //     deviceEvent.currentState = this.pointer[PointerInput.DeltaVertical];
 
-                this.onInputChangedObservable.notifyObservers(deviceEvent);
-            }
-            if (this.pointer[PointerInput.DeltaVertical] !== 0) {
-                deviceEvent.inputIndex = PointerInput.DeltaVertical;
-                deviceEvent.previousState = previousDeltaVertical;
-                deviceEvent.currentState = this.pointer[PointerInput.DeltaVertical];
-
-                this.onInputChangedObservable.notifyObservers(deviceEvent);
-            }
+            //     this.onInputChangedObservable.notifyObservers(deviceEvent);
+            // }
 
             // Lets Propagate the event for move with same position.
             if (!this._usingSafari && evt.button !== -1) {
@@ -536,6 +542,7 @@ export class Engine extends ThinEngine<Scene> {
                 // console.log('pointerDownEvent_clientY');
             }
 
+            // evt.button + 2  ---> leftClick: 2, middleClick: 3, rightClick:4
             deviceEvent.inputIndex = evt.button + 2;
             deviceEvent.previousState = previousButton;
             deviceEvent.currentState = this.pointer[evt.button + 2];
@@ -598,7 +605,7 @@ export class Engine extends ThinEngine<Scene> {
             }
         };
 
-        this._pointerEnterEvent = (evt: any) => {
+        this._pointerEnterEvent = (evt: Event) => {
             const deviceType = this._getPointerType(evt);
             // Store previous values for event
             const deviceEvent = evt as IPointerEvent;
@@ -609,7 +616,28 @@ export class Engine extends ThinEngine<Scene> {
             this.onInputChangedObservable.notifyObservers(deviceEvent);
         };
 
-        this._pointerLeaveEvent = (evt: any) => {
+        this._pointerLeaveEvent = (evt: Event) => {
+            const deviceType = this._getPointerType(evt);
+            // Store previous values for event
+            const deviceEvent = evt as IPointerEvent;
+            deviceEvent.deviceType = deviceType;
+
+            deviceEvent.currentState = 3;
+
+            this.onInputChangedObservable.notifyObservers(deviceEvent);
+        };
+
+        this._pointerOutEvent = (evt: Event) => {
+            const deviceType = this._getPointerType(evt);
+            // Store previous values for event
+            const deviceEvent = evt as IPointerEvent;
+            deviceEvent.deviceType = deviceType;
+            deviceEvent.currentState = 3;
+
+            this.onInputChangedObservable.notifyObservers(deviceEvent);
+        };
+
+        this._pointerCancelEvent = (evt: Event) => {
             const deviceType = this._getPointerType(evt);
             // Store previous values for event
             const deviceEvent = evt as IPointerEvent;
@@ -670,6 +698,8 @@ export class Engine extends ThinEngine<Scene> {
         canvasEle.addEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
         canvasEle.addEventListener(`${eventPrefix}down`, this._pointerDownEvent);
         canvasEle.addEventListener(`${eventPrefix}up`, this._pointerUpEvent);
+        canvasEle.addEventListener(`${eventPrefix}out`, this._pointerOutEvent);
+        canvasEle.addEventListener(`${eventPrefix}cancel`, this._pointerCancelEvent);
         canvasEle.addEventListener('blur', this._pointerBlurEvent);
         canvasEle.addEventListener(
             this._getWheelEventName(),

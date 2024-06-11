@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IRange, ISelectionCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { EventState, IRange, ISelectionCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
 import { BooleanNumber, sortRules } from '@univerjs/core';
 
-import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
+import { EVENT_TYPE, FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 
 // import { clearLineByBorderType } from '../../basics/draw';
 import { getCellPositionByIndex, getColor } from '../../basics/tools';
-import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IPoint, IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext } from '../../context';
 import type { Engine } from '../../engine';
@@ -29,6 +29,7 @@ import type { Scene } from '../../scene';
 import type { SceneViewer } from '../../scene-viewer';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
+import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
@@ -67,7 +68,7 @@ export class Spreadsheet extends SheetComponent {
     ) {
         super(oKey, spreadsheetSkeleton);
         this._initialDefaultExtension();
-
+        this.initUserEvents();
         this.makeDirty(true);
     }
 
@@ -768,7 +769,6 @@ export class Spreadsheet extends SheetComponent {
             color += letters[Math.floor(Math.random() * 6)];
         }
 
-        // 确保生成的颜色足够亮
         const r = Number.parseInt(color.substring(1, 3), 16);
         const g = Number.parseInt(color.substring(3, 5), 16);
         const b = Number.parseInt(color.substring(5, 7), 16);
@@ -777,5 +777,67 @@ export class Spreadsheet extends SheetComponent {
         }
 
         return color;
+    }
+
+    private _lastPointerPos: IPoint;
+    private _pointerScrolling: boolean;
+    initUserEvents() {
+        // control spreadsheet scrolling
+
+        // move to scroll.render-controller
+
+        // scene.input-manager@triggerPointerDown --> this.onPointerMoveObserver.notifyObservers
+        // this.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
+        //     const e = evt as IPointerEvent | IMouseEvent;
+        //     // console.log('....', e, this.width, this.height);
+        //     // this._view.scrollTo({
+        //     //     x: e.offsetX - this._view.left - this.horizontalThumbWidth / 2,
+        //     // });
+        //     this._lastPointerPos = { x: e.offsetX, y: e.offsetY };
+        //     this._pointerScrolling = true;
+        //     state.stopPropagation();
+        // });
+
+        // this.on(EVENT_TYPE.PointerMove, (evt: unknown, state: EventState) => {
+        //     if (!this._pointerScrolling) return;
+        //     console.log('spreadsheet moving...........');
+        //     const e = evt as IPointerEvent | IMouseEvent;
+        //     const viewMain = (this.getScene() as Scene).getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        //     if (!viewMain) return;
+        //     const deltaX = -(e.offsetX - this._lastPointerPos.x);
+        //     const deltaY = -(e.offsetY - this._lastPointerPos.y);
+        //     // const viewportScrollX = viewMain.viewportScrollX + deltaX;
+        //     // const viewportScrollY = viewMain.viewportScrollY + deltaY;
+        //     if (deltaX !== 0 || deltaY !== 0) {
+        //         console.log('....delta', deltaX, deltaY);
+        //     }
+
+        //     viewMain.scrollByViewportScroll({
+        //         deltaX,
+        //         deltaY,
+        //     });
+        //     this._lastPointerPos = { x: e.offsetX, y: e.offsetY };
+        //     state.stopPropagation();
+        // });
+
+        // this.on(EVENT_TYPE.PointerUp, (evt: unknown, state: EventState) => {
+        //     this._pointerScrolling = false;
+        //     console.log('%c moving end!! PointerUp', 'color: red');
+        // });
+        // this.on(EVENT_TYPE.PointerUp, (evt: unknown, state: EventState) => {
+        //     this._pointerScrolling = false;
+        //     console.log('%c moving end!! PointerUp', 'color: red');
+        // });
+        // this.on(EVENT_TYPE.PointerOut, (evt: unknown, state: EventState) => {
+        //     this._pointerScrolling = false;
+        //     console.log('%c moving end!! PointerOut', 'color: red');
+        // });
+        // this.on(EVENT_TYPE.PointerLeave, (evt: unknown, state: EventState) => {
+        //     // this._pointerScrolling = false;
+        //     console.log('%c moving end!! PointerLeave', 'color: red', this._pointerScrolling);
+        // });
+        // this.on(EVENT_TYPE.PointerCancel, (evt: unknown, state: EventState) => {
+        //     this._pointerScrolling = false;
+        // });
     }
 }

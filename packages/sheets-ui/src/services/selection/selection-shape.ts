@@ -16,7 +16,7 @@
 
 import type { IRangeWithCoord, ISelectionCellWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
-import type { Scene } from '@univerjs/engine-render';
+import type { IObjectFullState, IRectProps, Scene } from '@univerjs/engine-render';
 import { cancelRequestFrame, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
@@ -40,6 +40,8 @@ enum SELECTION_MANAGER_KEY {
     backgroundMiddleRight = '__SpreadsheetSelectionBackgroundControlMiddleRight__',
     backgroundBottom = '__SpreadsheetSelectionBackgroundControlBottom__',
     fill = '__SpreadsheetSelectionFillControl__',
+    fillTopLeft = '__SpreadsheetSelectionFillControlTopLeft__',
+    fillBottomRight = '__SpreadsheetSelectionFillControlBottomRight__',
     lineMain = '__SpreadsheetDragLineMainControl__',
     lineContent = '__SpreadsheetDragLineContentControl__',
     line = '__SpreadsheetDragLineControl__',
@@ -68,7 +70,7 @@ const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
 /**
  * The main selection canvas component
  */
-export class SelectionShape extends Disposable {
+export class SelectionControl extends Disposable {
     private _leftControl!: Rect;
     private _rightControl!: Rect;
     private _topControl!: Rect;
@@ -79,9 +81,14 @@ export class SelectionShape extends Disposable {
     private _backgroundControlMiddleLeft!: Rect;
     private _backgroundControlMiddleRight!: Rect;
 
-    private _fillControl!: Rect;
+    /**
+     * right bottom small rect
+     */
+    private _fillControl: Rect;
+    private _fillControlTopLeft: Rect | null;
+    private _fillControlBottomRight: Rect | null;
 
-    private _selectionShape!: Group;
+    private _selectionShapeGroup!: Group;
 
     private _rowHeaderBackground!: Rect;
     private _rowHeaderBorder!: Rect;
@@ -112,7 +119,7 @@ export class SelectionShape extends Disposable {
 
     private _widgetRects: Rect[] = [];
 
-    private _dispose$ = new BehaviorSubject<SelectionShape>(this);
+    private _dispose$ = new BehaviorSubject<SelectionControl>(this);
     readonly dispose$ = this._dispose$.asObservable();
 
     readonly selectionMoving$ = new Subject<Nullable<IRangeWithCoord>>();
@@ -135,6 +142,7 @@ export class SelectionShape extends Disposable {
         private _scene: Scene,
         private _zIndex: number,
         private _isHeaderHighlight: boolean = true,
+        private _isMobile: boolean = false,
         private readonly _themeService: ThemeService
     ) {
         super();
@@ -165,6 +173,22 @@ export class SelectionShape extends Disposable {
         return this._fillControl;
     }
 
+    get fillControlTopLeft(): Rect<IRectProps> | null {
+        return this._fillControlTopLeft;
+    }
+
+    set fillControlTopLeft(value: Rect) {
+        this._fillControlTopLeft = value;
+    }
+
+    get fillControlBottomRight(): Rect<IRectProps> | null {
+        return this._fillControlBottomRight;
+    }
+
+    set fillControlBottomRight(value: Rect) {
+        this._fillControlBottomRight = value;
+    }
+
     get backgroundControlTop() {
         return this._backgroundControlTop;
     }
@@ -182,7 +206,7 @@ export class SelectionShape extends Disposable {
     }
 
     get selectionShape() {
-        return this._selectionShape;
+        return this._selectionShapeGroup;
     }
 
     get model() {
@@ -288,8 +312,8 @@ export class SelectionShape extends Disposable {
         this._backgroundControlMiddleLeft?.dispose();
         this._backgroundControlMiddleRight?.dispose();
         this._backgroundControlBottom?.dispose();
-        this._fillControl?.dispose();
-        this._selectionShape?.dispose();
+        this._fillControl.dispose();
+        this._selectionShapeGroup?.dispose();
 
         this._rowHeaderBackground?.dispose();
         this._rowHeaderBorder?.dispose();
@@ -412,6 +436,7 @@ export class SelectionShape extends Disposable {
             strokeWidth = defaultStyle.strokeWidth!,
             AutofillSize = defaultStyle.AutofillSize!,
             AutofillStrokeWidth = defaultStyle.AutofillStrokeWidth!,
+            expandCornerSize = defaultStyle.expandCornerSize!,
         } = style;
 
         const scale = this._getScale();
@@ -508,21 +533,42 @@ export class SelectionShape extends Disposable {
         }
 
         if (hasAutoFill === true && !this._hasWidgets(widgets)) {
-            this.fillControl.setProps({
+            const fillProps: IRectProps = {
                 fill: stroke,
                 stroke: AutofillStroke,
                 strokeScaleEnabled: false,
-            });
-            this.fillControl.transformByState({
+            };
+            const sizeState: IObjectFullState = {
                 width: AutofillSize - AutofillStrokeWidth,
                 height: AutofillSize - AutofillStrokeWidth,
                 left: endX - startX - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
                 top: endY - startY - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
                 strokeWidth: AutofillStrokeWidth,
-            });
+            };
+            this.fillControl.setProps(fillProps);
+            this.fillControl.transformByState(sizeState);
             this.fillControl.show();
+
+            if (this._isMobile) {
+                this.fillControlTopLeft!.setProps({ ...fillProps, ...{ fill: 'black' } });
+                this.fillControlTopLeft!.transformByState({
+                    left: -expandCornerSize / 2,
+                    top: -expandCornerSize / 2,
+                });
+
+                this.fillControlBottomRight!.setProps({ ...fillProps, ...{ fill: 'red' } });
+                this.fillControlBottomRight!.transformByState({
+                    left: endX - startX - expandCornerSize / 2,
+                    top: endY - startY - expandCornerSize / 2,
+                });
+
+                this.fillControlTopLeft!.show();
+                this.fillControlBottomRight!.show();
+            }
         } else {
             this.fillControl.hide();
+            this.fillControlTopLeft?.hide();
+            this.fillControlBottomRight?.hide();
         }
 
         this._updateBackgroundControl(style);
@@ -543,6 +589,7 @@ export class SelectionShape extends Disposable {
         this.selectionShape.makeDirtyNoDebounce(true);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initialize() {
         this._defaultStyle = getNormalSelectionStyle(this._themeService);
 
@@ -587,26 +634,58 @@ export class SelectionShape extends Disposable {
             zIndex: zIndex + 1,
         });
 
+        const expandCornerSize = this._defaultStyle!.expandCornerSize || 0;
+        const AutofillStrokeWidth = this._defaultStyle!.AutofillStrokeWidth || 0;
+        if (this._isMobile) {
+            this.fillControlTopLeft = new Rect(SELECTION_MANAGER_KEY.fillTopLeft + zIndex, {
+                zIndex: zIndex + 1.5,
+                width: expandCornerSize,
+                height: expandCornerSize,
+                radius: expandCornerSize / 2,
+                strokeWidth: AutofillStrokeWidth,
+            });
+            this.fillControlBottomRight = new Rect(SELECTION_MANAGER_KEY.fillBottomRight + zIndex, {
+                zIndex: zIndex + 1.5,
+                width: expandCornerSize,
+                height: expandCornerSize,
+                radius: expandCornerSize / 2,
+                strokeWidth: AutofillStrokeWidth,
+            });
+        }
+
         this._dashRect = new Rect(SELECTION_MANAGER_KEY.dash + zIndex, {
             zIndex: zIndex + 2,
             evented: false,
             stroke: '#fff',
         });
 
-        const shapes = [this._fillControl, this._leftControl, this._rightControl, this._topControl,
-            this._bottomControl, this._backgroundControlTop, this._backgroundControlMiddleLeft,
-            this._backgroundControlMiddleRight, this._backgroundControlBottom, this._dashRect,
+        const shapes = [
+            this._fillControl,
+            this._leftControl, this._rightControl, this._topControl, this._bottomControl,
+            this._backgroundControlTop, this._backgroundControlMiddleLeft,
+            this._backgroundControlMiddleRight, this._backgroundControlBottom,
+            this._dashRect,
         ];
+        if (this._isMobile) {
+            shapes.push(this.fillControlTopLeft!, this.fillControlBottomRight!);
+        }
+
+        // for (let index = 0; index < shapes.length; index++) {
+        //     const shape = shapes[index];
+        //     if (![this.fillControlTopLeft, this.fillControlBottomRight].includes(shape)) {
+        //         // shape.evented = false;
+        //     }
+        // }
 
         this._widgetRects = this._initialWidget();
-        this._selectionShape = new Group(SELECTION_MANAGER_KEY.Selection + zIndex, ...shapes, ...this._widgetRects);
-        this._selectionShape.hide();
-        this._selectionShape.evented = false;
-        this._selectionShape.zIndex = zIndex;
+        this._selectionShapeGroup = new Group(SELECTION_MANAGER_KEY.Selection + zIndex, ...shapes, ...this._widgetRects);
+        this._selectionShapeGroup.hide();
+        this._selectionShapeGroup.evented = false;
+        this._selectionShapeGroup.zIndex = zIndex;
 
         const scene = this.getScene();
 
-        scene.addObject(this._selectionShape, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
+        scene.addObject(this._selectionShapeGroup, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
 
         this.disposeWithMe(
             toDisposable(

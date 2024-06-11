@@ -347,6 +347,7 @@ export class ScrollBar extends BaseScrollBar {
         });
 
         // 垂直滚动条的拖拽事件
+        // scene.input-manager@_onPointerDown --> base-object@triggerPointerDown!
         this.verticalThumbRect?.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             const srcElement = this.verticalThumbRect;
@@ -364,11 +365,16 @@ export class ScrollBar extends BaseScrollBar {
         this._verticalPointerMoveObserver = mainScene.onPointerMoveObserver.add((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             if (!this._isVerticalMove) {
+                // console.log('delta', this._lastY);
+                // this._view.scrollToByViewportScroll({
+                //     viewportScrollY: -(e.offsetY - this._lastY),
+                // });
                 return;
+            } else {
+                this._view.scrollByBar({
+                    y: e.offsetY - this._lastY,
+                });
             }
-            this._view.scrollByBar({
-                y: e.offsetY - this._lastY,
-            });
             this._lastY = e.offsetY;
             mainScene.getEngine()?.setRemainCapture();
         });

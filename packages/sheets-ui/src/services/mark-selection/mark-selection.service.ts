@@ -21,7 +21,7 @@ import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
 import { ISelectionRenderService } from '../selection/selection-render.service';
-import { SelectionShape } from '../selection/selection-shape';
+import { SelectionControl } from '../selection/selection-shape';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 export interface IMarkSelectionService {
@@ -37,7 +37,7 @@ interface IMarkSelectionInfo {
     subUnitId: string;
     selection: ISelectionWithStyle;
     zIndex: number;
-    control: SelectionShape | null;
+    control: SelectionControl | null;
     exits: string[];
 }
 
@@ -99,7 +99,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             if (!scene || !skeleton) return;
 
             const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-            const control = new SelectionShape(scene, zIndex, false, this._themeService);
+            const control = new SelectionControl(scene, zIndex, false, false, this._themeService);
             control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
             shape.control = control;
         });

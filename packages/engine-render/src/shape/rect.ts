@@ -148,11 +148,17 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         };
     }
 
+    /**
+     * invoked by viewport@render --> group@render --> shape@render
+     * @param ctx
+     * @param viewportInfo
+     */
     protected override _draw(ctx: UniverRenderingContext, viewportInfo?: IViewportInfo) {
         const { radius, paintFirst, stroke, strokeWidth, fill, strokeScaleEnabled, fillRule, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, strokeDashArray } = this;
         if (!strokeDashArray) {
             Rect.drawWith(ctx, this);
         } else {
+            // use parent trasnform to get startXY, and add width&height to get endXY
             const { startX, startY, endX, endY } = this;
             const rect = { left: startX, top: startY, right: endX, bottom: endY };
             let { left, top, right, bottom } = rect;

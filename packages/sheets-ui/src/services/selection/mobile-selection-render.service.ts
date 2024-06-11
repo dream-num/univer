@@ -16,9 +16,7 @@
 
 /* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
-
 import type {
-    IInterceptor,
     IRange,
     IRangeWithCoord,
     ISelection,
@@ -28,104 +26,22 @@ import type {
     Nullable,
     Observer,
 } from '@univerjs/core';
-import { createInterceptorKey, InterceptorManager, IUniverInstanceService, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { InterceptorManager, IUniverInstanceService, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import { getNormalSelectionStyle } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
-import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
-import type { Observable } from 'rxjs';
+import { Inject, Injector } from '@wendellhu/redi';
 import { BehaviorSubject, Subject } from 'rxjs';
 
-// import { SHEET_VIEWPORT_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { getSheetObject } from '../../controllers/utils/component-tools';
 import type { SelectionRenderModel } from './selection-render-model';
-import { SelectionControl as SelectionShape } from './selection-shape';
-import { SelectionShapeExtension } from './selection-shape-extension';
+import { SelectionControl } from './selection-shape';
+import { type IControlFillConfig, type ISelectionRenderService, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './selection-render.service';
 
-export interface IControlFillConfig {
-    oldRange: IRange;
-    newRange: IRange;
-}
-
-export interface ISelectionRenderService {
-    readonly selectionMoveEnd$: Observable<ISelectionWithCoordAndStyle[]>;
-    readonly controlFillConfig$: Observable<IControlFillConfig | null>;
-    readonly selectionMoving$: Observable<ISelectionWithCoordAndStyle[]>;
-    readonly selectionMoveStart$: Observable<ISelectionWithCoordAndStyle[]>;
-    readonly usable$: Observable<boolean>;
-
-    interceptor: InterceptorManager<{
-        RANGE_MOVE_PERMISSION_CHECK: IInterceptor<boolean, null>;
-        RANGE_FILL_PERMISSION_CHECK: IInterceptor<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>;
-    }>;
-
-    enableHeaderHighlight(): void;
-    disableHeaderHighlight(): void;
-    enableDetectMergedCell(): void;
-    disableDetectMergedCell(): void;
-    setStyle(style: ISelectionStyle): void;
-    resetStyle(): void;
-    enableSelection(): void;
-    disableSelection(): void;
-    enableShowPrevious(): void;
-    disableShowPrevious(): void;
-    enableRemainLast(): void;
-    disableRemainLast(): void;
-    enableSkipRemainLast(): void;
-    disableSkipRemainLast(): void;
-
-    addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle): void;
-    updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]): void;
-    changeRuntime(skeleton: Nullable<SpreadsheetSkeleton>, scene: Nullable<Scene>, viewport?: Viewport): void;
-
-    /** @deprecated This should not be provided by the selection render service. */
-    getViewPort(): Viewport;
-    getCurrentControls(): SelectionShape[];
-    getActiveSelections(): Nullable<ISelection[]>;
-    getActiveRange(): Nullable<IRange>;
-    getActiveSelection(): Nullable<SelectionShape>;
-    getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[];
-    attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
-    attachRangeWithCoord(range: IRange): Nullable<IRangeWithCoord>;
-    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
-    getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithCoord>;
-    expandSelectionEventTrigger(
-        evt: IPointerEvent | IMouseEvent,
-        zIndex: number,
-        rangeType: RANGE_TYPE,
-        viewport?: Viewport,
-        scrollTimerType?: ScrollTimerType
-    ): void;
-    // getMoveCellInfo(direction: Direction, selectionData: Nullable<ISelectionWithCoord>): Nullable<ISelectionWithCoord>;
-    // transformCellDataToSelectionData(row: number, column: number): Nullable<ISelectionWithCoord>;
-    reset(): void;
-
-    refreshSelectionMoveStart(): void;
-
-    enableSingleSelection(): void;
-    disableSingleSelection(): void;
-}
-
-/**
- * TODO 注册 selection 拦截，可能在有公式 ArrayObject 时，fx 公式栏显示不同
- *
- * SelectionRenderService 维护 viewModel 数据 list，action 也是修改这一层数据，obs 监听到数据变动后，自动刷新（control 仍然可以持有数据）
- *
- * This service is related to the drawing of the selection.
- * By modifying the properties of the service,
- * you can adjust the style and performance of each selection area.
- * This service is used in conjunction with the SelectionManagerService
- * to implement functions related to the selection area in univer.
- *
- * @todo Refactor it to RenderController.
- */
-
-export const RANGE_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('rangeMovePermissionCheck');
-export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>('rangeFillPermissionCheck');
-
-export class SelectionRenderService implements ISelectionRenderService {
+export class MobileSelectionRenderService implements ISelectionRenderService {
     hasSelection: boolean = false;
 
     private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
@@ -139,7 +55,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     readonly controlFillConfig$ = this._controlFillConfig$.asObservable();
 
-    private _selectionControls: SelectionShape[] = []; // sheetID:Controls
+    private _selectionControls: SelectionControl[] = []; // sheetID:Controls
 
     private _startSelectionRange: IRangeWithCoord = {
         startY: 0,
@@ -219,6 +135,7 @@ export class SelectionRenderService implements ISelectionRenderService {
     public interceptor = new InterceptorManager({ RANGE_MOVE_PERMISSION_CHECK, RANGE_FILL_PERMISSION_CHECK });
 
     constructor(
+        // private readonly _context: IRenderContext<Workbook>,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -226,6 +143,21 @@ export class SelectionRenderService implements ISelectionRenderService {
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
+        window.srs = this;
+    }
+
+    private _getSheetObject() {
+        return getSheetObject(this._context.unit, this._context)!;
+    }
+
+    private _getActiveViewport(evt: IPointerEvent | IMouseEvent) {
+        const sheetObject = this._getSheetObject();
+
+        return sheetObject?.scene.getActiveViewportByCoord(Vector2.FromArray([evt.offsetX, evt.offsetY]));
+    }
+
+    dispose() {
+
     }
 
     enableHeaderHighlight() {
@@ -298,6 +230,8 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     /**
      * add a selection
+     *
+     * engine@_pointerUpEvent --> scene.input-manager@_onPointerUp --> this._selectionMoveEnd$
      * @param selectionRange
      * @param curCellRange
      */
@@ -322,11 +256,30 @@ export class SelectionRenderService implements ISelectionRenderService {
         if (scene == null || skeleton == null) {
             return;
         }
+        const control = new SelectionControl(scene, currentControls.length, this._isHeaderHighlight, true, this._themeService);
 
-        const control = new SelectionShape(scene, currentControls.length, this._isHeaderHighlight, false, this._themeService);
+        // new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
 
-        // eslint-disable-next-line no-new
-        new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
+        control.fillControlTopLeft!.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this.expandingSelection = true;
+            this.expandSelectionEventTrigger(
+                evt,
+                currentControls.length + 1,
+                RANGE_TYPE.NORMAL,
+                this._activeViewport!
+                // this._getActiveViewport(evt)
+            );
+        });
+        control.fillControlBottomRight!.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this.expandingSelection = true;
+            this.expandSelectionEventTrigger(
+                evt,
+                currentControls.length + 1,
+                RANGE_TYPE.NORMAL,
+                this._activeViewport!
+                // this._getActiveViewport(evt)
+            );
+        });
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
@@ -449,7 +402,7 @@ export class SelectionRenderService implements ISelectionRenderService {
     getActiveSelections(): Nullable<ISelection[]> {
         const controls = this.getCurrentControls();
         if (controls && controls.length > 0) {
-            const selections = controls?.map((control: SelectionShape) => {
+            const selections = controls?.map((control: SelectionControl) => {
                 const model: SelectionRenderModel = control.model;
                 const currentCell = model.currentCell;
                 let primary: Nullable<ISelectionCell> = null;
@@ -501,7 +454,7 @@ export class SelectionRenderService implements ISelectionRenderService {
      * get active selection control
      * @returns
      */
-    getActiveSelection(): Nullable<SelectionShape> {
+    getActiveSelection(): Nullable<SelectionControl> {
         const controls = this.getCurrentControls();
         return controls && controls[controls.length - 1];
     }
@@ -531,12 +484,15 @@ export class SelectionRenderService implements ISelectionRenderService {
         this.reset();
     }
 
+    expandingSelection: boolean = false;
     /**
      *
      * @param evt component point event
      * @param style selection style, Styles for user-customized selectors
      * @param zIndex Stacking order of the selection object
      * @param rangeType Determines whether the selection is made normally according to the range or by rows and columns
+     *
+     * invoked by selection.render-controller@pointerDownObserver
      */
     expandSelectionEventTrigger(
         evt: IPointerEvent | IMouseEvent,
@@ -607,9 +563,10 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         this._startSelectionRange = startSelectionRange;
 
-        let selectionControl: Nullable<SelectionShape> = this.getActiveSelection();
+        let selectionControl: Nullable<SelectionControl> = this.getActiveSelection();
 
         const curControls = this.getCurrentControls();
+        const expandingMode = this.expandingSelection || evt.shiftKey;
 
         if (!curControls) {
             return false;
@@ -628,7 +585,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             }
 
             // There can only be one highlighted cell, so clear the highlighted cell of the existing selection
-            if (!evt.shiftKey) {
+            if (!expandingMode) {
                 control.clearHighlight();
             }
         }
@@ -637,20 +594,16 @@ export class SelectionRenderService implements ISelectionRenderService {
         if (
             (curControls.length > 0 &&
                 !evt.ctrlKey &&
-                !evt.shiftKey &&
+                !expandingMode &&
                 !this._isShowPreviousEnable &&
-                !this._isRemainLastEnable) || (curControls.length > 0 && this._isSingleSelection && !evt.shiftKey)
+                !this._isRemainLastEnable) || (curControls.length > 0 && this._isSingleSelection && !expandingMode)
         ) {
-            for (const control of curControls) {
-                control.dispose();
-            }
-
-            curControls.length = 0;
+            this._clearSelectionControls();
         }
 
         const currentCell = selectionControl && selectionControl.model.currentCell;
 
-        if (selectionControl && evt.shiftKey && currentCell) {
+        if (selectionControl && expandingMode && currentCell) {
             const { actualRow, actualColumn, mergeInfo: actualMergeInfo } = currentCell;
 
             /**
@@ -718,35 +671,34 @@ export class SelectionRenderService implements ISelectionRenderService {
             this._isRemainLastEnable &&
             selectionControl &&
             !evt.ctrlKey &&
-            !evt.shiftKey &&
+            !expandingMode &&
             !this._isSkipRemainLastEnable && !this._isSingleSelection
         ) {
             /**
              * Supports the formula ref text selection feature,
              * under the condition of preserving all previous selections, it modifies the position of the latest selection.
              */
-
-            selectionControl.update(
-                startSelectionRange,
-                rowHeaderWidth,
-                columnHeaderHeight,
-                this._selectionStyle,
-                primaryWithCoord
-            );
+            // console.log('selectionControl', startSelectionRange);
+            // selectionControl.update(
+            //     startSelectionRange,
+            //     rowHeaderWidth,
+            //     columnHeaderHeight,
+            //     this._selectionStyle,
+            //     primaryWithCoord
+            // );
         } else {
             /**
              * The default behavior is to clear previous selections and always create new selections.
              */
-            selectionControl = new SelectionShape(
+            selectionControl = new SelectionControl(
                 scene,
                 curControls.length + zIndex,
                 this._isHeaderHighlight,
-                false,
+                true,
                 this._themeService
             );
 
-            // eslint-disable-next-line no-new
-            new SelectionShapeExtension(selectionControl, skeleton, scene, this._themeService, this._injector);
+            // new SelectionShapeExtension(selectionControl, skeleton, scene, this._themeService, this._injector);
 
             selectionControl.update(
                 startSelectionRange,
@@ -765,7 +717,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         this._endSelection();
 
-        scene.disableEvent();
+        // scene.disableEvent();
 
         const startViewport = scene.getActiveViewportByCoord(Vector2.FromArray([newEvtOffsetX, newEvtOffsetY]));
 
@@ -788,6 +740,8 @@ export class SelectionRenderService implements ISelectionRenderService {
         let lastY = newEvtOffsetY;
 
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+            if (!this.expandingSelection) return;
+
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
             const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
@@ -920,6 +874,312 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
             this._endSelection();
+            this.expandingSelection = false;
+            // this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+
+            // when selection mouse up, enable the short cut service
+            this._shortcutService.setDisable(false);
+        });
+
+        // when selection mouse down, disable the short cut service
+        this._shortcutService.setDisable(true);
+    }
+
+    eventTrigger(
+        evt: IPointerEvent | IMouseEvent,
+        zIndex = 0,
+        rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL,
+        viewport?: Viewport,
+        scrollTimerType: ScrollTimerType = ScrollTimerType.ALL
+    ) {
+        if (this._isSelectionEnabled === false) {
+            return;
+        }
+
+        const skeleton = this._skeleton;
+
+        const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+
+        const scene = this._scene;
+
+        if (scene == null || skeleton == null) {
+            return;
+        }
+
+        if (viewport != null) {
+            this._activeViewport = viewport;
+        }
+
+        const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+
+        let { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
+
+        this._startOffsetX = newEvtOffsetX;
+        this._startOffsetY = newEvtOffsetY;
+
+        const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords);
+
+        const { scaleX, scaleY } = scene.getAncestorScale();
+
+        if (rangeType === RANGE_TYPE.ROW) {
+            newEvtOffsetX = 0;
+        } else if (rangeType === RANGE_TYPE.COLUMN) {
+            newEvtOffsetY = 0;
+        }
+
+        const selectionData = this._getSelectedRangeWithMerge(newEvtOffsetX, newEvtOffsetY, scaleX, scaleY, scrollXY);
+
+        if (!selectionData) {
+            return false;
+        }
+
+        const { rangeWithCoord: actualRangeWithCoord, primaryWithCoord } = selectionData;
+
+        const { startRow, startColumn, endColumn, endRow, startY, endY, startX, endX } = actualRangeWithCoord;
+
+        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+
+        const startSelectionRange = {
+            startColumn,
+            startRow,
+            endColumn,
+            endRow,
+            startY,
+            endY,
+            startX,
+            endX,
+            rangeType,
+        };
+
+        this._startSelectionRange = startSelectionRange;
+
+        let selectionControl: Nullable<SelectionControl> = this.getActiveSelection();
+
+        const curControls = this.getCurrentControls();
+        const expandingMode = this.expandingSelection || evt.shiftKey;
+
+        if (!curControls) {
+            return false;
+        }
+
+        for (const control of curControls) {
+            // right click
+            if (evt.button === 2 && control.model.isInclude(startSelectionRange)) {
+                selectionControl = control;
+                return;
+            }
+            // Click to an existing selection
+            if (control.model.isEqual(startSelectionRange)) {
+                selectionControl = control;
+                break;
+            }
+
+            // There can only be one highlighted cell, so clear the highlighted cell of the existing selection
+            if (!expandingMode) {
+                control.clearHighlight();
+            }
+        }
+
+        // In addition to pressing the ctrl or shift key, we must clear the previous selection
+        if (
+            (curControls.length > 0 &&
+                !evt.ctrlKey &&
+                !expandingMode &&
+                !this._isShowPreviousEnable &&
+                !this._isRemainLastEnable) || (curControls.length > 0 && this._isSingleSelection && !expandingMode)
+        ) {
+            this._clearSelectionControls();
+        }
+
+        const currentCell = selectionControl && selectionControl.model.currentCell;
+
+        if (
+            this._isRemainLastEnable &&
+            selectionControl &&
+            !evt.ctrlKey &&
+            !expandingMode &&
+            !this._isSkipRemainLastEnable && !this._isSingleSelection
+        ) {
+            /**
+             * Supports the formula ref text selection feature,
+             * under the condition of preserving all previous selections, it modifies the position of the latest selection.
+             */
+            // console.log('selectionControl', startSelectionRange);
+            selectionControl.update(
+                startSelectionRange,
+                rowHeaderWidth,
+                columnHeaderHeight,
+                this._selectionStyle,
+                primaryWithCoord
+            );
+        }
+
+        this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
+
+        this.hasSelection = true;
+
+        this._endSelection();
+        this.expandingSelection = false;
+        // scene.disableEvent();
+        return;
+
+        const startViewport = scene.getActiveViewportByCoord(Vector2.FromArray([newEvtOffsetX, newEvtOffsetY]));
+
+        const scrollTimer = ScrollTimer.create(this._scene, scrollTimerType);
+        scrollTimer.startScroll(viewportMain?.left ?? 0, viewportMain?.top ?? 0, viewportMain);
+
+        this._scrollTimer = scrollTimer;
+
+        this._addCancelObserver();
+
+        scene.getTransformer()?.clearSelectedObjects();
+
+        if (rangeType === RANGE_TYPE.ROW || rangeType === RANGE_TYPE.COLUMN) {
+            this._moving(newEvtOffsetX, newEvtOffsetY, selectionControl, rangeType);
+        }
+
+        let xCrossTime = 0;
+        let yCrossTime = 0;
+        let lastX = newEvtOffsetX;
+        let lastY = newEvtOffsetY;
+
+        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+            if (!this.expandingSelection) return;
+
+            const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
+                Vector2.FromArray([moveOffsetX, moveOffsetY])
+            );
+
+            this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, rangeType);
+
+            let scrollOffsetX = newMoveOffsetX;
+            let scrollOffsetY = newMoveOffsetY;
+
+            const currentSelection = this.getActiveSelection();
+            const freeze = this._getFreeze();
+
+            const selection = currentSelection?.model;
+            const endViewport =
+                scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY])) ??
+                this._getViewportByCell(selection?.endRow, selection?.endColumn);
+
+            if (startViewport && endViewport && viewportMain) {
+                const isCrossingX =
+                    (lastX < viewportMain.left && newMoveOffsetX > viewportMain.left) ||
+                    (lastX > viewportMain.left && newMoveOffsetX < viewportMain.left);
+                const isCrossingY =
+                    (lastY < viewportMain.top && newMoveOffsetY > viewportMain.top) ||
+                    (lastY > viewportMain.top && newMoveOffsetY < viewportMain.top);
+
+                if (isCrossingX) {
+                    xCrossTime += 1;
+                }
+
+                if (isCrossingY) {
+                    yCrossTime += 1;
+                }
+
+                const startKey = startViewport.viewportKey;
+                const endKey = endViewport.viewportKey;
+
+                if (startKey === SHEET_VIEWPORT_KEY.VIEW_ROW_TOP) {
+                    if (moveOffsetY < viewportMain.top && (selection?.endRow ?? 0) < (freeze?.startRow ?? 0)) {
+                        scrollOffsetY = viewportMain.top;
+                    } else if (isCrossingY && yCrossTime % 2 === 1) {
+                        viewportMain.scrollTo({
+                            y: 0,
+                        });
+                    }
+                } else if (startKey === SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT) {
+                    if (moveOffsetX < viewportMain.left && (selection?.endColumn ?? 0) < (freeze?.startColumn ?? 0)) {
+                        scrollOffsetX = viewportMain.left;
+                    } else if (isCrossingX && xCrossTime % 2 === 1) {
+                        viewportMain.scrollTo({
+                            x: 0,
+                        });
+                    }
+                } else if (startKey === endKey) {
+                    let disableX = false;
+                    let disableY = false;
+                    if (startKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP) {
+                        disableX = true;
+                        disableY = true;
+                    } else if (startKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP) {
+                        disableY = true;
+                    } else if (startKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT) {
+                        disableX = true;
+                    }
+
+                    if ((selection?.endRow ?? 0) > (freeze?.startRow ?? 0)) {
+                        disableY = false;
+                    }
+
+                    if ((selection?.endColumn ?? 0) > (freeze?.startColumn ?? 0)) {
+                        disableX = false;
+                    }
+                    if (disableX) {
+                        scrollOffsetX = viewportMain.left;
+                    }
+
+                    if (disableY) {
+                        scrollOffsetY = viewportMain.top;
+                    }
+                } else {
+                    const startXY = {
+                        x: startViewport.scrollX,
+                        y: startViewport.scrollY,
+                    };
+                    const endXY = {
+                        x: endViewport.scrollX,
+                        y: endViewport.scrollY,
+                    };
+                    const shouldResetX = startXY.x !== endXY.x && isCrossingX && xCrossTime % 2 === 1;
+                    const shouldResetY = startXY.y !== endXY.y && isCrossingY && yCrossTime % 2 === 1;
+
+                    if (shouldResetX || shouldResetY) {
+                        viewportMain.scrollTo({
+                            x: shouldResetX ? startXY.x : undefined,
+                            y: shouldResetY ? startXY.y : undefined,
+                        });
+
+                        if (!shouldResetX) {
+                            scrollOffsetX = viewportMain.left;
+                        }
+
+                        if (!shouldResetY) {
+                            scrollOffsetY = viewportMain.top;
+                        }
+                    }
+
+                    if (
+                        (startKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP && endKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT) ||
+                        (endKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP && startKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT)
+                    ) {
+                        scrollOffsetX = viewportMain.left;
+                    }
+
+                    if (
+                        (startKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP && endKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP) ||
+                        (endKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP && startKey === SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP)
+                    ) {
+                        scrollOffsetY = viewportMain.top;
+                    }
+                }
+
+                lastX = newMoveOffsetX;
+                lastY = newMoveOffsetY;
+            }
+            scrollTimer.scrolling(scrollOffsetX, scrollOffsetY, () => {
+                this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, rangeType);
+            });
+        });
+
+        this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+            this._endSelection();
+            this.expandingSelection = false;
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
 
             // when selection mouse up, enable the short cut service
@@ -1048,7 +1308,7 @@ export class SelectionRenderService implements ISelectionRenderService {
     private _moving(
         moveOffsetX: number,
         moveOffsetY: number,
-        selectionControl: Nullable<SelectionShape>,
+        selectionControl: Nullable<SelectionControl>,
         rangeType: RANGE_TYPE
     ) {
         const skeleton = this._skeleton;
@@ -1160,7 +1420,6 @@ export class SelectionRenderService implements ISelectionRenderService {
         if (scene == null) {
             return;
         }
-
         scene.onPointerMoveObserver.remove(this._moveObserver);
         scene.onPointerUpObserver.remove(this._upObserver);
         scene.enableEvent();
@@ -1261,10 +1520,3 @@ export class SelectionRenderService implements ISelectionRenderService {
         };
     }
 }
-
-/**
- * @deprecated Should be refactored to RenderUnit.
- */
-export const ISelectionRenderService = createIdentifier<SelectionRenderService>(
-    'univer.sheet.selection-render-service'
-);

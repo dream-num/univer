@@ -60,6 +60,7 @@ export abstract class BaseObject extends Disposable {
 
     onPointerOutObserver = new Observable<IPointerEvent | IMouseEvent>();
     onPointerLeaveObserver = new Observable<IPointerEvent | IMouseEvent>();
+    onPointerCancelObserver = new Observable<IPointerEvent | IMouseEvent>();
     onPointerOverObserver = new Observable<IPointerEvent | IMouseEvent>();
     onPointerEnterObserver = new Observable<IPointerEvent | IMouseEvent>();
 
@@ -231,10 +232,10 @@ export abstract class BaseObject extends Disposable {
         return this.top + (this.getParent()?.ancestorTop || 0);
     }
 
-    get ancestorTransform() {
+    get ancestorTransform(): Transform {
         const parent = this.getParent();
         if (this.isInGroup && parent?.classType === RENDER_CLASS_TYPE.GROUP) {
-            return parent?.ancestorTransform.multiply(this.transform);
+            return (parent as BaseObject)?.ancestorTransform.multiply(this.transform);
         }
         return this.transform;
     }
@@ -700,6 +701,14 @@ export abstract class BaseObject extends Disposable {
     triggerPointerLeave(evt: IPointerEvent | IMouseEvent) {
         if (!this.onPointerLeaveObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerPointerLeave(evt);
+            return false;
+        }
+        return true;
+    }
+
+    triggerPointerCancel(evt: IPointerEvent | IMouseEvent) {
+        if (!this.onPointerLeaveObserver.notifyObservers(evt)?.stopPropagation) {
+            this._parent?.triggerPointerCancel(evt);
             return false;
         }
         return true;

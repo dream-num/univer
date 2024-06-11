@@ -22,7 +22,7 @@ import {
     RANGE_TYPE,
     toDisposable,
 } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
+import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
@@ -156,13 +156,102 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         return snapshot.freeze;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initScrollEventListener() {
-        const scene = this._getSheetObject()?.scene;
-        if (scene == null) {
+        const sheetObject = this._getSheetObject();
+        if (!sheetObject) return;
+        const scene = sheetObject.scene;
+        const spreadsheet = sheetObject.spreadsheet;
+        if (scene == null || spreadsheet == null) {
             return;
         }
-
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        const _lastPointerPos: IPoint = { x: 0, y: 0 };
+        let _pointerScrolling: boolean = false;
+
+        const velocity = { x: 0, y: 0 };
+        const deceleration = 0.95; // 衰减系数
+        let scrollInertiaAnimationID: null | number = null;
+        const pointerScrollInertia = () => {
+            if (!viewportMain) return;
+            velocity.x *= deceleration;
+            velocity.y *= deceleration;
+            _lastPointerPos.x += velocity.x;
+            _lastPointerPos.y += velocity.y;
+            viewportMain.scrollByViewportScroll({
+                deltaX: velocity.x,
+                deltaY: velocity.y,
+            });
+            if (Math.abs(velocity.x) > 1 || Math.abs(velocity.y) > 1) {
+                scrollInertiaAnimationID = requestAnimationFrame(pointerScrollInertia);
+            } else {
+                scrollInertiaAnimationID = null;
+            }
+        };
+
+        const cancelInertiaAnimation = () => {
+            cancelAnimationFrame(scrollInertiaAnimationID!);
+            scrollInertiaAnimationID = null;
+        };
+
+        spreadsheet.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            cancelInertiaAnimation();
+
+            if (!viewportMain) return;
+
+            _lastPointerPos.x = evt.offsetX;
+            _lastPointerPos.y = evt.offsetY;
+            _pointerScrolling = true;
+            state.stopPropagation();
+        });
+
+        spreadsheet.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            // cancelInertiaAnimation();
+            if (!_pointerScrolling) return;
+            if (!viewportMain) return;
+            // console.log('spreadsheet moving...........');
+            const e = evt as IPointerEvent | IMouseEvent;
+            const deltaX = -(e.offsetX - _lastPointerPos.x);
+            const deltaY = -(e.offsetY - _lastPointerPos.y);
+            velocity.x = -(e.offsetX - _lastPointerPos.x);
+            velocity.y = -(e.offsetY - _lastPointerPos.y);
+
+            if (deltaX !== 0 || deltaY !== 0) {
+                // console.log('....delta', deltaX, deltaY);
+            }
+
+            viewportMain.scrollByViewportScroll({
+                deltaX,
+                deltaY,
+            });
+            _lastPointerPos.x = e.offsetX;
+            _lastPointerPos.y = e.offsetY;
+
+            state.stopPropagation();
+        });
+
+        spreadsheet.onPointerUpObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            _pointerScrolling = false;
+            scrollInertiaAnimationID = requestAnimationFrame(pointerScrollInertia);
+        });
+
+        // trigger by scene.input-manager@_onPointerMove because currObject has changed
+        spreadsheet.onPointerLeaveObserver.add(() => {
+            // this._pointerScrolling = false;
+        });
+        spreadsheet.onPointerOutObserver.add(() => {
+            _pointerScrolling = false;
+        });
+        scene.onPointerOutObserver.add(() => {
+            _pointerScrolling = false;
+        });
+        scene.onPointerCancelObserver.add(() => {
+            _pointerScrolling = false;
+        });
+        scene.onPointerUpObserver.add(() => {
+            _pointerScrolling = false;
+        });
+
         this.disposeWithMe(
             toDisposable(
                 // set scrollInfo, the event is triggered in viewport@_scrollToScrollbarPos

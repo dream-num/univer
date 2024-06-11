@@ -159,6 +159,7 @@ export function getSetCellFormulaMutations(
         }
     }
 
+    // eslint-disable-next-line complexity
     matrix.forValue((row, col, value) => {
         const originalFormula = value.f || '';
         const originalFormulaId = value.si || '';
@@ -175,10 +176,24 @@ export function getSetCellFormulaMutations(
 
         // Directly reuse when there is a formula id
         if (isFormulaId(originalFormulaId)) {
-            const { unitId: pasteFromUnitId = '', subUnitId: pasteFromSubUnitId = '', range } = pasteFrom || {};
+            const { unitId: pasteFromUnitId = '', subUnitId: pasteFromSubUnitId = '', range: pasteFromRange } = pasteFrom || {};
 
-            if (((pasteFromUnitId && unitId !== pasteFromUnitId) || (pasteFromSubUnitId && subUnitId !== pasteFromSubUnitId)) && range?.rows && range?.cols) {
-                const formulaString = formulaDataModel.getFormulaStringByCell(range.rows[row], range.cols[col], pasteFromSubUnitId, pasteFromUnitId);
+            if (((pasteFromUnitId && unitId !== pasteFromUnitId) || (pasteFromSubUnitId && subUnitId !== pasteFromSubUnitId)) && pasteFromRange?.rows && pasteFromRange?.cols) {
+                const formulaString = formulaDataModel.getFormulaStringByCell(pasteFromRange.rows[row], pasteFromRange.cols[col], pasteFromSubUnitId, pasteFromUnitId);
+
+                const rowIndex = row % copyRowLength;
+                const colIndex = col % copyColumnLength;
+
+                const copyX = copyInfo?.copyRange ? copyInfo?.copyRange?.cols[colIndex] : colIndex;
+                const copyY = copyInfo?.copyRange ? copyInfo?.copyRange?.rows[rowIndex] : rowIndex;
+                const offsetX = range.cols[col] - copyX;
+                const offsetY = range.rows[row] - copyY;
+                const shiftedFormula = lexerTreeBuilder.moveFormulaRefOffset(formulaString || '', offsetX, offsetY);
+
+                valueObject.si = null;
+                valueObject.f = shiftedFormula;
+                valueObject.v = null;
+                valueObject.p = null;
 
                 // TODO handle as normal formula string
             } else {

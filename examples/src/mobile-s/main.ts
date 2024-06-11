@@ -26,11 +26,12 @@ import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import type { FUniver } from '@univerjs/facade';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { UniverSheetsFilterMobileUIPlugin } from '@univerjs/sheets-filter-ui';
+import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
+import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
+import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
+import { UniverSheetsFormulaMobilePlugin } from '@univerjs/sheets-formula';
 import { enUS } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
-
-/* eslint-disable-next-line node/prefer-global/process */
-const IS_E2E: boolean = !!process.env.IS_E2E;
 
 const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
 
@@ -44,20 +45,21 @@ const univer = new Univer({
     logLevel: LogLevel.VERBOSE,
 });
 
+univer.registerPlugin(UniverFormulaEnginePlugin);
+
 // core plugins
 univer.registerPlugin(UniverDocsPlugin, {
     hasScroll: false,
 });
 univer.registerPlugin(UniverRenderEnginePlugin);
-univer.registerPlugin(UniverMobileUIPlugin, {
-    container: 'app',
-});
+univer.registerPlugin(UniverMobileUIPlugin, { container: 'app' });
+univer.registerPlugin(UniverRPCMainThreadPlugin, {
+    workerURL: './worker.js',
+} as IUniverRPCMainThreadConfig);
 
 univer.registerPlugin(UniverDocsUIPlugin);
 
-univer.registerPlugin(UniverSheetsPlugin, {
-    notExecuteFormula: true,
-});
+univer.registerPlugin(UniverSheetsPlugin);
 
 univer.registerPlugin(UniverSheetsMobileUIPlugin);
 
@@ -65,10 +67,8 @@ univer.registerPlugin(UniverSheetsMobileUIPlugin);
 univer.registerPlugin(UniverSheetsFilterPlugin);
 univer.registerPlugin(UniverSheetsFilterMobileUIPlugin);
 
-// univer.registerPlugin(UniverSheetsNumfmtPlugin);
-univer.registerPlugin(UniverFormulaEnginePlugin, {
-    notExecuteFormula: true,
-});
+univer.registerPlugin(UniverSheetsNumfmtPlugin);
+univer.registerPlugin(UniverSheetsFormulaMobilePlugin);
 
 const mockUser = {
     userID: 'Owner_qxVnhPbQ',

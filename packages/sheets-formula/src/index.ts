@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { UniverSheetsFormulaPlugin } from './formula-ui-plugin';
+export { UniverSheetsFormulaPlugin, UniverSheetsFormulaMobilePlugin } from './formula-ui-plugin';
 export { IDescriptionService } from './services/description.service';
 export { DescriptionService } from './services/description.service';
 export {

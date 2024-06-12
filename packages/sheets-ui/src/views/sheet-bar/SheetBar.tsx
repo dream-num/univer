@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import { ICommandService, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
-import { InsertSheetCommand, WorkbookEditablePermission } from '@univerjs/sheets';
+import { InsertSheetCommand, WorkbookCreateSheetPermission, WorkbookEditablePermission } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
@@ -56,9 +56,11 @@ export const SheetBar = () => {
     }, []);
 
     useEffect(() => {
-        const subscription = permissionService.getPermissionPoint$(new WorkbookEditablePermission(unitId)?.id)?.pipe(
-            map((permission) => permission?.value ?? false)
-        )?.subscribe((permission) => {
+        const composePermission$ = permissionService.composePermission$([new WorkbookEditablePermission(unitId)?.id, new WorkbookCreateSheetPermission(unitId)?.id])?.pipe(
+            map((permissions) => permissions?.every((permission) => permission?.value ?? false))
+        );
+
+        const subscription = composePermission$?.subscribe((permission) => {
             setEditPermission(permission ?? false);
         });
 

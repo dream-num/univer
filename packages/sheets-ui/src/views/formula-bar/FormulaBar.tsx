@@ -63,8 +63,8 @@ export function FormulaBar() {
             const subUnitId = worksheet.getSheetId();
             const range = selectionManager.getLast()?.range;
             if (!range) return;
-            const worksheetSetCellValuePermission = permissionService.getPermissionPoint(new WorksheetSetCellValuePermission(unitId, subUnitId).id);
-            const worksheetEditPermission = permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id);
+            const worksheetSetCellValuePermission = permissionService.getPermissionPoint(new WorksheetSetCellValuePermission(unitId, subUnitId).id)?.value;
+            const worksheetEditPermission = permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value;
 
             if (!worksheetSetCellValuePermission || !worksheetEditPermission) {
                 setDisable(true);
@@ -94,7 +94,7 @@ export function FormulaBar() {
             }
         }
         );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const INITIAL_SNAPSHOT = {

@@ -19,7 +19,7 @@ import { Disposable, remove, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, of } from 'rxjs';
-import { concatMap, map } from 'rxjs/operators';
+import { concatMap } from 'rxjs/operators';
 
 import { HTTPHeaders } from './headers';
 import type { HTTPResponseType } from './http';
@@ -28,7 +28,6 @@ import { HTTPParams } from './params';
 import type { HTTPRequestMethod } from './request';
 import { HTTPRequest } from './request';
 import type { HTTPEvent } from './response';
-import { HTTPResponse, HTTPResponseError } from './response';
 import type { HTTPHandlerFn, HTTPInterceptorFn, RequestPipe } from './interceptor';
 
 export interface IRequestParams {
@@ -37,9 +36,13 @@ export interface IRequestParams {
 
     /** Query headers. */
     headers?: { [key: string]: string | number | boolean };
+
     /** Expected types of the response data. */
     responseType?: HTTPResponseType;
+
     withCredentials?: boolean;
+
+    reportProgress?: boolean;
 }
 
 export interface IPostRequestParams extends IRequestParams {
@@ -52,6 +55,7 @@ export interface IPostRequestParams extends IRequestParams {
 export interface IHTTPInterceptor {
     /** The priority of the interceptor. The higher the value, the earlier the interceptor is called. */
     priority?: number;
+
     /** The interceptor function. */
     interceptor: HTTPInterceptorFn;
 }
@@ -61,8 +65,9 @@ export interface IHTTPInterceptor {
  *
  * You can use interceptors to:
  *
- * 1. modify requests (headers included) before they are sent, or modify responses before they are returned to the caller.
- * 2. thresholding, logging, caching, etc.
+ * 1. modify requests (headers included) before they are sent, or modify responses
+ * before they are returned to the caller.
+ * 2. threshold, logging, caching, etc.
  * 3. authentication, authorization, etc.
  */
 export class HTTPService extends Disposable {
@@ -94,23 +99,23 @@ export class HTTPService extends Disposable {
         return toDisposable(() => remove(this._interceptors, interceptor));
     }
 
-    get<T>(url: string, options?: IRequestParams): Promise<HTTPResponse<T>> {
-        return this._request<T>('GET', url, options);
+    get<T>(url: string, params?: IRequestParams): Promise<HTTPEvent<T>> {
+        return this._request<T>('GET', url, params);
     }
 
-    post<T>(url: string, options?: IPostRequestParams): Promise<HTTPResponse<T>> {
-        return this._request<T>('POST', url, options);
+    post<T>(url: string, params?: IPostRequestParams): Promise<HTTPEvent<T>> {
+        return this._request<T>('POST', url, params);
     }
 
-    put<T>(url: string, options?: IPostRequestParams): Promise<HTTPResponse<T>> {
-        return this._request<T>('PUT', url, options);
+    put<T>(url: string, params?: IPostRequestParams): Promise<HTTPEvent<T>> {
+        return this._request<T>('PUT', url, params);
     }
 
-    delete<T>(url: string, options?: IRequestParams): Promise<HTTPResponse<T>> {
-        return this._request<T>('DELETE', url, options);
+    delete<T>(url: string, params?: IRequestParams): Promise<HTTPEvent<T>> {
+        return this._request<T>('DELETE', url, params);
     }
 
-    patch<T>(url: string, options?: IPostRequestParams): Promise<HTTPResponse<T>> {
+    patch<T>(url: string, options?: IPostRequestParams): Promise<HTTPEvent<T>> {
         return this._request<T>('PATCH', url, options);
     }
 
@@ -118,7 +123,7 @@ export class HTTPService extends Disposable {
         method: HTTPRequestMethod,
         url: string,
         options?: IPostRequestParams
-    ): Observable<HTTPResponse<T>> {
+    ): Observable<HTTPEvent<T>> {
         // Things to do when sending a HTTP request:
         // 1. Generate HTTPRequest/HTTPHeader object
         // 2. Call interceptors and finally the HTTP implementation.
@@ -127,21 +132,13 @@ export class HTTPService extends Disposable {
         const request = new HTTPRequest(method, url, {
             headers,
             params,
-            withCredentials: options?.withCredentials ?? false, // default value for withCredentials is false by MDN
+            withCredentials: options?.withCredentials ?? false,
+            reportProgress: options?.reportProgress ?? false,
             responseType: options?.responseType ?? 'json',
             body: (['GET', 'DELETE'].includes(method)) ? undefined : (options as IPostRequestParams)?.body,
         });
 
-        return of(request).pipe(
-            concatMap((request) => this._runInterceptorsAndImplementation(request)),
-            map((response) => {
-                if (response instanceof HTTPResponseError) {
-                    throw response;
-                }
-
-                return response;
-            })
-        );
+        return of(request).pipe(concatMap((request) => this._runInterceptorsAndImplementation(request)));
     }
 
     /** The HTTP request implementations */
@@ -149,7 +146,7 @@ export class HTTPService extends Disposable {
         method: HTTPRequestMethod,
         url: string,
         options?: IRequestParams
-    ): Promise<HTTPResponse<T>> {
+    ): Promise<HTTPEvent<T>> {
         // Things to do when sending a HTTP request:
         // 1. Generate HTTPRequest/HTTPHeader object
         // 2. Call interceptors and finally the HTTP implementation.
@@ -161,6 +158,7 @@ export class HTTPService extends Disposable {
             withCredentials: options?.withCredentials ?? false, // default value for withCredentials is false by MDN
             responseType: options?.responseType ?? 'json',
             body: (['GET', 'DELETE'].includes(method)) ? undefined : (options as IPostRequestParams)?.body,
+
         });
 
         // eslint-disable-next-line ts/no-explicit-any
@@ -171,11 +169,7 @@ export class HTTPService extends Disposable {
         // The event$ may emit multiple values, but we only care about the first one.
         // We may need to care about other events (especially progress events) in the future.
         const result = await firstValueFrom(events$);
-        if (result instanceof HTTPResponse) {
-            return result;
-        }
-
-        throw new Error(`${(result as HTTPResponseError).error}`);
+        return result;
     }
 
     // eslint-disable-next-line ts/no-explicit-any

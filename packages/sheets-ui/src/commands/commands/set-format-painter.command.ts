@@ -19,8 +19,6 @@ import {
     CommandType,
     ICommandService,
     isICellData,
-    IUndoRedoService,
-    IUniverInstanceService,
     ObjectMatrix,
     sequenceExecute,
     Tools,
@@ -92,9 +90,7 @@ export const SetOnceFormatPainterCommand: ICommand = {
 export interface IApplyFormatPainterCommandParams {
     subUnitId: string;
     unitId: string;
-    styleRange: IRange;
-    styleValues: ICellData[][];
-    mergeRanges: IRange[];
+    range: IRange;
 }
 
 export const ApplyFormatPainterCommand: ICommand = {
@@ -102,9 +98,8 @@ export const ApplyFormatPainterCommand: ICommand = {
     id: 'sheet.command.apply-format-painter',
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IApplyFormatPainterCommandParams) => {
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const formatPainterService = accessor.get(IFormatPainterService);
+        return formatPainterService.applyFormatPainter(params.unitId, params.subUnitId, params.range);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, IStyleData } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import type { IMutationInfo, IRange, IStyleData } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { SelectionManagerService, SetRangeValuesMutation } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -31,6 +31,7 @@ export interface IFormatPainterService {
     getStatus(): FormatPainterStatus;
     setSelectionFormat(format: ISelectionFormatInfo): void;
     getSelectionFormat(): ISelectionFormatInfo;
+    applyFormatPainter(unitId: string, subUnitId: string, range: IRange): boolean;
 }
 
 export interface ISelectionFormatInfo {
@@ -43,7 +44,14 @@ export interface IFormatPainterHook {
     isDefaultHook?: boolean;
     priority?: number;
     onStatusChange(status: FormatPainterStatus): void;
-    onApply(range: IRange, format: ISelectionFormatInfo): void;
+    onApply(
+        unitId: string,
+        subUnitId: string,
+        range: IRange,
+        format: ISelectionFormatInfo): {
+        undos: IMutationInfo[];
+        redos: IMutationInfo[];
+    };
 }
 export enum FormatPainterStatus {
     OFF,
@@ -64,7 +72,10 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
     constructor(
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService
+        @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
+        @ILogService private readonly _logService: ILogService,
+        @ICommandService private readonly _commandService: ICommandService,
+        @IUndoRedoService private readonly _undoRedoService: IUndoRedoService
     ) {
         super();
 
@@ -107,8 +118,39 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         return this._selectionFormat;
     }
 
-    applyFormatPainter(range: IRange) {
+    applyFormatPainter(unitId: string, subUnitId: string, range: IRange) {
+        const hooks = this.getHooks();
+        const redoMutationsInfo: IMutationInfo[] = [];
+        const undoMutationsInfo: IMutationInfo[] = [];
+        hooks.forEach((h) => {
+            const applyReturn = h.onApply(
+                unitId,
+                subUnitId,
+                range,
+                this._selectionFormat
+            );
+            if (applyReturn) {
+                redoMutationsInfo.push(...applyReturn.redos);
+                undoMutationsInfo.push(...applyReturn.undos);
+            }
+        });
 
+        this._logService.log('[FormatPainterService]', 'apply mutations', {
+            undoMutationsInfo,
+            redoMutationsInfo,
+        });
+
+        const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
+        if (result) {
+            // add to undo redo services
+            this._undoRedoService.pushUndoRedo({
+                unitID: unitId,
+                undoMutations: undoMutationsInfo,
+                redoMutations: redoMutationsInfo,
+            });
+        }
+
+        return result;
     }
 
     private _updateRangeMark(status: FormatPainterStatus) {

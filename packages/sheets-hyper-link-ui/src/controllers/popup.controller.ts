@@ -66,7 +66,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     workbookTypes: [WorkbookEditablePermission],
                     worksheetTypes: [WorksheetViewPermission, WorksheetInsertHyperlinkPermission],
                     rangeTypes: [RangeProtectionPermissionViewPoint],
-                }, [{ startRow: currentCol, startColumn: currentRow, endRow: currentCol, endColumn: currentRow }]);
+                }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);
                 if (!permission) {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
                     return;

@@ -179,6 +179,10 @@ export class DocDrawingUpdateController extends Disposable {
                 title: '',
                 description: '',
                 layoutType: PositionedObjectLayoutType.INLINE,
+                distB: 0,
+                distL: 0,
+                distR: 0,
+                distT: 0,
             };
 
             docDrawingParams.push(docDrawingParam);

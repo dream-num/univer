@@ -23,7 +23,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';
 import { InputNumber, Radio, RadioGroup } from '@univerjs/design';
-import { TextWrappingStyle, UpdateDocDrawingWrappingStyleCommand } from '../../commands/commands/update-doc-drawing.command';
+import { TextWrappingStyle, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand } from '../../commands/commands/update-doc-drawing.command';
 import styles from './index.module.less';
 
 export interface IDocDrawingTextWrapProps {
@@ -31,10 +31,10 @@ export interface IDocDrawingTextWrapProps {
 }
 
 interface IDistToText {
-    top: number;
-    left: number;
-    bottom: number;
-    right: number;
+    distT: number;
+    distL: number;
+    distB: number;
+    distR: number;
 }
 
 export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
@@ -89,22 +89,64 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
 
     function handleWrapTextChange(value: number | string | boolean) {
         setWrapText(value as string);
+
+        const focusDrawings = drawingManagerService.getFocusDrawings();
+        if (focusDrawings.length === 0) {
+            return;
+        }
+
+        const drawings = focusDrawings.map((drawing) => {
+            return {
+                unitId: drawing.unitId,
+                subUnitId: drawing.subUnitId,
+                drawingId: drawing.drawingId,
+            };
+        });
+
+        commandService.executeCommand(UpdateDocDrawingWrapTextCommand.id, {
+            unitId: focusDrawings[0].unitId,
+            subUnitId: focusDrawings[0].unitId,
+            drawings,
+            wrapText: value as WrapTextType,
+        });
     }
 
     const [distToText, setDistToText] = useState<IDistToText>({
-        top: 0,
-        left: 0,
-        bottom: 0,
-        right: 0,
+        distT: 0,
+        distL: 0,
+        distB: 0,
+        distR: 0,
     });
 
-    function handleDistToTextChange(value: Nullable<number>, direction: 'top' | 'left' | 'bottom' | 'right') {
+    function handleDistToTextChange(value: Nullable<number>, direction: keyof IDistToText) {
         if (value == null) {
             return;
         }
 
         const newDistToText = { ...distToText, [direction]: value };
         setDistToText(newDistToText as IDistToText);
+
+        const focusDrawings = drawingManagerService.getFocusDrawings();
+        if (focusDrawings.length === 0) {
+            return;
+        }
+
+        const drawings = focusDrawings.map((drawing) => {
+            return {
+                unitId: drawing.unitId,
+                subUnitId: drawing.subUnitId,
+                drawingId: drawing.drawingId,
+            };
+        });
+
+        commandService.executeCommand(UpdateDocDrawingDistanceCommand.id, {
+            unitId: focusDrawings[0].unitId,
+            subUnitId: focusDrawings[0].unitId,
+            drawings,
+            dist: {
+                [direction]: value,
+            },
+        });
     }
 
     return (
@@ -162,7 +204,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={distToText.top} onChange={(val) => { handleDistToTextChange(val, 'top'); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={distToText.distT} onChange={(val) => { handleDistToTextChange(val, 'distT'); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -176,7 +218,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={distToText.left} onChange={(val) => { handleDistToTextChange(val, 'left'); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={distToText.distL} onChange={(val) => { handleDistToTextChange(val, 'distL'); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -192,7 +234,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={distToText.bottom} onChange={(val) => { handleDistToTextChange(val, 'bottom'); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={distToText.distB} onChange={(val) => { handleDistToTextChange(val, 'distB'); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -206,7 +248,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={distToText.right} onChange={(val) => { handleDistToTextChange(val, 'right'); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={distToText.distR} onChange={(val) => { handleDistToTextChange(val, 'distR'); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>

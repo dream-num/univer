@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Workbook } from '@univerjs/core';
+import type { ICellData, IStyleData, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
+    ObjectMatrix,
     OnLifecycle,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
 
-import type { IApplyFormatPainterCommandParams } from '../../commands/commands/set-format-painter.command';
+import { Inject } from '@wendellhu/redi';
+import { SelectionManagerService } from '@univerjs/sheets';
+import { getCellInfoInMergeData } from '@univerjs/engine-render';
 import {
     ApplyFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
+import type { IFormatPainterHook } from '../../services/format-painter/format-painter.service';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 
@@ -39,7 +43,8 @@ export class FormatPainterController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IFormatPainterService private readonly _formatPainterService: IFormatPainterService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
 
@@ -48,6 +53,7 @@ export class FormatPainterController extends Disposable {
 
     private _initialize() {
         this._commandExecutedListener();
+        this._addDefaultHook();
     }
 
     private _commandExecutedListener() {
@@ -56,11 +62,15 @@ export class FormatPainterController extends Disposable {
                 this._selectionRenderService.selectionMoveEnd$.subscribe((selections) => {
                     if (this._formatPainterService.getStatus() !== FormatPainterStatus.OFF) {
                         const { rangeWithCoord } = selections[selections.length - 1];
-                        this._applyFormatPainter({
-                            startRow: rangeWithCoord.startRow,
-                            startColumn: rangeWithCoord.startColumn,
-                            endRow: rangeWithCoord.endRow,
-                            endColumn: rangeWithCoord.endColumn,
+                        this._commandService.executeCommand(ApplyFormatPainterCommand.id, {
+                            unitId: this._univerInstanceService.getFocusedUnit()?.getUnitId() || '',
+                            subUnitId: (this._univerInstanceService.getFocusedUnit() as Workbook).getActiveSheet().getSheetId(),
+                            range: {
+                                startRow: rangeWithCoord.startRow,
+                                startColumn: rangeWithCoord.startColumn,
+                                endRow: rangeWithCoord.endRow,
+                                endColumn: rangeWithCoord.endColumn,
+                            },
                         });
                         // if once, turn off the format painter
                         if (this._formatPainterService.getStatus() === FormatPainterStatus.ONCE) {
@@ -72,63 +82,56 @@ export class FormatPainterController extends Disposable {
         );
     }
 
-    private async _applyFormatPainter(range: IRange) {
-        const { styles: stylesMatrix, merges } = this._formatPainterService.getSelectionFormat();
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const unitId = workbook.getUnitId();
-        const subUnitId = workbook.getActiveSheet().getSheetId();
-        if (!stylesMatrix) return;
-
-        const { startRow, startColumn, endRow, endColumn } = stylesMatrix.getDataRange();
-        const styleRowsNum = endRow - startRow + 1;
-        const styleColsNum = endColumn - startColumn + 1;
-        const styleValues: ICellData[][] = Array.from({ length: range.endRow - range.startRow + 1 }, () =>
-            Array.from({ length: range.endColumn - range.startColumn + 1 }, () => ({}))
-        );
-        const mergeRanges: IRange[] = [];
-
-        styleValues.forEach((row, rowIndex) => {
-            row.forEach((col, colIndex) => {
-                const mappedRowIndex = (rowIndex % styleRowsNum) + startRow;
-                const mappedColIndex = (colIndex % styleColsNum) + startColumn;
-                const style = stylesMatrix.getValue(mappedRowIndex, mappedColIndex);
-
-                if (style) {
-                    styleValues[rowIndex][colIndex].s = style;
+    private _addDefaultHook() {
+        const defaultHook: IFormatPainterHook = {
+            id: 'default-format-painter',
+            priority: 0,
+            isDefaultHook: true,
+            onStatusChange: (status: FormatPainterStatus) => {
+                if (status !== FormatPainterStatus.OFF) {
+                    const format = this._collectSelectionRangeFormat();
+                    if (format) {
+                        this._formatPainterService.setSelectionFormat(format);
+                    }
                 }
-            });
-        });
+            },
+            onApply() {
 
-        merges.forEach((merge) => {
-            const relatedRange: IRange = {
-                startRow: merge.startRow - startRow,
-                startColumn: merge.startColumn - startColumn,
-                endRow: merge.endRow - startRow,
-                endColumn: merge.endColumn - startColumn,
-            };
-            // merge will apply at least once
-            const rowRepeats = Math.max(1, Math.floor((range.endRow - range.startRow + 1) / styleRowsNum));
-            const colRepeats = Math.max(1, Math.floor((range.endColumn - range.startColumn + 1) / styleColsNum));
-            for (let i = 0; i < rowRepeats; i++) {
-                for (let j = 0; j < colRepeats; j++) {
-                    mergeRanges.push({
-                        startRow: relatedRange.startRow + i * styleRowsNum + range.startRow,
-                        startColumn: relatedRange.startColumn + j * styleColsNum + range.startColumn,
-                        endRow: relatedRange.endRow + i * styleRowsNum + range.startRow,
-                        endColumn: relatedRange.endColumn + j * styleColsNum + range.startColumn,
+            },
+        };
+    }
+
+    private _collectSelectionRangeFormat() {
+        const selection = this._selectionManagerService.getLast();
+        const range = selection?.range;
+        if (!range) return null;
+        const { startRow, endRow, startColumn, endColumn } = range;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const worksheet = workbook?.getActiveSheet();
+        const cellData = worksheet.getCellMatrix();
+        const mergeData = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getMergeData();
+
+        const styles = workbook.getStyles();
+        const stylesMatrix = new ObjectMatrix<IStyleData>();
+        const merges = [];
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
+                const cell = cellData.getValue(r, c) as ICellData;
+                stylesMatrix.setValue(r, c, styles.getStyleByCell(cell) || {});
+                const { isMergedMainCell, ...mergeInfo } = getCellInfoInMergeData(r, c, mergeData);
+                if (isMergedMainCell) {
+                    merges.push({
+                        startRow: mergeInfo.startRow,
+                        startColumn: mergeInfo.startColumn,
+                        endRow: mergeInfo.endRow,
+                        endColumn: mergeInfo.endColumn,
                     });
                 }
             }
-        });
-
-        const ApplyFormatPainterCommandParams: IApplyFormatPainterCommandParams = {
-            subUnitId,
-            unitId,
-            styleRange: range,
-            styleValues,
-            mergeRanges,
+        }
+        return {
+            styles: stylesMatrix,
+            merges,
         };
-
-        await this._commandService.executeCommand(ApplyFormatPainterCommand.id, ApplyFormatPainterCommandParams);
     }
 }

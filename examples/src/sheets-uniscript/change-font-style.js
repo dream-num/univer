@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// eslint-disable-next-line no-undef
 const activeSheet = univerAPI.getActiveWorkbook().getActiveSheet();
 
 // Set A1:B2 to bold

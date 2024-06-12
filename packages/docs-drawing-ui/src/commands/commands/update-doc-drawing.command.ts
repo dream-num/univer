@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { ICommand, IMutationInfo, JSONXActions, WrapTextType } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -77,7 +77,7 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
             return false;
         }
 
-        const { drawings, wrappingStyle, unitId, subUnitId } = params;
+        const { drawings, wrappingStyle, unitId } = params;
 
         if (docsSkeletonObject.unitId !== unitId) {
             return false;
@@ -164,6 +164,154 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
 
                     rawActions.push(action!);
                 }
+            }
+        }
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges: null,
+            },
+        };
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
+    },
+};
+
+interface IDist {
+    distT: number;
+    distB: number;
+    distL: number;
+    distR: number;
+}
+
+interface IUpdateDocDrawingDistanceParams {
+    unitId: string;
+    subUnitId: string;
+    drawings: IDocDrawing[];
+    dist: IDist;
+}
+
+/**
+ * The command to update drawing wrap text.
+ */
+export const UpdateDocDrawingDistanceCommand: ICommand = {
+    id: 'doc.command.update-doc-drawing-distance',
+
+    type: CommandType.COMMAND,
+
+    handler: (accessor: IAccessor, params?: IUpdateDocDrawingDistanceParams) => {
+        if (params == null) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (documentDataModel == null) {
+            return false;
+        }
+
+        const { drawings, dist, unitId } = params;
+
+        const jsonX = JSONX.getInstance();
+        const rawActions: JSONXActions = [];
+
+        const { drawings: oldDrawings = {} } = documentDataModel.getSnapshot();
+
+        for (const drawing of drawings) {
+            const { drawingId } = drawing;
+
+            for (const [key, value] of Object.entries(dist)) {
+                const oldValue = oldDrawings[drawingId][key as keyof IDist];
+
+                if (oldValue !== value) {
+                    const action = jsonX.replaceOp(['drawings', drawingId, key], oldValue, value);
+
+                    rawActions.push(action!);
+                }
+            }
+        }
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges: null,
+            },
+        };
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
+    },
+};
+
+interface IUpdateDocDrawingWrapTextParams {
+    unitId: string;
+    subUnitId: string;
+    drawings: IDocDrawing[];
+    wrapText: WrapTextType;
+}
+
+/**
+ * The command to update drawing wrap text.
+ */
+export const UpdateDocDrawingWrapTextCommand: ICommand = {
+    id: 'doc.command.update-doc-drawing-wrap-text',
+
+    type: CommandType.COMMAND,
+
+    handler: (accessor: IAccessor, params?: IUpdateDocDrawingWrapTextParams) => {
+        if (params == null) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (documentDataModel == null) {
+            return false;
+        }
+
+        const { drawings, wrapText, unitId } = params;
+
+        const jsonX = JSONX.getInstance();
+        const rawActions: JSONXActions = [];
+
+        const { drawings: oldDrawings = {} } = documentDataModel.getSnapshot();
+
+        // Update drawing layoutType.
+        for (const drawing of drawings) {
+            const { drawingId } = drawing;
+
+            const oldWrapText = oldDrawings[drawingId].wrapText;
+
+            if (oldWrapText !== wrapText) {
+                const action = jsonX.replaceOp(['drawings', drawingId, 'wrapText'], oldWrapText, wrapText);
+
+                rawActions.push(action!);
             }
         }
 

@@ -1,3 +1,4 @@
+import './scripts/generate-locales.mjs';
 import path from 'node:path';
 import process from 'node:process';
 

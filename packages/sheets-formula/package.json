@@ -90,13 +90,13 @@
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@vitejs/plugin-react": "^4.2.1",
+        "@vitejs/plugin-react": "^4.3.1",
         "@wendellhu/redi": "0.15.2",
         "less": "^4.2.0",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.12",
+        "vite": "^5.2.13",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

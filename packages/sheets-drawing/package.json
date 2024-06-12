@@ -61,7 +61,6 @@
         "@univerjs/drawing": "workspace:*",
         "@wendellhu/redi": "0.15.2"
     },
-    "dependencies": {},
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*",
@@ -69,7 +68,7 @@
         "@univerjs/sheets": "workspace:*",
         "@wendellhu/redi": "^0.15.2",
         "typescript": "^5.4.5",
-        "vite": "^5.2.12",
+        "vite": "^5.2.13",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

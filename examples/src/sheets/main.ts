@@ -65,6 +65,7 @@ univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
 });
+window.univerAPI = FUniver.newAPI(univer);
 
 univer.registerPlugin(UniverDocsUIPlugin);
 
@@ -163,4 +164,3 @@ setTimeout(() => {
 }, LOAD_LAZY_PLUGINS_TIMEOUT);
 
 window.univer = univer;
-window.univerAPI = FUniver.newAPI(univer);

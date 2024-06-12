@@ -21,12 +21,10 @@ import type { Subscriber } from 'rxjs';
 import { Observable } from 'rxjs';
 import type { HTTPRequest } from '../request';
 import type { HTTPEvent, HTTPResponseBody } from '../response';
-import { HTTPResponse, HTTPResponseError } from '../response';
+import { HTTPProgress, HTTPResponse, HTTPResponseError } from '../response';
 import { HTTPHeaders } from '../headers';
 import { HTTPStatusCode } from '../http';
 import type { IHTTPImplementation } from './implementation';
-
-// CREDIT: This implementation is inspired by (and uses lots of code from) Angular's HttpClient implementation.
 
 /**
  * An HTTP implementation using Fetch API. This implementation can both run in browser and Node.js.
@@ -106,14 +104,30 @@ export class FetchHTTPImplementation implements IHTTPImplementation {
     ): Promise<HTTPResponseBody> {
         const chunks: Uint8Array[] = [];
         const reader = response.body!.getReader();
+        const contentLength = response.headers.get('content-length');
 
         let receivedLength = 0;
+
+        const reportProgress = request.requestParams?.reportProgress;
+        const responseType = request.responseType;
+        let partialText: string | undefined;
+        let decoder: TextDecoder;
+
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
             chunks.push(value);
             receivedLength += value.length;
+
+            if (reportProgress && responseType === 'text') {
+                partialText = (partialText ?? '') + (decoder ??= new TextDecoder()).decode(value, { stream: true });
+                subscriber.next(new HTTPProgress(
+                    contentLength ? Number.parseInt(contentLength, 10) : undefined,
+                    receivedLength,
+                    partialText
+                ));
+            }
         }
 
         const all = mergeChunks(chunks, receivedLength);

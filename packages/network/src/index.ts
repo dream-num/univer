@@ -21,7 +21,7 @@ export { FetchHTTPImplementation } from './services/http/implementations/fetch';
 export { XHRHTTPImplementation } from './services/http/implementations/xhr';
 export { HTTPRequest, type HTTPRequestMethod } from './services/http/request';
 export { type HTTPResponseType, HTTPStatusCode } from './services/http/http';
-export { HTTPResponse, type HTTPEvent, HTTPResponseError } from './services/http/response';
+export { HTTPResponse, type HTTPEvent, HTTPResponseError, HTTPEventType, HTTPProgress, ResponseHeader, type HTTPResponseBody } from './services/http/response';
 export {
     type ISocket,
     ISocketService,

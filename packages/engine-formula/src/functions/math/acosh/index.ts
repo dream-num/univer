@@ -17,6 +17,7 @@
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Acosh extends BaseFunction {
@@ -30,8 +31,38 @@ export class Acosh extends BaseFunction {
         }
 
         if (variant.isError()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return variant;
         }
-        return variant.acosh();
+
+        if (variant.isArray()) {
+            return variant.map((currentValue) => {
+                if (currentValue.isError()) {
+                    return currentValue;
+                }
+                return calculateAcosh(currentValue);
+            });
+        }
+
+        return calculateAcosh(variant);
     }
+}
+
+function calculateAcosh(variant: BaseValueObject) {
+    let value = variant.getValue();
+
+    if (variant.isBoolean()) {
+        value = value ? 1 : 0;
+    }
+
+    if (typeof value !== 'number' || value < 1) {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+
+    const result = Math.acosh(value);
+
+    if (Number.isNaN(result)) {
+        return ErrorValueObject.create(ErrorType.NUM);
+    }
+
+    return NumberValueObject.create(result);
 }

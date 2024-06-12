@@ -17,6 +17,7 @@
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Acos extends BaseFunction {
@@ -25,14 +26,51 @@ export class Acos extends BaseFunction {
     override maxParams = 1;
 
     override calculate(variant: BaseValueObject) {
+        if (!variant) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
         if (variant.isString()) {
             variant = variant.convertToNumberObjectValue();
         }
 
         if (variant.isError()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return variant;
         }
 
-        return variant.acos();
+        if (variant.isArray()) {
+            return variant.map((currentValue) => {
+                if (currentValue.isError()) {
+                    return currentValue;
+                }
+                return calculateAcos(currentValue);
+            });
+        }
+
+        return calculateAcos(variant);
     }
+}
+
+function calculateAcos(variant: BaseValueObject) {
+    let value = variant.getValue();
+
+    if (value === null || value === undefined || Number.isNaN(value)) {
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    if (variant.isBoolean()) {
+        value = value ? 1 : 0;
+    }
+
+    if (typeof value !== 'number' || value < -1 || value > 1) {
+        return ErrorValueObject.create(ErrorType.NUM); // Return #NUM! error if value is out of range
+    }
+
+    const result = Math.acos(value);
+
+    if (Number.isNaN(result)) {
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    return NumberValueObject.create(result);
 }

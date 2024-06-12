@@ -52,6 +52,7 @@ export class SheetsFindReplaceController extends Disposable implements IDisposab
     override dispose(): void {
         super.dispose();
 
+        this._findReplaceController.closePanel();
         this._provider.dispose();
     }
 

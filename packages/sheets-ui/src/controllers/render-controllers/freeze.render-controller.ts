@@ -1153,7 +1153,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                         const params = command.params as IInsertRowCommandParams;
                         const range = params.range;
                         const insertCount = range.endRow - range.startRow + 1;
-                        if (range.startRow <= freeze.startRow) {
+                        if (range.startRow < freeze.startRow) {
                             const newFreeze: IFreeze = {
                                 ...freeze,
                                 startRow: Math.max(1, freeze.startRow + insertCount),

@@ -17,10 +17,10 @@
 /* eslint-disable complexity */
 /* eslint-disable max-lines-per-function */
 
-import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
 import { Disposable, DisposableCollection, FOCUSING_EDITOR_STANDALONE, ICommandService, IContextService, IPermissionService, isICellData, IUniverInstanceService, LifecycleStages, LocaleService, ObjectMatrix, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, ISetRangeValuesCommandParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetNameMutationParams } from '@univerjs/sheets';
-import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SelectionManagerService, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SelectionManagerService, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookHideSheetPermission, WorkbookManageCollaboratorPermission, WorkbookMoveSheetPermission, WorkbookRenameSheetPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
 import { InsertCommand } from '@univerjs/docs';
@@ -195,9 +195,21 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
                 break;
 
             case SetWorksheetOrderCommand.id:
+                permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission, WorkbookMoveSheetPermission]);
+                errorMsg = this._localeService.t('permission.dialog.operatorSheetErr');
+                if (permission === false) {
+                    this._worksheetProtectionRuleModel.resetOrder();
+                }
+                break;
             case SetWorksheetNameCommand.id:
+                permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission, WorkbookRenameSheetPermission]);
+                errorMsg = this._localeService.t('permission.dialog.operatorSheetErr');
+                if (permission === false) {
+                    this._worksheetProtectionRuleModel.resetOrder();
+                }
+                break;
             case SetWorksheetShowCommand.id:
-                permission = this._permissionCheckByWorksheetCommand();
+                permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission, WorkbookHideSheetPermission]);
                 errorMsg = this._localeService.t('permission.dialog.operatorSheetErr');
                 if (permission === false) {
                     this._worksheetProtectionRuleModel.resetOrder();
@@ -325,7 +337,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         return true;
     }
 
-    private _permissionCheckByWorksheetCommand() {
+    private _permissionCheckByWorksheetCommand(types: WorkbookPermissionPointConstructor[]) {
         const target = getSheetCommandTarget(this._univerInstanceService);
         if (!target) {
             return false;
@@ -336,7 +348,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         if (worksheetRule || selectionRule) {
             return this._permissionService.getPermissionPoint(new WorkbookManageCollaboratorPermission(unitId).id)?.value ?? false;
         } else {
-            return this._permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value ?? false;
+            return this._permissionService.composePermission(types.map((F) => new F(unitId).id)).every((permission) => permission.value);
         }
     }
 

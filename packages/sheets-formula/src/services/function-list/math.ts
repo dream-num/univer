@@ -144,6 +144,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             },
         ],
     },
+
     {
         functionName: FUNCTION_NAMES_MATH.ASIN,
         functionType: FunctionType.Math,
@@ -386,6 +387,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             },
         ],
     },
+
     {
         functionName: FUNCTION_NAMES_MATH.COS,
         functionType: FunctionType.Math,

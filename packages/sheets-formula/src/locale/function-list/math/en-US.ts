@@ -29,7 +29,7 @@ export default {
         },
     },
     ACOS: {
-        description: 'Returns the arccosine, or inverse cosine, of a number. The arccosine is the angle whose cosine is number. The returned angle is given in radians in the range 0 (zero) to pi.',
+        description: 'Returns the arccosine, or inverse cosine, of a number. The arccosine is the angle whose cosine is the specified number. The returned angle is given in radians in the range 0 (zero) to pi.',
         abstract: 'Returns the arccosine of a number',
         links: [
             {
@@ -38,11 +38,11 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'The cosine of the angle you want and must be from -1 to 1.' },
+            number: { name: 'number', detail: 'The cosine of the angle you want. It must be from -1 to 1.' },
         },
     },
     ACOSH: {
-        description: 'Returns the inverse hyperbolic cosine of a number. The number must be greater than or equal to 1. The inverse hyperbolic cosine is the value whose hyperbolic cosine is number, so ACOSH(COSH(number)) equals number.',
+        description: 'Returns the inverse hyperbolic cosine of a number. The number must be greater than or equal to 1. The inverse hyperbolic cosine is the value whose hyperbolic cosine is the specified number, so ACOSH(COSH(number)) equals the specified number.',
         abstract: 'Returns the inverse hyperbolic cosine of a number',
         links: [
             {
@@ -66,7 +66,7 @@ export default {
         functionParameter: {
             number: {
                 name: 'number',
-                detail: 'Number is the cotangent of the angle you want. This must be a real number.',
+                detail: 'The cotangent of the angle you want. This must be a real number.',
             },
         },
     },
@@ -80,10 +80,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The real number for which you want to calculate the hyperbolic arccotangent.' },
+            number2: { name: 'number2', detail: 'Optional. A second real number.' },
         },
-    },
+    },    
     AGGREGATE: {
         description: 'Returns an aggregate in a list or database',
         abstract: 'Returns an aggregate in a list or database',
@@ -113,7 +113,7 @@ export default {
         },
     },
     ASIN: {
-        description: 'Returns the arcsine of a number',
+        description: 'Returns the arcsine, or inverse sine, of a number. The arcsine is the angle whose sine is number. The returned angle is given in radians in the range -π/2 to π/2.',
         abstract: 'Returns the arcsine of a number',
         links: [
             {
@@ -122,10 +122,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The sine of the angle you want and must be from -1 to 1.' },
+            number2: { name: 'number2', detail: 'Optional. A second number that specifies the sine of the angle you want and must be from -1 to 1.' },
         },
-    },
+    },    
     ASINH: {
         description: 'Returns the inverse hyperbolic sine of a number',
         abstract: 'Returns the inverse hyperbolic sine of a number',
@@ -136,8 +136,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The hyperbolic sine of the angle you want.' },
+            number2: { name: 'number2', detail: 'Optional. A second number that specifies the hyperbolic sine of the angle you want.' },
         },
     },
     ATAN: {
@@ -150,8 +150,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The tangent of the angle you want.' },
+            number2: { name: 'number2', detail: 'Optional. A second number that specifies the tangent of the angle you want.' },
         },
     },
     ATAN2: {
@@ -164,10 +164,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The y-coordinate of the point.' },
+            number2: { name: 'number2', detail: 'The x-coordinate of the point.' },
         },
-    },
+    },    
     ATANH: {
         description: 'Returns the inverse hyperbolic tangent of a number',
         abstract: 'Returns the inverse hyperbolic tangent of a number',
@@ -276,8 +276,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The angle in radians for which you want to calculate the cosine.' },
+            number2: { name: 'number2', detail: 'Optional. A second angle.' },
         },
     },
     COSH: {
@@ -290,8 +290,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The real number for which you want to calculate the hyperbolic cosine.' },
+            number2: { name: 'number2', detail: 'Optional. A second real number.' },
         },
     },
     COT: {
@@ -304,8 +304,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The angle in radians for which you want to calculate the cotangent.' },
+            number2: { name: 'number2', detail: 'Optional. A second angle.' },
         },
     },
     COTH: {
@@ -318,8 +318,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The real number for which you want to calculate the hyperbolic cotangent.' },
+            number2: { name: 'number2', detail: 'Optional. A second real number.' },
         },
     },
     CSC: {
@@ -332,8 +332,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The angle in radians for which you want to calculate the cosecant.' },
+            number2: { name: 'number2', detail: 'Optional. A second angle.' },
         },
     },
     CSCH: {
@@ -346,10 +346,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The real number for which you want to calculate the hyperbolic cosecant.' },
+            number2: { name: 'number2', detail: 'Optional. A second real number.' },
         },
-    },
+    },    
     DECIMAL: {
         description: 'Converts a text representation of a number in a given base into a decimal number',
         abstract: 'Converts a text representation of a number in a given base into a decimal number',

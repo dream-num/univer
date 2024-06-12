@@ -17,7 +17,7 @@
 import { cellToRange, type IRange } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 
-import { generateNullCell, generateNullCellValue } from '../utils';
+import { generateNullCell, generateNullCellStyle, generateNullCellValue } from '../utils';
 
 describe('Test utils', () => {
     it('Test generateNullCell', () => {
@@ -34,8 +34,8 @@ describe('Test utils', () => {
     });
 
     it('Test generateNullCellValue', () => {
-        const range1: IRange[] = [cellToRange(0, 0), cellToRange(1, 1)];
-        const result = generateNullCellValue(range1);
+        const range: IRange[] = [cellToRange(0, 0), cellToRange(1, 1)];
+        const result = generateNullCellValue(range);
         expect(result).toEqual({
             0: {
                 0: {
@@ -52,6 +52,23 @@ describe('Test utils', () => {
                      f: null,
                      si: null,
                      custom: null,
+                },
+            },
+        });
+    });
+
+    it('Test generateNullCellStyle', () => {
+        const range: IRange[] = [cellToRange(0, 0), cellToRange(1, 1)];
+        const result = generateNullCellStyle(range);
+        expect(result).toEqual({
+            0: {
+                0: {
+                    s: null,
+                },
+            },
+            1: {
+                1: {
+                    s: null,
                 },
             },
         });

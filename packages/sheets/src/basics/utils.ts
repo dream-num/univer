@@ -95,3 +95,23 @@ export function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveTy
 
     return cellValue.clone();
 }
+
+// Generate cellValue from range and set s to null
+export function generateNullCellStyle(ranges: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
+    const cellValue = new ObjectMatrix<ICellData>();
+
+    ranges.forEach((range: IRange) => {
+        const { startRow, startColumn, endRow, endColumn } = range;
+
+        for (let i = startRow; i <= endRow; i++) {
+            for (let j = startColumn; j <= endColumn; j++) {
+                cellValue.setValue(i, j, {
+                    s: null,
+                });
+            }
+        }
+    });
+
+    return cellValue.clone();
+}
+

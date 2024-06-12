@@ -65,6 +65,16 @@ export class HTTPProgress implements IHTTPEvent {
 
     constructor(
         /**
+         * Total number of bytes to download. Depending on the request or
+         * response, this may not be computable and thus may not be present.
+         */
+        public readonly total: number | undefined,
+
+        /**
+         * Number of bytes downloaded.
+         */
+        public readonly loaded: number,
+        /**
          * The partial response body as downloaded so far.
          *
          * Only present if the responseType was `text`.

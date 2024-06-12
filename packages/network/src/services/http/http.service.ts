@@ -42,6 +42,9 @@ export interface IRequestParams {
 
     withCredentials?: boolean;
 
+    /**
+     * Should report progress.
+     */
     reportProgress?: boolean;
 }
 

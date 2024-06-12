@@ -26,8 +26,6 @@ import { HTTPHeaders } from '../headers';
 import { HTTPStatusCode } from '../http';
 import type { IHTTPImplementation } from './implementation';
 
-// CREDIT: This implementation is inspired by (and uses lots of code from) Angular's HttpClient implementation.
-
 /**
  * An HTTP implementation using Fetch API. This implementation can both run in browser and Node.js.
  *
@@ -106,6 +104,7 @@ export class FetchHTTPImplementation implements IHTTPImplementation {
     ): Promise<HTTPResponseBody> {
         const chunks: Uint8Array[] = [];
         const reader = response.body!.getReader();
+        const contentLength = response.headers.get('content-length');
 
         let receivedLength = 0;
 
@@ -123,7 +122,11 @@ export class FetchHTTPImplementation implements IHTTPImplementation {
 
             if (reportProgress && responseType === 'text') {
                 partialText = (partialText ?? '') + (decoder ??= new TextDecoder()).decode(value, { stream: true });
-                subscriber.next(new HTTPProgress(partialText));
+                subscriber.next(new HTTPProgress(
+                    contentLength ? Number.parseInt(contentLength, 10) : undefined,
+                    receivedLength,
+                    partialText
+                ));
             }
         }
 

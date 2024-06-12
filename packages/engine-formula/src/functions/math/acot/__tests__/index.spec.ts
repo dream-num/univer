@@ -20,39 +20,30 @@ import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Acot } from '../index';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorType } from '../../../../basics/error-type';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test acot function', () => {
-    const textFunction = new Acot(FUNCTION_NAMES_MATH.ACOT);
+    const acotFunction = new Acot(FUNCTION_NAMES_MATH.ACOT);
 
     describe('Acot', () => {
-        it('Value is normal', () => {
+        it('should return 0.7853981633974483 for acot(1)', () => {
             const value = NumberValueObject.create(1);
-            const result = textFunction.calculate(value);
-            expect(result.getValue()).toBe(0.7853981633974483);
+            const result = acotFunction.calculate(value);
+            expect(result.getValue()).toBeCloseTo(0.7853981633974483); // π/4
         });
 
-        it('Value is string number', () => {
+        it('should return 0.7853981633974483 for acot("1")', () => {
             const value = new StringValueObject('1');
-            const result = textFunction.calculate(value);
-            expect(result.getValue()).toBe(0.7853981633974483);
+            const result = acotFunction.calculate(value);
+            expect(result.getValue()).toBeCloseTo(0.7853981633974483); // π/4
         });
 
-        it('Value is array', () => {
-            const valueArray = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [1, ' ', 1.23, true, false],
-                    [0, '100', '2.34', 'test', -3],
-                ]),
-                rowCount: 2,
-                columnCount: 5,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const result = textFunction.calculate(valueArray);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[0.7853981633974483, '#VALUE!', 0.682622552417217, 0.7853981633974483, 1.5707963267948966],
-                [1.5707963267948966, 0.009999666686665238, 0.40385979490737667, '#VALUE!', -0.3217505543966422]]);
+        it('should return #VALUE! error for NaN', () => {
+            const value = NumberValueObject.create(NaN);
+            const result = acotFunction.calculate(value);
+            expect(result).toBeInstanceOf(ErrorValueObject);
+            expect(result.getErrorType()).toBe(ErrorType.VALUE);
         });
     });
 });

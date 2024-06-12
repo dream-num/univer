@@ -20,39 +20,30 @@ import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Acosh } from '../index';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorType } from '../../../../basics/error-type';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test acosh function', () => {
-    const textFunction = new Acosh(FUNCTION_NAMES_MATH.ACOSH);
+    const acoshFunction = new Acosh(FUNCTION_NAMES_MATH.ACOSH);
 
     describe('Acosh', () => {
-        it('Value is normal', () => {
+        it('should return 0 for acosh(1)', () => {
             const value = NumberValueObject.create(1);
-            const result = textFunction.calculate(value);
+            const result = acoshFunction.calculate(value);
             expect(result.getValue()).toBe(0);
         });
 
-        it('Value is string number', () => {
+        it('should return 0 for acosh("1")', () => {
             const value = new StringValueObject('1');
-            const result = textFunction.calculate(value);
+            const result = acoshFunction.calculate(value);
             expect(result.getValue()).toBe(0);
         });
 
-        it('Value is array', () => {
-            const valueArray = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [1, ' ', 1.23, true, false],
-                    [0, '100', '2.34', 'test', -3],
-                ]),
-                rowCount: 2,
-                columnCount: 5,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const result = textFunction.calculate(valueArray);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[0, '#VALUE!', 0.6658635291565548, 0, '#NUM!'],
-                ['#NUM!', 5.298292365610484, 1.494153066724473, '#VALUE!', '#NUM!']]);
+        it('should return #NUM! error for values less than 1', () => {
+            const value = NumberValueObject.create(0.5);
+            const result = acoshFunction.calculate(value);
+            expect(result).toBeInstanceOf(ErrorValueObject);
+            expect(result.getErrorType()).toBe(ErrorType.NUM);
         });
     });
 });

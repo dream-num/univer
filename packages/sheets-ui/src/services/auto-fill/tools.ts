@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
-import { CellValueType, Direction, ObjectMatrix, Tools } from '@univerjs/core';
+import type { ICellData, IRange, Nullable } from '@univerjs/core';
+import { CellValueType, Direction, Tools } from '@univerjs/core';
 
 export const chnNumChar = { 零: 0, 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
 export const chnNumChar2 = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -780,24 +780,4 @@ export function getAutoFillRepeatRange(sourceRange: IRange, targetRange: IRange)
     }
 
     return repeats;
-}
-
-// Generate cellValue from range and set v/p/f/si to null
-export function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
-    const cellValue = new ObjectMatrix<ICellData>();
-    range.forEach((r: IRange) => {
-        const { startRow, startColumn, endRow, endColumn } = r;
-        for (let i = startRow; i <= endRow; i++) {
-            for (let j = startColumn; j <= endColumn; j++) {
-                cellValue.setValue(i, j, {
-                    v: null,
-                    p: null,
-                    f: null,
-                    si: null,
-                });
-            }
-        }
-    });
-
-    return cellValue.getData();
 }

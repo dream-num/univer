@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import type { ICellData, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
+import { ObjectMatrix } from '@univerjs/core';
+import type { Nullable } from 'vitest';
+
 export const groupByKey = <T = Record<string, unknown>>(arr: T[], key: string, blankKey = '') => {
     return arr.reduce(
         (result, current) => {
@@ -47,3 +51,47 @@ export const createUniqueKey = (initValue = 0) => {
         return _initValue++;
     };
 };
+
+/**
+ * Generate cellValue from range and set null
+ * @param range
+ * @returns
+ */
+export function generateNullCell(range: IRange[]): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
+    const cellValue = new ObjectMatrix<Nullable<ICellData>>();
+    range.forEach((range: IRange) => {
+        const { startRow, startColumn, endRow, endColumn } = range;
+        for (let i = startRow; i <= endRow; i++) {
+            for (let j = startColumn; j <= endColumn; j++) {
+                cellValue.setValue(i, j, null);
+            }
+        }
+    });
+
+    return cellValue.clone();
+}
+
+/**
+ * Generate cellValue from range and set v/p/f/si/custom to null
+ * @param range
+ * @returns
+ */
+export function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
+    const cellValue = new ObjectMatrix<ICellData>();
+    range.forEach((range: IRange) => {
+        const { startRow, startColumn, endRow, endColumn } = range;
+        for (let i = startRow; i <= endRow; i++) {
+            for (let j = startColumn; j <= endColumn; j++) {
+                cellValue.setValue(i, j, {
+                    v: null,
+                    p: null,
+                    f: null,
+                    si: null,
+                    custom: null,
+                });
+            }
+        }
+    });
+
+    return cellValue.clone();
+}

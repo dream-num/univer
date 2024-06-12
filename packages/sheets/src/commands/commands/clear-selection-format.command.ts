@@ -64,7 +64,7 @@ export const ClearSelectionFormatCommand: ICommand = {
         const clearMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: generateNullCellValue(selections),
+            cellValue: generateNullCellStyle(selections),
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,
@@ -105,7 +105,7 @@ export const ClearSelectionFormatCommand: ICommand = {
 };
 
 // Generate cellValue from range and set s to null
-export function generateNullCellValue(ranges: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
+export function generateNullCellStyle(ranges: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
     const cellValue = new ObjectMatrix<ICellData>();
 
     ranges.forEach((range: IRange) => {

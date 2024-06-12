@@ -23,18 +23,11 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';
 import { InputNumber, Radio, RadioGroup } from '@univerjs/design';
+import { TextWrappingStyle, UpdateDocDrawingWrappingStyleCommand } from '../../commands/commands/update-doc-drawing.command';
 import styles from './index.module.less';
 
 export interface IDocDrawingTextWrapProps {
     drawings: IDrawingParam[];
-}
-
-enum TextWrappingStyle {
-    INLINE = 'inline',
-    BEHIND_TEXT = 'behindText',
-    IN_FRONT_OF_TEXT = 'inFrontOfText',
-    WRAP_SQUARE = 'wrapSquare',
-    WRAP_TOP_AND_BOTTOM = 'wrapTopAndBottom',
 }
 
 interface IDistToText {
@@ -69,28 +62,27 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
     const [wrappingStyle, setWrappingStyle] = useState(TextWrappingStyle.INLINE);
 
     function handleWrappingStyleChange(value: number | string | boolean) {
-        // console.log(value);
-        // console.log(drawings);
         setWrappingStyle(value as TextWrappingStyle);
 
-        // const focusDrawings = drawingManagerService.getFocusDrawings();
-        // if (focusDrawings.length === 0) {
-        //     return;
-        // }
+        const focusDrawings = drawingManagerService.getFocusDrawings();
+        if (focusDrawings.length === 0) {
+            return;
+        }
 
-        // const updateParams = focusDrawings.map((drawing) => {
-        //     return {
-        //         unitId: drawing.unitId,
-        //         subUnitId: drawing.subUnitId,
-        //         drawingId: drawing.drawingId,
-        //         anchorType: value,
-        //     };
-        // });
+        const drawings = focusDrawings.map((drawing) => {
+            return {
+                unitId: drawing.unitId,
+                subUnitId: drawing.subUnitId,
+                drawingId: drawing.drawingId,
+            };
+        });
 
-        // commandService.executeCommand(SetDocDrawingCommand.id, {
-        //     unitId: focusDrawings[0].unitId,
-        //     drawings: updateParams,
-        // });
+        commandService.executeCommand(UpdateDocDrawingWrappingStyleCommand.id, {
+            unitId: focusDrawings[0].unitId,
+            subUnitId: focusDrawings[0].unitId,
+            drawings,
+            wrappingStyle: value as TextWrappingStyle,
+        });
     }
 
     const [wrapText, setWrapText] = useState('');

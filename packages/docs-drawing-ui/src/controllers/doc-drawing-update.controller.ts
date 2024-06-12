@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
-import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
@@ -175,6 +175,7 @@ export class DocDrawingUpdateController extends Disposable {
                 source,
                 transform: docDrawingPositionToTransform(docTransform),
                 docTransform,
+                behindDoc: BooleanNumber.FALSE,
                 title: '',
                 description: '',
                 layoutType: PositionedObjectLayoutType.INLINE,
@@ -222,11 +223,11 @@ export class DocDrawingUpdateController extends Disposable {
                 height: imageHeight,
             },
             positionH: {
-                relativeFrom: ObjectRelativeFromH.MARGIN,
+                relativeFrom: ObjectRelativeFromH.PAGE,
                 posOffset: position.left,
             },
             positionV: {
-                relativeFrom: ObjectRelativeFromV.PAGE,
+                relativeFrom: ObjectRelativeFromV.MARGIN,
                 posOffset: position.top,
             },
             angle: 0,

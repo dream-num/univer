@@ -19,7 +19,7 @@ import { Direction, FOCUSING_COMMON_DRAWINGS } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode } from '@univerjs/ui';
 import { type IMoveDrawingsCommandParams, MoveDocDrawingsCommand } from '../../commands/commands/move-drawings.command';
-import { DeleteDocDrawingsCommand } from '../../commands/commands/delete-doc-drawings.command';
+import { DeleteDocDrawingsCommand } from '../../commands/commands/delete-doc-drawing.command';
 
 export function whenDocDrawingFocused(contextService: IContextService): boolean {
     return (

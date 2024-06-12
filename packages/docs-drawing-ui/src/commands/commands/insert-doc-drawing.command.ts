@@ -29,7 +29,7 @@ import { getRetainAndDeleteFromReplace, RichTextEditingMutation, TextSelectionMa
 import type { IInsertDrawingCommandParams } from './interfaces';
 
 /**
- * The command to insert new defined name
+ * The command to insert new drawings
  */
 export const InsertDocDrawingCommand: ICommand = {
     id: 'doc.command.insert-doc-image',

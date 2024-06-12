@@ -165,9 +165,10 @@ export function getSetCellFormulaMutations(
         const originalFormulaId = value.si || '';
 
         let valueObject: ICellDataWithSpanInfo = {};
-        // Paste the formula only, you also need to process some regular values
+        // Paste the formula only, you also need to process some regular values, but style information is not needed
         if (isSpecialPaste) {
             valueObject = Tools.deepClone(value);
+            valueObject.s = null;
         }
 
         if (!copyRowLength || !copyColumnLength) {
@@ -194,8 +195,6 @@ export function getSetCellFormulaMutations(
                 valueObject.f = shiftedFormula;
                 valueObject.v = null;
                 valueObject.p = null;
-
-                // TODO handle as normal formula string
             } else {
                 valueObject.si = originalFormulaId;
                 valueObject.f = null;

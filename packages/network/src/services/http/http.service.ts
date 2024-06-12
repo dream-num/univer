@@ -166,7 +166,7 @@ export class HTTPService extends Disposable {
                 }
             ),
             catchError((error) => {
-                throw new Error(`Failed to fetch SSE: ${error}`);
+                return of([error.message]);
             })
         );
     }

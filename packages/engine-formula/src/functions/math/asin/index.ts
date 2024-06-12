@@ -20,7 +20,7 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Abs extends BaseFunction {
+export class Asin extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
@@ -39,26 +39,26 @@ export class Abs extends BaseFunction {
                 if (currentValue.isError()) {
                     return currentValue;
                 }
-                return calculateAbs(currentValue);
+                return calculateAsin(currentValue);
             });
         }
 
-        return calculateAbs(variant);
+        return calculateAsin(variant);
     }
 }
 
-function calculateAbs(variant: BaseValueObject) {
+function calculateAsin(variant: BaseValueObject) {
     let value = variant.getValue();
 
     if (variant.isBoolean()) {
         value = value ? 1 : 0;
     }
 
-    if (typeof value !== 'number') {
-        return ErrorValueObject.create(ErrorType.VALUE);
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < -1 || value > 1) {
+        return ErrorValueObject.create(ErrorType.NUM); // Return #NUM! error if value is out of range
     }
 
-    const result = Math.abs(value);
+    const result = Math.asin(value);
 
     if (Number.isNaN(result)) {
         return ErrorValueObject.create(ErrorType.VALUE);

@@ -20,7 +20,7 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Abs extends BaseFunction {
+export class Asinh extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
@@ -34,31 +34,31 @@ export class Abs extends BaseFunction {
             return variant;
         }
 
-        if (variant.isArray()) {
-            return variant.map((currentValue) => {
+        if ((variant as BaseValueObject).isArray()) {
+            return (variant as BaseValueObject).map((currentValue) => {
                 if (currentValue.isError()) {
                     return currentValue;
                 }
-                return calculateAbs(currentValue);
+                return asinh(currentValue as BaseValueObject);
             });
         }
 
-        return calculateAbs(variant);
+        return asinh(variant as BaseValueObject);
     }
 }
 
-function calculateAbs(variant: BaseValueObject) {
-    let value = variant.getValue();
+function asinh(num: BaseValueObject) {
+    let currentValue = num.getValue();
 
-    if (variant.isBoolean()) {
-        value = value ? 1 : 0;
+    if (num.isBoolean()) {
+        currentValue = currentValue ? 1 : 0;
     }
 
-    if (typeof value !== 'number') {
+    if (!Number.isFinite(currentValue)) {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
-    const result = Math.abs(value);
+    const result = Math.asinh(Number(currentValue));
 
     if (Number.isNaN(result)) {
         return ErrorValueObject.create(ErrorType.VALUE);

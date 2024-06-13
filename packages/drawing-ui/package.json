@@ -67,7 +67,7 @@
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "clsx": ">=2.0.0",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0"
     },
@@ -81,7 +81,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "clsx": "^2.1.1",
         "less": "^4.2.0",
         "react": "18.3.1",

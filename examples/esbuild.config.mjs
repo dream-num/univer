@@ -13,6 +13,7 @@ import vue from 'esbuild-plugin-vue3';
 const nodeModules = path.resolve(process.cwd(), './node_modules');
 
 const args = minimist(process.argv.slice(2));
+const isE2E = !!args.e2e;
 
 // User should also config their bunlder to build monaco editor's resources for web worker.
 const monacoEditorEntryPoints = ['vs/language/typescript/ts.worker.js', 'vs/editor/editor.worker.js'];
@@ -99,7 +100,7 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
         'process.env.GIT_COMMIT_HASH': `"${gitCommitHash}"`,
         'process.env.GIT_REF_NAME': `"${gitRefName}"`,
         'process.env.BUILD_TIME': `"${new Date().toISOString()}"`,
-        'process.env.IS_E2E': args.e2e ? 'true' : 'false',
+        'process.env.IS_E2E': isE2E ? 'true' : 'false',
     },
 });
 
@@ -109,7 +110,7 @@ if (args.watch) {
 
     const { port } = await ctx.serve({
         servedir: './local',
-        port: 3002,
+        port: isE2E ? 3000 : 3002,
     });
 
     const url = `http://localhost:${port}`;

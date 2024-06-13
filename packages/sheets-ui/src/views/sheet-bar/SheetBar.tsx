@@ -21,7 +21,6 @@ import { InsertSheetCommand, WorkbookCreateSheetPermission, WorkbookEditablePerm
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { map } from 'rxjs';
 import { useObservable } from '@univerjs/ui';
 import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';
@@ -35,7 +34,6 @@ const SCROLL_WIDTH = 100;
 export const SheetBar = () => {
     const [leftScrollState, setLeftScrollState] = useState(true);
     const [rightScrollState, setRightScrollState] = useState(true);
-    const [editPermission, setEditPermission] = useState(false);
 
     const commandService = useDependency(ICommandService);
     const sheetBarService = useDependency(ISheetBarService);
@@ -48,6 +46,9 @@ export const SheetBar = () => {
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
 
+    const workbookEditablePermission = useObservable(permissionService.getPermissionPoint$(new WorkbookEditablePermission(unitId)?.id));
+    const workbookCreateSheetPermission = useObservable(permissionService.getPermissionPoint$(new WorkbookCreateSheetPermission(unitId)?.id));
+
     useEffect(() => {
         const subscription = sheetBarService.scroll$.subscribe((state: IScrollState) => {
             updateScrollButtonState(state);
@@ -57,20 +58,6 @@ export const SheetBar = () => {
             subscription.unsubscribe();
         };
     }, []);
-
-    useEffect(() => {
-        const composePermission$ = permissionService.composePermission$([new WorkbookEditablePermission(unitId)?.id, new WorkbookCreateSheetPermission(unitId)?.id])?.pipe(
-            map((permissions) => permissions?.every((permission) => permission?.value ?? false))
-        );
-
-        const subscription = composePermission$?.subscribe((permission) => {
-            setEditPermission(permission ?? false);
-        });
-
-        return () => {
-            subscription && subscription.unsubscribe();
-        };
-    }, [currentUser, permissionService, unitId]);
 
     const updateScrollButtonState = (state: IScrollState) => {
         const { leftEnd, rightEnd } = state;
@@ -98,7 +85,7 @@ export const SheetBar = () => {
         <div className={styles.sheetBar}>
             <div className={styles.sheetBarOptions}>
                 {/* Add sheet button */}
-                <SheetBarButton onClick={addSheet} disabled={!editPermission}>
+                <SheetBarButton onClick={addSheet} disabled={!(workbookCreateSheetPermission?.value && workbookEditablePermission?.value)}>
                     <IncreaseSingle />
                 </SheetBarButton>
                 {/* All sheets button */}

@@ -41,8 +41,8 @@ export class PermissionService extends Disposable implements IPermissionService 
             return false;
         }
         const permissionPoint = this._permissionPointMap.get(item.id);
-        if (permissionPoint && permissionPoint.getValue() === item.value) {
-            return true;
+        if (permissionPoint) {
+            throw new Error('PermissionPoint already exists');
         }
         this._permissionPointMap.set(item.id, new BehaviorSubject<IPermissionPoint<unknown>>(item));
         this._permissionPointUpdate$.next(item);

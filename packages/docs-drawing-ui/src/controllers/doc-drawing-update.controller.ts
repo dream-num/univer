@@ -49,7 +49,8 @@ export class DocDrawingUpdateController extends Disposable {
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManager: TextSelectionManagerService
     ) {
         super();
 
@@ -423,6 +424,8 @@ export class DocDrawingUpdateController extends Disposable {
                 } else {
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
                     this._docDrawingService.focusDrawing(params);
+                    // Need to remove text selections when focus drawings.
+                    this._textSelectionManager.replaceTextRanges([]);
                 }
             })
         );

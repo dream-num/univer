@@ -48,7 +48,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManager: TextSelectionManagerService
     ) {
         super();
 
@@ -295,6 +296,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 } else {
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
                     this._docDrawingService.focusDrawing(params);
+                    // Need to remove text selections when focus drawings.
+                    this._textSelectionManager.replaceTextRanges([]);
                 }
             })
         );

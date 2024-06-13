@@ -14,31 +14,25 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import type { CustomRangeType, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
+import { IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { serializeTextRange, TextSelectionManagerService } from '../services/text-selection-manager.service';
-import { getRetainAndDeleteFromReplace } from './retain-delete-params';
 
 interface IAddCustomRangeParam {
     unitId: string;
-    body: IDocumentBody;
     range: ITextRange;
-    customRange: ICustomRange;
     segmentId?: string;
+    textRanges: ITextRangeWithStyle[];
+    rangeId: string;
+    rangeType: CustomRangeType;
 }
 
-export function addCustomRangeFactory(accessor: IAccessor, param: IAddCustomRangeParam) {
-    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-    const selections = textSelectionManagerService.getSelections()?.slice(0, 1);
-
-    if (!Array.isArray(selections) || selections.length === 0) {
-        return false;
-    }
-
-    const { unitId, range, customRange, segmentId } = param;
+export function addCustomRangeFactory(param: IAddCustomRangeParam) {
+    const { unitId, range, rangeId, rangeType, segmentId, textRanges } = param;
     const { startOffset, endOffset } = range;
 
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -46,7 +40,7 @@ export function addCustomRangeFactory(accessor: IAccessor, param: IAddCustomRang
         params: {
             unitId,
             actions: [],
-            textRanges: selections.map(serializeTextRange),
+            textRanges,
         },
     };
 
@@ -57,7 +51,8 @@ export function addCustomRangeFactory(accessor: IAccessor, param: IAddCustomRang
         dataStream: '',
         customRanges: [
             {
-                ...customRange,
+                rangeId,
+                rangeType,
                 startIndex: startOffset,
                 endIndex: endOffset + 2,
             },
@@ -97,8 +92,42 @@ export function addCustomRangeFactory(accessor: IAccessor, param: IAddCustomRang
     });
 
     doMutation.params.actions = jsonX.editOp(textX.serialize());
+    return doMutation;
+}
 
-    return {
-        redos: [doMutation],
-    };
+interface IAddCustomRangeFactoryParam {
+    segmentId?: string;
+    rangeId: string;
+    rangeType: CustomRangeType;
+}
+
+export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAddCustomRangeFactoryParam) {
+    const { segmentId, rangeId, rangeType } = param;
+    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+
+    const selections = textSelectionManagerService.getSelections()?.slice(0, 1);
+
+    if (!Array.isArray(selections) || selections.length === 0) {
+        return false;
+    }
+
+    const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+    if (!documentDataModel) {
+        return false;
+    }
+
+    const unitId = documentDataModel.getUnitId();
+    const textRanges = selections.map(serializeTextRange);
+
+    const doMutation = addCustomRangeFactory({
+        unitId,
+        range: selections[0] as ITextRange,
+        rangeId,
+        rangeType,
+        textRanges,
+        segmentId,
+    });
+
+    return doMutation;
 }

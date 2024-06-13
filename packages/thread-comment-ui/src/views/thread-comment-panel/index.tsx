@@ -38,10 +38,22 @@ export interface IThreadCommentPanelProps {
     sortComments?: (comments: IThreadComment[]) => IThreadComment[];
     onItemLeave?: (comment: IThreadComment) => void;
     onItemEnter?: (comment: IThreadComment) => void;
+    showFilter?: boolean;
 }
 
 export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
-    const { unitId, subUnitId$, type, onAdd, getSubUnitName, onResolve, sortComments, onItemLeave, onItemEnter } = props;
+    const {
+        unitId,
+        subUnitId$,
+        type,
+        onAdd,
+        getSubUnitName,
+        onResolve,
+        sortComments,
+        onItemLeave,
+        onItemEnter,
+        showFilter = true,
+    } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
     const localeService = useDependency(LocaleService);
@@ -119,44 +131,48 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
 
     return (
         <div className={styles.threadCommentPanel}>
-            <div className={styles.threadCommentPanelForms}>
-                <Select
-                    borderless
-                    value={unit}
-                    onChange={(e) => setUnit(e)}
-                    options={[
-                        {
-                            value: 'current',
-                            label: localeService.t('threadCommentUI.filter.sheet.current'),
-                        }, {
-                            value: 'all',
-                            label: localeService.t('threadCommentUI.filter.sheet.all'),
-                        },
-                    ]}
-                />
-                <Select
-                    borderless
-                    value={status}
-                    onChange={(e) => setStatus(e)}
-                    options={[
-                        {
-                            value: 'all',
-                            label: localeService.t('threadCommentUI.filter.status.all'),
-                        }, {
-                            value: 'resolved',
-                            label: localeService.t('threadCommentUI.filter.status.resolved'),
-                        },
-                        {
-                            value: 'unsolved',
-                            label: localeService.t('threadCommentUI.filter.status.unsolved'),
-                        },
-                        {
-                            value: 'concern_me',
-                            label: localeService.t('threadCommentUI.filter.status.concernMe'),
-                        },
-                    ]}
-                />
-            </div>
+            {showFilter
+                ? (
+                    <div className={styles.threadCommentPanelForms}>
+                        <Select
+                            borderless
+                            value={unit}
+                            onChange={(e) => setUnit(e)}
+                            options={[
+                                {
+                                    value: 'current',
+                                    label: localeService.t('threadCommentUI.filter.sheet.current'),
+                                }, {
+                                    value: 'all',
+                                    label: localeService.t('threadCommentUI.filter.sheet.all'),
+                                },
+                            ]}
+                        />
+                        <Select
+                            borderless
+                            value={status}
+                            onChange={(e) => setStatus(e)}
+                            options={[
+                                {
+                                    value: 'all',
+                                    label: localeService.t('threadCommentUI.filter.status.all'),
+                                }, {
+                                    value: 'resolved',
+                                    label: localeService.t('threadCommentUI.filter.status.resolved'),
+                                },
+                                {
+                                    value: 'unsolved',
+                                    label: localeService.t('threadCommentUI.filter.status.unsolved'),
+                                },
+                                {
+                                    value: 'concern_me',
+                                    label: localeService.t('threadCommentUI.filter.status.concernMe'),
+                                },
+                            ]}
+                        />
+                    </div>
+                )
+                : null}
             {statuedComments?.map((comment) => (
                 <ThreadCommentTree
                     prefix={prefix}
@@ -170,12 +186,15 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     showHighlight={activeCommentId?.commentId === comment.id}
                     onClick={() => {
                         shouldScroll.current = false;
-                        commandService.executeCommand(SetActiveCommentOperation.id, {
-                            unitId: comment.unitId,
-                            subUnitId: comment.subUnitId,
-                            commentId: comment.id,
-                            temp: true,
-                        });
+                        commandService.executeCommand(
+                            SetActiveCommentOperation.id,
+                            {
+                                unitId: comment.unitId,
+                                subUnitId: comment.subUnitId,
+                                commentId: comment.id,
+                                temp: true,
+                            }
+                        );
                     }}
                     onClose={() => onResolve?.(comment.id)}
                     onMouseEnter={() => onItemEnter?.(comment)}

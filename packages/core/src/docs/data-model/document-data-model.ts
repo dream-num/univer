@@ -233,6 +233,10 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         return this.snapshot.drawingsOrder;
     }
 
+    getCustomRanges() {
+        return this.snapshot.body?.customRanges;
+    }
+
     getRev(): number {
         return this.snapshot.rev ?? 1;
     }

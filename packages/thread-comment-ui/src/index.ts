@@ -16,7 +16,7 @@
 
 export { UniverThreadCommentUIPlugin } from './plugin';
 export { ToggleSheetCommentPanelOperation, SetActiveCommentOperation, type ISetActiveCommentOperationParams } from './commands/operations/comment.operations';
-export { ThreadCommentPanelService } from './services/thread-comment-panel.service';
+export { ThreadCommentPanelService, type ActiveCommentInfo } from './services/thread-comment-panel.service';
 export { ThreadCommentPanel } from './views/thread-comment-panel';
 export type { IThreadCommentPanelProps } from './views/thread-comment-panel';
 export { ThreadCommentTree } from './views/thread-comment-tree';

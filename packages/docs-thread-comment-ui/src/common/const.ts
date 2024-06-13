@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
-export { UniverDocsCommentUIPlugin } from './plugin';
+export const PLUGIN_NAME = 'DOC_THREAD_COMMENT_UI_PLUGIN';
+
+export const DEFAULT_DOC_SUBUNIT_ID = 'default_doc';

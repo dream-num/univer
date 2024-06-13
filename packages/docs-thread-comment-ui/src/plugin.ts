@@ -14,3 +14,36 @@
  * limitations under the License.
  */
 
+import { Plugin, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
+import { PLUGIN_NAME } from './common/const';
+import type { IDocThreadCommentUIConfig } from './controllers/doc-thread-comment-ui.controller';
+import { DocThreadCommentUIController } from './controllers/doc-thread-comment-ui.controller';
+import { DocThreadCommentPanelService } from './services/doc-thread-comment-panel.service';
+
+export class UniverDocsCommentUIPlugin extends Plugin {
+    static override pluginName = PLUGIN_NAME;
+    static override type = UniverInstanceType.UNIVER_DOC;
+
+    constructor(
+        private _config: IDocThreadCommentUIConfig = { menu: {} },
+        @Inject(Injector) protected _injector: Injector
+    ) {
+        super();
+    }
+
+    override onStarting(injector: Injector): void {
+        ([
+            [
+                DocThreadCommentUIController,
+                {
+                    useFactory: () => this._injector.createInstance(DocThreadCommentUIController, this._config),
+                },
+            ],
+            [DocThreadCommentPanelService],
+        ] as Dependency[]).forEach((dep) => {
+            injector.add(dep);
+        });
+    }
+}

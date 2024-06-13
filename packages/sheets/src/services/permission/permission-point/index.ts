@@ -48,6 +48,7 @@ export { WorkbookHistoryPermission } from './workbook/history';
 export { WorkbookViewPermission } from './workbook/view';
 export { WorkbookSharePermission } from './workbook/share';
 export { WorkbookCopyPermission } from './workbook/copy';
+export { WorkbookCopySheetPermission } from './workbook/copy-sheet';
 export { WorkbookManageCollaboratorPermission } from './workbook/manage-collaborator';
 
 export { RangeProtectionPermissionEditPoint } from './range/edit';

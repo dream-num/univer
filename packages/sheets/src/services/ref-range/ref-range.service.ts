@@ -161,6 +161,9 @@ export class RefRangeService extends Disposable {
                 const worksheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
                 const unitId = getUnitId(this._univerInstanceService);
                 const subUnitId = getSubUnitId(this._univerInstanceService);
+                if (!worksheet || !unitId || !subUnitId) {
+                    return { redos: [], undos: [], preRedos: [], preUndos: [] };
+                }
                 // eslint-disable-next-line max-lines-per-function
                 const getEffectsCbList = () => {
                     switch (command.id) {
@@ -365,6 +368,10 @@ export class RefRangeService extends Disposable {
     ): IDisposable => {
         const unitId = _unitId || getUnitId(this._univerInstanceService);
         const subUnitId = _subUnitId || getSubUnitId(this._univerInstanceService);
+        if (!unitId || !subUnitId) {
+            return toDisposable(() => {});
+        }
+
         const refRangeManagerId = getRefRangId(unitId, subUnitId);
         const rangeString = this._serializer.serialize(range);
 
@@ -400,7 +407,7 @@ function getUnitId(univerInstanceService: IUniverInstanceService) {
 }
 
 function getSubUnitId(univerInstanceService: IUniverInstanceService) {
-    return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();
+    return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
 }
 
 function getSelectionRanges(selectionManagerService: SelectionManagerService) {

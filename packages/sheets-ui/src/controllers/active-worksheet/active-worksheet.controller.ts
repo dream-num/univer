@@ -97,7 +97,7 @@ export class ActiveWorksheetController extends Disposable {
             return;
         }
 
-        const activeSheet = workbook.getActiveSheet().getSheetId();
+        const activeSheet = workbook.getActiveSheet()?.getSheetId();
         if (activeSheet !== subUnitId) {
             return;
         }
@@ -140,7 +140,7 @@ export class ActiveWorksheetController extends Disposable {
         }
 
         // The deleted sheet is not the currently active sheet, we don't have to do things.
-        const activeSheet = workbook.getRawActiveSheet();
+        const activeSheet = workbook.getActiveSheet();
         if (activeSheet) {
             return;
         }

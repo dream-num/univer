@@ -35,6 +35,10 @@ export function getAddPermissionHidden$(accessor: IAccessor) {
     ).pipe(
         map(() => {
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) {
+                return false;
+            }
+
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
             const subUnitRuleList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
@@ -72,6 +76,10 @@ export function getEditPermissionHidden$(accessor: IAccessor) {
     ).pipe(
         map(() => {
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) {
+                return false;
+            }
+
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
             const subUnitRuleList = rangeRuleModel.getSubunitRuleList(unitId, subUnitId);

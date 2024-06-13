@@ -169,6 +169,11 @@ export class ConditionalFormattingService extends Disposable {
                         const params = commandInfo.params as IRemoveSheetCommandParams;
                         const unitId = params.unitId || getUnitId(this._univerInstanceService);
                         const subUnitId = params.subUnitId || getSubUnitId(this._univerInstanceService);
+
+                        if (!subUnitId) {
+                            return { redos: [], undos: [] };
+                        }
+
                         const ruleList = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
                         if (!ruleList) {
                             return { redos: [], undos: [] };
@@ -402,4 +407,4 @@ export class ConditionalFormattingService extends Disposable {
 }
 
 const getUnitId = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-const getSubUnitId = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();
+const getSubUnitId = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();

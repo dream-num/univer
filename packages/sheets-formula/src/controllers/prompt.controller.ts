@@ -1142,7 +1142,7 @@ export class PromptController extends Disposable {
 
         return {
             unitId: workbook.getUnitId(),
-            sheetId: worksheet.getSheetId(),
+            sheetId: worksheet?.getSheetId() || '',
             skeleton,
         };
     }

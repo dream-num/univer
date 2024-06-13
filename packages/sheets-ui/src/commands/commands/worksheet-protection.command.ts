@@ -152,6 +152,11 @@ export const DeleteWorksheetProtectionFormSheetBarCommand: ICommand = {
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverType.UNIVER_SHEET)!;
         const worksheet = workbook?.getActiveSheet();
         const unitId = workbook.getUnitId();
+
+        if (!worksheet) {
+            return false;
+        }
+
         const subUnitId = worksheet.getSheetId();
 
         const rule = worksheetProtectionRuleModel.getRule(unitId, subUnitId);

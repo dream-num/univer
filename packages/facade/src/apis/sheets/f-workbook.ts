@@ -111,8 +111,12 @@ export class FWorkbook {
             unitId: this.id,
             subUnitId: this._workbook.getSheets()[this._workbook.getSheets().length - 1].getSheetId(),
         });
+        const worksheet = this._workbook.getActiveSheet();
+        if (!worksheet) {
+            throw new Error('No active sheet found');
+        }
 
-        return this._injector.createInstance(FWorksheet, this._workbook, this._workbook.getActiveSheet());
+        return this._injector.createInstance(FWorksheet, this._workbook, worksheet);
     }
 
     /**
@@ -172,8 +176,12 @@ export class FWorkbook {
             unitId,
             subUnitId,
         });
+        const worksheet = this._workbook.getActiveSheet();
+        if (!worksheet) {
+            throw new Error('No active sheet found');
+        }
 
-        return this._injector.createInstance(FWorksheet, this._workbook, this._workbook.getActiveSheet());
+        return this._injector.createInstance(FWorksheet, this._workbook, worksheet);
     }
 
     /**

@@ -127,6 +127,8 @@ export class RangeProtectionRefRangeService extends Disposable {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         if (workbook) {
             const sheet = workbook.getActiveSheet();
+            if (!sheet) return;
+
             registerRefRange(workbook.getUnitId(), sheet.getSheetId());
         }
     }

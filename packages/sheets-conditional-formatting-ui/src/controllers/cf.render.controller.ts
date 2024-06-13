@@ -53,6 +53,8 @@ export class SheetsCfRenderController extends Disposable {
             if (!workbook) return false;
 
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) return false;
+
             return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
         })).subscribe(markDirtySkeleton));
 
@@ -62,6 +64,8 @@ export class SheetsCfRenderController extends Disposable {
             if (!workbook) return false;
 
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) return false;
+
             return v.filter((item) => ['sort', 'delete'].includes(item.type) && item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
         })).subscribe(markDirtySkeleton));
 
@@ -72,6 +76,8 @@ export class SheetsCfRenderController extends Disposable {
             if (!workbook) return false;
 
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) return false;
+
             return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
         })).subscribe(markDirtySkeleton));
     }

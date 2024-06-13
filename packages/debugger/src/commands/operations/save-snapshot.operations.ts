@@ -54,6 +54,9 @@ export const SaveSnapshotOptions: ICommand = {
 
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return false;
+        }
         const snapshot = resourceLoaderService.saveWorkbook(workbook);
         const gitHash = process.env.GIT_COMMIT_HASH;
         const gitBranch = process.env.GIT_REF_NAME;

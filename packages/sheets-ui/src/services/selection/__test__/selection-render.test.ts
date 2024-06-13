@@ -199,7 +199,7 @@ describe('Test indirect', () => {
 
         const workbook = testBed.sheet;
 
-        const worksheet = workbook?.getActiveSheet();
+        const worksheet = workbook?.getActiveSheet()!;
 
         const config = worksheet.getConfig();
 

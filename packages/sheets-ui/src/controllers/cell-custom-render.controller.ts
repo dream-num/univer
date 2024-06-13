@@ -60,6 +60,11 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                     const { offsetX, offsetY } = evt;
                     const scene = currentRender.scene;
                     const worksheet = workbook.getActiveSheet();
+
+                    if (!worksheet) {
+                        return;
+                    }
+
                     const activeViewport = scene.getActiveViewportByCoord(
                         Vector2.FromArray([offsetX, offsetY])
                     );
@@ -107,7 +112,8 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                     const row = cellIndex.actualRow;
                     const col = cellIndex.actualCol;
                     const sortedRenders = renders.sort(sortRules);
-                    const subUnitId = workbook.getActiveSheet().getSheetId();
+                    const subUnitId = worksheet.getSheetId();
+
                     const info: ICellRenderContext = {
                         data: cellData,
                         style: skeleton.getsStyles().getStyleByCell(cellData),

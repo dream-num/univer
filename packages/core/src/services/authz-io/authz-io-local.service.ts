@@ -40,7 +40,7 @@ export class AuthzIoLocalService implements IAuthzIoService {
     }
 
     private _getRole(type: UnitRole) {
-        const user = this._userManagerService.currentUser;
+        const user = this._userManagerService.getCurrentUser();
         if (!user) {
             return false;
         }
@@ -83,14 +83,7 @@ export class AuthzIoLocalService implements IAuthzIoService {
             }
             case UnitObject.Worksheet: {
                 const params = config.worksheetObject!;
-                const user = this._userManagerService.currentUser;
                 this._permissionMap.set(id, { ...params, objectType: config.objectType });
-                // const actions = params.strategies.map((s) => {
-                //     return {
-                //         action: s.action,
-                //         allowed: isDevRole(user.userID, UnitRole.Owner) || s.role === UnitRole.Editor,
-                //     };
-                // });
             }
         }
 
@@ -115,7 +108,7 @@ export class AuthzIoLocalService implements IAuthzIoService {
     }
 
     async batchAllowed(config: IAllowedRequest[]): Promise<IBatchAllowedResponse['objectActions']> {
-        const user = this._userManagerService.currentUser;
+        const user = this._userManagerService.getCurrentUser();
         const defaultValue = config.map((item) => ({
             unitID: item.unitID,
             objectID: item.objectID,

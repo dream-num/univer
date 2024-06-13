@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ICellData, Nullable } from '@univerjs/core';
 import { SortType } from '../services/interface';
 import type { ICommonComparableCellValue } from './sheets-sort.controller';
 
@@ -109,5 +110,15 @@ export const compareString = (a1: ICommonComparableCellValue, a2: ICommonCompara
     }
 
     return null;
+};
+
+export const isNullValue = (cell: Nullable<ICellData>) => {
+    if (!cell) {
+        return true;
+    }
+    if (Object.keys(cell).length === 0) {
+        return true;
+    }
+    return false;
 };
 

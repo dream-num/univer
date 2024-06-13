@@ -23,7 +23,7 @@ import type { ICellValueCompareFn } from '../commands/sheets-reorder.command';
 import { ReorderRangeCommand } from '../commands/sheets-reorder.command';
 import { ReorderRangeMutation } from '../commands/sheets-reorder.mutation';
 import { SheetsSortService } from '../services/sheets-sort.service';
-import { compareNull, compareNumber, compareString } from './utils';
+import { compareNull, compareNumber, compareString, isNullValue } from './utils';
 
 export type ICommonComparableCellValue = number | string | null;
 
@@ -73,7 +73,7 @@ export class SheetsSortController extends Disposable {
     }
 
     private _getCommonValue(a: Nullable<ICellData>): ICommonComparableCellValue {
-        if (!a) {
+        if (isNullValue(a)) {
             return null;
         }
         if (a?.t === CellValueType.NUMBER) {
@@ -88,7 +88,7 @@ export class SheetsSortController extends Disposable {
         if (a?.t === CellValueType.FORCE_STRING) {
             return Number.parseFloat(`${a.v}`);
         }
-        return `${a.v}`;
+        return `${a?.v}`;
     }
 }
 

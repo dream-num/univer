@@ -137,8 +137,8 @@ export const ReorderRangeCommand: ICommand = {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: redos,
-                redoMutations: undos,
+                undoMutations: undos,
+                redoMutations: redos,
             });
             return true;
         }

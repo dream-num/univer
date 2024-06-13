@@ -217,6 +217,10 @@ export class SheetFindModel extends FindModel {
                 )
                 .subscribe(() => {
                     const activeSheet = this._workbook.getActiveSheet();
+                    if (!activeSheet) {
+                        return;
+                    }
+
                     const activeSheetId = activeSheet.getSheetId();
                     if (!this._matchesByWorksheet.has(activeSheetId)) {
                         return;
@@ -280,6 +284,7 @@ export class SheetFindModel extends FindModel {
 
         const checkShouldFindInSelections = (): boolean => {
             const currentWorksheet = this._workbook.getActiveSheet();
+            if (!currentWorksheet) return false;
             const currentSelections = this._selectionManagerService.getSelections();
             const shouldFindInSelections = currentSelections?.some((selection) => !isSelectionSingleCell(selection, currentWorksheet)) ?? false;
             return shouldFindInSelections;
@@ -291,6 +296,8 @@ export class SheetFindModel extends FindModel {
 
         const performFindInWorksheet = (): IFindComplete => {
             const currentWorksheet = this._workbook.getActiveSheet();
+            if (!currentWorksheet) return { results: [] };
+
             const lastMatch = this.currentMatch; // temporarily store the last match to restore the position after the model changes
 
             findBySelections = checkShouldFindInSelections();
@@ -476,6 +483,10 @@ export class SheetFindModel extends FindModel {
         const searchBackgroundColor = this._themeService.getCurrentTheme().gold400;
         const color = new ColorKit(searchBackgroundColor).toRgb();
         const worksheet = this._workbook.getActiveSheet();
+        if (!worksheet) {
+            return;
+        }
+
         const activeSheetId = worksheet.getSheetId();
         const highlightShapes = matches.filter((match) => match.range.subUnitId === activeSheetId).map((find, index) => {
             const { startColumn, startRow, endColumn, endRow } = find.range.range;
@@ -533,7 +544,7 @@ export class SheetFindModel extends FindModel {
 
     private _focusMatch(match: ISheetCellMatch): void {
         const subUnitId = match.range.subUnitId;
-        if (subUnitId !== this._workbook.getActiveSheet().getSheetId()) {
+        if (subUnitId !== this._workbook.getActiveSheet()?.getSheetId()) {
             this._commandService.syncExecuteCommand(SetWorksheetActivateCommand.id,
                 { unitId: this._workbook.getUnitId(), subUnitId } as ISetWorksheetActivateCommandParams,
                 { fromFindReplace: true }
@@ -585,7 +596,7 @@ export class SheetFindModel extends FindModel {
             }
 
             if (!noFocus) this._focusMatch(match);
-            if (this._workbook.getActiveSheet().getSheetId() === match.range.subUnitId) {
+            if (this._workbook.getActiveSheet()?.getSheetId() === match.range.subUnitId) {
                 this._updateCurrentHighlightShape(this._activeHighlightIndex);
             }
 
@@ -618,7 +629,7 @@ export class SheetFindModel extends FindModel {
             }
 
             if (!noFocus) this._focusMatch(match);
-            if (this._workbook.getActiveSheet().getSheetId() === match.range.subUnitId) {
+            if (this._workbook.getActiveSheet()?.getSheetId() === match.range.subUnitId) {
                 this._updateCurrentHighlightShape(this._activeHighlightIndex);
             }
 
@@ -660,7 +671,11 @@ export class SheetFindModel extends FindModel {
             return this._findPreviousMatchByRange(this._matches, selections[0].range);
         }
 
-        const currentSheetId = this._workbook.getActiveSheet().getSheetId();
+        const currentSheetId = this._workbook.getActiveSheet()?.getSheetId();
+        if (!currentSheetId) {
+            return null;
+        }
+
         const worksheetThatHasMatch = this._findPreviousWorksheetThatHasAMatch(currentSheetId, loop);
         if (!worksheetThatHasMatch) {
             return null;
@@ -699,7 +714,11 @@ export class SheetFindModel extends FindModel {
             return this._findNextMatchByRange(this._matches, selections[0].range, stayIfOnMatch);
         }
 
-        const currentSheetId = this._workbook.getActiveSheet().getSheetId();
+        const currentSheetId = this._workbook.getActiveSheet()?.getSheetId();
+        if (!currentSheetId) {
+            return null;
+        }
+
         const worksheetThatHasMatch = this._findNextWorksheetThatHasAMatch(currentSheetId, loop);
         if (!worksheetThatHasMatch) {
             return null;

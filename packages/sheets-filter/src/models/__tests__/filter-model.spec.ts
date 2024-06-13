@@ -131,7 +131,7 @@ describe('Test filter model and related utils', () => {
             filterColumn = new FilterColumn(
                 'test',
                 'sheet1',
-                get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!,
+                get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.ensureActiveSheet(),
                 { colId: 0, customFilters: { customFilters: [{ operator: CustomFilterOperator.LESS_THAN, val: 123 }] } },
                 { getAlreadyFilteredOutRows() { return new Set(); } }
             );

@@ -239,6 +239,9 @@ export class SheetsHyperLinkResolverService {
             return false;
         }
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return false;
+        }
 
         if (worksheet.getSheetId() === subUnitId) {
             return worksheet;

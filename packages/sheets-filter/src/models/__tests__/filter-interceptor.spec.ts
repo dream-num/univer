@@ -15,8 +15,8 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { IWorkbookData, LocaleType } from '@univerjs/core';
-import { Direction, ICommandService, Plugin, RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
+import type { IWorkbookData, LocaleType, Workbook } from '@univerjs/core';
+import { Direction, ICommandService, IUniverInstanceService, Plugin, RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -37,6 +37,12 @@ describe('Test "Filter Interceptor"', () => {
         get = testBed.get;
         sheetsFilterService = testBed.sheetsFilterService;
         commandService = testBed.commandService;
+        univer.__getInjector();
+
+        // active sheet
+        const currentService = get(IUniverInstanceService);
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        workbook.ensureActiveSheet();
     });
 
     afterEach(() => {

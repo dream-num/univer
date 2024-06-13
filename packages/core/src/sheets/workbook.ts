@@ -262,6 +262,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         this._worksheets.delete(sheetId);
         this._snapshot.sheetOrder.splice(this._snapshot.sheetOrder.indexOf(sheetId), 1);
         delete this._snapshot.sheets[sheetId];
+        this._sheetDisposed$.next(sheetToRemove);
 
         return true;
     }

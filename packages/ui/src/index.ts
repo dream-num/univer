@@ -41,7 +41,7 @@ export {
 export { IConfirmService } from './services/confirm/confirm.service';
 export { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
 export {
-    DesktopContextMenuService,
+    ContextMenuService,
     type IContextMenuHandler,
     IContextMenuService,
 } from './services/contextmenu/contextmenu.service';
@@ -63,17 +63,17 @@ export {
     MenuPosition,
     type MenuItemDefaultValueType,
 } from './services/menu/menu';
-export { DesktopMenuService, IMenuService } from './services/menu/menu.service';
+export { MenuService, IMenuService } from './services/menu/menu.service';
 export { DesktopMessageService } from './services/message/desktop-message.service';
 export { IMessageService } from './services/message/message.service';
 export { DesktopNotificationService } from './services/notification/desktop-notification.service';
 export { type NotificationType, type INotificationOptions } from './components/notification/Notification';
 export { INotificationService } from './services/notification/notification.service';
-export { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
+export { PlatformService, IPlatformService } from './services/platform/platform.service';
 export { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
 export { IGlobalZoneService } from './services/global-zone/global-zone.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
-export { DesktopShortcutService, type IShortcutItem, IShortcutService } from './services/shortcut/shortcut.service';
+export { ShortcutService, type IShortcutItem, IShortcutService } from './services/shortcut/shortcut.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 export { ISidebarService } from './services/sidebar/sidebar.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';

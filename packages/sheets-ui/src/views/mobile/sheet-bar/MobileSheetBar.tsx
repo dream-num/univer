@@ -44,7 +44,7 @@ export function MobileSheetBar() {
             .map((sheet, index) => {
                 return {
                     sheetId: sheet.getSheetId(),
-                    label: <span>{sheet.getName()}</span>,
+                    label: sheet.getName(),
                     index,
                     selected: activeSheet === sheet,
                     color: sheet.getTabColor() ?? undefined,

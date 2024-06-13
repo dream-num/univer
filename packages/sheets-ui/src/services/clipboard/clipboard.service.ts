@@ -482,13 +482,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             }
         });
 
-        const pasteTarget = this._getPastedRange(
-            cellMatrix
-        );
-
-        if (!pasteTarget) {
-            return false;
-        }
+        const pasteTarget = this._getPastedRange(cellMatrix);
+        if (!pasteTarget) return false;
 
         const worksheet = this._univerInstanceService
             .getUniverSheetInstance(pasteTarget.unitId)

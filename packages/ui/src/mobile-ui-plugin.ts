@@ -31,18 +31,18 @@ import { DesktopBeforeCloseService, IBeforeCloseService } from './services/befor
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { IConfirmService } from './services/confirm/confirm.service';
 import { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
-import { DesktopContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
+import { ContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
 import { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
 import { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
-import { DesktopMenuService, IMenuService } from './services/menu/menu.service';
+import { IMenuService, MenuService } from './services/menu/menu.service';
 import { DesktopMessageService } from './services/message/desktop-message.service';
 import { IMessageService } from './services/message/message.service';
 import { DesktopNotificationService } from './services/notification/desktop-notification.service';
 import { INotificationService } from './services/notification/notification.service';
-import { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
-import { DesktopShortcutService, IShortcutService } from './services/shortcut/shortcut.service';
+import { IPlatformService, PlatformService } from './services/platform/platform.service';
+import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
@@ -81,10 +81,10 @@ export class UniverMobileUIPlugin extends Plugin {
             [ShortcutPanelService],
             [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
-            [IShortcutService, { useClass: DesktopShortcutService }],
-            [IPlatformService, { useClass: DesktopPlatformService }],
-            [IMenuService, { useClass: DesktopMenuService }],
-            [IContextMenuService, { useClass: DesktopContextMenuService }],
+            [IShortcutService, { useClass: ShortcutService }],
+            [IPlatformService, { useClass: PlatformService }],
+            [IMenuService, { useClass: MenuService }],
+            [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
             [IDialogService, { useClass: DesktopDialogService, lazy: true }],

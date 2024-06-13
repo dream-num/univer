@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import { Disposable, Rectangle } from '@univerjs/core';
 import type { IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { IContextMenuService, MenuPosition } from '@univerjs/ui';
+import { IContextMenuService, ILayoutService, MenuPosition } from '@univerjs/ui';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
@@ -30,6 +30,7 @@ import { ISelectionRenderService } from '../../../services/selection/selection-r
 export class SheetContextMenuMobileRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
+        @ILayoutService private readonly _layoutService: ILayoutService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
@@ -40,20 +41,28 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
     }
 
     private _init(): void {
+        let listenToSelectionChangeEvent = false;
+
+        this.disposeWithMe(this._selectionManagerService.selectionMoveStart$.subscribe(() => listenToSelectionChangeEvent = true));
         this.disposeWithMe(this._selectionManagerService.selectionMoveEnd$.subscribe((selection) => {
-            if (!selection) {
+            if (!selection || listenToSelectionChangeEvent === false) {
                 return;
             }
+
+            listenToSelectionChangeEvent = false;
 
             const selectionRange = selection[0];
             if (!selectionRange.primary || Rectangle.equals(selectionRange.range, selectionRange.primary)) {
                 return;
             }
 
+            const canvasRect = this._layoutService.getCanvasElement().getBoundingClientRect();
             const range = this._selectionRenderService.attachSelectionWithCoord(selectionRange);
             this._contextMenuService.triggerContextMenu({
-                clientX: range.rangeWithCoord.startX,
-                clientY: range.rangeWithCoord.startY,
+                // TODO@wzhudev: there is an offset with the rangeWithCoord.endX and rangeWithCoord.endY
+                // with the client rect
+                clientX: range.rangeWithCoord.startX + canvasRect.left,
+                clientY: range.rangeWithCoord.endY + canvasRect.top,
                 preventDefault: () => {},
                 stopPropagation: () => {},
             } as unknown as IPointerEvent, MenuPosition.CONTEXT_MENU);

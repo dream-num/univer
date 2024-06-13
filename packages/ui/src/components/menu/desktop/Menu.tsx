@@ -64,7 +64,9 @@ function MenuWrapper(props: IBaseMenuProps) {
     const { menuType, onOptionSelect } = props;
     const menuService = useDependency(IMenuService);
 
-    if (!menuType) return;
+    if (!menuType) {
+        return null;
+    };
 
     if (Array.isArray(menuType)) {
         const menuTypes = menuType.map((type) => menuService.getMenuItems(type));
@@ -190,18 +192,17 @@ export const Menu = (props: IBaseMenuProps) => {
 
 interface IMenuItemProps {
     menuItem: IDisplayMenuItem<IMenuItem>;
-    onClick: (params: Partial<IValueOption>) => void;
+    onClick: (object: Partial<IValueOption>) => void;
 }
 
 function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const menuService = useDependency(IMenuService);
 
-    const menuItems = menuItem.id ? menuService.getMenuItems(menuItem.id) : [];
-
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
     const activated = useObservable<boolean>(menuItem.activated$, false);
     const hidden = useObservable(menuItem.hidden$, false);
     const value = useObservable<MenuItemDefaultValueType>(menuItem.value$);
+
     const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
     const selectionsFromObservable = useObservable(isObservable(item.selections) ? item.selections : undefined);
     const [inputValue, setInputValue] = useState(value);
@@ -291,6 +292,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
         );
     };
 
+    const subMenuItems = menuItem.id ? menuService.getMenuItems(menuItem.id) : [];
     const renderSubItemsType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
 
@@ -306,7 +308,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 )}
                 expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
             >
-                {menuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}
+                {subMenuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}
             </DesignSubMenu>
         );
     };

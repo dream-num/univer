@@ -23,7 +23,7 @@ export { Univer } from './univer';
 export { shallowEqual, isRangesEqual, isUnitRangesEqual } from './common/equal';
 export { isNumeric, isSafeNumeric } from './common/number';
 export { isBooleanString } from './common/boolean';
-export { dedupe, remove, rotate, groupBy } from './common/array';
+export { dedupe, remove, rotate, groupBy, makeArray } from './common/array';
 export { mergeSets } from './common/set';
 export {
     DEFAULT_EMPTY_DOCUMENT_VALUE,

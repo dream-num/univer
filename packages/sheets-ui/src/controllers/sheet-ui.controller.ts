@@ -227,6 +227,7 @@ import {
 } from './shortcuts/view.shortcut';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import { CellMergeAllMenuItemFactory, CellMergeCancelMenuItemFactory, CellMergeHorizontalMenuItemFactory, CellMergeMenuItemFactory, CellMergeVerticalMenuItemFactory } from './menu/merge.menu';
+import { sheetPermissionAddProtectContextMenuFactory, sheetPermissionChangeSheetPermissionSheetBarMenuFactory, sheetPermissionContextMenuFactory, sheetPermissionEditProtectContextMenuFactory, sheetPermissionProtectSheetInSheetBarMenuFactory, sheetPermissionRemoveProtectContextMenuFactory, sheetPermissionRemoveProtectionSheetBarMenuFactory, sheetPermissionToolbarMenuFactory, sheetPermissionViewAllProtectRuleContextMenuFactory, sheetPermissionViewAllProtectRuleSheetBarMenuFactory } from './menu/permission.menu';
 
 export interface IUniverSheetsUIConfig {
     menu: MenuConfig;
@@ -352,6 +353,7 @@ export class SheetUIController extends Disposable {
         });
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initMenus(): void {
         const { menu = {} } = this._config;
 
@@ -427,6 +429,18 @@ export class SheetUIController extends Disposable {
                 ChangeColorSheetMenuItemFactory,
                 HideSheetMenuItemFactory,
                 ShowMenuItemFactory,
+
+                // sheet protection
+                sheetPermissionContextMenuFactory,
+                sheetPermissionAddProtectContextMenuFactory,
+                sheetPermissionEditProtectContextMenuFactory,
+                sheetPermissionRemoveProtectContextMenuFactory,
+                sheetPermissionViewAllProtectRuleContextMenuFactory,
+                sheetPermissionProtectSheetInSheetBarMenuFactory,
+                sheetPermissionRemoveProtectionSheetBarMenuFactory,
+                sheetPermissionChangeSheetPermissionSheetBarMenuFactory,
+                sheetPermissionViewAllProtectRuleSheetBarMenuFactory,
+                sheetPermissionToolbarMenuFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));

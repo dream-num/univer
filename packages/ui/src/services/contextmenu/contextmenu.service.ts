@@ -24,10 +24,6 @@ export interface IContextMenuHandler {
     handleContextMenu(event: IPointerEvent | IMouseEvent, menuType: string): void;
 }
 
-export interface IContextMenuPosition {
-
-}
-
 export interface IContextMenuService {
     disabled: boolean;
 
@@ -40,7 +36,7 @@ export interface IContextMenuService {
 
 export const IContextMenuService = createIdentifier<IContextMenuService>('ui.contextmenu.service');
 
-export class DesktopContextMenuService extends Disposable implements IContextMenuService {
+export class ContextMenuService extends Disposable implements IContextMenuService {
     private _currentHandler: IContextMenuHandler | null = null;
 
     disabled: boolean = false;

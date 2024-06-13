@@ -15,13 +15,12 @@
  */
 
 import { ICommandService } from '@univerjs/core';
-import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 import { Popup } from '@univerjs/design';
 import type { IMouseEvent } from '@univerjs/engine-render';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
-import { Menu } from '../../../components/menu/desktop/Menu';
+import { MobileMenu } from '../../../components/menu/mobile/MobileMenu';
 
 export function MobileContextMenu() {
     const [visible, setVisible] = useState(false);
@@ -30,7 +29,6 @@ export function MobileContextMenu() {
 
     const contextMenuService = useDependency(IContextMenuService);
     const commandService = useDependency(ICommandService);
-    const injector = useInjector();
 
     useEffect(() => {
         const disposables = contextMenuService.registerContextMenuHandler({
@@ -62,7 +60,8 @@ export function MobileContextMenu() {
             <section onPointerDown={(e) => e.stopPropagation()}>
                 {/* TODO@wzhudev: maybe we should add another component for mobile devices. */}
                 {menuType && (
-                    <Menu
+                    // TODO@wzhudev: change to mobile menu
+                    <MobileMenu
                         menuType={[menuType]}
                         onOptionSelect={(params) => {
                             const { label: commandId, value } = params;

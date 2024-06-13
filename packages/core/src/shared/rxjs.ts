@@ -19,6 +19,15 @@ import { Observable } from 'rxjs';
 
 type CallbackFn<T extends readonly unknown[]> = (cb: (...args: T) => void) => IDisposable;
 
+/**
+ * Creates an observable from a callback function.
+ *
+ * @param callback The callback function that will be called when the observable is subscribed to. **Please not that the
+ * if the callback function has `this` context, it will be lost when the callback is called. So you probably
+ * should bind the callback to the correct context.**
+ *
+ * @returns The observable that will emit when the callback function gets called.
+ */
 export function fromCallback<T extends readonly unknown[]>(callback: CallbackFn<T>): Observable<T> {
     return new Observable((subscriber) => {
         const disposable: IDisposable | undefined = callback((...args: T) => subscriber.next(args));

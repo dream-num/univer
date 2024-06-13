@@ -15,7 +15,7 @@
  */
 
 import { UnitAction } from '@univerjs/protocol';
-import { WorkbookCommentPermission, WorkbookCopyPermission, WorkbookCreateSheetPermission, WorkbookDeleteSheetPermission, WorkbookDuplicatePermission, WorkbookEditablePermission, WorkbookExportPermission, WorkbookHideSheetPermission, WorkbookManageCollaboratorPermission, WorkbookMoveSheetPermission, WorkbookPrintPermission, WorkbookRenameSheetPermission, WorkbookSharePermission, WorkbookViewPermission } from '../permission-point';
+import { WorkbookCommentPermission, WorkbookCopyPermission, WorkbookCopySheetPermission, WorkbookCreateSheetPermission, WorkbookDeleteSheetPermission, WorkbookDuplicatePermission, WorkbookEditablePermission, WorkbookExportPermission, WorkbookHideSheetPermission, WorkbookManageCollaboratorPermission, WorkbookMoveSheetPermission, WorkbookPrintPermission, WorkbookRenameSheetPermission, WorkbookSharePermission, WorkbookViewPermission } from '../permission-point';
 
 export const getAllWorkbookPermissionPoint = () => [
     WorkbookEditablePermission,
@@ -32,6 +32,7 @@ export const getAllWorkbookPermissionPoint = () => [
     WorkbookDuplicatePermission,
     WorkbookSharePermission,
     WorkbookMoveSheetPermission,
+    WorkbookCopySheetPermission,
 ];
 
 export const defaultWorkbookPermissionPoints = [
@@ -48,4 +49,6 @@ export const defaultWorkbookPermissionPoints = [
     UnitAction.HideSheet,
     UnitAction.Duplicate,
     UnitAction.Share,
+    UnitAction.MoveSheet,
+    UnitAction.CopySheet,
 ];

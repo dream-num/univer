@@ -228,8 +228,7 @@ export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             subscriber.next(false);
             return disposable.dispose;
         }).pipe(
-            combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission])),
-            map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled
-            )),
+            combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookHideSheetPermission])),
+            map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled)),
     };
 }

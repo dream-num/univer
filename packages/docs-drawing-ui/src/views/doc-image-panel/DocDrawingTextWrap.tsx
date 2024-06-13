@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { ICommandService, LocaleService, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
@@ -42,6 +42,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
 
     const { drawings } = props;
 
@@ -52,6 +53,8 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
     }
 
     const { unitId } = drawingParam;
+
+    const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
 
     const renderObject = renderManagerService.getRenderById(unitId);
     const scene = renderObject?.scene;
@@ -148,6 +151,70 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
             },
         });
     }
+
+    function updateState(drawingParam: IDrawingParam) {
+        const drawing = documentDataModel?.getSnapshot()?.drawings?.[drawingParam.drawingId];
+        if (drawing == null) {
+            return;
+        }
+
+        const {
+            distT = 0, distL = 0, distB = 0, distR = 0,
+            layoutType = PositionedObjectLayoutType.INLINE,
+            behindDoc = BooleanNumber.FALSE,
+            wrapText = WrapTextType.BOTH_SIDES,
+        } = drawing;
+        const distToText = {
+            distT,
+            distL,
+            distB,
+            distR,
+        };
+
+        setDistToText(distToText);
+
+        setWrapText(wrapText as unknown as string);
+
+        if (layoutType === PositionedObjectLayoutType.WRAP_NONE) {
+            if (behindDoc === BooleanNumber.TRUE) {
+                setWrappingStyle(TextWrappingStyle.BEHIND_TEXT);
+            } else {
+                setWrappingStyle(TextWrappingStyle.IN_FRONT_OF_TEXT);
+            }
+        } else {
+            switch (layoutType) {
+                case PositionedObjectLayoutType.INLINE:
+                    setWrappingStyle(TextWrappingStyle.INLINE);
+                    break;
+                case PositionedObjectLayoutType.WRAP_SQUARE:
+                    setWrappingStyle(TextWrappingStyle.WRAP_SQUARE);
+                    break;
+                case PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM:
+                    setWrappingStyle(TextWrappingStyle.WRAP_TOP_AND_BOTTOM);
+                    break;
+                default:
+                    throw new Error(`Unsupported layout type: ${layoutType}`);
+            }
+        }
+    }
+
+    useEffect(() => {
+        const focusDrawings = drawingManagerService.getFocusDrawings();
+        if (focusDrawings.length === 0) {
+            return;
+        }
+
+        updateState(focusDrawings[0]);
+
+        const subscription = drawingManagerService.focus$.subscribe((drawingParams) => {
+            updateState(drawingParams[0]);
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)}>

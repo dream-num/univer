@@ -121,8 +121,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
     borderDash: number[] = [];
     borderSpacing = 0;
 
-    anchorFill = 'rgb(255,255,255)';
-    anchorStroke = 'rgb(185,185,185)';
+    anchorFill = 'rgb(255, 255, 255)';
+    anchorStroke = 'rgb(185, 185, 185)';
     anchorStrokeWidth = 1;
     anchorSize = 10;
     anchorCornerRadius = 10;

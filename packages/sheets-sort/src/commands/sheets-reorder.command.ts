@@ -79,6 +79,10 @@ export const ReorderRangeCommand: ICommand = {
                 continue;
             }
 
+            if (worksheet.getRowRawVisible(rowIndex) === false) {
+                continue;
+            }
+
             if (mergeDataInRange.length && !mergeMainRowIndexes.includes(rowIndex)) {
                 continue;
             }

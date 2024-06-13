@@ -70,7 +70,7 @@
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@wendellhu/redi": "^0.15.2",
+        "@wendellhu/redi": "^0.15.4",
         "typescript": "^5.4.5",
         "vite": "^5.2.13",
         "vitest": "^1.6.0"

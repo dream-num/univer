@@ -171,8 +171,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       css-loader:
         specifier: ^6.10.0
         version: 6.11.0(webpack@5.92.0(@swc/core@1.5.7)(esbuild@0.20.2))
@@ -316,8 +316,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/uniscript
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -393,8 +393,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -424,8 +424,8 @@ importers:
         specifier: workspace:*
         version: link:../sheets
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -474,8 +474,8 @@ importers:
         specifier: ^5.0.4
         version: 5.0.5(vite@5.2.13(@types/node@20.14.2)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))(vue@3.4.27(typescript@5.4.5))
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -604,8 +604,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -640,8 +640,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: ^0.15.2
-        version: 0.15.2
+        specifier: ^0.15.4
+        version: 0.15.4
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
@@ -689,8 +689,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -740,8 +740,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -780,8 +780,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -826,8 +826,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -872,8 +872,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -928,8 +928,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -982,8 +982,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       jest-canvas-mock:
         specifier: ^2.5.2
         version: 2.5.2
@@ -1031,8 +1031,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -1061,8 +1061,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1085,8 +1085,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1125,8 +1125,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1165,8 +1165,8 @@ importers:
         specifier: workspace:*
         version: link:../sheets
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       dayjs:
         specifier: ^1.11.11
         version: 1.11.11
@@ -1250,8 +1250,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1314,8 +1314,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1356,8 +1356,8 @@ importers:
         specifier: workspace:*
         version: link:../sheets
       '@wendellhu/redi':
-        specifier: ^0.15.2
-        version: 0.15.2
+        specifier: ^0.15.4
+        version: 0.15.4
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
@@ -1405,8 +1405,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1441,8 +1441,8 @@ importers:
         specifier: workspace:*
         version: link:../sheets
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1496,8 +1496,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1548,8 +1548,8 @@ importers:
         specifier: workspace:*
         version: link:../sheets-ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1606,8 +1606,8 @@ importers:
         specifier: ^4.3.1
         version: 4.3.1(vite@5.2.13(@types/node@20.14.2)(less@4.2.0)(sass@1.77.5)(terser@5.31.1))
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -1649,8 +1649,8 @@ importers:
         specifier: workspace:*
         version: link:../sheets
       '@wendellhu/redi':
-        specifier: ^0.15.2
-        version: 0.15.2
+        specifier: ^0.15.4
+        version: 0.15.4
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1704,8 +1704,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.15.2
-        version: 0.15.2
+        specifier: ^0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1759,8 +1759,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -1820,8 +1820,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1866,8 +1866,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -1927,8 +1927,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1982,8 +1982,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -2018,8 +2018,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -2057,8 +2057,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -2100,8 +2100,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -2140,8 +2140,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -2217,8 +2217,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -2364,8 +2364,8 @@ importers:
         specifier: workspace:*
         version: link:../uniscript
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -2422,8 +2422,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.2
-        version: 0.15.2
+        specifier: 0.15.4
+        version: 0.15.4
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -5063,8 +5063,8 @@ packages:
   '@webassemblyjs/wast-printer@1.12.1':
     resolution: {integrity: sha512-+X4WAlOisVWQMikjbcvY2e0rwPsKQ9F688lksZhBcPycBBuii3O7m8FACbDMWDojpAqvjIncrG8J0XHKyQfVeA==}
 
-  '@wendellhu/redi@0.15.2':
-    resolution: {integrity: sha512-a74HbcIU58K9knNEE3BRTMV9Be1PAHcdZphWoxbXJwJgK+OYa4eiG7nkP1SZqNeKgVj6nT885ShigEuTbmVBkg==}
+  '@wendellhu/redi@0.15.4':
+    resolution: {integrity: sha512-XhflsMuOJKGpdhZUzr45t//3yjAsXP9uBtqwQaPcH8dK7MTqrP7saKffLn/GbVmZsJ/cORm8nCbsdvwZtmdkKA==}
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -13891,7 +13891,7 @@ snapshots:
       '@webassemblyjs/ast': 1.12.1
       '@xtuc/long': 4.2.2
 
-  '@wendellhu/redi@0.15.2': {}
+  '@wendellhu/redi@0.15.4': {}
 
   '@xtuc/ieee754@1.2.0': {}
 

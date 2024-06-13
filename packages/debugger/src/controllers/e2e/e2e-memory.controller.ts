@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LifecycleStages, LocaleType, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LifecycleStages, LocaleType, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { DisposeUniverCommand } from '../../commands/commands/unit.command';
 
 const DEFAULT_WORKBOOK_DATA_DEMO = {
     id: 'test',
@@ -62,14 +63,16 @@ const DEFAULT_WORKBOOK_DATA_DEMO = {
 const AWAIT_LOADING_TIMEOUT = 5000;
 const AWAIT_DISPOSING_TIMEOUT = 5000;
 
-export interface IE2EMemoryControllerAPI {
+export interface IE2EControllerAPI {
     loadAndRelease(id: number): Promise<void>;
+    loadDefaultSheet(): Promise<void>;
+    disposeUniver(): Promise<void>;
 }
 
 declare global {
     // eslint-disable-next-line ts/naming-convention
     interface Window {
-        E2EMemoryAPI: IE2EMemoryControllerAPI;
+        E2EControllerAPI: IE2EControllerAPI;
     }
 }
 
@@ -79,14 +82,17 @@ declare global {
 @OnLifecycle(LifecycleStages.Starting, E2EMemoryController)
 export class E2EMemoryController {
     constructor(
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         this._initPlugin();
     }
 
     private _initPlugin(): void {
-        window.E2EMemoryAPI = {
+        window.E2EControllerAPI = {
             loadAndRelease: (id) => this._releaseAndLoad(id),
+            loadDefaultSheet: () => this._loadDefaultSheet(),
+            disposeUniver: () => this._disposeUniver(),
         };
     }
 
@@ -96,6 +102,15 @@ export class E2EMemoryController {
         await timer(AWAIT_LOADING_TIMEOUT);
         this._univerInstanceService.disposeUnit(unitId);
         await timer(AWAIT_DISPOSING_TIMEOUT);
+    }
+
+    private async _loadDefaultSheet(): Promise<void> {
+        this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+        await timer(AWAIT_LOADING_TIMEOUT);
+    }
+
+    private async _disposeUniver(): Promise<void> {
+        await this._commandService.executeCommand(DisposeUniverCommand.id);
     }
 }
 

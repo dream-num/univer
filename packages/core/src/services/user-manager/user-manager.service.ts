@@ -15,7 +15,6 @@
  */
 
 import type { IUser } from '@univerjs/protocol';
-import { UnitRole } from '@univerjs/protocol';
 
 import { BehaviorSubject, Subject } from 'rxjs';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
@@ -26,7 +25,7 @@ export class UserManagerService {
     private _model = new Map<string, IUser>();
     private _userChange$ = new Subject<{ type: 'add' | 'delete'; user: IUser } | { type: 'clear' }>();
     public userChange$ = this._userChange$.asObservable();
-    private _currentUser$ = new BehaviorSubject<IUser>(createDefaultUser(UnitRole.Owner));
+    private _currentUser$ = new BehaviorSubject<IUser>(createDefaultUser());
     /**
      * When the current user undergoes a switch or change
      * @memberof UserManagerService

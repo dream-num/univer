@@ -21,14 +21,15 @@ import { expect, test } from '@playwright/test';
 
 // The type definition is copied from:
 // examples/src/plugins/debugger/controllers/e2e/e2e-memory.controller.ts
-export interface IE2EMemoryControllerAPI {
+export interface IE2EControllerAPI {
     loadAndRelease(id: number): Promise<void>;
-    getHeapMemoryUsage(): number;
+    disposeUniver(): Promise<void>;
 }
+
 declare global {
     // eslint-disable-next-line ts/naming-convention
     interface Window {
-        E2EMemoryAPI: IE2EMemoryControllerAPI;
+        E2EControllerAPI: IE2EControllerAPI;
     }
 }
 
@@ -39,12 +40,12 @@ test('memory', async ({ page }) => {
     const memoryBeforeLoad = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory before load:', memoryBeforeLoad);
 
-    await page.evaluate(() => window.E2EMemoryAPI.loadAndRelease(1));
+    await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(1));
     await page.waitForTimeout(5000); // wait for long enough to let the GC do its job
     const memoryAfterFirstLoad = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after first load:', memoryAfterFirstLoad);
 
-    await page.evaluate(() => window.E2EMemoryAPI.loadAndRelease(2));
+    await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(2));
     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after second load:', memoryAfterSecondLoad);
 

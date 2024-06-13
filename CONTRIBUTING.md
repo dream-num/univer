@@ -142,6 +142,14 @@ With the help of vscode and its rich ecosystem, you could directly debug unit te
 
 ![](./docs/img/debug-unit-test.png)
 
+### E2E test
+
+You may need to install dependencies of Playwright manually by running the following command:
+
+```shell
+pnpm exec playwright install
+```
+
 ### Clean code
 
 > Programs are meant to be ready by humans and only icidentally for computers to execute. - Harold Abelson

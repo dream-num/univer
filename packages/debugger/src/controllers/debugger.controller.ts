@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, ICommandService } from '@univerjs/core';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -71,12 +71,11 @@ export class DebuggerController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
-        this._initializeContextMenu();
 
+        this._initializeContextMenu();
         this._initCustomComponents();
 
         [

@@ -38,6 +38,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
     const layoutService = useDependency(ILayoutService);
+    const componentManager = useDependency(ComponentManager);
 
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -199,7 +200,6 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
     }
 
     function renderButtonType() {
-        const componentManager = useDependency(ComponentManager);
         const isCustomComponent = componentManager.get(typeof label === 'string' ? label : label?.name ?? '');
 
         return (

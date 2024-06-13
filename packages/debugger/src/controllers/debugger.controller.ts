@@ -34,7 +34,7 @@ import { TEST_EDITOR_CONTAINER_COMPONENT } from '../views/test-editor/component-
 // @ts-ignore
 import VueI18nIcon from '../components/VueI18nIcon.vue';
 
-import { CreateEmptySheetCommand, DisposeCurrentUnitCommand } from '../commands/commands/unit.command';
+import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverCommand } from '../commands/commands/unit.command';
 import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 import { ImageDemo } from '../components/Image';
 import { ChangeUserCommand } from '../commands/operations/change-user.operation';
@@ -45,6 +45,7 @@ import {
     CreateFloatDOMMenuItemFactory,
     DialogMenuItemFactory,
     DisposeCurrentUnitMenuItemFactory,
+    DisposeUniverItemFactory,
     FloatDomMenuItemFactory,
     LocaleMenuItemFactory,
     MessageMenuItemFactory,
@@ -88,6 +89,7 @@ export class DebuggerController extends Disposable {
             SidebarOperation,
             SetEditable,
             SaveSnapshotOptions,
+            DisposeUniverCommand,
             DisposeCurrentUnitCommand,
             CreateEmptySheetCommand,
             CreateFloatDomCommand,
@@ -112,6 +114,7 @@ export class DebuggerController extends Disposable {
             SetEditableMenuItemFactory,
             SaveSnapshotSetEditableMenuItemFactory,
             UnitMenuItemFactory,
+            DisposeUniverItemFactory,
             DisposeCurrentUnitMenuItemFactory,
             CreateEmptySheetMenuItemFactory,
             FloatDomMenuItemFactory,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, JSONXActions, WrapTextType } from '@univerjs/core';
+import type { ICommand, IMutationInfo, IObjectPositionH, IObjectPositionV, JSONXActions, WrapTextType } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -310,6 +310,77 @@ export const UpdateDocDrawingWrapTextCommand: ICommand = {
 
             if (oldWrapText !== wrapText) {
                 const action = jsonX.replaceOp(['drawings', drawingId, 'wrapText'], oldWrapText, wrapText);
+
+                rawActions.push(action!);
+            }
+        }
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges: null,
+            },
+        };
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
+    },
+};
+
+interface IUpdateDocDrawingPositionParams {
+    unitId: string;
+    subUnitId: string;
+    drawings: IDocDrawing[];
+    direction: 'positionH' | 'positionV';
+    position: IObjectPositionH | IObjectPositionV;
+}
+
+/**
+ * The command to update drawing position.
+ */
+export const UpdateDocDrawingPositionCommand: ICommand = {
+    id: 'doc.command.update-doc-drawing-position',
+
+    type: CommandType.COMMAND,
+
+    handler: (accessor: IAccessor, params?: IUpdateDocDrawingPositionParams) => {
+        if (params == null) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (documentDataModel == null) {
+            return false;
+        }
+
+        const { drawings, direction, position, unitId } = params;
+
+        const jsonX = JSONX.getInstance();
+        const rawActions: JSONXActions = [];
+
+        const { drawings: oldDrawings = {} } = documentDataModel.getSnapshot();
+
+        // Update drawing layoutType.
+        for (const drawing of drawings) {
+            const { drawingId } = drawing;
+
+            const oldPosition = oldDrawings[drawingId].docTransform[direction];
+
+            if (oldPosition.relativeFrom !== position.relativeFrom || oldPosition.posOffset !== position.posOffset) {
+                const action = jsonX.replaceOp(['drawings', drawingId, 'docTransform', direction], oldPosition, position);
 
                 rawActions.push(action!);
             }

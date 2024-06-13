@@ -38,7 +38,7 @@ import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing
 import { UngroupDocDrawingCommand } from '../commands/commands/ungroup-doc-drawing.command';
 import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
-import { UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand } from '../commands/commands/update-doc-drawing.command';
+import { UpdateDocDrawingDistanceCommand, UpdateDocDrawingPositionCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand } from '../commands/commands/update-doc-drawing.command';
 import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 
 @OnLifecycle(LifecycleStages.Ready, DocDrawingUIController)
@@ -81,6 +81,7 @@ export class DocDrawingUIController extends Disposable {
             UpdateDocDrawingWrappingStyleCommand,
             UpdateDocDrawingDistanceCommand,
             UpdateDocDrawingWrapTextCommand,
+            UpdateDocDrawingPositionCommand,
             RemoveDocDrawingCommand,
             SetDocDrawingCommand,
             SidebarDocDrawingOperation,

@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import { ICommandService, LocaleService } from '@univerjs/core';
+import type { IObjectPositionH, IObjectPositionV } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';
-import { Radio, RadioGroup } from '@univerjs/design';
-import { SetDocDrawingCommand } from '../../commands/commands/set-doc-drawing.command';
+import { Checkbox, InputNumber, Select } from '@univerjs/design';
+
+import { DocSkeletonManagerService } from '@univerjs/docs';
+import { UpdateDocDrawingPositionCommand } from '../../commands/commands/update-doc-drawing.command';
 import styles from './index.module.less';
 
 export interface IDocDrawingPositionProps {
@@ -34,6 +37,8 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const docSkeletonManagerService = useDependency(DocSkeletonManagerService);
 
     const { drawings } = props;
 
@@ -43,7 +48,9 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
         return;
     }
 
-    const { unitId } = drawingParam;
+    const { unitId, drawingId } = drawingParam;
+
+    const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
 
     const renderObject = renderManagerService.getRenderById(unitId);
     const scene = renderObject?.scene;
@@ -51,30 +58,108 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
         return;
     }
 
-    const [value, setValue] = useState('');
+    const skeleton = docSkeletonManagerService.getCurrent();
 
-    function handleChange(value: string | number | boolean) {
-        setValue((value as string));
+    // console.log(skeleton?.skeleton);
+
+    const HORIZONTAL_RELATIVE_FROM = [{
+        label: localeService.t('image-position.column'),
+        value: String(ObjectRelativeFromH.COLUMN),
+    }, {
+        label: localeService.t('image-position.page'),
+        value: String(ObjectRelativeFromH.PAGE),
+    }, {
+        label: localeService.t('image-position.margin'),
+        value: String(ObjectRelativeFromH.MARGIN),
+    }];
+
+    const VERTICAL_RELATIVE_FROM = [{
+        label: localeService.t('image-position.line'),
+        value: String(ObjectRelativeFromV.LINE),
+    }, {
+        label: localeService.t('image-position.page'),
+        value: String(ObjectRelativeFromV.PAGE),
+    }, {
+        label: localeService.t('image-position.margin'),
+        value: String(ObjectRelativeFromV.MARGIN),
+    }, {
+        label: localeService.t('image-position.paragraph'),
+        value: String(ObjectRelativeFromV.PARAGRAPH),
+    }];
+
+    const [hPosition, setHPosition] = useState<IObjectPositionH>({
+        relativeFrom: ObjectRelativeFromH.PAGE,
+        posOffset: 0,
+    });
+
+    const [vPosition, setVPosition] = useState<IObjectPositionV>({
+        relativeFrom: ObjectRelativeFromV.PAGE,
+        posOffset: 0,
+    });
+
+    function handlePositionChange(direction: 'positionH' | 'positionV', value: IObjectPositionH | IObjectPositionV) {
+        if (direction === 'positionH') {
+            setHPosition(value as IObjectPositionH);
+        } else {
+            setVPosition(value as IObjectPositionV);
+        }
 
         const focusDrawings = drawingManagerService.getFocusDrawings();
         if (focusDrawings.length === 0) {
             return;
         }
 
-        const updateParams = focusDrawings.map((drawing) => {
+        const drawings = focusDrawings.map((drawing) => {
             return {
                 unitId: drawing.unitId,
                 subUnitId: drawing.subUnitId,
                 drawingId: drawing.drawingId,
-                anchorType: value,
             };
         });
 
-        commandService.executeCommand(SetDocDrawingCommand.id, {
+        commandService.executeCommand(UpdateDocDrawingPositionCommand.id, {
             unitId: focusDrawings[0].unitId,
-            drawings: updateParams,
+            subUnitId: focusDrawings[0].unitId,
+            drawings,
+            direction,
+            position: value,
         });
     }
+
+    function updateState(drawingParam: IDrawingParam) {
+        const drawing = documentDataModel?.getSnapshot()?.drawings?.[drawingParam.drawingId];
+        if (drawing == null) {
+            return;
+        }
+
+        const {
+            positionH,
+            positionV,
+        } = drawing.docTransform;
+
+        setHPosition(positionH);
+        setVPosition(positionV);
+    }
+
+    useEffect(() => {
+        const focusDrawings = drawingManagerService.getFocusDrawings();
+        if (focusDrawings.length === 0) {
+            return;
+        }
+
+        updateState(focusDrawings[0]);
+
+        const subscription = drawingManagerService.focus$.subscribe((drawingParams) => {
+            updateState(drawingParams[0]);
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const disabled = false; // documentDataModel?.getSnapshot()?.drawings?.[drawingId].layoutType === PositionedObjectLayoutType.INLINE;
 
     return (
         <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)}>
@@ -83,13 +168,131 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                     <div>{localeService.t('image-position.title')}</div>
                 </div>
             </div>
-            <div className={clsx(styles.imageCommonPanelRow)}>
-                <div className={clsx(styles.imageCommonPanelColumn)}>
-                    <RadioGroup value={value} onChange={handleChange} direction="vertical">
-                        <Radio value="SheetDrawingAnchorType.Both">{localeService.t('drawing-anchor.both')}</Radio>
-                        <Radio value="SheetDrawingAnchorType.Position">{localeService.t('drawing-anchor.position')}</Radio>
-                        <Radio value="SheetDrawingAnchorType.None">{localeService.t('drawing-anchor.none')}</Radio>
-                    </RadioGroup>
+            <div className={styles.imageCommonPanelRow}>
+                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSubtitle)}>
+                    <div>{localeService.t('image-position.horizontal')}</div>
+                </div>
+            </div>
+
+            <div className={styles.imageCommonPanelRow}>
+                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+                    <label>
+                        <div className={styles.imageCommonPanelRow}>
+                            <div className={styles.imageCommonPanelColumn}>
+                                {localeService.t('image-position.absolutePosition')}
+                            </div>
+                        </div>
+                        <div className={styles.imageCommonPanelRow}>
+                            <div className={styles.imageCommonPanelColumn}>
+                                <InputNumber
+                                    precision={1}
+                                    disabled={disabled}
+                                    value={hPosition.posOffset}
+                                    onChange={(val) => {
+                                        handlePositionChange('positionH', {
+                                            relativeFrom: hPosition.relativeFrom,
+                                            posOffset: val as number,
+                                        });
+                                    }}
+                                    className={styles.imageCommonPanelInput}
+                                />
+                            </div>
+                        </div>
+                    </label>
+                </div>
+                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+                    <label>
+                        <div className={styles.imageCommonPanelRow}>
+                            <div className={styles.imageCommonPanelColumn}>
+                                {localeService.t('image-position.toTheRightOf')}
+                            </div>
+                        </div>
+                        <div className={styles.imageCommonPanelRow}>
+                            <div className={styles.imageCommonPanelColumn}>
+                                <Select
+                                    value={String(hPosition.relativeFrom)}
+                                    disabled={disabled}
+                                    options={HORIZONTAL_RELATIVE_FROM}
+                                    onChange={(val) => {
+                                        handlePositionChange('positionH', {
+                                            relativeFrom: +val as ObjectRelativeFromH,
+                                            posOffset: hPosition.posOffset,
+                                        });
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div className={styles.imageCommonPanelRow}>
+                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSubtitle)}>
+                    <div>{localeService.t('image-position.vertical')}</div>
+                </div>
+            </div>
+
+            <div className={styles.imageCommonPanelRow}>
+                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+                    <label>
+                        <div className={styles.imageCommonPanelRow}>
+                            <div className={styles.imageCommonPanelColumn}>
+                                {localeService.t('image-position.absolutePosition')}
+                            </div>
+                        </div>
+                        <div className={styles.imageCommonPanelRow}>
+                            <div className={styles.imageCommonPanelColumn}>
+                                <InputNumber
+                                    precision={1}
+                                    disabled={disabled}
+                                    value={vPosition.posOffset}
+                                    onChange={(val) => {
+                                        handlePositionChange('positionV', {
+                                            relativeFrom: vPosition.relativeFrom,
+                                            posOffset: val as number,
+                                        });
+                                    }}
+                                    className={styles.imageCommonPanelInput}
+                                />
+                            </div>
+                        </div>
+                    </label>
+                </div>
+                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSpan2)}>
+                    <label>
+                        <div className={styles.imageCommonPanelRow}>
+                            <div className={styles.imageCommonPanelColumn}>
+                                {localeService.t('image-position.bellow')}
+                            </div>
+                        </div>
+                        <div className={styles.imageCommonPanelRow}>
+                            <div className={styles.imageCommonPanelColumn}>
+                                <Select
+                                    disabled={disabled}
+                                    value={String(vPosition.relativeFrom)}
+                                    options={VERTICAL_RELATIVE_FROM}
+                                    onChange={(val) => {
+                                        handlePositionChange('positionV', {
+                                            relativeFrom: +val as ObjectRelativeFromV,
+                                            posOffset: vPosition.posOffset,
+                                        });
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div className={styles.imageCommonPanelRow}>
+                <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelSubtitle)}>
+                    <div>{localeService.t('image-position.options')}</div>
+                </div>
+            </div>
+
+            <div className={styles.imageCommonPanelRow} style={{ marginBottom: '50px' }}>
+                <div className={styles.imageCommonPanelColumn}>
+                    <Checkbox disabled={disabled} checked onChange={() => {}}>{localeService.t('image-position.moveObjectWithText')}</Checkbox>
                 </div>
             </div>
         </div>

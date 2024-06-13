@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
-import { BooleanNumber, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType, WrapTextType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
@@ -136,18 +136,18 @@ export class DocDrawingUpdateController extends Disposable {
         const { unitId, subUnitId } = info;
         const docDrawingParams: IDocDrawing[] = [];
 
+        const renderObject = this._renderManagerService.getRenderById(unitId);
+
+        if (renderObject == null) {
+            return;
+        }
+
         for (const imageParam of imageParams) {
             if (imageParam == null) {
                 continue;
             }
             const { imageId, imageSourceType, source, base64Cache } = imageParam;
             const { width, height, image } = await getImageSize(base64Cache || '');
-
-            const renderObject = this._renderManagerService.getRenderById(unitId);
-
-            if (renderObject == null) {
-                return;
-            }
 
             const { width: sceneWidth, height: sceneHeight } = renderObject.scene;
 
@@ -179,6 +179,7 @@ export class DocDrawingUpdateController extends Disposable {
                 title: '',
                 description: '',
                 layoutType: PositionedObjectLayoutType.INLINE,
+                wrapText: WrapTextType.BOTH_SIDES,
                 distB: 0,
                 distL: 0,
                 distR: 0,
@@ -192,6 +193,12 @@ export class DocDrawingUpdateController extends Disposable {
             unitId,
             drawings: docDrawingParams,
         } as IInsertDrawingCommandParams);
+
+        // const transformer = renderObject.scene.getTransformerByCreate();
+
+        // setTimeout(() => {
+        //     transformer.updateControl();
+        // }, 200);
 
         // this._docSkeletonManagerService.getCurrent()?.skeleton.calculate();
     }

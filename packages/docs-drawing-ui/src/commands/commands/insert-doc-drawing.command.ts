@@ -54,7 +54,7 @@ export const InsertDocDrawingCommand: ICommand = {
 
         const unitId = documentDataModel.getUnitId();
         const { drawings } = params;
-        const { collapsed, startOffset, segmentId, style } = activeTextRange;
+        const { collapsed, startOffset, segmentId } = activeTextRange;
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
@@ -102,21 +102,12 @@ export const InsertDocDrawingCommand: ICommand = {
             rawActions.push(addDrawingOrderAction!);
         }
 
-        const textRanges = [
-            {
-                startOffset: startOffset + drawings.length,
-                endOffset: startOffset + drawings.length,
-                collapsed: true,
-                style,
-            },
-        ];
-
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
                 actions: [],
-                textRanges,
+                textRanges: [],
             },
         };
 
@@ -130,32 +121,5 @@ export const InsertDocDrawingCommand: ICommand = {
         >(doMutation.id, doMutation.params);
 
         return Boolean(result);
-        // const sheetDrawingParams = drawings.map((param) => param.sheetDrawingParam);
-        // const unitIds = drawings.map((param) => param.unitId);
-
-        // execute do mutations and add undo mutations to undo stack if completed
-        // const jsonOp = docDrawingService.getBatchAddOp(drawings) as IDrawingJsonUndo1;
-
-        // const { unitId, subUnitId, undo, redo, objects } = jsonOp;
-
-        // const result = commandService.syncExecuteCommand(SetDocDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type: DocDrawingApplyType.INSERT });
-
-        // if (result) {
-        //     undoRedoService.pushUndoRedo({
-        //         unitID: unitId,
-        //         undoMutations: [
-        //             { id: SetDocDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects, type: DocDrawingApplyType.REMOVE } },
-        //             { id: ClearDocDrawingTransformerOperation.id, params: unitIds },
-        //         ],
-        //         redoMutations: [
-        //             { id: SetDocDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type: DocDrawingApplyType.INSERT } },
-        //             { id: ClearDocDrawingTransformerOperation.id, params: unitIds },
-        //         ],
-        //     });
-
-        //     return true;
-        // }
-
-        // return false;
     },
 };

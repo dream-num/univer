@@ -34,7 +34,7 @@ export const SheetPermissionUserDialog = () => {
     const sheetPermissionUserManagerService = useDependency(SheetPermissionUserManagerService);
     const userList = sheetPermissionUserManagerService.userList;
     const searchUserList = userList.filter((item) => {
-        return item.subject?.name.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase()) && item.role !== UnitRole.Owner;
+        return item.subject?.name.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase()) && item.role === UnitRole.Editor;
     });
     const [selectUserInfo, setSelectUserInfo] = useState<ICollaborator[]>(sheetPermissionUserManagerService.selectUserList);
 

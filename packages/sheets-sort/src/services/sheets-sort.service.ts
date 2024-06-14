@@ -24,7 +24,7 @@ import { Disposable, ICommandService,
 import type { ISheetRangeLocation } from '@univerjs/sheets-ui';
 
 import { getSheetCommandTarget } from '@univerjs/sheets';
-import { type ICellValueCompareFn, ReorderRangeCommand } from '../commands/sheets-reorder.command';
+import { type ICellValueCompareFn, SortRangeCommand } from '../commands/sheets-sort.command';
 import type { ISortOption } from './interface';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsSortService)
@@ -61,7 +61,7 @@ export class SheetsSortService extends Disposable {
 
     applySort(sortOption: ISortOption, unitId?: string, subUnitId?: string) {
         const { unitId: _unitId, subUnitId: _subUnitId } = getSheetCommandTarget(this._univerInstanceService) || {};
-        this._commandService.executeCommand(ReorderRangeCommand.id, {
+        this._commandService.executeCommand(SortRangeCommand.id, {
             orderRules: sortOption.orderRules,
             range: sortOption.range,
             hasTitle: sortOption.hasTitle ?? false,

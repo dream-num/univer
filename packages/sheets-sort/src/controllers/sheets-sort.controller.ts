@@ -19,9 +19,8 @@ import { CellValueType, Disposable, ICommandService, LifecycleStages, OnLifecycl
 
 import { Inject } from '@wendellhu/redi';
 import { SheetsRenderService } from '@univerjs/sheets-ui';
-import type { ICellValueCompareFn } from '../commands/sheets-reorder.command';
-import { ReorderRangeCommand } from '../commands/sheets-reorder.command';
-import { ReorderRangeMutation } from '../commands/sheets-reorder.mutation';
+import type { ICellValueCompareFn } from '../commands/sheets-sort.command';
+import { SortRangeCommand } from '../commands/sheets-sort.command';
 import { SheetsSortService } from '../services/sheets-sort.service';
 import { compareNull, compareNumber, compareString, isNullValue } from './utils';
 
@@ -36,7 +35,7 @@ export class SheetsSortController extends Disposable {
     ) {
         super();
         [
-            ReorderRangeMutation,
+            SortRangeCommand,
         ].forEach((m) => this.disposeWithMe(this._sheetRenderService.registerSkeletonChangingMutations(m.id)));
         this._initCommands();
         this._registerCompareFns();
@@ -44,8 +43,7 @@ export class SheetsSortController extends Disposable {
 
     private _initCommands(): void {
         [
-            ReorderRangeCommand,
-            ReorderRangeMutation,
+            SortRangeCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

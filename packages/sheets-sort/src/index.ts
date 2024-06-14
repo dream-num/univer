@@ -15,15 +15,11 @@
  */
 
 export { UniverSheetsSortPlugin } from './plugin';
-export {
-    type IReorderRangeMutationParams,
-    ReorderRangeMutation,
-} from './commands/sheets-reorder.mutation';
 
 export {
-    type IReorderRangeCommandParams,
-    ReorderRangeCommand,
-} from './commands/sheets-reorder.command';
+    type ISortRangeCommandParams,
+    SortRangeCommand,
+} from './commands/sheets-sort.command';
 
 export { SheetsSortService } from './services/sheets-sort.service';
 export { type ISortOption, SortType, type IOrderRule } from './services/interface';

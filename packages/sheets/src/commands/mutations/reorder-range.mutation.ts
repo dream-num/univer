@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-// This file provides a ton of mutations to manipulate `FilterModel`.
-// These models would be held on `SheetsFilterService`.
-
 import { CommandType, IUniverInstanceService, ObjectMatrix, Range, Tools } from '@univerjs/core';
 import type { ICellData, IMutation, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';

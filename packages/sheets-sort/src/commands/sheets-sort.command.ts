@@ -17,17 +17,15 @@
 // This file provides a ton of mutations to manipulate `FilterModel`.
 // These models would be held on `SheetsFilterService`.
 
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle, sequenceExecute } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, Rectangle, sequenceExecute } from '@univerjs/core';
 import type { ICellData, ICommand, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { getPrimaryForRange, type ISheetCommandSharedParams, NORMAL_SELECTION_PLUGIN_NAME } from '@univerjs/sheets';
-import { SetSelectionsOperation } from '@univerjs/sheets';
+import type { IReorderRangeCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import { getPrimaryForRange, NORMAL_SELECTION_PLUGIN_NAME, ReorderRangeCommand, SetSelectionsOperation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IOrderRule, SortType } from '../services/interface';
 import { SheetsSortService } from '../services/sheets-sort.service';
-import type { IReorderRangeMutationParams } from './sheets-reorder.mutation';
-import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from './sheets-reorder.mutation';
 
-export interface IReorderRangeCommandParams extends ISheetCommandSharedParams {
+export interface ISortRangeCommandParams extends ISheetCommandSharedParams {
     range: IRange;
     orderRules: IOrderRule[];
     hasTitle: boolean;
@@ -48,11 +46,11 @@ export type CellValue = number | string | null;
 
 export type ICellValueCompareFn = (type: SortType, a: Nullable<ICellData>, b: Nullable<ICellData>) => Nullable<number>;
 
-export const ReorderRangeCommand: ICommand = {
-    id: 'sheet.command.reorder-range',
+export const SortRangeCommand: ICommand = {
+    id: 'sheet.command.sort-range',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
-    handler: (accessor: IAccessor, params: IReorderRangeCommandParams) => {
+
+    handler: (accessor: IAccessor, params: ISortRangeCommandParams) => {
         const { range, orderRules, hasTitle, unitId, subUnitId } = params;
         const sortService = accessor.get(SheetsSortService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -103,21 +101,6 @@ export const ReorderRangeCommand: ICommand = {
             order[oldOrder[oldIndex]] = index;
         });
 
-        const reorderMutation = {
-            id: ReorderRangeMutation.id,
-            params: {
-                unitId,
-                subUnitId,
-                order,
-                range,
-            } as IReorderRangeMutationParams,
-        };
-
-        const undoReorderMutation = {
-            id: ReorderRangeMutation.id,
-            params: ReorderRangeUndoMutationFactory(reorderMutation.params),
-        };
-
         const setSelectionsOperation = {
             id: SetSelectionsOperation.id,
             params: {
@@ -127,22 +110,20 @@ export const ReorderRangeCommand: ICommand = {
                 selections: [{ range, primary: getPrimaryForRange(range, worksheet), style: null }],
             },
         };
-        const redos = [setSelectionsOperation, reorderMutation];
-        const undos = [undoReorderMutation];
+
+        const reorderRangeCommand = {
+            id: ReorderRangeCommand.id,
+            params: {
+                unitId,
+                subUnitId,
+                range,
+                order,
+            } as unknown as IReorderRangeCommandParams,
+        };
 
         const commandService = accessor.get(ICommandService);
-        const res = sequenceExecute(redos, commandService);
-
-        if (res) {
-            const undoRedoService = accessor.get(IUndoRedoService);
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: undos,
-                redoMutations: redos,
-            });
-            return true;
-        }
-        return false;
+        const res = sequenceExecute([setSelectionsOperation, reorderRangeCommand], commandService);
+        return res.result;
     },
 
 };

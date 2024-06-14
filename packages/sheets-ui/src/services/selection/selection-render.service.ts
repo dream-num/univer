@@ -57,7 +57,7 @@ export interface ISelectionRenderService {
 
     interceptor: InterceptorManager<{
         RANGE_MOVE_PERMISSION_CHECK: IInterceptor<boolean, null>;
-        RANGE_FILL_PERMISSION_CHECK: IInterceptor<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton }>;
+        RANGE_FILL_PERMISSION_CHECK: IInterceptor<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>;
     }>;
 
     enableHeaderHighlight(): void;
@@ -122,7 +122,7 @@ export interface ISelectionRenderService {
  */
 
 export const RANGE_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('rangeMovePermissionCheck');
-export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton }>('rangeFillPermissionCheck');
+export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>('rangeFillPermissionCheck');
 
 export class SelectionRenderService implements ISelectionRenderService {
     hasSelection: boolean = false;

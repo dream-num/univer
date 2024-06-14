@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { ICommandInfo, Nullable } from '@univerjs/core';
 import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
@@ -23,6 +23,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';
 import { InputNumber, Radio, RadioGroup } from '@univerjs/design';
+import { RichTextEditingMutation } from '@univerjs/docs';
 import { TextWrappingStyle, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand } from '../../commands/commands/update-doc-drawing.command';
 import styles from './index.module.less';
 
@@ -61,6 +62,10 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
     if (scene == null) {
         return;
     }
+
+    const [disableWrapText, setDisableWrapText] = useState(true);
+    const [disableDistTB, setDisableDistTB] = useState(true);
+    const [disableDistLR, setDisableDistLR] = useState(true);
 
     const [wrappingStyle, setWrappingStyle] = useState(TextWrappingStyle.INLINE);
 
@@ -152,6 +157,15 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
         });
     }
 
+    function updateFocusDrawingState() {
+        const focusDrawings = drawingManagerService.getFocusDrawings();
+        if (focusDrawings.length === 0) {
+            return;
+        }
+
+        updateState(focusDrawings[0]);
+    }
+
     function updateState(drawingParam: IDrawingParam) {
         const drawing = documentDataModel?.getSnapshot()?.drawings?.[drawingParam.drawingId];
         if (drawing == null) {
@@ -174,6 +188,27 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
         setDistToText(distToText);
 
         setWrapText(wrapText as unknown as string);
+
+        setDisableWrapText(layoutType !== PositionedObjectLayoutType.WRAP_SQUARE);
+
+        if (
+            layoutType === PositionedObjectLayoutType.WRAP_NONE ||
+            layoutType === PositionedObjectLayoutType.INLINE
+        ) {
+            setDisableDistTB(true);
+        } else {
+            setDisableDistTB(false);
+        }
+
+        if (
+            layoutType === PositionedObjectLayoutType.WRAP_NONE ||
+            layoutType === PositionedObjectLayoutType.INLINE ||
+            layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM
+        ) {
+            setDisableDistLR(true);
+        } else {
+            setDisableDistLR(false);
+        }
 
         if (layoutType === PositionedObjectLayoutType.WRAP_NONE) {
             if (behindDoc === BooleanNumber.TRUE) {
@@ -199,21 +234,27 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
     }
 
     useEffect(() => {
-        const focusDrawings = drawingManagerService.getFocusDrawings();
-        if (focusDrawings.length === 0) {
-            return;
-        }
-
-        updateState(focusDrawings[0]);
+        updateFocusDrawingState();
 
         const subscription = drawingManagerService.focus$.subscribe((drawingParams) => {
+            if (drawingParams.length === 0) {
+                return;
+            }
             updateState(drawingParams[0]);
+        });
+
+        // Need to update focus drawing position when focus drawing wrap style changed or other edit which will affect the position.
+        const mutationListener = commandService.onCommandExecuted(async (command: ICommandInfo) => {
+            if (command.id === RichTextEditingMutation.id) {
+                updateFocusDrawingState();
+            }
         });
 
         return () => {
             subscription.unsubscribe();
+            mutationListener.dispose();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -247,7 +288,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
             </div>
             <div className={clsx(styles.imageCommonPanelRow)}>
                 <div className={clsx(styles.imageCommonPanelColumn)}>
-                    <RadioGroup value={wrapText} onChange={handleWrapTextChange} direction="horizontal">
+                    <RadioGroup disabled={disableWrapText} value={wrapText} onChange={handleWrapTextChange} direction="horizontal">
                         <Radio value={WrapTextType.BOTH_SIDES}>{localeService.t('image-text-wrap.bothSide')}</Radio>
                         <Radio value={WrapTextType.LEFT}>{localeService.t('image-text-wrap.leftOnly')}</Radio>
                         <Radio value={WrapTextType.RIGHT}>{localeService.t('image-text-wrap.rightOnly')}</Radio>
@@ -271,7 +312,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={distToText.distT} onChange={(val) => { handleDistToTextChange(val, 'distT'); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber disabled={disableDistTB} precision={1} value={distToText.distT} onChange={(val) => { handleDistToTextChange(val, 'distT'); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -285,7 +326,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={distToText.distL} onChange={(val) => { handleDistToTextChange(val, 'distL'); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber disabled={disableDistLR} precision={1} value={distToText.distL} onChange={(val) => { handleDistToTextChange(val, 'distL'); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -301,7 +342,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={distToText.distB} onChange={(val) => { handleDistToTextChange(val, 'distB'); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber disabled={disableDistTB} precision={1} value={distToText.distB} onChange={(val) => { handleDistToTextChange(val, 'distB'); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -315,7 +356,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber precision={1} value={distToText.distR} onChange={(val) => { handleDistToTextChange(val, 'distR'); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber disabled={disableDistLR} precision={1} value={distToText.distR} onChange={(val) => { handleDistToTextChange(val, 'distR'); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>

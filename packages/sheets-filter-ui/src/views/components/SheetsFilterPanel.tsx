@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { ComponentType } from 'react';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Button, type ISegmentedProps, Segmented } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { IUIPartsService, useObservable } from '@univerjs/ui';
+import { ComponentContainer, useComponentsOfPart, useObservable } from '@univerjs/ui';
 import { ICommandService, LocaleService } from '@univerjs/core';
 
-import { filter, map, of } from 'rxjs';
+import { of } from 'rxjs';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { FilterBy, SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
@@ -69,13 +68,13 @@ export function FilterPanel() {
     const filterService = useDependency(SheetsFilterService);
     const range = filterService.activeFilterModel?.getRange();
     const colIndex = sheetsFilterPanelService.col;
-    const FilterPanelEmbedPointPart = useComponentsForPart('filter-panel-embed-point');
+    const FilterPanelEmbedPointPart = useComponentsOfPart('filter-panel-embed-point');
 
     return (
         <div className={styles.sheetsFilterPanel}>
             <ComponentContainer
                 components={FilterPanelEmbedPointPart}
-                commonProps={{ range, colIndex, onClose: onCancel }}
+                sharedProps={{ range, colIndex, onClose: onCancel }}
             />
             <div className={styles.sheetsFilterPanelHeader}>
                 <Segmented value={filterBy} options={options} onChange={(value) => onFilterByTypeChange(value as FilterBy)}></Segmented>
@@ -110,32 +109,32 @@ function useFilterByOptions(localeService: LocaleService): ISegmentedProps['opti
     , [locale, localeService]);
 }
 
-export function useComponentsForPart(part: string) {
-    const uiPartsService = useDependency(IUIPartsService);
-    const updateCounterRef = useRef<number>(0);
-    const componentPartUpdateCount = useObservable(
-        () => uiPartsService.componentRegistered$.pipe(
-            filter((key) => key === part),
-            map(() => updateCounterRef.current += 1)
-        ),
-        undefined,
-        undefined,
-        [uiPartsService]
-    );
-    return useMemo(() => uiPartsService.getComponents(part), [componentPartUpdateCount]);
-}
+// export function useComponentsForPart(part: string) {
+//     const uiPartsService = useDependency(IUIPartsService);
+//     const updateCounterRef = useRef<number>(0);
+//     const componentPartUpdateCount = useObservable(
+//         () => uiPartsService.componentRegistered$.pipe(
+//             filter((key) => key === part),
+//             map(() => updateCounterRef.current += 1)
+//         ),
+//         undefined,
+//         undefined,
+//         [uiPartsService]
+//     );
+//     return useMemo(() => uiPartsService.getComponents(part), [componentPartUpdateCount]);
+// }
 
-export function ComponentContainer(props: {
-    components?: Set<() => ComponentType>;
-    fallback?: React.ReactNode;
-    commonProps?: any;
-}) {
-    const { components, fallback, commonProps } = props;
-    if (!components || components.size === 0) {
-        return fallback ?? null;
-    }
+// export function ComponentContainer(props: {
+//     components?: Set<() => ComponentType>;
+//     fallback?: React.ReactNode;
+//     commonProps?: any;
+// }) {
+//     const { components, fallback, commonProps } = props || {};
+//     if (!components || components.size === 0) {
+//         return fallback ?? null;
+//     }
 
-    return Array.from(components.values()).map((component, index) =>
-        React.createElement(component(), { key: `${index}`, ...commonProps })
-    );
-}
+//     return Array.from(components.values()).map((component, index) =>
+//         React.createElement(component(), { key: `${index}`, ...commonProps })
+//     );
+// }

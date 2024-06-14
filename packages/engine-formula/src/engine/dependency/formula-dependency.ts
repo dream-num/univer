@@ -378,7 +378,7 @@ export class FormulaDependencyGenerator extends Disposable {
             throw new Error('astNode is null');
         }
 
-        this._formulaASTCache.set(`${unitId}${formulaString}##${refOffsetX}${refOffsetY}`, astNode);
+        this._formulaASTCache.set(`${unitId}${formulaString}##${refOffsetX}-${refOffsetY}`, astNode);
 
         return astNode;
     }

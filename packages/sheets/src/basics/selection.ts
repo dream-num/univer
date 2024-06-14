@@ -22,8 +22,7 @@ import type {
     Nullable,
     ThemeService,
 } from '@univerjs/core';
-import { ColorKit, makeCellRangeToRangeData } from '@univerjs/core';
-import { getCellInfoInMergeData } from '@univerjs/engine-render';
+import { ColorKit, getCellInfoInMergeData, makeCellRangeToRangeData } from '@univerjs/core';
 
 export const SELECTION_CONTROL_BORDER_BUFFER_WIDTH = 1.5; // The draggable range of the selection is too thin, making it easy for users to miss. Therefore, a buffer gap is provided to make it easier for users to select.
 

@@ -97,10 +97,6 @@ export class WorksheetPermissionService extends RxDisposable {
             this._worksheetProtectionRuleModel.ruleChange$.subscribe((info) => {
                 switch (info.type) {
                     case 'add': {
-                        getAllWorksheetPermissionPoint().forEach((F) => {
-                            const instance = new F(info.unitId, info.subUnitId);
-                            this._permissionService.addPermissionPoint(instance);
-                        });
                         break;
                     }
                     case 'delete': {

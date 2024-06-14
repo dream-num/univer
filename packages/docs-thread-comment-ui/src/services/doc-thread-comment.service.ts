@@ -15,24 +15,15 @@
  */
 
 import type { ITextRange, Nullable } from '@univerjs/core';
+import type { IThreadComment } from '@univerjs/thread-comment';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
-export type EditingComment = {
-    type: 'add';
-    range: ITextRange;
-} | {
-    type: 'edit';
-    commentId: string;
-};
-
-export class DocThreadCommentPanelService {
-    readonly _visible$ = new BehaviorSubject(false);
-
-    readonly _editing$ = new Subject<Nullable<EditingComment>>();
-    readonly editing$ = this._editing$.asObservable();
+export class DocThreadCommentService {
+    private _addingComment$ = new BehaviorSubject<Nullable<IThreadComment & ITextRange>>(undefined);
+    readonly addingComment$ = this._addingComment$.asObservable();
 
     constructor(
         @ISidebarService private readonly _sidebarService: ISidebarService,
@@ -40,17 +31,11 @@ export class DocThreadCommentPanelService {
     ) {
     }
 
-    showPanel(editing: Nullable<EditingComment>) {
-        this._visible$.next(true);
-        this._editing$.next(editing);
+    startAdd(comment: IThreadComment & ITextRange) {
+        this._addingComment$.next(comment);
     }
 
-    closePanel() {
-        this._visible$.next(false);
-        this._editing$.next(null);
-    }
-
-    switchActiveComment(editing: EditingComment) {
-        this._editing$.next(editing);
+    endAdd() {
+        this._addingComment$.next(undefined);
     }
 }

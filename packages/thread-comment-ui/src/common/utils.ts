@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export const PLUGIN_NAME = 'DOC_THREAD_COMMENT_UI_PLUGIN';
+import dayjs from 'dayjs';
 
-export const DEFAULT_DOC_SUBUNIT_ID = 'default_doc';
-
-export const DEFAULT_TEMP_COMMENT_ID = 'default_comment';
+export function getDT() {
+    return dayjs().format('YYYY/MM/DD HH:mm');
+}

@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-import { CommandType, CustomRangeType, type ICommand, ICommandService, sequenceExecuteAsync } from '@univerjs/core';
-import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
+import type { ICommand, ITextRange } from '@univerjs/core';
+import { CommandType, CustomRangeType, ICommandService, sequenceExecuteAsync } from '@univerjs/core';
+import { addCustomRangeFactory, serializeTextRange } from '@univerjs/docs';
+import type { TextRange } from '@univerjs/engine-render';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { AddCommentMutation, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
+import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 
-interface IAddDocCommentComment {
+export interface IAddDocCommentComment {
     unitId: string;
     comment: IThreadComment;
+    range: ITextRange;
 }
 
 export const AddDocCommentComment: ICommand<IAddDocCommentComment> = {
@@ -31,20 +35,26 @@ export const AddDocCommentComment: ICommand<IAddDocCommentComment> = {
         if (!params) {
             return false;
         }
-        const { comment: originComment } = params;
+        const { comment: originComment, unitId, range } = params;
         const dataSourceService = accessor.get(IThreadCommentDataSourceService);
         const comment = await dataSourceService.addComment(originComment);
         const commandService = accessor.get(ICommandService);
 
-        const doMutation = addCustomRangeBySelectionFactory(accessor, {
+        const doMutation = addCustomRangeFactory({
             rangeId: comment.id,
             rangeType: CustomRangeType.COMMENT,
+            unitId,
+            range,
         });
 
         if (doMutation) {
             const commentMutation = {
                 id: AddCommentMutation.id,
-                params,
+                params: {
+                    unitId,
+                    subUnitId: DEFAULT_DOC_SUBUNIT_ID,
+                    comment,
+                },
             };
 
             return (await sequenceExecuteAsync([commentMutation, doMutation], commandService)).result;

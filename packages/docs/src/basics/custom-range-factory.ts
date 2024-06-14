@@ -16,23 +16,21 @@
 
 import type { CustomRangeType, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
 import { IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
-import { serializeTextRange, TextSelectionManagerService } from '../services/text-selection-manager.service';
+import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
 interface IAddCustomRangeParam {
     unitId: string;
     range: ITextRange;
     segmentId?: string;
-    textRanges: ITextRangeWithStyle[];
     rangeId: string;
     rangeType: CustomRangeType;
 }
 
 export function addCustomRangeFactory(param: IAddCustomRangeParam) {
-    const { unitId, range, rangeId, rangeType, segmentId, textRanges } = param;
+    const { unitId, range, rangeId, rangeType, segmentId } = param;
     const { startOffset, endOffset } = range;
 
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -40,7 +38,7 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam) {
         params: {
             unitId,
             actions: [],
-            textRanges,
+            textRanges: undefined,
         },
     };
 
@@ -106,9 +104,9 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
-    const selections = textSelectionManagerService.getSelections()?.slice(0, 1);
+    const selection = textSelectionManagerService.getSelections()?.[0];
 
-    if (!Array.isArray(selections) || selections.length === 0) {
+    if (!selection) {
         return false;
     }
 
@@ -118,14 +116,16 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     }
 
     const unitId = documentDataModel.getUnitId();
-    const textRanges = selections.map(serializeTextRange);
 
     const doMutation = addCustomRangeFactory({
         unitId,
-        range: selections[0] as ITextRange,
+        range: {
+            startOffset: selection.startOffset!,
+            endOffset: selection.endOffset!,
+            collapsed: true,
+        },
         rangeId,
         rangeType,
-        textRanges,
         segmentId,
     });
 

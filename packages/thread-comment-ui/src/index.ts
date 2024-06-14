@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { getDT } from './common/utils';
 export { UniverThreadCommentUIPlugin } from './plugin';
 export { ToggleSheetCommentPanelOperation, SetActiveCommentOperation, type ISetActiveCommentOperationParams } from './commands/operations/comment.operations';
 export { ThreadCommentPanelService, type ActiveCommentInfo } from './services/thread-comment-panel.service';

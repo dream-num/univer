@@ -18,11 +18,11 @@ import type { IAccessor } from '@wendellhu/redi';
 import { UniverInstanceType } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
+import { ShowCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
 
 export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: AddDocCommentComment.id,
+        id: ShowCommentPanelOperation.id,
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'BoldSingle',

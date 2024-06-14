@@ -21,13 +21,13 @@ import React, { useRef, useState } from 'react';
 import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
 import { ICommandService, LocaleService, Tools, type UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
-import dayjs from 'dayjs';
 import { Dropdown, Menu, MenuItem } from '@univerjs/design';
 import type { IUser } from '@univerjs/protocol';
 import cs from 'clsx';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { ThreadCommentEditor } from '../thread-comment-editor';
 import { transformDocument2TextNodes, transformTextNodes2Document } from '../thread-comment-editor/util';
+import { getDT } from '../../common/utils';
 import styles from './index.module.less';
 
 export interface IThreadCommentTreeProps {
@@ -45,6 +45,8 @@ export interface IThreadCommentTreeProps {
     autoFocus?: boolean;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
+    onAddComment?: (comment: IThreadComment) => boolean;
+    onDeleteComment?: (comment: IThreadComment) => boolean;
 }
 
 export interface IThreadCommentItemProps {
@@ -58,12 +60,14 @@ export interface IThreadCommentItemProps {
     onReply: (user: IUser | undefined) => void;
     isRoot?: boolean;
     onClose?: () => void;
+    onAddComment?: (comment: IThreadComment) => boolean;
+    onDeleteComment?: (comment: IThreadComment) => boolean;
 }
 
 const MOCK_ID = '__mock__';
 
 const ThreadCommentItem = (props: IThreadCommentItemProps) => {
-    const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved, isRoot, onClose } = props;
+    const { item, unitId, subUnitId, editing, onEditingChange, onReply, resolved, isRoot, onClose, onDeleteComment } = props;
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const userManagerService = useDependency(UserManagerService);
@@ -72,7 +76,12 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const isCommentBySelf = currentUser?.userID === item.personId;
     const isMock = item.id === MOCK_ID;
     const [showReply, setShowReply] = useState(false);
+
     const handleDeleteItem = () => {
+        if (onDeleteComment?.(item) === false) {
+            return;
+        }
+
         commandService.executeCommand(
             isRoot ? DeleteCommentTreeCommand.id : DeleteCommentCommand.id,
             {
@@ -185,6 +194,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         autoFocus,
         onMouseEnter,
         onMouseLeave,
+        onAddComment,
+        onDeleteComment,
     } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [isHover, setIsHover] = useState(false);
@@ -235,6 +246,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         onClose?.();
     };
 
+    const subUnitName = getSubUnitName(comments?.root.subUnitId ?? subUnitId);
+
     return (
         <div
             className={cs(styles.threadComment, {
@@ -256,8 +269,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 <div className={styles.threadCommentTitlePosition}>
                     <div className={styles.threadCommentTitleHighlight} />
                     {refStr || comments?.root.ref}
-                    {' · '}
-                    {getSubUnitName(comments?.root.subUnitId ?? subUnitId)}
+                    {subUnitName ? ' · ' : ''}
+                    {subUnitName}
                 </div>
                 {comments
                     ? (
@@ -311,6 +324,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                     },
                                 }]));
                             }}
+                            onAddComment={onAddComment}
+                            onDeleteComment={onDeleteComment}
                         />
                     )
                 )}
@@ -322,22 +337,28 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                             key={`${autoFocus}`}
                             ref={editorRef}
                             onSave={({ text, attachments }) => {
+                                const comment: IThreadComment = {
+                                    text,
+                                    attachments,
+                                    dT: getDT(),
+                                    id: Tools.generateRandomId(),
+                                    ref: refStr!,
+                                    personId: currentUser?.userID!,
+                                    parentId: comments?.root.id,
+                                    unitId,
+                                    subUnitId,
+                                };
+
+                                if (onAddComment?.(comment) === false) {
+                                    return;
+                                }
+
                                 commandService.executeCommand(
                                     AddCommentCommand.id,
                                     {
                                         unitId,
                                         subUnitId,
-                                        comment: {
-                                            text,
-                                            attachments,
-                                            dT: dayjs().format('YYYY/MM/DD HH:mm'),
-                                            id: Tools.generateRandomId(),
-                                            ref: refStr,
-                                            personId: currentUser?.userID,
-                                            parentId: comments?.root.id,
-                                            unitId,
-                                            subUnitId,
-                                        },
+                                        comment,
                                     } as IAddCommentCommandParams
                                 );
                             }}

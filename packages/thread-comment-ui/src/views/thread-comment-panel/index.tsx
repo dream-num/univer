@@ -18,11 +18,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
-import { ICommandService, LocaleService, type UniverInstanceType, UserManagerService } from '@univerjs/core';
+import type { Nullable, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import { Button, Select } from '@univerjs/design';
 import { IncreaseSingle } from '@univerjs/icons';
 import type { Observable } from 'rxjs';
+import type { IThreadCommentTreeProps } from '../thread-comment-tree';
 import { ThreadCommentTree } from '../thread-comment-tree';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
@@ -39,6 +41,10 @@ export interface IThreadCommentPanelProps {
     onItemLeave?: (comment: IThreadComment) => void;
     onItemEnter?: (comment: IThreadComment) => void;
     showFilter?: boolean;
+    disableAdd?: boolean;
+    tempComment?: Nullable<IThreadComment>;
+    onAddComment?: IThreadCommentTreeProps['onAddComment'];
+    onDeleteComment?: IThreadCommentTreeProps['onDeleteComment'];
 }
 
 export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
@@ -53,6 +59,10 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         onItemLeave,
         onItemEnter,
         showFilter = true,
+        disableAdd,
+        tempComment,
+        onAddComment,
+        onDeleteComment,
     } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
@@ -68,14 +78,19 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const currentUser = userService.currentUser;
     const shouldScroll = useRef(true);
     const prefix = 'panel';
+
     const comments = useMemo(() => {
-        if (unit === 'all') {
-            const filteredComments = unitComments.map((i) => i[1]).flat().filter((i) => !i.parentId);
-            return sortComments ? sortComments(filteredComments) : filteredComments;
-        } else {
-            return unitComments.find((i) => i[0] === subUnitId)?.[1] ?? [];
-        }
-    }, [unit, unitComments, subUnitId, sortComments]);
+        const res = (() => {
+            if (unit === 'all') {
+                const filteredComments = unitComments.map((i) => i[1]).flat().filter((i) => !i.parentId);
+                return sortComments ? sortComments(filteredComments) : filteredComments;
+            } else {
+                return unitComments.find((i) => i[0] === subUnitId)?.[1] ?? [];
+            }
+        })();
+
+        return tempComment ? [...res, tempComment] : res;
+    }, [unit, unitComments, subUnitId, sortComments, tempComment]);
 
     const statuedComments = useMemo(() => {
         if (status === 'resolved') {
@@ -199,6 +214,8 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     onClose={() => onResolve?.(comment.id)}
                     onMouseEnter={() => onItemEnter?.(comment)}
                     onMouseLeave={() => onItemLeave?.(comment)}
+                    onAddComment={onAddComment}
+                    onDeleteComment={onDeleteComment}
                 />
             ))}
             {statuedComments.length
@@ -223,6 +240,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                                     className={styles.threadCommentPanelAdd}
                                     type="primary"
                                     onClick={onAdd}
+                                    disabled={disableAdd}
                                 >
                                     <IncreaseSingle />
                                     {localeService.t('threadCommentUI.panel.addComment')}

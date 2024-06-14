@@ -20,6 +20,7 @@ import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DocThreadCommentPanel } from '../views/doc-thread-comment-panel';
+import { ShowCommentPanelOperation, StartAddCommentOperation } from '../commands/operations/show-comment-panel.operation';
 import { AddDocCommentMenuItemFactory } from './menu';
 
 export interface IDocThreadCommentUIConfig {
@@ -43,7 +44,11 @@ export class DocThreadCommentUIController extends Disposable {
     }
 
     private _initCommands() {
-        [AddDocCommentComment].forEach((command) => {
+        [
+            AddDocCommentComment,
+            ShowCommentPanelOperation,
+            StartAddCommentOperation,
+        ].forEach((command) => {
             this.disposeWithMe(this._commandService.registerCommand(command));
         });
     }

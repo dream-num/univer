@@ -294,6 +294,9 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
 
         // Need to update focus drawing position when focus drawing changes.
         const subscription = drawingManagerService.focus$.subscribe((drawingParams) => {
+            if (drawingParams.length === 0) {
+                return;
+            }
             updateState(drawingParams[0]);
         });
 

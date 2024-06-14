@@ -173,7 +173,7 @@ jobs:
               run: pnpm install cnpm -g
 
             - name: 🐙 Sync to cnpm
-              run: pnpm sync-cnpm
+              run: pnpm sync:cnpm
 
     build-storybook:
         runs-on: ubuntu-latest

@@ -129,7 +129,7 @@ export class SheetsSortUIController extends RxDisposable {
             children: { label: 'CustomSortPanel' },
             destroyOnClose: true,
             defaultPosition: getCustomSortDialogDefaultPosition(),
-            preservePositionOnDestroy: true,
+            preservePositionOnDestroy: false,
             onClose: () => this._closePanel(),
             mask: true,
         });

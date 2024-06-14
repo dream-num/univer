@@ -83,7 +83,11 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     private _addComponent(workbook: Workbook) {
         const { scene, components } = this._context;
 
-        const worksheet = workbook.ensureActiveSheet(); // Automatically switch to the first sheet
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            throw new Error('No active sheet found');
+        }
+
         const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
 
         this._addViewport(worksheet);

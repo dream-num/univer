@@ -37,7 +37,6 @@ import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validati
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { FUniver } from '@univerjs/facade';
 import { enUS, ruRU, zhCN } from '../locales';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -98,7 +97,133 @@ univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+        id: 'workbookId',
+        sheetOrder: ['worksheetId'],
+        name: 'UniverSheet Demo',
+        appVersion: '3.0.0-alpha',
+        locale: 'zhCN' as LocaleType,
+        styles: {},
+        sheets: {
+            worksheetId: {
+                name: '工作表1',
+                id: 'worksheetId',
+                tabColor: '',
+                hidden: 0,
+                rowCount: 1000,
+                columnCount: 20,
+                zoomRatio: 1,
+                scrollTop: 0,
+                scrollLeft: 0,
+                defaultColumnWidth: 73,
+                defaultRowHeight: 19,
+                mergeData: [],
+                cellData: {
+                    0: {
+                        0: {
+                            v: 'A1',
+                        },
+                        1: {
+                            v: 'B1',
+                        },
+                        2: {
+                            v: 'C1',
+                        },
+                        3: {
+                            v: 'D1',
+                        },
+                    },
+                    1: {
+                        0: {
+                            v: 'A2',
+                        },
+                        1: {
+                            v: 'B2',
+                        },
+                        2: {
+                            v: 'C2',
+                        },
+                        3: {
+                            v: 'D2',
+                        },
+                    },
+                    2: {
+                        0: {
+                            v: 'A3',
+                        },
+                        1: {
+                            v: 'B3',
+                        },
+                        2: {
+                            v: 'C3',
+                        },
+                        3: {
+                            v: 'D3',
+                        },
+                    },
+                    3: {
+                        0: {
+                            v: 'A4',
+                        },
+                        1: {
+                            v: 'B4',
+                        },
+                        2: {
+                            v: 'C4',
+                        },
+                        3: {
+                            v: 'D4',
+                        },
+                    },
+                    4: {
+                        0: {
+                            v: 'A5',
+                        },
+                        1: {
+                            v: 'B5',
+                        },
+                        2: {
+                            v: 'C5',
+                        },
+                        3: {
+                            v: 'D5',
+                        },
+                    },
+                },
+                showGridlines: 1,
+                selections: ['A1'],
+                rightToLeft: 0,
+            },
+            sheet1: {
+                name: 'sheet1',
+                id: 'sheet1',
+                cellData: {},
+            },
+        },
+        resources: [
+            {
+                name: 'SHEET_FILTER_PLUGIN',
+                data: JSON.stringify({
+                    worksheetId: {
+                        ref: {
+                            startColumn: 1,
+                            endColumn: 2,
+                            startRow: 1,
+                            endRow: 2,
+                        },
+
+                        filterColumns: [{
+                            colId: 2,
+                            filters: {
+                                filters: ['1'],
+                            },
+                        }],
+                        cachedFilteredOut: [],
+                    },
+                }),
+            },
+        ],
+    });
 }
 
 const mockUser = {

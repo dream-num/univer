@@ -33,7 +33,7 @@ describe('test worksheet', () => {
     function prepare(workbookData?: IWorkbookData) {
         const testBed = createCoreTestBed(workbookData);
         univer = testBed.univer;
-        worksheet = testBed.sheet.ensureActiveSheet();
+        worksheet = testBed.sheet.getActiveSheet()!;
     }
 
     afterEach(() => {

@@ -403,5 +403,8 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
                 sheetOrder.push(sheetId);
             }
         }
+
+        // Active the first sheet.
+        this.ensureActiveSheet();
     }
 }

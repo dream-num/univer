@@ -195,7 +195,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                         offsetY: rowOffset,
                     };
                     this._scrollManagerService.setScrollInfoToCurrSheetWithoutNotify(lastestScrollInfo);
-                    this._scrollManagerService.setScrollInfoToSnapshot({ ...lastestScrollInfo, viewportScrollX, viewportScrollY });
+                    // snapshot is diff by diff people!
+                    // this._scrollManagerService.setScrollInfoToSnapshot({ ...lastestScrollInfo, viewportScrollX, viewportScrollY });
                 })
             )
         );
@@ -288,18 +289,10 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 const scene = sheetObject.scene;
                 const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
                 const currScrollInfo = this._scrollManagerService.getScrollInfoByParam(param as unknown as IScrollManagerSearchParam);
-
-                const workbook = this._context.unit;
-                const worksheet = workbook.getActiveSheet();
-
                 if (viewportMain) {
                     if (currScrollInfo) {
                         viewportMain.viewportScrollX = currScrollInfo.viewportScrollX || 0;
                         viewportMain.viewportScrollY = currScrollInfo.viewportScrollY || 0;
-                    } else {
-                        const { scrollLeft, scrollTop } = worksheet.getScrollLeftTopFromSnapshot();
-                        viewportMain.viewportScrollX = scrollLeft || 0;
-                        viewportMain.viewportScrollY = scrollTop || 0;
                     }
                     this._updateSceneSize(param as unknown as ISheetSkeletonManagerParam);
                 }

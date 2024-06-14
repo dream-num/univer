@@ -84,7 +84,7 @@ export interface ICellDataForSheetInterceptor extends ICellData {
     customRender?: Nullable<ICellCustomRender[]>;
     interceptorAutoHeight?: number;
     /**
-     * whether cell can be covered when sibling is overflow
+     * can cell be covered when sibling is overflow
      */
     coverable?: boolean;
 }

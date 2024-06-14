@@ -39,7 +39,7 @@ export interface ICanvasFloatDom {
     componentKey: string;
     unitId?: string;
     subUnitId?: string;
-    props?: any;
+    props?: Record<string, any>;
 }
 
 interface ICanvasFloatDomInfo {

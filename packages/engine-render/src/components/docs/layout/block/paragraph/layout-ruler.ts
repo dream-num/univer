@@ -519,7 +519,7 @@ function _lineOperator(
         const affectInlineDrawings = ctx.paragraphConfigCache.get(line.paragraphIndex)?.paragraphInlineSkeDrawings;
         // Update inline drawings after the line is layout.
         if (affectInlineDrawings && affectInlineDrawings.size > 0) {
-            __updatePreLineDrawingPosition(line, affectInlineDrawings);
+            __updatePreLineDrawingPosition(line, affectInlineDrawings, drawingAnchor?.get(paragraphIndex)?.top);
         }
     }
 
@@ -926,13 +926,17 @@ function __getLineHeight(
 
 function __updatePreLineDrawingPosition(
     line: IDocumentSkeletonLine,
-    paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>
+    paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>,
+    blockAnchorTop?: number
 ) {
+    const column = line.parent;
     const page = line?.parent?.parent?.parent;
 
-    if (page == null) {
+    if (page == null || column == null) {
         return;
     }
+
+    const isPageBreak = __checkPageBreak(column);
 
     const drawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const { top } = line;
@@ -964,6 +968,11 @@ function __updatePreLineDrawingPosition(
                 drawing.width = width;
                 drawing.height = height;
                 drawing.angle = angle;
+                drawing.isPageBreak = isPageBreak;
+                drawing.lineTop = top;
+                drawing.columnLeft = column.left;
+                drawing.blockAnchorTop = blockAnchorTop ?? top;
+                drawing.lineHeight = line.lineHeight;
 
                 drawings.set(drawing.drawingId, drawing);
             }

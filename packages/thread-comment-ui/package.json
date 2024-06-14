@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/thread-comment-ui",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "private": false,
     "description": "Univer common thread comment UI plugin",
     "author": "DreamNum <developer@univer.ai>",
@@ -59,14 +59,15 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "tsc && vite build",
+        "sync:cnpm": "cnpm sync"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "clsx": ">=2.0.0",
         "dayjs": ">=1.11.0",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
@@ -74,7 +75,7 @@
     },
     "dependencies": {
         "@univerjs/icons": "^0.1.56",
-        "@univerjs/protocol": "^0.1.37",
+        "@univerjs/protocol": "0.1.38-alpha.3",
         "@univerjs/thread-comment": "workspace:*"
     },
     "devDependencies": {
@@ -82,7 +83,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.11",
         "less": "^4.2.0",

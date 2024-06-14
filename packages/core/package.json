@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/core",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "private": false,
     "description": "Core library for Univer.",
     "author": "DreamNum <developer@univer.ai>",
@@ -56,14 +56,15 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "tsc && vite build",
+        "sync:cnpm": "cnpm sync"
     },
     "peerDependencies": {
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "^0.1.37",
+        "@univerjs/protocol": "0.1.38-alpha.3",
         "nanoid": "5.0.7",
         "numeral": "^2.0.6",
         "ot-json1": "^1.0.2"
@@ -71,7 +72,7 @@
     "devDependencies": {
         "@types/numeral": "^2.0.5",
         "@univerjs/shared": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
         "vite": "^5.2.13",

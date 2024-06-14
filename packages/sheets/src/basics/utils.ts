@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Worksheet } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange, Worksheet } from '@univerjs/core';
+import { ObjectMatrix } from '@univerjs/core';
+import type { Nullable } from 'vitest';
 import type { IExpandParams } from '../commands/commands/utils/selection-utils';
 
 export const groupByKey = <T = Record<string, unknown>>(arr: T[], key: string, blankKey = '') => {
@@ -156,3 +158,66 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
 
     return destRange;
 }
+/**
+ * Generate cellValue from range and set null
+ * @param range
+ * @returns
+ */
+export function generateNullCell(range: IRange[]): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
+    const cellValue = new ObjectMatrix<Nullable<ICellData>>();
+    range.forEach((range: IRange) => {
+        const { startRow, startColumn, endRow, endColumn } = range;
+        for (let i = startRow; i <= endRow; i++) {
+            for (let j = startColumn; j <= endColumn; j++) {
+                cellValue.setValue(i, j, null);
+            }
+        }
+    });
+
+    return cellValue.clone();
+}
+
+/**
+ * Generate cellValue from range and set v/p/f/si/custom to null
+ * @param range
+ * @returns
+ */
+export function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
+    const cellValue = new ObjectMatrix<ICellData>();
+    range.forEach((range: IRange) => {
+        const { startRow, startColumn, endRow, endColumn } = range;
+        for (let i = startRow; i <= endRow; i++) {
+            for (let j = startColumn; j <= endColumn; j++) {
+                cellValue.setValue(i, j, {
+                    v: null,
+                    p: null,
+                    f: null,
+                    si: null,
+                    custom: null,
+                });
+            }
+        }
+    });
+
+    return cellValue.clone();
+}
+
+// Generate cellValue from range and set s to null
+export function generateNullCellStyle(ranges: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
+    const cellValue = new ObjectMatrix<ICellData>();
+
+    ranges.forEach((range: IRange) => {
+        const { startRow, startColumn, endRow, endColumn } = range;
+
+        for (let i = startRow; i <= endRow; i++) {
+            for (let j = startColumn; j <= endColumn; j++) {
+                cellValue.setValue(i, j, {
+                    s: null,
+                });
+            }
+        }
+    });
+
+    return cellValue.clone();
+}
+

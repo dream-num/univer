@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/design",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "private": false,
     "description": "UI component library for building exceptional Univer.",
     "author": "DreamNum <developer@univer.ai>",
@@ -61,7 +61,8 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "tsc && vite build",
+        "sync:cnpm": "cnpm sync"
     },
     "peerDependencies": {
         "clsx": ">=2.0.0",

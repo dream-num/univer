@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/storybook",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "private": true,
     "description": "Some infrastructures for univerjs",
     "author": "DreamNum <developer@univer.ai>",
@@ -30,7 +30,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "css-loader": "^6.10.0",
         "less-loader": "^12.2.0",
         "storybook": "8.1.6",

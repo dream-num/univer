@@ -108,7 +108,7 @@ export {
 } from './services/undoredo/undoredo.service';
 export * from './shared';
 export { fromCallback } from './shared/rxjs';
-export { UserManagerService } from './services/user-manager/user-manager.service';
+export { UserManagerService, type IUser } from './services/user-manager/user-manager.service';
 
 // #region sheet
 

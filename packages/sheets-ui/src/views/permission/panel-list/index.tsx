@@ -55,7 +55,7 @@ export const SheetPermissionPanelList = () => {
     const authzIoService = useDependency(IAuthzIoService);
     const permissionService = useDependency(IPermissionService);
     const usesManagerService = useDependency(UserManagerService);
-    const currentUser = usesManagerService.currentUser;
+    const currentUser = usesManagerService.getCurrentUser();
     const [currentRuleRanges, currentRuleRangesSet] = useState<IRange[]>([]);
 
     useObservable(worksheetProtectionModel.ruleRefresh$);
@@ -225,10 +225,10 @@ export const SheetPermissionPanelList = () => {
 
                             const hasManagerPermission = manageCollaboratorAction || currentUser.userID === item.creator?.userID;
 
-                            const worksheet = workbook.getActiveSheet();
-
                             let ruleName = '';
 
+                            const targetSheet = workbook.getSheetBySheetId(rule.subUnitId);
+                            const targetName = targetSheet?.getName();
                             if (rule.unitType === UnitObject.SelectRange) {
                                 const ranges = (rule as IRangeProtectionRule).ranges;
                                 const rangeStr = ranges?.length
@@ -237,9 +237,9 @@ export const SheetPermissionPanelList = () => {
                                         return v === 'NaN' ? '' : v;
                                     }).filter((r) => !!r).join(',')
                                     : '';
-                                ruleName = `${worksheet.getName()}(${rangeStr})`;
+                                ruleName = `${targetName}(${rangeStr})`;
                             } else if (rule.unitType === UnitObject.Worksheet) {
-                                ruleName = worksheet.getName();
+                                ruleName = targetName || '';
                             }
 
                             return (

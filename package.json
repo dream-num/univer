@@ -1,7 +1,7 @@
 {
     "name": "univer",
     "type": "module",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "private": true,
     "packageManager": "pnpm@9.0.5",
     "author": "DreamNum Inc. <developer@univer.ai>",
@@ -42,7 +42,8 @@
         "release": "release-it",
         "release:alpha": "release-it preminor --preRelease=alpha",
         "release:beta": "release-it preminor --preRelease=beta",
-        "release:rc": "release-it prerelease --preRelease=rc"
+        "release:rc": "release-it prerelease --preRelease=rc",
+        "sync:cnpm": "turbo sync:cnpm"
     },
     "devDependencies": {
         "@antfu/eslint-config": "^2.21.0",

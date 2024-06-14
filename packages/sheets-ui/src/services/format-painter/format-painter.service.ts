@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, IStyleData, Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
-import { getCellInfoInMergeData } from '@univerjs/engine-render';
+import type { IMutationInfo, IRange, IStyleData } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { SelectionManagerService, SetRangeValuesMutation } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -26,14 +25,33 @@ import { IMarkSelectionService } from '../mark-selection/mark-selection.service'
 
 export interface IFormatPainterService {
     status$: Observable<FormatPainterStatus>;
+    addHook(hooks: IFormatPainterHook): void;
+    getHooks(): IFormatPainterHook[];
     setStatus(status: FormatPainterStatus): void;
     getStatus(): FormatPainterStatus;
+    setSelectionFormat(format: ISelectionFormatInfo): void;
     getSelectionFormat(): ISelectionFormatInfo;
+    applyFormatPainter(unitId: string, subUnitId: string, range: IRange): boolean;
 }
 
 export interface ISelectionFormatInfo {
     styles: ObjectMatrix<IStyleData>;
     merges: IRange[];
+}
+
+export interface IFormatPainterHook {
+    id: string;
+    isDefaultHook?: boolean;
+    priority?: number;
+    onStatusChange(status: FormatPainterStatus): void;
+    onApply(
+        unitId: string,
+        subUnitId: string,
+        range: IRange,
+        format: ISelectionFormatInfo): {
+        undos: IMutationInfo[];
+        redos: IMutationInfo[];
+    };
 }
 export enum FormatPainterStatus {
     OFF,
@@ -48,11 +66,16 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
     private _selectionFormat: ISelectionFormatInfo;
     private _markId: string | null = null;
     private readonly _status$: BehaviorSubject<FormatPainterStatus>;
+    private _defaultHook: IFormatPainterHook | null = null;
+    private _extendHooks: IFormatPainterHook[] = [];
 
     constructor(
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService
+        @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
+        @ILogService private readonly _logService: ILogService,
+        @ICommandService private readonly _commandService: ICommandService,
+        @IUndoRedoService private readonly _undoRedoService: IUndoRedoService
     ) {
         super();
 
@@ -61,21 +84,77 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         this._selectionFormat = { styles: new ObjectMatrix<IStyleData>(), merges: [] };
     }
 
-    setStatus(status: FormatPainterStatus) {
-        if (status !== FormatPainterStatus.OFF) {
-            this._getSelectionRangeFormat();
+    addHook(hook: IFormatPainterHook) {
+        if (hook.isDefaultHook && (hook.priority ?? 0) > (this._defaultHook?.priority ?? -1)) {
+            this._defaultHook = hook;
+        } else {
+            this._extendHooks.push(hook);
+            this._extendHooks.sort((a, b) => (a.priority || 0) - (b.priority || 0));
         }
+    }
+
+    getHooks() {
+        return this._defaultHook ? [this._defaultHook, ...this._extendHooks] : this._extendHooks;
+    }
+
+    setStatus(status: FormatPainterStatus) {
         this._updateRangeMark(status);
         this._status$.next(status);
+        const hooks = this.getHooks();
+        hooks.forEach((hook) => {
+            hook.onStatusChange(status);
+        });
     }
 
     getStatus(): FormatPainterStatus {
         return this._status$.getValue();
     }
 
+    setSelectionFormat(format: ISelectionFormatInfo) {
+        this._selectionFormat = format;
+    }
+
+    getSelectionFormat() {
+        return this._selectionFormat;
+    }
+
+    applyFormatPainter(unitId: string, subUnitId: string, range: IRange) {
+        const hooks = this.getHooks();
+        const redoMutationsInfo: IMutationInfo[] = [];
+        const undoMutationsInfo: IMutationInfo[] = [];
+        hooks.forEach((h) => {
+            const applyReturn = h.onApply(
+                unitId,
+                subUnitId,
+                range,
+                this._selectionFormat
+            );
+            if (applyReturn) {
+                redoMutationsInfo.push(...applyReturn.redos);
+                undoMutationsInfo.push(...applyReturn.undos);
+            }
+        });
+
+        this._logService.log('[FormatPainterService]', 'apply mutations', {
+            undoMutationsInfo,
+            redoMutationsInfo,
+        });
+
+        const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
+        if (result) {
+            // add to undo redo services
+            this._undoRedoService.pushUndoRedo({
+                unitID: unitId,
+                undoMutations: undoMutationsInfo,
+                redoMutations: redoMutationsInfo,
+            });
+        }
+
+        return result;
+    }
+
     private _updateRangeMark(status: FormatPainterStatus) {
         this._markSelectionService.removeAllShapes();
-        this._markId = null;
 
         if (status !== FormatPainterStatus.OFF) {
             const selection = this._selectionManagerService.getLast();
@@ -90,40 +169,5 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
                 }
             }
         }
-    }
-
-    private _getSelectionRangeFormat() {
-        const selection = this._selectionManagerService.getLast();
-        const range = selection?.range;
-        if (!range) return;
-        const { startRow, endRow, startColumn, endColumn } = range;
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook?.getActiveSheet();
-        const cellData = worksheet.getCellMatrix();
-        const mergeData = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getMergeData();
-
-        const styles = workbook.getStyles();
-        const stylesMatrix = new ObjectMatrix<IStyleData>();
-        this._selectionFormat.merges = [];
-        for (let r = startRow; r <= endRow; r++) {
-            for (let c = startColumn; c <= endColumn; c++) {
-                const cell = cellData.getValue(r, c) as ICellData;
-                stylesMatrix.setValue(r, c, styles.getStyleByCell(cell) || {});
-                const { isMergedMainCell, ...mergeInfo } = getCellInfoInMergeData(r, c, mergeData);
-                if (isMergedMainCell) {
-                    this._selectionFormat.merges.push({
-                        startRow: mergeInfo.startRow,
-                        startColumn: mergeInfo.startColumn,
-                        endRow: mergeInfo.endRow,
-                        endColumn: mergeInfo.endColumn,
-                    });
-                }
-            }
-        }
-        this._selectionFormat.styles = stylesMatrix;
-    }
-
-    getSelectionFormat() {
-        return this._selectionFormat;
     }
 }

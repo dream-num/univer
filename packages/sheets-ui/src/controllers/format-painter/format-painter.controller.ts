@@ -14,24 +14,32 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Workbook } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, IStyleData, Workbook } from '@univerjs/core';
 import {
     Disposable,
+    getCellInfoInMergeData,
     ICommandService,
+    isICellData,
     IUniverInstanceService,
     LifecycleStages,
+    ObjectMatrix,
     OnLifecycle,
     toDisposable,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 
-import type { IApplyFormatPainterCommandParams } from '../../commands/commands/set-format-painter.command';
+import { Inject, Injector } from '@wendellhu/redi';
+import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation, getAddMergeMutationRangeByType, RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
 import {
     ApplyFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
+import type { IFormatPainterHook, ISelectionFormatInfo } from '../../services/format-painter/format-painter.service';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 import { ISelectionRenderService } from '../../services/selection/selection-render.service';
+import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
 
 @OnLifecycle(LifecycleStages.Rendered, FormatPainterController)
 export class FormatPainterController extends Disposable {
@@ -39,7 +47,10 @@ export class FormatPainterController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IFormatPainterService private readonly _formatPainterService: IFormatPainterService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
 
@@ -48,6 +59,7 @@ export class FormatPainterController extends Disposable {
 
     private _initialize() {
         this._commandExecutedListener();
+        this._addDefaultHook();
     }
 
     private _commandExecutedListener() {
@@ -56,11 +68,15 @@ export class FormatPainterController extends Disposable {
                 this._selectionRenderService.selectionMoveEnd$.subscribe((selections) => {
                     if (this._formatPainterService.getStatus() !== FormatPainterStatus.OFF) {
                         const { rangeWithCoord } = selections[selections.length - 1];
-                        this._applyFormatPainter({
-                            startRow: rangeWithCoord.startRow,
-                            startColumn: rangeWithCoord.startColumn,
-                            endRow: rangeWithCoord.endRow,
-                            endColumn: rangeWithCoord.endColumn,
+                        this._commandService.executeCommand(ApplyFormatPainterCommand.id, {
+                            unitId: this._univerInstanceService.getFocusedUnit()?.getUnitId() || '',
+                            subUnitId: (this._univerInstanceService.getFocusedUnit() as Workbook).getActiveSheet().getSheetId(),
+                            range: {
+                                startRow: rangeWithCoord.startRow,
+                                startColumn: rangeWithCoord.startColumn,
+                                endRow: rangeWithCoord.endRow,
+                                endColumn: rangeWithCoord.endColumn,
+                            },
                         });
                         // if once, turn off the format painter
                         if (this._formatPainterService.getStatus() === FormatPainterStatus.ONCE) {
@@ -72,12 +88,68 @@ export class FormatPainterController extends Disposable {
         );
     }
 
-    private async _applyFormatPainter(range: IRange) {
-        const { styles: stylesMatrix, merges } = this._formatPainterService.getSelectionFormat();
+    private _addDefaultHook() {
+        const defaultHook: IFormatPainterHook = {
+            id: 'default-format-painter',
+            priority: 0,
+            isDefaultHook: true,
+            onStatusChange: (status: FormatPainterStatus) => {
+                if (status !== FormatPainterStatus.OFF) {
+                    const format = this._collectSelectionRangeFormat();
+                    if (format) {
+                        this._formatPainterService.setSelectionFormat(format);
+                    }
+                }
+            },
+            onApply: (unitId, subUnitId, range, format) => {
+                return this._getUndoRedoMutationInfo(unitId, subUnitId, range, format);
+            },
+        };
+        this._formatPainterService.addHook(defaultHook);
+    }
+
+    private _collectSelectionRangeFormat() {
+        const selection = this._selectionManagerService.getLast();
+        const range = selection?.range;
+        if (!range) return null;
+        const { startRow, endRow, startColumn, endColumn } = range;
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const unitId = workbook.getUnitId();
-        const subUnitId = workbook.getActiveSheet().getSheetId();
-        if (!stylesMatrix) return;
+        const worksheet = workbook?.getActiveSheet();
+        const cellData = worksheet.getCellMatrix();
+        const mergeData = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getMergeData();
+
+        const styles = workbook.getStyles();
+        const stylesMatrix = new ObjectMatrix<IStyleData>();
+        const merges = [];
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
+                const cell = cellData.getValue(r, c) as ICellData;
+                stylesMatrix.setValue(r, c, styles.getStyleByCell(cell) || {});
+                const { isMergedMainCell, ...mergeInfo } = getCellInfoInMergeData(r, c, mergeData);
+                if (isMergedMainCell) {
+                    merges.push({
+                        startRow: mergeInfo.startRow,
+                        startColumn: mergeInfo.startColumn,
+                        endRow: mergeInfo.endRow,
+                        endColumn: mergeInfo.endColumn,
+                    });
+                }
+            }
+        }
+        return {
+            styles: stylesMatrix,
+            merges,
+        };
+    }
+
+    private _getUndoRedoMutationInfo(unitId: string, subUnitId: string, range: IRange, format: ISelectionFormatInfo) {
+        const sheetInterceptorService = this._sheetInterceptorService;
+        const univerInstanceService = this._univerInstanceService;
+        const accessor = {
+            get: this._injector.get.bind(this._injector),
+        };
+        const { merges, styles: stylesMatrix } = format;
+        if (!stylesMatrix) return { undos: [], redos: [] };
 
         const { startRow, startColumn, endRow, endColumn } = stylesMatrix.getDataRange();
         const styleRowsNum = endRow - startRow + 1;
@@ -120,15 +192,93 @@ export class FormatPainterController extends Disposable {
                 }
             }
         });
+        const currentSelections = [range];
+        const cellValue = new ObjectMatrix<ICellData>();
+        let realCellValue: IObjectMatrixPrimitiveType<ICellData> | undefined;
 
-        const ApplyFormatPainterCommandParams: IApplyFormatPainterCommandParams = {
+        if (Tools.isArray(styleValues)) {
+            for (let i = 0; i < currentSelections.length; i++) {
+                const { startRow, startColumn, endRow, endColumn } = currentSelections[i];
+
+                for (let r = 0; r <= endRow - startRow; r++) {
+                    for (let c = 0; c <= endColumn - startColumn; c++) {
+                        cellValue.setValue(r + startRow, c + startColumn, styleValues[r][c]);
+                    }
+                }
+            }
+        } else if (isICellData(styleValues)) {
+            for (let i = 0; i < currentSelections.length; i++) {
+                const { startRow, startColumn } = currentSelections[i];
+
+                cellValue.setValue(startRow, startColumn, styleValues);
+            }
+        } else {
+            realCellValue = styleValues as IObjectMatrixPrimitiveType<ICellData>;
+        }
+
+        const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            styleRange: range,
-            styleValues,
-            mergeRanges,
+            cellValue: realCellValue ?? cellValue.getMatrix(),
         };
+        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+            accessor,
+            setRangeValuesMutationParams
+        );
 
-        await this._commandService.executeCommand(ApplyFormatPainterCommand.id, ApplyFormatPainterCommandParams);
+        const { undos: interceptorUndos, redos: interceptorRedos } = sheetInterceptorService.onCommandExecute({
+            id: SetRangeValuesCommand.id,
+            params: { ...setRangeValuesMutationParams, range: currentSelections },
+        });
+
+        // handle merge
+        const ranges = getAddMergeMutationRangeByType(mergeRanges);
+
+        const mergeRedos: IMutationInfo[] = [];
+        const mergeUndos: IMutationInfo[] = [];
+
+        // First we should check if there are values in the going-to-be-merged cells.
+        const worksheet = (univerInstanceService.getUnit(unitId) as Workbook).getSheetBySheetId(subUnitId)!;
+        const willRemoveSomeCell = checkCellContentInRanges(worksheet, ranges);
+
+        // prepare redo mutations
+        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+            unitId,
+            subUnitId,
+            ranges,
+        };
+        const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
+            unitId,
+            subUnitId,
+            ranges,
+        };
+        mergeRedos.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
+        mergeRedos.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
+
+        // prepare undo mutations
+        const undoRemoveMergeMutationParams = RemoveMergeUndoMutationFactory(accessor, removeMergeMutationParams);
+        const undoMutationParams = AddMergeUndoMutationFactory(accessor, addMergeMutationParams);
+        mergeUndos.push({ id: RemoveWorksheetMergeMutation.id, params: undoMutationParams });
+        mergeUndos.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+
+        // add set range values mutations to undo redo mutations
+        if (willRemoveSomeCell) {
+            const data = getClearContentMutationParamsForRanges(accessor, unitId, worksheet, ranges);
+            mergeRedos.unshift(...data.redos);
+            mergeUndos.push(...data.undos);
+        }
+
+        return {
+            undos: [
+                { id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams },
+                ...interceptorUndos,
+                ...mergeUndos,
+            ],
+            redos: [
+                { id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams },
+                ...interceptorRedos,
+                ...mergeRedos,
+            ],
+        };
     }
 }

@@ -1,5 +1,33 @@
 
 
+## [0.1.15](https://github.com/dream-num/univer/compare/v0.1.14...v0.1.15) (2024-06-14)
+
+
+### Bug Fixes
+
+* change ref when user change ([#2501](https://github.com/dream-num/univer/issues/2501)) ([b23148b](https://github.com/dream-num/univer/commit/b23148b07166cee702d0a2ffe81e13cdc55b8148))
+* **core:** fix disposing univer causing error ([#2515](https://github.com/dream-num/univer/issues/2515)) ([ca76011](https://github.com/dream-num/univer/commit/ca76011ffb563e773a1a0c7a2b6379fc3f686537))
+* **core:** init user info ([#2499](https://github.com/dream-num/univer/issues/2499)) ([b3393ef](https://github.com/dream-num/univer/commit/b3393ef05d71bb2b9e74fa87d6d57e6fc80b4085))
+* **design:** fix syntax error in calculation within less file ([#2506](https://github.com/dream-num/univer/issues/2506)) ([9c2947f](https://github.com/dream-num/univer/commit/9c2947fa93e42c189d6abcb39f931b61b7d56137))
+* **find:** when dispose, should close panel ([#2495](https://github.com/dream-num/univer/issues/2495)) ([4a72bcc](https://github.com/dream-num/univer/commit/4a72bcc721c73431042d57acdaee1acc7e5fd522))
+* **hyper-link:** bugfix for hyper-link remove-sheet ([#2444](https://github.com/dream-num/univer/issues/2444)) ([039a59d](https://github.com/dream-num/univer/commit/039a59d96b677bcc1b5795cd6a0b91eed8681218))
+* only users with editing permissions can join the protected colla… ([#2504](https://github.com/dream-num/univer/issues/2504)) ([2ea683e](https://github.com/dream-num/univer/commit/2ea683e9cf14a7999b242d2df4a02b5588298cf2))
+* rename change permission ([#2481](https://github.com/dream-num/univer/issues/2481)) ([ee6a464](https://github.com/dream-num/univer/commit/ee6a464948c3d5147a7a5991418c28cb805b9087))
+* scrollInfo should not save into snapshot ([#2514](https://github.com/dream-num/univer/issues/2514)) ([782c7dc](https://github.com/dream-num/univer/commit/782c7dc492dde037c53551a9cc2390fa0ae883e4))
+* **sheet:** null cell ([#2483](https://github.com/dream-num/univer/issues/2483)) ([63040e1](https://github.com/dream-num/univer/commit/63040e187e64f389396cd1b02165f251bfdb9222))
+* **sheets-hyper-link:** skip error on ref-range mutation ([#2446](https://github.com/dream-num/univer/issues/2446)) ([56c6e12](https://github.com/dream-num/univer/commit/56c6e1269791dfb835f1af7ccdc381518f97e6b5))
+* **umd:** change dependency build order for UMD packages ([#2449](https://github.com/dream-num/univer/issues/2449)) ([3337e79](https://github.com/dream-num/univer/commit/3337e79005414e3dfc1ed15f65a46ead43b80256))
+
+
+### Features
+
+* add scrollLeftTop for sheet snapshot ([#2414](https://github.com/dream-num/univer/issues/2414)) ([23775c8](https://github.com/dream-num/univer/commit/23775c84cc55ac6447d29c72fda29d67c0665960)), closes [#2348](https://github.com/dream-num/univer/issues/2348)
+* change move sheet permission ([#2493](https://github.com/dream-num/univer/issues/2493)) ([d2f3f54](https://github.com/dream-num/univer/commit/d2f3f54b5b3f1f42e592d00517cc6438b46ccbd7))
+* **network:** support sse in network fetch ([#2482](https://github.com/dream-num/univer/issues/2482)) ([8f5d0f4](https://github.com/dream-num/univer/commit/8f5d0f4ef4d1bb3c2e8140d0eb4889f01c1263cd))
+* set the initial cursor at the begining of document ([#2447](https://github.com/dream-num/univer/issues/2447)) ([a812d2e](https://github.com/dream-num/univer/commit/a812d2e60b12ef9ec42fe3e987850307ecb86d5b))
+* **sheets-ui:** optimize ref-range for hyper-link and thread-comment ([#2405](https://github.com/dream-num/univer/issues/2405)) ([88f2f6d](https://github.com/dream-num/univer/commit/88f2f6d0c1b0a182241575d37967574d3c6b1218))
+* support props on float dom component ([#2518](https://github.com/dream-num/univer/issues/2518)) ([0a52859](https://github.com/dream-num/univer/commit/0a52859a4e8dc2ccc1687db03265e8b0e7a7f1ef))
+
 ## [0.1.14](https://github.com/dream-num/univer/compare/v0.1.13...v0.1.14) (2024-06-07)
 
 

@@ -30,6 +30,7 @@ import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     FOCUSING_EDITOR_INPUT_FORMULA,
+    getCellInfoInMergeData,
     ICommandService,
     IContextService,
     isFormulaString,
@@ -65,7 +66,6 @@ import {
 } from '@univerjs/engine-formula';
 import {
     DeviceInputEventType,
-    getCellInfoInMergeData,
     IRenderManagerService,
     ITextSelectionRenderManager,
 } from '@univerjs/engine-render';

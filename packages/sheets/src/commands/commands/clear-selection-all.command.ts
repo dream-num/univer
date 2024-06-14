@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICommand, IMutationInfo, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
-    ObjectMatrix,
     sequenceExecute,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -30,6 +29,7 @@ import { SelectionManagerService } from '../../services/selection-manager.servic
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { generateNullCell } from '../../basics/utils';
 
 /**
  * The command to clear all in current selected ranges.
@@ -62,7 +62,7 @@ export const ClearSelectionAllCommand: ICommand = {
         const clearMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: generateNullCellValue(selections),
+            cellValue: generateNullCell(selections),
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,
@@ -100,17 +100,3 @@ export const ClearSelectionAllCommand: ICommand = {
     },
 };
 
-// Generate cellValue from range and set null
-function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
-    const cellValue = new ObjectMatrix<Nullable<ICellData>>();
-    range.forEach((range: IRange) => {
-        const { startRow, startColumn, endRow, endColumn } = range;
-        for (let i = startRow; i <= endRow; i++) {
-            for (let j = startColumn; j <= endColumn; j++) {
-                cellValue.setValue(i, j, null);
-            }
-        }
-    });
-
-    return cellValue.clone();
-}

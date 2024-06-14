@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/drawing",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -54,11 +54,12 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "tsc && vite build",
+        "sync:cnpm": "cnpm sync"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -69,7 +70,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "less": "^4.2.0",
         "ot-json1": "^1.0.2",
         "react": "18.3.1",

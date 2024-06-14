@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/engine-formula",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "private": false,
     "description": "UniverSheet normal base-formula-engine",
     "author": "DreamNum <developer@univer.ai>",
@@ -56,12 +56,13 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "tsc && vite build",
+        "sync:cnpm": "cnpm sync"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/rpc": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -73,7 +74,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
         "vite": "^5.2.13",

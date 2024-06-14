@@ -179,9 +179,9 @@ export default {
             },
         ],
         functionParameter: {
-            text1: { name: 'findText', detail: 'The text to find. The item can be a text value, number, or cell reference.' },
-            text2: { name: 'withinText', detail: 'The text in which findText has to be found.The item can be a text value, number, or cell reference.' },
-            number1: { name: 'startNum', detail: 'The position from which string has to be found' },
+            findText: { name: 'find_text', detail: 'The text to find. The item can be a text value, number, or cell reference.' },
+            withinText: { name: 'within_text', detail: 'The text in which findText has to be found.The item can be a text value, number, or cell reference.' },
+            startNumber: { name: 'start_num', detail: 'The position from which string has to be found' },
         },
     },
     FINDB: {

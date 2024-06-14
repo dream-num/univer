@@ -436,6 +436,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (sheetTransform == null) {
             return;
         }
+        const map = this._ensureMap(unitId, subUnitId);
+        map.set(id, layer);
 
         const sheetDrawingParam: ISheetFloatDom = {
             unitId,
@@ -456,8 +458,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             unitId,
             drawings: [sheetDrawingParam],
         } as IInsertDrawingCommandParams);
-        const map = this._ensureMap(unitId, subUnitId);
-        map.set(id, layer);
 
         return {
             id,

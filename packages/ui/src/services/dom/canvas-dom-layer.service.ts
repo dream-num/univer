@@ -35,6 +35,7 @@ export interface IFloatDom {
     onPointerDown: (evt: PointerEvent | MouseEvent) => void;
     onPointerUp: (evt: PointerEvent | MouseEvent) => void;
     onWheel: (evt: WheelEvent) => void;
+    props?: Record<string, any>;
 }
 
 export class CanvasFloatDomService {

@@ -56,7 +56,8 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "tsc && vite build",
+        "sync:cnpm": "cnpm sync"
     },
     "peerDependencies": {},
     "dependencies": {

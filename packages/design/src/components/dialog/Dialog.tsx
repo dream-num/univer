@@ -189,12 +189,14 @@ export function Dialog(props: IDialogProps) {
             : modal;
     };
 
+    const needMask = mask ?? !draggable;
+
     return mountContainer && (
         <RcDialog
             className={className}
             width={width}
             prefixCls={styles.dialog}
-            rootClassName={draggable ? styles.dialogRootDraggable : styles.dialogRoot}
+            rootClassName={!needMask ? styles.dialogRootDraggable : styles.dialogRoot}
             getContainer={() => mountContainer}
             visible={visible}
             title={TitleIfDraggable}
@@ -202,7 +204,7 @@ export function Dialog(props: IDialogProps) {
             closeIcon={closeIcon}
             destroyOnClose={destroyOnClose}
             footer={footer}
-            mask={mask ?? !draggable}
+            mask={needMask}
             style={style}
             onClose={onClose}
         >

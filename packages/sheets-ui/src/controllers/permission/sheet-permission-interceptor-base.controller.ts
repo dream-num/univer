@@ -157,6 +157,9 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
                     worksheetTypes: [WorksheetCopyPermission],
                 });
                 errorMsg = this._localeService.t('permission.dialog.copyErr');
+                if (!this._permissionService.getPermissionPoint(new WorkbookCopyPermission(this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId()).id)?.value) {
+                    errorMsg = this._localeService.t('permission.dialog.workbookCopyErr');
+                }
                 break;
             case DeltaColumnWidthCommand.id:
             case SetColWidthCommand.id:

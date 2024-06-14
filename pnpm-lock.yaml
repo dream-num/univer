@@ -2336,6 +2336,9 @@ importers:
       '@univerjs/sheets-thread-comment':
         specifier: workspace:*
         version: link:../sheets-thread-comment
+      '@univerjs/sheets-thread-comment-base':
+        specifier: workspace:*
+        version: link:../sheets-thread-comment-base
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui

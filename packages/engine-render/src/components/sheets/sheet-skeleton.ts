@@ -1508,6 +1508,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    // eslint-disable-next-line complexity
     private _getOverflowBound(
         row: number,
         startColumn: number,
@@ -1521,7 +1522,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             for (let i = startColumn; i >= endColumn; i--) {
                 const column = i;
                 const cell = this._worksheet?.getCell(row, column);
-                if ((!isEmptyCell(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
+                if (((!isEmptyCell(cell) || cell?.coverable === false) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                     if (column === startColumn) {
                         return column;
                     }
@@ -1550,7 +1551,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         for (let i = startColumn; i <= endColumn; i++) {
             const column = i;
             const cell = this._worksheet?.getCell(row, column);
-            if ((!isEmptyCell(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
+            if (((!isEmptyCell(cell) || cell?.coverable === false) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                 if (column === startColumn) {
                     return column;
                 }

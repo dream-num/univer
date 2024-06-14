@@ -17,23 +17,38 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import type { ICommandInfo } from '@univerjs/core';
+import type { ICommandInfo, Workbook } from '@univerjs/core';
 import { ICommandService } from '@univerjs/core';
 import type { ISetWorksheetActiveOperationParams } from '@univerjs/sheets';
-import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActiveOperation, SetWorksheetHideMutation, SetWorksheetNameMutation, SetWorksheetOrderMutation } from '@univerjs/sheets';
+import {
+    InsertSheetMutation,
+    RemoveSheetMutation,
+    SetWorksheetActiveOperation,
+    SetWorksheetHideMutation,
+    SetWorksheetNameMutation,
+    SetWorksheetOrderMutation,
+} from '@univerjs/sheets';
 import type { IBaseSheetBarProps } from '../../sheet-bar/sheet-bar-tabs/SheetBarItem';
 import { useActiveWorkbook } from '../../../components/hook';
 
 import styles from './index.module.less';
 
 export function MobileSheetBar() {
+    const workbook = useActiveWorkbook();
+    if (!workbook) {
+        return null;
+    }
+
+    return <MobileSheetBarImpl workbook={workbook} />;
+}
+
+function MobileSheetBarImpl(props: { workbook: Workbook }) {
+    const { workbook } = props;
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
     const [activeKey, setActiveKey] = useState('');
     const tabMapRef = React.useRef<Map<string, HTMLElement | null>>(new Map());
 
     const commandService = useDependency(ICommandService);
-
-    const workbook = useActiveWorkbook()!;
 
     const updateSheetItems = useCallback(() => {
         const currentSubUnitId = workbook.getActiveSheet().getSheetId();

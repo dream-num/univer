@@ -3,6 +3,7 @@
         width: 100%;
         overflow-x: scroll;
         height: 32px;
+        background-color: rgb(var(--bg-color));
     }
 
     &-slider {
@@ -13,18 +14,19 @@
     }
 
     &-item {
-        box-sizing: border-box;
-        display: flex;
-        height: 100%;
         align-items: center;
-        flex-wrap: nowrap;
-        white-space: nowrap;
-        overflow: hidden;
-        font-size: 12px;
-        padding: 2px 4px;
-        min-width: 48px;
-        flex-shrink: 0;
+        box-sizing: border-box;
         flex-grow: 1;
+        flex-shrink: 0;
+        flex-wrap: nowrap;
+        font-size: 12px;
+        height: 100%;
+        line-height: 28px;
+        min-width: 48px;
+        overflow: hidden;
+        padding: 2px 4px;
+        text-align: center;
+        white-space: nowrap;
         border-right: 1px solid rgb(var(--border-color));
         background-color: rgb(var(--bg-color));
         text-overflow: ellipsis;

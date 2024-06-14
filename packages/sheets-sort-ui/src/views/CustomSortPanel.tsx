@@ -43,7 +43,9 @@ export function CustomSortPanel() {
     const { range } = state;
     const allCols = Array.from({ length: range.endColumn - range.startColumn + 1 }, (_, i) => i + range.startColumn);
 
-    const [list, setList] = useState<IOrderRule[]>([]);
+    const [list, setList] = useState<IOrderRule[]>([
+        { type: SortType.ASC, colIndex: range.startColumn },
+    ]);
     const [hasTitle, setHasTitle] = useState(false);
 
     const onItemChange = useCallback((index: number, value: Nullable<IOrderRule>) => {
@@ -140,6 +142,8 @@ export function SortOptionItem(props: { allCols: number[]; list: IOrderRule[]; i
     const handleChangeColIndex = useCallback((menuItem: { index: number; label: string }) => {
         onChange({ ...item, colIndex: menuItem.index }, currentIndex);
     }, [currentIndex, item, onChange]);
+
+    const showDelete = list.length > 1;
     return (
         <div className={styles.customSortPanelItem}>
             <div className={styles.customSortPanelItemHead}>
@@ -191,7 +195,7 @@ export function SortOptionItem(props: { allCols: number[]; list: IOrderRule[]; i
                 </RadioGroup>
             </div>
             <div className={styles.customSortPanelItemRemove}>
-                <DeleteEmptySingle onClick={() => onChange(null, currentIndex)} />
+                { showDelete && <DeleteEmptySingle onClick={() => onChange(null, currentIndex)} />}
             </div>
         </div>
     );

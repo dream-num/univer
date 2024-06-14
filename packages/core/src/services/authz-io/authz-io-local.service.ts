@@ -37,6 +37,7 @@ export class AuthzIoLocalService implements IAuthzIoService {
         @Inject(UserManagerService) private _userManagerService: UserManagerService
     ) {
         this._initSnapshot();
+        _userManagerService.setCurrentUser(createDefaultUser(UnitRole.Owner));
     }
 
     private _getRole(type: UnitRole) {

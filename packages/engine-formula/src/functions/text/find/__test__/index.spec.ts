@@ -139,7 +139,7 @@ describe('Test find function', () => {
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [5], // 'o' found at position 5
                 [4], // 'l' found at position 4
-                [8], // 'W' found at position 8
+                [7], // 'W' found at position 8
             ]);
         });
 

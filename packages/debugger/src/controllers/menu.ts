@@ -29,7 +29,7 @@ import { SaveSnapshotOptions } from '../commands/operations/save-snapshot.operat
 import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
-import { CreateEmptySheetCommand, DisposeCurrentUnitCommand } from '../commands/commands/unit.command';
+import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverCommand } from '../commands/commands/unit.command';
 import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 import { ChangeUserCommand, UnitRole } from '../commands/operations/change-user.operation';
 
@@ -225,10 +225,21 @@ const UNIT_ITEM_MENU_ID = 'debugger.unit-menu-item';
 export function UnitMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: UNIT_ITEM_MENU_ID,
-        title: 'Unit',
-        tooltip: 'Unit Commands',
+        title: 'Dispose',
+        tooltip: 'Lifecycle Related Commands',
         type: MenuItemType.SUBITEMS,
         positions: [MenuPosition.TOOLBAR_OTHERS],
+    };
+}
+
+export function DisposeUniverItemFactory(_accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: DisposeUniverCommand.id,
+        title: 'Dispose Univer',
+        tooltip: 'Dispose the Univer instance',
+        icon: 'DS',
+        type: MenuItemType.BUTTON,
+        positions: [UNIT_ITEM_MENU_ID],
     };
 }
 

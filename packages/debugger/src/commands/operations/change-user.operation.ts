@@ -38,7 +38,7 @@ export const ChangeUserCommand: ICommand = {
     handler: async (accessor: IAccessor, params: IChangeUserParams) => {
         const userManagerService = accessor.get(UserManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        userManagerService.currentUser = createDefaultUser(params.value);
+        userManagerService.setCurrentUser(createDefaultUser(params.value));
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const permissionService = accessor.get(IPermissionService);
         const unitId = workbook.getUnitId();

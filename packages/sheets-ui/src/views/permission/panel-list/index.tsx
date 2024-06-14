@@ -55,7 +55,7 @@ export const SheetPermissionPanelList = () => {
     const authzIoService = useDependency(IAuthzIoService);
     const permissionService = useDependency(IPermissionService);
     const usesManagerService = useDependency(UserManagerService);
-    const currentUser = usesManagerService.currentUser;
+    const currentUser = usesManagerService.getCurrentUser();
     const [currentRuleRanges, currentRuleRangesSet] = useState<IRange[]>([]);
 
     useObservable(worksheetProtectionModel.ruleRefresh$);

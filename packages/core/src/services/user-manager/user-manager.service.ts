@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { IUser } from '@univerjs/protocol';
-
 import { BehaviorSubject, Subject } from 'rxjs';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
 import { createDefaultUser } from './const';
 
+export interface IUser {
+    userID: string; name: string; avatar?: string;
+};
 @OnLifecycle(LifecycleStages.Starting, UserManagerService)
 export class UserManagerService {
     private _model = new Map<string, IUser>();
@@ -31,22 +32,22 @@ export class UserManagerService {
      * @memberof UserManagerService
      */
     public currentUser$ = this._currentUser$.asObservable();
-
-    get currentUser() {
-        return this._currentUser$.getValue();
+    getCurrentUser<T extends IUser>() {
+        return this._currentUser$.getValue() as T;
     }
 
-    set currentUser(user: IUser) {
+    setCurrentUser<T extends IUser>(user: T) {
+        this.addUser(user);
         this._currentUser$.next(user);
     }
 
-    addUser(user: IUser) {
+    addUser<T extends IUser>(user: T) {
         this._model.set(user.userID, user);
         this._userChange$.next({ type: 'add', user });
     }
 
-    getUser(userId: string, callBack?: () => void) {
-        const user = this._model.get(userId);
+    getUser<T extends IUser>(userId: string, callBack?: () => void) {
+        const user = this._model.get(userId) as T;
         if (user) {
             return user;
         }

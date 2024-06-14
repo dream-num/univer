@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, ICommandService } from '@univerjs/core';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -34,7 +34,7 @@ import { TEST_EDITOR_CONTAINER_COMPONENT } from '../views/test-editor/component-
 // @ts-ignore
 import VueI18nIcon from '../components/VueI18nIcon.vue';
 
-import { CreateEmptySheetCommand, DisposeCurrentUnitCommand } from '../commands/commands/unit.command';
+import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverCommand } from '../commands/commands/unit.command';
 import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 import { ImageDemo } from '../components/Image';
 import { ChangeUserCommand } from '../commands/operations/change-user.operation';
@@ -45,6 +45,7 @@ import {
     CreateFloatDOMMenuItemFactory,
     DialogMenuItemFactory,
     DisposeCurrentUnitMenuItemFactory,
+    DisposeUniverItemFactory,
     FloatDomMenuItemFactory,
     LocaleMenuItemFactory,
     MessageMenuItemFactory,
@@ -70,12 +71,11 @@ export class DebuggerController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
-        this._initializeContextMenu();
 
+        this._initializeContextMenu();
         this._initCustomComponents();
 
         [
@@ -88,6 +88,7 @@ export class DebuggerController extends Disposable {
             SidebarOperation,
             SetEditable,
             SaveSnapshotOptions,
+            DisposeUniverCommand,
             DisposeCurrentUnitCommand,
             CreateEmptySheetCommand,
             CreateFloatDomCommand,
@@ -112,6 +113,7 @@ export class DebuggerController extends Disposable {
             SetEditableMenuItemFactory,
             SaveSnapshotSetEditableMenuItemFactory,
             UnitMenuItemFactory,
+            DisposeUniverItemFactory,
             DisposeCurrentUnitMenuItemFactory,
             CreateEmptySheetMenuItemFactory,
             FloatDomMenuItemFactory,

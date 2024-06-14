@@ -61,7 +61,7 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/rpc": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -73,7 +73,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
         "vite": "^5.2.13",

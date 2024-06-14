@@ -59,7 +59,7 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*",
-        "@wendellhu/redi": "0.15.2"
+        "@wendellhu/redi": "0.15.4"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

@@ -68,6 +68,7 @@
         "@univerjs/sheets-hyper-link-ui": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",
+        "@univerjs/sheets-thread-comment-base": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/sheets-zen-editor": "workspace:*",
         "@univerjs/slides": "workspace:*",

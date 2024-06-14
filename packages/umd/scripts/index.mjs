@@ -190,6 +190,7 @@ function buildJS() {
         '@univerjs/sheets-filter-ui',
         '@univerjs/thread-comment',
         '@univerjs/thread-comment-ui',
+        '@univerjs/sheets-thread-comment-base',
         '@univerjs/sheets-thread-comment',
         '@univerjs/drawing',
         '@univerjs/drawing-ui',

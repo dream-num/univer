@@ -1009,6 +1009,11 @@ function __getDrawingPosition(
         drawing.height = height;
         drawing.angle = angle;
         drawing.initialState = true;
+        drawing.columnLeft = column.left;
+        drawing.lineTop = lineTop;
+        drawing.lineHeight = lineHeight;
+        drawing.isPageBreak = isPageBreak;
+        drawing.blockAnchorTop = blockAnchorTop ?? lineTop;
 
         drawings.set(drawing.drawingId, drawing);
     }

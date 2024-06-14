@@ -1115,9 +1115,6 @@ importers:
       '@univerjs/engine-numfmt':
         specifier: workspace:*
         version: link:../engine-numfmt
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc

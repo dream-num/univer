@@ -72,3 +72,66 @@ export interface ITextRangeParam extends ITextRange {
     segmentId?: string; //The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.
     isActive?: boolean; // Whether the text range is active or current range.
 }
+
+/**
+ * Determines whether the cell(row, column) is within the range of the merged cells.
+ */
+export function getCellInfoInMergeData(row: number, column: number, mergeData?: IRange[]): ISelectionCell {
+    let isMerged = false; // The upper left cell only renders the content
+    let isMergedMainCell = false;
+    let newEndRow = row;
+    let newEndColumn = column;
+    let mergeRow = row;
+    let mergeColumn = column;
+
+    if (mergeData == null) {
+        return {
+            actualRow: row,
+            actualColumn: column,
+            isMergedMainCell,
+            isMerged,
+            endRow: newEndRow,
+            endColumn: newEndColumn,
+            startRow: mergeRow,
+            startColumn: mergeColumn,
+        };
+    }
+
+    for (let i = 0; i < mergeData.length; i++) {
+        const {
+            startRow: startRowMarge,
+            endRow: endRowMarge,
+            startColumn: startColumnMarge,
+            endColumn: endColumnMarge,
+        } = mergeData[i];
+        if (row === startRowMarge && column === startColumnMarge) {
+            newEndRow = endRowMarge;
+            newEndColumn = endColumnMarge;
+            mergeRow = startRowMarge;
+            mergeColumn = startColumnMarge;
+
+            isMergedMainCell = true;
+            break;
+        }
+        if (row >= startRowMarge && row <= endRowMarge && column >= startColumnMarge && column <= endColumnMarge) {
+            newEndRow = endRowMarge;
+            newEndColumn = endColumnMarge;
+            mergeRow = startRowMarge;
+            mergeColumn = startColumnMarge;
+
+            isMerged = true;
+            break;
+        }
+    }
+
+    return {
+        actualRow: row,
+        actualColumn: column,
+        isMergedMainCell,
+        isMerged,
+        endRow: newEndRow,
+        endColumn: newEndColumn,
+        startRow: mergeRow,
+        startColumn: mergeColumn,
+    };
+}

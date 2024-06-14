@@ -17,6 +17,7 @@
 import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, IStyleData, Workbook } from '@univerjs/core';
 import {
     Disposable,
+    getCellInfoInMergeData,
     ICommandService,
     isICellData,
     IUniverInstanceService,
@@ -31,7 +32,6 @@ import {
 import { Inject, Injector } from '@wendellhu/redi';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation, getAddMergeMutationRangeByType, RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
-import { getCellInfoInMergeData } from '@univerjs/engine-render';
 import {
     ApplyFormatPainterCommand,
     SetOnceFormatPainterCommand,

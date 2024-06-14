@@ -19,6 +19,7 @@ import {
     Direction,
     Disposable,
     DisposableCollection,
+    getCellInfoInMergeData,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
@@ -29,7 +30,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DeviceInputEventType, getCellInfoInMergeData } from '@univerjs/engine-render';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 import type {
     IAddWorksheetMergeMutationParams,
     IRemoveSheetMutationParams,

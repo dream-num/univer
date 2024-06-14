@@ -22,7 +22,6 @@ import type {
     IObjectMatrixPrimitiveType,
     IRange,
     IRowData,
-    Nullable,
     Workbook,
     Worksheet,
 } from '@univerjs/core';
@@ -788,19 +787,4 @@ export class SheetClipboardController extends RxDisposable {
 
         return worksheet;
     }
-}
-
-// Generate cellValue from range and set null
-function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
-    const cellValue = new ObjectMatrix<Nullable<ICellData>>();
-    range.forEach((range: IRange) => {
-        const { startRow, startColumn, endRow, endColumn } = range;
-        for (let i = startRow; i <= endRow; i++) {
-            for (let j = startColumn; j <= endColumn; j++) {
-                cellValue.setValue(i, j, null);
-            }
-        }
-    });
-
-    return cellValue.getData();
 }

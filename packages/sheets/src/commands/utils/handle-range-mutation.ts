@@ -31,6 +31,7 @@ import {
     SetRangeValuesUndoMutationFactory,
 } from '../mutations/set-range-values.mutation';
 import { getSheetMutationTarget } from '../commands/utils/target-util';
+import { generateNullCell } from '../../basics/utils';
 
 /**
  * Generate undo mutation of a `InsertRangeMutation`
@@ -196,7 +197,7 @@ export function getRemoveRangeMutations(accessor: IAccessor, params: IDeleteRang
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: generateNullCellValue([range]),
+            cellValue: generateNullCell([range]),
         };
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,
@@ -435,18 +436,4 @@ export function handleDeleteRangeMutation<T>(
             }
         }
     }
-}
-
-export function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
-    const cellValue = new ObjectMatrix<Nullable<ICellData>>();
-    range.forEach((range: IRange) => {
-        const { startRow, startColumn, endRow, endColumn } = range;
-        for (let i = startRow; i <= endRow; i++) {
-            for (let j = startColumn; j <= endColumn; j++) {
-                cellValue.setValue(i, j, null);
-            }
-        }
-    });
-
-    return cellValue.getData();
 }

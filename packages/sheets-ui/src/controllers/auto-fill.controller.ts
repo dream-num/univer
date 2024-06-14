@@ -81,7 +81,7 @@ import { ISelectionRenderService } from '../services/selection/selection-render.
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import type { IDiscreteRange } from './utils/range-tools';
-import { discreteRangeToRange, generateNullCellValue, rangeToDiscreteRange } from './utils/range-tools';
+import { discreteRangeToRange, generateNullCellValueRowCol, rangeToDiscreteRange } from './utils/range-tools';
 
 @OnLifecycle(LifecycleStages.Steady, AutoFillController)
 export class AutoFillController extends Disposable {
@@ -852,7 +852,7 @@ export class AutoFillController extends Disposable {
         const clearMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: generateNullCellValue([target]),
+            cellValue: generateNullCellValueRowCol([target]),
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,

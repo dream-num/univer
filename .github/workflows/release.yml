@@ -154,6 +154,27 @@ jobs:
                   vercel-org-id: ${{ secrets.ORG_ID}}
                   vercel-project-id: ${{ secrets.PROJECT_ID}}
 
+    sync-cnpm:
+        runs-on: ubuntu-latest
+        needs: [release-npm]
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
+
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+            - name: 🚚 Install dependencies
+              run: pnpm install cnpm -g
+
+            - name: 🐙 Sync to cnpm
+              run: pnpm sync-cnpm
+
     build-storybook:
         runs-on: ubuntu-latest
         needs: [release-npm]

@@ -34,7 +34,8 @@
         "lib"
     ],
     "scripts": {
-        "build:umd": "node ./scripts/index.mjs"
+        "build:umd": "node ./scripts/index.mjs",
+        "sync:cnpm": "cnpm sync"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",

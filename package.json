@@ -42,7 +42,8 @@
         "release": "release-it",
         "release:alpha": "release-it preminor --preRelease=alpha",
         "release:beta": "release-it preminor --preRelease=beta",
-        "release:rc": "release-it prerelease --preRelease=rc"
+        "release:rc": "release-it prerelease --preRelease=rc",
+        "sync:cnpm": "turbo sync:cnpm"
     },
     "devDependencies": {
         "@antfu/eslint-config": "^2.21.0",

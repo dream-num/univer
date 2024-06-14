@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-thread-comment-base",
-    "version": "0.1.13",
+    "version": "0.1.15",
     "private": false,
     "description": "Univer sheets thread comment base plugin",
     "author": "DreamNum <developer@univer.ai>",

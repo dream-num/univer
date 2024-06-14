@@ -65,7 +65,7 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
                         ...(position.absolute.top) ? { top: 0 } : { bottom: 0 },
                     }}
                 >
-                    {Component ? <Component /> : null}
+                    {Component ? <Component {...layer.props} /> : null}
                 </div>
             </div>
         )

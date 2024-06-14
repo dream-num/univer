@@ -101,6 +101,7 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
         for (const drawing of drawings) {
             const { drawingId } = drawing;
 
+            // Update layoutType.
             const oldLayoutType = oldDrawings[drawingId].layoutType;
             const newLayoutType = WRAPPING_STYLE_TO_LAYOUT_TYPE[wrappingStyle];
 
@@ -110,6 +111,7 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
                 rawActions.push(updateLayoutTypeAction!);
             }
 
+            // Update behindDoc if layoutType is WRAP_NONE.
             if (wrappingStyle === TextWrappingStyle.BEHIND_TEXT || wrappingStyle === TextWrappingStyle.IN_FRONT_OF_TEXT) {
                 const oldBehindDoc = oldDrawings[drawingId].behindDoc;
                 const newBehindDoc = wrappingStyle === TextWrappingStyle.BEHIND_TEXT ? BooleanNumber.TRUE : BooleanNumber.FALSE;
@@ -125,16 +127,15 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
                 continue;
             }
 
+            // Update positionH and positionV if layoutType is not inline.
             let skeDrawing = null;
+            let pageMarginTop = 0;
+            let pageMarginLeft = 0;
             for (const page of pages) {
-                for (const [key, value] of page.skeDrawings.entries()) {
-                    if (key === drawingId) {
-                        skeDrawing = value;
-                        break;
-                    }
-                }
-
-                if (skeDrawing != null) {
+                if (page.skeDrawings.has(drawingId)) {
+                    skeDrawing = page.skeDrawings.get(drawingId);
+                    pageMarginTop = page.marginTop;
+                    pageMarginLeft = page.marginLeft;
                     break;
                 }
             }
@@ -142,24 +143,42 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
             if (skeDrawing != null) {
                 const { aTop, aLeft } = skeDrawing;
                 const oldPositionH = oldDrawings[drawingId].docTransform.positionH;
+                let posOffsetH = aLeft;
+
+                if (oldPositionH.relativeFrom === ObjectRelativeFromH.MARGIN) {
+                    posOffsetH -= pageMarginLeft;
+                } else if (oldPositionH.relativeFrom === ObjectRelativeFromH.COLUMN) {
+                    posOffsetH -= skeDrawing.columnLeft;
+                }
+
                 const newPositionH = {
-                    relativeFrom: ObjectRelativeFromH.PAGE,
-                    posOffset: aLeft,
+                    relativeFrom: oldPositionH.relativeFrom,
+                    posOffset: posOffsetH,
                 };
 
-                if (oldPositionH.relativeFrom !== newPositionH.relativeFrom || oldPositionH.posOffset !== newPositionH.posOffset) {
+                if (oldPositionH.posOffset !== newPositionH.posOffset) {
                     const action = jsonX.replaceOp(['drawings', drawingId, 'docTransform', 'positionH'], oldPositionH, newPositionH);
 
                     rawActions.push(action!);
                 }
 
                 const oldPositionV = oldDrawings[drawingId].docTransform.positionV;
+                let posOffsetV = aTop;
+
+                if (oldPositionV.relativeFrom === ObjectRelativeFromV.PAGE) {
+                    posOffsetV += pageMarginTop;
+                } else if (oldPositionV.relativeFrom === ObjectRelativeFromV.LINE) {
+                    posOffsetV -= skeDrawing.lineTop;
+                } else if (oldPositionV.relativeFrom === ObjectRelativeFromV.PARAGRAPH) {
+                    posOffsetV -= skeDrawing.blockAnchorTop;
+                }
+
                 const newPositionV = {
-                    relativeFrom: ObjectRelativeFromV.MARGIN,
-                    posOffset: aTop,
+                    relativeFrom: oldPositionV.relativeFrom,
+                    posOffset: posOffsetV,
                 };
 
-                if (oldPositionV.relativeFrom !== newPositionV.relativeFrom || oldPositionV.posOffset !== newPositionV.posOffset) {
+                if (oldPositionV.posOffset !== newPositionV.posOffset) {
                     const action = jsonX.replaceOp(['drawings', drawingId, 'docTransform', 'positionV'], oldPositionV, newPositionV);
 
                     rawActions.push(action!);

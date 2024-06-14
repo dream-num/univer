@@ -18,7 +18,7 @@ import type { IMutationInfo } from '@univerjs/core';
 import { CellValueType, Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { ClearSelectionAllCommand, ClearSelectionContentCommand, getSheetCommandTarget, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
+import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
 import type { IAddHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link';
 import { AddHyperLinkCommand, AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { isLegalLink, serializeUrl } from '../common/util';
@@ -211,7 +211,11 @@ export class SheetHyperLinkSetRangeController extends Disposable {
     private _initClearSelectionCommandInterceptor() {
         this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
             getMutations: (command) => {
-                if (command.id === ClearSelectionContentCommand.id || command.id === ClearSelectionAllCommand.id) {
+                if (
+                    command.id === ClearSelectionContentCommand.id ||
+                    command.id === ClearSelectionAllCommand.id ||
+                    command.id === ClearSelectionFormatCommand.id
+                ) {
                     const redos: IMutationInfo[] = [];
                     const undos: IMutationInfo[] = [];
                     const selection = this._selectionManagerService.getFirst();

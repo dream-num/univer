@@ -18,6 +18,7 @@ import { Inject } from '@wendellhu/redi';
 import type { Workbook } from '@univerjs/core';
 import { Disposable, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 
+import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from '../worksheet-permission/utils';
 import { getAllWorkbookPermissionPoint } from './util';
 
 @OnLifecycle(LifecycleStages.Starting, WorkbookPermissionService)
@@ -50,6 +51,14 @@ export class WorkbookPermissionService extends Disposable {
 
         this.disposeWithMe(this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             const unitId = workbook.getUnitId();
+            workbook.getSheets().forEach((worksheet) => {
+                const subUnitId = worksheet.getSheetId();
+
+                [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
+                    const instance = new F(unitId, subUnitId);
+                    this._permissionService.deletePermissionPoint(instance.id);
+                });
+            });
             getAllWorkbookPermissionPoint().forEach((F) => {
                 const instance = new F(unitId);
                 this._permissionService.deletePermissionPoint(instance.id);

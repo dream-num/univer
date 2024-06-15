@@ -48,17 +48,12 @@ export function deriveStateFromActiveSheet$<T>(univerInstanceService: IUniverIns
 
 export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
-    const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
-    const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const userManagerService = accessor.get(UserManagerService);
-    const contextService = accessor.get(IContextService);
-    const focusedOnDrawing$ = contextService.subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false));
 
-    return combineLatest([userManagerService.currentUser$, workbook$, selectionManagerService.selectionMoveEnd$, focusedOnDrawing$]).pipe(
-        switchMap(([_, workbook, selection, focusOnDrawings]) => {
-            if (focusOnDrawings || !workbook) {
+    return combineLatest([userManagerService.currentUser$, workbook$]).pipe(
+        switchMap(([_, workbook]) => {
+            if (!workbook) {
                 return of(true);
             }
 
@@ -67,47 +62,63 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
                     if (!worksheet) {
                         return of(true);
                     }
-                    const unitId = workbook.getUnitId();
-                    const subUnitId = worksheet.getSheetId();
 
-                    const permissionService = accessor.get(IPermissionService);
+                    const selectionManagerService = accessor.get(SelectionManagerService);
+                    const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
+                    const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
 
-                    const { workbookTypes = [WorkbookEditablePermission], worksheetTypes, rangeTypes } = permissionTypes;
+                    const contextService = accessor.get(IContextService);
+                    const focusedOnDrawing$ = contextService.subscribeContextValue$(FOCUSING_COMMON_DRAWINGS).pipe(startWith(false));
 
-                    const permissionIds: string[] = [];
+                    return combineLatest([selectionManagerService.selectionMoveEnd$, focusedOnDrawing$]).pipe(
+                        switchMap(([selection, focusOnDrawings]) => {
+                            if (focusOnDrawings) {
+                                return of(true);
+                            }
 
-                    workbookTypes?.forEach((F) => {
-                        permissionIds.push(new F(unitId).id);
-                    });
+                            const unitId = workbook.getUnitId();
+                            const subUnitId = worksheet.getSheetId();
 
-                    worksheetTypes?.forEach((F) => {
-                        permissionIds.push(new F(unitId, subUnitId).id);
-                    });
+                            const permissionService = accessor.get(IPermissionService);
 
-                    const worksheetRule = worksheetRuleModel.getRule(unitId, subUnitId);
+                            const { workbookTypes = [WorkbookEditablePermission], worksheetTypes, rangeTypes } = permissionTypes;
 
-                    if (worksheetRule) {
-                        return permissionService.composePermission$(permissionIds).pipe(map((list) => {
-                            return list.some((item) => item.value === false);
-                        }));
-                    }
+                            const permissionIds: string[] = [];
 
-                    const selectionRanges = selection?.map((selection) => selection.range);
-                    const rules = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
-                        return selectionRanges?.some((range) => {
-                            return rule.ranges.some((ruleRange) => Rectangle.intersects(range, ruleRange));
-                        });
-                    });
+                            workbookTypes?.forEach((F) => {
+                                permissionIds.push(new F(unitId).id);
+                            });
 
-                    rangeTypes?.forEach((F) => {
-                        rules.forEach((rule) => {
-                            permissionIds.push(new F(unitId, subUnitId, rule.permissionId).id);
-                        });
-                    });
+                            worksheetTypes?.forEach((F) => {
+                                permissionIds.push(new F(unitId, subUnitId).id);
+                            });
 
-                    return permissionService.composePermission$(permissionIds).pipe(map((list) => {
-                        return list.some((item) => item.value === false);
-                    }));
+                            const worksheetRule = worksheetRuleModel.getRule(unitId, subUnitId);
+
+                            if (worksheetRule) {
+                                return permissionService.composePermission$(permissionIds).pipe(map((list) => {
+                                    return list.some((item) => item.value === false);
+                                }));
+                            }
+
+                            const selectionRanges = selection?.map((selection) => selection.range);
+                            const rules = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
+                                return selectionRanges?.some((range) => {
+                                    return rule.ranges.some((ruleRange) => Rectangle.intersects(range, ruleRange));
+                                });
+                            });
+
+                            rangeTypes?.forEach((F) => {
+                                rules.forEach((rule) => {
+                                    permissionIds.push(new F(unitId, subUnitId, rule.permissionId).id);
+                                });
+                            });
+
+                            return permissionService.composePermission$(permissionIds).pipe(map((list) => {
+                                return list.some((item) => item.value === false);
+                            }));
+                        })
+                    );
                 })
             );
         })

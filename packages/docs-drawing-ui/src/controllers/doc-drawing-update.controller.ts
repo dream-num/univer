@@ -260,6 +260,7 @@ export class DocDrawingUpdateController extends Disposable {
     }
 
     private _updateDrawingListener() {
+        // Question:@JOCS featurePluginUpdate 是做啥的？
         this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
             const drawings: Partial<IDocDrawing>[] = [];
 

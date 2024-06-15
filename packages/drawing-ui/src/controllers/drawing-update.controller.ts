@@ -756,6 +756,7 @@ export class DrawingUpdateController extends Disposable {
     //         drawings.push({ unitId, subUnitId, drawingId });
     //     }
     // });
+
     private _addListenerOnDrawing(scene: Scene) {
         const transformer = scene.getTransformerByCreate();
 

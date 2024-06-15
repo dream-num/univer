@@ -47,7 +47,7 @@ export class ForceStringRenderController extends RxDisposable implements IRender
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
-                    priority: 101,
+                    priority: 10,
                     handler: (cell, pos, next) => {
                         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                         if (!skeleton) {

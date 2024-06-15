@@ -65,5 +65,8 @@ test('no error when dispose a unit', async ({ page }) => {
     await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(1));
     await page.waitForTimeout(2000);
 
+    await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(2));
+    await page.waitForTimeout(2000);
+
     expect(errored).toBeFalsy();
 });

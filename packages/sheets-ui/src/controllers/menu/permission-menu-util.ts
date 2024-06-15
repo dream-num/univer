@@ -390,9 +390,9 @@ export function getRemovePermissionDisable$(accessor: IAccessor) {
                     const permission$ = permissionService.getPermissionPoint$(new WorkbookManageCollaboratorPermission(unitId).id)?.pipe(map((e) => !!e.value)) ?? of(false);
 
                     const changes$ = merge(
-                        accessor.get(RangeProtectionRuleModel).ruleChange$,
-                        accessor.get(WorksheetProtectionRuleModel).ruleChange$
-                    );
+                        selectionProtectionRuleModel.ruleChange$,
+                        worksheetProtectionRuleModel.ruleChange$
+                    ).pipe(startWith(null));
                     return combineLatest([changes$, permission$]).pipe(
                         map(([_, permission]) => {
                             if (!permission) {

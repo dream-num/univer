@@ -506,22 +506,24 @@ export const handleReorderRange = (param: IReorderRangeCommand, targetRange: IRa
     if (!range || !order) {
         return [];
     }
-    if (targetRange.endColumn < range.startColumn || targetRange.startColumn > range.endColumn) {
+
+    if (Rectangle.contains(range, targetRange) && targetRange.endRow === targetRange.startRow) {
+        const operators: IOperator[] = [];
+        const targetRow = targetRange.startRow;
+        for (const k in order) {
+            if (order[k] === targetRow) {
+                const toRow = Number(k);
+                operators.push({
+                    type: OperatorType.VerticalMove,
+                    step: toRow - targetRow,
+                    length: 0,
+                });
+                return operators;
+            }
+        }
         return [];
     }
-    const operators: IOperator[] = [];
-    const targetRow = targetRange.startRow;
-    for (const k in order) {
-        if (order[k] === targetRow) {
-            const toRow = Number(k);
-            operators.push({
-                type: OperatorType.VerticalMove,
-                step: toRow - targetRow,
-                length: 0,
-            });
-            return operators;
-        }
-    }
+
     return [];
 };
 

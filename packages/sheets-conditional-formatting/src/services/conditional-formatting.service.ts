@@ -16,8 +16,8 @@
 
 import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import { afterInitApply, createInterceptorKey, Disposable, ICommandService, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
-import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
+import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, IReorderRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, RemoveSheetCommand, ReorderRangeMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -353,6 +353,18 @@ export class ConditionalFormattingService extends Disposable {
                         };
                         handleSubUnit(to);
                         handleSubUnit(from);
+                        break;
+                    }
+                    case ReorderRangeMutation.id: {
+                        const { range, unitId, subUnitId } = commandInfo.params as IReorderRangeMutationParams;
+                        const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
+                        if (allRules) {
+                            const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, range)));
+                            effectRule.forEach((rule) => {
+                                this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
+                                this._deleteComputeCache(unitId, subUnitId, rule.cfId);
+                            });
+                        }
                         break;
                     }
                 }

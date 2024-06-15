@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import { LocaleService, LocaleType, Tools } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import React, { useCallback, useState } from 'react';
 import { type IOrderRule, SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { Button, Checkbox, DraggableList, Dropdown, Radio, RadioGroup } from '@univerjs/design';
@@ -35,18 +35,19 @@ export function CustomSortPanel() {
     const sheetsSortService = useDependency(SheetsSortService);
     const localeService = useDependency(LocaleService);
 
+    const [hasTitle, setHasTitle] = useState(false);
+
     const state = sheetsSortUIService.customSortState();
-    if (!state || !state.range) {
+    if (!state || !state.location) {
         return null;
     }
+    const { range, unitId, subUnitId } = state.location;
 
-    const { range } = state;
-    const allCols = Array.from({ length: range.endColumn - range.startColumn + 1 }, (_, i) => i + range.startColumn);
+    const titles = sheetsSortUIService.getTitles(hasTitle);
 
     const [list, setList] = useState<IOrderRule[]>([
         { type: SortType.ASC, colIndex: range.startColumn },
     ]);
-    const [hasTitle, setHasTitle] = useState(false);
 
     const onItemChange = useCallback((index: number, value: Nullable<IOrderRule>) => {
         const newList = [...list];
@@ -72,10 +73,21 @@ export function CustomSortPanel() {
         sheetsSortService.applySort({ range, orderRules, hasTitle });
         sheetsSortUIService.closeCustomSortPanel();
     }, [sheetsSortService, sheetsSortUIService, range]);
+
     const cancel = useCallback(() => {
         sheetsSortUIService.closeCustomSortPanel();
     }, [sheetsSortUIService]);
-    const canNew = list.length < allCols.length;
+
+    const setTitle = useCallback((value: boolean) => {
+        setHasTitle(value);
+        if (value) {
+            sheetsSortUIService.setSelection(unitId, subUnitId, { ...range, startRow: range.startRow + 1 });
+        } else {
+            sheetsSortUIService.setSelection(unitId, subUnitId, range);
+        }
+    }, [sheetsSortUIService, range, subUnitId, unitId]);
+
+    const canNew = list.length < titles.length;
 
     const dragList = list.map((item) => ({ ...item, id: `${item.colIndex}` }));
 
@@ -84,7 +96,7 @@ export function CustomSortPanel() {
             <div className={styles.customSortPanelContent} onMouseDown={(e) => { e.stopPropagation(); }}>
                 <div className={styles.customSortPanelExt}>
                     <div className={styles.firstRowCheck}>
-                        <Checkbox checked={hasTitle} onChange={(value) => setHasTitle(!!value)}>
+                        <Checkbox checked={hasTitle} onChange={(value) => setTitle(!!value)}>
                             {localeService.t('sheets-sort.dialog.first-row-check')}
                         </Checkbox>
                     </div>
@@ -111,7 +123,7 @@ export function CustomSortPanel() {
                         draggableHandle={`.${styles.customSortPanelItemHandler}`}
                         itemRender={(item) => (
                             <SortOptionItem
-                                allCols={allCols}
+                                titles={titles}
                                 list={dragList}
                                 item={item}
                                 onChange={(value, index) => onItemChange(index, value)}
@@ -130,20 +142,17 @@ export function CustomSortPanel() {
     );
 }
 
-export function SortOptionItem(props: { allCols: number[]; list: IOrderRule[]; item: IOrderRule; onChange: (value: Nullable<IOrderRule>, index: number) => void }) {
-    const { list, item, allCols, onChange } = props;
+export function SortOptionItem(props: { titles: { index: number; label: string }[]; list: IOrderRule[]; item: IOrderRule; onChange: (value: Nullable<IOrderRule>, index: number) => void }) {
+    const { list, item, titles, onChange } = props;
     const localeService = useDependency(LocaleService);
-    const colTranslator = colIndexTranslator(localeService);
-    const availableMenu = allCols.filter((colIndex) => (!list.some((item) => item.colIndex === colIndex)) || colIndex === item.colIndex).map((colIndex) => ({
-        index: colIndex,
-        label: colTranslator(colIndex),
-    }));
+    const availableMenu = titles.filter((title) => (!list.some((item) => item.colIndex === title.index)) || title.index === item.colIndex);
     const currentIndex = list.findIndex((listItem) => listItem.colIndex === item.colIndex);
     const handleChangeColIndex = useCallback((menuItem: { index: number; label: string }) => {
         onChange({ ...item, colIndex: menuItem.index }, currentIndex);
     }, [currentIndex, item, onChange]);
 
     const showDelete = list.length > 1;
+    const itemLabel = titles.find((title) => title.index === item.colIndex)?.label;
     return (
         <div className={styles.customSortPanelItem}>
             <div className={styles.customSortPanelItemHead}>
@@ -176,7 +185,7 @@ export function SortOptionItem(props: { allCols: number[]; list: IOrderRule[]; i
                         )}
                     >
                         <div className={styles.customSortPanelItemColumnInput}>
-                            {colTranslator(item.colIndex)}
+                            {itemLabel}
                             <MoreDownSingle className={styles.customSortPanelItemColumnInputDropdown} />
                         </div>
                     </Dropdown>
@@ -210,20 +219,5 @@ function findNextColIndex(range: IRange, list: Nullable<IOrderRule>[]): number |
         }
     }
     return null;
-}
-
-function colIndexTranslator(localeService: LocaleService) {
-    return (colIndex: number) => {
-        const colName = Tools.chatAtABC(colIndex);
-        const currentLocale = localeService.getCurrentLocale();
-        switch (currentLocale) {
-            case LocaleType.ZH_CN:
-                return `"${colName}"列`;
-            case LocaleType.EN_US:
-                return `Column "${colName}"`;
-            default:
-                return `Column "${colName}"`;
-        }
-    };
 }
 

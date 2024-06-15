@@ -20,11 +20,13 @@ import { Disposable, ICommandService,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
+    LocaleType,
     OnLifecycle,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 
-import { SelectionManagerService } from '@univerjs/sheets';
+import { getPrimaryForRange, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import type { ISheetRangeLocation } from '@univerjs/sheets-ui';
 import { expandToContinuousRange } from '@univerjs/sheets-ui';
@@ -43,7 +45,7 @@ export enum EXTEND_TYPE {
 }
 
 export interface ICustomSortState {
-    range?: IRange;
+    location?: ISheetSortLocation;
     show: boolean;
 }
 
@@ -72,6 +74,8 @@ export class SheetsSortUIService extends Disposable {
             return false;
         }
 
+        this.setSelection(location.unitId, location.subUnitId, location.range);
+
         const mergeCheck = this._sheetsSortService.mergeCheck(location);
         if (!mergeCheck) {
             this.showMergeError();
@@ -95,6 +99,8 @@ export class SheetsSortUIService extends Disposable {
             return false;
         }
 
+        this.setSelection(location.unitId, location.subUnitId, location.range);
+
         const mergeCheck = this._sheetsSortService.mergeCheck(location);
         if (!mergeCheck) {
             this.showMergeError();
@@ -109,40 +115,45 @@ export class SheetsSortUIService extends Disposable {
         return this._customSortState$.getValue();
     }
 
-    private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetSortLocation >> {
-        const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET) as Workbook;
-        const worksheet = workbook.getActiveSheet();
-        const selection = this._selectionManagerService.getLast();
-        if (!selection) {
-            return null;
-        }
-        let range;
-        if (extend === true) {
-            range = expandToContinuousRange(selection.range, { up: true, down: true, left: true, right: true }, worksheet);
-        } else if (extend === false) {
-            range = selection.range;
-        } else {
-            const confirmRes = await this.showExtendConfirm();
-            if (confirmRes === EXTEND_TYPE.CANCEL) {
-                return null;
-            }
-            if (confirmRes === EXTEND_TYPE.KEEP) {
-                range = selection.range;
-            } else {
-                range = expandToContinuousRange(selection.range, { up: true, down: true, left: true, right: true }, worksheet);
-            }
-        }
-        const primary = this._selectionManagerService.getLast()?.primary;
-        if (!primary) {
-            return null;
+    getTitles(hasTitle: boolean) {
+        const location = this.customSortState()?.location;
+        if (!location) {
+            return [];
         }
 
-        return {
-            range,
-            unitId: workbook.getUnitId(),
-            subUnitId: worksheet.getSheetId(),
-            colIndex: primary.actualColumn,
+        const { unitId, subUnitId, range } = location;
+        const worksheet = (this._univerInstanceService.getUnit(unitId) as Workbook)?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return [];
+        }
+
+        const colTranslator = colIndexTranslator(this._localeService);
+
+        return Array.from({ length: range.endColumn - range.startColumn + 1 },
+            (_, i) => {
+                const cellValue = worksheet.getCell(range.startRow, i + range.startColumn)?.v;
+                return {
+                    index: i + range.startColumn,
+                    label: hasTitle ?
+                        `${cellValue ?? colTranslator(i + range.startColumn)}` :
+                        colTranslator(i + range.startColumn),
+                };
+            });
+    }
+
+    setSelection(unitId: string, subUnitId: string, range: IRange) {
+        const worksheet = (this._univerInstanceService.getUnit(unitId) as Workbook)?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return;
+        }
+        const setSelectionsOperationParams = {
+            unitId,
+            subUnitId,
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            selections: [{ range, primary: getPrimaryForRange(range, worksheet), style: null }],
+
         };
+        this._commandService.executeCommand(SetSelectionsOperation.id, setSelectionsOperationParams);
     }
 
     async showMergeError(): Promise<boolean> {
@@ -183,10 +194,61 @@ export class SheetsSortUIService extends Disposable {
     }
 
     showCustomSortPanel(location: ISheetSortLocation) {
-        this._customSortState$.next({ range: location.range, show: true });
+        this._customSortState$.next({ location, show: true });
     }
 
     closeCustomSortPanel() {
         this._customSortState$.next({ show: false });
     }
+
+    private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetSortLocation >> {
+        const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET) as Workbook;
+        const worksheet = workbook.getActiveSheet();
+        const selection = this._selectionManagerService.getLast();
+        if (!selection) {
+            return null;
+        }
+        let range;
+        if (extend === true) {
+            range = expandToContinuousRange(selection.range, { up: true, down: true, left: true, right: true }, worksheet);
+        } else if (extend === false) {
+            range = selection.range;
+        } else {
+            const confirmRes = await this.showExtendConfirm();
+            if (confirmRes === EXTEND_TYPE.CANCEL) {
+                return null;
+            }
+            if (confirmRes === EXTEND_TYPE.KEEP) {
+                range = selection.range;
+            } else {
+                range = expandToContinuousRange(selection.range, { up: true, down: true, left: true, right: true }, worksheet);
+            }
+        }
+        const primary = this._selectionManagerService.getLast()?.primary;
+        if (!primary) {
+            return null;
+        }
+
+        return {
+            range,
+            unitId: workbook.getUnitId(),
+            subUnitId: worksheet.getSheetId(),
+            colIndex: primary.actualColumn,
+        };
+    }
+}
+
+function colIndexTranslator(localeService: LocaleService) {
+    return (colIndex: number) => {
+        const colName = Tools.chatAtABC(colIndex);
+        const currentLocale = localeService.getCurrentLocale();
+        switch (currentLocale) {
+            case LocaleType.ZH_CN:
+                return `"${colName}"列`;
+            case LocaleType.EN_US:
+                return `Column "${colName}"`;
+            default:
+                return `Column "${colName}"`;
+        }
+    };
 }

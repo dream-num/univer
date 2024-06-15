@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, UniverInstanceService } from '@univerjs/core';
+import type { UniverInstanceService } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable } from '@univerjs/core';
 
 import { Inject, Injector } from '@wendellhu/redi';
@@ -26,6 +26,7 @@ import { AscendingSingle, CustomSortSingle, DescendingSingle, ExpandAscendingSin
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/sheets-sort.command';
 import { CustomSortPanel } from '../views/CustomSortPanel';
+import type { ISheetSortLocation } from '../services/sheets-sort-ui.service';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';
 import EmbedSortBtn from '../views/EmbedSortBtn';
 import { SHEETS_SORT_ASC_EXT_ICON, SHEETS_SORT_ASC_ICON, SHEETS_SORT_CUSTOM_ICON, SHEETS_SORT_DESC_EXT_ICON, SHEETS_SORT_DESC_ICON, sortRangeAscCtxMenuFactory, sortRangeAscExtCtxMenuFactory, sortRangeAscExtMenuFactory, sortRangeAscMenuFactory, sortRangeCtxMenuFactory, sortRangeCustomCtxMenuFactory, sortRangeCustomMenuFactory, sortRangeDescCtxMenuFactory, sortRangeDescExtCtxMenuFactory, sortRangeDescExtMenuFactory, sortRangeDescMenuFactory, sortRangeMenuFactory } from './sheets-sort.menu';
@@ -112,20 +113,20 @@ export class SheetsSortUIController extends RxDisposable {
 
         // this controller is also responsible for toggling the CustomSortDialog
         this._sheetsSortUIService.customSortState$.pipe(takeUntil(this.dispose$)).subscribe((newState) => {
-            if (newState && newState.show && newState.range) {
-                this._openCustomSortPanel(newState.range);
+            if (newState && newState.show && newState.location) {
+                this._openCustomSortPanel(newState.location);
             } else if (newState && !newState?.show) {
                 this._closePanel();
             }
         });
     }
 
-    private _openCustomSortPanel(range: IRange): void {
+    private _openCustomSortPanel(location: ISheetSortLocation): void {
         this._dialogService.open({
             id: CUSTOM_SORT_DIALOG_ID,
             draggable: true,
             width: CUSTOM_SORT_PANEL_WIDTH,
-            title: { title: `${this._localeService.t('sheets-sort.general.sort-custom')}: ${serializeRange(range)}` },
+            title: { title: `${this._localeService.t('sheets-sort.general.sort-custom')}: ${serializeRange(location.range)}` },
             children: { label: 'CustomSortPanel' },
             destroyOnClose: true,
             defaultPosition: getCustomSortDialogDefaultPosition(),

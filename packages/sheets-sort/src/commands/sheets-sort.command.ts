@@ -20,7 +20,7 @@
 import { CommandType, ICommandService, IUniverInstanceService, Rectangle, sequenceExecute } from '@univerjs/core';
 import type { ICellData, ICommand, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { IReorderRangeCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import { getPrimaryForRange, NORMAL_SELECTION_PLUGIN_NAME, ReorderRangeCommand, SetSelectionsOperation } from '@univerjs/sheets';
+import { ReorderRangeCommand } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IOrderRule, SortType } from '../services/interface';
 import { SheetsSortService } from '../services/sheets-sort.service';
@@ -101,16 +101,6 @@ export const SortRangeCommand: ICommand = {
             order[oldOrder[oldIndex]] = index;
         });
 
-        const setSelectionsOperation = {
-            id: SetSelectionsOperation.id,
-            params: {
-                unitId,
-                subUnitId,
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                selections: [{ range, primary: getPrimaryForRange(range, worksheet), style: null }],
-            },
-        };
-
         const reorderRangeCommand = {
             id: ReorderRangeCommand.id,
             params: {
@@ -122,7 +112,7 @@ export const SortRangeCommand: ICommand = {
         };
 
         const commandService = accessor.get(ICommandService);
-        const res = sequenceExecute([setSelectionsOperation, reorderRangeCommand], commandService);
+        const res = sequenceExecute([reorderRangeCommand], commandService);
         return res.result;
     },
 

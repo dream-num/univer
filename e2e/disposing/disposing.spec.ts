@@ -43,10 +43,30 @@ test('no error on constructing and disposing', async ({ page }) => {
     await page.waitForTimeout(2000);
 
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
-    await page.waitForTimeout(2000); // wait for long enough to let the GC do its job
+    await page.waitForTimeout(2000);
 
     await page.evaluate(() => window.E2EControllerAPI.disposeUniver());
-    await page.waitForTimeout(2000); // wait for long enough to let the GC do its job
+    await page.waitForTimeout(2000);
+
+    expect(errored).toBeFalsy();
+});
+
+test('no error when dispose a unit', async ({ page }) => {
+    let errored = false;
+
+    page.on('pageerror', (error) => {
+        console.error('Page error:', error);
+        errored = true;
+    });
+
+    await page.goto('http://localhost:3000/sheets/');
+    await page.waitForTimeout(2000);
+
+    await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(1));
+    await page.waitForTimeout(2000);
+
+    await page.evaluate(() => window.E2EControllerAPI.loadAndRelease(2));
+    await page.waitForTimeout(2000);
 
     expect(errored).toBeFalsy();
 });

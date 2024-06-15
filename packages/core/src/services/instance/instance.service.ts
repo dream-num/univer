@@ -119,21 +119,28 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         };
     }
 
-    private readonly _currentUnits$ = new BehaviorSubject<{ [type: UnitType]: Nullable<UnitModel> }>({});
+    private _currentUnits = new Map<UnitType, Nullable<UnitModel>>();
+    private readonly _currentUnits$ = new BehaviorSubject<Map<UnitType, Nullable<UnitModel>>>(this._currentUnits);
     readonly currentUnits$ = this._currentUnits$.asObservable();
     getCurrentTypeOfUnit$<T>(type: number): Observable<Nullable<T>> {
-        return this.currentUnits$.pipe(map((units) => units[type] ?? null), distinctUntilChanged()) as Observable<Nullable<T>>;
+        return this.currentUnits$.pipe(map((units) => units.get(type) ?? null), distinctUntilChanged()) as Observable<Nullable<T>>;
     }
 
     getCurrentUnitForType<T>(type: UnitType): Nullable<T> {
-        return this._currentUnits$.getValue()[type] as Nullable<T>;
+        return this._currentUnits.get(type) as Nullable<T>;
     }
 
     setCurrentUnitForType(unitId: string): void {
         const result = this._getUnitById(unitId);
         if (!result) throw new Error(`[UniverInstanceService]: no document with unitId ${unitId}!`);
 
-        this._currentUnits$.next({ ...this._currentUnits$.getValue(), [result[1]]: result[0] });
+        this._currentUnits.set(result[1], result[0]);
+        this._currentUnits$.next(this._currentUnits);
+    }
+
+    private _removeCurrentUnitForType(type: UnitType): void {
+        this._currentUnits.set(type, null);
+        this._currentUnits$.next(this._currentUnits);
     }
 
     private readonly _unitAdded$ = new Subject<UnitModel>();
@@ -142,21 +149,28 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         return this._unitAdded$.pipe(filter((unit) => unit.type === type)) as Observable<T>;
     }
 
+    /**
+     * Add a unit into Univer.
+     *
+     * @ignore
+     *
+     * @param unit The unit to be added.
+     */
     __addUnit(unit: UnitModel): void {
         const type = unit.type;
 
         if (!this._unitsByType.has(type)) {
             this._unitsByType.set(type, []);
         }
-
         this._unitsByType.get(type)!.push(unit);
 
-        this._currentUnits$.next({ ...this._currentUnits$.getValue(), [type]: unit });
         this._unitAdded$.next(unit);
+
+        this.setCurrentUnitForType(unit.getUnitId());
     }
 
     private _unitDisposed$ = new Subject<UnitModel>();
-    unitDisposed$ = this._unitDisposed$.asObservable();
+    readonly unitDisposed$ = this._unitDisposed$.asObservable();
     getTypeOfUnitDisposed$<T extends UnitModel<object, number>>(type: UniverInstanceType): Observable<T> {
         return this.unitDisposed$.pipe(filter((unit) => unit.type === type)) as Observable<T>;
     }
@@ -242,9 +256,12 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         const index = units.indexOf(unit);
         units.splice(index, 1);
 
-        this._unitDisposed$.next(unit);
-        this._currentUnits$.next({ ...this._currentUnits$.getValue(), [type]: null });
+        // Firstly un-mark the unit as "current".
+        this._removeCurrentUnitForType(type);
         this._focused$.next(null);
+
+        // Then dispose the unit.
+        this._unitDisposed$.next(unit);
 
         return true;
     }

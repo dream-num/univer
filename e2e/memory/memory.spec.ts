@@ -23,6 +23,7 @@ import { expect, test } from '@playwright/test';
 // examples/src/plugins/debugger/controllers/e2e/e2e-memory.controller.ts
 export interface IE2EControllerAPI {
     loadAndRelease(id: number): Promise<void>;
+    loadDefaultSheet(): Promise<void>;
     disposeUniver(): Promise<void>;
 }
 
@@ -32,6 +33,8 @@ declare global {
         E2EControllerAPI: IE2EControllerAPI;
     }
 }
+
+const MAX_MEMORY_OVERFLOW = 2_500_000;
 
 test('memory', async ({ page }) => {
     await page.goto('http://localhost:3000/sheets/');
@@ -49,9 +52,8 @@ test('memory', async ({ page }) => {
     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after second load:', memoryAfterSecondLoad);
 
-    // max overflow for 3MB
     const notLeaking = (memoryAfterSecondLoad <= memoryAfterFirstLoad)
-        || (memoryAfterSecondLoad - memoryAfterFirstLoad <= 2_500_000);
+        || (memoryAfterSecondLoad - memoryAfterFirstLoad <= MAX_MEMORY_OVERFLOW);
     expect(notLeaking).toBeTruthy();
 });
 

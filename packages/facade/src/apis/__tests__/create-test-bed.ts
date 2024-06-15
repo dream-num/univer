@@ -32,7 +32,7 @@ import {
 } from '@univerjs/core';
 import { FormulaDataModel, FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import { SelectionManagerService, SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { RangeProtectionRuleModel, SelectionManagerService, SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import {
     DescriptionService,
     FormulaCustomFunctionService,
@@ -151,6 +151,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([WorksheetPermissionService]);
             injector.add([WorkbookPermissionService]);
             injector.add([WorksheetProtectionPointModel]);
+            injector.add([RangeProtectionRuleModel]);
             injector.add([IAuthzIoService, { useClass: AuthzIoLocalService }]);
             injector.add([WorksheetProtectionRuleModel]);
 

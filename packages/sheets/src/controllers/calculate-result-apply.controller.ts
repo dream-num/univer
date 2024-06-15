@@ -34,10 +34,6 @@ export class CalculateResultApplyController extends Disposable {
     }
 
     private _initialize(): void {
-        this._commandExecutedListener();
-    }
-
-    private _commandExecutedListener() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id !== SetFormulaCalculationResultMutation.id) {

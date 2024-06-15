@@ -69,13 +69,17 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             control: null,
             exits,
         });
+
         this.refreshShapes();
         return id;
     }
 
     refreshShapes() {
-        const currentUnitId = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-        const currentSubUnitId = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
+        const currentSheet = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!currentSheet) return;
+
+        const currentUnitId = currentSheet.getUnitId();
+        const currentSubUnitId = currentSheet.getActiveSheet()?.getSheetId();
         this._shapeMap.forEach((shape) => {
             const { unitId, subUnitId, selection, control: oldControl, zIndex } = shape;
 

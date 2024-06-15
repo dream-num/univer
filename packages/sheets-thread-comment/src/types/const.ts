@@ -16,4 +16,4 @@
 
 export const SHEETS_THREAD_COMMENT_MODAL = 'univer.sheet.thread-comment-modal';
 export const COMMENT_SINGLE_ICON = 'comment-single';
-export const SHEETS_THREAD_COMMENT = 'univer.sheet.thread-comment';
+export const SHEETS_THREAD_COMMENT = 'SHEET_THREAD_COMMENT';

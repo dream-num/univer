@@ -20,14 +20,17 @@ import type { IAccessor } from '@wendellhu/redi';
 import type { ISheetCommandSharedParams } from '../utils/interface';
 import type { IReorderRangeMutationParams } from '../mutations/reorder-range.mutation';
 import { ReorderRangeMutation, ReorderRangeUndoMutationFactory } from '../mutations/reorder-range.mutation';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 
 export interface IReorderRangeCommandParams extends ISheetCommandSharedParams {
     range: IRange;
     order: { [key: number]: number };
 }
 
+export const ReorderRangeCommandId = 'sheet.command.reorder-range' as const;
+
 export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
-    id: 'sheet.command.reorder-range',
+    id: ReorderRangeCommandId,
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params: IReorderRangeCommandParams) => {
         const { subUnitId, unitId, range, order } = params;
@@ -47,14 +50,27 @@ export const ReorderRangeCommand: ICommand<IReorderRangeCommandParams> = {
             id: ReorderRangeMutation.id,
             params: ReorderRangeUndoMutationFactory(reorderMutation.params),
         };
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: ReorderRangeCommand.id, params });
 
-        const result = sequenceExecute([reorderMutation], commandService);
+        const redos = [
+            ...(interceptorCommands.preRedos ?? []),
+            reorderMutation,
+            ...interceptorCommands.redos,
+        ];
+
+        const undos = [
+            ...(interceptorCommands.preUndos ?? []),
+            undoReorderMutation,
+            ...interceptorCommands.undos,
+        ];
+        const result = sequenceExecute(redos, commandService);
         if (result.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [undoReorderMutation],
-                redoMutations: [reorderMutation],
+                undoMutations: undos,
+                redoMutations: redos,
             });
             return true;
         }

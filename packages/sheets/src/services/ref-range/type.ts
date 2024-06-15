@@ -32,6 +32,8 @@ import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../comma
 import { MoveColsCommandId, MoveRowsCommandId } from '../../commands/commands/move-rows-cols.command';
 import type { IRemoveRowColCommandParams } from '../../commands/commands/remove-row-col.command';
 import { RemoveColCommandId, RemoveRowCommandId } from '../../commands/commands/remove-row-col.command';
+import type { IReorderRangeCommandParams } from '../../commands/commands/reorder-range.command';
+import { ReorderRangeCommandId } from '../../commands/commands/reorder-range.command';
 
 export type IMoveRowsCommand = ICommandInfo<IMoveRowsCommandParams> & { id: typeof MoveRowsCommandId };
 export type IMoveColsCommand = ICommandInfo<IMoveColsCommandParams> & { id: typeof MoveColsCommandId };
@@ -55,6 +57,8 @@ export type IInsertRangeMoveRightCommand = ICommandInfo<InsertRangeMoveRightComm
     id: typeof InsertRangeMoveRightCommandId;
 };
 
+export type IReorderRangeCommand = ICommandInfo<IReorderRangeCommandParams> & { id: typeof ReorderRangeCommandId };
+
 export type EffectRefRangeParams =
     | IMoveRangeCommand
     | IInsertRowCommand
@@ -65,7 +69,8 @@ export type EffectRefRangeParams =
     | IInsertRangeMoveDownCommand
     | IInsertRangeMoveRightCommand
     | IMoveColsCommand
-    | IMoveRowsCommand;
+    | IMoveRowsCommand
+    | IReorderRangeCommand;
 
 export const EffectRefRangId = {
     MoveRangeCommandId,
@@ -79,6 +84,7 @@ export const EffectRefRangId = {
     InsertRangeMoveRightCommandId,
     MoveColsCommandId,
     MoveRowsCommandId,
+    ReorderRangeCommandId,
 } as const;
 
 export enum OperatorType {

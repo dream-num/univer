@@ -38,6 +38,7 @@ import type {
     IMoveRowsCommand,
     IOperator,
     IRemoveRowColCommand,
+    IReorderRangeCommand,
 } from './type';
 import { EffectRefRangId, OperatorType } from './type';
 
@@ -499,6 +500,28 @@ export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRang
     }
     return operators;
 };
+
+export const handleReorderRange = (param: IReorderRangeCommand, targetRange: IRange) => {
+    const { range, order } = param.params || {};
+    if (!range || !order) {
+        return [];
+    }
+    const operators: IOperator[] = [];
+    const targetRow = targetRange.startRow;
+    for (const k in order) {
+        if (order[k] === targetRow) {
+            const toRow = Number(k);
+            operators.push({
+                type: OperatorType.VerticalMove,
+                step: toRow - targetRow,
+                length: 0,
+            });
+            return operators;
+        }
+    }
+    return [];
+};
+
 // see docs/tldr/ref-range/insert-rows-cols.tldr
 export const handleBaseInsertRange = (_insertRange: IRange, _targetRange: IRange) => {
     const insertRange = handleRangeTypeInput(_insertRange);
@@ -904,6 +927,10 @@ export const handleDefaultRangeChangeWithEffectRefCommands = (range: IRange, com
             operator = handleIRemoveRow(commandInfo as IRemoveRowColCommand, range);
             break;
         }
+        case EffectRefRangId.ReorderRangeCommandId: {
+            operator = handleReorderRange(commandInfo as IReorderRangeCommand, range);
+            break;
+        }
     }
 
     const resultRange = runRefRangeMutations(operator, range);
@@ -1135,6 +1162,22 @@ export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: 
                 return [];
             }
             return [range];
+        }
+        case EffectRefRangId.ReorderRangeCommandId: {
+            const params = command;
+            const { range, order } = params.params!;
+            const effectRanges = [];
+            for (let row = range.startRow; row <= range.endRow; row++) {
+                if (row in order) {
+                    effectRanges.push({
+                        startRow: row,
+                        endRow: row,
+                        startColumn: range.startColumn,
+                        endColumn: range.endColumn,
+                    });
+                }
+            }
+            return effectRanges;
         }
     }
 }

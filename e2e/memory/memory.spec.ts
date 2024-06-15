@@ -23,6 +23,7 @@ import { expect, test } from '@playwright/test';
 // examples/src/plugins/debugger/controllers/e2e/e2e-memory.controller.ts
 export interface IE2EControllerAPI {
     loadAndRelease(id: number): Promise<void>;
+    loadDefaultSheet(): Promise<void>;
     disposeUniver(): Promise<void>;
 }
 

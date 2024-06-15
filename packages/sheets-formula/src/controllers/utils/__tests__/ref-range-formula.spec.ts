@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { IFormulaDataItem } from '@univerjs/engine-formula';
-import { formulaDataItemToCellData, isFormulaDataItem } from '../ref-range-formula';
+import { formulaDataItemToCellData, formulaDataItemToCellDataFormula, isFormulaDataItem } from '../ref-range-formula';
 
 describe('Ref range formula test', () => {
     describe('Util function', () => {
@@ -90,6 +90,77 @@ describe('Ref range formula test', () => {
             };
 
             result = formulaDataItemToCellData(formulaDataItem);
+
+            expect(result).toStrictEqual({ f: null, si: null });
+        });
+
+        it('Function formulaDataItemToCellDataFormula', () => {
+            let formulaDataItem: IFormulaDataItem = {
+                f: '=SUM(1)',
+            };
+
+            let result = formulaDataItemToCellDataFormula(formulaDataItem);
+
+            expect(result).toStrictEqual({
+                f: '=SUM(1)',
+            });
+
+            formulaDataItem = {
+                f: '',
+                si: 'id1',
+            };
+
+            result = formulaDataItemToCellDataFormula(formulaDataItem);
+
+            expect(result).toStrictEqual({
+                si: 'id1',
+            });
+
+            formulaDataItem = {
+                f: '=SUM(1)',
+                si: 'id1',
+            };
+
+            result = formulaDataItemToCellDataFormula(formulaDataItem);
+
+            expect(result).toStrictEqual({
+                f: '=SUM(1)',
+            });
+
+            formulaDataItem = {
+                f: '=SUM(1)',
+                si: 'id1',
+                x: 0,
+                y: 0,
+            };
+
+            result = formulaDataItemToCellDataFormula(formulaDataItem);
+
+            expect(result).toStrictEqual({
+                f: '=SUM(1)',
+            });
+
+            formulaDataItem = {
+                f: '=SUM(1)',
+                si: 'id1',
+                x: 0,
+                y: 1,
+            };
+
+            result = formulaDataItemToCellDataFormula(formulaDataItem);
+
+            expect(result).toStrictEqual({
+                f: '=SUM(1)',
+            });
+
+            formulaDataItem = {
+                f: '',
+                si: '',
+                x: 0,
+                y: 1,
+            };
+
+            result = formulaDataItemToCellDataFormula(formulaDataItem);
 
             expect(result).toStrictEqual({ f: null, si: null });
         });

@@ -142,7 +142,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
             return;
         }
 
-        const transform = drawingParam.transform;
+        const { transform } = drawingParam;
 
         if (transform == null) {
             return;
@@ -237,6 +237,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
             chagneStartSub.unsubscribe();
             focusSub.unsubscribe();
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleWidthChange = debounce((val: number | null) => {

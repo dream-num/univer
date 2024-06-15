@@ -172,14 +172,6 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
             unitId,
             drawings: docDrawingParams,
         } as IInsertDrawingCommandParams);
-
-        // const transformer = renderObject.scene.getTransformerByCreate();
-
-        // setTimeout(() => {
-        //     transformer.updateControl();
-        // }, 200);
-
-        // this._docSkeletonManagerService.getCurrent()?.skeleton.calculate();
     }
 
     private _getImagePosition(
@@ -223,7 +215,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     }
 
     private _updateDrawingListener() {
-        // Question:@JOCS featurePluginUpdate 是做啥的？
+        // REFACTOR: @JOCS  需要修改，移除 transformer 修改，不需要跟新了，单独处理了。
         this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
             if (params.length === 0) {
                 return;

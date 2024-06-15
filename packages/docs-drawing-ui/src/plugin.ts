@@ -26,6 +26,7 @@ import { DocDrawingUIController } from './controllers/doc-drawing.controller';
 import { DocDrawingUpdateRenderController } from './controllers/render-controllers/doc-drawing-update.render-controller';
 import { DocDrawingTransformUpdateController } from './controllers/doc-drawing-transform-update.controller';
 import { DocDrawingAddRemoveController } from './controllers/doc-drawing-add-remove.controller';
+import { DocDrawingTransformerController } from './controllers/doc-drawing-transformer-update.controller';
 
 const PLUGIN_NAME = 'DOCS_DRAWING_UI_PLUGIN';
 
@@ -47,6 +48,7 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
             [DocDrawingUIController],
             [DocDrawingPopupMenuController],
             [DocDrawingTransformUpdateController],
+            [DocDrawingTransformerController],
             [DocDrawingAddRemoveController],
         ];
 

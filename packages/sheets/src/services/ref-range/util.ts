@@ -506,6 +506,9 @@ export const handleReorderRange = (param: IReorderRangeCommand, targetRange: IRa
     if (!range || !order) {
         return [];
     }
+    if (targetRange.endColumn < range.startColumn || targetRange.startColumn > range.endColumn) {
+        return [];
+    }
     const operators: IOperator[] = [];
     const targetRow = targetRange.startRow;
     for (const k in order) {

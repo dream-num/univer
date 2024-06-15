@@ -68,7 +68,7 @@
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/protocol": "0.1.38-alpha.3",
+        "@univerjs/protocol": "0.1.38-alpha.4",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@wendellhu/redi": "^0.15.4",

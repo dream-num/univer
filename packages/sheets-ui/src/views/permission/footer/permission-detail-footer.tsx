@@ -19,7 +19,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 import { ISidebarService, useObservable } from '@univerjs/ui';
 import { IAuthzIoService, ICommandService, LocaleService } from '@univerjs/core';
-import { UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
+import { CreateRequest_WorkSheetObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { AddRangeProtectionCommand } from '@univerjs/sheets';
 import { SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
@@ -79,6 +79,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                                             unitID: activeRule.unitId,
                                             name: activeRule.name,
                                             strategies: [{ role: UnitRole.Editor, action: UnitAction.Edit }, { role: UnitRole.Reader, action: UnitAction.View }],
+                                            scope: CreateRequest_WorkSheetObjectScope.SomeCollaborator,
                                         },
                                         objectType: UnitObject.Worksheet,
                                     });
@@ -109,10 +110,11 @@ export const SheetPermissionPanelDetailFooter = () => {
                                     unitID: activeRule.unitId,
                                     name: activeRule.name,
                                     strategies: [{ role: UnitRole.Editor, action: UnitAction.Edit }, { role: UnitRole.Reader, action: UnitAction.View }],
+                                    scope: CreateRequest_WorkSheetObjectScope.SomeCollaborator,
                                 },
                                 objectType: UnitObject.Worksheet,
                             });
-                            const { ranges = [], ...sheetRule } = activeRule;
+                            const { ranges: _range = [], ...sheetRule } = activeRule;
                             sheetRule.permissionId = permissionId;
                             commandService.executeCommand(AddWorksheetProtectionCommand.id, {
                                 rule: sheetRule,
@@ -141,7 +143,7 @@ export const SheetPermissionPanelDetailFooter = () => {
                             label: UNIVER_SHEET_PERMISSION_PANEL,
                             showDetail: false,
                         },
-                        width: 320,
+                        width: 330,
                         footer: {
                             label: UNIVER_SHEET_PERMISSION_PANEL_FOOTER,
                             showDetail: false,

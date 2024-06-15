@@ -75,7 +75,7 @@
     },
     "dependencies": {
         "@univerjs/icons": "^0.1.56",
-        "@univerjs/protocol": "0.1.38-alpha.3",
+        "@univerjs/protocol": "0.1.38-alpha.4",
         "@univerjs/thread-comment": "workspace:*"
     },
     "devDependencies": {

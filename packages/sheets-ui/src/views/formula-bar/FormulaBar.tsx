@@ -60,6 +60,7 @@ export function FormulaBar() {
         ).subscribe(() => {
             const unitId = workbook.getUnitId();
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) return;
             const subUnitId = worksheet.getSheetId();
             const range = selectionManager.getLast()?.range;
             if (!range) return;

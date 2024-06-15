@@ -58,7 +58,8 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
 
     addShape(selection: ISelectionWithStyle, exits: string[] = [], zIndex: number = DEFAULT_Z_INDEX): string | null {
         const workbook = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const subUnitId = workbook.getActiveSheet().getSheetId();
+        const subUnitId = workbook.getActiveSheet()?.getSheetId();
+        if (!subUnitId) return null;
         const id = Tools.generateRandomId();
         this._shapeMap.set(id, {
             selection,
@@ -74,7 +75,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
 
     refreshShapes() {
         const currentUnitId = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-        const currentSubUnitId = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();
+        const currentSubUnitId = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
         this._shapeMap.forEach((shape) => {
             const { unitId, subUnitId, selection, control: oldControl, zIndex } = shape;
 

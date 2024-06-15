@@ -46,7 +46,7 @@ export class FormulaRefRangeService extends Disposable {
             const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
             const unitId = workbook.getUnitId();
-            const subUnitId = worksheet.getSheetId();
+            const subUnitId = worksheet?.getSheetId();
 
             const transformSequenceNodes = sequenceNodes?.map((node) => {
                 if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {

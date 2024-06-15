@@ -66,6 +66,10 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
             }
 
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) {
+                return of(true);
+            }
+
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
 
@@ -133,6 +137,10 @@ export function getCommentDisable$(accessor: IAccessor, permissionTypes: IPermis
             }
 
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) {
+                return of(true);
+            }
+
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
 
@@ -191,6 +199,10 @@ export function getBaseRangeMenuHidden$(accessor: IAccessor) {
 
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) {
+                return true;
+            }
+
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
 
@@ -227,6 +239,10 @@ export function getInsertAfterMenuHidden$(accessor: IAccessor, type: 'row' | 'co
 
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) {
+                return true;
+            }
+
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
 
@@ -269,6 +285,10 @@ export function getInsertBeforeMenuHidden$(accessor: IAccessor, type: 'row' | 'c
 
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) {
+                return true;
+            }
+
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
 
@@ -311,6 +331,10 @@ export function getDeleteMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
 
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) {
+                return true;
+            }
+
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
 
@@ -356,6 +380,10 @@ export function getCellMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
 
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) {
+                return true;
+            }
+
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
 

@@ -316,6 +316,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             skeleton;
         const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) return;
+
         const zoomRatio = worksheet.getZoomRatio() || 1;
         scene?.setScaleValue(zoomRatio, zoomRatio);
         scene?.transformByState({
@@ -413,6 +415,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         if (skeleton == null) return false;
 
         const worksheet = this._context.unit.getActiveSheet();
+        if (!worksheet) return false;
+
         const {
             startColumn: freezeStartColumn,
             startRow: freezeStartRow,

@@ -34,7 +34,7 @@ const TextInput = (props: { id: string; type: CFValueType | 'none';value: number
     const { type, className, onChange, id, value } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-    const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();
+    const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
     const formulaInitValue = useMemo(() => {
         return String(value).startsWith('=') ? String(value) : '=';
     }, [value]);

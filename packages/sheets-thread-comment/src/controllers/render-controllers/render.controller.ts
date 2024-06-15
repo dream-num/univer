@@ -70,7 +70,13 @@ export class SheetsThreadCommentRenderController extends Disposable {
             if (!workbook) return;
 
             const unitId = workbook.getUnitId();
-            const subUnitId = workbook.getActiveSheet().getSheetId();
+            const subUnitId = workbook.getActiveSheet()?.getSheetId();
+            if (!subUnitId) {
+                // TODO@zhangw: handle this case
+                console.warn('No active sheet found');
+                return;
+            }
+
             const currentRender = this._renderManagerService.getRenderById(unitId);
             const skeleton = currentRender?.with(SheetSkeletonManagerService).getOrCreateSkeleton({ sheetId: subUnitId });
 

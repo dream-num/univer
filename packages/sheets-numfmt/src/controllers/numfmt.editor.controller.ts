@@ -203,7 +203,13 @@ export class NumfmtEditorController extends Disposable {
                         case SetRangeValuesCommand.id: {
                             const workbook = self._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                             const unitId = workbook.getUnitId();
-                            const subUnitId = workbook.getActiveSheet().getSheetId();
+                            const subUnitId = workbook.getActiveSheet()?.getSheetId();
+                            if (!subUnitId) {
+                                return {
+                                    redos: [],
+                                    undos: [],
+                                };
+                            }
                             const list = self._collectEffectMutation.getEffects();
                             if (!list.length) {
                                 return {

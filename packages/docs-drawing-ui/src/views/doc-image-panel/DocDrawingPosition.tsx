@@ -122,9 +122,11 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
         commandService.executeCommand(UpdateDocDrawingPositionCommand.id, {
             unitId: focusDrawings[0].unitId,
             subUnitId: focusDrawings[0].unitId,
-            drawings,
-            direction,
-            position: value,
+            drawings: drawings.map((drawing) => ({
+                drawingId: drawing.drawingId,
+                direction,
+                position: value,
+            })),
         });
 
         transformer.refreshControls();

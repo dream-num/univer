@@ -18,12 +18,9 @@ import type { Workbook, Worksheet } from '@univerjs/core';
 import { IPermissionService, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs/operators';
-
-// import type { UnitAction, UnitObject } from '@univerjs/protocol';
 import { UniverType } from '@univerjs/protocol';
 
 import type { IObjectModel, IObjectPointModel } from '../type';
-import { SheetInterceptorService } from '../../sheet-interceptor/sheet-interceptor.service';
 import { WorksheetProtectionRuleModel } from './worksheet-permission-rule.model';
 import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './utils';
 import { WorksheetProtectionPointModel } from './worksheet-permission-point.model';
@@ -39,8 +36,7 @@ export class WorksheetPermissionService extends RxDisposable {
         @Inject(Injector) readonly _injector: Injector,
         @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
         @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
-        @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
+        @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService
     ) {
         super();
         this._init();

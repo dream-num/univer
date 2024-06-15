@@ -27,6 +27,7 @@ export class WorkbookPermissionService extends Disposable {
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
     ) {
         super();
+
         this._init();
     }
 

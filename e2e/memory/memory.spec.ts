@@ -34,6 +34,8 @@ declare global {
     }
 }
 
+const MAX_MEMORY_OVERFLOW = 2_500_000;
+
 test('memory', async ({ page }) => {
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(2000);
@@ -50,9 +52,8 @@ test('memory', async ({ page }) => {
     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after second load:', memoryAfterSecondLoad);
 
-    // max overflow for 3MB
     const notLeaking = (memoryAfterSecondLoad <= memoryAfterFirstLoad)
-        || (memoryAfterSecondLoad - memoryAfterFirstLoad <= 2_500_000);
+        || (memoryAfterSecondLoad - memoryAfterFirstLoad <= MAX_MEMORY_OVERFLOW);
     expect(notLeaking).toBeTruthy();
 });
 

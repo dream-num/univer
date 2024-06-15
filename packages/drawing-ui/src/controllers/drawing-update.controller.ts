@@ -688,6 +688,10 @@ export class DrawingUpdateController extends Disposable {
                     const drawingShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
                     const drawingShape = scene.getObject(drawingShapeKey);
 
+                    if (drawingShape == null) {
+                        return true;
+                    }
+
                     const drawingParam = this._drawingManagerService.getDrawingByParam(param) as IDrawingParam;
                     if (drawingParam == null) {
                         return;
@@ -699,10 +703,6 @@ export class DrawingUpdateController extends Disposable {
                     }
 
                     const { left = 0, top = 0, width = 0, height = 0, angle = 0, flipX = false, flipY = false, skewX = 0, skewY = 0 } = transform;
-
-                    if (drawingShape == null) {
-                        return true;
-                    }
 
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                 });

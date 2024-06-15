@@ -209,7 +209,7 @@ export class ImageUpdateController extends Disposable {
             }
 
             const image = await this._drawingRenderService.renderImage(imageParam, renderObject.scene);
-            if (!image) {
+            if (image == null) {
                 return;
             }
             this._addHoverForImage(image);

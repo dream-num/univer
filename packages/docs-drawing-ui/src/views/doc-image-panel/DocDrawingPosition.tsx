@@ -53,11 +53,12 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
 
     const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
 
-    // const renderObject = renderManagerService.getRenderById(unitId);
-    // const scene = renderObject?.scene;
-    // if (scene == null) {
-    //     return;
-    // }
+    const renderObject = renderManagerService.getRenderById(unitId);
+    const scene = renderObject?.scene;
+    if (scene == null) {
+        return;
+    }
+    const transformer = scene.getTransformerByCreate();
 
     const HORIZONTAL_RELATIVE_FROM = [{
         label: localeService.t('image-position.column'),
@@ -125,6 +126,8 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             direction,
             position: value,
         });
+
+        transformer.refreshControls();
     }
 
     function handleHorizontalRelativeFromChange(value: string) {

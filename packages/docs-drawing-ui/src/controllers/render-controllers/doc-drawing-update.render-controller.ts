@@ -223,6 +223,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     }
 
     private _updateDrawingListener() {
+        // Question:@JOCS featurePluginUpdate 是做啥的？
         this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
             if (params.length === 0) {
                 return;

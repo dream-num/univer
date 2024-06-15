@@ -356,12 +356,16 @@ export const UpdateDocDrawingWrapTextCommand: ICommand = {
     },
 };
 
-interface IUpdateDocDrawingPositionParams {
-    unitId: string;
-    subUnitId: string;
-    drawings: IDocDrawing[];
+export interface IDrawingPosition {
+    drawingId: string;
     direction: 'positionH' | 'positionV';
     position: IObjectPositionH | IObjectPositionV;
+}
+
+export interface IUpdateDocDrawingPositionParams {
+    unitId: string;
+    subUnitId: string;
+    drawings: IDrawingPosition[];
 }
 
 /**
@@ -385,7 +389,7 @@ export const UpdateDocDrawingPositionCommand: ICommand = {
             return false;
         }
 
-        const { drawings, direction, position, unitId } = params;
+        const { drawings, unitId } = params;
 
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
@@ -394,7 +398,7 @@ export const UpdateDocDrawingPositionCommand: ICommand = {
 
         // Update drawing layoutType.
         for (const drawing of drawings) {
-            const { drawingId } = drawing;
+            const { drawingId, direction, position } = drawing;
 
             const oldPosition = oldDrawings[drawingId].docTransform[direction];
 

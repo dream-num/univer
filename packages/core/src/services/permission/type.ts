@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Observable } from 'rxjs';
+import type { BehaviorSubject, Observable } from 'rxjs';
 import { createIdentifier } from '@wendellhu/redi';
 import type { UnitAction, UnitObject } from '@univerjs/protocol';
 import type { Nullable } from '../../common/type-utils';
@@ -54,7 +54,7 @@ export interface IPermissionParam {
 export interface IPermissionService {
     permissionPointUpdate$: Observable<IPermissionPoint<unknown>>;
     deletePermissionPoint(permissionId: string): void;
-    addPermissionPoint<T = boolean>(permissionPoint: IPermissionPoint<T>): boolean;
+    addPermissionPoint<T = boolean>(permissionPoint: IPermissionPoint<T> | BehaviorSubject<IPermissionPoint<T>>): boolean;
     updatePermissionPoint<T = boolean>(permissionId: string, value: T): void;
     getPermissionPoint<T = boolean>(permissionId: string): Nullable<IPermissionPoint<T>>;
     getPermissionPoint$<T = boolean>(permissionId: string): Nullable<Observable<IPermissionPoint<T>>>;
@@ -62,6 +62,7 @@ export interface IPermissionService {
 
     composePermission$(permissionId: string[]): Observable<IPermissionPoint<unknown>[]>;
     composePermission(permissionId: string[]): IPermissionPoint<unknown>[];
+    getAllPermissionPoint(): Map<string, Observable<IPermissionPoint<unknown>>>;
 }
 
 export const IPermissionService = createIdentifier<IPermissionService>('univer.permission-service');

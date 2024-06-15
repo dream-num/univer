@@ -24,7 +24,7 @@ import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceSe
 import { IDialogService } from '@univerjs/ui';
 import { getAllWorksheetPermissionPoint, SetWorksheetPermissionPointsCommand, WorksheetProtectionPointModel } from '@univerjs/sheets';
 import type { ICollaborator, UnitAction } from '@univerjs/protocol';
-import { UnitObject, UnitRole } from '@univerjs/protocol';
+import { CreateRequest_WorkSheetObjectScope, UnitObject, UnitRole } from '@univerjs/protocol';
 import Spin from '../spin';
 import { defaultWorksheetUnitActionList, subUnitPermissionTypeMap, UNIVER_SHEET_PERMISSION_DIALOG_ID } from '../../../basics/const/permission';
 import styles from './index.module.less';
@@ -129,6 +129,7 @@ export const SheetPermissionDialog = () => {
                     collaborators,
                     name: '',
                     strategies: actions,
+                    scope: CreateRequest_WorkSheetObjectScope.AllCollaborator,
                 },
             });
 

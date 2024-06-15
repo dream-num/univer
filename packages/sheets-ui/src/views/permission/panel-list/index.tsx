@@ -176,7 +176,7 @@ export const SheetPermissionPanelList = () => {
                 label: UNIVER_SHEET_PERMISSION_PANEL,
                 showDetail: true,
             },
-            width: 320,
+            width: 330,
             footer: {
                 label: UNIVER_SHEET_PERMISSION_PANEL_FOOTER,
                 showDetail: true,

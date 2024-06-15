@@ -53,6 +53,11 @@ export interface ISheetSortLocation extends ISheetRangeLocation {
     colIndex: number;
 }
 
+const SORT_ERROR_MESSAGE = {
+    MERGE_ERROR: 'sheets-sort.error.merge-size',
+    EMPTY_ERROR: 'sheets-sort.error.empty',
+};
+
 @OnLifecycle(LifecycleStages.Ready, SheetsSortService)
 export class SheetsSortUIService extends Disposable {
     private readonly _customSortState$ = new BehaviorSubject<Nullable<ICustomSortState>>(null);
@@ -78,7 +83,13 @@ export class SheetsSortUIService extends Disposable {
 
         const mergeCheck = this._sheetsSortService.mergeCheck(location);
         if (!mergeCheck) {
-            this.showMergeError();
+            this.showCheckError(SORT_ERROR_MESSAGE.MERGE_ERROR);
+            return false;
+        }
+
+        const emptyCheck = this._sheetsSortService.emptyCheck(location);
+        if (!emptyCheck) {
+            this.showCheckError(SORT_ERROR_MESSAGE.EMPTY_ERROR);
             return false;
         }
 
@@ -103,9 +114,16 @@ export class SheetsSortUIService extends Disposable {
 
         const mergeCheck = this._sheetsSortService.mergeCheck(location);
         if (!mergeCheck) {
-            this.showMergeError();
+            this.showCheckError(SORT_ERROR_MESSAGE.MERGE_ERROR);
             return false;
         }
+
+        const emptyCheck = this._sheetsSortService.emptyCheck(location);
+        if (!emptyCheck) {
+            this.showCheckError(SORT_ERROR_MESSAGE.EMPTY_ERROR);
+            return false;
+        }
+
         // open customize dialog
         this.showCustomSortPanel(location);
         return true;
@@ -156,14 +174,14 @@ export class SheetsSortUIService extends Disposable {
         this._commandService.executeCommand(SetSelectionsOperation.id, setSelectionsOperationParams);
     }
 
-    async showMergeError(): Promise<boolean> {
+    async showCheckError(content: string): Promise<boolean> {
         return await this._confirmService.confirm({
-            id: 'sort-range-merge-error',
+            id: 'sort-range-check-error',
             title: {
                 title: this._localeService.t('info.tooltip'),
             },
             children: {
-                title: <div>{this._localeService.t('sheets-sort.error.merge-size')}</div>,
+                title: <div>{this._localeService.t(content)}</div>,
             },
         });
     }

@@ -25,6 +25,7 @@ import type { ISheetRangeLocation } from '@univerjs/sheets-ui';
 
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { type ICellValueCompareFn, SortRangeCommand } from '../commands/sheets-sort.command';
+import { isNullValue } from '../controllers/utils';
 import type { ISortOption } from './interface';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsSortService)
@@ -49,6 +50,22 @@ export class SheetsSortService extends Disposable {
         }
 
         return isRangeDividedEqually(range, mergeDataInRange);
+    }
+
+    emptyCheck(location: ISheetRangeLocation) {
+        const { unitId, subUnitId, range } = location;
+        const sheet = (this._univerInstanceService.getUnit(unitId) as Workbook)?.getSheetBySheetId(subUnitId);
+        if (!sheet) {
+            return false;
+        }
+        for (let row = range.startRow; row <= range.endRow; row++) {
+            for (let col = range.startColumn; col <= range.endColumn; col++) {
+                if (!isNullValue(sheet.getCellRaw(row, col))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     registerCompareFn(fn: ICellValueCompareFn) {

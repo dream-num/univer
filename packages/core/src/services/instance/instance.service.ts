@@ -156,7 +156,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     }
 
     private _unitDisposed$ = new Subject<UnitModel>();
-    unitDisposed$ = this._unitDisposed$.asObservable();
+    readonly unitDisposed$ = this._unitDisposed$.asObservable();
     getTypeOfUnitDisposed$<T extends UnitModel<object, number>>(type: UniverInstanceType): Observable<T> {
         return this.unitDisposed$.pipe(filter((unit) => unit.type === type)) as Observable<T>;
     }
@@ -242,9 +242,12 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         const index = units.indexOf(unit);
         units.splice(index, 1);
 
-        this._unitDisposed$.next(unit);
+        // Firstly un-mark the unit as "current".
         this._currentUnits$.next({ ...this._currentUnits$.getValue(), [type]: null });
         this._focused$.next(null);
+
+        // Then dispose the unit.
+        this._unitDisposed$.next(unit);
 
         return true;
     }

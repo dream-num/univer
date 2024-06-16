@@ -74,6 +74,12 @@ export class SheetsSortController extends Disposable {
         if (isNullValue(a)) {
             return null;
         }
+
+        const richTextValue = a?.p?.body?.dataStream;
+        if (richTextValue) {
+            return richTextValue;
+        }
+
         if (a?.t === CellValueType.NUMBER) {
             return Number.parseFloat(`${a.v}`);
         }

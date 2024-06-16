@@ -17,7 +17,8 @@
 import { UniverInstanceType } from '@univerjs/core';
 import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
-import { SheetMenuPosition } from '@univerjs/sheets-ui';
+import { getCurrentRangeDisable$, SheetMenuPosition } from '@univerjs/sheets-ui';
+import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSortPermission } from '@univerjs/sheets';
 import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/sheets-sort.command';
 
 const SHEETS_SORT_MENU_ID = 'sheet.menu.sheets-sort';
@@ -37,6 +38,7 @@ export function sortRangeMenuFactory(accessor: IAccessor): IMenuItem {
         icon: SHEETS_SORT_ASC_ICON,
         tooltip: 'sheets-sort.general.sort',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }
 
@@ -102,6 +104,7 @@ export function sortRangeCtxMenuFactory(accessor: IAccessor): IMenuItem {
         ],
         group: MenuGroup.CONTEXT_MENU_DATA,
         icon: SHEETS_SORT_ASC_ICON,
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }
 
@@ -155,3 +158,4 @@ export function sortRangeCustomCtxMenuFactory(_accessor: IAccessor): IMenuItem {
         icon: SHEETS_SORT_CUSTOM_ICON,
     };
 }
+

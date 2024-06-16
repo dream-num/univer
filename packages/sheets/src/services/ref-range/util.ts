@@ -275,6 +275,32 @@ export const handleMoveRowsCommon = (params: IMoveRowsCommand, targetRange: IRan
     return res;
 };
 
+export const handleReorderRangeCommon = (param: IReorderRangeCommand, targetRange: IRange) => {
+    const { range, order } = param.params || {};
+    if (!range || !order) {
+        return [targetRange];
+    }
+    const matrix = new ObjectMatrix();
+    Range.foreach(targetRange, (row, col) => {
+        matrix.setValue(row, col, 1);
+    });
+
+    const cacheMatrix = new ObjectMatrix();
+    Range.foreach(range, (row, col) => {
+        if (order.hasOwnProperty(row)) {
+            const targetRow = order[row];
+            const cloneCell = matrix.getValue(targetRow, col) ?? 0;
+            cacheMatrix.setValue(row, col, cloneCell);
+        }
+    });
+
+    cacheMatrix.forValue((row, col, cellData) => {
+        matrix.setValue(row, col, cellData);
+    });
+    const res = queryObjectMatrix(matrix, (value) => value === 1);
+    return res;
+};
+
 export const handleMoveCols = (params: IMoveColsCommand, targetRange: IRange): IOperator[] => {
     const { fromRange, toRange } = params.params || {};
     if (!toRange || !fromRange) {
@@ -523,7 +549,6 @@ export const handleReorderRange = (param: IReorderRangeCommand, targetRange: IRa
         }
         return [];
     }
-
     return [];
 };
 
@@ -993,6 +1018,9 @@ export const handleCommonDefaultRangeChangeWithEffectRefCommands = (range: IRang
         }
         case EffectRefRangId.MoveRowsCommandId: {
             return handleMoveRowsCommon(commandInfo as IMoveRowsCommand, range);
+        }
+        case EffectRefRangId.ReorderRangeCommandId: {
+            return handleReorderRangeCommon(commandInfo as IReorderRangeCommand, range);
         }
         case EffectRefRangId.RemoveColCommandId: {
             operator = handleIRemoveCol(commandInfo as IRemoveRowColCommand, range);

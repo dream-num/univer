@@ -68,6 +68,13 @@ export class SheetsSortService extends Disposable {
         return false;
     }
 
+    singleCheck(location: ISheetRangeLocation) {
+        if (location.range.startRow === location.range.endRow) {
+            return false;
+        }
+        return true;
+    }
+
     registerCompareFn(fn: ICellValueCompareFn) {
         this._compareFns.unshift(fn);
     }

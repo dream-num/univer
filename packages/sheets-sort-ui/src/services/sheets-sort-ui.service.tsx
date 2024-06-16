@@ -56,6 +56,7 @@ export interface ISheetSortLocation extends ISheetRangeLocation {
 const SORT_ERROR_MESSAGE = {
     MERGE_ERROR: 'sheets-sort.error.merge-size',
     EMPTY_ERROR: 'sheets-sort.error.empty',
+    SINGLE_ERROR: 'sheets-sort.error.single',
 };
 
 @OnLifecycle(LifecycleStages.Ready, SheetsSortService)
@@ -80,6 +81,12 @@ export class SheetsSortUIService extends Disposable {
         }
 
         this.setSelection(location.unitId, location.subUnitId, location.range);
+
+        const singleCheck = this._sheetsSortService.singleCheck(location);
+        if (!singleCheck) {
+            this.showCheckError(SORT_ERROR_MESSAGE.SINGLE_ERROR);
+            return false;
+        }
 
         const mergeCheck = this._sheetsSortService.mergeCheck(location);
         if (!mergeCheck) {
@@ -111,6 +118,12 @@ export class SheetsSortUIService extends Disposable {
         }
 
         this.setSelection(location.unitId, location.subUnitId, location.range);
+
+        const singleCheck = this._sheetsSortService.singleCheck(location);
+        if (!singleCheck) {
+            this.showCheckError(SORT_ERROR_MESSAGE.SINGLE_ERROR);
+            return false;
+        }
 
         const mergeCheck = this._sheetsSortService.mergeCheck(location);
         if (!mergeCheck) {
@@ -226,7 +239,7 @@ export class SheetsSortUIService extends Disposable {
         if (!selection) {
             return null;
         }
-        let range;
+        let range: IRange;
         if (extend === true) {
             range = expandToContinuousRange(selection.range, { up: true, down: true, left: true, right: true }, worksheet);
         } else if (extend === false) {

@@ -29,6 +29,7 @@ export default {
         error: {
             'merge-size': 'The selected range contains merged cells of different sizes, which cannot be sorted.',
             empty: 'The selected range has no content and cannot be sorted.',
+            single: 'The selected range has only one row and cannot be sorted.',
         },
         dialog: {
             'sort-reminder': 'Sort Reminder',

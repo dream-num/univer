@@ -31,7 +31,7 @@ const zLocale: typeof enUS = {
         error: {
             'merge-size': '所选区域的合并单元格的大小不一致，无法排序。',
             empty: '所选区域无内容，无法排序。',
-
+            single: '所选区域仅有一行，无法排序。',
         },
         dialog: {
             'sort-reminder': '排序提醒',

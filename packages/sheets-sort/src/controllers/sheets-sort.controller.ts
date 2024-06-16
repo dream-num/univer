@@ -84,6 +84,9 @@ export class SheetsSortController extends Disposable {
             return Number.parseFloat(`${a.v}`);
         }
         if (a?.t === CellValueType.STRING) {
+            if (typeof a.v === 'number') {
+                return a.v;
+            }
             return `${a.v}`;
         }
         if (a?.t === CellValueType.BOOLEAN) {

@@ -18,7 +18,7 @@ import type { Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { SetSelectionsOperation } from '@univerjs/sheets';
+import { ReorderRangeCommand, ReorderRangeMutation, SetSelectionsOperation } from '@univerjs/sheets';
 import type { ISortRangeCommandParams } from '../sheets-sort.command';
 import { SortRangeCommand } from '../sheets-sort.command';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -35,6 +35,8 @@ describe('Test "Sort Range Commands"', () => {
         get = testBed.get;
         commandService = get(ICommandService);
         commandService.registerCommand(SetSelectionsOperation);
+        commandService.registerCommand(ReorderRangeMutation);
+        commandService.registerCommand(ReorderRangeCommand);
         const univerInstanceService = get(IUniverInstanceService);
         const workbook = univerInstanceService.getUniverSheetInstance('test');
         const worksheet = workbook?.getSheetBySheetId('sheet1')!;

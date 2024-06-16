@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { Disposable, ICommandService,
     ILogService,
     IUniverInstanceService,
@@ -234,7 +234,7 @@ export class SheetsSortUIService extends Disposable {
 
     private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetSortLocation >> {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET) as Workbook;
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet() as Worksheet;
         const selection = this._selectionManagerService.getLast();
         if (!selection) {
             return null;

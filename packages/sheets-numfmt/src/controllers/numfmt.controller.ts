@@ -107,6 +107,9 @@ export class NumfmtController extends Disposable implements INumfmtController {
 
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const sheet = workbook.getActiveSheet();
+        if (!sheet) {
+            return false;
+        }
 
         const cellValue = sheet.getCellRaw(range.startRow, range.startColumn);
         const numfmtValue = numfmtService.getValue(

@@ -38,7 +38,7 @@ export const SheetsThreadCommentPanel = () => {
     const unitId = workbook.getUnitId();
     const commandService = useDependency(ICommandService);
     const subUnitId$ = useMemo(() => workbook.activeSheet$.pipe(map((i) => i?.getSheetId())), [workbook.activeSheet$]);
-    const subUnitId = useObservable(subUnitId$, workbook.getActiveSheet().getSheetId());
+    const subUnitId = useObservable(subUnitId$, workbook.getActiveSheet()?.getSheetId());
     const activeShapeId = useRef<string | null>();
     const panelService = useDependency(ThreadCommentPanelService);
     const activeCommentId = useObservable(panelService.activeCommentId$);

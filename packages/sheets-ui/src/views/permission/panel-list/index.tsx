@@ -249,6 +249,9 @@ export const SheetPermissionPanelList = () => {
                                     onMouseMove={() => {
                                         const { subUnitId, unitType } = rule;
                                         const activeSheet = workbook.getActiveSheet();
+                                        if (!activeSheet) {
+                                            return false;
+                                        }
                                         const activeSubUnitId = activeSheet.getSheetId();
                                         if (subUnitId !== activeSubUnitId) {
                                             return false;

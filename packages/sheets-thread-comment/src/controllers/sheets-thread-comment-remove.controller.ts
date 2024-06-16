@@ -44,7 +44,10 @@ export class ThreadCommentRemoveSheetsController extends Disposable {
                             return { redos: [], undos: [] };
                         }
                         const unitId = workbook.getUnitId();
-                        const subUnitId = params.subUnitId || workbook.getActiveSheet().getSheetId();
+                        const subUnitId = params.subUnitId || workbook.getActiveSheet()?.getSheetId();
+                        if (!subUnitId) {
+                            return { redos: [], undos: [] };
+                        }
                         const { commentMap } = this._threadCommentModel.ensureMap(unitId, subUnitId);
 
                         const ids = Array.from(Object.keys(commentMap));

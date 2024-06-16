@@ -67,7 +67,12 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         this._initRerenderScheduler();
         this._initCommandListener();
 
-        const sheetId = this._context.unit.getActiveSheet().getSheetId();
+        const worksheet = this._context.unit.getActiveSheet();
+        if (!worksheet) {
+            throw new Error('No active sheet found');
+        }
+
+        const sheetId = worksheet.getSheetId();
         this._sheetSkeletonManagerService.setCurrent({ sheetId });
         const should = workbook.getShouldRenderLoopImmediately();
         if (should) {
@@ -79,6 +84,10 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const { scene, components } = this._context;
 
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            throw new Error('No active sheet found');
+        }
+
         const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
 
         this._addViewport(worksheet);
@@ -273,6 +282,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             const unitId = workbook.getUnitId();
             if (COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id) || this._sheetRenderService.checkMutationShouldTriggerRerender(command.id)) {
                 const worksheet = workbook.getActiveSheet();
+                if (!worksheet) return;
+
                 const sheetId = worksheet.getSheetId();
                 const params = command.params;
                 const { unitId, subUnitId } = params as ISetWorksheetMutationParams;

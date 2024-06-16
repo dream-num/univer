@@ -267,7 +267,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     const sheetData: ISheetData = {};
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
-    const sheetId = workbook.getActiveSheet().getSheetId();
+    const sheetId = workbook.getActiveSheet()!.getSheetId();
     workbook.getSheets().forEach((sheet) => {
         const sheetConfig = sheet.getConfig();
         sheetData[sheet.getSheetId()] = {

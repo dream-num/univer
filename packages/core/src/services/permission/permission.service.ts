@@ -25,7 +25,6 @@ export class PermissionService extends Disposable implements IPermissionService 
     private _permissionPointMap: Map<string, BehaviorSubject<IPermissionPoint<any>>> = new Map();
 
     private _permissionPointUpdate$ = new Subject<IPermissionPoint<unknown>>();
-
     public permissionPointUpdate$ = this._permissionPointUpdate$.asObservable();
 
     deletePermissionPoint(permissionId: string) {

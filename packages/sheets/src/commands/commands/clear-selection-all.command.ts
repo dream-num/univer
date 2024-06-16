@@ -49,6 +49,8 @@ export const ClearSelectionAllCommand: ICommand = {
 
         const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) return false;
+
         const subUnitId = worksheet.getSheetId();
         const selections = selectionManagerService.getSelectionRanges();
         if (!selections?.length) {

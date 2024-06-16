@@ -53,6 +53,7 @@ export class SheetsFilterController extends Disposable {
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initInterceptors(): void {
         this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
             getMutations: (command) => this._getUpdateFilter(command),

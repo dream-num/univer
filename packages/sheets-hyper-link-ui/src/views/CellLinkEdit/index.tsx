@@ -177,7 +177,7 @@ export const CellLinkEdit = () => {
             return;
         }
         if (!range.sheetName) {
-            range.sheetName = workbook.getActiveSheet().getName();
+            range.sheetName = workbook.getActiveSheet()?.getName() || '';
         }
         const newPayload = serializeRangeToRefString(range);
         setPayload(newPayload);

@@ -36,7 +36,8 @@ export function ZoomSlider() {
     const univerInstanceService = useDependency(IUniverInstanceService);
 
     const getCurrentZoom = useCallback(() => {
-        const currentZoom = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getZoomRatio() * 100 || 100;
+        const worksheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
+        const currentZoom = (worksheet && (worksheet.getZoomRatio() * 100)) || 100;
         return Math.round(currentZoom);
     }, [univerInstanceService]);
 

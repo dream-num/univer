@@ -575,7 +575,7 @@ describe('Test auto fill rules in controller', () => {
                         endColumn: 7,
                     }
                 );
-                expect(workbook.getActiveSheet().getMergeData().length).toBe(2);
+                expect(workbook.getActiveSheet()?.getMergeData().length).toBe(2);
                 expect(selectionManagerService.getLast()?.primary).toEqual(expect.objectContaining({
                     startRow: 0,
                     startColumn: 5,

@@ -150,6 +150,8 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                 }
 
                 const worksheet = workbook.getActiveSheet();
+                if (!worksheet) return;
+
                 const activeDropdown = this._dropdownManagerService.activeDropdown;
                 const currLoc = activeDropdown?.location;
                 if (
@@ -184,7 +186,9 @@ export class SheetsDataValidationRenderController extends RxDisposable {
             if (!workbook) return;
 
             const unitId = workbook.getUnitId();
-            const subUnitId = workbook.getActiveSheet().getSheetId();
+            const subUnitId = workbook.getActiveSheet()?.getSheetId();
+            if (!subUnitId) return;
+
             const skeleton = this._renderManagerService.getRenderById(unitId)
                 ?.with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId)
                 ?.skeleton;

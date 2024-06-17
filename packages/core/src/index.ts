@@ -108,7 +108,7 @@ export {
 } from './services/undoredo/undoredo.service';
 export * from './shared';
 export { fromCallback } from './shared/rxjs';
-export { UserManagerService } from './services/user-manager/user-manager.service';
+export { UserManagerService, type IUser } from './services/user-manager/user-manager.service';
 
 // #region sheet
 
@@ -178,6 +178,7 @@ export { DataValidationOperator } from './types/enum/data-validation-operator';
 export { DataValidationType } from './types/enum/data-validation-type';
 export { DataValidationStatus } from './types/enum/data-validation-status';
 export type { IPermissionTypes, WorkbookPermissionPointConstructor } from './services/permission/type';
+export { PermissionService } from './services/permission/permission.service';
 
 export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
 export { IAuthzIoService } from './services/authz-io/type';

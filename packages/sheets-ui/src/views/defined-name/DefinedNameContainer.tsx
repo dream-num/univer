@@ -118,7 +118,10 @@ export const DefinedNameContainer = () => {
     };
 
     const getInertFormulaOrRefString = () => {
-        const sheetName = workbook.getActiveSheet().getName();
+        const sheetName = workbook.getActiveSheet()?.getName();
+        if (!sheetName) {
+            return '';
+        }
 
         const selections = selectionManagerService.getSelections();
         if (selections == null) {

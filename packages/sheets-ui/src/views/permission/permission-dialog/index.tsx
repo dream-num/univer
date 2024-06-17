@@ -24,7 +24,7 @@ import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceSe
 import { IDialogService } from '@univerjs/ui';
 import { getAllWorksheetPermissionPoint, SetWorksheetPermissionPointsCommand, WorksheetProtectionPointModel } from '@univerjs/sheets';
 import type { ICollaborator, UnitAction } from '@univerjs/protocol';
-import { UnitObject, UnitRole } from '@univerjs/protocol';
+import { CreateRequest_WorkSheetObjectScope, UnitObject, UnitRole } from '@univerjs/protocol';
 import Spin from '../spin';
 import { defaultWorksheetUnitActionList, subUnitPermissionTypeMap, UNIVER_SHEET_PERMISSION_DIALOG_ID } from '../../../basics/const/permission';
 import styles from './index.module.less';
@@ -45,6 +45,10 @@ export const SheetPermissionDialog = () => {
     const permissionService = useDependency(IPermissionService);
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheet = workbook.getActiveSheet();
+    if (!worksheet) {
+        throw new Error('No active sheet found');
+    }
+
     const [collaborators, setCollaborators] = useState<ICollaborator[]>([]);
     const commandService = useDependency(ICommandService);
     const [loading, setLoading] = useState(() => {
@@ -108,6 +112,9 @@ export const SheetPermissionDialog = () => {
     const handleChangeActionPermission = async () => {
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook?.getActiveSheet();
+        if (!worksheet) {
+            throw new Error('No active sheet found');
+        }
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const pointRule = worksheetProtectionPointRuleModel.getRule(unitId, subUnitId);
@@ -129,6 +136,7 @@ export const SheetPermissionDialog = () => {
                     collaborators,
                     name: '',
                     strategies: actions,
+                    scope: CreateRequest_WorkSheetObjectScope.AllCollaborator,
                 },
             });
 

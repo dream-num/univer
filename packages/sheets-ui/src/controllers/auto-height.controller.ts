@@ -57,7 +57,14 @@ export class AutoHeightController extends Disposable {
 
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const unitId = workbook.getUnitId();
-        const subUnitId = workbook.getActiveSheet().getSheetId();
+        const subUnitId = workbook.getActiveSheet()?.getSheetId();
+
+        if (!subUnitId) {
+            return {
+                redos: [],
+                undos: [],
+            };
+        }
 
         const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)!.with(SheetSkeletonManagerService);
         const { skeleton } = sheetSkeletonService.getCurrent()!;

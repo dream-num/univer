@@ -104,6 +104,14 @@ export class SheetCanvasPopManagerService extends Disposable {
     attachPopupToObject(targetObject: BaseObject, popup: ICanvasPopup): IDisposable {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return {
+                dispose: () => {
+                    // empty
+                },
+            };
+        }
+
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getOrCreateSkeleton({
@@ -153,6 +161,10 @@ export class SheetCanvasPopManagerService extends Disposable {
     attachPopupToCell(row: number, col: number, popup: ICanvasPopup, viewport?: Viewport): Nullable<IDisposable> {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return null;
+        }
+
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getOrCreateSkeleton({

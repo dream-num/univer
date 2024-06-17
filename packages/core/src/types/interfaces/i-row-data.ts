@@ -40,3 +40,9 @@ export interface IRowData {
      */
     hd?: BooleanNumber;
 }
+
+export interface IRowAutoHeightInfo {
+    row: number;
+    autoHeight?: number;
+}
+

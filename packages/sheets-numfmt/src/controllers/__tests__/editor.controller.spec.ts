@@ -54,7 +54,7 @@ describe('test editor', () => {
         testBed.get(NumfmtEditorController);
         testBed.get(SheetsNumfmtCellContentController);
         workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        worksheet = workbook.getActiveSheet();
+        worksheet = workbook.getActiveSheet()!;
     });
 
     it('before edit with currency', () => {

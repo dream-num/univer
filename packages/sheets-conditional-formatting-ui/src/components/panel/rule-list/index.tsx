@@ -118,6 +118,10 @@ export const RuleList = (props: IRuleListProps) => {
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
     const worksheet = workbook.getActiveSheet();
+    if (!worksheet) {
+        throw new Error('No active sheet found');
+    }
+
     const subUnitId = worksheet.getSheetId();
 
     const [currentRuleRanges, currentRuleRangesSet] = useState<IRange[]>([]);
@@ -162,7 +166,7 @@ export const RuleList = (props: IRuleListProps) => {
                 const { startRow, startColumn, endRow, endColumn } = range;
                 for (let row = startRow; row <= endRow; row++) {
                     for (let col = startColumn; col <= endColumn; col++) {
-                        const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
+                        const permission = (worksheet?.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
                         if (permission?.[UnitAction.Edit] === false || permission?.[UnitAction.View] === false) {
                             return true;
                         }
@@ -269,7 +273,10 @@ export const RuleList = (props: IRuleListProps) => {
 
     const handleDelete = (rule: IConditionFormattingRule) => {
         const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-        const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();
+        const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
+        if (!unitId || !subUnitId) {
+            throw new Error('No active sheet found');
+        }
         commandService.executeCommand(DeleteCfCommand.id, { unitId, subUnitId, cfId: rule.cfId } as IDeleteCfCommandParams);
     };
 
@@ -280,7 +287,11 @@ export const RuleList = (props: IRuleListProps) => {
     const handleDragStop = (_layout: unknown, from: { y: number }, to: { y: number }) => {
         draggingIdSet(-1);
         const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-        const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();
+        const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
+        if (!unitId || !subUnitId) {
+            throw new Error('No active sheet found');
+        }
+
         const getSaveIndex = (index: number) => {
             const length = ruleList.length;
             return Math.min(length - 1, Math.max(0, index));

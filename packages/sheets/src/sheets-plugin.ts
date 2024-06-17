@@ -22,7 +22,6 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
-import { FeatureCalculationController } from './controllers/feature-calculation.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { NumfmtService } from './services/numfmt/numfmt.service';
@@ -114,8 +113,7 @@ export class UniverSheetsPlugin extends Plugin {
         if (!this._config?.notExecuteFormula) {
             // Should execute formula.
             dependencies.push(
-                [CalculateResultApplyController],
-                [FeatureCalculationController]
+                [CalculateResultApplyController]
             );
         }
 

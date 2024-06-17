@@ -93,10 +93,10 @@ describe('test menu items', () => {
         disposableCollection.add(menuItem.activated$!.subscribe((v: boolean) => (activated = v)));
         disposableCollection.add(menuItem.disabled$!.subscribe((v: boolean) => (disabled = v)));
         expect(activated).toBeFalsy();
-        expect(disabled).toBeFalsy();
 
         select({ startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 });
         expect(await commandService.executeCommand(SetBoldCommand.id)).toBeTruthy();
         expect(activated).toBe(true);
+        expect(disabled).toBeFalsy();
     });
 });

@@ -104,7 +104,7 @@ function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
                 const { startRow, startColumn, endRow, endColumn } = range;
                 for (let row = startRow; row <= endRow; row++) {
                     for (let col = startColumn; col <= endColumn; col++) {
-                        const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
+                        const permission = (worksheet?.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
                         if (permission?.[UnitAction.Edit] === false || permission?.[UnitAction.View] === false) {
                             return true;
                         }

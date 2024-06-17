@@ -96,7 +96,7 @@ export function virtualizeDiscreteRanges(ranges: IDiscreteRange[]): {
     };
 }
 
-export function generateNullCellValue(range: IDiscreteRange[]): IObjectMatrixPrimitiveType<ICellData> {
+export function generateNullCellValueRowCol(range: IDiscreteRange[]): IObjectMatrixPrimitiveType<ICellData> {
     const cellValue = new ObjectMatrix<ICellData>();
     range.forEach((r) => {
         const { rows, cols } = r;
@@ -107,6 +107,7 @@ export function generateNullCellValue(range: IDiscreteRange[]): IObjectMatrixPri
                     p: null,
                     f: null,
                     si: null,
+                    custom: null,
                 });
             });
         });

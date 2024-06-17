@@ -56,7 +56,7 @@ describe('Test set worksheet show commands', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
 
-                const targetActiveSheet = workbook.getActiveSheet();
+                const targetActiveSheet = workbook.getActiveSheet()!;
                 const targetSheetId = targetActiveSheet?.getSheetId();
                 expect(
                     await commandService.executeCommand(SetWorksheetActivateCommand.id, { subUnitId: targetSheetId })

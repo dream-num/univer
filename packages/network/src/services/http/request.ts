@@ -21,6 +21,9 @@ import type { HTTPParams } from './params';
 
 export type HTTPRequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
+/**
+ * @internal
+ */
 export interface IHTTPRequestParams {
     // eslint-disable-next-line ts/no-explicit-any
     body?: any;
@@ -28,6 +31,7 @@ export interface IHTTPRequestParams {
     params?: HTTPParams;
     responseType: HTTPResponseType;
     withCredentials: boolean;
+    reportProgress?: boolean;
 }
 
 let HTTPRequestUID = 0;

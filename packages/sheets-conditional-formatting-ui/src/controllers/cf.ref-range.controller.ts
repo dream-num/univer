@@ -72,7 +72,7 @@ export class SheetsCfRefRangeController extends Disposable {
             const { unitId, subUnitId, rule } = option;
             const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
-            if (option.unitId !== workbook.getUnitId() || option.subUnitId !== worksheet.getSheetId()) {
+            if (option.unitId !== workbook.getUnitId() || option.subUnitId !== worksheet?.getSheetId()) {
                 return;
             }
             switch (option.type) {

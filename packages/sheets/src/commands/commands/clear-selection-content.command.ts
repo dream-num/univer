@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange, Workbook } from '@univerjs/core';
+import type { ICommand, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
-    ObjectMatrix,
     sequenceExecute,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -30,6 +29,7 @@ import { SelectionManagerService } from '../../services/selection-manager.servic
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { generateNullCellValue } from '../../basics/utils';
 
 /**
  * The command to clear content in current selected ranges.
@@ -51,6 +51,8 @@ export const ClearSelectionContentCommand: ICommand = {
 
         const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) return false;
+
         const subUnitId = worksheet.getSheetId();
         const selections = selectionManagerService.getSelectionRanges();
         if (!selections?.length) {
@@ -87,24 +89,3 @@ export const ClearSelectionContentCommand: ICommand = {
         return false;
     },
 };
-
-// Generate cellValue from range and set v/p/f/si to null
-function generateNullCellValue(range: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
-    const cellValue = new ObjectMatrix<ICellData>();
-    range.forEach((range: IRange) => {
-        const { startRow, startColumn, endRow, endColumn } = range;
-        for (let i = startRow; i <= endRow; i++) {
-            for (let j = startColumn; j <= endColumn; j++) {
-                cellValue.setValue(i, j, {
-                    v: null,
-                    p: null,
-                    f: null,
-                    si: null,
-                    custom: null,
-                });
-            }
-        }
-    });
-
-    return cellValue.clone();
-}

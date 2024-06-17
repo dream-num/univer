@@ -23,6 +23,7 @@ import {
     DEFAULT_STYLES,
     DocumentDataModel,
     extractPureTextFromCell,
+    getCellInfoInMergeData,
     getColorStyle,
     HorizontalAlign,
     IContextService,
@@ -46,6 +47,7 @@ import type {
     IObjectArrayPrimitiveType,
     IPaddingData,
     IRange,
+    IRowAutoHeightInfo,
     IRowData,
     ISelectionCellWithCoord,
     IStyleBase,
@@ -67,7 +69,6 @@ import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-c
 import {
     degToRad,
     getCellByIndex,
-    getCellInfoInMergeData,
     getCellPositionByIndex,
     getFontStyleString,
     hasUnMergedCellInRow,
@@ -135,11 +136,6 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
         width: allRotatedWidth,
         height: allRotatedHeight,
     };
-}
-
-export interface IRowAutoHeightInfo {
-    row: number;
-    autoHeight?: number;
 }
 
 interface ICellOtherConfig {

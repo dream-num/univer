@@ -34,6 +34,7 @@ import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit
 import { ApplyFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
 import { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
+import { PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 type ICheckPermissionCommandParams = IMoveRowsCommandParams | IMoveColsCommandParams | IMoveRangeCommandParams | ISetRangeValuesCommandParams | ISheetPasteParams | ISetSpecificRowsVisibleCommandParams;
@@ -481,13 +482,13 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
     }
 
     private _permissionCheckByPaste(params: ISheetPasteParams) {
-        if (params.value === 'special-paste-value' || params.value === 'special-paste-formula') {
+        if (params.value === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE || params.value === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA) {
             return this.permissionCheckWithRanges({
                 workbookTypes: [WorkbookEditablePermission],
                 rangeTypes: [RangeProtectionPermissionEditPoint],
                 worksheetTypes: [WorksheetSetCellStylePermission, WorksheetEditPermission],
             });
-        } else if (params.value === 'special-paste-format') {
+        } else if (params.value === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT) {
             return this.permissionCheckWithRanges({
                 workbookTypes: [WorkbookEditablePermission],
                 rangeTypes: [RangeProtectionPermissionEditPoint],

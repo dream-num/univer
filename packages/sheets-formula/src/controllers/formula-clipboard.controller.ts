@@ -34,8 +34,6 @@ import type { ICellDataWithSpanInfo, ICopyPastePayload, IDiscreteRange, ISheetCl
 import type { IAccessor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { SPECIAL_PASTE_FORMULA } from '../commands/commands/formula-clipboard.command';
-
 export const DEFAULT_PASTE_FORMULA = 'default-paste-formula';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaClipboardController)
@@ -63,7 +61,7 @@ export class FormulaClipboardController extends Disposable {
 
     private _pasteFormulaHook(): ISheetClipboardHook {
         return {
-            id: SPECIAL_PASTE_FORMULA,
+            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
             priority: 10,
             specialPasteInfo: { label: 'specialPaste.formula' },
             onPasteCells: (pasteFrom, pasteTo, data, payload) => this._onPasteCells(pasteFrom, pasteTo, data, payload, true),
@@ -86,6 +84,8 @@ export class FormulaClipboardController extends Disposable {
         isSpecialPaste: boolean
     ) {
         const pasteType = payload.pasteType;
+
+        // Intercept scenarios where formulas do not need to be processed, and only process default paste and paste formulas only
         if (pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE || pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT || pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH) {
             return {
                 undos: [],
@@ -201,7 +201,7 @@ export function getSetCellFormulaMutations(
                 valueObject.v = null;
                 valueObject.p = null;
             }
-        } else if (isFormulaString(originalFormula) && copyInfo.pasteType === PREDEFINED_HOOK_NAME.DEFAULT_PASTE) {
+        } else if (isFormulaString(originalFormula)) {
             const rowIndex = row % copyRowLength;
             const colIndex = col % copyColumnLength;
 

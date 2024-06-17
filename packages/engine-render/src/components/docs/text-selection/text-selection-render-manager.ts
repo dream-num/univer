@@ -815,6 +815,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     private _getCanvasOffset() {
+        // This is quiet ambiguous, when did the engine's canvas offset changes?
         const engine = this._scene?.getEngine() as Engine;
         return getCanvasOffsetByEngine(engine);
     }

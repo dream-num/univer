@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-import type { SheetsSelectionsService } from '@univerjs/sheets';
+import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, RxDisposable, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { WorkbookSelections } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, forkJoin, map, merge, of, scan, switchMap, takeUntil } from 'rxjs';
+import { Nullable } from 'vitest';
 
 /**
  * Ref selections service reuses code of `SelectionManagerService`. And it only contains ref selections
@@ -25,5 +31,38 @@ import { createIdentifier } from '@wendellhu/redi';
  */
 export const IRefSelectionsService = createIdentifier<SheetsSelectionsService>('sheets-formula.ref-selections.service');
 
-// TODO@wzhudev: `IRefSelectionsService` should have a total different implementation than `SheetsSelectionsService`
-// because ref ranges could from different units in a formula.
+/**
+ * RefSelectionsService treats `selectionMoveStart$` `selectionMoving$` and `selectionMoveEnd$` differently
+ * than `SheetsSelectionsService`. Because ref selections can be in different workbooks.
+ */
+export class RefSelectionsService extends SheetsSelectionsService {
+    constructor(
+    @IUniverInstanceService _instanceSrv: IUniverInstanceService
+    ) {
+        super(_instanceSrv);
+    }
+
+    protected override _init(): void {
+        const $ = this._getAliveWorkbooks$().pipe(takeUntil(this.dispose$));
+        this.selectionMoveStart$ = $.pipe(switchMap((ss) => merge(...ss.map((s) => s.selectionMoveStart$))));
+        this.selectionMoving$ = $.pipe(switchMap((ss) => merge(...ss.map((s) => s.selectionMoving$))));
+        this.selectionMoveEnd$ = $.pipe(switchMap((ss) => merge(...ss.map((s) => s.selectionMoveEnd$))));
+    }
+
+    private _getAliveWorkbooks$(): Observable<WorkbookSelections[]> {
+        const aliveWorkbooks = this._instanceSrv.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        aliveWorkbooks.forEach((workbook) => this._ensureWorkbookSelection(workbook.getUnitId()));
+
+        const workbooks$ = new BehaviorSubject(aliveWorkbooks);
+        this.disposeWithMe(this._instanceSrv.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+            this._ensureWorkbookSelection(workbook.getUnitId());
+            workbooks$.next([...workbooks$.getValue(), workbook]);
+        }));
+        this.disposeWithMe(this._instanceSrv.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+            this._removeWorkbookSelection(workbook.getUnitId());
+            workbooks$.next(workbooks$.getValue().filter((unit) => unit !== workbook));
+        }));
+
+        return workbooks$.pipe(map((workbooks) => workbooks.map((w) => this._ensureWorkbookSelection(w.getUnitId()))));
+    }
+}

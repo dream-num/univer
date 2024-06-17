@@ -24,12 +24,11 @@ export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisible
     id: 'sheet.operation.set-cell-edit-visible',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
-        const editorBridgeService = accessor.get(IEditorBridgeService);
-
-        if (params == null) {
+        if (!params) {
             return false;
         }
 
+        const editorBridgeService = accessor.get(IEditorBridgeService);
         editorBridgeService.changeVisible(params);
 
         return true;
@@ -41,16 +40,18 @@ export const SetCellEditVisibleWithF2Operation: IOperation<IEditorBridgeServiceV
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-
         commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, params);
-
         return true;
     },
 };
 
+// FIXME: should not use operation as an event
+
 /**
  * When the editor is not clicked to change the cursor,
  * the arrow keys will exit editing and move the cell.
+ *
+ * @deprecated Should not use operation as an event.
  */
 export const SetCellEditVisibleArrowOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
     id: 'sheet.operation.set-cell-edit-visible-arrow',

@@ -245,7 +245,8 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _renderRawFormula = false;
 
     constructor(
-        private _worksheet: Worksheet | undefined,
+        readonly worksheet: Worksheet,
+
         /**
          * @deprecated avoid use `IWorksheetData` directly, use API provided by `Worksheet`, otherwise
          * `ViewModel` will be not working.
@@ -322,31 +323,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this.columnHeaderHeight + this._marginTop;
     }
 
-    get worksheet() {
-        return this._worksheet;
-    }
-
-    // get dataMergeCacheAll() {
-    //     return this._dataMergeCacheAll;
-    // }
-
-    /**
-     * @deprecated
-     */
-    static create(
-        worksheet: Worksheet | undefined,
-        config: IWorksheetData,
-        cellData: ObjectMatrix<Nullable<ICellData>>,
-        styles: Styles,
-        localeService: LocaleService,
-        contextService: IContextService
-    ) {
-        return new SpreadsheetSkeleton(worksheet, config, cellData, styles, localeService, contextService);
-    }
-
-    /**
-     * TODO: DR-Univer, fix as unknown as
-     */
     override dispose(): void {
         super.dispose();
 
@@ -362,7 +338,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._renderedCellCache = null as unknown as ObjectMatrix<boolean>;
         this._overflowCache = null as unknown as ObjectMatrix<IRange>;
 
-        this._worksheet = null as unknown as Worksheet;
         this._worksheetData = null as unknown as IWorksheetData;
         this._cellData = null as unknown as ObjectMatrix<Nullable<ICellData>>;
         this._styles = null as unknown as Styles;
@@ -371,15 +346,16 @@ export class SpreadsheetSkeleton extends Skeleton {
     /**
      * @deprecated should never expose a property that is provided by another module!
      */
-    getCellData() {
-        return this._cellData;
+    getsStyles() {
+        return this._styles;
     }
 
     /**
-     * @deprecated should never expose a property that is provided by another module!
+     * Get which Workbook and Worksheet this skeleton is attached to.
+     * @returns [unitId, sheetId]
      */
-    getsStyles() {
-        return this._styles;
+    getLocation(): [string, string] {
+        return [this.worksheet.getUnitId(), this.worksheet.getSheetId()];
     }
 
     private _initContextListener() {
@@ -491,7 +467,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { columnCount, columnData, mergeData, defaultRowHeight, defaultColumnWidth } = this._worksheetData;
         let height = defaultRowHeight;
 
-        const worksheet = this._worksheet;
+        const worksheet = this.worksheet;
         if (!worksheet) {
             return height;
         }
@@ -603,7 +579,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _dynamicallyUpdateRowHeaderWidth(rowHeader: { width: number }): number {
         const SIZE_BY_EACH_CHARACTER = 8;
-        const widthByComputation = (`${this._worksheet?.getRowCount()}`.length * SIZE_BY_EACH_CHARACTER);
+        const widthByComputation = (`${this.worksheet.getRowCount()}`.length * SIZE_BY_EACH_CHARACTER);
         return Math.max(rowHeader.width, widthByComputation);
     }
 
@@ -873,16 +849,6 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
-        // if (column === -1) {
-        //     const columnLength = columnWidthAccumulation.length - 1;
-        //     const lastColumnValue = columnWidthAccumulation[columnLength];
-        //     if (lastColumnValue <= offsetX) {
-        //         column = columnWidthAccumulation.length - 1;
-        //     } else {
-        //         column = 0;
-        //     }
-        // }
-
         return column;
     }
 
@@ -913,15 +879,6 @@ export class SpreadsheetSkeleton extends Skeleton {
                 row = row + 1;
             }
         }
-        // if (row === -1) {
-        //     const rowLength = rowHeightAccumulation.length - 1;
-        //     const lastRowValue = rowHeightAccumulation[rowLength];
-        //     if (lastRowValue <= offsetY) {
-        //         row = rowHeightAccumulation.length - 1;
-        //     } else {
-        //         row = 0;
-        //     }
-        // }
 
         return row;
     }
@@ -1440,7 +1397,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         for (let r = 0; r < rowCount; r++) {
             let rowHeight = defaultRowHeight;
 
-            if (this._worksheet?.getRowFiltered(r)) {
+            if (this.worksheet.getRowFiltered(r)) {
                 rowHeight = 0;
             } else if (data[r] != null) {
                 const rowDataItem = data[r];
@@ -1523,7 +1480,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             const columnCount = this._columnWidthAccumulation.length - 1;
             for (let i = startColumn; i >= endColumn; i--) {
                 const column = i;
-                const cell = this._worksheet?.getCell(row, column);
+                const cell = this.worksheet.getCell(row, column);
                 if ((!isCellCoverable(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                     if (column === startColumn) {
                         return column;
@@ -1552,7 +1509,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
         for (let i = startColumn; i <= endColumn; i++) {
             const column = i;
-            const cell = this._worksheet?.getCell(row, column);
+            const cell = this.worksheet.getCell(row, column);
             if ((!isCellCoverable(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                 if (column === startColumn) {
                     return column;
@@ -1697,19 +1654,15 @@ export class SpreadsheetSkeleton extends Skeleton {
             return true;
         }
 
-        if (!this._worksheet) {
-            return true;
-        }
-
         /**
          * TODO: DR-Univer getCellRaw for slide demo, the implementation approach will be changed in the future.
          */
-        const cell = this._worksheet.getCell(r, c) || this._worksheet.getCellRaw(r, c);
+        const cell = this.worksheet.getCell(r, c) || this.worksheet.getCellRaw(r, c);
         if (!cell) {
             return true;
         }
 
-        const hidden = this._worksheet.getColVisible(c) === false || this._worksheet.getRowVisible(r) === false;
+        const hidden = this.worksheet.getColVisible(c) === false || this.worksheet.getRowVisible(r) === false;
         if (hidden) {
             const { isMerged, isMergedMainCell } = getCellInfoInMergeData(
                 r,
@@ -1931,7 +1884,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * In Excel, for the border rendering of merged cells to take effect, the outermost cells need to have the same border style.
      */
     private _setMergeBorderProps(type: BORDER_TYPE, cache: IStylesCache, mergeRange: IRange) {
-        if (!this._worksheet || !cache.border) {
+        if (!this.worksheet || !cache.border) {
             return;
         }
 
@@ -1974,7 +1927,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 row = i;
             }
 
-            const cell = this._worksheet.getCell(row, column);
+            const cell = this.worksheet.getCell(row, column);
             if (!cell) {
                 isAddBorders = false;
                 break;

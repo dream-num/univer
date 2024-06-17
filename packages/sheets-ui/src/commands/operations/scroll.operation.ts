@@ -17,32 +17,36 @@
 import type { IOperation } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 
+import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IScrollManagerWithSearchParam } from '../../services/scroll-manager.service';
-import { ScrollManagerService } from '../../services/scroll-manager.service';
+import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 
 export const SetScrollOperation: IOperation<IScrollManagerWithSearchParam> = {
     id: 'sheet.operation.set-scroll',
     type: CommandType.OPERATION,
 
     handler: (accessor, params: IScrollManagerWithSearchParam) => {
-        if (params == null) {
+        if (!params) {
             return false;
         }
 
-        const scrollManagerService = accessor.get(ScrollManagerService);
         // freeze is handled by set-scroll.command.ts
+
+        const { unitId, sheetId, offsetX, offsetY, sheetViewStartColumn, sheetViewStartRow } = params;
         const currentService = accessor.get(IUniverInstanceService);
-        const workbook = currentService.getUniverSheetInstance(params!.unitId);
-        const worksheet = workbook!.getSheetBySheetId(params!.sheetId);
+        const renderManagerService = accessor.get(IRenderManagerService);
+        const workbook = currentService.getUniverSheetInstance(unitId);
+        const worksheet = workbook!.getSheetBySheetId(sheetId);
+        const scrollManagerService = renderManagerService.getRenderById(unitId)!.with(SheetScrollManagerService);
         const { xSplit, ySplit } = worksheet!.getConfig().freeze;
 
         scrollManagerService.setScrollInfoAndEmitEvent({
-            unitId: params.unitId,
-            sheetId: params.sheetId,
-            offsetX: params.offsetX,
-            offsetY: params.offsetY,
-            sheetViewStartRow: params.sheetViewStartRow - ySplit,
-            sheetViewStartColumn: params.sheetViewStartColumn - xSplit,
+            unitId,
+            sheetId,
+            offsetX,
+            offsetY,
+            sheetViewStartRow: sheetViewStartRow - ySplit,
+            sheetViewStartColumn: sheetViewStartColumn - xSplit,
         });
 
         return true;

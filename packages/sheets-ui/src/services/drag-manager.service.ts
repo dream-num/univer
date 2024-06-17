@@ -16,12 +16,11 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
 import { distinctUntilChanged, Subject } from 'rxjs';
 import type { IDragEvent } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getHoverCellPosition } from '../common/utils';
-import { ScrollManagerService } from './scroll-manager.service';
+import { SheetScrollManagerService } from './scroll-manager.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 import type { IHoverCellPosition } from './hover-manager.service';
 
@@ -45,7 +44,6 @@ export class DragManagerService extends Disposable {
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
@@ -78,9 +76,11 @@ export class DragManagerService extends Disposable {
         if (!worksheet) return;
         // const skeletonParam = this._sheetSkeletonManagerService.getCurrent();
         const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
-        const skeletonParam = currentRender?.with(SheetSkeletonManagerService)?.getCurrent();
+        if (!currentRender) return;
 
-        const scrollInfo = this._scrollManagerService.getCurrentScrollInfo();
+        const skeletonParam = currentRender.with(SheetSkeletonManagerService).getCurrent();
+        const scrollManagerService = currentRender.with(SheetScrollManagerService);
+        const scrollInfo = scrollManagerService.getCurrentScrollInfo();
 
         if (!skeletonParam || !scrollInfo || !currentRender) return;
 

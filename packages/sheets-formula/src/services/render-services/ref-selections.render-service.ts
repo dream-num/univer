@@ -19,6 +19,7 @@ import { DisposableCollection, RANGE_TYPE, ThemeService, toDisposable } from '@u
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, type ISelectionWithCoordAndStyle, type SheetsSelectionsService, type WorkbookSelections } from '@univerjs/sheets';
+import type { SelectionShape } from '@univerjs/sheets-ui';
 import { BaseSelectionRenderService, checkInHeaderRanges, getAllSelection, getCoordByOffset, getSheetObject, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
@@ -62,6 +63,10 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._remainLastEnabled = true; // For ref range selections, we should always remain others.
     }
 
+    getLocation(): [string, string] {
+        return this._skeleton.getLocation();
+    }
+
     setRemainLastEnabled(enabled: boolean): void {
         this._remainLastEnabled = enabled;
     }
@@ -69,6 +74,14 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     setSkipLastEnabled(enabled: boolean): void {
         this._skipLastEnabled = enabled;
     }
+
+    removeControl(control: SelectionShape): void {
+        const index = this._selectionControls.findIndex((c) => c === control);
+        if (index !== -1) {
+            control.dispose();
+            this._selectionControls.splice(index, 1);
+        }
+    };
 
     /**
      * Call this method and user will be able to select on the canvas to update selections.
@@ -92,6 +105,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         const listenerDisposables = new DisposableCollection();
 
         listenerDisposables.add(spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            console.warn('debug start dragging', this._skeleton.worksheet?.getUnitId());
             this._onPointerDown(evt, spreadsheet.zIndex + 1, RANGE_TYPE.NORMAL, this._getActiveViewport(evt));
             if (evt.button !== 2) {
                 state.stopPropagation();
@@ -167,6 +181,8 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             // Clear already existed selections.
             this._reset();
 
+            // The selections' style would be colorful here. PromptController would change the color of
+            // selections later.
             for (const selectionWithStyle of selectionsWithStyles) {
                 const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
                 this._addSelectionControlBySelectionData(selectionData);

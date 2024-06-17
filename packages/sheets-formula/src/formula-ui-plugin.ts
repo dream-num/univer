@@ -20,7 +20,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IRefSelectionsService, SheetsSelectionsService } from '@univerjs/sheets';
+import { IRefSelectionsService, RefSelectionsService, SheetsSelectionsService } from '@univerjs/sheets';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaDisplayController } from './controllers/array-formula-display.controller';
@@ -86,7 +86,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         const j = this._injector;
         const dependencies: Dependency[] = [
             [IFormulaPromptService, { useClass: FormulaPromptService }],
-            [IRefSelectionsService, { useClass: SheetsSelectionsService }],
+            [IRefSelectionsService, { useClass: RefSelectionsService }],
             [IDescriptionService, { useFactory: () => j.createInstance(DescriptionService, this._config?.description) }],
             [IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }],
             [IRegisterFunctionService, { useClass: RegisterFunctionService }],

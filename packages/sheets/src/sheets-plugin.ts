@@ -29,7 +29,6 @@ import { INumfmtService } from './services/numfmt/type';
 import { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
 
 import { RefRangeService } from './services/ref-range/ref-range.service';
-import { SheetsSelectionsService } from './services/selections/selection-manager.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 import { WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from './services/permission/worksheet-permission';
@@ -40,6 +39,7 @@ import { RangeProtectionRefRangeService } from './services/permission/range-perm
 import { RangeProtectionService } from './services/permission/range-permission/range-protection.service';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
 import { NumberCellDisplayController } from './controllers/number-cell.controller';
+import { SheetsSelectionsService } from './services/selections/selection-manager.service';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 

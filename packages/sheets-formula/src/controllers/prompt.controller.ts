@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// FIXME: why so many calling to close the editor here?
+
 import type {
     DocumentDataModel,
     ICommandInfo,
@@ -41,7 +43,6 @@ import {
     RANGE_TYPE,
     Rectangle,
     ThemeService,
-    toDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -66,6 +67,7 @@ import {
     serializeRangeToRefString,
 } from '@univerjs/engine-formula';
 import {
+    Control,
     DeviceInputEventType,
     IRenderManagerService,
     ITextSelectionRenderManager,
@@ -91,7 +93,7 @@ import {
     MoveSelectionCommand,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-import { IContextMenuService, IEditorService, KeyCode, MetaKeys, SetEditorResizeOperation } from '@univerjs/ui';
+import { IContextMenuService, IEditorService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 
@@ -164,6 +166,14 @@ export class PromptController extends Disposable {
         return this._renderManagerService.getRenderById(
             this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
         )!.with(RefSelectionsRenderService);
+    }
+
+    /**
+     * If there are multiple sheet instances, we should enable or disable all of them.
+     */
+    private get _allSelectionRenderServices(): RefSelectionsRenderService[] {
+        return this._renderManagerService.getAllRenderersOfType(UniverInstanceType.UNIVER_SHEET)
+            .map((renderer) => renderer.with(RefSelectionsRenderService));
     }
 
     constructor(
@@ -254,46 +264,44 @@ export class PromptController extends Disposable {
 
     private _initialCursorSync() {
         this.disposeWithMe(
-            toDisposable(
-                this._textSelectionManagerService.textSelection$.subscribe((params) => {
-                    if (params?.unitId == null) {
-                        return;
-                    }
+            this._textSelectionManagerService.textSelection$.subscribe((params) => {
+                if (params?.unitId == null) {
+                    return;
+                }
 
-                    const editor = this._editorService.getEditor(params.unitId);
-                    if (!editor
-                        || editor.onlyInputContent()
-                        || (editor.isSheetEditor() && this._editorBridgeService.isVisible().visible === false)
-                    ) {
-                        return;
-                    }
+                const editor = this._editorService.getEditor(params.unitId);
+                if (!editor
+                    || editor.onlyInputContent()
+                    || (editor.isSheetEditor() && this._editorBridgeService.isVisible().visible === false)
+                ) {
+                    return;
+                }
 
-                    const onlyInputRange = editor.onlyInputRange();
+                const onlyInputRange = editor.onlyInputRange();
 
-                    // @ts-ignore
-                    if (params?.options?.fromSelection) {
-                        return;
-                    } else {
-                        this._quitSelectingMode();
-                    }
+                // @ts-ignore
+                if (params?.options?.fromSelection) {
+                    return;
+                } else {
+                    this._quitSelectingMode();
+                }
 
-                    this._contextSwitch();
-                    this._checkShouldEnterSelectingMode(onlyInputRange);
+                this._contextSwitch();
+                this._checkShouldEnterSelectingMode(onlyInputRange);
 
-                    if (this._formulaPromptService.isLockedSelectionChange()) {
-                        return;
-                    }
+                if (this._formulaPromptService.isLockedSelectionChange()) {
+                    return;
+                }
 
-                    this._highlightFormula();
+                this._highlightFormula();
 
-                    if (onlyInputRange) {
-                        return;
-                    }
+                if (onlyInputRange) {
+                    return;
+                }
 
-                    // TODO@Dushusir: use real text info
-                    this._changeFunctionPanelState();
-                })
-            )
+                // TODO@Dushusir: use real text info
+                this._changeFunctionPanelState();
+            })
         );
     }
 
@@ -394,23 +402,21 @@ export class PromptController extends Disposable {
 
             if (selections.length === 0) return;
 
-            // Rebuild selections when the selection is changed from cache refs in the formula string (not current selections)!
-            this._updateRefSelectionStyle(this._isSelectionMovingRefSelections);
+            // Update rendering in each selection render service.
+            this._allSelectionRenderServices.forEach((r) => this._updateRefSelectionStyle(r, this._isSelectionMovingRefSelections));
 
             const selectionControls = this._selectionRenderService.getSelectionControls();
             selectionControls.forEach((c) => {
                 c.disableHelperSelection();
-
                 d.add(c.selectionMoving$.subscribe((toRange) => this._onSelectionControlChange(toRange, c)));
                 d.add(c.selectionScaling$.subscribe((toRange) => this._onSelectionControlChange(toRange, c)));
-
                 d.add(c.selectionMoved$.subscribe(() => this._formulaPromptService.disableLockedSelectionChange()));
                 d.add(c.selectionScaled$.subscribe(() => this._formulaPromptService.disableLockedSelectionChange()));
             });
         }));
     }
 
-    // #region - selecting mode - user can use cursor to select a range on the canvas and move the selection
+    // #region - Selecting Mode: user can use cursor to select a range on the canvas and move the selection
     // with keyboard shortcuts
 
     private _updateSelecting(selectionsWithStyles: ISelectionWithStyle[], performInsertion: boolean = false) {
@@ -428,18 +434,16 @@ export class PromptController extends Disposable {
     private _selectionsChangeDisposables: Nullable<IDisposable>;
     private _enableRefSelectionsRenderService() {
         const d = this._selectionsChangeDisposables = new DisposableCollection();
-
-        d.add(this._selectionRenderService.enableSelectionChanging());
-
-        // When the current selections change, the ref string is updated without touch `IRefSelectionsService`.
-
-        d.add(this._selectionRenderService.selectionMoving$.subscribe((selections) => {
-            this._updateSelecting(selections.map((s) => convertSelectionDataToRange(s)));
-        }));
-
-        d.add(this._selectionRenderService.selectionMoveStart$.subscribe((selections) => {
-            this._updateSelecting(selections.map((s) => convertSelectionDataToRange(s)), true);
-        }));
+        this._allSelectionRenderServices.forEach((renderer) => {
+            d.add(renderer.enableSelectionChanging());
+            d.add(renderer.selectionMoving$.subscribe((selections) => {
+                // When the current selections change, the ref string is updated without touch `IRefSelectionsService`.
+                this._updateSelecting(selections.map((s) => convertSelectionDataToRange(s)));
+            }));
+            d.add(renderer.selectionMoveStart$.subscribe((selections) => {
+                this._updateSelecting(selections.map((s) => convertSelectionDataToRange(s)), true);
+            }));
+        });
     }
 
     private _disposeSelectionsChangeListeners(): void {
@@ -473,7 +477,7 @@ export class PromptController extends Disposable {
             this._previousSequenceNodes = Tools.deepClone(insertNodes);
             this._formulaPromptService.setSequenceNodes(insertNodes);
 
-            const refString = this._getRefString(currentSelection);
+            const refString = this._generateRefString(currentSelection);
             this._formulaPromptService.insertSequenceRef(this._previousInsertRefStringIndex, refString);
 
             this._selectionRenderService.setSkipLastEnabled(false);
@@ -487,71 +491,69 @@ export class PromptController extends Disposable {
 
     private _initAcceptFormula() {
         this.disposeWithMe(
-            toDisposable(
-                this._formulaPromptService.acceptFormulaName$.subscribe((formulaString: string) => {
-                    const activeRange = this._textSelectionManagerService.getActiveRange();
+            this._formulaPromptService.acceptFormulaName$.subscribe((formulaString: string) => {
+                const activeRange = this._textSelectionManagerService.getActiveRange();
 
-                    if (activeRange == null) {
-                        this._hideFunctionPanel();
-                        return;
+                if (activeRange == null) {
+                    this._hideFunctionPanel();
+                    return;
+                }
+
+                const { startOffset } = activeRange;
+
+                const lastSequenceNodes = this._formulaPromptService.getSequenceNodes();
+
+                const nodeIndex = this._formulaPromptService.getCurrentSequenceNodeIndex(startOffset - 2);
+
+                const node = lastSequenceNodes[nodeIndex];
+
+                if (node == null || typeof node === 'string') {
+                    this._hideFunctionPanel();
+                    return;
+                }
+
+                const difference = formulaString.length - node.token.length;
+                const newNode = { ...node };
+
+                newNode.token = formulaString;
+
+                newNode.endIndex += difference;
+
+                lastSequenceNodes[nodeIndex] = newNode;
+
+                const isDefinedName = this._descriptionService.hasDefinedNameDescription(formulaString);
+
+                const isFormulaDefinedName = this._descriptionService.isFormulaDefinedName(formulaString);
+
+                const formulaStringCount = formulaString.length + 1;
+
+                const mustAddBracket = !isDefinedName || isFormulaDefinedName;
+
+                if (mustAddBracket) {
+                    lastSequenceNodes.splice(nodeIndex + 1, 0, matchToken.OPEN_BRACKET);
+                }
+
+                for (let i = nodeIndex + 2, len = lastSequenceNodes.length; i < len; i++) {
+                    const node = lastSequenceNodes[i];
+                    if (typeof node === 'string') {
+                        continue;
                     }
 
-                    const { startOffset } = activeRange;
-
-                    const lastSequenceNodes = this._formulaPromptService.getSequenceNodes();
-
-                    const nodeIndex = this._formulaPromptService.getCurrentSequenceNodeIndex(startOffset - 2);
-
-                    const node = lastSequenceNodes[nodeIndex];
-
-                    if (node == null || typeof node === 'string') {
-                        this._hideFunctionPanel();
-                        return;
-                    }
-
-                    const difference = formulaString.length - node.token.length;
                     const newNode = { ...node };
 
-                    newNode.token = formulaString;
+                    newNode.startIndex += formulaStringCount;
+                    newNode.endIndex += formulaStringCount;
 
-                    newNode.endIndex += difference;
+                    lastSequenceNodes[i] = newNode;
+                }
 
-                    lastSequenceNodes[nodeIndex] = newNode;
+                let selectionIndex = newNode.endIndex + 1;
+                if (mustAddBracket) {
+                    selectionIndex += 1;
+                }
 
-                    const isDefinedName = this._descriptionService.hasDefinedNameDescription(formulaString);
-
-                    const isFormulaDefinedName = this._descriptionService.isFormulaDefinedName(formulaString);
-
-                    const formulaStringCount = formulaString.length + 1;
-
-                    const mustAddBracket = !isDefinedName || isFormulaDefinedName;
-
-                    if (mustAddBracket) {
-                        lastSequenceNodes.splice(nodeIndex + 1, 0, matchToken.OPEN_BRACKET);
-                    }
-
-                    for (let i = nodeIndex + 2, len = lastSequenceNodes.length; i < len; i++) {
-                        const node = lastSequenceNodes[i];
-                        if (typeof node === 'string') {
-                            continue;
-                        }
-
-                        const newNode = { ...node };
-
-                        newNode.startIndex += formulaStringCount;
-                        newNode.endIndex += formulaStringCount;
-
-                        lastSequenceNodes[i] = newNode;
-                    }
-
-                    let selectionIndex = newNode.endIndex + 1;
-                    if (mustAddBracket) {
-                        selectionIndex += 1;
-                    }
-
-                    this._syncToEditor(lastSequenceNodes, selectionIndex, undefined, false, false);
-                })
-            )
+                this._syncToEditor(lastSequenceNodes, selectionIndex, undefined, false, false);
+            })
         );
     }
 
@@ -769,6 +771,7 @@ export class PromptController extends Disposable {
         if (config && isFormulaString(config.dataStream)) {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
             this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
+            this._contextService.setContextValue(UNI_DISABLE_CHANGING_FOCUS_KEY, true);
 
             const lastSequenceNodes =
                 this._lexerTreeBuilder.sequenceNodesBuilder(config.dataStream.replace(/\r/g, '').replace(/\n/g, '')) ||
@@ -791,6 +794,7 @@ export class PromptController extends Disposable {
 
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
         this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
+        this._contextService.setContextValue(UNI_DISABLE_CHANGING_FOCUS_KEY, false);
 
         this._formulaPromptService.disableLockedSelectionChange();
 
@@ -831,8 +835,7 @@ export class PromptController extends Disposable {
             this._existsSequenceNode = true;
             const { textRuns, refSelections } = this._buildTextRuns(sequenceNodes);
             bodyList.forEach((body) => (body!.textRuns = textRuns));
-
-            this._refreshSelectionForReference(refSelections);
+            this._allSelectionRenderServices.forEach((r) => this._refreshSelectionForReference(r, refSelections));
         }
 
         this._refreshFormulaAndCellEditor(unitIds);
@@ -915,20 +918,15 @@ export class PromptController extends Disposable {
      * Draw the referenced selection text based on the style and token.
      * @param refSelections
      */
-    private _refreshSelectionForReference(refSelections: IRefSelection[]) {
-        const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
+    private _refreshSelectionForReference(refSelectionRenderService: RefSelectionsRenderService, refSelections: IRefSelection[]) {
+        const [unitId, sheetId] = refSelectionRenderService.getLocation();
 
-        const selectionWithStyle: ISelectionWithStyle[] = [];
-
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-        const worksheet = workbook?.getSheetBySheetId(sheetId);
-
-        if (worksheet == null) {
-            return;
-        }
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId)!;
+        const worksheet = workbook.getSheetBySheetId(sheetId)!;
 
         let lastRange: Nullable<ISelectionWithStyle> = null;
 
+        const selectionWithStyle: ISelectionWithStyle[] = [];
         for (let i = 0, len = refSelections.length; i < len; i++) {
             const refSelection = refSelections[i];
             const { themeColor, token, refIndex } = refSelection;
@@ -987,11 +985,9 @@ export class PromptController extends Disposable {
             selectionWithStyle.push(lastRange);
         }
 
-        if (selectionWithStyle.length === 0) {
-            return;
+        if (selectionWithStyle.length) {
+            this._refSelectionsService.addSelections(unitId, sheetId, selectionWithStyle);
         }
-
-        this._refSelectionsService.addSelections(selectionWithStyle);
     }
 
     private _getPrimary(range: IRange, themeColor: string, refIndex: number) {
@@ -1050,15 +1046,12 @@ export class PromptController extends Disposable {
 
     private _getSheetIdByName(unitId: string, sheetName: string) {
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-
         return workbook?.getSheetBySheetName(normalizeSheetName(sheetName))?.getSheetId();
     }
 
     private _getSheetNameById(unitId: string, sheetId: string) {
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-
         const sheetName = workbook?.getSheetBySheetId(sheetId)?.getName() || '';
-
         return sheetName;
     }
 
@@ -1074,11 +1067,13 @@ export class PromptController extends Disposable {
         };
     }
 
-    private _getOpenForCurrentSheet() {
+    // FIXME@Jocs: this internal implementations should be exposed to callers.
+    // This method should be moved to EditorService.
+    private _getEditorOpenedForSheet() {
         const documentDataModel = this._univerInstanceService.getCurrentUniverDocInstance()!;
         const editorUnitId = documentDataModel.getUnitId();
         const editor = this._editorService.getEditor(editorUnitId);
-        if (editor == null) {
+        if (!editor) {
             return {
                 openUnitId: null,
                 openSheetId: null,
@@ -1095,30 +1090,23 @@ export class PromptController extends Disposable {
      * Convert the selection range to a ref string for the formula engine, such as A1:B1
      * @param currentSelection
      */
-    private _getRefString(currentSelection: ISelectionWithStyle) {
-        const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
-
+    private _generateRefString(currentSelection: ISelectionWithStyle) {
         let refUnitId = '';
         let refSheetName = '';
 
-        const { openUnitId, openSheetId } = this._getOpenForCurrentSheet();
+        const { unitId, sheetId } = currentSelection.range;
+        const { openUnitId, openSheetId } = this._getEditorOpenedForSheet();
 
-        if (unitId === openUnitId) {
-            refUnitId = '';
-        } else {
+        if (unitId !== openUnitId && unitId) {
             refUnitId = unitId;
         }
 
-        if (sheetId === openSheetId) {
-            refSheetName = '';
-        } else {
+        if (sheetId !== openSheetId && unitId && sheetId) {
             refSheetName = this._getSheetNameById(unitId, sheetId);
         }
 
         const { range, primary } = currentSelection;
-
         let { startRow, endRow, startColumn, endColumn } = range;
-
         const { startAbsoluteRefType, endAbsoluteRefType, rangeType } = range;
 
         if (primary) {
@@ -1242,10 +1230,7 @@ export class PromptController extends Disposable {
          */
         setTimeout(() => {
             this._textSelectionRenderManager.focus();
-            this._setRemainCapture();
         }, 0);
-
-        this._setRemainCapture();
     }
 
     private _fitEditorSize() {
@@ -1309,7 +1294,7 @@ export class PromptController extends Disposable {
             return;
         }
 
-        const refString = this._getRefString(currentSelection);
+        const refString = this._generateRefString(currentSelection);
 
         this._formulaPromptService.setSequenceNodes(insertNodes);
 
@@ -1381,26 +1366,30 @@ export class PromptController extends Disposable {
         }
     }
 
-    private _updateRefSelectionStyle(refSelections: IRefSelection[]) {
-        const controls = this._selectionRenderService.getSelectionControls();
-        const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
+    // FIXME: @wzhudev: this method could be merged with `_refreshSelectionForReference`.
 
+    private _updateRefSelectionStyle(refSelectionRenderService: RefSelectionsRenderService, refSelections: IRefSelection[]) {
+        const controls = refSelectionRenderService.getSelectionControls();
+        const [unitId, sheetId] = refSelectionRenderService.getLocation();
+
+        const matchedControls = new Set<SelectionShape>();
         for (let i = 0, len = refSelections.length; i < len; i++) {
             const refSelection = refSelections[i];
             const { refIndex, themeColor, token } = refSelection;
             const rangeWithSheet = deserializeRangeWithSheet(token);
             const { unitId: refUnitId, sheetName, range } = rangeWithSheet;
 
-            if (refUnitId != null && refUnitId.length > 0 && unitId !== refUnitId) {
+            if (!refUnitId && refUnitId.length > 0 && unitId !== refUnitId) {
                 continue;
             }
 
             const refSheetId = this._getSheetIdByName(unitId, sheetName.trim());
-            if (refSheetId != null && refSheetId !== sheetId) {
+            if (refSheetId && refSheetId !== sheetId) {
                 continue;
             }
 
             const control = controls.find((c) => {
+                // 范围相等方法又写一遍！
                 const { startRow, startColumn, endRow, endColumn, rangeType } = c.getRange();
                 if (
                     rangeType === RANGE_TYPE.COLUMN &&
@@ -1434,13 +1423,16 @@ export class PromptController extends Disposable {
                 return false;
             });
 
-            if (!control) {
-                continue;
+            if (control) {
+                const style = getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString());
+                control.updateStyle(style);
+                matchedControls.add(control);
             }
-
-            const style = getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString());
-            control.updateStyle(style);
         }
+
+        controls.forEach((control) => {
+            if (!matchedControls.has(control)) { refSelectionRenderService.removeControl(control); }
+        });
     }
 
     private _onSelectionControlChange(toRange: IRangeWithCoord, selectionControl: SelectionShape) {
@@ -1487,7 +1479,7 @@ export class PromptController extends Disposable {
             }
         }
 
-        const refString = this._getRefString({
+        const refString = this._generateRefString({
             range: {
                 startRow: Math.min(startRow, endRow),
                 endRow: Math.max(startRow, endRow),
@@ -1527,16 +1519,6 @@ export class PromptController extends Disposable {
         }
     }
 
-    private _setRemainCapture() {
-        const { unitId } = this._getCurrentUnitIdAndSheetId();
-
-        const editorObject = getEditorObject(unitId, this._renderManagerService);
-
-        const engine = editorObject?.engine;
-
-        engine?.setRemainCapture();
-    }
-
     private _cursorStateListener() {
         /**
          * The user's operations follow the sequence of opening the editor and then moving the cursor.
@@ -1570,10 +1552,13 @@ export class PromptController extends Disposable {
             return;
         }
 
+        // FIXME: @Jocs: lots of code duplications here
+
         this._editorBridgeService.changeVisible({
             visible: false,
             eventType: DeviceInputEventType.Keyboard,
             keycode,
+            unitId: '',
         });
     }
 
@@ -1592,6 +1577,7 @@ export class PromptController extends Disposable {
             visible: false,
             eventType: DeviceInputEventType.Keyboard,
             keycode,
+            unitId: '',
         });
     }
 
@@ -1603,6 +1589,7 @@ export class PromptController extends Disposable {
                 visible: false,
                 eventType: DeviceInputEventType.Keyboard,
                 keycode,
+                unitId: '',
             });
         }
     }
@@ -1692,6 +1679,7 @@ export class PromptController extends Disposable {
                             visible: false,
                             eventType: DeviceInputEventType.Keyboard,
                             keycode,
+                            unitId: '',
                         });
                         return;
                     }
@@ -1758,29 +1746,28 @@ export class PromptController extends Disposable {
 
     private _inputFormulaListener() {
         this.disposeWithMe(
-            toDisposable(
-                this._editorService.inputFormula$.subscribe((param) => {
-                    const { formulaString, editorUnitId } = param;
+            this._editorService.inputFormula$.subscribe((param) => {
+                const { formulaString, editorUnitId } = param;
 
-                    if (formulaString.substring(0, 1) !== compareToken.EQUALS) {
-                        return;
-                    }
+                if (formulaString.substring(0, 1) !== compareToken.EQUALS) {
+                    return;
+                }
 
-                    const visibleState = this._editorBridgeService.isVisible();
-                    if (visibleState.visible === false) {
-                        this._editorBridgeService.changeVisible({
-                            visible: true,
-                            eventType: DeviceInputEventType.Dblclick,
-                        });
-                    }
+                const visibleState = this._editorBridgeService.isVisible();
+                if (visibleState.visible === false) {
+                    this._editorBridgeService.changeVisible({
+                        visible: true,
+                        eventType: DeviceInputEventType.Dblclick,
+                        unitId: '',
+                    });
+                }
 
-                    const lastSequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString) || [];
+                const lastSequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString) || [];
 
-                    this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
+                this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
 
-                    this._syncToEditor(lastSequenceNodes, formulaString.length - 1, editorUnitId);
-                })
-            )
+                this._syncToEditor(lastSequenceNodes, formulaString.length - 1, editorUnitId);
+            })
         );
 
         this.disposeWithMe(

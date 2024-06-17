@@ -206,6 +206,8 @@ export function convertSelectionDataToRange(
             endRow: rangeWithCoord.endRow,
             endColumn: rangeWithCoord.endColumn,
             rangeType: rangeWithCoord.rangeType,
+            unitId: rangeWithCoord.unitId,
+            sheetId: rangeWithCoord.sheetId,
         },
         primary: null,
         style,

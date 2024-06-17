@@ -177,11 +177,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
     private _helping: boolean = false;
 
-    private _isInsertRefString: boolean = false;
-
     private _sequenceNodes: Array<string | ISequenceNode> = [];
-
-    private _isSelectionMoving = false;
 
     private _isLockedOnSelectionChangeRefString: boolean = false;
 

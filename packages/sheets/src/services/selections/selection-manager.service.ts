@@ -41,22 +41,26 @@ export class SheetsSelectionsService extends RxDisposable {
         return { unitId: workbook.getUnitId(), sheetId: worksheet.getSheetId() };
     }
 
-    readonly selectionMoveStart$: Observable<Nullable<ISelectionWithStyle[]>>;
-    readonly selectionMoving$: Observable<Nullable<ISelectionWithStyle[]>>;
-    readonly selectionMoveEnd$: Observable<ISelectionWithStyle[]>;
+    selectionMoveStart$: Observable<Nullable<ISelectionWithStyle[]>>;
+    selectionMoving$: Observable<Nullable<ISelectionWithStyle[]>>;
+    selectionMoveEnd$: Observable<ISelectionWithStyle[]>;
 
     constructor(
-        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService
+        @IUniverInstanceService protected readonly _instanceSrv: IUniverInstanceService
     ) {
         super();
+        this._init();
+    }
 
+    protected _init(): void {
         const c$ = this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).pipe(shareReplay(1), takeUntil(this.dispose$));
+
         this.selectionMoveStart$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveStart$));
         this.selectionMoving$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoving$));
         this.selectionMoveEnd$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveEnd$));
 
         this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
-            this._workbookSelections.delete(workbook.getUnitId());
+            this._removeWorkbookSelection(workbook.getUnitId());
         });
     }
 
@@ -144,7 +148,7 @@ export class SheetsSelectionsService extends RxDisposable {
         );
     }
 
-    private _getCurrentSelections() {
+    protected _getCurrentSelections() {
         const current = this._currentSelectionPos;
         if (!current) {
             return [];
@@ -158,8 +162,8 @@ export class SheetsSelectionsService extends RxDisposable {
         return this._ensureWorkbookSelection(unitId);
     }
 
-    private _workbookSelections = new Map<string, WorkbookSelections>();
-    private _ensureWorkbookSelection(unitId: string): WorkbookSelections {
+    protected _workbookSelections = new Map<string, WorkbookSelections>();
+    protected _ensureWorkbookSelection(unitId: string): WorkbookSelections {
         let wbSelection = this._workbookSelections.get(unitId);
         if (!wbSelection) {
             const workbook = this._instanceSrv.getUnit<Workbook>(unitId);
@@ -172,6 +176,10 @@ export class SheetsSelectionsService extends RxDisposable {
         }
 
         return wbSelection;
+    }
+
+    protected _removeWorkbookSelection(unitId: string): void {
+        this._workbookSelections.delete(unitId);
     }
 }
 

@@ -16,14 +16,16 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { ICellData, ICommandInfo, IDocumentBody, IPosition, Nullable, Workbook } from '@univerjs/core';
+import type {
+    ICellData,
+    ICommandInfo,
+    IDocumentBody,
+    IPosition,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
 import {
-    CellValueType,
-    DEFAULT_EMPTY_DOCUMENT_VALUE,
-    Direction,
-    Disposable,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    EDITOR_ACTIVATED,
+    CellValueType, DEFAULT_EMPTY_DOCUMENT_VALUE, Direction, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_EDITOR_STANDALONE,
@@ -39,6 +41,7 @@ import {
     LocaleService,
     toDisposable,
     Tools,
+    UniverInstanceType,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
@@ -64,6 +67,7 @@ import {
     ScrollBar,
 } from '@univerjs/engine-render';
 import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
+import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { distinctUntilChanged, filter } from 'rxjs';
@@ -102,12 +106,16 @@ export class EditingRenderController extends Disposable implements IRenderModule
      */
     private _cursorChange: CursorChange = CursorChange.InitialState;
 
+    /** If the corresponding unit is active and prepared for editing. */
+    private _isUnitEditing = false;
+
+    private _d: Nullable<IDisposable>;
+
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @IContextService private readonly _contextService: IContextService,
-        /** @deprecated This controller should not directly use univerInstanceService. Instead, it should call editor service. */
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
@@ -121,59 +129,89 @@ export class EditingRenderController extends Disposable implements IRenderModule
     ) {
         super();
 
-        this._init();
-    }
+        // EditingRenderController is per unit. It should only handle keyboard events when the unit is
+        // the current of its type.
+        this.disposeWithMe(this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+            if (workbook?.getUnitId() === this._context.unitId) {
+                this._d = this._init();
+            } else {
+                this._disposeCurrent();
 
-    private _init() {
-        this._initialEditFocusListener();
-        this._initialKeyboardListener();
-        this._initialCursorSync();
-        this._listenEditorFocus();
-        this._commandExecutedListener();
+                // Force ending editor when he switch to another workbook.
+                if (this._isUnitEditing) {
+                    this._handleEditorInvisible({
+                        visible: false,
+                        eventType: DeviceInputEventType.Keyboard,
+                        keycode: KeyCode.ESC,
+                        unitId: this._context.unitId,
+                    });
+
+                    this._isUnitEditing = false;
+                }
+            }
+        }));
 
         this._initEditorVisibilityListener();
-        this._cursorStateListener();
+    }
+
+    override dispose(): void {
+        super.dispose();
+
+        this._disposeCurrent();
+    }
+
+    private _disposeCurrent(): void {
+        this._d?.dispose();
+        this._d = null;
+    }
+
+    private _init(): IDisposable {
+        const d = new DisposableCollection();
+        this._subscribeToCurrentCell(d);
+        this._initialKeyboardListener(d);
+        this._initialCursorSync(d);
+        this._listenEditorFocus(d);
+        this._commandExecutedListener(d);
+        this._cursorStateListener(d);
+        return d;
     }
 
     private _initEditorVisibilityListener(): void {
         this.disposeWithMe(this._editorBridgeService.visible$
             .pipe(distinctUntilChanged((prev, curr) => prev.visible === curr.visible))
             .subscribe((param) => {
-                param.visible ? this._handleEditorVisible(param) : this._handleEditorInvisible(param);
+                if (param.unitId === this._context.unitId && param.visible) {
+                    this._isUnitEditing = true;
+                    this._handleEditorVisible(param);
+                } else if (this._isUnitEditing) {
+                    this._handleEditorInvisible(param);
+                    this._isUnitEditing = false;
+                }
             }));
     }
 
-    private _listenEditorFocus() {
+    private _listenEditorFocus(d: DisposableCollection) {
         const renderConfig = this._getEditorObject();
+        if (!renderConfig) return;
 
-        if (renderConfig == null) {
-            return;
-        }
+        d.add(renderConfig.document.onPointerDown$.subscribeEvent(() => {
+            // fix https://github.com/dream-num/univer/issues/628, need to recalculate the cell editor size after
+            // it acquire focus.
+            if (this._isUnitEditing && this._editorBridgeService.isVisible()) {
+                const param = this._editorBridgeService.getEditCellState();
+                const editorId = this._editorBridgeService.getCurrentEditorId();
 
-        this.disposeWithMe(
-            toDisposable(
-                renderConfig.document.onPointerDown$.subscribeEvent(() => {
-                    // fix https://github.com/dream-num/univer/issues/628, need to recalculate the cell editor size after it acquire focus.
-                    if (this._editorBridgeService.isVisible()) {
-                        const param = this._editorBridgeService.getEditCellState();
-                        const editorId = this._editorBridgeService.getCurrentEditorId();
+                if (!param || !editorId || !this._editorService.isSheetEditor(editorId)) {
+                    return;
+                }
 
-                        if (param == null || editorId == null || !this._editorService.isSheetEditor(editorId)) {
-                            return;
-                        }
+                const skeleton = this._getEditorSkeleton(editorId);
+                if (!skeleton) return;
 
-                        const skeleton = this._getEditorSkeleton(editorId);
-                        if (!skeleton) {
-                            return;
-                        }
-
-                        const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
-
-                        this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
-                    }
-                })
-            )
-        );
+                const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
+                this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+            }
+        }));
     }
 
     private _getEditorSkeleton(editorId: string) {
@@ -184,52 +222,50 @@ export class EditingRenderController extends Disposable implements IRenderModule
         return this._renderManagerService.getRenderById(editorId)?.with(DocSkeletonManagerService).getViewModel();
     }
 
-    private _initialCursorSync() {
-        this.disposeWithMe(
-            this._cellEditorManagerService.focus$.pipe(filter((f) => !!f)).subscribe(() => {
-                this._textSelectionRenderManager.sync();
-            })
-        );
+    private _initialCursorSync(d: DisposableCollection) {
+        d.add(this._cellEditorManagerService.focus$.pipe(filter((f) => !!f)).subscribe(() => {
+            this._textSelectionRenderManager.sync();
+        }));
     }
 
-    private _initialEditFocusListener() {
-        this.disposeWithMe(
-            // TODO: After the sheet dispose, recreate the sheet, the first cell edit may be unsuccessful,
-            // it should be the editor initialization late, and we need to pay attention to this problem in the future.
-            this._editorBridgeService.currentEditCellState$.subscribe((editCellState) => {
-                if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
-                    return;
-                }
+    /**
+     * Should update current editing cell info when selection is changed.
+     * @param d DisposableCollection
+     */
+    private _subscribeToCurrentCell(d: DisposableCollection) {
+        // TODO: After the sheet dispose, recreate the sheet, the first cell edit may be unsuccessful,
+        // it should be the editor initialization late, and we need to pay attention to this problem in the future.
+        d.add(this._editorBridgeService.currentEditCellState$.subscribe((editCellState) => {
+            if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
+                return;
+            }
 
-                const { position, documentLayoutObject, scaleX, editorUnitId } = editCellState;
-                const editorObject = this._getEditorObject();
-                if (editorObject == null || this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) === true || this._contextService.getContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE) === true) {
-                    return;
-                }
+            const { position, documentLayoutObject, scaleX, editorUnitId } = editCellState;
+            if (
+                this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) ||
+                this._contextService.getContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE)
+            ) {
+                return;
+            }
 
-                const { startX, endX } = position;
-                const { textRotation, wrapStrategy, documentModel } = documentLayoutObject;
-                const { vertexAngle: angle } = convertTextRotation(textRotation);
-                documentModel!.updateDocumentId(editorUnitId);
+            const { startX, endX } = position;
+            const { textRotation, wrapStrategy, documentModel } = documentLayoutObject;
+            const { vertexAngle: angle } = convertTextRotation(textRotation);
+            documentModel!.updateDocumentId(editorUnitId);
 
-                if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
-                    documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
-                }
+            if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
+                documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
+            }
 
-                this._univerInstanceService.changeDoc(editorUnitId, documentModel!);
+            this._instanceSrv.changeDoc(editorUnitId, documentModel!);
+            this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
+            this._textSelectionManagerService.replaceTextRanges([{
+                startOffset: 0,
+                endOffset: 0,
+            }]);
 
-                this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
-
-                this._textSelectionManagerService.replaceTextRanges([
-                    {
-                        startOffset: 0,
-                        endOffset: 0,
-                    },
-                ]);
-
-                this._textSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
-            })
-        );
+            this._textSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
+        }));
     }
 
     private _fitTextSize(
@@ -378,7 +414,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         let { startX, startY } = actualRangeWithCoord;
 
-        const { document: documentComponent, scene, engine } = editorObject;
+        const { document: documentComponent, scene, engine: docEngine } = editorObject;
 
         const viewportMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
 
@@ -438,11 +474,16 @@ export class EditingRenderController extends Disposable implements IRenderModule
          * When modifying the selection area for a formula, it is necessary to add a setTimeout to ensure successful updating.
          */
         requestIdleCallback(() => {
-            engine.resizeBySize(
+            docEngine.resizeBySize(
                 fixLineWidthByScale(editorWidth, precisionScaleX),
                 fixLineWidthByScale(physicHeight, precisionScaleY)
             );
         });
+
+        const canvasElement = this._context.engine.getCanvasElement();
+        const canvasBoundingRect = canvasElement.getBoundingClientRect();
+        startX += canvasBoundingRect.left;
+        // startY += canvasBoundingRect.top;
 
         // Update cell editor container position and size.
         this._cellEditorManagerService.setState({
@@ -629,19 +670,21 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
     }
 
-    private _initialKeyboardListener() {
-        this.disposeWithMe(
-            this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
-                const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
-                const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
+    /**
+     * Should activate the editor when the user inputs text.
+     * @param d DisposableCollection
+     */
+    private _initialKeyboardListener(d: DisposableCollection) {
+        d.add(this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
+            const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
+            const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
 
-                // TODO@Jocs: should get editor instead of current doc
-                const unitId = this._univerInstanceService.getCurrentUniverDocInstance()?.getUnitId();
-                if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
-                    this._showEditorByKeyboard(config);
-                }
-            })
-        );
+            // TODO@Jocs: should get editor instead of current doc
+            const unitId = this._instanceSrv.getCurrentUniverDocInstance()?.getUnitId();
+            if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
+                this._showEditorByKeyboard(config);
+            }
+        }));
     }
 
     private _showEditorByKeyboard(config: Nullable<IEditorInputConfig>) {
@@ -655,87 +698,82 @@ export class EditingRenderController extends Disposable implements IRenderModule
             visible: true,
             eventType: DeviceInputEventType.Keyboard,
             keycode: event.which,
+            unitId: this._context.unitId,
         });
     }
 
     /**
      * Listen to document edits to refresh the size of the sheet editor, not for normal editor.
      */
-    private _commandExecutedListener() {
+    private _commandExecutedListener(d: DisposableCollection) {
         const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
 
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (updateCommandList.includes(command.id)) {
-                    const params = command.params as IRichTextEditingMutationParams;
-                    const { unitId: commandUnitId } = params;
+        d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (updateCommandList.includes(command.id)) {
+                const params = command.params as IRichTextEditingMutationParams;
+                const { unitId: commandUnitId } = params;
 
-                    if (!this._editorService.isSheetEditor(commandUnitId)) {
-                        return;
-                    }
-
-                    const editorId = this._editorBridgeService.getCurrentEditorId();
-                    if (editorId == null) {
-                        return;
-                    }
-
-                    const skeleton = this._getEditorSkeleton(editorId);
-                    if (skeleton == null) {
-                        return;
-                    }
-
-                    this._editorBridgeService.changeEditorDirty(true);
-
-                    const param = this._editorBridgeService.getEditCellState();
-                    if (param == null) {
-                        return;
-                    }
-
-                    const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
-
-                    this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+                if (!this._editorService.isSheetEditor(commandUnitId)) {
+                    return;
                 }
-            })
-        );
 
-        this.disposeWithMe(
-            // Use fix https://github.com/dream-num/univer/issues/1231.
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === ClearSelectionFormatCommand.id) {
-                    this._editorBridgeService.refreshEditCellState();
+                const editorId = this._editorBridgeService.getCurrentEditorId();
+                if (editorId == null) {
+                    return;
                 }
-            })
-        );
+
+                const skeleton = this._getEditorSkeleton(editorId);
+                if (skeleton == null) {
+                    return;
+                }
+
+                this._editorBridgeService.changeEditorDirty(true);
+
+                const param = this._editorBridgeService.getEditCellState();
+                if (param == null) {
+                    return;
+                }
+
+                const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
+
+                this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+            }
+        }));
+
+        // Use fix https://github.com/dream-num/univer/issues/1231.
+        d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (command.id === ClearSelectionFormatCommand.id) {
+                this._editorBridgeService.refreshEditCellState();
+            }
+        }));
 
         const closeEditorOperation = [SetCellEditVisibleArrowOperation.id];
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (closeEditorOperation.includes(command.id)) {
-                    const params = command.params as IEditorBridgeServiceVisibleParam & { isShift: boolean };
-                    const { keycode, isShift } = params;
+        d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (closeEditorOperation.includes(command.id)) {
+                const params = command.params as IEditorBridgeServiceVisibleParam & { isShift: boolean };
+                const { keycode, isShift } = params;
 
-                    /**
-                     * After the user enters the editor and actively moves the editor selection area with the mouse,
-                     * the up, down, left, and right keys can no longer switch editing cells,
-                     * but move the cursor within the editor instead.
-                     */
-                    if (keycode != null &&
-                        (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR))
-                    ) {
-                        this._moveInEditor(keycode, isShift);
-                        return;
-                    }
-
-                    // TODO@Jocs: After we merging editor related controllers, this seems verbose.
-                    // We can directly call SetRangeValues here.
-                    this._editorBridgeService.changeVisible(params);
+                /**
+                 * After the user enters the editor and actively moves the editor selection area with the mouse,
+                 * the up, down, left, and right keys can no longer switch editing cells,
+                 * but move the cursor within the editor instead.
+                 */
+                if (keycode != null &&
+                    (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR))
+                ) {
+                    this._moveInEditor(keycode, isShift);
+                    return;
                 }
 
-                if (command.id === SetCellEditVisibleWithF2Operation.id) {
-                    this._cursorChange = CursorChange.CursorChange;
-                }
-            })
-        );
+                // TODO@Jocs: After we merging editor related controllers, this seems verbose.
+                // We can directly call SetRangeValues here.
+                this._editorBridgeService.changeVisible(params);
+            }
+
+            if (command.id === SetCellEditVisibleWithF2Operation.id) {
+                this._cursorChange = CursorChange.CursorChange;
+            }
+        }));
     }
 
     private _setOpenForCurrent(unitId: Nullable<string>, sheetId: Nullable<string>) {
@@ -779,7 +817,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._instanceSrv.getUniverSheetInstance(unitId);
         const worksheet = workbook?.getActiveSheet();
 
         if (worksheet == null) {
@@ -915,28 +953,19 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
     }
 
-    private _cursorStateListener() {
-        /**
-         * The user's operations follow the sequence of opening the editor and then moving the cursor.
-         * The logic here predicts the user's first cursor movement behavior based on this rule
-         */
-
-        const editorObject = this._getEditorObject();
-        if (editorObject == null) {
-            return;
-        }
-
+    /**
+     * The user's operations follow the sequence of opening the editor and then moving the cursor.
+     * The logic here predicts the user's first cursor movement behavior based on this rule
+     */
+    private _cursorStateListener(d: DisposableCollection) {
+        const editorObject = this._getEditorObject()!;
         const { document: documentComponent } = editorObject;
 
-        this.disposeWithMe(
-            toDisposable(
-                documentComponent.onPointerDown$.subscribeEvent(() => {
-                    if (this._cursorChange === CursorChange.StartEditor) {
-                        this._cursorChange = CursorChange.CursorChange;
-                    }
-                })
-            )
-        );
+        d.add(toDisposable(documentComponent.onPointerDown$.subscribeEvent(() => {
+            if (this._cursorChange === CursorChange.StartEditor) {
+                this._cursorChange = CursorChange.CursorChange;
+            }
+        })));
     }
 
     // TODO: @JOCS, is it necessary to move these commands MoveSelectionOperation\MoveCursorOperation to shortcut? and use multi-commands?
@@ -1041,3 +1070,4 @@ function isRichText(body: IDocumentBody) {
         paragraphs.length >= 2
     );
 }
+

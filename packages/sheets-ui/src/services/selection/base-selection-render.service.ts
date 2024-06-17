@@ -62,7 +62,7 @@ export interface ISheetSelectionRenderService {
 
     getSkeleton(): SpreadsheetSkeleton;
 
-    getSelectionControls(): SelectionControl[]; // AutoFill
+    getSelectionControls(): SelectionControl[];
 
     // The following methods are used to get range locations in a worksheet. Though `attachRangeWithCoord` should not happens here.
     // And `attachPrimaryWithCoord` is redundant.
@@ -221,14 +221,13 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
-        // update control
         control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
     }
 
     newSelectionControl(scene: Scene, _rangeType: RANGE_TYPE): SelectionControl {
         const selectionControls = this.getSelectionControls();
 
-        const control = new SelectionControl(scene, selectionControls.length, this._isHeaderHighlight, this._themeService);//this._selectionStyle);
+        const control = new SelectionControl(scene, selectionControls.length, this._isHeaderHighlight, this._themeService);
         this._selectionControls.push(control);
 
         return control;
@@ -273,7 +272,13 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[] {
         const selectionControls = this._selectionControls;
-        return selectionControls.map((control) => control.getValue());
+        const [unitId, sheetId] = this._skeleton.getLocation();
+        return selectionControls.map((control) => {
+            const v = control.getValue();
+            v.rangeWithCoord.sheetId = sheetId;
+            v.rangeWithCoord.unitId = unitId;
+            return v;
+        });
     }
 
     getSelectionControls() {
@@ -281,7 +286,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     protected _clearSelectionControls() {
-        const allSelectionControls = this.getSelectionControls();
+        const allSelectionControls = this._selectionControls;
         for (const control of allSelectionControls) {
             control.dispose();
         }
@@ -349,7 +354,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     endSelection() {
-        this._clearEndingListeners();
+        this._clearUpdatingListeners();
 
         // ---> _updateSelections --> executeCommand(SetSelectionsOperation.id --> selectionManager.setSelections
         // ---> _selectionMoveEnd$.next --> _initSelectionChangeListener _reset --> _clearSelectionControls
@@ -362,12 +367,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     protected _reset() {
         this._clearSelectionControls();
-        this._clearMove();
-
         this._downObserver?.unsubscribe();
         this._downObserver = null;
-        this._scenePointerUpSub?.unsubscribe();
-        this._scenePointerUpSub = null;
     }
 
     resetAndEndSelection() {
@@ -484,7 +485,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
 
         scene.disableEvent();
-        this._clearEndingListeners();
+        this._clearUpdatingListeners();
         this._addEndingListeners();
 
         scene.getTransformer()?.clearSelectedObjects();
@@ -497,13 +498,12 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             }
             this._moving(viewportPosX, viewportPosY, activeSelectionControl, rangeType);
         }
-        // #region setup moving
+
         this._setupPointerMoveListener(viewportMain, activeSelectionControl!, rangeType, scrollTimerType, viewportPosX, viewportPosY);
-        // #endregion
 
         this._shortcutService.setDisable(true);
         this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
-            this._clearEndingListeners();
+            this._clearUpdatingListeners();
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
             this._shortcutService.setDisable(false);
         });
@@ -699,12 +699,15 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     ) {
         const skeleton = this._skeleton;
         const scene = this._scene;
+        const [unitId, sheetId] = skeleton.getLocation();
 
         const currSelectionRange: IRange = {
             startRow: activeSelectionControl?.model.startRow ?? -1,
             endRow: activeSelectionControl?.model.endRow ?? -1,
             startColumn: activeSelectionControl?.model.startColumn ?? -1,
             endColumn: activeSelectionControl?.model.endColumn ?? -1,
+            unitId,
+            sheetId,
         };
 
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
@@ -755,6 +758,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             startColumn: newSelectionRange.startColumn,
             endRow: newSelectionRange.endRow,
             endColumn: newSelectionRange.endColumn,
+            unitId,
+            sheetId,
             startY: startCellXY?.startY || 0,
             endY: endCellXY?.endY || 0,
             startX: startCellXY?.startX || 0,
@@ -768,7 +773,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             currSelectionRange.endRow !== newSelectionRange.endRow ||
             currSelectionRange.endColumn !== newSelectionRange.endColumn;
         if (activeSelectionControl != null && rangeChanged) {
-            // selectionControl.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight);
             this._updateSelectionControlRange(activeSelectionControl, newSelectionRangeWithCoord);
             this._selectionMoving$.next(this.getSelectionDataWithStyle());
         }
@@ -780,25 +784,19 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         control.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight, this._selectionStyle, !highlight ? null : highlight);
     }
 
-    private _clearMove(): void {
-        this._scenePointerMoveSub?.unsubscribe();
-        this._scenePointerMoveSub = null;
-    }
-
-    protected _clearEndingListeners() {
+    protected _clearUpdatingListeners() {
         const scene = this._scene;
         scene.enableEvent();
 
-        this._clearMove();
+        this._scenePointerMoveSub?.unsubscribe();
+        this._scenePointerMoveSub = null;
         this._scenePointerUpSub?.unsubscribe();
         this._scenePointerUpSub = null;
-
-        this._scrollTimer?.dispose();
-
         this._cancelDownSubscription?.unsubscribe();
         this._cancelDownSubscription = null;
         this._cancelUpSubscription?.unsubscribe();
         this._cancelUpSubscription = null;
+        this._scrollTimer?.dispose();
     }
 
     protected _addEndingListeners() {
@@ -813,8 +811,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._cancelUpSubscription?.unsubscribe();
         this._cancelUpSubscription = null;
 
-        this._cancelDownSubscription = mainScene.onPointerDown$.subscribeEvent(() => this._clearEndingListeners());
-        this._cancelUpSubscription = mainScene.onPointerUp$.subscribeEvent(() => this._clearEndingListeners());
+        this._cancelDownSubscription = mainScene.onPointerDown$.subscribeEvent(() => this._clearUpdatingListeners());
+        this._cancelUpSubscription = mainScene.onPointerUp$.subscribeEvent(() => this._clearUpdatingListeners());
     }
 
     protected _getCellRangeByCursorPosition(

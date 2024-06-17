@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IExecutionOptions, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
-import { ICommandService, RxDisposable } from '@univerjs/core';
+import type { ICommandInfo, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
+import { DisposableCollection, ICommandService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
@@ -24,78 +24,92 @@ import {
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
-import { merge, takeUntil } from 'rxjs';
+import { merge } from 'rxjs';
 import { IRangeSelectorService } from '@univerjs/ui';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
-import type { ICurrentEditCellParam } from '../../services/editor-bridge.service';
+import type { ICurrentEditCellParam, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { getSheetObject } from '../utils/component-tools';
 
+// TODO: wzhudev: this should be merged with Edit EditingRenderController.
+
 export class EditorBridgeRenderController extends RxDisposable implements IRenderModule {
+    private _d: Nullable<IDisposable>;
+
     constructor(
         private readonly _context: IRenderContext<Workbook>,
+        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
+        // FIXME: should use WorkbookSelections
+        // FIXME: should check if it is the current sheet, if it becomes the current sheet,
+        // it should update cell params, otherwise it should do nothing.
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService
     ) {
         super();
 
-        this._initialize();
+        this.disposeWithMe(this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
+            if (workbook && workbook.getUnitId() === this._context.unitId) {
+                this._d = this._init();
+            } else {
+                this._disposeCurrent();
+            }
+        }));
 
-        this._commandExecutedListener();
-    }
-
-    private _initialize() {
-        this._initSelectionChangeListener();
-        this._initEventListener();
         this._initialRangeSelector();
     }
 
-    private _initSelectionChangeListener() {
-        merge(
+    private _init(): IDisposable {
+        const d = new DisposableCollection();
+        this._initSelectionChangeListener(d);
+        this._initEventListener(d);
+        this._commandExecutedListener(d);
+        return d;
+    }
+
+    private _disposeCurrent(): void {
+        this._d?.dispose();
+        this._d = null;
+    }
+
+    private _initSelectionChangeListener(d: DisposableCollection) {
+        d.add(merge(
             this._selectionManagerService.selectionMoveEnd$,
             this._selectionManagerService.selectionMoveStart$
-        )
-            .pipe(takeUntil(this.dispose$))
-            .subscribe((params) => this._handleSelectionChange(params));
+        ).subscribe((params) => this._updateEditorPosition(params)));
     }
 
-    private _updateEditorPosition(cell: ISelectionCell): void {
-        const sheetObject = this._getSheetObject();
-        const { scene, engine } = sheetObject;
-        const unitId = this._context.unitId;
-        const sheetId = this._context.unit.getActiveSheet()?.getSheetId();
-        if (!sheetId) return;
-
-        this._commandService.executeCommand<ICurrentEditCellParam>(SetActivateCellEditOperation.id, {
-            scene,
-            engine,
-            primary: cell,
-            unitId,
-            sheetId,
-        });
-    }
-
-    private _handleSelectionChange(params: Nullable<ISelectionWithStyle[]>) {
-        // The editor only responds to regular selections.
+    private _updateEditorPosition(params: Nullable<ISelectionWithStyle[]>) {
         if (this._editorBridgeService.isVisible().visible) return;
 
         const primary = params?.[params.length - 1]?.primary;
         if (primary) {
-            this._updateEditorPosition(primary);
+            const sheetObject = this._getSheetObject();
+            const { scene, engine } = sheetObject;
+            const unitId = this._context.unitId;
+            const sheetId = this._context.unit.getActiveSheet()?.getSheetId();
+            if (!sheetId) return;
+
+            this._commandService.executeCommand<ICurrentEditCellParam>(SetActivateCellEditOperation.id, {
+                scene,
+                engine,
+                primary,
+                unitId,
+                sheetId,
+            });
         }
     }
 
-    private _initEventListener() {
+    private _initEventListener(d: DisposableCollection) {
         const sheetObject = this._getSheetObject();
         const { spreadsheet, spreadsheetColumnHeader, spreadsheetLeftTopPlaceholder, spreadsheetRowHeader } = sheetObject;
 
-        spreadsheet.onDblclick$.subscribeEvent((evt) => {
-            // No need to enter edit status when user click the right button.
+        d.add(spreadsheet.onDblclick$.subscribeEvent((evt) => {
             if (evt.button === 2) {
                 return;
             }
@@ -103,16 +117,17 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: true,
                 eventType: DeviceInputEventType.Dblclick,
-            });
-        });
+                unitId: this._context.unitId,
+            } as IEditorBridgeServiceVisibleParam);
+        }));
 
-        spreadsheet.onPointerDown$.subscribeEvent(this._onCanvasPointerDown.bind(this));
-        spreadsheetColumnHeader.onPointerDown$.subscribeEvent(this._onCanvasPointerDown.bind(this));
-        spreadsheetLeftTopPlaceholder.onPointerDown$.subscribeEvent(this._onCanvasPointerDown.bind(this));
-        spreadsheetRowHeader.onPointerDown$.subscribeEvent(this._onCanvasPointerDown.bind(this));
+        d.add(spreadsheet.onPointerDown$.subscribeEvent(this._tryHideEditor.bind(this)));
+        d.add(spreadsheetColumnHeader.onPointerDown$.subscribeEvent(this._tryHideEditor.bind(this)));
+        d.add(spreadsheetLeftTopPlaceholder.onPointerDown$.subscribeEvent(this._tryHideEditor.bind(this)));
+        d.add(spreadsheetRowHeader.onPointerDown$.subscribeEvent(this._tryHideEditor.bind(this)));
     }
 
-    private _onCanvasPointerDown() {
+    private _tryHideEditor() {
         // In the activated state of formula editing,
         // prohibit closing the editor according to the state to facilitate generating selection reference text.
         if (this._editorBridgeService.isForceKeepVisible()) {
@@ -123,19 +138,20 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _hideEditor() {
-        if (this._editorBridgeService.isVisible().visible !== true) {
-            return;
-        }
+        if (this._editorBridgeService.isVisible().visible !== true) return;
 
         this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
             visible: false,
             eventType: DeviceInputEventType.PointerDown,
+            unitId: this._context.unitId,
         });
     }
 
     private _initialRangeSelector() {
         this.disposeWithMe(this._selectionManagerService.selectionMoving$.subscribe(this._rangeSelector.bind(this)));
         this.disposeWithMe(this._selectionManagerService.selectionMoveStart$.subscribe(this._rangeSelector.bind(this)));
+
+        // TODO: this method shouldn't be here. Fix in when refactor the range selector.
 
         /**
          * pro/issues/388
@@ -144,15 +160,11 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
          */
         this.disposeWithMe(
             this._rangeSelectorService.openSelector$.subscribe(() => {
-                const selectionWithStyle = this._selectionManagerService.getCurrentSelections();
                 const { unitId, sheetId, sheetName } = this._getCurrentUnitIdAndSheetId();
-
                 if (!sheetId || !sheetName) return;
 
-                const ranges = selectionWithStyle?.map((value: ISelectionWithStyle) => {
-                    return { range: value.range, unitId, sheetId, sheetName };
-                });
-
+                const selectionWithStyle = this._selectionManagerService.getCurrentSelections();
+                const ranges = selectionWithStyle?.map((value) => ({ range: value.range, unitId, sheetId, sheetName }));
                 if (ranges) {
                     this._rangeSelectorService.selectionChange(ranges);
                 }
@@ -166,7 +178,6 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         }
 
         const { unitId, sheetId, sheetName } = this._getCurrentUnitIdAndSheetId();
-
         if (!sheetId || !sheetName) return;
 
         const ranges = selectionWithStyle.map((value: ISelectionWithStyle) => {
@@ -190,30 +201,20 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         return getSheetObject(this._context.unit, this._context)!;
     }
 
-    private _commandExecutedListener() {
-        const updateCommandList = COMMAND_LISTENER_SKELETON_CHANGE;
+    private _commandExecutedListener(d: DisposableCollection) {
+        d.add(this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
+            // When the zoom ratio is changed, the editor needs to be refreshed to get the latest cell size and position.
+            if (command.id === SetZoomRatioCommand.id) {
+                this._editorBridgeService.refreshEditCellState();
+            }
 
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
-                if (options?.fromCollab) {
-                    return;
-                }
+            if (options?.fromCollab) return;
 
-                if (command.id === SetWorksheetActiveOperation.id) {
-                    this._onCanvasPointerDown();
-                } else if (updateCommandList.includes(command.id)) {
-                    this._hideEditor();
-                }
-            })
-        );
-
-        // When the zoom ratio is changed, the editor needs to be refreshed to get the latest cell size and position.
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SetZoomRatioCommand.id) {
-                    this._editorBridgeService.refreshEditCellState();
-                }
-            })
-        );
+            if (command.id === SetWorksheetActiveOperation.id) {
+                this._tryHideEditor();
+            } else if (COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id)) {
+                this._hideEditor();
+            }
+        }));
     }
 }

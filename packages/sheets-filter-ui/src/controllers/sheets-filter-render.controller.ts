@@ -83,7 +83,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                     if (!skeletonParams) return of(null);
 
                     const { unit: workbook, unitId } = this._context;
-                    const worksheetId = workbook.getActiveSheet().getSheetId();
+                    const worksheetId = workbook.getActiveSheet()?.getSheetId() || '';
                     const filterModel = this._sheetsFilterService.getFilterModel(unitId, worksheetId) ?? undefined;
                     const getParams = (): ISheetsFilterRenderParams => ({
                         unitId,

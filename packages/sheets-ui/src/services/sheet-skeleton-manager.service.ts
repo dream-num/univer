@@ -44,7 +44,7 @@ export interface ISheetSkeletonManagerSearch {
  * so it is managed uniformly through the service.
  */
 export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
-    private _currentSkeleton: ISheetSkeletonManagerSearch = {
+    private _currentSkeletonSearchParam: ISheetSkeletonManagerSearch = {
         sheetId: '',
     };
 
@@ -78,7 +78,7 @@ export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
 
     /** @deprecated */
     getCurrent(): Nullable<ISheetSkeletonManagerParam> {
-        return this._getSkeleton(this._currentSkeleton);
+        return this._getSkeleton(this._currentSkeletonSearchParam);
     }
 
     getUnitSkeleton(unitId: string, sheetId: string): Nullable<ISheetSkeletonManagerParam> {
@@ -109,7 +109,7 @@ export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
             });
         }
 
-        this._currentSkeleton = searchParam;
+        this._currentSkeletonSearchParam = searchParam;
 
         const nextParam = this.getCurrent();
         this._currentSkeletonBefore$.next(nextParam);

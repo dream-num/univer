@@ -21,6 +21,7 @@ import { SheetsHyperLinkController } from './controllers/sheet-hyper-link.contro
 import { HyperLinkModel } from './models/hyper-link.model';
 import { SHEET_HYPER_LINK_PLUGIN } from './types/const';
 import { SheetsHyperLinkResourceController } from './controllers/sheet-hyper-link-resource.controller';
+import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
 
 export class UniverSheetsHyperLinkPlugin extends Plugin {
     static override pluginName = SHEET_HYPER_LINK_PLUGIN;
@@ -37,6 +38,7 @@ export class UniverSheetsHyperLinkPlugin extends Plugin {
         ([
             [SheetsHyperLinkResourceController],
             [SheetsHyperLinkController],
+            [SheetsHyperLinkRefRangeController],
             [HyperLinkModel],
         ] as Dependency[]).forEach((dep) => {
             _injector.add(dep);

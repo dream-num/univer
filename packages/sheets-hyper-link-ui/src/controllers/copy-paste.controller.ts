@@ -43,7 +43,6 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
         this._initCopyPaste();
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initCopyPaste() {
         this._sheetClipboardService.addClipboardHook({
             id: SHEET_HYPER_LINK_UI_PLUGIN,
@@ -56,20 +55,7 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
             },
             onPastePlainText: (pasteTo: ISheetDiscreteRangeLocation, clipText: string) => {
                 if (isLegalLink(clipText)) {
-                    let text = serializeUrl(clipText);
-                    const url = new URL(text);
-                    const name = clipText;
-                    if (
-                        url.hostname === location.hostname &&
-                        url.port === location.port &&
-                        url.protocol === location.protocol &&
-                        url.pathname === location.pathname &&
-                        url.hash
-                    ) {
-                        text = url.hash;
-                        // const urlInfo = this._resolverService.parseHyperLink(text);
-                        // name = urlInfo.name || clipText;
-                    }
+                    const text = serializeUrl(clipText);
 
                     const { range, unitId, subUnitId } = pasteTo;
                     const { ranges: [pasteToRange], mapFunc } = virtualizeDiscreteRanges([range]);
@@ -98,7 +84,6 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
                                     id: newId,
                                     row,
                                     column,
-                                    display: name,
                                     payload: text,
                                 },
                             },

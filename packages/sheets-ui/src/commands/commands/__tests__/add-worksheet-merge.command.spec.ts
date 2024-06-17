@@ -352,6 +352,7 @@ describe('Test add worksheet merge commands', () => {
             const univerInstanceService = get(IUniverInstanceService);
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) throw new Error('No active sheet found');
             const mergeData = worksheet.getConfig().mergeData;
             expect(mergeData.length).toBe(0);
             expect(await commandService.executeCommand(AddWorksheetMergeAllCommand.id)).toBeTruthy();
@@ -447,6 +448,7 @@ describe('Test add worksheet merge commands', () => {
             const univerInstanceService = get(IUniverInstanceService);
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) throw new Error('No active sheet found');
             const mergeData = worksheet.getConfig().mergeData;
             expect(mergeData.length).toBe(0);
             expect(await commandService.executeCommand(AddWorksheetMergeAllCommand.id)).toBeTruthy();

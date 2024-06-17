@@ -35,7 +35,7 @@ import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from '.
 
 export interface IRangeChange {
     oldCell: IRange;
-    newCell: IRange;
+    newCell: IRange | null;
 }
 
 export class FormulaDataModel extends Disposable {

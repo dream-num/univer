@@ -16,14 +16,13 @@
 
 import type { ICellData, IMutationInfo, IPosition, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { ObjectMatrix } from '@univerjs/core';
-import { Vector2 } from '@univerjs/engine-render';
+import { SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISetRangeValuesMutationParams, ISheetLocation } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IBoundRectNoAngle, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ICollaborator } from '@univerjs/protocol';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
-import { VIEWPORT_KEY } from './keys';
 
 export function getUserListEqual(userList1: ICollaborator[], userList2: ICollaborator[]) {
     if (userList1.length !== userList2.length) return false;
@@ -143,23 +142,23 @@ export function getCellIndexByOffsetWithMerge(offsetX: number, offsetY: number, 
 export function getViewportByCell(row: number, column: number, scene: Scene, worksheet: Worksheet) {
     const freeze = worksheet.getFreeze();
     if (!freeze || (freeze.startRow <= 0 && freeze.startColumn <= 0)) {
-        return scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
     }
 
     if (row > freeze.startRow && column > freeze.startColumn) {
-        return scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
     }
 
     if (row <= freeze.startRow && column <= freeze.startColumn) {
-        return scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
+        return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
     }
 
     if (row <= freeze.startRow && column > freeze.startColumn) {
-        return scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_TOP);
+        return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP);
     }
 
     if (row > freeze.startRow && column <= freeze.startColumn) {
-        return scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT);
+        return scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT);
     }
 }
 
@@ -177,7 +176,7 @@ export function transformBound2OffsetBound(originBound: IBoundRectNoAngle, scene
 
 export function transformPosition2Offset(x: number, y: number, scene: Scene, skeleton: SpreadsheetSkeleton, worksheet: Worksheet) {
     const { scaleX, scaleY } = scene.getAncestorScale();
-    const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+    const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
     if (!viewMain) {
         return {
             x,
@@ -194,18 +193,18 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
     const freezeWidth = endSheetView.startX - startSheetView.startX;
     const freezeHeight = endSheetView.startY - startSheetView.startY;
 
-    const { top, left, viewportScrollX: actualScrollX, viewportScrollY: actualScrollY } = viewMain;
+    const { top, left, viewportScrollX, viewportScrollY } = viewMain;
     let offsetX: number;
     // viewMain or viewTop
     if (x > left) {
-        offsetX = (x - actualScrollX) * scaleX;
+        offsetX = (x - viewportScrollX) * scaleX;
     } else {
         offsetX = ((freezeWidth + rowHeaderWidth) - (left - x)) * scaleX;
     }
 
     let offsetY: number;
     if (y > top) {
-        offsetY = (y - actualScrollY) * scaleY;
+        offsetY = (y - viewportScrollY) * scaleY;
     } else {
         offsetY = ((freezeHeight + columnHeaderHeight) - (top - y)) * scaleX;
     }

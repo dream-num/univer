@@ -210,7 +210,7 @@ describe('test "hitCell" method', () => {
     beforeEach(() => {
         const testBed = createTestBed();
         univer = testBed.univer;
-        worksheet = testBed.sheet.getActiveSheet();
+        worksheet = testBed.sheet.getActiveSheet()!;
     });
 
     afterEach(() => {

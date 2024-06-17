@@ -23,7 +23,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { ScrollTimerType, Vector2 } from '@univerjs/engine-render';
+import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import {
     convertSelectionDataToRange,
@@ -42,7 +42,6 @@ import { Inject } from '@wendellhu/redi';
 import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
 import type { ISetZoomRatioOperationParams } from '../../commands/operations/set-zoom-ratio.operation';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
-import { VIEWPORT_KEY } from '../../common/keys';
 import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import type { ISheetObjectParam } from '../utils/component-tools';
@@ -75,6 +74,9 @@ export class SelectionRenderController extends Disposable implements IRenderModu
     private _init() {
         const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            throw new Error('No active sheet');
+        }
         const sheetObject = this._getSheetObject();
 
         this._initViewMainListener(sheetObject);
@@ -136,6 +138,10 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         const valueArray = formulaOrRefString.split(',');
 
         let worksheet = workbook.getActiveSheet();
+
+        if (!worksheet) {
+            return [];
+        }
 
         const selections = [];
 
@@ -367,6 +373,9 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
         const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return;
+        }
 
         this._definedNamesService.setCurrentRange({
             range: lastSelection.range,
@@ -394,7 +403,9 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         if (!workbook) return;
 
         const unitId = workbook.getUnitId();
-        const sheetId = workbook.getActiveSheet().getSheetId();
+        const sheetId = workbook.getActiveSheet()?.getSheetId();
+        if (!sheetId) return;
+
         const current = this._selectionManagerService.getCurrent();
 
         if (selectionDataWithStyleList == null || selectionDataWithStyleList.length === 0) {
@@ -426,7 +437,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
                 const params = command.params as ISetZoomRatioOperationParams;
                 const { unitId, subUnitId } = params;
-                if (!(unitId === workbook.getUnitId() && subUnitId === worksheet.getSheetId())) {
+                if (!(unitId === workbook.getUnitId() && subUnitId === worksheet?.getSheetId())) {
                     return;
                 }
 
@@ -446,7 +457,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
             const { sheetId, skeleton } = param;
             const { scene } = this._context;
 
-            const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+            const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
             this._selectionRenderService.changeRuntime(skeleton, scene, viewportMain);
 

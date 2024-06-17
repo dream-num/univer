@@ -16,22 +16,22 @@
 
 import type { IPosition, ITransformState, Nullable, Worksheet } from '@univerjs/core';
 import { Disposable, DisposableCollection, DrawingTypeEnum, ICommandService, IUniverInstanceService, Tools } from '@univerjs/core';
+import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, Rect } from '@univerjs/engine-render';
+import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import type { ISetFrozenMutationParams } from '@univerjs/sheets';
+import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
+import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
+import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
+import { ISelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { IFloatDomLayout } from '@univerjs/ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
-import { ISelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService, VIEWPORT_KEY } from '@univerjs/sheets-ui';
-import type { ISetFrozenMutationParams } from '@univerjs/sheets';
-import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
-import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
+import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
 
 export interface ICanvasFloatDom {
     allowTransform: boolean;
@@ -39,6 +39,7 @@ export interface ICanvasFloatDom {
     componentKey: string;
     unitId?: string;
     subUnitId?: string;
+    props?: Record<string, any>;
 }
 
 interface ICanvasFloatDomInfo {
@@ -51,7 +52,7 @@ interface ICanvasFloatDomInfo {
 
 export function transformBound2DOMBound(originBound: IBoundRectNoAngle, scene: Scene, skeleton: SpreadsheetSkeleton, worksheet: Worksheet) {
     const { scaleX, scaleY } = scene.getAncestorScale();
-    const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+    const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
     const absolute = {
         left: true,
         top: true,
@@ -266,7 +267,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     const rect = new Rect(rectShapeKey, imageConfig);
 
                     scene.addObject(rect, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(rect);
-
+                    const map = this._ensureMap(unitId, subUnitId);
                     const disposableCollection = new DisposableCollection();
                     const initPosition = calcPosition(rect, renderObject.renderObject, skeleton.skeleton, target.worksheet);
                     const position$ = new BehaviorSubject<IFloatDomLayout>(initPosition);
@@ -294,6 +295,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         onWheel: (evt: WheelEvent) => {
                             canvas.dispatchEvent(new WheelEvent(evt.type, evt));
                         },
+                        props: map.get(drawingId)?.props,
                     });
 
                     const listener = rect.onTransformChangeObservable.add(() => {
@@ -434,6 +436,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         if (sheetTransform == null) {
             return;
         }
+        const map = this._ensureMap(unitId, subUnitId);
+        map.set(id, layer);
 
         const sheetDrawingParam: ISheetFloatDom = {
             unitId,
@@ -454,8 +458,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             unitId,
             drawings: [sheetDrawingParam],
         } as IInsertDrawingCommandParams);
-        const map = this._ensureMap(unitId, subUnitId);
-        map.set(id, layer);
 
         return {
             id,

@@ -27,7 +27,7 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
         '@wendellhu/redi': {
             global: '@wendellhu/redi',
             name: '@wendellhu/redi',
-            version: '0.15.2',
+            version: '0.15.4',
         },
         '@wendellhu/redi/react-bindings': {
             global: '@wendellhu/redi/react-bindings',

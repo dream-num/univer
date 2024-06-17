@@ -16,9 +16,8 @@
 
 import { ICommandService, LocaleService } from '@univerjs/core';
 import { Dropdown, Tooltip } from '@univerjs/design';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { MoreDownSingle } from '@univerjs/icons';
-import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { Ref } from 'react';
 import React, { forwardRef, useMemo, useState } from 'react';
 import { isObservable, Observable } from 'rxjs';
@@ -30,6 +29,7 @@ import { useObservable } from '../../../components/hooks/observable';
 import { Menu } from '../../../components/menu/desktop/Menu';
 import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
 import { MenuItemType } from '../../../services/menu/menu';
+import { ILayoutService } from '../../../services/layout/layout.service';
 import { ToolbarButton } from './Button/ToolbarButton';
 import styles from './index.module.less';
 import { useToolbarItemStatus } from './hook';
@@ -37,16 +37,17 @@ import { useToolbarItemStatus } from './hook';
 export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: Ref<any>) => {
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
-    const injector = useInjector();
+    const layoutService = useDependency(ILayoutService);
+    const componentManager = useDependency(ComponentManager);
+
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const [dropdownVisible, setDropdownVisible] = useState(false);
 
     const { value, hidden, disabled, activated } = useToolbarItemStatus(props);
 
     const handleCommandExecuted = (commandId: string, params?: Record<string, any>) => {
+        layoutService.focus();
         commandService.executeCommand(commandId, params);
-        const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
-        textSelectionRenderManager.focus();
     };
 
     function handleVisibleChange(visible: boolean) {
@@ -199,7 +200,6 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
     }
 
     function renderButtonType() {
-        const componentManager = useDependency(ComponentManager);
         const isCustomComponent = componentManager.get(typeof label === 'string' ? label : label?.name ?? '');
 
         return (

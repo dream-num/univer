@@ -112,7 +112,7 @@ export class BackScrollController extends RxDisposable {
             offsetX = left - boundRight + ANCHOR_WIDTH;
         }
 
-        const config = viewportMain.getBarScroll(offsetX, offsetY);
+        const config = viewportMain.transViewportScroll2ScrollValue(offsetX, offsetY);
         viewportMain.scrollBy(config);
     }
 

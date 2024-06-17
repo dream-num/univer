@@ -23,10 +23,11 @@ import {
     DEFAULT_STYLES,
     DocumentDataModel,
     extractPureTextFromCell,
+    getCellInfoInMergeData,
     getColorStyle,
     HorizontalAlign,
     IContextService,
-    isEmptyCell,
+    isCellCoverable,
     isNullCell,
     isWhiteColor,
     LocaleService,
@@ -46,6 +47,7 @@ import type {
     IObjectArrayPrimitiveType,
     IPaddingData,
     IRange,
+    IRowAutoHeightInfo,
     IRowData,
     ISelectionCellWithCoord,
     IStyleBase,
@@ -67,7 +69,6 @@ import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-c
 import {
     degToRad,
     getCellByIndex,
-    getCellInfoInMergeData,
     getCellPositionByIndex,
     getFontStyleString,
     hasUnMergedCellInRow,
@@ -135,11 +136,6 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
         width: allRotatedWidth,
         height: allRotatedHeight,
     };
-}
-
-export interface IRowAutoHeightInfo {
-    row: number;
-    autoHeight?: number;
 }
 
 interface ICellOtherConfig {
@@ -1525,7 +1521,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             for (let i = startColumn; i >= endColumn; i--) {
                 const column = i;
                 const cell = this._worksheet?.getCell(row, column);
-                if ((!isEmptyCell(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
+                if ((!isCellCoverable(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                     if (column === startColumn) {
                         return column;
                     }
@@ -1554,7 +1550,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         for (let i = startColumn; i <= endColumn; i++) {
             const column = i;
             const cell = this._worksheet?.getCell(row, column);
-            if ((!isEmptyCell(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
+            if ((!isCellCoverable(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                 if (column === startColumn) {
                     return column;
                 }

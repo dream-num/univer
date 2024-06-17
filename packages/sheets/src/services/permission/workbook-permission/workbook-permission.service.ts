@@ -18,15 +18,20 @@ import { Inject } from '@wendellhu/redi';
 import type { Workbook } from '@univerjs/core';
 import { Disposable, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 
+import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from '../worksheet-permission/utils';
+import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
+import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint } from '../permission-point';
 import { getAllWorkbookPermissionPoint } from './util';
 
 @OnLifecycle(LifecycleStages.Starting, WorkbookPermissionService)
 export class WorkbookPermissionService extends Disposable {
     constructor(
         @Inject(IPermissionService) private _permissionService: IPermissionService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
+        @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel
     ) {
         super();
+
         this._init();
     }
 
@@ -49,6 +54,22 @@ export class WorkbookPermissionService extends Disposable {
 
         this.disposeWithMe(this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             const unitId = workbook.getUnitId();
+            workbook.getSheets().forEach((worksheet) => {
+                const subUnitId = worksheet.getSheetId();
+
+                const rangeRuleList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
+                rangeRuleList.forEach((rule) => {
+                    [RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint].forEach((F) => {
+                        const instance = new F(unitId, subUnitId, rule.permissionId);
+                        this._permissionService.deletePermissionPoint(instance.id);
+                    });
+                });
+
+                [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
+                    const instance = new F(unitId, subUnitId);
+                    this._permissionService.deletePermissionPoint(instance.id);
+                });
+            });
             getAllWorkbookPermissionPoint().forEach((F) => {
                 const instance = new F(unitId);
                 this._permissionService.deletePermissionPoint(instance.id);

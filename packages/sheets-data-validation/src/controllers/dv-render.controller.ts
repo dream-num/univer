@@ -154,6 +154,8 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                 }
 
                 const worksheet = workbook.getActiveSheet();
+                if (!worksheet) return;
+
                 const activeDropdown = this._dropdownManagerService.activeDropdown;
                 const currLoc = activeDropdown?.location;
                 if (
@@ -188,7 +190,9 @@ export class SheetsDataValidationRenderController extends RxDisposable {
             if (!workbook) return;
 
             const unitId = workbook.getUnitId();
-            const subUnitId = workbook.getActiveSheet().getSheetId();
+            const subUnitId = workbook.getActiveSheet()?.getSheetId();
+            if (!subUnitId) return;
+
             const skeleton = this._renderManagerService.getRenderById(unitId)
                 ?.with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId)
                 ?.skeleton;
@@ -213,9 +217,9 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
                     priority: 200,
-                    // eslint-disable-next-line max-lines-per-function
+                    // eslint-disable-next-line max-lines-per-function, complexity
                     handler: (cell, pos, next) => {
-                        const { row, col, unitId, subUnitId } = pos;
+                        const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
                         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
                         if (!manager) {
                             return next(cell);
@@ -239,7 +243,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                         if (!rule) {
                             return next(cell);
                         }
-                        const cellRaw = pos.worksheet.getCellRaw(pos.row, pos.col);
+                        const cellRaw = worksheet.getCellRaw(pos.row, pos.col);
                         const validStatus = this._dataValidationModel.validator(getCellValueOrigin(cellRaw), rule, pos);
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                         const cellValue = getCellValueOrigin(cell);
@@ -335,9 +339,12 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                                     subUnitId,
                                     row,
                                     col,
+                                    workbook,
+                                    worksheet,
                                 };
                                 return validator?.canvasRender?.calcCellAutoHeight?.(info);
                             },
+                            coverable: (cell?.coverable ?? true) && !(rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE),
                         });
                     },
                 }

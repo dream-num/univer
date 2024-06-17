@@ -74,7 +74,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
             <div className={`${stylesBase.mTSm}`}>
                 <TextEditor
                     id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_formula`)}
-                    openForSheetSubUnitId={worksheet.getSheetId()}
+                    openForSheetSubUnitId={worksheet?.getSheetId()}
                     openForSheetUnitId={workbook.getUnitId()}
                     value={formula}
                     canvasStyle={{ fontSize: 10 }}

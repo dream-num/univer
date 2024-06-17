@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { HoverManagerService } from '@univerjs/sheets-ui';
+import { Disposable, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
+import { HoverManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { debounceTime } from 'rxjs';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetsHyperLinkPopupController)
 export class SheetsHyperLinkPopupController extends Disposable {
     constructor(
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
-        @Inject(SheetsHyperLinkPopupService) private readonly _sheetsHyperLinkPopupService: SheetsHyperLinkPopupService
+        @Inject(SheetsHyperLinkPopupService) private readonly _sheetsHyperLinkPopupService: SheetsHyperLinkPopupService,
+        @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -39,7 +41,30 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     return;
                 }
 
-                this._sheetsHyperLinkPopupService.showPopup(currentCell.location);
+                const skeleton = this._renderManagerService.getRenderById(currentCell.location.unitId)
+                    ?.with(SheetSkeletonManagerService)
+                    .getUnitSkeleton(currentCell.location.unitId, currentCell.location.subUnitId)
+                    ?.skeleton;
+
+                const currentCol = currentCell.location.col;
+                const currentRow = currentCell.location.row;
+                let targetRow = currentRow;
+                let targetCol = currentCol;
+
+                if (skeleton) {
+                    skeleton.overflowCache.forValue((row, col, value) => {
+                        if (Rectangle.contains(value, { startColumn: currentCol, endColumn: currentCol, startRow: currentRow, endRow: currentRow })) {
+                            targetRow = row;
+                            targetCol = col;
+                        }
+                    });
+                }
+
+                this._sheetsHyperLinkPopupService.showPopup({
+                    ...currentCell.location,
+                    row: targetRow,
+                    col: targetCol,
+                });
             })
         );
     }

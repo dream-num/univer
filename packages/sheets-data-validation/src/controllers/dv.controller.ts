@@ -83,7 +83,12 @@ export class DataValidationController extends RxDisposable {
             if (!workbook) {
                 return;
             }
-            this._sheetDataValidationService.switchCurrent(workbook.getUnitId(), workbook.getActiveSheet().getSheetId());
+            const worksheet = workbook.getActiveSheet();
+            if (!worksheet) {
+                return;
+            }
+
+            this._sheetDataValidationService.switchCurrent(workbook.getUnitId(), worksheet.getSheetId());
             disposableCollection.add(toDisposable(
                 workbook.activeSheet$.subscribe((worksheet) => {
                     if (worksheet) {
@@ -105,6 +110,10 @@ export class DataValidationController extends RxDisposable {
                     const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                     const unitId = workbook.getUnitId();
                     const worksheet = workbook.getActiveSheet();
+                    if (!worksheet) {
+                        throw new Error('No active sheet found');
+                    }
+
                     const subUnitId = worksheet.getSheetId();
                     const selections = this._selectionManagerService.getSelectionRanges();
 

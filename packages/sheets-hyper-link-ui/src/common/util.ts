@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+import type { ICellData, Nullable } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE } from '@univerjs/core';
+
 const expression = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
 const regex = new RegExp(expression);
 
 export function isLegalLink(link: string) {
+    if (!Number.isNaN(+link)) {
+        return false;
+    }
+
     if (link.startsWith('http://localhost:3002') || link.startsWith('localhost:3002')) {
         return true;
     }
@@ -34,10 +41,46 @@ export function isEmail(url: string) {
     return pattern.test(url);
 }
 
-export function serializeUrl(url: string) {
-    if (isLegalLink(url)) {
-        return hasProtocol(url) ? url : isEmail(url) ? `mailto://${url}` : `http://${url}`;
+export function serializeUrl(urlStr: string) {
+    if (isLegalLink(urlStr)) {
+        const transformedUrl = hasProtocol(urlStr) ? urlStr : isEmail(urlStr) ? `mailto://${urlStr}` : `http://${urlStr}`;
+
+        const url = new URL(transformedUrl);
+        if (
+            url.hostname === location.hostname &&
+            url.port === location.port &&
+            url.protocol === location.protocol &&
+            url.pathname === location.pathname &&
+            url.hash &&
+            !url.search
+        ) {
+            return url.hash;
+        }
+
+        return transformedUrl;
     }
 
-    return url;
+    return urlStr;
+}
+
+export function getCellValueOrigin(cell: Nullable<ICellData>) {
+    if (cell === null) {
+        return '';
+    }
+
+    if (cell?.p) {
+        const body = cell?.p.body;
+
+        if (body == null) {
+            return '';
+        }
+
+        const data = body.dataStream;
+        const lastString = data.substring(data.length - 2, data.length);
+        const newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
+
+        return newDataStream;
+    }
+
+    return cell?.v;
 }

@@ -105,6 +105,7 @@ import { SheetPermissionOpenPanelOperation } from '../commands/operations/sheet-
 import { SheetPermissionOpenDialogOperation } from '../commands/operations/sheet-permission-open-dialog.operation';
 import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBarCommand, AddRangeProtectionFromToolbarCommand, DeleteRangeProtectionFromContextMenuCommand, SetProtectionCommand, SetRangeProtectionFromContextMenuCommand, ViewSheetPermissionFromContextMenuCommand, ViewSheetPermissionFromSheetBarCommand } from '../commands/commands/range-protection.command';
 import { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from '../commands/commands/worksheet-protection.command';
+import { ScrollToRangeOperation } from '../commands/operations/scroll-to-range.operation';
 import {
     ClearSelectionAllMenuItemFactory,
     ClearSelectionContentMenuItemFactory,
@@ -272,6 +273,7 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initCommands(): void {
         [
             AddWorksheetMergeAllCommand,
@@ -318,6 +320,7 @@ export class SheetUIController extends Disposable {
             SetSelectionFrozenCommand,
             SetRowFrozenCommand,
             SetColumnFrozenCommand,
+            ScrollToRangeOperation,
             CancelFrozenCommand,
             SetUnderlineCommand,
             SetZoomRatioCommand,

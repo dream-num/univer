@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-data-validation",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "private": false,
     "description": "Data validation for Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -58,7 +58,8 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "build": "tsc && vite build"
+        "build": "tsc && vite build",
+        "sync:cnpm": "cnpm sync"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
@@ -70,7 +71,7 @@
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "clsx": ">=2.0.0",
         "dayjs": ">=1.11.0",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
@@ -78,7 +79,7 @@
     },
     "dependencies": {
         "@univerjs/icons": "^0.1.56",
-        "@univerjs/protocol": "^0.1.36"
+        "@univerjs/protocol": "0.1.38-alpha.4"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
@@ -91,14 +92,14 @@
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.11",
         "less": "^4.2.0",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.12",
+        "vite": "^5.2.13",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

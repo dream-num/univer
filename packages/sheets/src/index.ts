@@ -291,6 +291,7 @@ export {
     runRefRangeMutations,
     handleCommonDefaultRangeChangeWithEffectRefCommands,
     handleDefaultRangeChangeWithEffectRefCommands,
+    handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests,
 } from './services/ref-range/util';
 export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
 export { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
@@ -377,3 +378,4 @@ export { RangeProtectionPermissionEditPoint } from './services/permission/permis
 export { RangeProtectionPermissionViewPoint } from './services/permission/permission-point/range/view';
 
 export type { IAddWorksheetProtectionParams } from './commands/mutations/add-worksheet-protection.mutation';
+export { generateNullCellValue } from './basics/utils';

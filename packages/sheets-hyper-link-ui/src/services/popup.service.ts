@@ -20,6 +20,7 @@ import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { Disposable } from '@univerjs/core';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 
 interface IHyperLinkPopup {
@@ -27,6 +28,8 @@ interface IHyperLinkPopup {
     subUnitId: string;
     id: string;
     disposable?: IDisposable;
+    row: number;
+    col: number;
 }
 
 interface IHyperLinkEditing {
@@ -36,7 +39,11 @@ interface IHyperLinkEditing {
     column: number;
 }
 
-export class SheetsHyperLinkPopupService {
+const isEqualLink = (a: ISheetLocationBase, b: ISheetLocationBase) => {
+    return a.unitId === b.unitId && a.subUnitId === b.subUnitId && a.row === b.row && a.col === b.col;
+};
+
+export class SheetsHyperLinkPopupService extends Disposable {
     private _currentPopup: IHyperLinkPopup | null = null;
     private _currentPopup$ = new Subject<IHyperLinkPopup | null>();
     currentPopup$ = this._currentPopup$.asObservable();
@@ -55,11 +62,26 @@ export class SheetsHyperLinkPopupService {
     constructor(
         @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel,
         @Inject(SheetCanvasPopManagerService) private readonly _sheetCanvasPopManagerService: SheetCanvasPopManagerService
-    ) {}
+    ) {
+        super();
+
+        this.disposeWithMe(() => {
+            this.hideCurrentPopup();
+            this.endEditing();
+
+            this._currentEditing$.complete();
+            this._currentPopup$.complete();
+        });
+    }
 
     showPopup(location: ISheetLocationBase) {
+        if (this._currentPopup && isEqualLink(location, this._currentPopup)) {
+            return;
+        }
+
         this.hideCurrentPopup();
         const { unitId, subUnitId, row, col } = location;
+
         const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
         if (!link) {
             return;
@@ -76,6 +98,8 @@ export class SheetsHyperLinkPopupService {
                 subUnitId,
                 id: link.id,
                 disposable,
+                row,
+                col,
             };
             this._currentPopup$.next(this._currentPopup);
         }

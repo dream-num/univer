@@ -21,7 +21,7 @@ import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SheetsThreadCommentModel } from '../../models/sheets-thread-comment.model';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsThreadCommentRenderController)
 export class SheetsThreadCommentRenderController extends Disposable {
@@ -70,7 +70,13 @@ export class SheetsThreadCommentRenderController extends Disposable {
             if (!workbook) return;
 
             const unitId = workbook.getUnitId();
-            const subUnitId = workbook.getActiveSheet().getSheetId();
+            const subUnitId = workbook.getActiveSheet()?.getSheetId();
+            if (!subUnitId) {
+                // TODO@zhangw: handle this case
+                console.warn('No active sheet found');
+                return;
+            }
+
             const currentRender = this._renderManagerService.getRenderById(unitId);
             const skeleton = currentRender?.with(SheetSkeletonManagerService).getOrCreateSkeleton({ sheetId: subUnitId });
 

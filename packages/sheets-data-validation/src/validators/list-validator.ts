@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
+import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverInstanceService, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IRange, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
 import type { IBaseDataValidationWidget, IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
-import { isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DropdownWidget } from '../widgets/dropdown-widget';
@@ -70,9 +70,24 @@ export function isValidListFormula(formula: string, lexer: LexerTreeBuilder) {
     return (nodes) && nodes.some((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.FUNCTION && supportedFormula.indexOf(node.token.toLowerCase()) > -1);
 }
 
+function isRuleIntersects(rule: IDataValidationRule, sheetName: string) {
+    const { formula1 = '', ranges } = rule;
+    const isRefString = isReferenceString(formula1.slice(1));
+
+    if (isRefString) {
+        const refRange = deserializeRangeWithSheet(formula1.slice(1));
+        if ((!refRange.sheetName || refRange.sheetName === sheetName) && ranges.some((range: IRange) => Rectangle.intersects(range, refRange.range))) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export class ListValidator extends BaseDataValidator {
     protected formulaService = this.injector.get(DataValidationFormulaService);
     private _lexer = this.injector.get(LexerTreeBuilder);
+    private _univerInstanceService = this.injector.get(IUniverInstanceService);
 
     id: string = DataValidationType.LIST;
     title: string = 'dataValidation.list.title';
@@ -90,15 +105,19 @@ export class ListValidator extends BaseDataValidator {
         return rule.renderMode !== DataValidationRenderMode.TEXT;
     }
 
-    override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
+    override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
         const success = !Tools.isBlank(rule.formula1);
         const valid = isValidListFormula(rule.formula1 ?? '', this._lexer);
+        const sheetName = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId)?.getName();
+        const isIntersects = isRuleIntersects(rule, sheetName ?? '');
 
         return {
-            success: Boolean(success && valid),
+            success: Boolean(success && valid && !isIntersects),
             formula1: success
-                ? valid ?
-                    undefined :
+                ? valid
+                    ? !isIntersects ?
+                        undefined :
+                        this.localeService.t('dataValidation.validFail.listIntersects') :
                     this.localeService.t('dataValidation.validFail.listInvalid')
                 : this.localeService.t('dataValidation.validFail.list'),
         };
@@ -141,6 +160,8 @@ export class ListValidator extends BaseDataValidator {
         if (!workbook) return [];
 
         const worksheet = (currentSubUnitId ? workbook.getSheetBySheetId(currentSubUnitId) : undefined) ?? workbook.getActiveSheet();
+        if (!worksheet) return [];
+
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const results = this.formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
@@ -151,10 +172,11 @@ export class ListValidator extends BaseDataValidator {
         const { formula1 = '' } = rule;
         const univerInstanceService = this.injector.get(IUniverInstanceService);
         const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
-            return [];
-        }
+        if (!workbook) return [];
+
         const worksheet = (currentSubUnitId ? workbook.getSheetBySheetId(currentSubUnitId) : undefined) ?? workbook.getActiveSheet();
+        if (!worksheet) return [];
+
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);

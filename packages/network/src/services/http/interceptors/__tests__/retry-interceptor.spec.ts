@@ -74,7 +74,7 @@ describe('test "HTTPRetryInterceptor"', () => {
 
         const request = httpService.get('http://example.com');
         request.then((response) => {
-            expect(response.body).toEqual({ text: 'Succeeded' });
+            expect((response as HTTPResponse<{ text: string }>).body).toEqual({ text: 'Succeeded' });
             done();
         });
 

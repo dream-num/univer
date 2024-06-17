@@ -27,4 +27,7 @@ export { HyperLinkModel } from './models/hyper-link.model';
 export { SheetsHyperLinkController } from './controllers/sheet-hyper-link.controller';
 export { HyperLinkType } from './types/enums/hyper-link-type';
 export { UniverSheetsHyperLinkPlugin } from './plugin';
+export { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
 export type { ICellHyperLink, ICellLinkContent } from './types/interfaces/i-hyper-link';
+
+export { ERROR_RANGE } from './types/const';

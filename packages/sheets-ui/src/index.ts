@@ -23,7 +23,7 @@ export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from './comman
 export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from './commands/operations/cell-edit.operation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
-export { deriveStateFromActiveSheet$, getCurrentRangeDisable$, getCommentDisable$ } from './controllers/menu/menu-util';
+export { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from './controllers/menu/menu-util';
 export { SheetsRenderService } from './services/sheets-render.service';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export {
@@ -35,7 +35,7 @@ export {
     type IScrollToCellCommandParams,
     type ISetScrollRelativeCommandParams,
 } from './commands/commands/set-scroll.command';
-export { VIEWPORT_KEY } from './common/keys';
+export { SHEET_VIEWPORT_KEY as VIEWPORT_KEY } from './common/keys';
 export { AutoFillController } from './controllers/auto-fill.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';
@@ -105,5 +105,6 @@ export { FormulaEditorController } from './controllers/editor/formula-editor.con
 export { StatusBarController } from './controllers/status-bar.controller';
 export { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';
+export { ScrollToRangeOperation } from './commands/operations/scroll-to-range.operation';
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';
 export { UniverSheetsMobileUIPlugin } from './mobile-sheets-ui-plugin';

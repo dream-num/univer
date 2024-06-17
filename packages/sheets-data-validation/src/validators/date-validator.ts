@@ -96,7 +96,7 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         return !Tools.isBlank(formula) && (isFormulaString(formula) || !Number.isNaN(+formula!) || (Boolean(formula) && dayjs(formula).isValid()));
     }
 
-    override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
+    override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
         const operator = rule.operator;
         if (!operator) {
             return {
@@ -217,7 +217,7 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         return cellValue.isBefore(formula1) || cellValue.isSame(formula1);
     }
 
-    validatorFormulaValue(rule: IDataValidationRuleBase): string | undefined {
+    validatorFormulaValue(rule: IDataValidationRule): string | undefined {
         if (!Tools.isDefine(rule.operator)) {
             return undefined;
         }

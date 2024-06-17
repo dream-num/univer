@@ -25,7 +25,16 @@ const nameMap = {
     [UnitRole.Reader]: 'Reader',
     [UnitRole.UNRECOGNIZED]: 'UNRECOGNIZED',
 };
-export const createDefaultUser = (type: UnitRole) => {
+export const createDefaultUser = (type?: UnitRole) => {
+    if (!type) {
+        return {
+            userID: '',
+            name: '',
+            avatar: '',
+            anonymous: true,
+            canBindAnonymous: false,
+        } as IUser;
+    }
     const user = {
         userID: `${nameMap[type]}_${Tools.generateRandomId(8)}`,
         name: nameMap[type],

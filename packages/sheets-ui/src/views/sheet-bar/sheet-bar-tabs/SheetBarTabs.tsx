@@ -74,7 +74,8 @@ export function SheetBarTabs() {
     const permissionService = useDependency(IPermissionService);
 
     const updateSheetItems = useCallback(() => {
-        const currentSubUnitId = workbook.getActiveSheet().getSheetId();
+        const currentSubUnitId = workbook.getActiveSheet()?.getSheetId() || '';
+        setActiveKey(currentSubUnitId);
 
         const sheets = workbook.getSheets();
         const activeSheet = workbook.getActiveSheet();
@@ -184,6 +185,10 @@ export function SheetBarTabs() {
             onNameChangeCheck: () => {
                 const unitId = workbook.getUnitId();
                 const worksheet = workbook?.getActiveSheet();
+                if (!worksheet) {
+                    throw new Error('No active sheet found');
+                }
+
                 const subUnitId = worksheet.getSheetId();
                 const worksheetRule = worksheetProtectionRuleModel.getRule(unitId, subUnitId);
                 const selectionRule = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
@@ -230,7 +235,7 @@ export function SheetBarTabs() {
     const nameRepeatCheck = (name: string) => {
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
-        const currenSheetName = worksheet.getName();
+        const currenSheetName = worksheet?.getName();
         // TODO@Dushusir: no need trigger save
         if (currenSheetName === name) return false;
 

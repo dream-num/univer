@@ -18,13 +18,14 @@ import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@
 import { DisposableCollection, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { getSheetCommandTarget, RangeProtectionRuleModel, SelectionManagerService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
 import { Inject, Optional } from '@wendellhu/redi';
-import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 
 import { UnitAction } from '@univerjs/protocol';
 import { HeaderMoveRenderController } from '../render-controllers/header-move.render-controller';
 import { HeaderResizeRenderController } from '../render-controllers/header-resize.render-controller';
 import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { HeaderFreezeRenderController } from '../render-controllers/freeze.render-controller';
+import { getTransformCoord } from '../utils/component-tools';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 
@@ -63,8 +64,8 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                     }
                     const { worksheet, unitId, subUnitId } = target;
 
-                    const workSheetEditPermission = this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false;
-                    if (!workSheetEditPermission) {
+                    const worksheetEditPermission = this._permissionService.composePermission([new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id]).every((permission) => permission.value);
+                    if (!worksheetEditPermission) {
                         return false;
                     }
 
@@ -111,8 +112,8 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                     }
                     const { worksheet, unitId, subUnitId } = target;
 
-                    const workSheetEditPermission = this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false;
-                    if (!workSheetEditPermission) {
+                    const worksheetEditPermission = this._permissionService.composePermission([new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id]).every((permission) => permission.value);
+                    if (!worksheetEditPermission) {
                         return false;
                     }
 
@@ -178,15 +179,15 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
     private _initRangeFillPermissionInterceptor() {
         this.disposeWithMe(
             this._selectionRenderService.interceptor.intercept(this._selectionRenderService.interceptor.getInterceptPoints().RANGE_FILL_PERMISSION_CHECK, {
-                handler: (_: Nullable<boolean>, position: { x: number; y: number; skeleton: SpreadsheetSkeleton }) => {
+                handler: (_: Nullable<boolean>, position: { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }) => {
                     const target = getSheetCommandTarget(this._univerInstanceService);
                     if (!target) {
                         return false;
                     }
                     const { worksheet, unitId, subUnitId } = target;
 
-                    const workSheetEditPermission = this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false;
-                    if (!workSheetEditPermission) {
+                    const worksheetEditPermission = this._permissionService.composePermission([new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id]).every((permission) => permission.value);
+                    if (!worksheetEditPermission) {
                         return false;
                     }
 
@@ -195,9 +196,10 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                     });
 
                     const selectionRange = ranges?.find((range) => {
+                        const transformCoord = getTransformCoord(position.x, position.y, position.scene, position.skeleton);
                         const cellPosition = position.skeleton.getCellByIndex(range.endRow, range.endColumn);
-                        const missX = Math.abs(cellPosition.endX - position.x);
-                        const missY = Math.abs(cellPosition.endY - position.y);
+                        const missX = Math.abs(cellPosition.endX - transformCoord.x);
+                        const missY = Math.abs(cellPosition.endY - transformCoord.y);
                         return missX <= 5 && missY <= 5;
                     });
 
@@ -231,8 +233,8 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                     }
                     const { worksheet, unitId, subUnitId } = target;
 
-                    const workSheetEditPermission = this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false;
-                    if (!workSheetEditPermission) {
+                    const worksheetEditPermission = this._permissionService.composePermission([new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id]).every((permission) => permission.value);
+                    if (!worksheetEditPermission) {
                         return false;
                     }
 

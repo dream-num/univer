@@ -43,7 +43,7 @@ export const SheetPermissionOpenPanelOperation: ICommand<IPermissionOpenPanelPar
                 showDetail,
                 fromSheetBar,
             },
-            width: 320,
+            width: 330,
             footer: {
                 label: UNIVER_SHEET_PERMISSION_PANEL_FOOTER,
                 showDetail,

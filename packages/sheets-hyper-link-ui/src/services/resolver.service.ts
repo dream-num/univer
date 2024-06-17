@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook } from '@univerjs/core';
-import { ICommandService, isValidRange, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
+import type { IRange, Workbook, Worksheet } from '@univerjs/core';
+import { ICommandService, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { NORMAL_SELECTION_PLUGIN_NAME, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { ScrollToCellCommand } from '@univerjs/sheets-ui';
+import { ERROR_RANGE } from '@univerjs/sheets-hyper-link';
+import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-import { ERROR_RANGE } from '../types/const';
 
 interface ISheetUrlParams {
     gid?: string;
@@ -31,7 +31,22 @@ interface ISheetUrlParams {
     rangeid?: string;
 }
 
-function getContainRange(range: IRange, mergedCells: IRange[]) {
+function getContainRange(range: IRange, worksheet: Worksheet) {
+    const mergedCells = worksheet.getMergeData();
+    const maxCol = worksheet.getMaxColumns() - 1;
+    const maxRow = worksheet.getMaxRows() - 1;
+    if (maxCol < range.endColumn) {
+        range.endColumn = maxCol;
+    }
+
+    if (maxRow < range.endRow) {
+        range.endRow = maxRow;
+    }
+
+    if (range.rangeType === RANGE_TYPE.COLUMN || RANGE_TYPE.ROW) {
+        return range;
+    }
+
     const relativeCells: IRange[] = [];
     mergedCells.forEach((cell) => {
         if (Rectangle.intersects(range, cell)) {
@@ -169,7 +184,7 @@ export class SheetsHyperLinkResolverService {
     async navigateToRange(unitId: string, subUnitId: string, range: IRange) {
         const worksheet = await this.navigateToSheetById(unitId, subUnitId);
         if (worksheet) {
-            const realRange = getContainRange(range, worksheet.getMergeData());
+            const realRange = getContainRange(range, worksheet);
             await this._commandService.executeCommand(
                 SetSelectionsOperation.id,
                 {
@@ -177,12 +192,11 @@ export class SheetsHyperLinkResolverService {
                     subUnitId,
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     selections: [{
-
                         range: realRange,
                     }],
                 } as ISetSelectionsOperationParams
             );
-            await this._commandService.executeCommand(ScrollToCellCommand.id, {
+            await this._commandService.executeCommand(ScrollToRangeOperation.id, {
                 range: realRange,
             });
         }
@@ -225,6 +239,9 @@ export class SheetsHyperLinkResolverService {
             return false;
         }
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return false;
+        }
 
         if (worksheet.getSheetId() === subUnitId) {
             return worksheet;

@@ -20,8 +20,8 @@ import { COPY_TYPE, ISheetClipboardService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { AddCommentMutation, DeleteCommentMutation, type IThreadComment } from '@univerjs/thread-comment';
 import { serializeRange, singleReferenceToGrid } from '@univerjs/engine-formula';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 import { SHEETS_THREAD_COMMENT } from '../types/const';
-import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
 
 const transformRef = (ref: string, source: { row: number; column: number }, target: { row: number; column: number }) => {
     const refObj = singleReferenceToGrid(ref);

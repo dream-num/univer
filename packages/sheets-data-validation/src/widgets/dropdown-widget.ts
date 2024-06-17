@@ -29,7 +29,7 @@ const PADDING_H = 4;
 const ICON_SIZE = 6;
 const ICON_PLACE = 14;
 const MARGIN_H = 6;
-const MARGIN_V = 2;
+const MARGIN_V = 4;
 const DROP_DOWN_ICON_COLOR = '#565656';
 
 const downPath = new Path2D('M3.32201 4.84556C3.14417 5.05148 2.85583 5.05148 2.67799 4.84556L0.134292 1.90016C-0.152586 1.56798 0.0505937 1 0.456301 1L5.5437 1C5.94941 1 6.15259 1.56798 5.86571 1.90016L3.32201 4.84556Z');
@@ -111,6 +111,40 @@ function createDocuments(text: string, localeService: LocaleService, style?: Nul
     };
 }
 
+function calcPadding(cellWidth: number, cellHeight: number, fontWidth: number, fontHeight: number, vt: VerticalAlign, ht: HorizontalAlign) {
+    let paddingTop = 0;
+    switch (vt) {
+        case VerticalAlign.BOTTOM:
+            paddingTop = (cellHeight - (MARGIN_V * 2) - fontHeight) + MARGIN_V;
+            break;
+        case VerticalAlign.MIDDLE:
+            paddingTop = ((cellHeight - (MARGIN_V * 2) - fontHeight) / 2) + MARGIN_V;
+            break;
+
+        default:
+            paddingTop = MARGIN_V;
+            break;
+    }
+
+    let paddingLeft = 0;
+    switch (ht) {
+        case HorizontalAlign.CENTER:
+            paddingLeft = (cellWidth - fontWidth) / 2;
+            break;
+        case HorizontalAlign.RIGHT:
+            paddingLeft = (cellWidth - fontWidth);
+            break;
+
+        default:
+            break;
+    }
+
+    return {
+        paddingLeft,
+        paddingTop,
+    };
+}
+
 export interface IDropdownInfo {
     top: number;
     left: number;
@@ -175,7 +209,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         ctx.restore();
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line max-lines-per-function
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton): void {
         const { primaryWithCoord, row, col, style, data, subUnitId } = info;
         const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
@@ -210,9 +244,8 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         const valueStr = `${value ?? ''}`;
         const activeItem = list.find((i) => i.label === valueStr);
         let { tb, vt, ht } = style || {};
-
         tb = tb ?? WrapStrategy.WRAP;
-        vt = vt ?? VerticalAlign.TOP;
+        vt = vt ?? VerticalAlign.BOTTOM;
         ht = ht ?? HorizontalAlign.LEFT;
         if (rule.renderMode === DataValidationRenderMode.ARROW) {
             this._drawDownIcon(ctx, cellBounding, cellWidth, cellHeight, vt);
@@ -236,33 +269,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
 
             const { height: fontHeight, width: fontWidth } = textLayout;
-
-            let paddingTop = 0;
-            switch (vt) {
-                case VerticalAlign.BOTTOM:
-                    paddingTop = (cellHeight - MARGIN_V - fontHeight);
-                    break;
-                case VerticalAlign.MIDDLE:
-                    paddingTop = (cellHeight - MARGIN_V - fontHeight) / 2;
-                    break;
-
-                default:
-                    paddingTop = MARGIN_V;
-                    break;
-            }
-
-            let paddingLeft = 0;
-            switch (ht) {
-                case HorizontalAlign.CENTER:
-                    paddingLeft = (realWidth - fontWidth) / 2;
-                    break;
-                case HorizontalAlign.RIGHT:
-                    paddingLeft = (realWidth - fontWidth);
-                    break;
-
-                default:
-                    break;
-            }
+            const { paddingTop, paddingLeft } = calcPadding(realWidth, cellHeight, fontWidth, fontHeight, vt, ht);
 
             ctx.translate(0, paddingTop);
             ctx.save();
@@ -296,36 +303,10 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             ) {
                 docModel.updateDocumentDataPageSize(Math.max(realWidth, 1));
             }
-
             documentSkeleton.calculate();
             const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
-
             const { height: fontHeight, width: fontWidth } = textLayout;
-            let paddingTop = 0;
-            switch (vt) {
-                case VerticalAlign.BOTTOM:
-                    paddingTop = (cellHeight - MARGIN_V - fontHeight);
-                    break;
-                case VerticalAlign.MIDDLE:
-                    paddingTop = (cellHeight - MARGIN_V - fontHeight) / 2;
-                    break;
-
-                default:
-                    paddingTop = MARGIN_V;
-                    break;
-            }
-            let paddingLeft = 0;
-            switch (ht) {
-                case HorizontalAlign.CENTER:
-                    paddingLeft = (realWidth - fontWidth) / 2;
-                    break;
-                case HorizontalAlign.RIGHT:
-                    paddingLeft = (realWidth - fontWidth);
-                    break;
-
-                default:
-                    break;
-            }
+            const { paddingTop, paddingLeft } = calcPadding(realWidth, cellHeight, fontWidth, fontHeight, vt, ht);
 
             ctx.translate(MARGIN_H, paddingTop);
             const rectWidth = Math.max(cellWidth - MARGIN_H * 2, 1);
@@ -393,7 +374,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
         if (rule.renderMode === DataValidationRenderMode.ARROW) {
             const realWidth = cellWidth - ICON_PLACE;
-            const { documentSkeleton, docModel } = createDocSkeleton(valueStr, this._localeService, style);
+            const { documentSkeleton, docModel } = createDocuments(valueStr, this._localeService, style);
             if (
                 tb === WrapStrategy.WRAP
             ) {

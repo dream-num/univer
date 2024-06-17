@@ -23,7 +23,7 @@ import {
     WrapStrategy,
 } from '../types/enum';
 import { type IRange, RANGE_TYPE } from '../types/interfaces';
-import type { ICellData } from '../types/interfaces/i-cell-data';
+import type { ICellData, ICellDataForSheetInterceptor } from '../types/interfaces/i-cell-data';
 import type { IDocumentData } from '../types/interfaces/i-document-data';
 import type { IRangeWithCoord, ISelectionCell, ISelectionCellWithCoord } from '../types/interfaces/i-selection-data';
 import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
@@ -130,6 +130,10 @@ export function isEmptyCell(cell: Nullable<ICellData>) {
         return true;
     }
     return false;
+}
+
+export function isCellCoverable(cell: Nullable<ICellDataForSheetInterceptor>) {
+    return isEmptyCell(cell) && cell?.coverable !== false;
 }
 
 export function getColorStyle(color: Nullable<IColorStyle>): Nullable<string> {
@@ -547,6 +551,18 @@ export function isValidRange(range: IRange): boolean {
     }
 
     if (!(Number.isNaN(startColumn) && Number.isNaN(endColumn)) && rangeType === RANGE_TYPE.ROW) {
+        return false;
+    }
+
+    if (
+        rangeType !== RANGE_TYPE.ROW &&
+        rangeType !== RANGE_TYPE.COLUMN && (
+            Number.isNaN(startColumn) ||
+            Number.isNaN(startRow) ||
+            Number.isNaN(endColumn) ||
+            Number.isNaN(endRow)
+        )
+    ) {
         return false;
     }
 

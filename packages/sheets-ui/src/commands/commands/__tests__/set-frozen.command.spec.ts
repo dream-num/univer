@@ -75,7 +75,7 @@ describe('Test commands used for change selections', () => {
     }
 
     const scrollTo = (startRow: number, startColumn: number, offsetX = 0, offsetY = 0) => {
-        scrollManagerService.addOrReplaceByParam({
+        scrollManagerService.setScrollInfoToCurrSheet({
             sheetViewStartRow: startRow,
             sheetViewStartColumn: startColumn,
             offsetX,
@@ -88,7 +88,7 @@ describe('Test commands used for change selections', () => {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
-        return worksheet.getConfig().freeze;
+        return worksheet?.getConfig().freeze;
     };
 
     function disposeTestBed() {
@@ -108,7 +108,7 @@ describe('Test commands used for change selections', () => {
             ...currentInfo,
         });
         scrollManagerService = get(ScrollManagerService);
-        scrollManagerService.setCurrentScroll({
+        scrollManagerService.setSearchParamAndRefresh({
             ...currentInfo,
         });
     }
@@ -155,22 +155,22 @@ describe('Test commands used for change selections', () => {
         it('xSplit or ySplit must bigger than 0 if row or column was set', async () => {
             select(2, 2, 2, 2, 2, 2, false, false);
             scrollTo(2, 2);
-            let config: IFreeze;
+            let config: IFreeze | undefined;
             await commandService.executeCommand(SetColumnFrozenCommand.id);
             config = getFreeze();
             expect(config?.startRow === -1 && config.startColumn === 2).toBeTruthy();
-            expect(config.xSplit).toBe(1);
+            expect(config?.xSplit).toBe(1);
 
             await commandService.executeCommand(SetRowFrozenCommand.id);
             config = getFreeze();
             expect(config?.startRow === 2 && config.startColumn === -1).toBeTruthy();
-            expect(config.ySplit).toBe(1);
+            expect(config?.ySplit).toBe(1);
 
             await commandService.executeCommand(SetSelectionFrozenCommand.id);
             config = getFreeze();
             expect(config?.startRow === 2 && config.startColumn === 2).toBeTruthy();
-            expect(config.ySplit).toBe(1);
-            expect(config.xSplit).toBe(1);
+            expect(config?.ySplit).toBe(1);
+            expect(config?.xSplit).toBe(1);
         });
 
         it('Should cancel all freeze', async () => {

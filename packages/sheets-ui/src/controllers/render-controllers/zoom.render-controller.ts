@@ -67,6 +67,8 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
 
                 const workbook = this._context.unit;
                 const sheet = workbook.getActiveSheet();
+                if (!sheet) return;
+
                 const currentRatio = sheet.getZoomRatio();
                 let nextRatio = +Number.parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
                 nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
@@ -90,7 +92,10 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
 
             const workbook = this._context.unit;
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) return;
+
             const zoomRatio = worksheet.getZoomRatio() || 1;
+            // viewport.resize --> setScrollInfo
             this._updateViewZoom(zoomRatio);
         }));
     }

@@ -44,15 +44,13 @@ describe('Test find function', () => {
             const findText = StringValueObject.create('xyz');
             const withinText = StringValueObject.create('Hello World');
             const result = findFunction.calculate(findText, withinText);
-            expect(result.isError()).toBe(true); ;
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE); // Text not found // Text not found
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[ErrorType.VALUE]]); // Text not found // Text not found
         });
         it('Find text in case sensitive', () => {
             const findText = StringValueObject.create('hello');
             const withinText = StringValueObject.create('Hello World');
             const result = findFunction.calculate(findText, withinText);
-            expect(result.isError()).toBe(true); ;
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE); // Text not found
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[ErrorType.VALUE]]); // Text not found
         });
         it('Find text in array', () => {
             const findText = new ArrayValueObject({

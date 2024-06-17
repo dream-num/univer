@@ -27,6 +27,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { IEditorService, IShortcutService } from '@univerjs/ui';
 
+import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     MoveCursorDownShortcut,
     MoveCursorLeftShortcut,
@@ -48,13 +49,13 @@ import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './sh
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocClipboardController } from './controllers/clipboard.controller';
 import { DocEditorBridgeController } from './controllers/doc-editor-bridge.controller';
-import { DocRenderController } from './controllers/doc-render.controller';
-import { DocCanvasView } from './views/doc-canvas-view';
+import { DocRenderController } from './views/doc-canvas-view';
 import { DocFloatingObjectController } from './controllers/doc-floating-object.controller';
 import { ZoomController } from './controllers/zoom.controller';
 import { TextSelectionController } from './controllers/text-selection.controller';
 import { BackScrollController } from './controllers/back-scroll.controller';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
+import { DocsRenderService } from './services/doc-render.service';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
@@ -64,6 +65,7 @@ export class UniverDocsUIPlugin extends Plugin {
         private readonly _config: IUniverDocsUIConfig,
         @Inject(Injector) override _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @ILogService private _logService: ILogService
     ) {
         super();
@@ -108,7 +110,7 @@ export class UniverDocsUIPlugin extends Plugin {
             ],
             [DocClipboardController],
             [DocEditorBridgeController],
-            [DocRenderController],
+            [DocsRenderService],
             [DocFloatingObjectController],
             [ZoomController],
             [TextSelectionController],
@@ -127,9 +129,6 @@ export class UniverDocsUIPlugin extends Plugin {
                 },
             ],
             [DocCanvasPopManagerService],
-
-            // Render views
-            [DocCanvasView],
         ];
 
         dependencies.forEach((d) => {
@@ -155,5 +154,11 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initModules(): void {
         this._injector.get(AppUIController);
+
+        ([
+            DocRenderController,
+        ]).forEach((m) => {
+            this._renderManagerSrv.registerRenderController(UniverInstanceType.UNIVER_DOC, m);
+        });
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, IUniverInstanceService, LifecycleService, LifecycleStages, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Optional } from '@wendellhu/redi';
@@ -59,8 +59,8 @@ export class DesktopUIController extends Disposable {
                         const render = this._renderManagerService.getRenderById(renderId)!;
                         if (!render.unitId) return;
 
-                        const unitType = this._instanceService.getUnitType(render.unitId);
-                        if (unitType !== UniverInstanceType.UNIVER_SHEET) return;
+                        // const unitType = this._instanceService.getUnitType(render.unitId);
+                        // if (unitType !== UniverInstanceType.UNIVER_SHEET) return;
 
                         render.engine.setContainer(canvasElement);
                     }

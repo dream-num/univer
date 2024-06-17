@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { DependentOn, IUniverInstanceService, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IUniverInstanceService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
@@ -94,7 +94,6 @@ export class UniverSheetsUIPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverSheetsUIConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
@@ -182,8 +181,8 @@ export class UniverSheetsUIPlugin extends Plugin {
         ([
             SheetSkeletonManagerService,
             SheetRenderController,
-        ]).forEach((controller) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
+        ]).forEach((m) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, m));
         });
     }
 
@@ -219,8 +218,8 @@ export class UniverSheetsUIPlugin extends Plugin {
             SheetPermissionInterceptorCanvasRenderController,
             SheetPermissionInterceptorFormulaRenderController,
             SheetPermissionRenderController,
-        ]).forEach((controller) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
+        ]).forEach((m) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, m));
         });
     }
 

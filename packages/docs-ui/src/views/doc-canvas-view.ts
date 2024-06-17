@@ -14,91 +14,33 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, EventState, Nullable } from '@univerjs/core';
-import { IConfigService,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-    RxDisposable,
-    UniverInstanceType,
-} from '@univerjs/core';
-import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '@univerjs/docs';
-import type { IRender, IWheelEvent, Scene } from '@univerjs/engine-render';
-import { DocBackground, Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/engine-render';
+import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
+import { ICommandService, IConfigService, RxDisposable } from '@univerjs/core';
+import type { IDocSkeletonManagerParam, IRichTextEditingMutationParams } from '@univerjs/docs';
+import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSkeletonManagerService, RichTextEditingMutation, VIEWPORT_KEY } from '@univerjs/docs';
+import type { DocumentSkeleton, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
+import { DocBackground, Documents, EVENT_TYPE, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
-import { BehaviorSubject, takeUntil } from 'rxjs';
+import { Inject } from '@wendellhu/redi';
+import { takeUntil } from 'rxjs';
 
-@OnLifecycle(LifecycleStages.Starting, DocCanvasView)
-export class DocCanvasView extends RxDisposable {
-    private _scene!: Scene;
-
-    private _currentDocumentModel!: DocumentDataModel;
-
-    private readonly _fps$ = new BehaviorSubject<string>('');
-
-    readonly fps$ = this._fps$.asObservable();
-
+export class DocRenderController extends RxDisposable implements IRenderModule {
     constructor(
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        private readonly _context: IRenderContext<DocumentDataModel>,
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IConfigService private readonly _configService: IConfigService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
-        this._initialize();
-    }
 
-    private _initialize() {
-        this._renderManagerService.createRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
-            this._create(unitId);
-        });
-
-        this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
-            this._create(documentModel?.getUnitId());
-        });
-
-        this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).forEach((documentModel) => {
-            this._create(documentModel.getUnitId());
-        });
-    }
-
-    override dispose(): void {
-        this._fps$.complete();
-    }
-
-    private _create(unitId: Nullable<string>) {
-        if (unitId == null) {
-            return;
-        }
-
-        const model = this._univerInstanceService.getUniverDocInstance(unitId);
-
-        if (model == null) {
-            return;
-        }
-
-        this._currentDocumentModel = model;
-
-        if (!this._renderManagerService.has(unitId)) {
-            this._addNewRender();
-        }
+        this._addNewRender();
+        this._initRenderRefresh();
+        this._initCommandListener();
     }
 
     private _addNewRender() {
-        const documentModel = this._currentDocumentModel;
-
-        const unitId = documentModel.getUnitId();
-        this._renderManagerService.createRender(unitId);
-
-        const currentRender = this._renderManagerService.getRenderById(unitId);
-
-        if (currentRender == null) {
-            return;
-        }
-
-        const { scene, engine } = currentRender;
-
-        this._scene = scene;
+        const { scene, engine, unit } = this._context;
 
         const viewMain = new Viewport(VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: 0,
@@ -148,46 +90,142 @@ export class DocCanvasView extends RxDisposable {
             new Layer(scene, [], DOCS_COMPONENT_HEADER_LAYER_INDEX)
         );
 
-        // this._viewLoader(scene);
+        this._addComponent();
 
-        this._addComponent(currentRender);
-
-        const should = this._currentDocumentModel.getShouldRenderLoopImmediately();
-
+        const should = unit.getShouldRenderLoopImmediately();
         if (should) {
             engine.runRenderLoop(() => {
                 scene.render();
-                this._fps$.next(Math.round(engine.getFps()).toString());
             });
         }
-
-        this._renderManagerService.setCurrent(unitId);
     }
 
-    private _addComponent(currentRender: IRender) {
-        const scene = this._scene;
-        const documentModel = this._currentDocumentModel;
+    private _addComponent() {
+        const { scene, unit: documentModel, components } = this._context;
         const config = {
             pageMarginLeft: documentModel.documentStyle.marginLeft || 0,
             pageMarginTop: documentModel.documentStyle.marginTop || 0,
         };
+
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, undefined, config);
-
-        const docBackground = new DocBackground(DOCS_VIEW_KEY.BACKGROUND, undefined, config);
-
         documents.zIndex = DOCS_COMPONENT_DEFAULT_Z_INDEX;
-
+        const docBackground = new DocBackground(DOCS_VIEW_KEY.BACKGROUND, undefined, config);
         docBackground.zIndex = DOCS_COMPONENT_DEFAULT_Z_INDEX;
 
-        currentRender.mainComponent = documents;
-        currentRender.components.set(DOCS_VIEW_KEY.MAIN, documents);
-        currentRender.components.set(DOCS_VIEW_KEY.BACKGROUND, docBackground);
+        this._context.mainComponent = documents;
+        components.set(DOCS_VIEW_KEY.MAIN, documents);
+        components.set(DOCS_VIEW_KEY.BACKGROUND, docBackground);
 
         scene.addObjects([documents], DOCS_COMPONENT_MAIN_LAYER_INDEX);
         scene.addObjects([docBackground], DOCS_COMPONENT_BACKGROUND_LAYER_INDEX);
 
         if (this._editorService.getEditor(documentModel.getUnitId()) == null) {
             scene.enableLayerCache(DOCS_COMPONENT_MAIN_LAYER_INDEX);
+        }
+    }
+
+    private _initRenderRefresh() {
+        this._docSkeletonManagerService.currentSkeletonBefore$.pipe(takeUntil(this.dispose$)).subscribe((param) => {
+            this._create(param);
+        });
+    }
+
+    private _create(param: Nullable<IDocSkeletonManagerParam>) {
+        if (!param) {
+            return;
+        }
+
+        const { skeleton: documentSkeleton } = param;
+        const { mainComponent, components } = this._context;
+
+        const docsComponent = mainComponent as Documents;
+        const docBackground = components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground;
+
+        docsComponent.changeSkeleton(documentSkeleton);
+        docBackground.changeSkeleton(documentSkeleton);
+
+        this._recalculateSizeBySkeleton(documentSkeleton);
+    }
+
+    private _initCommandListener() {
+        const updateCommandList = [RichTextEditingMutation.id];
+
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            // TODO@Jocs: performance, only update the skeleton when the command is related to the current unit.
+            if (updateCommandList.includes(command.id)) {
+                const params = command.params as IRichTextEditingMutationParams;
+                const { unitId } = params;
+
+                const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
+                if (docsSkeletonObject == null) {
+                    return;
+                }
+
+                const { skeleton } = docsSkeletonObject;
+
+                // TODO: `disabled` is only used for read only demo, and will be removed in the future.
+                const disabled = !!skeleton.getViewModel().getDataModel().getSnapshot().disabled;
+                if (disabled) {
+                    return;
+                }
+
+                skeleton.calculate();
+
+                if (this._editorService.isEditor(unitId)) {
+                    this._context.mainComponent?.makeDirty();
+
+                    return;
+                }
+
+                this._recalculateSizeBySkeleton(skeleton);
+            }
+        }));
+    }
+
+    private _recalculateSizeBySkeleton(skeleton: DocumentSkeleton) {
+        const { mainComponent, scene, unitId, components } = this._context;
+
+        const docsComponent = mainComponent as Documents;
+
+        const docBackground = components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground;
+
+        const pages = skeleton.getSkeletonData()?.pages;
+        if (pages == null) {
+            return;
+        }
+
+        let width = 0;
+        let height = 0;
+
+        for (let i = 0, len = pages.length; i < len; i++) {
+            const page = pages[i];
+            const { pageWidth, pageHeight } = page;
+
+            if (docsComponent.pageLayoutType === PageLayoutType.VERTICAL) {
+                height += pageHeight;
+
+                height += docsComponent.pageMarginTop;
+
+                if (i === len - 1) {
+                    height += docsComponent.pageMarginTop;
+                }
+
+                width = Math.max(width, pageWidth);
+            } else if (docsComponent.pageLayoutType === PageLayoutType.HORIZONTAL) {
+                width += pageWidth;
+
+                if (i !== len - 1) {
+                    width += docsComponent.pageMarginLeft;
+                }
+                height = Math.max(height, pageHeight);
+            }
+        }
+
+        docsComponent.resize(width, height);
+        docBackground.resize(width, height);
+
+        if (!this._editorService.isEditor(unitId)) {
+            scene.resize(width, height);
         }
     }
 }

@@ -55,11 +55,11 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     ) {
         super();
 
-        this._addNewRender(this._context.unit);
+        this._addNewRender();
     }
 
-    private _addNewRender(workbook: Workbook) {
-        const { scene, engine } = this._context;
+    private _addNewRender() {
+        const { scene, engine, unit: workbook } = this._context;
 
         scene.addLayer(new Layer(scene, [], 0), new Layer(scene, [], 2));
 
@@ -278,24 +278,29 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
     private _initCommandListener(): void {
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            const workbook = this._context.unit;
-            const unitId = workbook.getUnitId();
-            if (COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id) || this._sheetRenderService.checkMutationShouldTriggerRerender(command.id)) {
+            const { unit: workbook, unitId: workbookId } = this._context;
+            const { params, id: commandId } = command;
+            const { unitId } = params as ISetWorksheetMutationParams;
+            if (unitId !== workbookId) {
+                return;
+            }
+
+            if (COMMAND_LISTENER_SKELETON_CHANGE.includes(commandId) || this._sheetRenderService.checkMutationShouldTriggerRerender(commandId)) {
                 const worksheet = workbook.getActiveSheet();
                 if (!worksheet) return;
 
-                const sheetId = worksheet.getSheetId();
+                const worksheetId = worksheet.getSheetId();
                 const params = command.params;
-                const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
+                const { subUnitId } = params as ISetWorksheetMutationParams;
 
-                if ((unitId !== workbook.getUnitId() && subUnitId !== worksheet.getSheetId())) {
+                if (subUnitId !== worksheetId) {
                     return;
                 }
 
-                if (command.id !== SetWorksheetActiveOperation.id) {
+                if (commandId !== SetWorksheetActiveOperation.id) {
                     this._sheetSkeletonManagerService.makeDirty({
-                        sheetId,
-                        commandId: command.id,
+                        sheetId: worksheetId,
+                        commandId,
                     }, true);
                 }
 
@@ -304,15 +309,15 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                 // setCurrent ---> currentSkeletonBefore$ ---> zoom.controller.subscribe ---> scene._setTransForm --->  viewports markDirty
                 // setCurrent ---> currentSkeleton$ ---> scroll.controller.subscribe ---> scene?.transformByState ---> scene._setTransFor
                 this._sheetSkeletonManagerService.setCurrent({
-                    sheetId,
-                    commandId: command.id,
+                    sheetId: worksheetId,
+                    commandId,
                 });
-            } else if (COMMAND_LISTENER_VALUE_CHANGE.includes(command.id)) {
+            } else if (COMMAND_LISTENER_VALUE_CHANGE.includes(commandId)) {
                 this._sheetSkeletonManagerService.reCalculate();
             }
 
             if (command.type === CommandType.MUTATION) {
-                this._markUnitDirty(unitId, command);
+                this._markUnitDirty(workbookId, command);
             }
         }));
     }

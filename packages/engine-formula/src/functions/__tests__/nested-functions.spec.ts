@@ -48,8 +48,7 @@ import { FUNCTION_NAMES_TEXT } from '../text/function-names';
 import { IFunctionService } from '../../services/function.service';
 import type { ArrayValueObject } from '../../engine/value-object/array-value-object';
 import type { LexerNode } from '../../engine/analysis/lexer-node';
-import type { BaseValueObject } from '../../engine/value-object/base-value-object';
-import { createFunctionTestBed } from './create-function-test-bed';
+import { createFunctionTestBed, getObjectValue } from './create-function-test-bed';
 
 const getFunctionsTestWorkbookData = (): IWorkbookData => {
     return {
@@ -330,7 +329,7 @@ describe('Test nested functions', () => {
 
             const result = await interpreter.executeAsync(astNode as BaseAstNode);
 
-            expect((result as BaseValueObject).getValue()).toBe('$B$2');
+            expect(getObjectValue(result)).toStrictEqual([['$B$2']]);
         });
     });
 });

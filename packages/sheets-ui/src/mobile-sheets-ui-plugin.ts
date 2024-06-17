@@ -38,7 +38,7 @@ import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fil
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
-import { ScrollManagerService } from './services/scroll-manager.service';
+import { SheetScrollManagerService } from './services/scroll-manager.service';
 import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
@@ -102,7 +102,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [IAutoFillService, { useClass: AutoFillService }],
                 [SheetPrintInterceptorService],
 
-                [ScrollManagerService],
+                [SheetScrollManagerService],
                 // This would be removed from global injector and moved into RenderUnit provider.
                 // [SheetSkeletonManagerService],
                 [ISheetSelectionRenderService, { useClass: MobileSheetsSelectionRenderService }],
@@ -116,7 +116,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 // controllers
                 [ActiveWorksheetController],
                 [AutoHeightController],
-                [HeaderFreezeRenderController],
                 [SheetClipboardController],
                 [SheetsRenderService],
                 [

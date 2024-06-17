@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Workbook } from '@univerjs/core';
-import { ICommandService, IPermissionService, IUniverInstanceService, LocaleService, nameCharacterCheck, UniverInstanceType } from '@univerjs/core';
+import type { ICommandInfo } from '@univerjs/core';
+import { ICommandService, IPermissionService, LocaleService, nameCharacterCheck } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import {
     InsertSheetMutation,
@@ -58,7 +58,6 @@ export function SheetBarTabs() {
     const slideTabBarRef = useRef<{ slideTabBar: SlideTabBar | null }>({ slideTabBar: null });
     const slideTabBarContainerRef = useRef<HTMLDivElement>(null);
 
-    const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const sheetBarService = useDependency(ISheetBarService);
     const localeService = useDependency(LocaleService);
@@ -121,7 +120,7 @@ export function SheetBarTabs() {
             slideTabBar.destroy();
             subscribeList.forEach((subscribe) => subscribe.unsubscribe());
         };
-    }, [resetOrder]);
+    }, [resetOrder, workbook]);
 
     useEffect(() => {
         if (sheetList.length > 0) {
@@ -206,6 +205,8 @@ export function SheetBarTabs() {
         return slideTabBar;
     };
 
+    // TODO@Dushusir: the following callback functions should be wrapped by `useCallback`.
+
     const nameEmptyCheck = (name: string) => {
         if (name.trim() === '') {
             const id = 'sheetNameEmptyAlert';
@@ -255,7 +256,6 @@ export function SheetBarTabs() {
     };
 
     const nameRepeatCheck = (name: string) => {
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const currenSheetName = worksheet?.getName();
         // TODO@Dushusir: no need trigger save

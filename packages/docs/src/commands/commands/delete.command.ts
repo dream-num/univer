@@ -47,7 +47,6 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
     id: 'doc.command.merge-two-paragraph',
 
     type: CommandType.COMMAND,
-
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IMergeTwoParagraphParams) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);

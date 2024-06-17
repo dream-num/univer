@@ -378,7 +378,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         let { startX, startY } = actualRangeWithCoord;
 
-        const { document: documentComponent, scene, engine } = editorObject;
+        const { document: documentComponent, scene, engine: docEngine } = editorObject;
 
         const viewportMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
 
@@ -438,11 +438,16 @@ export class EditingRenderController extends Disposable implements IRenderModule
          * When modifying the selection area for a formula, it is necessary to add a setTimeout to ensure successful updating.
          */
         requestIdleCallback(() => {
-            engine.resizeBySize(
+            docEngine.resizeBySize(
                 fixLineWidthByScale(editorWidth, precisionScaleX),
                 fixLineWidthByScale(physicHeight, precisionScaleY)
             );
         });
+
+        const canvasElement = this._context.engine.getCanvasElement();
+        const canvasBoundingRect = canvasElement.getBoundingClientRect();
+        startX += canvasBoundingRect.left;
+        // startY += canvasBoundingRect.top;
 
         // Update cell editor container position and size.
         this._cellEditorManagerService.setState({
@@ -1041,3 +1046,4 @@ function isRichText(body: IDocumentBody) {
         paragraphs.length >= 2
     );
 }
+

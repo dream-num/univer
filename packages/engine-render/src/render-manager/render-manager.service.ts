@@ -34,6 +34,7 @@ export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseOb
 export interface IRenderManagerService extends IDisposable {
     /** @deprecated */
     currentRender$: Observable<Nullable<string>>;
+
     addRender(unitId: string, renderer: IRender): void;
     createRender(unitId: string): IRender;
     removeRender(unitId: string): void;
@@ -53,6 +54,9 @@ export interface IRenderManagerService extends IDisposable {
     /** @deprecated this design is very very weird! Remove it. */
     create(unitId: string): void;
 
+    created$: Observable<IRender>;
+    disposed$: Observable<string>;
+
     /** @deprecated There will be multi units to render at the same time, so there is no *current*. */
     getCurrent(): Nullable<IRender>;
     /** @deprecated There will be multi units to render at the same time, so there is no *first*. */
@@ -60,6 +64,7 @@ export interface IRenderManagerService extends IDisposable {
 
     has(unitId: string): boolean;
     withCurrentTypeOfUnit<T>(type: UniverInstanceType, id: DependencyIdentifier<T>): Nullable<T>;
+
     registerRenderModule<T extends UnitModel>(type: UnitType, dep: Dependency<T>): IDisposable;
 }
 
@@ -80,6 +85,12 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     private readonly _createRender$ = new Subject<string>();
     /** @deprecated */
     readonly createRender$ = this._createRender$.asObservable();
+
+    private readonly _renderCreated$ = new Subject<IRender>();
+    readonly created$ = this._renderCreated$.asObservable();
+
+    private readonly _renderDisposed$ = new Subject<string>();
+    readonly disposed$ = this._renderDisposed$.asObservable();
 
     get defaultEngine() {
         if (!this._defaultEngine) {
@@ -104,6 +115,9 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         this._renderDependencies.clear();
         this._renderMap.clear();
         this._currentRender$.complete();
+
+        this._renderCreated$.complete();
+        this._renderDisposed$.complete();
     }
 
     registerRenderModules(type: UnitType, deps: Dependency[]): IDisposable {
@@ -153,7 +167,9 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     }
 
     createRender(unitId: string): IRender {
-        return this._createRender(unitId, new Engine());
+        const renderer = this._createRender(unitId, new Engine());
+        this._renderCreated$.next(renderer);
+        return renderer;
     }
 
     getCurrentTypeOfRenderer(type: UniverInstanceType): Nullable<RenderUnit> {
@@ -196,7 +212,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         if (unit) {
             const type = this._univerInstanceService.getUnitType(unitId);
             const ctors = this._getRenderControllersForType(type);
-            renderUnit = new RenderUnit(this._injector, {
+            renderUnit = this._injector.createInstance(RenderUnit, {
                 unit,
                 engine,
                 scene,
@@ -285,6 +301,8 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         if (shouldDestroyEngine) {
             engine.dispose();
         }
+
+        this._renderDisposed$.next(item.unitId);
     }
 }
 

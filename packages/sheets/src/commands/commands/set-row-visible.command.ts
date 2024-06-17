@@ -166,7 +166,6 @@ export const SetRowHiddenCommand: ICommand = {
         const setSelectionOperationParams: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
-
             selections: getSelectionsAfterHiding(ranges).map((range) => ({
                 range,
                 primary: getPrimaryForRange(range, worksheet),

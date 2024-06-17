@@ -14,34 +14,41 @@
  * limitations under the License.
  */
 
-import { LocaleService, ThemeService } from '@univerjs/core';
+// Refer to packages/ui/src/views/App.tsx
+
+import { IUniverInstanceService, LocaleService, ThemeService } from '@univerjs/core';
+import { ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import type { ILocale } from '@univerjs/design';
-import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
+import {
+    builtInGlobalComponents,
+    BuiltInUIPart,
+    ComponentContainer,
+    ContextMenu,
+    IMessageService,
+    type IWorkbenchOptions,
+    Sidebar,
+    Toolbar,
+    useComponentsOfPart,
+    useObservable,
+    ZenZone,
+} from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import clsx from 'clsx';
+import { UnitGridService } from '../../services/unit-grid/unit-grid.service';
+import styles from './workbench.module.less';
 
-import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
-import { IMessageService } from '../services/message/message.service';
-import { BuiltInUIPart } from '../services/parts/parts.service';
-import styles from './app.module.less';
-import { ComponentContainer, useComponentsOfPart } from './components/ComponentContainer';
-import { Toolbar } from './components/doc-bars/Toolbar';
-import { Sidebar } from './components/sidebar/Sidebar';
-import { ZenZone } from './components/zen-zone/ZenZone';
-import { builtInGlobalComponents } from './parts';
-import { DesktopContextMenu } from './components/context-menu/ContextMenu';
+// Refer to packages/ui/src/views/workbench/Workbench.tsx
 
-export interface IUniverAppProps extends IWorkbenchOptions {
+export interface IUniWorkbenchProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
 
-    onRendered?: (container: HTMLElement) => void;
+    onRendered: () => void;
 }
 
-export function DesktopApp(props: IUniverAppProps) {
+export function UniWorkbench(props: IUniWorkbenchProps) {
     const {
         header = true,
-        toolbar = true,
         footer = true,
         contextMenu = true,
         mountContainer,
@@ -51,6 +58,9 @@ export function DesktopApp(props: IUniverAppProps) {
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
     const messageService = useDependency(IMessageService);
+    const unitGridService = useDependency(UnitGridService);
+    const instanceService = useDependency(IUniverInstanceService);
+
     const contentRef = useRef<HTMLDivElement>(null);
 
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
@@ -60,18 +70,22 @@ export function DesktopApp(props: IUniverAppProps) {
     const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
 
+    const unitGrid = useObservable(unitGridService.unitGrid$, undefined, true);
+    const focused = useObservable(instanceService.focused$);
+
+    const focusUnit = useCallback((unitId: string) => {
+        instanceService.focusUnit(unitId);
+        instanceService.setCurrentUnitForType(unitId);
+    }, [instanceService]);
+
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
             themeService.setTheme(defaultTheme);
         }
+
+        onRendered();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    useEffect(() => {
-        if (contentRef.current) {
-            onRendered?.(contentRef.current);
-        }
-    }, [onRendered]);
 
     const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);
 
@@ -108,45 +122,56 @@ export function DesktopApp(props: IUniverAppProps) {
               * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
               * bubbled to this element and refocus the input element.
               */}
-            <div className={styles.appLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
+            <div className={styles.workbenchLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
                 {/* header */}
-                {header && toolbar && (
-                    <header className={styles.appContainerHeader}>
+                {header && (
+                    <header className={styles.workbenchContainerHeader}>
                         <Toolbar headerMenuComponents={headerMenuComponents} />
                     </header>
                 )}
 
                 {/* content */}
-                <section className={styles.appContainer}>
-                    <div className={styles.appContainerWrapper}>
-                        <aside className={styles.appContainerLeftSidebar}>
+                <section className={styles.workbenchContainer}>
+                    <div className={styles.workbenchContainerWrapper}>
+                        <aside className={styles.workbenchContainerLeftSidebar}>
                             <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
                         </aside>
 
-                        <section className={styles.appContainerContent}>
+                        <section className={styles.workbenchContainerContent}>
                             <header>
                                 {header && <ComponentContainer key="header" components={headerComponents} />}
                             </header>
 
                             <section
-                                className={styles.appContainerCanvas}
+                                className={styles.workbenchContainerCanvasContainer}
                                 ref={contentRef}
                                 data-range-selector
                                 onContextMenu={(e) => e.preventDefault()}
                             >
+                                {/* Render units. */}
+                                {unitGrid?.map((unitId) => (
+                                    <UnitRenderer
+                                        key={unitId}
+                                        unitId={unitId}
+                                        focused={focused === unitId}
+                                        onFocus={focusUnit}
+                                        gridService={unitGridService}
+                                        instanceService={instanceService}
+                                    />
+                                ))}
                                 <ComponentContainer key="content" components={contentComponents} />
                             </section>
                         </section>
 
-                        <aside className={styles.appContainerSidebar}>
+                        <aside className={styles.workbenchContainerSidebar}>
                             <Sidebar />
                         </aside>
                     </div>
 
                     {/* footer */}
                     {footer && (
-                        <footer className={styles.appFooter}>
-                            <ComponentContainer key="footer" components={footerComponents} sharedProps={{ contextMenu }} />
+                        <footer className={styles.workbenchFooter}>
+                            <ComponentContainer key="footer" components={footerComponents} />
                         </footer>
                     )}
 
@@ -155,9 +180,45 @@ export function DesktopApp(props: IUniverAppProps) {
             </div>
             <ComponentContainer key="global" components={globalComponents} />
             <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
-            {contextMenu && <DesktopContextMenu />}
-            <FloatingContainer />
+            {contextMenu && <ContextMenu />}
         </ConfigProvider>
+    );
+}
+
+interface IUnitRendererProps {
+    unitId: string;
+    focused: boolean;
+
+    gridService: UnitGridService;
+    instanceService: IUniverInstanceService;
+
+    onFocus?: (unitId: string) => void;
+}
+
+function UnitRenderer(props: IUnitRendererProps) {
+    const { unitId, gridService, focused, onFocus } = props;
+    const mountRef = useRef<HTMLDivElement>(null);
+
+    const focus = useCallback(() => {
+        !focused && onFocus?.(unitId);
+    }, [focused, onFocus, unitId]);
+
+    useEffect(() => {
+        if (mountRef.current) {
+            gridService.setContainerForRender(unitId, mountRef.current);
+        }
+    }, [gridService, unitId]);
+
+    return (
+        <div
+            className={clsx(styles.workbenchContainerCanvas, {
+                [styles.workbenchContainerCanvasFocused]: focused,
+            })}
+            ref={mountRef}
+            onPointerDownCapture={focus}
+            onWheelCapture={focus}
+        >
+        </div>
     );
 }
 

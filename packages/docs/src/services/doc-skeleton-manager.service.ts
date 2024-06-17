@@ -51,7 +51,7 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
         this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
             .pipe(takeUntil(this.dispose$))
             .subscribe((documentModel) => {
-                if (documentModel?.getUnitId() === this._context.unitId) {
+                if (documentModel && documentModel.getUnitId() === this._context.unitId) {
                     this._update(documentModel);
                 }
             });

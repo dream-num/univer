@@ -41,7 +41,7 @@ import { distinctUntilChanged, startWith } from 'rxjs';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { checkInHeaderRanges } from '../../controllers/utils/selections-tools';
-import { ScrollManagerService } from '../scroll-manager.service';
+import { SheetScrollManagerService } from '../scroll-manager.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { BaseSelectionRenderService, getAllSelection, getTopLeftSelection } from './base-selection-render.service';
 import { MobileSelectionControl } from './mobile-selection-shape';
@@ -76,7 +76,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService
+        @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService
     ) {
         super(
             injector,

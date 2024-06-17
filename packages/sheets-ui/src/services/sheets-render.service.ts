@@ -54,7 +54,7 @@ export class SheetsRenderService extends RxDisposable {
      */
     registerSkeletonChangingMutations(mutationId: string): IDisposable {
         if (this._skeletonChangeMutations.has(mutationId)) {
-            throw new Error(`[SheetsRenderService]: the mutationId ${mutationId} has already been registered!`);
+            return toDisposable(() => {});
         }
 
         this._skeletonChangeMutations.add(mutationId);

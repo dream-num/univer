@@ -24,13 +24,13 @@ import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
-import { UniverUIPlugin } from '@univerjs/ui';
+import { UniverUniUIPlugin } from '@univerjs/uniui';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { FUniver } from '@univerjs/facade';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { enUS } from '../locales';
+import { DEFAULT_WORKBOOK_DATA_DEMO1 } from '../data';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -52,7 +52,7 @@ univer.registerPlugin(UniverDocsPlugin, {
 });
 univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverRenderEnginePlugin);
-univer.registerPlugin(UniverUIPlugin, {
+univer.registerPlugin(UniverUniUIPlugin, {
     container: 'app',
 });
 
@@ -64,12 +64,13 @@ univer.registerPlugin(UniverSheetsPlugin);
 univer.registerPlugin(UniverSheetsUIPlugin);
 
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
-univer.registerPlugin(UniverSheetsZenEditorPlugin);
 univer.registerPlugin(UniverSheetsFormulaPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {
     univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO1);
+    // univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
 }
 
 // debugger plugin

@@ -57,10 +57,7 @@ import { IProgressService, ProgressService } from './services/progress/progress.
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 
-const PLUGIN_NAME = 'ui';
-
-export const DefaultUiConfig = {};
-
+export const UNIVER_UI_PLUGIN_NAME = 'UNIVER_UI_PLUGIN';
 export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
 
 /**
@@ -68,7 +65,7 @@ export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
  */
 @DependentOn(UniverRenderEnginePlugin)
 export class UniverUIPlugin extends Plugin {
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = UNIVER_UI_PLUGIN_NAME;
 
     constructor(
         private _config: Partial<IUniverUIConfig> = {},
@@ -77,8 +74,7 @@ export class UniverUIPlugin extends Plugin {
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, DefaultUiConfig, this._config);
-
+        this._config = Tools.deepMerge({}, this._config);
         if (this._config.disableAutoFocus) {
             this._contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);
         }
@@ -89,7 +85,6 @@ export class UniverUIPlugin extends Plugin {
             [ComponentManager],
             [ZIndexManager],
 
-            // services
             [ShortcutPanelService],
             [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
@@ -134,7 +129,6 @@ export class UniverUIPlugin extends Plugin {
                 },
             ],
         ], this._config.override);
-
         dependencies.forEach((dependency) => injector.add(dependency));
     }
 }

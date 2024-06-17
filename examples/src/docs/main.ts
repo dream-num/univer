@@ -15,7 +15,7 @@
  */
 
 /* eslint-disable node/prefer-global/process */
-import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
+import { LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -49,6 +49,7 @@ const univer = new Univer({
         [LocaleType.EN_US]: enUS,
         [LocaleType.RU_RU]: ruRU,
     },
+    logLevel: LogLevel.VERBOSE,
 });
 
 // core plugins

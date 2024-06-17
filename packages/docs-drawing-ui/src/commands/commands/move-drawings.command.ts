@@ -21,8 +21,8 @@ import type { IAccessor } from '@wendellhu/redi';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IDrawingPosition, IUpdateDocDrawingPositionParams } from './update-doc-drawing.command';
-import { UpdateDocDrawingPositionCommand } from './update-doc-drawing.command';
+import type { IDrawingDocTransform, IUpdateDrawingDocTransformParams } from './update-doc-drawing.command';
+import { UpdateDrawingDocTransformCommand } from './update-doc-drawing.command';
 
 export interface IMoveDrawingsCommandParams {
     direction: Direction;
@@ -84,16 +84,16 @@ export const MoveDocDrawingsCommand: ICommand = {
 
             return {
                 drawingId,
-                direction: direction === Direction.UP || direction === Direction.DOWN ? 'positionV' : 'positionH',
-                position: direction === Direction.UP || direction === Direction.DOWN ? newPositionV : newPositionH,
-            } as IDrawingPosition;
-        }).filter((drawing) => drawing != null) as IDrawingPosition[];
+                key: direction === Direction.UP || direction === Direction.DOWN ? 'positionV' : 'positionH',
+                value: direction === Direction.UP || direction === Direction.DOWN ? newPositionV : newPositionH,
+            } as IDrawingDocTransform;
+        }).filter((drawing) => drawing != null) as IDrawingDocTransform[];
 
         if (newDrawings.length === 0) {
             return false;
         }
 
-        const result = commandService.syncExecuteCommand<IUpdateDocDrawingPositionParams>(UpdateDocDrawingPositionCommand.id, {
+        const result = commandService.syncExecuteCommand<IUpdateDrawingDocTransformParams>(UpdateDrawingDocTransformCommand.id, {
             unitId,
             subUnitId: unitId,
             drawings: newDrawings,

@@ -170,9 +170,7 @@ export class DocDrawingTransformUpdateController extends Disposable {
 
     private _refreshDrawing(unitId: string, skeleton: DocumentSkeleton, currentRender: IRender) {
         const skeletonData = skeleton?.getSkeletonData();
-
         const { mainComponent, scene } = currentRender;
-
         const documentComponent = mainComponent as Documents;
 
         if (!skeletonData) {
@@ -180,15 +178,11 @@ export class DocDrawingTransformUpdateController extends Disposable {
         }
 
         const { left: docsLeft, top: docsTop, pageLayoutType, pageMarginLeft, pageMarginTop } = documentComponent;
-
         const { pages } = skeletonData;
-
         const updateDrawings: any[] = []; // IFloatingObjectManagerParam
-
         const { scaleX, scaleY } = scene.getAncestorScale();
 
         this._liquid.reset();
-
         this._pageMarginCache.clear();
 
         // const objectList: BaseObject[] = [];

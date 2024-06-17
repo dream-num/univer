@@ -26,7 +26,7 @@ import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';
 import { Checkbox, InputNumber, Select } from '@univerjs/design';
 
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { UpdateDocDrawingPositionCommand } from '../../commands/commands/update-doc-drawing.command';
+import { UpdateDrawingDocTransformCommand } from '../../commands/commands/update-doc-drawing.command';
 import styles from './index.module.less';
 
 export interface IDocDrawingPositionProps {
@@ -119,13 +119,13 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             };
         });
 
-        commandService.executeCommand(UpdateDocDrawingPositionCommand.id, {
+        commandService.executeCommand(UpdateDrawingDocTransformCommand.id, {
             unitId: focusDrawings[0].unitId,
             subUnitId: focusDrawings[0].unitId,
             drawings: drawings.map((drawing) => ({
                 drawingId: drawing.drawingId,
-                direction,
-                position: value,
+                key: direction,
+                value,
             })),
         });
 

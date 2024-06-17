@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-    toDisposable,
 } from '@univerjs/core';
 import type { IDocObjectParam } from '@univerjs/docs';
-import { DocSkeletonManagerService, getDocObject, SetDocZoomRatioCommand, SetDocZoomRatioOperation, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
-import type { IWheelEvent } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocSkeletonManagerService, neoGetDocObject, SetDocZoomRatioCommand, SetDocZoomRatioOperation, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
+import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
@@ -34,150 +30,108 @@ interface ISetDocMutationParams {
     unitId: string;
 }
 
-@OnLifecycle(LifecycleStages.Rendered, ZoomController)
-export class ZoomController extends Disposable {
-    private _initializedRender = new Set();
-
+export class DocZoomRenderController extends Disposable implements IRenderModule {
     constructor(
+        private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
-        this._initialize();
+        this._init();
     }
 
-    override dispose(): void {
-        super.dispose();
+    private _init() {
+        this._initSkeletonListener();
+        this._initCommandExecutedListener();
+        this._initRenderRefresher();
     }
 
-    private _initialize() {
-        this._skeletonListener();
-        this._commandExecutedListener();
-        this._initialRenderRefresh();
-    }
-
-    private _initialRenderRefresh() {
+    private _initRenderRefresher() {
         this._docSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (param == null) {
                 return;
             }
 
-            const { unitId } = param;
-
-            const currentRender = this._renderManagerService.getRenderById(unitId);
-
-            if (currentRender == null) {
+            const { unitId, scene } = this._context;
+            if (this._editorService.isEditor(unitId)) {
                 return;
             }
 
-            if (
-                this._initializedRender.has(unitId) || this._editorService.isEditor(unitId)
-            ) {
-                return;
-            }
+            this.disposeWithMe(scene.onMouseWheelObserver.add((e: IWheelEvent) => {
+                if (!e.ctrlKey) {
+                    return;
+                }
 
-            this._initializedRender.add(unitId);
+                const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
+                if (!documentModel) {
+                    return;
+                }
 
-            const { scene } = currentRender;
+                const deltaFactor = Math.abs(e.deltaX);
+                let ratioDelta = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
+                ratioDelta *= e.deltaY > 0 ? -1 : 1;
+                if (scene.scaleX < 1) {
+                    ratioDelta /= 2;
+                }
 
-            this.disposeWithMe(
-                toDisposable(
-                    scene.onMouseWheelObserver.add((e: IWheelEvent) => {
-                        if (!e.ctrlKey) {
-                            return;
-                        }
+                const currentRatio = documentModel.zoomRatio;
 
-                        const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
-                        if (!documentModel) {
-                            return;
-                        }
+                let nextRatio = +Number.parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
+                nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
 
-                        const deltaFactor = Math.abs(e.deltaX);
-                        let ratioDelta = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
-                        ratioDelta *= e.deltaY > 0 ? -1 : 1;
-                        if (scene.scaleX < 1) {
-                            ratioDelta /= 2;
-                        }
+                this._commandService.executeCommand(SetDocZoomRatioCommand.id, {
+                    zoomRatio: nextRatio,
+                    unitId: documentModel.getUnitId(),
+                });
 
-                        const currentRatio = documentModel.zoomRatio;
-
-                        let nextRatio = +Number.parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
-                        nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
-
-                        this._commandService.executeCommand(SetDocZoomRatioCommand.id, {
-                            zoomRatio: nextRatio,
-                            unitId: documentModel.getUnitId(),
-                        });
-
-                        e.preventDefault();
-                    })
-                )
+                e.preventDefault();
+            })
             );
         });
     }
 
-    // private _zoomEventBinding() {
-    //     const scene = this._getDocObject()?.scene;
-    //     if (scene == null) {
-    //         return;
-    //     }
+    private _initSkeletonListener() {
+        this.disposeWithMe(this._docSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+            if (param == null) {
+                return;
+            }
 
-    //     const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-    // }
+            const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
+            if (!documentModel) return;
 
-    private _skeletonListener() {
-        this.disposeWithMe(
-            toDisposable(
-                this._docSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-                    if (param == null) {
-                        return;
-                    }
+            const zoomRatio = documentModel.zoomRatio || 1;
 
-                    const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
-                    if (!documentModel) return;
-
-                    const zoomRatio = documentModel.zoomRatio || 1;
-
-                    this._updateViewZoom(zoomRatio, false);
-                })
-            )
-        );
+            this._updateViewZoom(zoomRatio, false);
+        }));
     }
 
-    private _commandExecutedListener() {
+    private _initCommandExecutedListener() {
         const updateCommandList = [SetDocZoomRatioOperation.id];
 
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (updateCommandList.includes(command.id)) {
-                    const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
-                    if (!documentModel) return;
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (updateCommandList.includes(command.id)) {
+                const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
+                if (!documentModel) return;
 
-                    const params = command.params;
-                    const { unitId } = params as ISetDocMutationParams;
-                    if (!(unitId === documentModel.getUnitId())) {
-                        return;
-                    }
-
-                    const zoomRatio = documentModel.zoomRatio || 1;
-
-                    this._updateViewZoom(zoomRatio);
+                const params = command.params;
+                const { unitId } = params as ISetDocMutationParams;
+                if (!(unitId === documentModel.getUnitId())) {
+                    return;
                 }
-            })
-        );
+
+                const zoomRatio = documentModel.zoomRatio || 1;
+
+                this._updateViewZoom(zoomRatio);
+            }
+        }));
     }
 
     private _updateViewZoom(zoomRatio: number, needRefreshSelection = true) {
-        const docObject = this._getDocObject();
-        if (docObject == null) {
-            return;
-        }
-
+        const docObject = neoGetDocObject(this._context);
         docObject.scene.scale(zoomRatio, zoomRatio);
 
         this._calculatePagePosition(docObject, zoomRatio);
@@ -247,9 +201,5 @@ export class ZoomController extends Disposable {
         }
 
         return this;
-    }
-
-    private _getDocObject() {
-        return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
 }

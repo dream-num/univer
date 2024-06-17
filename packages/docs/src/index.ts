@@ -15,7 +15,7 @@
  */
 
 export type { IDocObjectParam } from './basics/component-tools';
-export { getDocObject, getDocObjectById } from './basics/component-tools';
+export { getDocObject, neoGetDocObject, getDocObjectById } from './basics/component-tools';
 export * from './basics/docs-view-key';
 export { BreakLineCommand } from './commands/commands/break-line.command';
 export {

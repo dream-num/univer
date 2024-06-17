@@ -51,7 +51,7 @@ import { DocClipboardController } from './controllers/clipboard.controller';
 import { DocEditorBridgeController } from './controllers/doc-editor-bridge.controller';
 import { DocRenderController } from './views/doc-canvas-view';
 import { DocFloatingObjectController } from './controllers/doc-floating-object.controller';
-import { ZoomController } from './controllers/zoom.controller';
+import { DocZoomRenderController } from './controllers/zoom.controller';
 import { TextSelectionController } from './controllers/text-selection.controller';
 import { BackScrollController } from './controllers/back-scroll.controller';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
@@ -113,10 +113,11 @@ export class UniverDocsUIPlugin extends Plugin {
                 },
             ],
             [DocClipboardController],
+
+            // Some of the controllers here should be moved to RenderUnit.
             [DocEditorBridgeController],
             [DocsRenderService],
             [DocFloatingObjectController],
-            [ZoomController],
             [TextSelectionController],
             [BackScrollController],
             [
@@ -163,6 +164,7 @@ export class UniverDocsUIPlugin extends Plugin {
     private _initRenderBasics(): void {
         ([
             DocRenderController,
+            DocZoomRenderController,
         ]).forEach((m) => {
             this._renderManagerSrv.registerRenderController(UniverInstanceType.UNIVER_DOC, m);
         });

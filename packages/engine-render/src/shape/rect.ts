@@ -23,33 +23,12 @@ import { Shape } from './shape';
 
 export interface IRectProps extends IShapeProps {
     radius?: number;
-    startX?: number;
-    startY?: number;
-    endX?: number;
-    endY?: number;
 }
 
 export const RECT_OBJECT_ARRAY = ['radius'];
 
 export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
     private _radius: number = 0;
-
-    /**
-     * the X value of rect topleft position in scene (same cordinate as viewport)
-     */
-    private _startX: number = 0;
-    /**
-     * the Y of rect topleft position in scene (same cordinate as viewport)
-     */
-    private _startY: number = 0;
-    /**
-     * the X value of rect bottomright position in scene (same cordinate as viewport)
-     */
-    private _endX: number = 0;
-    /**
-     * the Y value of rect bottomright position in scene (same cordinate as viewport)
-     */
-    private _endY: number = 0;
 
     constructor(key?: string, props?: T) {
         super(key, props);
@@ -60,34 +39,6 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
 
     get radius() {
         return this._radius;
-    }
-
-    /**
-     * the X value of rect topleft position in scene (same cordinate as viewport)
-     */
-    get startX() {
-        return this._startX;
-    }
-
-    /**
-     * the Y of rect topleft position in scene (same cordinate as viewport)
-     */
-    get startY() {
-        return this._startY;
-    }
-
-    /**
-     * the X value of rect bottomright position in scene (same cordinate as viewport)
-     */
-    get endX() {
-        return this._endX;
-    }
-
-    /**
-     * the Y value of rect bottomright position in scene (same cordinate as viewport)
-     */
-    get endY() {
-        return this._endY;
     }
 
     static override drawWith(ctx: UniverRenderingContext, props: IRectProps | Rect) {
@@ -153,9 +104,19 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         if (!strokeDashArray) {
             Rect.drawWith(ctx, this);
         } else {
-            const { startX, startY, endX, endY } = this;
+            const parentTrans = this.getParent().transform;
+            // group.transform contains startXY
+            // selection-shape@_updateControl -->  this.selectionShape.translate(startX, startY);
+
+            // startXY comes from selecitonModel
+            // const { startX, startY, endX, endY } = this._selectionModel;
+            const startX = parentTrans.getMatrix()[4];
+            const startY = parentTrans.getMatrix()[5];
+            const endX = startX + this.width;
+            const endY = startY + this.height;
             const rect = { left: startX, top: startY, right: endX, bottom: endY };
             let { left, top, right, bottom } = rect;
+
             let width = right - left;
             let height = bottom - top;
             if (viewportInfo && Rectangle.hasIntersectionBetweenTwoRect(rect, viewportInfo.cacheBound)) {

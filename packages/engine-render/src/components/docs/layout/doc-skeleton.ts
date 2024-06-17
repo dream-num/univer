@@ -105,7 +105,6 @@ export class DocumentSkeleton extends Skeleton {
         // const start = +new Date();
         this._skeletonData = this._createSkeleton(ctx, bounds);
         // console.log('skeleton calculate cost', +new Date() - start);
-        // console.log(this._skeletonData);
     }
 
     getSkeletonData() {

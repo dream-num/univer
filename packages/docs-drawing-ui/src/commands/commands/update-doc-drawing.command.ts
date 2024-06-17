@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IObjectPositionH, IObjectPositionV, JSONXActions, WrapTextType } from '@univerjs/core';
+import type { ICommand, IDocDrawingBase, IMutationInfo, IObjectPositionH, IObjectPositionV, ISize, JSONXActions, WrapTextType } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -24,11 +24,15 @@ import {
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     PositionedObjectLayoutType,
+    TextX,
+    TextXActionType,
+    Tools,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
 
 export enum TextWrappingStyle {
     INLINE = 'inline',
@@ -356,27 +360,28 @@ export const UpdateDocDrawingWrapTextCommand: ICommand = {
     },
 };
 
-export interface IDrawingPosition {
+export interface IDrawingDocTransform {
     drawingId: string;
-    direction: 'positionH' | 'positionV';
-    position: IObjectPositionH | IObjectPositionV;
+    key: 'size' | 'positionH' | 'positionV';
+    value: ISize | IObjectPositionH | IObjectPositionV;
 }
 
-export interface IUpdateDocDrawingPositionParams {
+export interface IUpdateDrawingDocTransformParams {
     unitId: string;
     subUnitId: string;
-    drawings: IDrawingPosition[];
+    drawings: IDrawingDocTransform[];
+    noHistory?: boolean;
 }
 
 /**
  * The command to update drawing position.
  */
-export const UpdateDocDrawingPositionCommand: ICommand = {
-    id: 'doc.command.update-doc-drawing-position',
+export const UpdateDrawingDocTransformCommand: ICommand = {
+    id: 'doc.command.update-drawing-doc-transform',
 
     type: CommandType.COMMAND,
 
-    handler: (accessor: IAccessor, params?: IUpdateDocDrawingPositionParams) => {
+    handler: (accessor: IAccessor, params?: IUpdateDrawingDocTransformParams) => {
         if (params == null) {
             return false;
         }
@@ -389,7 +394,7 @@ export const UpdateDocDrawingPositionCommand: ICommand = {
             return false;
         }
 
-        const { drawings, unitId } = params;
+        const { drawings, unitId, noHistory } = params;
 
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
@@ -398,16 +403,172 @@ export const UpdateDocDrawingPositionCommand: ICommand = {
 
         // Update drawing layoutType.
         for (const drawing of drawings) {
-            const { drawingId, direction, position } = drawing;
+            const { drawingId, key, value } = drawing;
 
-            const oldPosition = oldDrawings[drawingId].docTransform[direction];
+            const oldValue = oldDrawings[drawingId].docTransform[key];
 
-            if (oldPosition.relativeFrom !== position.relativeFrom || oldPosition.posOffset !== position.posOffset) {
-                const action = jsonX.replaceOp(['drawings', drawingId, 'docTransform', direction], oldPosition, position);
+            if (!Tools.diffValue(oldValue, value)) {
+                const action = jsonX.replaceOp(['drawings', drawingId, 'docTransform', key], oldValue, value);
 
                 rawActions.push(action!);
             }
         }
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges: null,
+                noHistory: !!noHistory,
+            },
+        };
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
+    },
+};
+
+export interface IMoveInlineDrawingParams {
+    unitId: string;
+    subUnitId: string;
+    drawing: IDocDrawingBase;
+    offset: number;
+}
+
+/**
+ * The command to update drawing position.
+ */
+export const IMoveInlineDrawingCommand: ICommand = {
+    id: 'doc.command.move-inline-drawing',
+
+    type: CommandType.COMMAND,
+
+    // eslint-disable-next-line max-lines-per-function
+    handler: (accessor: IAccessor, params?: IMoveInlineDrawingParams) => {
+        if (params == null) {
+            return false;
+        }
+
+        const renderManagerService = accessor.get(IRenderManagerService);
+
+        const renderObject = renderManagerService.getRenderById(params.unitId);
+        const scene = renderObject?.scene;
+        if (scene == null) {
+            return false;
+        }
+        const transformer = scene.getTransformerByCreate();
+
+        const commandService = accessor.get(ICommandService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (documentDataModel == null) {
+            return false;
+        }
+
+        const { drawing, unitId, offset } = params;
+
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+        const rawActions: JSONXActions = [];
+
+        const { drawingId } = drawing;
+
+        // TODO: @JOCS update segmentId when in header and footer.
+        const segmentId = '';
+        const oldOffset = documentDataModel.getBody()?.customBlocks?.find((block) => block.blockId === drawingId)?.startIndex;
+
+        if (oldOffset == null) {
+            return false;
+        }
+
+        if (offset < oldOffset) {
+            // Insert first.
+            if (offset > 0) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: offset,
+                    segmentId,
+                });
+            }
+
+            textX.push({
+                t: TextXActionType.INSERT,
+                body: {
+                    dataStream: '\b',
+                    customBlocks: [{
+                        startIndex: 0,
+                        blockId: drawing.drawingId,
+                    }],
+                },
+                len: 1,
+                line: 0,
+                segmentId,
+            });
+
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: oldOffset - offset,
+                segmentId,
+            });
+
+            textX.push({
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+                segmentId: '',
+            });
+        } else {
+            // Delete first.
+            if (oldOffset > 0) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: oldOffset,
+                    segmentId,
+                });
+            }
+
+            textX.push({
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+                segmentId: '',
+            });
+
+            if (offset - oldOffset - 1 > 0) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: offset - oldOffset - 1,
+                    segmentId,
+                });
+            }
+
+            textX.push({
+                t: TextXActionType.INSERT,
+                body: {
+                    dataStream: '\b',
+                    customBlocks: [{
+                        startIndex: 0,
+                        blockId: drawing.drawingId,
+                    }],
+                },
+                len: 1,
+                line: 0,
+                segmentId,
+            });
+        }
+
+        const action = jsonX.editOp(textX.serialize());
+        rawActions.push(action!);
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -426,6 +587,8 @@ export const UpdateDocDrawingPositionCommand: ICommand = {
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
+
+        transformer.refreshControls();
 
         return Boolean(result);
     },

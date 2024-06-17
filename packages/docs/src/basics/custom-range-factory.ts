@@ -34,7 +34,7 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam) {
     const { startOffset, endOffset } = range;
     const start = Math.min(startOffset, endOffset);
     const end = Math.max(startOffset, endOffset);
-
+    console.log('===range', range);
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
         id: RichTextEditingMutation.id,
         params: {
@@ -46,18 +46,6 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam) {
 
     const textX = new TextX();
     const jsonX = JSONX.getInstance();
-
-    const body: IDocumentBody = {
-        dataStream: '',
-        customRanges: [
-            {
-                rangeId,
-                rangeType,
-                startIndex: start,
-                endIndex: end,
-            },
-        ],
-    };
 
     if (start > 0) {
         textX.push({
@@ -73,12 +61,22 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam) {
             dataStream: '\x1F',
         },
         len: 1,
-        line: start,
+        line: 0,
     });
 
     textX.push({
         t: TextXActionType.RETAIN,
-        body,
+        body: {
+            dataStream: '',
+            customRanges: [
+                {
+                    rangeId,
+                    rangeType,
+                    startIndex: 0,
+                    endIndex: end - start - 1,
+                },
+            ],
+        },
         len: end - start,
         segmentId,
     });
@@ -89,7 +87,7 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam) {
             dataStream: '\x1E',
         },
         len: 1,
-        line: start,
+        line: 0,
     });
 
     doMutation.params.actions = jsonX.editOp(textX.serialize());

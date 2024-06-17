@@ -37,7 +37,6 @@ export class DocThreadCommentUIController extends Disposable {
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
-
         this._initCommands();
         this._initMenus();
         this._initComponents();

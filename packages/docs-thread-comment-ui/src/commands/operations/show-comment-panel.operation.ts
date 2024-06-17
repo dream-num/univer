@@ -51,7 +51,7 @@ export const StartAddCommentOperation: ICommand = {
             id: commentId,
             ref: text,
             dT: getDT(),
-            personId: userManagerService.currentUser.userID,
+            personId: userManagerService.getCurrentUser().userID,
             text: {
                 dataStream: '\r\n',
             },

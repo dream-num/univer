@@ -56,7 +56,7 @@ export const DeleteLeftCommand: ICommand = {
         if (activeRange == null || skeleton == null || ranges == null) {
             return false;
         }
-
+        console.log('===activeRange', activeRange);
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
         if (!docDataModel) {
             return false;
@@ -205,7 +205,7 @@ export const DeleteRightCommand: ICommand = {
         const skeleton = docSkeletonManagerService.getCurrent()?.skeleton;
 
         let result;
-
+        console.log('===delete-right', activeRange, ranges);
         if (activeRange == null || skeleton == null || ranges == null) {
             return false;
         }

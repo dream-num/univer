@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { CustomRangeType, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
-import { IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import type { CustomRangeType, IMutationInfo, ITextRange } from '@univerjs/core';
+import { DataStreamTreeTokenType, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
@@ -34,7 +34,6 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam) {
     const { startOffset, endOffset } = range;
     const start = Math.min(startOffset, endOffset);
     const end = Math.max(startOffset, endOffset);
-    console.log('===range', range);
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
         id: RichTextEditingMutation.id,
         params: {
@@ -58,7 +57,7 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam) {
     textX.push({
         t: TextXActionType.INSERT,
         body: {
-            dataStream: '\x1F',
+            dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_START,
         },
         len: 1,
         line: 0,
@@ -72,7 +71,7 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam) {
                 {
                     rangeId,
                     rangeType,
-                    startIndex: 0,
+                    startIndex: -1,
                     endIndex: end - start - 1,
                 },
             ],
@@ -84,7 +83,7 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam) {
     textX.push({
         t: TextXActionType.INSERT,
         body: {
-            dataStream: '\x1E',
+            dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_END,
         },
         len: 1,
         line: 0,
@@ -131,4 +130,9 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     });
 
     return doMutation;
+}
+
+export interface IRemoveCustomRangeParam {
+    unitId: string;
+    rangeId: string;
 }

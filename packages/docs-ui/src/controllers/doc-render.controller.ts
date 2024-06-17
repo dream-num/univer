@@ -135,7 +135,6 @@ export class DocRenderController extends RxDisposable {
                 if (updateCommandList.includes(command.id)) {
                     const params = command.params as IRichTextEditingMutationParams;
                     const { unitId } = params;
-
                     const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
 
                     if (docsSkeletonObject == null) {

@@ -30,7 +30,7 @@ describe('Test find function', () => {
             const findText = StringValueObject.create('Univer');
             const withinText = StringValueObject.create('Hello Univer');
             const result = findFunction.calculate(findText, withinText);
-            expect(result.getValue()).toStrictEqual(7); // Indexing is 1-based
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[7]]); // Indexing is 1-based
         });
 
         it('Find text with start position', () => {
@@ -38,14 +38,14 @@ describe('Test find function', () => {
             const withinText = StringValueObject.create('Hello World');
             const startNum = NumberValueObject.create(5);
             const result = findFunction.calculate(findText, withinText, startNum);
-            expect(result.getValue()).toStrictEqual(5); // Finds 'o' at position 5
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[5]]); // Finds 'o' at position 5
         });
         it('Find text not found', () => {
             const findText = StringValueObject.create('xyz');
             const withinText = StringValueObject.create('Hello World');
             const result = findFunction.calculate(findText, withinText);
             expect(result.isError()).toBe(true); ;
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE); // Text not found
+            expect(result.getValue()).toStrictEqual(ErrorType.VALUE); // Text not found // Text not found
         });
         it('Find text in case sensitive', () => {
             const findText = StringValueObject.create('hello');
@@ -84,7 +84,7 @@ describe('Test find function', () => {
                 column: 0,
             });
             const result = findFunction.calculate(findText, withinText);
-            const resultArray = result.getArrayValue().map((row) =>
+            result.getArrayValue().map((row) =>
                 row.map((cell) => cell?.isError() ? cell.getValue() : cell?.getValue())
             );
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
@@ -147,7 +147,7 @@ describe('Test find function', () => {
             const findText = StringValueObject.create('😊');
             const withinText = StringValueObject.create('Hello 😊 World');
             const result = findFunction.calculate(findText, withinText);
-            expect(result.getValue()).toStrictEqual(7); // '😊' found at position 7
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[7]]); // Indexing is 1-based
         });
     });
 });

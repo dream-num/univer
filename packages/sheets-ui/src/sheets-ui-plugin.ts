@@ -58,7 +58,7 @@ import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-ba
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
-import { SheetRenderController } from './controllers/render-controllers/sheet-render.controller';
+import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 import { HoverRenderController } from './controllers/hover-render.controller';
 import { HoverManagerService } from './services/hover-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
@@ -175,7 +175,7 @@ export class UniverSheetsUIPlugin extends Plugin {
     }
 
     override onRendered(): void {
-        this._registerRenderControllers();
+        this._registerRenderModules();
     }
 
     private _registerRenderBasics(): void {
@@ -189,7 +189,7 @@ export class UniverSheetsUIPlugin extends Plugin {
 
     // We have to let render basics get bootstrapped before. Because some render controllers relies on
     // a correct skeleton when they get loaded.
-    private _registerRenderControllers(): void {
+    private _registerRenderModules(): void {
         ([
             // https://github.com/dream-num/univer-pro/issues/669
             // HeaderMoveRenderController(HMRC) must be initialized before SelectionRenderController(SRC).

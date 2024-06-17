@@ -17,7 +17,6 @@
 import type { Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
 
 import { InsertCommand } from '../commands/commands/core-editing.command';
@@ -28,7 +27,6 @@ export class NormalInputController extends Disposable {
     private _onInputSubscription: Nullable<Subscription>;
 
     constructor(
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
@@ -66,7 +64,8 @@ export class NormalInputController extends Disposable {
 
             const e = event as InputEvent;
 
-            const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
+            const skeleton = this._renderManagerService.getRenderById(documentModel.getUnitId())
+                ?.with(DocSkeletonManagerService).getSkeleton()?.skeleton;
 
             if (e.data == null || skeleton == null) {
                 return;

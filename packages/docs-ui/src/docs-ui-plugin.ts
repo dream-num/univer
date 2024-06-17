@@ -28,6 +28,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { IEditorService, IShortcutService } from '@univerjs/ui';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocSkeletonManagerService } from '@univerjs/docs';
 import {
     MoveCursorDownShortcut,
     MoveCursorLeftShortcut,
@@ -50,9 +51,9 @@ import { DocClipboardService, IDocClipboardService } from './services/clipboard/
 import { DocClipboardController } from './controllers/clipboard.controller';
 import { DocEditorBridgeController } from './controllers/doc-editor-bridge.controller';
 import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
-import { DocFloatingObjectController } from './controllers/doc-floating-object.controller';
+import { DocFloatingObjectRenderController } from './controllers/doc-floating-object.controller';
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
-import { TextSelectionController } from './controllers/text-selection.controller';
+import { DocTextSelectionRenderController } from './controllers/text-selection.controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 import { DocsRenderService } from './services/doc-render.service';
@@ -109,8 +110,6 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocClipboardController],
             [DocEditorBridgeController],
             [DocsRenderService],
-            [DocFloatingObjectController],
-            [TextSelectionController],
             [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
             [IDocClipboardService, { useClass: DocClipboardService }],
             [DocCanvasPopManagerService],
@@ -142,8 +141,11 @@ export class UniverDocsUIPlugin extends Plugin {
     private _initRenderBasics(): void {
         ([
             DocRenderController,
+            DocSkeletonManagerService,
             DocZoomRenderController,
             DocBackScrollRenderController,
+            DocFloatingObjectRenderController,
+            DocTextSelectionRenderController,
         ]).forEach((m) => {
             this._renderManagerSrv.registerRenderController(UniverInstanceType.UNIVER_DOC, m);
         });

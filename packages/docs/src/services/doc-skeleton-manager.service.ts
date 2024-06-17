@@ -14,130 +14,78 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { IUniverInstanceService, LocaleService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import type { DocumentViewModel } from '@univerjs/engine-render';
+import type { DocumentDataModel, Nullable } from '@univerjs/core';
+import { LocaleService, RxDisposable } from '@univerjs/core';
+import type { DocumentViewModel, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DocumentSkeleton } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 
-import type { IDocumentViewModelManagerParam } from './doc-view-model-manager.service';
 import { DocViewModelManagerService } from './doc-view-model-manager.service';
-
-export interface IDocSkeletonManagerParam {
-    unitId: string;
-    skeleton: DocumentSkeleton;
-    dirty: boolean;
-}
 
 /**
  * This service is for document build and manage doc skeletons.
  */
-export class DocSkeletonManagerService extends RxDisposable {
-    private _currentSkeletonUnitId: string = '';
+export class DocSkeletonManagerService extends RxDisposable implements IRenderModule {
+    private _skeleton: DocumentSkeleton;
 
-    private _docSkeletonMap: Map<string, IDocSkeletonManagerParam> = new Map();
-
-    private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<IDocSkeletonManagerParam>>(null);
+    private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<DocumentSkeleton>>(null);
     readonly currentSkeleton$ = this._currentSkeleton$.asObservable();
 
     // CurrentSkeletonBefore for pre-triggered logic during registration
-    private readonly _currentSkeletonBefore$ = new BehaviorSubject<Nullable<IDocSkeletonManagerParam>>(null);
-
+    private readonly _currentSkeletonBefore$ = new BehaviorSubject<Nullable<DocumentSkeleton>>(null);
     readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
 
     constructor(
+        private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
     ) {
         super();
-        this._initialize();
-    }
 
-    private _initialize() {
         this._init();
     }
 
     override dispose(): void {
+        super.dispose();
+
         this._currentSkeletonBefore$.complete();
         this._currentSkeleton$.complete();
-        this._docSkeletonMap.clear();
     }
 
     private _init() {
+        // TODO@wzhudev: useless when we move doc view model manager service to render unit
         this._docViewModelManagerService.currentDocViewModel$
             .pipe(takeUntil(this.dispose$))
             .subscribe((docViewModel) => {
-                if (docViewModel == null) {
+                if (!docViewModel) {
                     return;
                 }
 
-                this._setCurrent(docViewModel);
+                this._setCurrent(docViewModel.docViewModel);
             });
 
         this._docViewModelManagerService.getAllModel().forEach((docViewModel) => {
-            if (docViewModel == null) {
-                return;
-            }
-
-            this._setCurrent(docViewModel);
-        });
-
-        this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
-            this._docSkeletonMap.delete(documentModel.getUnitId());
-
-            this._currentSkeletonUnitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() ?? '';
+            this._setCurrent(docViewModel.docViewModel);
         });
     }
 
-    getCurrent(): Nullable<IDocSkeletonManagerParam> {
-        return this.getSkeletonByUnitId(this._currentSkeletonUnitId);
+    getSkeleton(): Nullable<DocumentSkeleton> {
+        return this._skeleton;
     }
 
-    getAllSkeleton(): Map<string, IDocSkeletonManagerParam> {
-        return this._docSkeletonMap;
-    }
-
-    makeDirty(unitId: string, state: boolean = true) {
-        const param = this.getSkeletonByUnitId(unitId);
-        if (param == null) {
-            return;
+    private _setCurrent(docViewModel: DocumentViewModel): Nullable<DocumentSkeleton> {
+        if (!this._skeleton) {
+            this._skeleton = this._buildSkeleton(docViewModel);
         }
 
-        param.dirty = state;
-    }
+        const skeleton = this._skeleton;
+        skeleton.calculate();
 
-    getSkeletonByUnitId(unitId: string): Nullable<IDocSkeletonManagerParam> {
-        return this._docSkeletonMap.get(unitId);
-    }
+        this._currentSkeletonBefore$.next(skeleton);
+        this._currentSkeleton$.next(skeleton);
 
-    private _setCurrent(docViewModelParam: IDocumentViewModelManagerParam): Nullable<IDocSkeletonManagerParam> {
-        const { unitId } = docViewModelParam;
-
-        if (!this._docSkeletonMap.has(unitId)) {
-            const skeleton = this._buildSkeleton(docViewModelParam.docViewModel);
-
-            skeleton.calculate();
-
-            this._docSkeletonMap.set(unitId, {
-                unitId,
-                skeleton,
-                dirty: false,
-            });
-        } else {
-            const skeletonParam = this.getSkeletonByUnitId(unitId)!;
-            skeletonParam.skeleton.calculate();
-            skeletonParam.dirty = true;
-        }
-
-        this._currentSkeletonUnitId = unitId;
-
-        this._currentSkeletonBefore$.next(this.getCurrent());
-
-        this._currentSkeleton$.next(this.getCurrent());
-
-        return this.getCurrent();
+        return this.getSkeleton();
     }
 
     private _buildSkeleton(documentViewModel: DocumentViewModel) {

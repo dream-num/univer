@@ -138,7 +138,7 @@ export class DocFloatingObjectController extends Disposable {
                     const params = command.params as IRichTextEditingMutationParams;
                     const { unitId: commandUnitId } = params;
 
-                    const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
+                    const docsSkeletonObject = this._docSkeletonManagerService.getSkeleton();
 
                     if (docsSkeletonObject == null) {
                         return;

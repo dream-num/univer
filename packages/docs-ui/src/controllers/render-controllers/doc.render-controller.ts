@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
 import { ICommandService, IConfigService, RxDisposable } from '@univerjs/core';
-import type { IDocSkeletonManagerParam, IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSkeletonManagerService, RichTextEditingMutation, VIEWPORT_KEY } from '@univerjs/docs';
 import type { DocumentSkeleton, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { DocBackground, Documents, EVENT_TYPE, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
@@ -130,21 +130,20 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         });
     }
 
-    private _create(param: Nullable<IDocSkeletonManagerParam>) {
-        if (!param) {
+    private _create(skeleton: Nullable<DocumentSkeleton>) {
+        if (!skeleton) {
             return;
         }
 
-        const { skeleton: documentSkeleton } = param;
         const { mainComponent, components } = this._context;
 
         const docsComponent = mainComponent as Documents;
         const docBackground = components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground;
 
-        docsComponent.changeSkeleton(documentSkeleton);
-        docBackground.changeSkeleton(documentSkeleton);
+        docsComponent.changeSkeleton(skeleton);
+        docBackground.changeSkeleton(skeleton);
 
-        this._recalculateSizeBySkeleton(documentSkeleton);
+        this._recalculateSizeBySkeleton(skeleton);
     }
 
     private _initCommandListener() {
@@ -156,12 +155,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 const params = command.params as IRichTextEditingMutationParams;
                 const { unitId } = params;
 
-                const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
-                if (docsSkeletonObject == null) {
+                const skeleton = this._docSkeletonManagerService.getSkeleton();
+                if (!skeleton) {
                     return;
                 }
-
-                const { skeleton } = docsSkeletonObject;
 
                 // TODO: `disabled` is only used for read only demo, and will be removed in the future.
                 const disabled = !!skeleton.getViewModel().getDataModel().getSnapshot().disabled;

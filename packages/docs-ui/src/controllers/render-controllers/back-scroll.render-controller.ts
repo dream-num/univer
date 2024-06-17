@@ -55,7 +55,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
     private _scrollToSelection(unitId: string) {
         const activeTextRange = this._textSelectionManagerService.getActiveRange();
         const docObject = neoGetDocObject(this._context);
-        const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
+        const skeleton = this._docSkeletonManagerService.getSkeleton()?.skeleton;
 
         if (activeTextRange == null || docObject == null || skeleton == null) {
             return;

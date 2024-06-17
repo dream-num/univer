@@ -15,18 +15,15 @@
  */
 
 /* eslint-disable node/prefer-global/process */
+
 import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
-import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
-import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
-import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { enUS, ruRU, zhCN } from '../locales';
 
@@ -58,7 +55,7 @@ univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
     footer: false,
 });
-univer.registerPlugin(UniverDrawingPlugin);
+
 univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverDocsUIPlugin, {
     container: 'univerdoc',
@@ -69,9 +66,7 @@ univer.registerPlugin(UniverDocsUIPlugin, {
     },
 });
 
-univer.registerPlugin(UniverDrawingUIPlugin);
-univer.registerPlugin(UniverDocsDrawingPlugin);
-univer.registerPlugin(UniverDocsDrawingUIPlugin);
+// univer.registerPlugin(UniverDocsDrawingUIPlugin);
 
 univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
 

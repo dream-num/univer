@@ -169,6 +169,8 @@ describe('Test clipboard', () => {
             expect(values && values[0][0]?.v).toBe('row1col2');
             expect(styles && styles[0][0]).toStrictEqual({
                 bg: { rgb: 'rgb(255,0,0)' },
+                ff: 'Arial',
+                fs: 10,
                 ht: 2,
                 vt: 2,
             });
@@ -209,6 +211,8 @@ describe('Test clipboard', () => {
             expect(values && values[0][0]?.v).toBe('row1col2');
             expect(styles && styles[0][0]).toStrictEqual({
                 bg: { rgb: 'rgb(255,0,0)' },
+                ff: 'Arial',
+                fs: 10,
                 ht: 2,
                 vt: 2,
             });
@@ -249,6 +253,8 @@ describe('Test clipboard', () => {
             expect(values && values[0][0]?.v).toBe('row1col2');
             expect(styles && styles[0][0]).toStrictEqual({
                 bg: { rgb: 'rgb(255,0,0)' },
+                ff: 'Arial',
+                fs: 10,
                 ht: 2,
                 vt: 2,
             });
@@ -293,11 +299,15 @@ describe('Test clipboard', () => {
 
             expect(styles && styles[0][0]).toStrictEqual({
                 bg: { rgb: 'rgb(255,0,0)' },
+                ff: 'Arial',
+                fs: 10,
                 ht: 2,
                 vt: 2,
             });
             expect(styles && styles[1][0]).toStrictEqual({
                 bg: { rgb: 'rgb(255,0,0)' },
+                ff: 'Arial',
+                fs: 10,
                 ht: 2,
                 vt: 2,
             });
@@ -349,11 +359,15 @@ describe('Test clipboard', () => {
                 expect(values && values[i][2]?.v).toBe('row1col2');
                 expect(styles && styles[i][0]).toStrictEqual({
                     bg: { rgb: 'rgb(255,0,0)' },
+                    ff: 'Arial',
+                    fs: 10,
                     ht: 2,
                     vt: 2,
                 });
                 expect(styles && styles[i][2]).toStrictEqual({
                     bg: { rgb: 'rgb(255,0,0)' },
+                    ff: 'Arial',
+                    fs: 10,
                     ht: 2,
                     vt: 2,
                 });
@@ -443,6 +457,8 @@ describe('Test clipboard', () => {
             expect(values && values[0][0]?.v).toBe('row1col2');
             expect(styles && styles[0][0]).toStrictEqual({
                 bg: { rgb: 'rgb(255,0,0)' },
+                ff: 'Arial',
+                fs: 10,
                 ht: 2,
                 vt: 2,
             });
@@ -564,7 +580,10 @@ describe('Test clipboard', () => {
             const mergedCells = getMergedCells(startRow, startColumn, endRow, endColumn);
 
             expect(values && values[0][0]?.v).toBe('row1col2');
-            expect(styles && styles[0][0]).toStrictEqual({ bg: { rgb: 'rgb(255,0,0)' }, ht: 2, vt: 2 });
+            expect(styles && styles[0][0]).toStrictEqual({
+                bg: { rgb: 'rgb(255,0,0)' }, ff: 'Arial',
+                fs: 10, ht: 2, vt: 2,
+            });
             expect(mergedCells && mergedCells[0]).toStrictEqual({
                 startRow: 9,
                 startColumn: 5,
@@ -666,7 +685,10 @@ describe('Test clipboard', () => {
 
             // first merged cells changed
             expect(values && values[0][0]?.v).toBe('row1col2');
-            expect(styles && styles[0][0]).toStrictEqual({ bg: { rgb: 'rgb(255,0,0)' }, ht: 2, vt: 2 });
+            expect(styles && styles[0][0]).toStrictEqual({
+                bg: { rgb: 'rgb(255,0,0)' }, ff: 'Arial',
+                fs: 10, ht: 2, vt: 2,
+            });
 
             // second merged cells not changed
             expect(values && values[2][1]?.v).toBe('456');

@@ -523,7 +523,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
                     };
                 }
             }
-        } else if (key === 'data-rotate') {
+        } else if (key === '--data-rotate') {
             const regex = /[+-]?\d+/;
             const match = value.match(regex);
 

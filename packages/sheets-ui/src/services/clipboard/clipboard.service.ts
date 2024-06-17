@@ -441,7 +441,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const mergeData = worksheet?.getMergeData();
 
-        if (mergeData) {
+        if (mergeData.length) {
             const pastedRangeLapWithMergedCell = mergeData.some((m) => {
                 return rangeIntersectWithDiscreteRange(m, pasteTarget.pastedRange) && !discreteRangeContainsRange(pasteTarget.pastedRange, m);
             });

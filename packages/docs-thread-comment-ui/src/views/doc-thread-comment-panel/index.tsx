@@ -64,6 +64,7 @@ export const DocThreadCommentPanel = () => {
                         comment,
                     };
                     commandService.executeCommand(AddDocCommentComment.id, params);
+                    docCommentService.endAdd();
                     return false;
                 }
 

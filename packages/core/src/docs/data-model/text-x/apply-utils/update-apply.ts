@@ -34,6 +34,7 @@ import {
     deleteTables,
     deleteTextRuns,
     insertCustomBlocks,
+    insertCustomRanges,
     insertParagraphs,
     insertTables,
     insertTextRuns,
@@ -438,43 +439,23 @@ function updateCustomRanges(
     currentIndex: number,
     coverType: UpdateDocsAttributeType
 ) {
+    if (!body.customRanges) {
+        body.customRanges = [];
+    }
     const { customRanges } = body;
 
-    const { tables: updateDataCustomRanges } = updateBody;
+    const { customRanges: updateDataCustomRanges } = updateBody;
 
     if (customRanges == null || updateDataCustomRanges == null) {
         return;
     }
 
-    const removeCustomRanges = deleteCustomRanges(body, textLength, currentIndex);
-    if (coverType !== UpdateDocsAttributeType.REPLACE) {
-        const newUpdateCustomRanges: ICustomRange[] = [];
-        for (const updateCustomRange of updateDataCustomRanges) {
-            const { startIndex: updateStartIndex, endIndex: updateEndIndex } = updateCustomRange;
-            let splitUpdateCustomRanges: ICustomRange[] = [];
-            for (const removeCustomRange of removeCustomRanges) {
-                const { startIndex: removeStartIndex, endIndex: removeEndIndex } = removeCustomRange;
-                if (removeStartIndex >= updateStartIndex && removeEndIndex <= updateEndIndex) {
-                    if (coverType === UpdateDocsAttributeType.COVER) {
-                        splitUpdateCustomRanges.push({
-                            ...removeCustomRange,
-                            ...updateCustomRange,
-                        });
-                    } else {
-                        splitUpdateCustomRanges.push({
-                            ...updateCustomRange,
-                            ...removeCustomRange,
-                        });
-                    }
-                    break;
-                }
-            }
-            newUpdateCustomRanges.push(...splitUpdateCustomRanges);
-            splitUpdateCustomRanges = [];
-        }
-        updateBody.customRanges = newUpdateCustomRanges;
+    let removeCustomRanges: ICustomRange[] = [];
+    if (coverType === UpdateDocsAttributeType.REPLACE) {
+        removeCustomRanges = deleteCustomRanges(body, textLength, currentIndex);
     }
-    insertTables(body, updateBody, textLength, currentIndex);
+
+    insertCustomRanges(body, updateBody, textLength, currentIndex);
 
     return removeCustomRanges;
 }

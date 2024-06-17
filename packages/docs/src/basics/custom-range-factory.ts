@@ -32,6 +32,8 @@ interface IAddCustomRangeParam {
 export function addCustomRangeFactory(param: IAddCustomRangeParam) {
     const { unitId, range, rangeId, rangeType, segmentId } = param;
     const { startOffset, endOffset } = range;
+    const start = Math.min(startOffset, endOffset);
+    const end = Math.max(startOffset, endOffset);
 
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
         id: RichTextEditingMutation.id,
@@ -51,32 +53,33 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam) {
             {
                 rangeId,
                 rangeType,
-                startIndex: startOffset,
-                endIndex: endOffset + 2,
+                startIndex: start,
+                endIndex: end,
             },
         ],
     };
 
-    if (startOffset > 0) {
+    if (start > 0) {
         textX.push({
             t: TextXActionType.RETAIN,
-            len: startOffset,
+            len: start,
             segmentId,
         });
     }
+
     textX.push({
         t: TextXActionType.INSERT,
         body: {
             dataStream: '\x1F',
         },
         len: 1,
-        line: startOffset,
+        line: start,
     });
 
     textX.push({
         t: TextXActionType.RETAIN,
         body,
-        len: endOffset - startOffset + 2,
+        len: end - start,
         segmentId,
     });
 
@@ -86,7 +89,7 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam) {
             dataStream: '\x1E',
         },
         len: 1,
-        line: startOffset,
+        line: start,
     });
 
     doMutation.params.actions = jsonX.editOp(textX.serialize());

@@ -270,6 +270,8 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
 export function checkCellValueType(v: Nullable<CellValue>, oldType: Nullable<CellValueType>): Nullable<CellValueType> {
     if (v === null) return null;
 
+    if (oldType === CellValueType.FORCE_STRING) return oldType;
+
     if (typeof v === 'string') {
         if (isSafeNumeric(v)) {
             if ((+v === 0 || +v === 1) && oldType === CellValueType.BOOLEAN) {

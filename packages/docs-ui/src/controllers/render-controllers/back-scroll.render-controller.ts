@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import { DocSkeletonManagerService, getDocObject, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
-import { getAnchorBounding, IRenderManagerService, NodePositionConvertToCursor } from '@univerjs/engine-render';
+import type { DocumentDataModel } from '@univerjs/core';
+import { RxDisposable } from '@univerjs/core';
+import { DocSkeletonManagerService, neoGetDocObject, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { getAnchorBounding, NodePositionConvertToCursor } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
 const ANCHOR_WIDTH = 1.5;
 
-@OnLifecycle(LifecycleStages.Rendered, BackScrollController)
-export class BackScrollController extends RxDisposable {
+export class DocBackScrollRenderController extends RxDisposable implements IRenderModule {
     constructor(
+        private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @IEditorService private readonly _editorService: IEditorService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -54,7 +54,7 @@ export class BackScrollController extends RxDisposable {
     // Let the selection show on the current screen.
     private _scrollToSelection(unitId: string) {
         const activeTextRange = this._textSelectionManagerService.getActiveRange();
-        const docObject = this._getDocObject();
+        const docObject = neoGetDocObject(this._context);
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
         if (activeTextRange == null || docObject == null || skeleton == null) {
@@ -114,9 +114,5 @@ export class BackScrollController extends RxDisposable {
 
         const config = viewportMain.transViewportScroll2ScrollValue(offsetX, offsetY);
         viewportMain.scrollBy(config);
-    }
-
-    private _getDocObject() {
-        return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
 }

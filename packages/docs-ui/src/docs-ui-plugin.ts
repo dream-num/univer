@@ -49,11 +49,11 @@ import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './sh
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocClipboardController } from './controllers/clipboard.controller';
 import { DocEditorBridgeController } from './controllers/doc-editor-bridge.controller';
-import { DocRenderController } from './views/doc-canvas-view';
+import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 import { DocFloatingObjectController } from './controllers/doc-floating-object.controller';
-import { DocZoomRenderController } from './controllers/zoom.controller';
+import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { TextSelectionController } from './controllers/text-selection.controller';
-import { BackScrollController } from './controllers/back-scroll.controller';
+import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 import { DocsRenderService } from './services/doc-render.service';
 
@@ -105,47 +105,25 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initDependencies(injector: Injector) {
         const dependencies: Dependency[] = [
-            // Controller
-            [
-                DocUIController,
-                {
-                    useFactory: () => this._injector.createInstance(DocUIController, this._config),
-                },
-            ],
+            [DocUIController, { useFactory: () => this._injector.createInstance(DocUIController, this._config) }],
             [DocClipboardController],
-
-            // Some of the controllers here should be moved to RenderUnit.
             [DocEditorBridgeController],
             [DocsRenderService],
             [DocFloatingObjectController],
             [TextSelectionController],
-            [BackScrollController],
-            [
-                // controllers
-                AppUIController,
-                {
-                    useFactory: () => this._injector.createInstance(AppUIController, this._config),
-                },
-            ],
-            [
-                IDocClipboardService,
-                {
-                    useClass: DocClipboardService,
-                },
-            ],
+            [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
+            [IDocClipboardService, { useClass: DocClipboardService }],
             [DocCanvasPopManagerService],
         ];
 
-        dependencies.forEach((d) => {
-            injector.add(d);
-        });
+        dependencies.forEach((d) => injector.add(d));
     }
 
     private _markDocAsFocused() {
         const currentService = this._injector.get(IUniverInstanceService);
         const editorService = this._injector.get(IEditorService);
         try {
-            const doc = currentService.getCurrentUniverDocInstance();
+            const doc = currentService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
             if (!doc) return;
 
             const id = doc.getUnitId();
@@ -165,6 +143,7 @@ export class UniverDocsUIPlugin extends Plugin {
         ([
             DocRenderController,
             DocZoomRenderController,
+            DocBackScrollRenderController,
         ]).forEach((m) => {
             this._renderManagerSrv.registerRenderController(UniverInstanceType.UNIVER_DOC, m);
         });

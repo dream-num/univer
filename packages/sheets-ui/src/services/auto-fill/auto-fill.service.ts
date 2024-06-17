@@ -275,7 +275,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             source,
             target,
             unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId(),
-            subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId(),
+            subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId(),
         } = this.autoFillLocation || {};
         const direction = this.direction;
         if (!source || !target || unitId !== triggerUnitId || subUnitId !== triggerSubUnitId) {

@@ -23,6 +23,8 @@
             "cache": false
         },
 
-        "lint:types": {}
+        "lint:types": {},
+
+        "sync:cnpm": {}
     }
 }

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-conditional-formatting",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "private": false,
     "description": "Conditional formatting plugin for Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -57,19 +57,20 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "tsc && vite build",
+        "sync:cnpm": "cnpm sync"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "dayjs": ">=1.11.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "^0.1.37"
+        "@univerjs/protocol": "0.1.38-alpha.4"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
@@ -78,12 +79,12 @@
         "@univerjs/icons-svg": "^0.1.55",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "dayjs": "^1.11.11",
         "rxjs": "^7.8.1",
         "sharp": "^0.33.4",
         "typescript": "^5.4.5",
-        "vite": "^5.2.12",
+        "vite": "^5.2.13",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

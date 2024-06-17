@@ -66,7 +66,7 @@ export function getCurrentUnitInfo(currentUniverService: IUniverInstanceService)
     let subUnitId: Nullable<string>;
 
     if (current.type === UniverInstanceType.UNIVER_SHEET) {
-        subUnitId = (current as Workbook).getActiveSheet().getSheetId();
+        subUnitId = (current as Workbook).getActiveSheet()?.getSheetId();
     } else if (current.type === UniverInstanceType.UNIVER_DOC) {
         subUnitId = unitId;
     } else if (current.type === UniverInstanceType.UNIVER_SLIDE) {

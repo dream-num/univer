@@ -46,7 +46,7 @@ import { ConditionalFormattingClearController } from './controllers/cf.clear.con
 import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
 
 export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
-    static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
+    static override pluginName = `${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_UI`;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     static commandList = [
@@ -69,17 +69,21 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
     ];
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsConditionalFormattingUIConfig> = {},
+        private readonly _config: Partial<IUniverSheetsConditionalFormattingUIConfig> = {
+        },
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();
         this._config = Tools.deepMerge({}, DefaultSheetConditionalFormattingUiConfig, this._config);
-
+        const skipConditionalFormattingCore = this._config.skipConditionalFormattingCore ?? false;
         this._initCommand();
-        SheetsConditionalFormattingPlugin.dependencyList.forEach((dependency) => {
-            this._injector.add(dependency);
-        });
+        if (!skipConditionalFormattingCore) {
+            SheetsConditionalFormattingPlugin.dependencyList.forEach((dependency) => {
+                this._injector.add(dependency);
+            });
+        }
+
         this._injector.add([SheetsCfRenderController]);
         this._injector.add([SheetsCfRefRangeController]);
         this._injector.add([ConditionalFormattingCopyPasteController]);
@@ -97,7 +101,13 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
     }
 
     _initCommand() {
-        [...SheetsConditionalFormattingPlugin.mutationList, ...UniverSheetsConditionalFormattingUIPlugin.commandList].forEach((m) => {
+        const skipConditionalFormattingCore = this._config.skipConditionalFormattingCore ?? false;
+        if (!skipConditionalFormattingCore) {
+            SheetsConditionalFormattingPlugin.mutationList.forEach((m) => {
+                this._commandService.registerCommand(m);
+            });
+        }
+        [...UniverSheetsConditionalFormattingUIPlugin.commandList].forEach((m) => {
             this._commandService.registerCommand(m);
         });
     }

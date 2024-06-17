@@ -45,7 +45,12 @@ export class DataValidationSheetController extends Disposable {
                         if (!workbook) {
                             return { redos: [], undos: [] };
                         }
-                        const subUnitId = params.subUnitId || workbook.getActiveSheet().getSheetId();
+                        const subUnitId = params.subUnitId || workbook.getActiveSheet()?.getSheetId();
+
+                        if (!subUnitId) {
+                            return { redos: [], undos: [] };
+                        }
+
                         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId);
                         if (!manager) {
                             return { redos: [], undos: [] };

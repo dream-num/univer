@@ -121,42 +121,42 @@ describe('Test move rows cols', () => {
     function getRowCount(): number {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         return worksheet.getRowCount();
     }
 
     function getColCount(): number {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         return worksheet.getColumnCount();
     }
 
     function getCellInfo(row: number, col: number): Nullable<ICellData> {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         return worksheet.getCellMatrix().getValue(row, col);
     }
 
     function getMergedInfo(row: number, col: number): Nullable<IRange> {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         return worksheet.getMergedCell(row, col);
     }
 
     function getRowHeight(row: number): number {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         return worksheet.getRowHeight(row);
     }
 
     function getColWidth(col: number): number {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         return worksheet.getColumnWidth(col);
     }
 

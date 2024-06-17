@@ -64,6 +64,7 @@ univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
 });
+window.univerAPI = FUniver.newAPI(univer);
 
 univer.registerPlugin(UniverDocsUIPlugin);
 
@@ -139,8 +140,7 @@ univer.registerPlugin(UniverDebuggerPlugin);
 
 const injector = univer.__getInjector();
 const userManagerService = injector.get(UserManagerService);
-userManagerService.currentUser = mockUser;
-userManagerService.addUser(mockUser);
+userManagerService.setCurrentUser(mockUser);
 
 declare global {
     // eslint-disable-next-line ts/naming-convention
@@ -158,4 +158,3 @@ setTimeout(() => {
 }, LOAD_LAZY_PLUGINS_TIMEOUT);
 
 window.univer = univer;
-window.univerAPI = FUniver.newAPI(univer);

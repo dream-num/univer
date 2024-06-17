@@ -148,7 +148,7 @@ export class SheetsThreadCommentController extends Disposable {
                 if (currentUnitId !== unitId) {
                     return;
                 }
-                const currentSheetId = currentUnit.getActiveSheet().getSheetId();
+                const currentSheetId = currentUnit.getActiveSheet()?.getSheetId();
                 if (currentSheetId !== subUnitId) {
                     await this._commandService.executeCommand(SetWorksheetActiveOperation.id, {
                         unitId,

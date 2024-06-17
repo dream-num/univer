@@ -36,6 +36,7 @@ import { BorderStyleManagerService } from '../../../services/border-style-manage
 import { SelectionManagerService } from '../../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
 import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../../services/permission/worksheet-permission';
+import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -98,6 +99,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
         override onStarting(injector: Injector): void {
             injector.add([WorksheetPermissionService]);
             injector.add([WorksheetProtectionPointModel]);
+            injector.add([RangeProtectionRuleModel]);
             injector.add([WorkbookPermissionService]);
             injector.add([WorksheetProtectionRuleModel]);
             injector.add([SelectionManagerService]);

@@ -111,7 +111,7 @@ describe('Test set frozen commands', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
 
-                const targetActiveSheet = workbook.getActiveSheet();
+                const targetActiveSheet = workbook.getActiveSheet()!;
                 const targetSheetId = targetActiveSheet?.getSheetId();
                 const originFreeze = workbook.getSheetBySheetId(targetSheetId)?.getConfig().freeze;
                 expect(

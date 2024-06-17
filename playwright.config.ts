@@ -2,6 +2,11 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
+ * If you are running tests in CI, you can use the `CI` environment variable to adjust the configuration.
+ */
+const isCI = !!process.env.CI;
+
+/**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
@@ -35,7 +40,7 @@ export default defineConfig({
     projects: [
         {
             name: 'chromium',
-            use: { ...devices['Desktop Chrome'], headless: true },
+            use: { ...devices['Desktop Chrome'], headless: isCI },
         },
 
         // {
@@ -72,7 +77,7 @@ export default defineConfig({
     webServer: {
         command: 'pnpm serve:e2e',
         url: 'http://localhost:3000/sheets',
-        reuseExistingServer: !process.env.CI,
+        reuseExistingServer: !isCI,
         timeout: 10000,
         stdout: 'pipe',
         stderr: 'pipe',

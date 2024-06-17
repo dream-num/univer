@@ -14,7 +14,24 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CommandType, type ICommand, IUniverInstanceService, type Univer, UniverInstanceType } from '@univerjs/core';
+
+declare global {
+    // eslint-disable-next-line ts/naming-convention
+    interface Window {
+        univer?: Univer;
+    }
+}
+
+export const DisposeUniverCommand: ICommand = {
+    id: 'debugger.command.dispose-unit',
+    type: CommandType.COMMAND,
+    handler: () => {
+        window.univer?.dispose();
+
+        return true;
+    },
+};
 
 export const DisposeCurrentUnitCommand: ICommand = {
     id: 'debugger.command.dispose-current-unit',

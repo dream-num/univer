@@ -115,6 +115,7 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         });
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _generateConditionalFormattingMutations(
         pastedRange: IDiscreteRange,
         copyInfo: {
@@ -126,6 +127,8 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const sheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
+        if (!sheet) return { redos: [], undos: [] };
+
         const subUnitId = sheet.getSheetId();
         if (copyInfo.copyType === COPY_TYPE.CUT) {
             // This do not need to deal with clipping.

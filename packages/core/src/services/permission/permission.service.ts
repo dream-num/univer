@@ -22,10 +22,9 @@ import type { IPermissionPoint, IPermissionService } from './type';
 import { PermissionStatus } from './type';
 
 export class PermissionService extends Disposable implements IPermissionService {
-    private _permissionPointMap: Map<string, BehaviorSubject<IPermissionPoint<unknown>>> = new Map();
+    private _permissionPointMap: Map<string, BehaviorSubject<IPermissionPoint<any>>> = new Map();
 
     private _permissionPointUpdate$ = new Subject<IPermissionPoint<unknown>>();
-
     public permissionPointUpdate$ = this._permissionPointUpdate$.asObservable();
 
     deletePermissionPoint(permissionId: string) {
@@ -36,11 +35,17 @@ export class PermissionService extends Disposable implements IPermissionService 
         }
     };
 
-    addPermissionPoint<T = boolean>(item: IPermissionPoint<T>) {
+    addPermissionPoint<T = boolean>(_item: IPermissionPoint<T> | BehaviorSubject<IPermissionPoint<T>>) {
+        const isSubject = _item instanceof BehaviorSubject;
+        const item = isSubject ? _item.getValue() : _item;
         if (!item.id) {
             return false;
         }
-        this._permissionPointMap.set(item.id, new BehaviorSubject<IPermissionPoint<unknown>>(item));
+        const permissionPoint = this._permissionPointMap.get(item.id);
+        if (permissionPoint) {
+            throw new Error(`${item.id} PermissionPoint already exists`);
+        }
+        this._permissionPointMap.set(item.id, isSubject ? _item : new BehaviorSubject<IPermissionPoint<unknown>>(item));
         this._permissionPointUpdate$.next(item);
         return true;
     };
@@ -77,10 +82,11 @@ export class PermissionService extends Disposable implements IPermissionService 
         const subjectList = permissionIdList.map((id) => {
             const subject = this._permissionPointMap?.get(id);
             if (!subject) {
-                throw new Error(`${id} permissionPoint is not exist`);
+                throw new Error(`[PermissionService]: ${id} permissionPoint does not exist!`);
             }
             return subject.asObservable();
         });
+
         return combineLatest(subjectList).pipe(
             // Check that all permissions exist
             map((list) => {
@@ -93,10 +99,19 @@ export class PermissionService extends Disposable implements IPermissionService 
         const valueList = permissionIdList.map((id) => {
             const subject = this._permissionPointMap?.get(id);
             if (!subject) {
-                throw new Error(`${id} permissionPoint is not exist`);
+                throw new Error(`[PermissionService]: ${id} permissionPoint does not exist!`);
             }
             return subject.getValue();
         });
+
         return valueList;
+    }
+
+    getAllPermissionPoint() {
+        const cacheMap = new Map<string, BehaviorSubject<IPermissionPoint<unknown>>>();
+        this._permissionPointMap.forEach((v, key) => {
+            cacheMap.set(key, v);
+        });
+        return cacheMap;
     }
 }

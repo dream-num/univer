@@ -132,7 +132,11 @@ export class StatusBarController extends Disposable {
             return this._clearResult();
         }
         const unitId = workbook.getUnitId();
-        const sheetId = workbook.getActiveSheet().getSheetId();
+        const sheetId = workbook.getActiveSheet()?.getSheetId();
+        if (!sheetId) {
+            return this._clearResult();
+        }
+
         const sheetData: ISheetData = {};
         const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
 

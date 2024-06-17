@@ -19,10 +19,9 @@ import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandPar
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import React, { useRef, useState } from 'react';
 import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
-import { ICommandService, LocaleService, Tools, type UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { ICommandService, type IUser, LocaleService, Tools, type UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import { Dropdown, Menu, MenuItem } from '@univerjs/design';
-import type { IUser } from '@univerjs/protocol';
 import cs from 'clsx';
 import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { ThreadCommentEditor } from '../thread-comment-editor';

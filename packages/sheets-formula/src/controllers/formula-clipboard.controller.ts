@@ -93,7 +93,13 @@ export class FormulaClipboardController extends Disposable {
         const matrix = data;
         const workbook = this._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const unitId = workbook.getUnitId();
-        const subUnitId = workbook.getActiveSheet().getSheetId();
+        const subUnitId = workbook.getActiveSheet()?.getSheetId();
+        if (!unitId || !subUnitId) {
+            return {
+                undos: [],
+                redos: [],
+            };
+        }
 
         return this._injector.invoke((accessor) => getSetCellFormulaMutations(
             unitId,

@@ -16,15 +16,24 @@
 
 import type { HTTPHeaders } from './headers';
 
-/**
- * There are multiple events could be resolved from the HTTP server.
- */
-export type HTTPEvent<T> = HTTPResponse<T> | HTTPResponseError;
+export type HTTPEvent<T> = HTTPResponse<T> | HTTPProgress;
+export enum HTTPEventType {
+    DownloadProgress,
+    Response,
+}
+
+interface IHTTPEvent {
+    type: HTTPEventType;
+}
 
 export type HTTPResponseBody = string | ArrayBuffer | Blob | object | null;
 
-/** Wraps (success) response info. */
-export class HTTPResponse<T> {
+/**
+ * Wraps success response info.
+ */
+export class HTTPResponse<T> implements IHTTPEvent {
+    readonly type = HTTPEventType.Response;
+
     readonly body: T;
     readonly headers: HTTPHeaders;
     readonly status: number;
@@ -47,6 +56,46 @@ export class HTTPResponse<T> {
         this.statusText = statusText;
     }
 }
+
+/**
+ * Progress event for HTTP request. Usually used for reporting download/upload progress or SSE streaming.
+ */
+export class HTTPProgress implements IHTTPEvent {
+    readonly type = HTTPEventType.DownloadProgress;
+
+    constructor(
+        /**
+         * Total number of bytes to download. Depending on the request or
+         * response, this may not be computable and thus may not be present.
+         */
+        public readonly total: number | undefined,
+
+        /**
+         * Number of bytes downloaded.
+         */
+        public readonly loaded: number,
+        /**
+         * The partial response body as downloaded so far.
+         *
+         * Only present if the responseType was `text`.
+         */
+        public readonly partialText?: string | undefined
+    ) {
+        // empty
+    }
+}
+
+export class ResponseHeader {
+    constructor(
+        readonly headers: HTTPHeaders,
+        readonly status: number,
+        readonly statusText: string
+    ) {
+        // empty
+    }
+}
+
+// #region error
 
 export class HTTPResponseError {
     readonly headers?: HTTPHeaders;
@@ -72,12 +121,4 @@ export class HTTPResponseError {
     }
 }
 
-export class ResponseHeader {
-    constructor(
-        readonly headers: HTTPHeaders,
-        readonly status: number,
-        readonly statusText: string
-    ) {
-        // empty
-    }
-}
+// #endregion

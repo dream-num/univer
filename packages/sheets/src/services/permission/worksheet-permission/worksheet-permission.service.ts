@@ -18,12 +18,11 @@ import type { Workbook, Worksheet } from '@univerjs/core';
 import { IPermissionService, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs/operators';
-
-// import type { UnitAction, UnitObject } from '@univerjs/protocol';
 import { UniverType } from '@univerjs/protocol';
 
 import type { IObjectModel, IObjectPointModel } from '../type';
-import { SheetInterceptorService } from '../../sheet-interceptor/sheet-interceptor.service';
+import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint } from '../permission-point';
+import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
 import { WorksheetProtectionRuleModel } from './worksheet-permission-rule.model';
 import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './utils';
 import { WorksheetProtectionPointModel } from './worksheet-permission-point.model';
@@ -40,7 +39,7 @@ export class WorksheetPermissionService extends RxDisposable {
         @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
         @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
         @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
+        @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel
     ) {
         super();
         this._init();
@@ -67,6 +66,15 @@ export class WorksheetPermissionService extends RxDisposable {
             });
             workbook.sheetDisposed$.subscribe((worksheet) => {
                 const subUnitId = worksheet.getSheetId();
+
+                const rangeRuleList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
+                rangeRuleList.forEach((rule) => {
+                    [RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint].forEach((F) => {
+                        const instance = new F(unitId, subUnitId, rule.permissionId);
+                        this._permissionService.deletePermissionPoint(instance.id);
+                    });
+                });
+
                 [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
                     const instance = new F(unitId, subUnitId);
                     this._permissionService.deletePermissionPoint(instance.id);
@@ -97,10 +105,6 @@ export class WorksheetPermissionService extends RxDisposable {
             this._worksheetProtectionRuleModel.ruleChange$.subscribe((info) => {
                 switch (info.type) {
                     case 'add': {
-                        getAllWorksheetPermissionPoint().forEach((F) => {
-                            const instance = new F(info.unitId, info.subUnitId);
-                            this._permissionService.addPermissionPoint(instance);
-                        });
                         break;
                     }
                     case 'delete': {

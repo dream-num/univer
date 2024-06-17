@@ -74,6 +74,9 @@ export class SelectionRenderController extends Disposable implements IRenderModu
     private _init() {
         const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            throw new Error('No active sheet');
+        }
         const sheetObject = this._getSheetObject();
 
         this._initViewMainListener(sheetObject);
@@ -135,6 +138,10 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         const valueArray = formulaOrRefString.split(',');
 
         let worksheet = workbook.getActiveSheet();
+
+        if (!worksheet) {
+            return [];
+        }
 
         const selections = [];
 
@@ -366,6 +373,9 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
         const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return;
+        }
 
         this._definedNamesService.setCurrentRange({
             range: lastSelection.range,
@@ -393,7 +403,9 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         if (!workbook) return;
 
         const unitId = workbook.getUnitId();
-        const sheetId = workbook.getActiveSheet().getSheetId();
+        const sheetId = workbook.getActiveSheet()?.getSheetId();
+        if (!sheetId) return;
+
         const current = this._selectionManagerService.getCurrent();
 
         if (selectionDataWithStyleList == null || selectionDataWithStyleList.length === 0) {
@@ -425,7 +437,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
                 const params = command.params as ISetZoomRatioOperationParams;
                 const { unitId, subUnitId } = params;
-                if (!(unitId === workbook.getUnitId() && subUnitId === worksheet.getSheetId())) {
+                if (!(unitId === workbook.getUnitId() && subUnitId === worksheet?.getSheetId())) {
                     return;
                 }
 

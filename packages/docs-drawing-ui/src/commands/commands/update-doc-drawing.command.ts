@@ -445,7 +445,7 @@ export interface IMoveInlineDrawingParams {
 }
 
 /**
- * The command to update drawing position.
+ * The command to move inline drawing.
  */
 export const IMoveInlineDrawingCommand: ICommand = {
     id: 'doc.command.move-inline-drawing',

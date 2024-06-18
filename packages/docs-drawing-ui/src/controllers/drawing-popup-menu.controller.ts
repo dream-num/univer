@@ -170,14 +170,14 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                 index: 2,
                 commandId: OpenImageCropOperation.id,
                 commandParams: { unitId, subUnitId, drawingId },
-                disable: false,
+                disable: true, // TODO: @JOCS, feature is not ready.
             },
             {
                 label: 'image-popup.reset',
                 index: 3,
                 commandId: ImageResetSizeOperation.id,
                 commandParams: [{ unitId, subUnitId, drawingId }],
-                disable: false,
+                disable: true, // TODO: @JOCS, feature is not ready.
             },
         ];
     }

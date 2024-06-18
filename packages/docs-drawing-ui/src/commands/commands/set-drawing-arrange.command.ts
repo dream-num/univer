@@ -39,7 +39,9 @@ export const SetDocDrawingArrangeCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        if (!params) return false;
+        if (params == null) {
+            return false;
+        }
 
         const docDrawingService = accessor.get(IDocDrawingService);
 

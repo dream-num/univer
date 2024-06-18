@@ -831,7 +831,7 @@ export class DrawingUpdateController extends Disposable {
 
                     if (params.length > 0) {
                         // this._drawingManagerService.batchUpdate(params);
-                        this._drawingManagerService.featurePluginUpdateNotification(params);
+                        // this._drawingManagerService.featurePluginUpdateNotification(params);
                     }
                 })
             )

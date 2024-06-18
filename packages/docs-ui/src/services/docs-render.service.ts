@@ -27,10 +27,14 @@ export class DocsRenderService extends RxDisposable {
     ) {
         super();
 
-        Promise.resolve().then(() => this._init());
+        this._init();
     }
 
     private _init() {
+        this._renderManagerService.createRender$
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((unitId) => this._createRenderWithId(unitId));
+
         this._instanceSrv.getTypeOfUnitAdded$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
             .pipe(takeUntil(this.dispose$))
             .subscribe((doc) => this._createRenderer(doc));
@@ -44,10 +48,14 @@ export class DocsRenderService extends RxDisposable {
 
     private _createRenderer(doc: DocumentDataModel) {
         const unitId = doc.getUnitId();
-        this._renderManagerService.createRender(unitId);
+        this._createRenderWithId(unitId);
 
         // NOTE@wzhudev: maybe not in univer mode
         this._renderManagerService.setCurrent(unitId);
+    }
+
+    private _createRenderWithId(unitId: string) {
+        this._renderManagerService.createRender(unitId);
     }
 
     private _disposeRenderer(doc: DocumentDataModel) {

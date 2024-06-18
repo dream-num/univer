@@ -24,6 +24,8 @@ export interface IDocumentViewModelManagerParam {
     docViewModel: DocumentViewModel;
 }
 
+// TODO@wzhudev: move this manager service into render unit
+
 /**
  * The view model manager is used to manage Doc view model. has a one-to-one correspondence with the doc skeleton.
  */

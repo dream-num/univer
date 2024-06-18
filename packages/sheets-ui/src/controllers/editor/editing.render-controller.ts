@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDocumentBody, IPosition, Nullable } from '@univerjs/core';
-import {
+import type { ICellData, ICommandInfo, IDocumentBody, IPosition, Nullable, Workbook } from '@univerjs/core';
+import { CellValueType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
+    Direction,
     Disposable,
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
+    FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_EDITOR_STANDALONE,
     FOCUSING_FORMULA_EDITOR,
     FOCUSING_SHEET,
@@ -27,10 +30,10 @@ import {
     HorizontalAlign,
     ICommandService,
     IContextService,
+    isFormulaString,
+    IUndoRedoService,
     IUniverInstanceService,
-    LifecycleStages,
     LocaleService,
-    OnLifecycle,
     toDisposable,
     Tools,
     VerticalAlign,
@@ -42,10 +45,12 @@ import {
     DOCS_COMPONENT_MAIN_LAYER_INDEX,
     DocSkeletonManagerService,
     DocViewModelManagerService,
+    MoveCursorOperation,
+    MoveSelectionOperation,
     RichTextEditingMutation,
     TextSelectionManagerService,
 } from '@univerjs/docs';
-import type { DocumentSkeleton, IDocumentLayoutObject, IEditorInputConfig, Scene } from '@univerjs/engine-render';
+import type { DocumentSkeleton, IDocumentLayoutObject, IEditorInputConfig, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
 import {
     convertTextRotation,
     DeviceInputEventType,
@@ -58,14 +63,19 @@ import {
 } from '@univerjs/engine-render';
 import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-
-import { ClearSelectionFormatCommand } from '@univerjs/sheets';
+import { ClearSelectionFormatCommand, SelectionManagerService, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand } from '@univerjs/sheets';
 import { filter } from 'rxjs';
+import { LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
+
 import { getEditorObject } from '../../basics/editor/get-editor-object';
-import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
+import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import styles from '../../views/sheet-container/index.module.less';
+import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
+import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
+import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -78,12 +88,23 @@ interface ICanvasOffset {
     top: number;
 }
 
-@OnLifecycle(LifecycleStages.Rendered, StartEditController)
-export class StartEditController extends Disposable {
+enum CursorChange {
+    InitialState,
+    StartEditor,
+    CursorChange,
+}
+
+export class EditingRenderController extends Disposable implements IRenderModule {
     private _editorVisiblePrevious = false;
 
+    /**
+     * It is used to distinguish whether the user has actively moved the cursor in the editor, mainly through mouse clicks.
+     */
+    private _cursorChange: CursorChange = CursorChange.InitialState;
+
     constructor(
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        private readonly _context: IRenderContext<Workbook>,
+        @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -91,6 +112,8 @@ export class StartEditController extends Disposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) protected readonly _localService: LocaleService,
@@ -98,21 +121,18 @@ export class StartEditController extends Disposable {
     ) {
         super();
 
-        this._initialize();
-
-        this._commandExecutedListener();
+        this._init();
     }
 
-    override dispose(): void {
-        super.dispose();
-    }
-
-    private _initialize() {
+    private _init() {
         this._initialEditFocusListener();
         this._initialStartEdit();
         this._initialKeyboardListener();
         this._initialCursorSync();
         this._listenEditorFocus();
+        this._commandExecutedListener();
+        this._initialExitInput();
+        this._cursorStateListener();
     }
 
     private _listenEditorFocus() {
@@ -128,15 +148,14 @@ export class StartEditController extends Disposable {
                     // fix https://github.com/dream-num/univer/issues/628, need to recalculate the cell editor size after it acquire focus.
                     if (this._editorBridgeService.isVisible()) {
                         const param = this._editorBridgeService.getEditCellState();
-                        const unitId = this._editorBridgeService.getCurrentEditorId();
+                        const editorId = this._editorBridgeService.getCurrentEditorId();
 
-                        if (param == null || unitId == null || !this._editorService.isSheetEditor(unitId)) {
+                        if (param == null || editorId == null || !this._editorService.isSheetEditor(editorId)) {
                             return;
                         }
 
-                        const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
-
-                        if (skeleton == null) {
+                        const skeleton = this._getEditorSkeleton(editorId);
+                        if (!skeleton) {
                             return;
                         }
 
@@ -147,6 +166,10 @@ export class StartEditController extends Disposable {
                 })
             )
         );
+    }
+
+    private _getEditorSkeleton(editorId: string) {
+        return this._renderManagerService.getRenderById(editorId)?.with(DocSkeletonManagerService).getSkeleton();
     }
 
     private _initialCursorSync() {
@@ -505,14 +528,10 @@ export class StartEditController extends Disposable {
             this._contextService.setContextValue(EDITOR_ACTIVATED, true);
 
             const { documentModel: documentDataModel } = documentLayoutObject;
-
-            const docParam = this._docSkeletonManagerService.getSkeletonByUnitId(editorUnitId);
-
-            if (docParam == null || documentDataModel == null) {
+            const skeleton = this._getEditorSkeleton(editorUnitId);
+            if (!skeleton || !documentDataModel) {
                 return;
             }
-
-            const { skeleton } = docParam;
 
             this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
             // move selection
@@ -652,19 +671,17 @@ export class StartEditController extends Disposable {
                         return;
                     }
 
-                    const unitId = this._editorBridgeService.getCurrentEditorId();
+                    const editorId = this._editorBridgeService.getCurrentEditorId();
+                    if (editorId == null) {
+                        return;
+                    }
 
-                    if (unitId == null) {
+                    const skeleton = this._getEditorSkeleton(editorId);
+                    if (skeleton == null) {
                         return;
                     }
 
                     this._editorBridgeService.changeEditorDirty(true);
-
-                    const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
-
-                    if (skeleton == null) {
-                        return;
-                    }
 
                     const param = this._editorBridgeService.getEditCellState();
                     if (param == null) {
@@ -686,6 +703,34 @@ export class StartEditController extends Disposable {
                 }
             })
         );
+
+        const closeEditorOperation = [SetCellEditVisibleArrowOperation.id];
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (closeEditorOperation.includes(command.id)) {
+                    const params = command.params as IEditorBridgeServiceVisibleParam & { isShift: boolean };
+                    const { keycode, isShift } = params;
+
+                    /**
+                     * After the user enters the editor and actively moves the editor selection area with the mouse,
+                     * the up, down, left, and right keys can no longer switch editing cells,
+                     * but move the cursor within the editor instead.
+                     */
+                    if (keycode != null &&
+                        (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR))
+                    ) {
+                        this._moveInEditor(keycode, isShift);
+                        return;
+                    }
+
+                    this._editorBridgeService.changeVisible(params);
+                }
+
+                if (command.id === SetCellEditVisibleWithF2Operation.id) {
+                    this._cursorChange = CursorChange.CursorChange;
+                }
+            })
+        );
     }
 
     private _setOpenForCurrent(unitId: Nullable<string>, sheetId: Nullable<string>) {
@@ -703,4 +748,341 @@ export class StartEditController extends Disposable {
     private _getEditorObject() {
         return getEditorObject(this._editorBridgeService.getCurrentEditorId(), this._renderManagerService);
     }
+
+    // private _init() {
+    //     this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC)
+    //         .pipe(takeUntil(this.dispose$))
+    //         .subscribe((docDataModel) => {
+    //             if (docDataModel == null) {
+    //                 return;
+    //             }
+
+    //             const unitId = docDataModel.getUnitId();
+
+    //             // Clear undo redo stack of cell editor when lose focus.
+    //             // WTF@wzhudev: this should be implemented in end-editor controller.
+    //             if (unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+    //                 this._undoRedoService.clearUndoRedo(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+    //             }
+    //         });
+    // }
+
+    private _initialExitInput() {
+        this.disposeWithMe(
+            this._editorBridgeService.visible$.subscribe(async (param) => {
+                const { visible, keycode, eventType } = param;
+
+                if (visible === this._editorVisiblePrevious) {
+                    return;
+                }
+
+                this._editorVisiblePrevious = visible;
+
+                if (visible === true) {
+                    // Change `CursorChange` to changed status, when formula bar clicked.
+                    this._cursorChange =
+                        eventType === DeviceInputEventType.PointerDown
+                            ? CursorChange.CursorChange
+                            : CursorChange.StartEditor;
+                    return;
+                }
+
+                this._cursorChange = CursorChange.InitialState;
+
+                const selections = this._selectionManagerService.getSelections();
+                const currentSelection = this._selectionManagerService.getCurrent();
+
+                if (currentSelection == null) {
+                    return;
+                }
+
+                const { unitId: workbookId, sheetId: worksheetId, pluginName } = currentSelection;
+
+                this._exitInput(param);
+
+                if (keycode === KeyCode.ESC) {
+                    // Reselect the current selections, when exist cell editor by press ESC.
+                    if (selections) {
+                        this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                            unitId: workbookId,
+                            subUnitId: worksheetId,
+                            pluginName,
+                            selections,
+                        });
+                    }
+
+                    return;
+                }
+
+                const editCellState = this._editorBridgeService.getEditCellState();
+
+                if (editCellState == null) {
+                    return;
+                }
+
+                const { unitId, sheetId, row, column, documentLayoutObject } = editCellState;
+
+                // If neither the formula bar editor nor the cell editor has been edited,
+                // it is considered that the content has not changed and returns directly.
+                const editorIsDirty = this._editorBridgeService.getEditorDirty();
+                if (editorIsDirty === false) {
+                    this._moveCursor(keycode);
+
+                    return;
+                }
+
+                const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+
+                const worksheet = workbook?.getSheetBySheetId(sheetId);
+
+                if (worksheet == null) {
+                    return;
+                }
+
+                const cellData: Nullable<ICellData> = getCellDataByInput(
+                    worksheet.getCellRaw(row, column) || {},
+                    documentLayoutObject,
+                    this._lexerTreeBuilder
+                );
+
+                if (cellData == null) {
+                    this._moveCursor(keycode);
+
+                    return;
+                }
+
+                const context = {
+                    subUnitId: sheetId,
+                    unitId,
+                    workbook: workbook!,
+                    worksheet,
+                    row,
+                    col: column,
+                };
+
+                /**
+                 * When closing the editor, switch to the current tab of the editor.
+                 */
+                if (workbookId === unitId && sheetId !== worksheetId && this._editorBridgeService.isForceKeepVisible()) {
+                    // SetWorksheetActivateCommand handler uses Promise
+                    await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                        subUnitId: sheetId,
+                        unitId,
+                    });
+                }
+                /**
+                 * When switching tabs while the editor is open,
+                 * the operation to refresh the selection will be blocked and needs to be triggered manually.
+                 */
+                this._selectionManagerService.refreshSelection();
+
+                const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
+                    this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT
+                )(cellData, context);
+
+                const finalCell = await this._editorBridgeService.interceptor.fetchThroughInterceptors(
+                    this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT_ASYNC
+                )(Promise.resolve(cell), context);
+
+                this._commandService.executeCommand(SetRangeValuesCommand.id, {
+                    subUnitId: sheetId,
+                    unitId,
+                    range: {
+                        startRow: row,
+                        startColumn: column,
+                        endRow: row,
+                        endColumn: column,
+                    },
+                    value: finalCell,
+                });
+
+                // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
+                this._moveCursor(keycode);
+            })
+        );
+    }
+
+    private _exitInput(param: IEditorBridgeServiceVisibleParam) {
+        this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+        this._contextService.setContextValue(EDITOR_ACTIVATED, false);
+        this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
+        this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
+
+        this._cellEditorManagerService.setState({
+            show: param.visible,
+        });
+        const editorUnitId = this._editorBridgeService.getCurrentEditorId();
+        if (editorUnitId == null || !this._editorService.isSheetEditor(editorUnitId)) {
+            return;
+        }
+        this._undoRedoService.clearUndoRedo(editorUnitId);
+        this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+    }
+
+    private _moveCursor(keycode?: KeyCode) {
+        if (keycode == null || !MOVE_SELECTION_KEYCODE_LIST.includes(keycode)) {
+            return;
+        }
+
+        let direction = Direction.LEFT;
+
+        switch (keycode) {
+            case KeyCode.ENTER:
+                direction = Direction.DOWN;
+                break;
+            case KeyCode.TAB:
+                direction = Direction.RIGHT;
+                break;
+            case KeyCode.ARROW_DOWN:
+                direction = Direction.DOWN;
+                break;
+            case KeyCode.ARROW_UP:
+                direction = Direction.UP;
+                break;
+            case KeyCode.ARROW_LEFT:
+                direction = Direction.LEFT;
+                break;
+            case KeyCode.ARROW_RIGHT:
+                direction = Direction.RIGHT;
+                break;
+        }
+
+        if (keycode === KeyCode.ENTER || keycode === KeyCode.TAB) {
+            this._commandService.executeCommand(MoveSelectionEnterAndTabCommand.id, {
+                keycode,
+                direction,
+            });
+        } else {
+            this._commandService.executeCommand(MoveSelectionCommand.id, {
+                direction,
+            });
+        }
+    }
+
+    private _cursorStateListener() {
+        /**
+         * The user's operations follow the sequence of opening the editor and then moving the cursor.
+         * The logic here predicts the user's first cursor movement behavior based on this rule
+         */
+
+        const editorObject = this._getEditorObject();
+        if (editorObject == null) {
+            return;
+        }
+
+        const { document: documentComponent } = editorObject;
+
+        this.disposeWithMe(
+            toDisposable(
+                documentComponent.onPointerDownObserver.add(() => {
+                    if (this._cursorChange === CursorChange.StartEditor) {
+                        this._cursorChange = CursorChange.CursorChange;
+                    }
+                })
+            )
+        );
+    }
+
+    // TODO: @JOCS, is it necessary to move these commands MoveSelectionOperation\MoveCursorOperation to shortcut? and use multi-commands?
+    private _moveInEditor(keycode: KeyCode, isShift: boolean) {
+        let direction = Direction.LEFT;
+        if (keycode === KeyCode.ARROW_DOWN) {
+            direction = Direction.DOWN;
+        } else if (keycode === KeyCode.ARROW_UP) {
+            direction = Direction.UP;
+        } else if (keycode === KeyCode.ARROW_RIGHT) {
+            direction = Direction.RIGHT;
+        }
+
+        if (isShift) {
+            this._commandService.executeCommand(MoveSelectionOperation.id, {
+                direction,
+            });
+        } else {
+            this._commandService.executeCommand(MoveCursorOperation.id, {
+                direction,
+            });
+        }
+    }
 }
+
+export function getCellDataByInput(
+    cellData: ICellData,
+    documentLayoutObject: IDocumentLayoutObject,
+    lexerTreeBuilder: LexerTreeBuilder
+) {
+    cellData = Tools.deepClone(cellData);
+
+    const { documentModel } = documentLayoutObject;
+    if (documentModel == null) {
+        return null;
+    }
+
+    const snapshot = documentModel.getSnapshot();
+
+    const { body } = snapshot;
+    if (body == null) {
+        return null;
+    }
+
+    cellData.t = undefined;
+
+    const data = body.dataStream;
+    const lastString = data.substring(data.length - 2, data.length);
+    let newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
+
+    if (isFormulaString(newDataStream)) {
+        if (cellData.f === newDataStream) {
+            return null;
+        }
+        const bracketCount = lexerTreeBuilder.checkIfAddBracket(newDataStream);
+        for (let i = 0; i < bracketCount; i++) {
+            newDataStream += matchToken.CLOSE_BRACKET;
+        }
+
+        cellData.f = newDataStream;
+        cellData.v = null;
+        cellData.p = null;
+    } else if (isForceString(newDataStream)) {
+        const v = extractStringFromForceString(newDataStream);
+        cellData.v = v;
+        cellData.f = null;
+        cellData.si = null;
+        cellData.p = null;
+        cellData.t = CellValueType.FORCE_STRING;
+    } else if (isRichText(body)) {
+        if (body.dataStream === '\r\n') {
+            cellData.v = '';
+            cellData.f = null;
+            cellData.si = null;
+            cellData.p = null;
+        } else {
+            cellData.p = snapshot;
+            cellData.v = null;
+            cellData.f = null;
+            cellData.si = null;
+        }
+    } else {
+        // If the data is empty, the data is set to null.
+        if ((newDataStream === cellData.v || (newDataStream === '' && cellData.v == null)) && cellData.p == null) {
+            return null;
+        }
+        cellData.v = newDataStream;
+        cellData.f = null;
+        cellData.si = null;
+        cellData.p = null;
+    }
+
+    return cellData;
+}
+
+function isRichText(body: IDocumentBody) {
+    const { textRuns = [], paragraphs = [] } = body;
+
+    return (
+        textRuns.some((textRun) => textRun.ts && !Tools.isEmptyObject(textRun.ts)) ||
+        paragraphs.some((paragraph) => paragraph.bullet) ||
+        paragraphs.length >= 2
+    );
+}
+

@@ -26,10 +26,8 @@ import { UniverUIPlugin } from '@univerjs/ui';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
-import { EditingController } from './controllers/editor/editing.controller';
-import { EndEditController } from './controllers/editor/end-edit.controller';
 import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
-import { StartEditController } from './controllers/editor/start-edit.controller';
+import { EditingRenderController } from './controllers/editor/editing.render-controller';
 import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
 import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 import { HeaderMenuRenderController } from './controllers/render-controllers/header-menu.render-controller';
@@ -130,7 +128,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 // controllers
                 [ActiveWorksheetController],
                 [AutoHeightController],
-                [EndEditController],
                 [FormulaEditorController],
                 [HeaderFreezeRenderController],
                 [SheetClipboardController],
@@ -141,9 +138,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                         useFactory: () => this._injector.createInstance(SheetUIController, this._config),
                     },
                 ],
-                [StartEditController],
                 [StatusBarController],
-                [EditingController],
                 [AutoFillController],
                 [FormatPainterController],
 
@@ -213,8 +208,12 @@ export class UniverSheetsUIPlugin extends Plugin {
             ForceStringRenderController,
             CellCustomRenderController,
             SheetContextMenuRenderController,
-            EditorBridgeRenderController,
 
+            // editor
+            EditorBridgeRenderController,
+            EditingRenderController,
+
+            // permission
             SheetPermissionInterceptorCanvasRenderController,
             SheetPermissionInterceptorFormulaRenderController,
             SheetPermissionRenderController,
@@ -227,8 +226,6 @@ export class UniverSheetsUIPlugin extends Plugin {
         const univerInstanceService = this._univerInstanceService;
         univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(filter((v) => !!v))
-            .subscribe((workbook) => {
-                univerInstanceService.focusUnit(workbook!.getUnitId());
-            });
+            .subscribe((workbook) => univerInstanceService.focusUnit(workbook!.getUnitId()));
     }
 }

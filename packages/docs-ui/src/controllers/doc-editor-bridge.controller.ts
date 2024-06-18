@@ -81,7 +81,7 @@ export class DocEditorBridgeController extends Disposable {
         }
 
         const skeleton = this._renderManagerService.getRenderById(editorDataModel.getUnitId())
-            ?.with(DocSkeletonManagerService).getSkeleton()?.skeleton;
+            ?.with(DocSkeletonManagerService).getSkeleton();
         if (editor == null || editor.render == null || skeleton == null || editorDataModel == null) {
             return;
         }

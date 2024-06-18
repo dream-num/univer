@@ -67,7 +67,6 @@ export class FormulaEditorController extends RxDisposable {
         @IContextService private readonly _contextService: IContextService,
         @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
@@ -423,12 +422,16 @@ export class FormulaEditorController extends RxDisposable {
         actions: JSONXActions
     ) {
         const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+        if (currentRender == null) {
+            return;
+        }
 
-        const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
+        const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
         const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
         const docViewModel = this._docViewModelManagerService.getViewModel(unitId);
 
-        if (docDataModel == null || docViewModel == null || docsSkeletonObject == null) {
+        if (docDataModel == null || docViewModel == null) {
             return;
         }
 
@@ -438,14 +441,6 @@ export class FormulaEditorController extends RxDisposable {
         this._checkAndSetRenderStyleConfig(docDataModel);
 
         docViewModel.reset(docDataModel);
-
-        const { skeleton } = docsSkeletonObject;
-
-        const currentRender = this._renderManagerService.getRenderById(unitId);
-
-        if (currentRender == null) {
-            return;
-        }
 
         skeleton.calculate();
 
@@ -462,11 +457,11 @@ export class FormulaEditorController extends RxDisposable {
     ) {
         const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
-        const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
+        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService).getSkeleton();
         const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
         const docViewModel = this._docViewModelManagerService.getViewModel(unitId);
 
-        if (docDataModel == null || docViewModel == null || docsSkeletonObject == null) {
+        if (docDataModel == null || docViewModel == null || skeleton == null) {
             return;
         }
 
@@ -480,8 +475,6 @@ export class FormulaEditorController extends RxDisposable {
         this._checkAndSetRenderStyleConfig(docDataModel);
 
         docViewModel.reset(docDataModel);
-
-        const { skeleton } = docsSkeletonObject;
 
         const currentRender = this._renderManagerService.getRenderById(unitId);
 
@@ -530,10 +523,9 @@ export class FormulaEditorController extends RxDisposable {
     }
 
     private _autoScroll() {
-        const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)
-            ?.skeleton;
         const position = this._formulaEditorManagerService.getPosition();
 
+        const skeleton = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)?.with(DocSkeletonManagerService).getSkeleton();
         const editorObject = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
 
         const formulaEditorDataModel = this._univerInstanceService.getUniverDocInstance(

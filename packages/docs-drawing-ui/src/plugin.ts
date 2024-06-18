@@ -23,7 +23,7 @@ import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocDrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { DocDrawingUIController } from './controllers/doc-drawing.controller';
-import { DocDrawingUpdateRenderController } from './controllers/doc-drawing-update.controller';
+import { DocDrawingUpdateRenderController } from './controllers/render-controllers/doc-drawing-update.render-controller';
 
 const PLUGIN_NAME = 'DOCS_DRAWING_UI_PLUGIN';
 

@@ -19,7 +19,7 @@ import { Disposable, IUniverInstanceService, toDisposable } from '@univerjs/core
 import type { DependencyIdentifier, IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { BaseObject } from '../base-object';
 import type { DocComponent } from '../components/docs/doc-component';
@@ -32,8 +32,8 @@ import { type IRender, type IRenderModuleCtor, RenderUnit } from './render-unit'
 export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;
 
 export interface IRenderManagerService extends IDisposable {
+    /** @deprecated */
     currentRender$: Observable<Nullable<string>>;
-    createRender$: Observable<Nullable<string>>;
     addRender(unitId: string, renderer: IRender): void;
     createRender(unitId: string): IRender;
     removeRender(unitId: string): void;
@@ -41,6 +41,15 @@ export interface IRenderManagerService extends IDisposable {
     getRenderById(unitId: string): Nullable<IRender>;
     getRenderAll(): Map<string, IRender>;
     defaultEngine: Engine;
+
+    // DEPT@Jocs
+    // Editor should not be coupled in docs-ui. It should be an common service resident in @univerjs/ui.
+    // However, currently the refactor is not completed so we have to throw an event and let
+    // docs-ui to create the editor's renderer.
+
+    /** @deprecated */
+    createRender$: Observable<string>;
+    /** @deprecated this design is very very weird! Remove it. */
     create(unitId: Nullable<string>): void;
 
     /** @deprecated There will be multi units to render at the same time, so there is no *current*. */
@@ -49,9 +58,7 @@ export interface IRenderManagerService extends IDisposable {
     getFirst(): Nullable<IRender>;
 
     has(unitId: string): boolean;
-
     withCurrentTypeOfUnit<T>(type: UniverInstanceType, id: DependencyIdentifier<T>): Nullable<T>;
-
     registerRenderController<T extends UnitModel>(type: UnitType, ctor: IRenderModuleCtor<T>): IDisposable;
 }
 
@@ -69,7 +76,8 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
     private readonly _currentRender$ = new BehaviorSubject<Nullable<string>>(this._currentUnitId);
     readonly currentRender$ = this._currentRender$.asObservable();
 
-    private readonly _createRender$ = new BehaviorSubject<Nullable<string>>(this._currentUnitId);
+    private readonly _createRender$ = new Subject<string>();
+    /** @deprecated */
     readonly createRender$ = this._createRender$.asObservable();
 
     get defaultEngine() {

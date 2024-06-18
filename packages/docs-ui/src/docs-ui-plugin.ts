@@ -51,12 +51,12 @@ import { DocClipboardService, IDocClipboardService } from './services/clipboard/
 import { DocClipboardController } from './controllers/clipboard.controller';
 import { DocEditorBridgeController } from './controllers/doc-editor-bridge.controller';
 import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
-import { DocFloatingObjectRenderController } from './controllers/doc-floating-object.controller';
+import { DocFloatingObjectRenderController } from './controllers/render-controllers/doc-floating-object.render-controller';
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
-import { DocTextSelectionRenderController } from './controllers/text-selection.controller';
+import { DocTextSelectionRenderController } from './controllers/render-controllers/text-selection.render-controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
-import { DocsRenderService } from './services/doc-render.service';
+import { DocsRenderService } from './services/docs-render.service';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
@@ -140,8 +140,8 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initRenderBasics(): void {
         ([
-            DocRenderController,
             DocSkeletonManagerService,
+            DocRenderController,
             DocZoomRenderController,
             DocBackScrollRenderController,
             DocFloatingObjectRenderController,

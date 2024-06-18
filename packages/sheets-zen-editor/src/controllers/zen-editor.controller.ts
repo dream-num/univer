@@ -61,7 +61,6 @@ export class ZenEditorController extends RxDisposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
     ) {
         super();
@@ -221,11 +220,11 @@ export class ZenEditorController extends RxDisposable {
             DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
         ];
 
-        const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
+        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
         const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
         const docViewModel = this._docViewModelManagerService.getViewModel(unitId);
 
-        if (docDataModel == null || docViewModel == null || docsSkeletonObject == null) {
+        if (docDataModel == null || docViewModel == null || skeleton == null) {
             return;
         }
 
@@ -244,8 +243,6 @@ export class ZenEditorController extends RxDisposable {
         }
 
         docViewModel.reset(docDataModel);
-
-        const { skeleton } = docsSkeletonObject;
 
         const currentRender = this._getDocObject();
 

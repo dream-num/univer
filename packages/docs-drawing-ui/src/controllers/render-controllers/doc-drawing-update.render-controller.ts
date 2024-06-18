@@ -27,14 +27,14 @@ import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerj
 import { docDrawingPositionToTransform, transformToDocDrawingPosition } from '@univerjs/docs-ui';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 
-import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
-import { InsertDocImageOperation } from '../commands/operations/insert-image.operation';
-import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
-import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
-import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
-import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.command';
-import { UngroupDocDrawingCommand } from '../commands/commands/ungroup-doc-drawing.command';
-import { SetDocDrawingCommand } from '../commands/commands/set-doc-drawing.command';
+import type { IInsertImageOperationParams } from '../../commands/operations/insert-image.operation';
+import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';
+import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../../commands/commands/interfaces';
+import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing-arrange.command';
+import { InsertDocDrawingCommand } from '../../commands/commands/insert-doc-drawing.command';
+import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
+import { UngroupDocDrawingCommand } from '../../commands/commands/ungroup-doc-drawing.command';
+import { SetDocDrawingCommand } from '../../commands/commands/set-doc-drawing.command';
 
 export class DocDrawingUpdateRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -120,8 +120,6 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         const { unitId } = this._context;
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
         const { width, height, image } = await getImageSize(base64Cache || '');
-
-        const { width: sceneWidth, height: sceneHeight } = this._context.scene;
 
         this._imageIoService.addImageSourceCache(imageId, imageSourceType, image);
 
@@ -210,15 +208,11 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 }
 
                 const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
-
                 if (sheetDrawing == null) {
                     return;
                 }
 
-                // const { marginLeft, marginTop } = pageMarginCache.get(drawingId) || { marginLeft: 0, marginTop: 0 };
-
                 const docTransform = transformToDocDrawingPosition({ ...sheetDrawing.transform, ...transform });
-
                 if (docTransform == null) {
                     return;
                 }

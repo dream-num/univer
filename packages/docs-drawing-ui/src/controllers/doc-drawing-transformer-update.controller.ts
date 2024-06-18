@@ -32,6 +32,7 @@ interface IDrawingCache {
     left: number;
     width: number;
     height: number;
+    angle: number;
 }
 
 interface IDrawingAnchor {
@@ -107,7 +108,7 @@ export class DocDrawingTransformerController extends Disposable {
                     const { objects } = state;
 
                     for (const object of objects.values()) {
-                        const { oKey, width, height, left, top } = object;
+                        const { oKey, width, height, left, top, angle } = object;
                         const drawing = this._drawingManagerService.getDrawingOKey(oKey);
                         if (drawing == null) {
                             continue;
@@ -123,6 +124,7 @@ export class DocDrawingTransformerController extends Disposable {
                                 left,
                                 width,
                                 height,
+                                angle,
                             });
                         }
                     }
@@ -131,7 +133,7 @@ export class DocDrawingTransformerController extends Disposable {
         );
 
         const throttleMultipleDrawingUpdate = throttle(this._updateMultipleDrawingDocTransform.bind(this), 50);
-        const throttleDrawingSizeUpdate = throttle(this._updateDrawingSize.bind(this), 50);
+        const throttleDrawingSizeAndAngleUpdate = throttle(this._updateDrawingSize.bind(this), 50);
         const throttleNonInlineMoveUpdate = throttle(this._moveNonInlineDrawing.bind(this), 50);
 
         this.disposeWithMe(
@@ -144,20 +146,21 @@ export class DocDrawingTransformerController extends Disposable {
                     } else if (objects.size === 1) {
                         const drawingCache: IDrawingCache = this._transformerCache.values().next().value;
                         const object: BaseObject = objects.values().next().value;
-                        const { width, height, top, left } = object;
+                        const { width, height, top, left, angle } = object;
 
                         if (
                             width === drawingCache.width &&
                             height === drawingCache.height &&
                             top === drawingCache.top &&
-                            left === drawingCache.left
+                            left === drawingCache.left &&
+                            angle === drawingCache.angle
                         ) {
                             return;
                         }
 
                         if (drawingCache && drawingCache.drawing.layoutType !== PositionedObjectLayoutType.INLINE) {
-                            if (width !== drawingCache.width || height !== drawingCache.height) {
-                                throttleDrawingSizeUpdate(drawingCache.drawing, object, true);
+                            if (width !== drawingCache.width || height !== drawingCache.height || angle !== drawingCache.angle) {
+                                throttleDrawingSizeAndAngleUpdate(drawingCache, object, true);
                             } else {
                                 throttleNonInlineMoveUpdate(drawingCache.drawing, object, true);
                             }
@@ -176,13 +179,14 @@ export class DocDrawingTransformerController extends Disposable {
                     } else if (objects.size === 1) {
                         const drawingCache: IDrawingCache = this._transformerCache.values().next().value;
                         const object: BaseObject = objects.values().next().value;
-                        const { width, height, top, left } = object;
+                        const { width, height, top, left, angle } = object;
 
                         if (
                             width === drawingCache.width &&
                             height === drawingCache.height &&
                             top === drawingCache.top &&
-                            left === drawingCache.left
+                            left === drawingCache.left &&
+                            angle === drawingCache.angle
                         ) {
                             return;
                         }
@@ -190,15 +194,15 @@ export class DocDrawingTransformerController extends Disposable {
                         if (drawingCache && drawingCache.drawing.layoutType === PositionedObjectLayoutType.INLINE) {
                             // Handle inline drawing.
 
-                            if (width !== drawingCache.width || height !== drawingCache.height) {
-                                this._updateDrawingSize(drawingCache.drawing, object);
+                            if (width !== drawingCache.width || height !== drawingCache.height || angle !== drawingCache.angle) {
+                                this._updateDrawingSize(drawingCache, object);
                             } else {
                                 this._moveInlineDrawing(drawingCache.drawing, object);
                             }
                         } else if (drawingCache) {
                             // Handle non-inline drawing.
-                            if (width !== drawingCache.width || height !== drawingCache.height) {
-                                this._updateDrawingSize(drawingCache.drawing, object);
+                            if (width !== drawingCache.width || height !== drawingCache.height || angle !== drawingCache.angle) {
+                                this._updateDrawingSize(drawingCache, object);
                             } else {
                                 this._moveNonInlineDrawing(drawingCache.drawing, object);
                             }
@@ -211,6 +215,7 @@ export class DocDrawingTransformerController extends Disposable {
         );
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _updateMultipleDrawingDocTransform(objects: Map<string, BaseObject>, noHistory = false): void {
         if (objects.size < 1) {
             return;
@@ -221,7 +226,7 @@ export class DocDrawingTransformerController extends Disposable {
         let subUnitId;
         // The new position is calculated based on the offset.
         for (const object of objects.values()) {
-            const { oKey, width, height, left, top } = object;
+            const { oKey, width, height, left, top, angle } = object;
             const drawing = this._drawingManagerService.getDrawingOKey(oKey);
             if (drawing == null) {
                 continue;
@@ -241,7 +246,7 @@ export class DocDrawingTransformerController extends Disposable {
                 continue;
             }
 
-            const { drawing: drawingData, top: oldTop, left: oldLeft, width: oldWidth, height: oldHeight } = drawingCache;
+            const { drawing: drawingData, top: oldTop, left: oldLeft, width: oldWidth, height: oldHeight, angle: oldAngle } = drawingCache;
 
             if (oldWidth !== width || oldHeight !== height) {
                 drawings.push({
@@ -251,6 +256,14 @@ export class DocDrawingTransformerController extends Disposable {
                         width,
                         height,
                     },
+                });
+            }
+
+            if (oldAngle !== angle) {
+                drawings.push({
+                    drawingId: drawing.drawingId,
+                    key: 'angle',
+                    value: angle,
                 });
             }
 
@@ -470,20 +483,30 @@ export class DocDrawingTransformerController extends Disposable {
     }
 
     // Update drawing when use transformer to resize it.
-    private _updateDrawingSize(drawing: IDocDrawingBase, object: BaseObject, noHistory = false) {
+    private _updateDrawingSize(drawingCache: IDrawingCache, object: BaseObject, noHistory = false) {
         const drawings: IDrawingDocTransform[] = [];
-
+        const { drawing, width: oldWidth, height: oldHeight, angle: oldAngle } = drawingCache;
         const { unitId, subUnitId } = drawing;
-        const { width, height } = object;
+        const { width, height, angle } = object;
 
-        drawings.push({
-            drawingId: drawing.drawingId,
-            key: 'size',
-            value: {
-                width,
-                height,
-            },
-        });
+        if (width !== oldWidth || height !== oldHeight) {
+            drawings.push({
+                drawingId: drawing.drawingId,
+                key: 'size',
+                value: {
+                    width,
+                    height,
+                },
+            });
+        }
+
+        if (angle !== oldAngle) {
+            drawings.push({
+                drawingId: drawing.drawingId,
+                key: 'angle',
+                value: angle,
+            });
+        }
 
         if (drawings.length > 0 && unitId && subUnitId) {
             this._commandService.executeCommand(UpdateDrawingDocTransformCommand.id, {

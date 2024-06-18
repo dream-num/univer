@@ -49,6 +49,7 @@ export const DrawingArrange = (props: IDrawingArrangeProps) => {
         return () => {
             focusDispose.unsubscribe();
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const onArrangeBtnClick = (arrangeType: ArrangeTypeEnum) => {

@@ -20,7 +20,7 @@ import type {
     IDocumentBody,
     IMutationInfo,
     IRetainAction,
-    ITextRange,
+    JSONXActions,
 } from '@univerjs/core';
 import {
     CommandType,
@@ -32,7 +32,7 @@ import {
     TextX,
     TextXActionType,
 } from '@univerjs/core';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { ITextRangeWithStyle, TextRange } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
@@ -133,6 +133,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
 
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IInnerCutCommandParams) => {
         const { segmentId, textRanges } = params;
         const commandService = accessor.get(ICommandService);
@@ -150,9 +151,9 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             return false;
         }
 
-        const documentModel = univerInstanceService.getUniverDocInstance(unitId);
-        const originBody = getDocsUpdateBody(documentModel!.getSnapshot(), segmentId);
-        if (originBody == null) {
+        const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const originBody = getDocsUpdateBody(documentDataModel!.getSnapshot(), segmentId);
+        if (originBody == null || documentDataModel == null) {
             return false;
         }
 
@@ -171,9 +172,14 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
+        const rawActions: JSONXActions = [];
 
-        for (const selection of selections) {
+        for (const selection of selections as TextRange[]) {
             const { startOffset, endOffset, collapsed } = selection;
+
+            if (startOffset == null || endOffset == null) {
+                continue;
+            }
 
             const len = startOffset - memoryCursor.cursor;
 
@@ -191,7 +197,27 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+        rawActions.push(jsonX.editOp(textX.serialize())!);
+
+        const removedCustomBlockIds = getCustomBlockIdsInSelections(originBody, selections);
+
+        if (removedCustomBlockIds.length > 0) {
+            for (const blockId of removedCustomBlockIds) {
+                const drawing = (documentDataModel.getDrawings() ?? {})[blockId];
+                const drawingOrder = documentDataModel.getDrawingsOrder();
+                const drawingIndex = drawingOrder!.indexOf(blockId);
+
+                const removeDrawingAction = jsonX.removeOp(['drawings', blockId], drawing);
+                const removeDrawingOrderAction = jsonX.removeOp(['drawingsOrder', drawingIndex], blockId);
+
+                rawActions.push(removeDrawingAction!);
+                rawActions.push(removeDrawingOrderAction!);
+            }
+        }
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -202,15 +228,39 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
     },
 };
 
+function getCustomBlockIdsInSelections(body: IDocumentBody, selections: TextRange[]): string[] {
+    const customBlockIds: string[] = [];
+    const { customBlocks = [] } = body;
+
+    for (const selection of selections) {
+        const { startOffset, endOffset } = selection;
+
+        if (startOffset == null || endOffset == null) {
+            continue;
+        }
+
+        for (const customBlock of customBlocks) {
+            const { startIndex } = customBlock;
+
+            if (startIndex >= startOffset && startIndex <= endOffset) {
+                customBlockIds.push(customBlock.blockId);
+            }
+        }
+    }
+
+    return customBlockIds;
+}
+
 // If the selection contains line breaks,
 // paragraph information needs to be preserved when performing the CUT operation
 function getRetainAndDeleteAndExcludeLineBreak(
-    range: ITextRange,
+    range: TextRange,
     body: IDocumentBody,
     segmentId: string = '',
     memoryCursor: number = 0
 ): Array<IRetainAction | IDeleteAction> {
-    const { startOffset, endOffset } = range;
+    const startOffset = range.startOffset!;
+    const endOffset = range.endOffset!;
     const dos: Array<IRetainAction | IDeleteAction> = [];
 
     const { paragraphs = [] } = body;

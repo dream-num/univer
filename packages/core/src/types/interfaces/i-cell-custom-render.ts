@@ -19,14 +19,14 @@
 import type { Nullable } from '../../shared';
 import type { Worksheet } from '../../sheets/worksheet';
 import type { Workbook } from '../../sheets/workbook';
-import type { ISelectionCellWithCoord } from './i-selection-data';
+import type { ISelectionCellWithMergeInfo } from './i-selection-data';
 import type { IStyleData } from './i-style-data';
 import type { ICellDataForSheetInterceptor } from './i-cell-data';
 
 export interface ICellRenderContext {
     data: ICellDataForSheetInterceptor;
     style: Nullable<IStyleData>;
-    primaryWithCoord: ISelectionCellWithCoord;
+    primaryWithCoord: ISelectionCellWithMergeInfo;
     unitId?: string;
     subUnitId: string;
     row: number;

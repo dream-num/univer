@@ -17,7 +17,7 @@
 import type {
     IRange,
     ISelection,
-    ISelectionCellWithCoord,
+    ISelectionCellWithMergeInfo,
     ISelectionWithCoord,
     Nullable,
     ThemeService,
@@ -210,7 +210,7 @@ export function convertSelectionDataToRange(
     return result;
 }
 
-export function convertPrimaryWithCoordToPrimary(primaryWithCoord: ISelectionCellWithCoord) {
+export function convertPrimaryWithCoordToPrimary(primaryWithCoord: ISelectionCellWithMergeInfo) {
     const { actualRow, actualColumn, isMerged, isMergedMainCell } = primaryWithCoord;
     const { startRow, startColumn, endRow, endColumn } = primaryWithCoord.mergeInfo;
     return {

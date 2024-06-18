@@ -23,7 +23,7 @@ import type {
     IRangeWithCoord,
     ISelection,
     ISelectionCell,
-    ISelectionCellWithCoord,
+    ISelectionCellWithMergeInfo,
     ISelectionWithCoord,
     Nullable,
     Observer,
@@ -85,13 +85,13 @@ export interface ISelectionRenderService {
     getCurrentControls(): SelectionShape[];
     getActiveSelections(): Nullable<ISelection[]>;
     getActiveRange(): Nullable<IRange>;
-    getActiveSelection(): Nullable<SelectionShape>;
+    getActiveSelectionControl(): Nullable<SelectionShape>;
     getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[];
     attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
     attachRangeWithCoord(range: IRange): Nullable<IRangeWithCoord>;
-    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
-    getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithCoord>;
-    expandSelectionEventTrigger(
+    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithMergeInfo>;
+    getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithMergeInfo>;
+    eventTrigger(
         evt: IPointerEvent | IMouseEvent,
         zIndex: number,
         rangeType: RANGE_TYPE,
@@ -501,7 +501,7 @@ export class SelectionRenderService implements ISelectionRenderService {
      * get active selection control
      * @returns
      */
-    getActiveSelection(): Nullable<SelectionShape> {
+    getActiveSelectionControl(): Nullable<SelectionShape> {
         const controls = this.getCurrentControls();
         return controls && controls[controls.length - 1];
     }
@@ -538,7 +538,7 @@ export class SelectionRenderService implements ISelectionRenderService {
      * @param zIndex Stacking order of the selection object
      * @param rangeType Determines whether the selection is made normally according to the range or by rows and columns
      */
-    expandSelectionEventTrigger(
+    eventTrigger(
         evt: IPointerEvent | IMouseEvent,
         zIndex = 0,
         rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL,
@@ -607,7 +607,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         this._startSelectionRange = startSelectionRange;
 
-        let selectionControl: Nullable<SelectionShape> = this.getActiveSelection();
+        let selectionControl: Nullable<SelectionShape> = this.getActiveSelectionControl();
 
         const curControls = this.getCurrentControls();
 
@@ -799,7 +799,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             let scrollOffsetX = newMoveOffsetX;
             let scrollOffsetY = newMoveOffsetY;
 
-            const currentSelection = this.getActiveSelection();
+            const currentSelection = this.getActiveSelectionControl();
             const freeze = this._getFreeze();
 
             const selection = currentSelection?.model;
@@ -977,7 +977,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         };
     }
 
-    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord> {
+    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithMergeInfo> {
         if (primary == null) {
             return;
         }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRangeWithCoord, ISelectionCellWithCoord, ISelectionWithCoord, Nullable } from '@univerjs/core';
+import type { IRangeWithCoord, ISelectionCellWithMergeInfo, ISelectionWithCoord, Nullable } from '@univerjs/core';
 import { makeCellToSelection, RANGE_TYPE } from '@univerjs/core';
 
 export class SelectionRenderModel implements IRangeWithCoord {
@@ -34,7 +34,10 @@ export class SelectionRenderModel implements IRangeWithCoord {
 
     private _endY: number = 0;
 
-    private _currentCell: Nullable<ISelectionCellWithCoord>;
+    /**
+     * top left cell of current selection
+     */
+    private _currentCell: Nullable<ISelectionCellWithMergeInfo>;
 
     private _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL;
 
@@ -168,7 +171,7 @@ export class SelectionRenderModel implements IRangeWithCoord {
         };
     }
 
-    setValue(newSelectionRange: IRangeWithCoord, currentCell: Nullable<ISelectionCellWithCoord>) {
+    setValue(newSelectionRange: IRangeWithCoord, currentCell: Nullable<ISelectionCellWithMergeInfo>) {
         const {
             startColumn,
             startRow,
@@ -206,7 +209,7 @@ export class SelectionRenderModel implements IRangeWithCoord {
         this.setCurrentCell(currentCell);
     }
 
-    setCurrentCell(currentCell: Nullable<ISelectionCellWithCoord>) {
+    setCurrentCell(currentCell: Nullable<ISelectionCellWithMergeInfo>) {
         if (currentCell) {
             this._currentCell = currentCell;
         }

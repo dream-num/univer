@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { EventState, IRange, ISelectionCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { EventState, IRange, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
 import { BooleanNumber, sortRules } from '@univerjs/core';
 
 import { EVENT_TYPE, FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
@@ -681,7 +681,7 @@ export class Spreadsheet extends SheetComponent {
         }
     }
 
-    private _clearBackground(ctx: UniverRenderingContext, backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>) {
+    private _clearBackground(ctx: UniverRenderingContext, backgroundPositions?: ObjectMatrix<ISelectionCellWithMergeInfo>) {
         backgroundPositions?.forValue((row, column, cellInfo) => {
             let { startY, endY, startX, endX } = cellInfo;
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;

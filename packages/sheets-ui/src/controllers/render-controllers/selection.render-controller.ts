@@ -46,7 +46,6 @@ import { ISelectionRenderService } from '../../services/selection/selection-rend
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import type { ISheetObjectParam } from '../utils/component-tools';
 import { getSheetObject } from '../utils/component-tools';
-import type { MobileSelectionRenderService } from '../../services/selection/mobile-selection-render.service';
 
 export class SelectionRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -62,7 +61,6 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         super();
 
         this._init();
-        window.src = this;
     }
 
     override dispose(): void {
@@ -199,20 +197,17 @@ export class SelectionRenderController extends Disposable implements IRenderModu
     private _initViewMainListener(sheetObject: ISheetObjectParam) {
         const { spreadsheet } = sheetObject;
 
-        const pointerDownPos = { x: 0, y: 0 };
-
         this.disposeWithMe(
             toDisposable(
                 spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                     this._selectionRenderService.enableDetectMergedCell();
-                    pointerDownPos.x = evt.offsetX;
-                    pointerDownPos.y = evt.offsetY;
-                    // this._selectionRenderService.eventTrigger(
-                    //     evt,
-                    //     spreadsheet.zIndex + 1,
-                    //     RANGE_TYPE.NORMAL,
-                    //     this._getActiveViewport(evt)
-                    // );
+
+                    this._selectionRenderService.eventTrigger(
+                        evt,
+                        spreadsheet.zIndex + 1,
+                        RANGE_TYPE.NORMAL,
+                        this._getActiveViewport(evt)
+                    );
 
                     if (evt.button !== 2) {
                         state.stopPropagation();
@@ -220,30 +215,6 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                 })
             )
         );
-        const spreadsheetOb = spreadsheet?.onPointerUpObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            const edge = 10;
-            if (Math.abs(evt.offsetX - pointerDownPos.x) > edge ||
-            Math.abs(evt.offsetY - pointerDownPos.y) > edge) {
-                return;
-            }
-            this._selectionRenderService.enableDetectMergedCell();
-            (this._selectionRenderService as MobileSelectionRenderService).eventTrigger(
-                evt,
-                spreadsheet.zIndex + 1,
-                RANGE_TYPE.NORMAL,
-                this._getActiveViewport(evt)
-            );
-
-            if (evt.button !== 2) {
-                state.stopPropagation();
-            }
-        });
-        // if (this._selectionRenderService instanceof MobileSelectionRenderService) {
-        this.disposeWithMe(toDisposable(spreadsheetOb));
-        // }
-
-        // control 在不断的 dispose 和 创建， 这里为 controls 绑定 pointer 事件没用
-        // const controls = this._selectionRenderService.getCurrentControls();
     }
 
     private _initThemeChangeListener() {
@@ -280,7 +251,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         this.disposeWithMe(
             spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                 this._selectionRenderService.disableDetectMergedCell();
-                this._selectionRenderService.expandSelectionEventTrigger(
+                this._selectionRenderService.eventTrigger(
                     evt,
                     (spreadsheet?.zIndex || 1) + 1,
                     RANGE_TYPE.ROW,
@@ -304,7 +275,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
             spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                 this._selectionRenderService.disableDetectMergedCell();
 
-                this._selectionRenderService.expandSelectionEventTrigger(
+                this._selectionRenderService.eventTrigger(
                     evt,
                     (spreadsheet?.zIndex || 1) + 1,
                     RANGE_TYPE.COLUMN,

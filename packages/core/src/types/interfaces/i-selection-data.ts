@@ -38,7 +38,7 @@ export interface IRangeWithCoord extends IPosition, IRange {}
 
 export interface ISelectionCell extends IRange, ISingleCell {}
 
-export interface ISelectionCellWithCoord extends IPosition, ISingleCell {
+export interface ISelectionCellWithMergeInfo extends IPosition, ISingleCell {
     mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell
 }
 
@@ -56,7 +56,7 @@ export interface ISelection {
 
 export interface ISelectionWithCoord {
     rangeWithCoord: IRangeWithCoord;
-    primaryWithCoord: Nullable<ISelectionCellWithCoord>;
+    primaryWithCoord: Nullable<ISelectionCellWithMergeInfo>;
 }
 
 export interface ITextRangeStart {

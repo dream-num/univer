@@ -18,7 +18,8 @@ import type {
     IRange,
     IRangeWithCoord,
     IScale,
-    ISelectionCellWithCoord,
+    ISelectionCell,
+    ISelectionCellWithMergeInfo,
     IStyleBase,
     LocaleService,
     Nullable,
@@ -528,7 +529,7 @@ export function getCellByIndex(
     rowHeightAccumulation: number[],
     columnWidthAccumulation: number[],
     mergeData: IRange[]
-): ISelectionCellWithCoord {
+): ISelectionCellWithMergeInfo {
     // eslint-disable-next-line prefer-const
     let { startY, endY, startX, endX } = getCellPositionByIndex(
         row,

@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { enUS, zhCN } from './locale';
 import { SheetsSortUIService } from './services/sheets-sort-ui.service';
 import type { IUniverSheetsSortUIConfig } from './controllers/sheets-sort-ui.controller';
 import { DefaultSheetsSortUIConfig, SheetsSortUIController } from './controllers/sheets-sort-ui.controller';
 
 const NAME = 'UNIVER_SHEETS_SORT_UI_PLUGIN';
-
+@DependentOn(UniverSheetsSortPlugin)
 export class UniverSheetsSortUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = NAME;

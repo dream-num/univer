@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
+import type { ICellData, Nullable, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -27,7 +27,7 @@ describe('Test "Sort Range Commands"', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let getData: (row: number, col: number) => any;
+    let getData: (row: number, col: number) => Nullable<ICellData>;
 
     beforeEach(() => {
         const testBed = createCommandTestBed();
@@ -38,7 +38,7 @@ describe('Test "Sort Range Commands"', () => {
         commandService.registerCommand(ReorderRangeMutation);
         commandService.registerCommand(ReorderRangeCommand);
         const univerInstanceService = get(IUniverInstanceService);
-        const workbook = univerInstanceService.getUniverSheetInstance('test');
+        const workbook = univerInstanceService.getUnit('test') as Workbook;
         const worksheet = workbook?.getSheetBySheetId('sheet1')!;
         getData = (row: number, col: number) => {
             const data = worksheet.getCellMatrix().getValue(row, col);
@@ -67,12 +67,12 @@ describe('Test "Sort Range Commands"', () => {
             } as ISortRangeCommandParams;
             const result = await commandService.executeCommand(SortRangeCommand.id, params);
             expect(result).toBeTruthy();
-            expect(getData(0, 0).v).toBe(6);
-            expect(getData(0, 1).v).toBe(15);
-            expect(getData(0, 2).v).toBe(200);
-            expect(getData(5, 0).v).toBe(1);
-            expect(getData(5, 1).v).toBe(20);
-            expect(getData(5, 2).v).toBe(100);
+            expect(getData(0, 0)?.v).toBe(6);
+            expect(getData(0, 1)?.v).toBe(15);
+            expect(getData(0, 2)?.v).toBe(200);
+            expect(getData(5, 0)?.v).toBe(1);
+            expect(getData(5, 1)?.v).toBe(20);
+            expect(getData(5, 2)?.v).toBe(100);
         });
 
         it('desc case: ', async () => {
@@ -90,12 +90,12 @@ describe('Test "Sort Range Commands"', () => {
             } as ISortRangeCommandParams;
             const result = await commandService.executeCommand(SortRangeCommand.id, params);
             expect(result).toBeTruthy();
-            expect(getData(0, 0).v).toBe(6);
-            expect(getData(0, 1).v).toBe(15);
-            expect(getData(0, 2).v).toBe(200);
-            expect(getData(5, 0).v).toBe(1);
-            expect(getData(5, 1).v).toBe(20);
-            expect(getData(5, 2).v).toBe(100);
+            expect(getData(0, 0)?.v).toBe(6);
+            expect(getData(0, 1)?.v).toBe(15);
+            expect(getData(0, 2)?.v).toBe(200);
+            expect(getData(5, 0)?.v).toBe(1);
+            expect(getData(5, 1)?.v).toBe(20);
+            expect(getData(5, 2)?.v).toBe(100);
         });
     });
 
@@ -115,12 +115,12 @@ describe('Test "Sort Range Commands"', () => {
             } as ISortRangeCommandParams;
             const result = await commandService.executeCommand(SortRangeCommand.id, params);
             expect(result).toBeTruthy();
-            expect(getData(0, 0).v).toBe(6);
-            expect(getData(0, 1).v).toBe(15);
-            expect(getData(0, 2).v).toBe(200);
-            expect(getData(5, 0).v).toBe(1);
-            expect(getData(5, 1).v).toBe(20);
-            expect(getData(5, 2).v).toBe(100);
+            expect(getData(0, 0)?.v).toBe(6);
+            expect(getData(0, 1)?.v).toBe(15);
+            expect(getData(0, 2)?.v).toBe(200);
+            expect(getData(5, 0)?.v).toBe(1);
+            expect(getData(5, 1)?.v).toBe(20);
+            expect(getData(5, 2)?.v).toBe(100);
         });
     });
 });

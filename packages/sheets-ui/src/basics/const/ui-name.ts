@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 
-export * from './plugin-name';
-export * from './ui-name.ts';
+export enum SheetsUIPart {
+    FILTER_PANEL_EMBED_POINT = 'filter-panel-embed-point',
+}

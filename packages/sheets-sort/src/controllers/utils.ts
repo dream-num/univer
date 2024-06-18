@@ -30,8 +30,7 @@ const removeStringSymbol = (str: string) => {
 
 export const compareNull = (
     a1: ICommonComparableCellValue,
-    a2: ICommonComparableCellValue,
-    type: SortType
+    a2: ICommonComparableCellValue
 ) => {
     const isA1Null = a1 === null || a1 === '';
     const isA2Null = a2 === null || a2 === '';

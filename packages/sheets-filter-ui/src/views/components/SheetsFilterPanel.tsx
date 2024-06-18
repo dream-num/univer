@@ -22,6 +22,7 @@ import { ICommandService, LocaleService } from '@univerjs/core';
 
 import { of } from 'rxjs';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
+import { SheetsUIPart } from '@univerjs/sheets-ui';
 import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { FilterBy, SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/sheets-filter.operation';
@@ -68,7 +69,7 @@ export function FilterPanel() {
     const filterService = useDependency(SheetsFilterService);
     const range = filterService.activeFilterModel?.getRange();
     const colIndex = sheetsFilterPanelService.col;
-    const FilterPanelEmbedPointPart = useComponentsOfPart('filter-panel-embed-point');
+    const FilterPanelEmbedPointPart = useComponentsOfPart(SheetsUIPart.FILTER_PANEL_EMBED_POINT);
 
     return (
         <div className={styles.sheetsFilterPanel}>
@@ -109,32 +110,3 @@ function useFilterByOptions(localeService: LocaleService): ISegmentedProps['opti
     , [locale, localeService]);
 }
 
-// export function useComponentsForPart(part: string) {
-//     const uiPartsService = useDependency(IUIPartsService);
-//     const updateCounterRef = useRef<number>(0);
-//     const componentPartUpdateCount = useObservable(
-//         () => uiPartsService.componentRegistered$.pipe(
-//             filter((key) => key === part),
-//             map(() => updateCounterRef.current += 1)
-//         ),
-//         undefined,
-//         undefined,
-//         [uiPartsService]
-//     );
-//     return useMemo(() => uiPartsService.getComponents(part), [componentPartUpdateCount]);
-// }
-
-// export function ComponentContainer(props: {
-//     components?: Set<() => ComponentType>;
-//     fallback?: React.ReactNode;
-//     commonProps?: any;
-// }) {
-//     const { components, fallback, commonProps } = props || {};
-//     if (!components || components.size === 0) {
-//         return fallback ?? null;
-//     }
-
-//     return Array.from(components.values()).map((component, index) =>
-//         React.createElement(component(), { key: `${index}`, ...commonProps })
-//     );
-// }

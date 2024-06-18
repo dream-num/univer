@@ -24,6 +24,7 @@ import { takeUntil } from 'rxjs';
 import { serializeRange } from '@univerjs/engine-formula';
 import { AscendingSingle, CustomSortSingle, DescendingSingle, ExpandAscendingSingle, ExpandDescendingSingle } from '@univerjs/icons';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
+import { SheetsUIPart } from '@univerjs/sheets-ui';
 import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/sheets-sort.command';
 import { CustomSortPanel } from '../views/CustomSortPanel';
 import type { ISheetSortLocation } from '../services/sheets-sort-ui.service';
@@ -104,7 +105,7 @@ export class SheetsSortUIController extends RxDisposable {
 
     private _initUI(): void {
         this.disposeWithMe(this._componentManager.register('CustomSortPanel', CustomSortPanel));
-        this.disposeWithMe(this._uiPartsService.registerComponent('filter-panel-embed-point', () => connectInjector(EmbedSortBtn, this._injector)));
+        this.disposeWithMe(this._uiPartsService.registerComponent(SheetsUIPart.FILTER_PANEL_EMBED_POINT, () => connectInjector(EmbedSortBtn, this._injector)));
         this.disposeWithMe(this._componentManager.register(SHEETS_SORT_ASC_ICON, AscendingSingle));
         this.disposeWithMe(this._componentManager.register(SHEETS_SORT_ASC_EXT_ICON, ExpandAscendingSingle));
         this.disposeWithMe(this._componentManager.register(SHEETS_SORT_DESC_ICON, DescendingSingle));

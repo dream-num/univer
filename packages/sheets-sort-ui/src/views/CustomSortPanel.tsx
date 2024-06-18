@@ -185,7 +185,7 @@ export function SortOptionItem(props: { titles: { index: number; label: string }
                         )}
                     >
                         <div className={styles.customSortPanelItemColumnInput}>
-                            {itemLabel}
+                            <span className={styles.customSortPanelItemColumnInputText}>{itemLabel}</span>
                             <MoreDownSingle className={styles.customSortPanelItemColumnInputDropdown} />
                         </div>
                     </Dropdown>

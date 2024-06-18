@@ -15,7 +15,8 @@
  */
 
 import type { ICellData, ICommandInfo, IDocumentBody, IPosition, Nullable, Workbook } from '@univerjs/core';
-import { CellValueType,
+import {
+    CellValueType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
     Disposable,
@@ -44,7 +45,6 @@ import {
     VIEWPORT_KEY as DOC_VIEWPORT_KEY,
     DOCS_COMPONENT_MAIN_LAYER_INDEX,
     DocSkeletonManagerService,
-    DocViewModelManagerService,
     MoveCursorOperation,
     MoveSelectionOperation,
     RichTextEditingMutation,
@@ -64,7 +64,7 @@ import {
 import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import { ClearSelectionFormatCommand, SelectionManagerService, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand } from '@univerjs/sheets';
-import { filter } from 'rxjs';
+import { distinctUntilChanged, filter } from 'rxjs';
 import { LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -95,8 +95,6 @@ enum CursorChange {
 }
 
 export class EditingRenderController extends Disposable implements IRenderModule {
-    private _editorVisiblePrevious = false;
-
     /**
      * It is used to distinguish whether the user has actively moved the cursor in the editor, mainly through mouse clicks.
      */
@@ -105,8 +103,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
         @IContextService private readonly _contextService: IContextService,
+        /** @deprecated This controller should not directly use univerInstanceService. Instead, it should call editor service. */
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
@@ -126,13 +124,21 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     private _init() {
         this._initialEditFocusListener();
-        this._initialStartEdit();
         this._initialKeyboardListener();
         this._initialCursorSync();
         this._listenEditorFocus();
         this._commandExecutedListener();
-        this._initialExitInput();
+
+        this._initEditorVisibilityListener();
         this._cursorStateListener();
+    }
+
+    private _initEditorVisibilityListener(): void {
+        this.disposeWithMe(this._editorBridgeService.visible$
+            .pipe(distinctUntilChanged((prev, curr) => prev.visible === curr.visible))
+            .subscribe((param) => {
+                param.visible ? this._handleEditorVisible(param) : this._handleEditorInvisible(param);
+            }));
     }
 
     private _listenEditorFocus() {
@@ -170,6 +176,10 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     private _getEditorSkeleton(editorId: string) {
         return this._renderManagerService.getRenderById(editorId)?.with(DocSkeletonManagerService).getSkeleton();
+    }
+
+    private _getEditorViewModel(editorId: string) {
+        return this._renderManagerService.getRenderById(editorId)?.with(DocSkeletonManagerService).getViewModel();
     }
 
     private _initialCursorSync() {
@@ -481,109 +491,99 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     // You can double-click on the cell or input content by keyboard to put the cell into the edit state.
     // eslint-disable-next-line max-lines-per-function
-    private _initialStartEdit() {
-        // eslint-disable-next-line max-lines-per-function
-        this.disposeWithMe(this._editorBridgeService.visible$.subscribe((param) => {
-            const { visible, eventType, keycode } = param;
+    private _handleEditorVisible(param: IEditorBridgeServiceVisibleParam) {
+        const { eventType, keycode } = param;
 
-            if (visible === this._editorVisiblePrevious) {
+        // Change `CursorChange` to changed status, when formula bar clicked.
+        this._cursorChange =
+            eventType === DeviceInputEventType.PointerDown
+                ? CursorChange.CursorChange
+                : CursorChange.StartEditor;
+
+        const editCellState = this._editorBridgeService.getEditCellState();
+        if (editCellState == null) {
+            return;
+        }
+
+        const {
+            position,
+            documentLayoutObject,
+            canvasOffset,
+            scaleX,
+            scaleY,
+            editorUnitId,
+            unitId,
+            sheetId,
+            isInArrayFormulaRange = false,
+        } = editCellState;
+
+        const editorObject = this._getEditorObject();
+
+        if (editorObject == null) {
+            return;
+        }
+
+        this._setOpenForCurrent(unitId, sheetId);
+
+        const { document, scene } = editorObject;
+
+        this._contextService.setContextValue(EDITOR_ACTIVATED, true);
+
+        const { documentModel: documentDataModel } = documentLayoutObject;
+        const skeleton = this._getEditorSkeleton(editorUnitId);
+        if (!skeleton || !documentDataModel) {
+            return;
+        }
+
+        this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+        // move selection
+        if (
+            eventType === DeviceInputEventType.Keyboard ||
+            (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
+        ) {
+            const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
+            const documentViewModel = this._getEditorViewModel(editorUnitId);
+
+            if (documentViewModel == null) {
                 return;
             }
 
-            this._editorVisiblePrevious = visible;
+            this._resetBodyStyle(snapshot.body!, !!isInArrayFormulaRange);
 
-            if (visible === false) {
-                this._setOpenForCurrent(null, null);
-                return;
+            documentDataModel.reset(snapshot);
+            documentViewModel.reset(documentDataModel);
+
+            document.makeDirty();
+
+            // @JOCS, Why calculate here?
+            if (keycode === KeyCode.BACKSPACE || eventType === DeviceInputEventType.Dblclick) {
+                skeleton.calculate();
+                this._editorBridgeService.changeEditorDirty(true);
             }
 
-            const editCellState = this._editorBridgeService.getEditCellState();
+            this._textSelectionManagerService.replaceTextRanges([
+                {
+                    startOffset: 0,
+                    endOffset: 0,
+                },
+            ]);
+        } else if (eventType === DeviceInputEventType.Dblclick) {
+            // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
+            const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
 
-            if (editCellState == null) {
-                return;
-            }
+            scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollTo({
+                y: Number.POSITIVE_INFINITY,
+            });
 
-            const {
-                position,
-                documentLayoutObject,
-                canvasOffset,
-                scaleX,
-                scaleY,
-                editorUnitId,
-                unitId,
-                sheetId,
-                isInArrayFormulaRange = false,
-            } = editCellState;
+            this._textSelectionManagerService.replaceTextRanges([
+                {
+                    startOffset: cursor,
+                    endOffset: cursor,
+                },
+            ]);
+        }
 
-            const editorObject = this._getEditorObject();
-
-            if (editorObject == null) {
-                return;
-            }
-
-            this._setOpenForCurrent(unitId, sheetId);
-
-            const { document, scene } = editorObject;
-
-            this._contextService.setContextValue(EDITOR_ACTIVATED, true);
-
-            const { documentModel: documentDataModel } = documentLayoutObject;
-            const skeleton = this._getEditorSkeleton(editorUnitId);
-            if (!skeleton || !documentDataModel) {
-                return;
-            }
-
-            this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
-            // move selection
-            if (
-                eventType === DeviceInputEventType.Keyboard ||
-                (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
-            ) {
-                const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
-                const documentViewModel = this._docViewModelManagerService.getViewModel(editorUnitId);
-
-                if (documentViewModel == null) {
-                    return;
-                }
-
-                this._resetBodyStyle(snapshot.body!, !!isInArrayFormulaRange);
-
-                documentDataModel.reset(snapshot);
-                documentViewModel.reset(documentDataModel);
-
-                document.makeDirty();
-
-                // @JOCS, Why calculate here?
-                if (keycode === KeyCode.BACKSPACE || eventType === DeviceInputEventType.Dblclick) {
-                    skeleton.calculate();
-                    this._editorBridgeService.changeEditorDirty(true);
-                }
-
-                this._textSelectionManagerService.replaceTextRanges([
-                    {
-                        startOffset: 0,
-                        endOffset: 0,
-                    },
-                ]);
-            } else if (eventType === DeviceInputEventType.Dblclick) {
-                    // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
-                const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
-
-                scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollTo({
-                    y: Number.POSITIVE_INFINITY,
-                });
-
-                this._textSelectionManagerService.replaceTextRanges([
-                    {
-                        startOffset: cursor,
-                        endOffset: cursor,
-                    },
-                ]);
-            }
-
-            this._renderManagerService.getRenderById(unitId)?.scene.resetCursor();
-        })
-        );
+        this._renderManagerService.getRenderById(unitId)?.scene.resetCursor();
     }
 
     private _resetBodyStyle(body: IDocumentBody, removeStyle = false) {
@@ -723,6 +723,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
                         return;
                     }
 
+                    // TODO@Jocs: After we merging editor related controllers, this seems verbose.
+                    // We can directly call SetRangeValues here.
                     this._editorBridgeService.changeVisible(params);
                 }
 
@@ -767,139 +769,122 @@ export class EditingRenderController extends Disposable implements IRenderModule
     //         });
     // }
 
-    private _initialExitInput() {
-        this.disposeWithMe(
-            this._editorBridgeService.visible$.subscribe(async (param) => {
-                const { visible, keycode, eventType } = param;
+    private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
+        const { keycode } = param;
 
-                if (visible === this._editorVisiblePrevious) {
-                    return;
-                }
+        this._setOpenForCurrent(null, null);
 
-                this._editorVisiblePrevious = visible;
+        this._cursorChange = CursorChange.InitialState;
 
-                if (visible === true) {
-                    // Change `CursorChange` to changed status, when formula bar clicked.
-                    this._cursorChange =
-                        eventType === DeviceInputEventType.PointerDown
-                            ? CursorChange.CursorChange
-                            : CursorChange.StartEditor;
-                    return;
-                }
+        const selections = this._selectionManagerService.getSelections();
+        const currentSelection = this._selectionManagerService.getCurrent();
 
-                this._cursorChange = CursorChange.InitialState;
+        if (currentSelection == null) {
+            return;
+        }
 
-                const selections = this._selectionManagerService.getSelections();
-                const currentSelection = this._selectionManagerService.getCurrent();
+        const { unitId: workbookId, sheetId: worksheetId, pluginName } = currentSelection;
 
-                if (currentSelection == null) {
-                    return;
-                }
+        this._exitInput(param);
 
-                const { unitId: workbookId, sheetId: worksheetId, pluginName } = currentSelection;
-
-                this._exitInput(param);
-
-                if (keycode === KeyCode.ESC) {
-                    // Reselect the current selections, when exist cell editor by press ESC.
-                    if (selections) {
-                        this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                            unitId: workbookId,
-                            subUnitId: worksheetId,
-                            pluginName,
-                            selections,
-                        });
-                    }
-
-                    return;
-                }
-
-                const editCellState = this._editorBridgeService.getEditCellState();
-
-                if (editCellState == null) {
-                    return;
-                }
-
-                const { unitId, sheetId, row, column, documentLayoutObject } = editCellState;
-
-                // If neither the formula bar editor nor the cell editor has been edited,
-                // it is considered that the content has not changed and returns directly.
-                const editorIsDirty = this._editorBridgeService.getEditorDirty();
-                if (editorIsDirty === false) {
-                    this._moveCursor(keycode);
-
-                    return;
-                }
-
-                const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-
-                const worksheet = workbook?.getSheetBySheetId(sheetId);
-
-                if (worksheet == null) {
-                    return;
-                }
-
-                const cellData: Nullable<ICellData> = getCellDataByInput(
-                    worksheet.getCellRaw(row, column) || {},
-                    documentLayoutObject,
-                    this._lexerTreeBuilder
-                );
-
-                if (cellData == null) {
-                    this._moveCursor(keycode);
-
-                    return;
-                }
-
-                const context = {
-                    subUnitId: sheetId,
-                    unitId,
-                    workbook: workbook!,
-                    worksheet,
-                    row,
-                    col: column,
-                };
-
-                /**
-                 * When closing the editor, switch to the current tab of the editor.
-                 */
-                if (workbookId === unitId && sheetId !== worksheetId && this._editorBridgeService.isForceKeepVisible()) {
-                    // SetWorksheetActivateCommand handler uses Promise
-                    await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
-                        subUnitId: sheetId,
-                        unitId,
-                    });
-                }
-                /**
-                 * When switching tabs while the editor is open,
-                 * the operation to refresh the selection will be blocked and needs to be triggered manually.
-                 */
-                this._selectionManagerService.refreshSelection();
-
-                const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
-                    this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT
-                )(cellData, context);
-
-                const finalCell = await this._editorBridgeService.interceptor.fetchThroughInterceptors(
-                    this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT_ASYNC
-                )(Promise.resolve(cell), context);
-
-                this._commandService.executeCommand(SetRangeValuesCommand.id, {
-                    subUnitId: sheetId,
-                    unitId,
-                    range: {
-                        startRow: row,
-                        startColumn: column,
-                        endRow: row,
-                        endColumn: column,
-                    },
-                    value: finalCell,
+        if (keycode === KeyCode.ESC) {
+            // Reselect the current selections, when exist cell editor by press ESC.
+            if (selections) {
+                this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                    unitId: workbookId,
+                    subUnitId: worksheetId,
+                    pluginName,
+                    selections,
                 });
+            }
 
-                // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
-                this._moveCursor(keycode);
-            })
+            return;
+        }
+
+        const editCellState = this._editorBridgeService.getEditCellState();
+
+        if (editCellState == null) {
+            return;
+        }
+
+        const { unitId, sheetId, row, column, documentLayoutObject } = editCellState;
+
+        // If neither the formula bar editor nor the cell editor has been edited,
+        // it is considered that the content has not changed and returns directly.
+        const editorIsDirty = this._editorBridgeService.getEditorDirty();
+        if (editorIsDirty === false) {
+            this._moveCursor(keycode);
+
+            return;
+        }
+
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+
+        const worksheet = workbook?.getSheetBySheetId(sheetId);
+
+        if (worksheet == null) {
+            return;
+        }
+
+        const cellData: Nullable<ICellData> = getCellDataByInput(
+            worksheet.getCellRaw(row, column) || {},
+            documentLayoutObject,
+            this._lexerTreeBuilder
         );
+
+        if (cellData == null) {
+            this._moveCursor(keycode);
+
+            return;
+        }
+
+        const context = {
+            subUnitId: sheetId,
+            unitId,
+            workbook: workbook!,
+            worksheet,
+            row,
+            col: column,
+        };
+
+        /**
+         * When closing the editor, switch to the current tab of the editor.
+         */
+        if (workbookId === unitId && sheetId !== worksheetId && this._editorBridgeService.isForceKeepVisible()) {
+            // SetWorksheetActivateCommand handler uses Promise
+            await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                subUnitId: sheetId,
+                unitId,
+            });
+        }
+        /**
+         * When switching tabs while the editor is open,
+         * the operation to refresh the selection will be blocked and needs to be triggered manually.
+         */
+        this._selectionManagerService.refreshSelection();
+
+        const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
+            this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT
+        )(cellData, context);
+
+        const finalCell = await this._editorBridgeService.interceptor.fetchThroughInterceptors(
+            this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT_ASYNC
+        )(Promise.resolve(cell), context);
+
+        this._commandService.executeCommand(SetRangeValuesCommand.id, {
+            subUnitId: sheetId,
+            unitId,
+            range: {
+                startRow: row,
+                startColumn: column,
+                endRow: row,
+                endColumn: column,
+            },
+            value: finalCell,
+        });
+
+        // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
+        this._moveCursor(keycode);
     }
 
     private _exitInput(param: IEditorBridgeServiceVisibleParam) {

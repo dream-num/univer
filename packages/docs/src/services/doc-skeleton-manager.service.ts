@@ -15,19 +15,19 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import { LocaleService, RxDisposable } from '@univerjs/core';
-import type { DocumentViewModel, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { DocumentSkeleton } from '@univerjs/engine-render';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, LocaleService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { DocumentSkeleton, DocumentViewModel } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 
-import { DocViewModelManagerService } from './doc-view-model-manager.service';
-
 /**
- * This service is for document build and manage doc skeletons.
+ * This service is for document build and manage doc skeletons. It also manages
+ * DocumentViewModels.
  */
 export class DocSkeletonManagerService extends RxDisposable implements IRenderModule {
     private _skeleton: DocumentSkeleton;
+    private _docViewModel: DocumentViewModel;
 
     private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<DocumentSkeleton>>(null);
     readonly currentSkeleton$ = this._currentSkeleton$.asObservable();
@@ -39,11 +39,19 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
-        this._init();
+        this._update();
+
+        this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((documentModel) => {
+                if (documentModel?.getUnitId() === this._context.unitId) {
+                    this._update();
+                }
+            });
     }
 
     override dispose(): void {
@@ -53,30 +61,24 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
         this._currentSkeleton$.complete();
     }
 
-    private _init() {
-        // TODO@wzhudev: useless when we move doc view model manager service to render unit
-        this._docViewModelManagerService.currentDocViewModel$
-            .pipe(takeUntil(this.dispose$))
-            .subscribe((docViewModel) => {
-                if (!docViewModel) {
-                    return;
-                }
+    private _update() {
+        const documentDataModel = this._context.unit;
+        const unitId = this._context.unitId;
 
-                this._setCurrent(docViewModel.docViewModel);
-            });
+        // No need to build view model, if data model has no body.
+        if (documentDataModel.getBody() == null) {
+            return;
+        }
 
-        this._docViewModelManagerService.getAllModel().forEach((docViewModel) => {
-            this._setCurrent(docViewModel.docViewModel);
-        });
-    }
+        // Always need to reset document data model, because cell editor change doc instance every time.
+        if (this._docViewModel && unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+            this._docViewModel.reset(documentDataModel);
+        } else if (!this._docViewModel) {
+            this._docViewModel = this._buildDocViewModel(documentDataModel);
+        }
 
-    getSkeleton(): DocumentSkeleton {
-        return this._skeleton;
-    }
-
-    private _setCurrent(docViewModel: DocumentViewModel): Nullable<DocumentSkeleton> {
         if (!this._skeleton) {
-            this._skeleton = this._buildSkeleton(docViewModel);
+            this._skeleton = this._buildSkeleton(this._docViewModel);
         }
 
         const skeleton = this._skeleton;
@@ -88,7 +90,19 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
         return this.getSkeleton();
     }
 
+    getSkeleton(): DocumentSkeleton {
+        return this._skeleton;
+    }
+
+    getViewModel(): DocumentViewModel {
+        return this._docViewModel;
+    }
+
     private _buildSkeleton(documentViewModel: DocumentViewModel) {
         return DocumentSkeleton.create(documentViewModel, this._localeService);
+    }
+
+    private _buildDocViewModel(documentDataModel: DocumentDataModel) {
+        return new DocumentViewModel(documentDataModel);
     }
 }

@@ -38,11 +38,10 @@ import {
     CoverContentCommand,
     VIEWPORT_KEY as DOC_VIEWPORT_KEY,
     DocSkeletonManagerService,
-    DocViewModelManagerService,
     RichTextEditingMutation,
     TextSelectionManagerService,
 } from '@univerjs/docs';
-import type { RenderComponentType } from '@univerjs/engine-render';
+import type { DocumentViewModel, RenderComponentType } from '@univerjs/engine-render';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
@@ -67,7 +66,6 @@ export class FormulaEditorController extends RxDisposable {
         @IContextService private readonly _contextService: IContextService,
         @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
@@ -429,7 +427,7 @@ export class FormulaEditorController extends RxDisposable {
 
         const skeleton = currentRender.with(DocSkeletonManagerService).getSkeleton();
         const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
-        const docViewModel = this._docViewModelManagerService.getViewModel(unitId);
+        const docViewModel = this._getEditorViewModel(unitId);
 
         if (docDataModel == null || docViewModel == null) {
             return;
@@ -459,7 +457,7 @@ export class FormulaEditorController extends RxDisposable {
 
         const skeleton = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService).getSkeleton();
         const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
-        const docViewModel = this._docViewModelManagerService.getViewModel(unitId);
+        const docViewModel = this._getEditorViewModel(unitId);
 
         if (docDataModel == null || docViewModel == null || skeleton == null) {
             return;
@@ -567,5 +565,9 @@ export class FormulaEditorController extends RxDisposable {
             viewportMain?.scrollTo({ x: 0, y: 0 });
             viewportMain?.getScrollBar()?.dispose();
         }
+    }
+
+    private _getEditorViewModel(unitId: string): Nullable<DocumentViewModel> {
+        return this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService).getViewModel();
     }
 }

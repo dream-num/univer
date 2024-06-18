@@ -41,6 +41,7 @@ export class DocsRenderService extends RxDisposable {
         this._instanceSrv.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
             .forEach((documentModel) => this._createRenderer(documentModel));
 
+        // TODO@wzhudev: maybe we should rollback here later
         this._instanceSrv.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
             .pipe(takeUntil(this.dispose$))
             .subscribe((doc) => this._disposeRenderer(doc));
@@ -48,10 +49,13 @@ export class DocsRenderService extends RxDisposable {
 
     private _createRenderer(doc: DocumentDataModel) {
         const unitId = doc.getUnitId();
-        this._createRenderWithId(unitId);
 
-        // NOTE@wzhudev: maybe not in univer mode
-        this._renderManagerService.setCurrent(unitId);
+        if (!this._renderManagerService.has(unitId)) {
+            this._createRenderWithId(unitId);
+
+            // NOTE@wzhudev: maybe not in univer mode
+            this._renderManagerService.setCurrent(unitId);
+        }
     }
 
     private _createRenderWithId(unitId: string) {

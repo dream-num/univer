@@ -633,6 +633,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._editors.set(editorUnitId, editor);
 
         // Delete scroll bar
+        // FIXME@Jocs: should add a configuration when creating a renderer, not delete it.
         (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0].getScrollBar()?.dispose();
 
         if (!editor.isSheetEditor()) {
@@ -754,6 +755,4 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 }
 
-export const IEditorService = createIdentifier<IEditorService>(
-    'univer.editor.service'
-);
+export const IEditorService = createIdentifier<IEditorService>('univer.editor.service');

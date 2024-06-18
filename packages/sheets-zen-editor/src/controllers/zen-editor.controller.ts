@@ -31,7 +31,6 @@ import type { IDocObjectParam, IRichTextEditingMutationParams } from '@univerjs/
 import {
     VIEWPORT_KEY as DOC_VIEWPORT_KEY,
     DocSkeletonManagerService,
-    DocViewModelManagerService,
     getDocObject,
     RichTextEditingMutation,
     TextSelectionManagerService,
@@ -60,8 +59,7 @@ export class ZenEditorController extends RxDisposable {
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
@@ -220,9 +218,10 @@ export class ZenEditorController extends RxDisposable {
             DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
         ];
 
-        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService).getSkeleton();
+        const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+        const skeleton = docSkeletonManagerService?.getSkeleton();
         const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
-        const docViewModel = this._docViewModelManagerService.getViewModel(unitId);
+        const docViewModel = docSkeletonManagerService?.getViewModel();
 
         if (docDataModel == null || docViewModel == null || skeleton == null) {
             return;

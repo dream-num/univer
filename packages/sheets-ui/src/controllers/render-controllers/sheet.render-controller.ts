@@ -279,21 +279,18 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     private _initCommandListener(): void {
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             const { unit: workbook, unitId: workbookId } = this._context;
-            const { params, id: commandId } = command;
-            const { unitId } = params as ISetWorksheetMutationParams;
-            if (unitId !== workbookId) {
-                return;
-            }
+            const { id: commandId } = command;
 
             if (COMMAND_LISTENER_SKELETON_CHANGE.includes(commandId) || this._sheetRenderService.checkMutationShouldTriggerRerender(commandId)) {
                 const worksheet = workbook.getActiveSheet();
                 if (!worksheet) return;
 
+                const workbookId = this._context.unitId;
                 const worksheetId = worksheet.getSheetId();
                 const params = command.params;
-                const { subUnitId } = params as ISetWorksheetMutationParams;
+                const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
 
-                if (subUnitId !== worksheetId) {
+                if (unitId !== workbookId || subUnitId !== worksheetId) {
                     return;
                 }
 

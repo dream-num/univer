@@ -32,7 +32,6 @@ import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
-import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { FUniver } from '@univerjs/facade';
@@ -76,7 +75,7 @@ univer.registerPlugin(UniverSheetsUIPlugin);
 // sheet feature plugins
 
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
-univer.registerPlugin(UniverSheetsZenEditorPlugin);
+// univer.registerPlugin(UniverSheetsZenEditorPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin, {
     notExecuteFormula: true,
 });

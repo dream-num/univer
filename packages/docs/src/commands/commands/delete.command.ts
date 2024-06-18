@@ -22,6 +22,7 @@ import {
     ICommandService,
     IUniverInstanceService,
     JSONX,
+    PositionedObjectLayoutType,
     TextX,
     TextXActionType,
     UpdateDocsAttributeType,
@@ -361,13 +362,52 @@ export const DeleteLeftCommand: ICommand = {
                         range: actualRange,
                     });
                 } else if (preGlyph.streamType === '\b') {
-                    const unitId = docDataModel.getUnitId();
-                    result = await commandService.executeCommand(DeleteCustomBlockCommand.id, {
-                        direction: DeleteDirection.LEFT,
-                        range: activeRange,
-                        unitId,
-                        drawingId: preGlyph.drawingId,
-                    });
+                    const drawing = docDataModel.getSnapshot().drawings?.[preGlyph.drawingId ?? ''];
+
+                    if (drawing == null) {
+                        return true;
+                    }
+
+                    const isInlineDrawing = drawing.layoutType === PositionedObjectLayoutType.INLINE;
+
+                    if (isInlineDrawing) {
+                        const unitId = docDataModel.getUnitId();
+                        result = await commandService.executeCommand(DeleteCustomBlockCommand.id, {
+                            direction: DeleteDirection.LEFT,
+                            range: activeRange,
+                            unitId,
+                            drawingId: preGlyph.drawingId,
+                        });
+                    } else {
+                        const prePreGlyph = skeleton.findNodeByCharIndex(startOffset - 2);
+                        if (prePreGlyph == null) {
+                            return true;
+                        }
+
+                        cursor -= preGlyph.count;
+                        cursor -= prePreGlyph.count;
+
+                        const textRanges = [
+                            {
+                                startOffset: cursor,
+                                endOffset: cursor,
+                                style,
+                            },
+                        ];
+
+                        result = await commandService.executeCommand(DeleteCommand.id, {
+                            unitId: docDataModel.getUnitId(),
+                            range: {
+                                ...activeRange,
+                                startOffset: activeRange.startOffset - 1,
+                                endOffset: activeRange.endOffset - 1,
+                            },
+                            segmentId,
+                            direction: DeleteDirection.LEFT,
+                            len: prePreGlyph.count,
+                            textRanges,
+                        });
+                    }
                 } else {
                     cursor -= preGlyph.count;
                     result = await commandService.executeCommand(DeleteCommand.id, {
@@ -400,6 +440,8 @@ export const DeleteLeftCommand: ICommand = {
 export const DeleteRightCommand: ICommand = {
     id: 'doc.command.delete-right',
     type: CommandType.COMMAND,
+
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -426,7 +468,7 @@ export const DeleteRightCommand: ICommand = {
         }
 
         const actualRange = getInsertSelection(activeRange, body);
-        const { startOffset, collapsed } = actualRange;
+        const { startOffset, endOffset, collapsed } = actualRange;
         // No need to delete when the cursor is at the last position of the last paragraph.
         if (startOffset === body.dataStream.length - 2 && collapsed) {
             return true;
@@ -435,12 +477,56 @@ export const DeleteRightCommand: ICommand = {
         let result: boolean = false;
         if (collapsed === true) {
             const needDeleteGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage)!;
+            const nextGlyph = skeleton.findNodeByCharIndex(startOffset + 1);
 
             if (needDeleteGlyph.content === '\r') {
                 result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
                     direction: DeleteDirection.RIGHT,
                     range: activeRange,
                 });
+            } else if (needDeleteGlyph.streamType === '\b') {
+                const drawing = docDataModel.getSnapshot().drawings?.[needDeleteGlyph.drawingId ?? ''];
+
+                if (drawing == null) {
+                    return true;
+                }
+
+                const isInlineDrawing = drawing.layoutType === PositionedObjectLayoutType.INLINE;
+
+                if (isInlineDrawing) {
+                    const unitId = docDataModel.getUnitId();
+                    result = await commandService.executeCommand(DeleteCustomBlockCommand.id, {
+                        direction: DeleteDirection.RIGHT,
+                        range: activeRange,
+                        unitId,
+                        drawingId: needDeleteGlyph.drawingId,
+                    });
+                } else {
+                    if (nextGlyph == null) {
+                        return true;
+                    }
+
+                    const textRanges = [
+                        {
+                            startOffset: startOffset + 1,
+                            endOffset: startOffset + 1,
+                            style,
+                        },
+                    ];
+
+                    result = await commandService.executeCommand(DeleteCommand.id, {
+                        unitId: docDataModel.getUnitId(),
+                        range: {
+                            ...activeRange,
+                            startOffset: startOffset + 1,
+                            endOffset: endOffset + 1,
+                        },
+                        segmentId,
+                        direction: DeleteDirection.RIGHT,
+                        textRanges,
+                        len: nextGlyph.count,
+                    });
+                }
             } else {
                 const textRanges = [
                     {
@@ -452,11 +538,7 @@ export const DeleteRightCommand: ICommand = {
 
                 result = await commandService.executeCommand(DeleteCommand.id, {
                     unitId: docDataModel.getUnitId(),
-                    range: {
-                        startOffset,
-                        endOffset: startOffset,
-                        collapsed,
-                    } as ITextActiveRange,
+                    range: actualRange,
                     segmentId,
                     direction: DeleteDirection.RIGHT,
                     textRanges,

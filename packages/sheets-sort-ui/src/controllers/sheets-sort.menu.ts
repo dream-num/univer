@@ -92,7 +92,7 @@ export function sortRangeCustomMenuFactory(_accessor: IAccessor): IMenuItem {
     };
 }
 
-export function sortRangeCtxMenuFactory(accessor: IAccessor): IMenuItem {
+export function sortRangeCtxMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: SHEETS_SORT_CTX_MENU_ID,
         title: 'sheets-sort.general.sort',
@@ -104,7 +104,6 @@ export function sortRangeCtxMenuFactory(accessor: IAccessor): IMenuItem {
         ],
         group: MenuGroup.CONTEXT_MENU_DATA,
         icon: SHEETS_SORT_ASC_ICON,
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }
 
@@ -115,6 +114,7 @@ export function sortRangeAscCtxMenuFactory(_accessor: IAccessor): IMenuItem {
         type: MenuItemType.BUTTON,
         icon: SHEETS_SORT_ASC_ICON,
         positions: [SHEETS_SORT_CTX_MENU_ID],
+        disabled$: getCurrentRangeDisable$(_accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }
 
@@ -125,6 +125,7 @@ export function sortRangeAscExtCtxMenuFactory(_accessor: IAccessor): IMenuItem {
         type: MenuItemType.BUTTON,
         icon: SHEETS_SORT_ASC_EXT_ICON,
         positions: [SHEETS_SORT_CTX_MENU_ID],
+        disabled$: getCurrentRangeDisable$(_accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }
 
@@ -135,7 +136,7 @@ export function sortRangeDescCtxMenuFactory(_accessor: IAccessor): IMenuItem {
         type: MenuItemType.BUTTON,
         positions: [SHEETS_SORT_CTX_MENU_ID],
         icon: SHEETS_SORT_DESC_ICON,
-
+        disabled$: getCurrentRangeDisable$(_accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }
 
@@ -146,6 +147,7 @@ export function sortRangeDescExtCtxMenuFactory(_accessor: IAccessor): IMenuItem 
         type: MenuItemType.BUTTON,
         positions: [SHEETS_SORT_CTX_MENU_ID],
         icon: SHEETS_SORT_DESC_EXT_ICON,
+        disabled$: getCurrentRangeDisable$(_accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }
 
@@ -156,6 +158,7 @@ export function sortRangeCustomCtxMenuFactory(_accessor: IAccessor): IMenuItem {
         type: MenuItemType.BUTTON,
         positions: [SHEETS_SORT_CTX_MENU_ID],
         icon: SHEETS_SORT_CUSTOM_ICON,
+        disabled$: getCurrentRangeDisable$(_accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSortPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }
 

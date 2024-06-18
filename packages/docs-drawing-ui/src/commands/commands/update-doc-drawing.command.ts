@@ -362,8 +362,8 @@ export const UpdateDocDrawingWrapTextCommand: ICommand = {
 
 export interface IDrawingDocTransform {
     drawingId: string;
-    key: 'size' | 'positionH' | 'positionV';
-    value: ISize | IObjectPositionH | IObjectPositionV;
+    key: 'size' | 'angle' | 'positionH' | 'positionV';
+    value: ISize | number | IObjectPositionH | IObjectPositionV;
 }
 
 export interface IUpdateDrawingDocTransformParams {

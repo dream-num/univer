@@ -233,13 +233,17 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
         }
     }
 
+    const [showPanel, setShowPanel] = useState(true);
+
     useEffect(() => {
         updateFocusDrawingState();
 
         const subscription = drawingManagerService.focus$.subscribe((drawingParams) => {
             if (drawingParams.length === 0) {
+                setShowPanel(false);
                 return;
             }
+            setShowPanel(true);
             updateState(drawingParams[0]);
         });
 
@@ -258,7 +262,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
     }, []);
 
     return (
-        <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)}>
+        <div className={clsx(styles.imageCommonPanelGrid, styles.imageCommonPanelBorder)} style={{ display: showPanel ? 'block' : 'none' }}>
             <div className={styles.imageCommonPanelRow}>
                 <div className={clsx(styles.imageCommonPanelColumn, styles.imageCommonPanelTitle)}>
                     <div>{localeService.t('image-text-wrap.title')}</div>

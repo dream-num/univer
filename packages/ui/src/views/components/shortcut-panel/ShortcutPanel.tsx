@@ -15,7 +15,8 @@
  */
 
 import { LocaleService } from '@univerjs/core';
-import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect } from 'react';
 
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';

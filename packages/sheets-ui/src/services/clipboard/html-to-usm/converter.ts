@@ -82,15 +82,6 @@ interface IHtmlToUSMServiceProps {
     getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
 }
 
-function hideIframe(iframe: HTMLIFrameElement) {
-    iframe.style.display = 'none';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.setAttribute('tabindex', '-1');
-    iframe.setAttribute('aria-hidden', 'true');
-    iframe.setAttribute('title', 'hidden iframe');
-}
-
 export class HtmlToUSMService {
     private static pluginList: IPastePlugin[] = [];
 
@@ -110,44 +101,37 @@ export class HtmlToUSMService {
 
     private _afterProcessRules: IAfterProcessRule[] = [];
 
-    private _htmlElement: HTMLIFrameElement;
+    private _dom: HTMLElement | null = null;
 
     private _getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
 
     constructor(props: IHtmlToUSMServiceProps) {
         this._getCurrentSkeleton = props.getCurrentSkeleton;
-        this._htmlElement = document.createElement('iframe');
-        this._htmlElement.style.display = 'none';
-        document.body.appendChild(this._htmlElement);
-        hideIframe(this._htmlElement);
     }
 
     // eslint-disable-next-line max-lines-per-function
     convert(html: string): IUniverSheetCopyDataModel {
-        if (this._htmlElement.contentDocument) {
-            this._htmlElement.contentDocument.open();
-            this._htmlElement.contentDocument.write(html);
-            this._htmlElement.contentDocument.close();
-        }
-        html = html.replace(/<!--[\s\S]*?-->/g, '').replace(/<style[\s\S]*?<\/style>/g, '');
-
         const pastePlugin = HtmlToUSMService.pluginList.find((plugin) => plugin.checkPasteType(html));
         if (pastePlugin) {
             this._styleRules = [...pastePlugin.stylesRules];
             this._afterProcessRules = [...pastePlugin.afterProcessRules];
         }
         const valueMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
-        const dom = parseToDom(html);
-
+        this._dom = parseToDom(html);
         // Convert stylesheets to map
-        const style = this._htmlElement.contentDocument!.querySelector('style');
+        const style = this._dom.querySelector('style');
+
         if (style) {
+            document.head.appendChild(style);
+            // const style = document.createElement('style');
+            // style.sheet!.insertRule(styleEl!.textContent!, 0);
             for (const rule of style.sheet!.cssRules) {
                 const cssRule = rule as CSSStyleRule;
                 const selectorText = cssRule.selectorText;
                 const style = cssRule.style;
                 this._styleMap.set(selectorText, style);
             }
+            style.remove();
         }
         const newDocBody: IDocumentBody = {
             dataStream: '',
@@ -159,7 +143,7 @@ export class HtmlToUSMService {
         // pick tables
         const tableStrings = html.match(/<table\b[^>]*>([\s\S]*?)<\/table>/gi);
         const tables: IParsedTablesInfo[] = [];
-        this.process(null, dom?.childNodes!, newDocBody, tables);
+        this.process(null, this._dom.childNodes!, newDocBody, tables);
         const { paragraphs, dataStream, textRuns } = newDocBody;
 
         // use paragraph to split rows
@@ -244,6 +228,7 @@ export class HtmlToUSMService {
                 rowProperties.push(...tableRowProp);
             });
         }
+        this.dispose();
         return {
             rowProperties,
             colProperties,
@@ -301,7 +286,7 @@ export class HtmlToUSMService {
         const valueMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
         const colProperties = parseColGroup(html) ?? [];
         const { rowProperties = [] } = parseTableRows(html);
-        const parsedCellMatrix = this._parseTableByHtml(this._htmlElement, this._getCurrentSkeleton()?.skeleton);
+        const parsedCellMatrix = this._parseTableByHtml(this._dom!, this._getCurrentSkeleton()?.skeleton);
         parsedCellMatrix &&
             parsedCellMatrix.forValue((row, col, value) => {
                 let style = handleStringToStyle(undefined, value.style);
@@ -344,9 +329,9 @@ export class HtmlToUSMService {
         };
     }
 
-    private _parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: SpreadsheetSkeleton) {
+    private _parseTableByHtml(htmlElement: HTMLElement, skeleton?: SpreadsheetSkeleton) {
         const cellMatrix = new ObjectMatrix<IParsedCellValueByClipboard>();
-        const tableEle = htmlElement.contentDocument?.querySelector('table');
+        const tableEle = htmlElement.querySelector('table');
         if (!tableEle) {
             return cellMatrix;
         }
@@ -573,7 +558,9 @@ export class HtmlToUSMService {
     }
 
     dispose() {
-        document.body.removeChild(this._htmlElement);
+        this._dom = null;
+        this._styleCache.clear();
+        this._styleMap.clear();
     }
 }
 

@@ -280,6 +280,11 @@ export class SelectionControl extends Disposable {
         this._updateControl(style, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
+    updateRange(range: IRangeWithCoord) {
+        this._selectionModel.setValue(range);
+        this._updateControl(null, this._rowHeaderWidth, this._columnHeaderHeight);
+    }
+
     update(
         newSelectionRange: IRangeWithCoord,
         rowHeaderWidth: number = 0,
@@ -292,6 +297,10 @@ export class SelectionControl extends Disposable {
             style = this._selectionStyle;
         }
         this._updateControl(style, rowHeaderWidth, columnHeaderHeight);
+    }
+
+    updateCurrCell(highlight?: Nullable<ISelectionCellWithMergeInfo>) {
+        this._selectionModel.setCurrentCell(highlight);
     }
 
     clearHighlight() {

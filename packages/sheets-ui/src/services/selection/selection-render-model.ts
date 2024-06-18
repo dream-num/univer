@@ -35,7 +35,9 @@ export class SelectionRenderModel implements IRangeWithCoord {
     private _endY: number = 0;
 
     /**
-     * top left cell of current selection
+     * highlight cell of selection
+     * when there is no merge info
+     * top left cell of current selection (or bottomLeft of current selection)
      */
     private _currentCell: Nullable<ISelectionCellWithMergeInfo>;
 
@@ -73,6 +75,9 @@ export class SelectionRenderModel implements IRangeWithCoord {
         return this._endY;
     }
 
+    /**
+     * highlight cell of selection
+     */
     get currentCell() {
         return this._currentCell;
     }

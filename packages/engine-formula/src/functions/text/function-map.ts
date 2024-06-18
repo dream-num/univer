@@ -21,6 +21,7 @@ import { Lenb } from './lenb';
 import { Text } from './text';
 import { Lower } from './lower';
 import { Find } from './find';
+import { Findb } from './findb';
 
 export const functionText = [
     [Concatenate, FUNCTION_NAMES_TEXT.CONCATENATE],
@@ -29,5 +30,6 @@ export const functionText = [
     [Text, FUNCTION_NAMES_TEXT.TEXT],
     [Lower, FUNCTION_NAMES_TEXT.LOWER],
     [Find, FUNCTION_NAMES_TEXT.FIND],
+    [Findb, FUNCTION_NAMES_TEXT.FINDB],
 
 ];

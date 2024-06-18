@@ -21,7 +21,7 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Find extends BaseFunction {
+export class Findb extends BaseFunction {
     override minParams = 2;
 
     override maxParams = 3;
@@ -86,7 +86,7 @@ export class Find extends BaseFunction {
                     return ErrorValueObject.create(ErrorType.VALUE);
                 }
 
-                const foundIndex = withinTextValueString.indexOf(findTextValueString, startNumValueNumber);
+                const foundIndex = this._findByteIndexOf(findTextValueString, withinTextValueString, startNumValueNumber);
                 if (foundIndex === -1) {
                     return ErrorValueObject.create(ErrorType.VALUE);
                 }
@@ -121,12 +121,31 @@ export class Find extends BaseFunction {
             return ArrayValueObject.createByArray([[ErrorType.VALUE]]);
         }
 
-        const foundIndex = withinTextString.indexOf(findTextString, startIndex);
+        const foundIndex = this._findByteIndexOf(findTextString, withinTextString, startIndex);
         if (foundIndex === -1) {
             return ArrayValueObject.createByArray([[ErrorType.VALUE]]);
         }
 
         // Return 1-based index
         return ArrayValueObject.createByArray([[foundIndex + 1]]);
+    }
+
+    private _findByteIndexOf(findTextString: string, withinTextString: string, startIndex: number): number {
+        const withinTextBytes = new TextEncoder().encode(withinTextString);
+        const findTextBytes = new TextEncoder().encode(findTextString);
+
+        for (let i = startIndex; i <= withinTextBytes.length - findTextBytes.length; i++) {
+            let found = true;
+            for (let j = 0; j < findTextBytes.length; j++) {
+                if (withinTextBytes[i + j] !== findTextBytes[j]) {
+                    found = false;
+                    break;
+                }
+            }
+            if (found) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

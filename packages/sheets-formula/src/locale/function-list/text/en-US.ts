@@ -185,8 +185,8 @@ export default {
         },
     },
     FINDB: {
-        description: 'Finds one text value within another (case-sensitive)',
-        abstract: 'Finds one text value within another (case-sensitive)',
+        description: 'Finds one text value within another (case-sensitive) and returns the position at which a string is first found within text counting each double-character as 2',
+        abstract: 'Finds one text value within another (case-sensitive) and returns the position at which a string is first found within text counting each double-character as 2',
         links: [
             {
                 title: 'Instruction',
@@ -194,8 +194,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: 'find_text', detail: 'The text to find. The item can be a text value, number, or cell reference.' },
+            withinText: { name: 'within_text', detail: 'The text in which findText has to be found.The item can be a text value, number, or cell reference.' },
+            startNumber: { name: 'start_num', detail: 'The position from which string has to be found' },
         },
     },
     FIXED: {

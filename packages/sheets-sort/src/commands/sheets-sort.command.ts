@@ -18,9 +18,9 @@
 // These models would be held on `SheetsFilterService`.
 
 import { CommandType, ICommandService, IUniverInstanceService, Rectangle, sequenceExecute } from '@univerjs/core';
-import type { ICellData, ICommand, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellData, ICommand, IRange, Nullable, Worksheet } from '@univerjs/core';
 import type { IReorderRangeCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import { ReorderRangeCommand } from '@univerjs/sheets';
+import { getSheetCommandTarget, ReorderRangeCommand } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IOrderRule, SortType } from '../services/interface';
 import { SheetsSortService } from '../services/sheets-sort.service';
@@ -54,8 +54,7 @@ export const SortRangeCommand: ICommand = {
         const { range, orderRules, hasTitle, unitId, subUnitId } = params;
         const sortService = accessor.get(SheetsSortService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getUnit(unitId) as Workbook;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
+        const { worksheet } = getSheetCommandTarget(univerInstanceService, params) || {};
         if (!worksheet) {
             return false;
         }

@@ -43,13 +43,13 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
     ) {
         super();
 
-        this._update();
+        this._init();
 
         this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
             .pipe(takeUntil(this.dispose$))
             .subscribe((documentModel) => {
                 if (documentModel?.getUnitId() === this._context.unitId) {
-                    this._update();
+                    this._update(documentModel);
                 }
             });
     }
@@ -61,8 +61,12 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
         this._currentSkeleton$.complete();
     }
 
-    private _update() {
+    private _init() {
         const documentDataModel = this._context.unit;
+        this._update(documentDataModel);
+    }
+
+    private _update(documentDataModel: DocumentDataModel) {
         const unitId = this._context.unitId;
 
         // No need to build view model, if data model has no body.
@@ -73,6 +77,8 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
         // Always need to reset document data model, because cell editor change doc instance every time.
         if (this._docViewModel && unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
             this._docViewModel.reset(documentDataModel);
+
+            this._context.unit = documentDataModel;
         } else if (!this._docViewModel) {
             this._docViewModel = this._buildDocViewModel(documentDataModel);
         }
@@ -86,8 +92,6 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
 
         this._currentSkeletonBefore$.next(skeleton);
         this._currentSkeleton$.next(skeleton);
-
-        return this.getSkeleton();
     }
 
     getSkeleton(): DocumentSkeleton {

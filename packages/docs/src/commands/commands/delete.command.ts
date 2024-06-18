@@ -20,6 +20,7 @@ import {
     ICommandService,
     IUniverInstanceService,
     JSONX,
+    PositionedObjectLayoutType,
     TextX,
     TextXActionType,
     UpdateDocsAttributeType,
@@ -256,8 +257,8 @@ export const DeleteLeftCommand: ICommand = {
             return false;
         }
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!docDataModel) {
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!documentDataModel) {
             return false;
         }
 
@@ -268,7 +269,7 @@ export const DeleteLeftCommand: ICommand = {
         // is in bullet list?
         const isBullet = hasListGlyph(curGlyph);
         // is in indented paragraph?
-        const isIndent = isIndentByGlyph(curGlyph, docDataModel.getBody());
+        const isIndent = isIndentByGlyph(curGlyph, documentDataModel.getBody());
 
         let cursor = startOffset;
 
@@ -279,7 +280,7 @@ export const DeleteLeftCommand: ICommand = {
             isFirstGlyph(curGlyph) && preGlyph !== curGlyph && (isBullet === true || isIndent === true);
 
         if (isUpdateParagraph && collapsed) {
-            const paragraph = getParagraphByGlyph(curGlyph, docDataModel.getBody());
+            const paragraph = getParagraphByGlyph(curGlyph, documentDataModel.getBody());
 
             if (paragraph == null) {
                 return false;
@@ -326,7 +327,7 @@ export const DeleteLeftCommand: ICommand = {
             ];
 
             result = await commandService.executeCommand(UpdateCommand.id, {
-                unitId: docDataModel.getUnitId(),
+                unitId: documentDataModel.getUnitId(),
                 updateBody: {
                     dataStream: '',
                     paragraphs: [{ ...updateParagraph }],
@@ -352,13 +353,52 @@ export const DeleteLeftCommand: ICommand = {
                         range: activeRange,
                     });
                 } else if (preGlyph.streamType === '\b') {
-                    const unitId = docDataModel.getUnitId();
-                    result = await commandService.executeCommand(DeleteCustomBlockCommand.id, {
-                        direction: DeleteDirection.LEFT,
-                        range: activeRange,
-                        unitId,
-                        drawingId: preGlyph.drawingId,
-                    });
+                    const drawing = documentDataModel.getSnapshot().drawings?.[preGlyph.drawingId ?? ''];
+
+                    if (drawing == null) {
+                        return true;
+                    }
+
+                    const isInlineDrawing = drawing.layoutType === PositionedObjectLayoutType.INLINE;
+
+                    if (isInlineDrawing) {
+                        const unitId = documentDataModel.getUnitId();
+                        result = await commandService.executeCommand(DeleteCustomBlockCommand.id, {
+                            direction: DeleteDirection.LEFT,
+                            range: activeRange,
+                            unitId,
+                            drawingId: preGlyph.drawingId,
+                        });
+                    } else {
+                        const prePreGlyph = skeleton.findNodeByCharIndex(startOffset - 2);
+                        if (prePreGlyph == null) {
+                            return true;
+                        }
+
+                        cursor -= preGlyph.count;
+                        cursor -= prePreGlyph.count;
+
+                        const textRanges = [
+                            {
+                                startOffset: cursor,
+                                endOffset: cursor,
+                                style,
+                            },
+                        ];
+
+                        result = await commandService.executeCommand(DeleteCommand.id, {
+                            unitId: documentDataModel.getUnitId(),
+                            range: {
+                                ...activeRange,
+                                startOffset: activeRange.startOffset - 1,
+                                endOffset: activeRange.endOffset - 1,
+                            },
+                            segmentId,
+                            direction: DeleteDirection.LEFT,
+                            len: prePreGlyph.count,
+                            textRanges,
+                        });
+                    }
                 } else {
                     cursor -= preGlyph.count;
 
@@ -371,7 +411,7 @@ export const DeleteLeftCommand: ICommand = {
                     ];
 
                     result = await commandService.executeCommand(DeleteCommand.id, {
-                        unitId: docDataModel.getUnitId(),
+                        unitId: documentDataModel.getUnitId(),
                         range: activeRange,
                         segmentId,
                         direction: DeleteDirection.LEFT,
@@ -400,6 +440,7 @@ export const DeleteRightCommand: ICommand = {
 
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const docSkeletonManagerService = accessor.get(DocSkeletonManagerService);
@@ -417,26 +458,70 @@ export const DeleteRightCommand: ICommand = {
             return false;
         }
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!docDataModel) {
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!documentDataModel) {
             return false;
         }
 
-        const { startOffset, collapsed, segmentId, style } = activeRange;
+        const { startOffset, collapsed, segmentId, style, endOffset } = activeRange;
 
         // No need to delete when the cursor is at the last position of the last paragraph.
-        if (startOffset === docDataModel.getBody()!.dataStream.length - 2 && collapsed) {
+        if (startOffset === documentDataModel.getBody()!.dataStream.length - 2 && collapsed) {
             return true;
         }
 
         if (collapsed === true) {
-            const needDeleteSpan = skeleton.findNodeByCharIndex(startOffset)!;
+            const needDeleteGlyph = skeleton.findNodeByCharIndex(startOffset)!;
+            const nextGlyph = skeleton.findNodeByCharIndex(startOffset + 1);
 
-            if (needDeleteSpan.content === '\r') {
+            if (needDeleteGlyph.content === '\r') {
                 result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
                     direction: DeleteDirection.RIGHT,
                     range: activeRange,
                 });
+            } else if (needDeleteGlyph.streamType === '\b') {
+                const drawing = documentDataModel.getSnapshot().drawings?.[needDeleteGlyph.drawingId ?? ''];
+
+                if (drawing == null) {
+                    return true;
+                }
+
+                const isInlineDrawing = drawing.layoutType === PositionedObjectLayoutType.INLINE;
+
+                if (isInlineDrawing) {
+                    const unitId = documentDataModel.getUnitId();
+                    result = await commandService.executeCommand(DeleteCustomBlockCommand.id, {
+                        direction: DeleteDirection.RIGHT,
+                        range: activeRange,
+                        unitId,
+                        drawingId: needDeleteGlyph.drawingId,
+                    });
+                } else {
+                    if (nextGlyph == null) {
+                        return true;
+                    }
+
+                    const textRanges = [
+                        {
+                            startOffset: startOffset + 1,
+                            endOffset: startOffset + 1,
+                            style,
+                        },
+                    ];
+
+                    result = await commandService.executeCommand(DeleteCommand.id, {
+                        unitId: documentDataModel.getUnitId(),
+                        range: {
+                            ...activeRange,
+                            startOffset: startOffset + 1,
+                            endOffset: endOffset + 1,
+                        },
+                        segmentId,
+                        direction: DeleteDirection.RIGHT,
+                        textRanges,
+                        len: nextGlyph.count,
+                    });
+                }
             } else {
                 const textRanges = [
                     {
@@ -447,12 +532,12 @@ export const DeleteRightCommand: ICommand = {
                 ];
 
                 result = await commandService.executeCommand(DeleteCommand.id, {
-                    unitId: docDataModel.getUnitId(),
+                    unitId: documentDataModel.getUnitId(),
                     range: activeRange,
                     segmentId,
                     direction: DeleteDirection.RIGHT,
                     textRanges,
-                    len: needDeleteSpan.count,
+                    len: needDeleteGlyph.count,
                 });
             }
         } else {

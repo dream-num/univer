@@ -42,7 +42,7 @@ function getAddOrRemoveDrawings(actions: JSONXActions): Nullable<IAddOrRemoveDra
     }
     const drawingsOp = actions.find((action) => Array.isArray(action) && action?.[0] === 'drawings');
 
-    if (drawingsOp == null || !Array.isArray(drawingsOp)) {
+    if (drawingsOp == null || !Array.isArray(drawingsOp) || drawingsOp.length !== 3) {
         return null;
     }
 

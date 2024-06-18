@@ -650,6 +650,7 @@ export class SlideTabBar {
         this._initConfig();
         this.removeListener();
         this.addListener();
+        this.scrollToItem(currentIndex);
     }
 
     primeval(): HTMLElement {
@@ -739,6 +740,24 @@ export class SlideTabBar {
         });
     }
 
+    scrollToItem(index?: number): void {
+        index = index ?? this._config.currentIndex;
+        // Check index validity
+        if (index < 0 || index >= this._slideTabItems.length) {
+            console.error('Index out of bounds');
+            return;
+        }
+
+        const right = this.calculateTabItemScrollX(index);
+        this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + right);
+
+        // Trigger a scroll event
+        this._config.onScroll({
+            leftEnd: this.isLeftEnd(),
+            rightEnd: this.isRightEnd(),
+        });
+    }
+
     calculateLeftScrollX(shouldFlipPage?: boolean): number {
         let scrollX = 0;
         const padding = 4;
@@ -779,6 +798,58 @@ export class SlideTabBar {
             }
             return false;
         });
+
+        return scrollX;
+    }
+
+    calculateTabItemScrollX(index: number): number {
+        let scrollX = 0;
+        const padding = 4;
+
+        const containerRect = this._slideTabBar.getBoundingClientRect();
+        const containerLeftPosition = containerRect.left;
+        const containerRightPosition = containerRect.left + containerRect.width;
+
+        const itemReact = this._slideTabItems[index].getSlideTabItem().getBoundingClientRect();
+        const itemLeft = itemReact.left;
+        const itemWidth = itemReact.width;
+
+        // Left side or part of left side
+        if (itemLeft - padding * 2 < containerLeftPosition) {
+            scrollX = itemLeft - containerLeftPosition - padding;
+        }
+
+        // Right side or part of right side
+        if (itemLeft + itemWidth + padding * 2 > containerRightPosition) {
+            scrollX = itemLeft + itemWidth - containerRightPosition + padding;
+        }
+
+        return scrollX;
+    }
+
+    calculateActiveTabItemScrollX(): number {
+        let scrollX = 0;
+        const padding = 4;
+
+        const containerRect = this._slideTabBar.getBoundingClientRect();
+        const containerLeftPosition = containerRect.left;
+        const containerRightPosition = containerRect.left + containerRect.width;
+
+        const itemReact = this._activeTabItem?.getSlideTabItem().getBoundingClientRect();
+        if (!itemReact) return 0;
+
+        const itemLeft = itemReact.left;
+        const itemWidth = itemReact.width;
+
+        // Part of left side
+        if (itemLeft - padding * 2 < containerLeftPosition && itemLeft + itemWidth > containerLeftPosition) {
+            scrollX = itemLeft - containerLeftPosition - padding;
+        }
+
+        // Part of right side
+        if (itemLeft < containerRightPosition && itemLeft + itemWidth + padding * 2 > containerRightPosition) {
+            scrollX = itemLeft + itemWidth - containerRightPosition + padding;
+        }
 
         return scrollX;
     }

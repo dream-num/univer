@@ -112,7 +112,7 @@ export function SheetBarTabs() {
             setupSubscribeScroll(),
             setupSubscribeScrollX(),
             setupSubscribeRenameId(),
-            setupSubscribeAddSheet(),
+            // When adding a sheet, it no longer slides, which has been uniformly handled in setupSlideTabBarUpdate
         ];
 
         return () => {
@@ -314,11 +314,6 @@ export function SheetBarTabs() {
             setTabEditor();
         });
 
-    const setupSubscribeAddSheet = () =>
-        sheetBarService.addSheet$.subscribe(() => {
-            slideTabBarRef.current.slideTabBar?.getScrollbar().scrollRight();
-        });
-
     const updateScrollButtonState = (state: IScrollState) => {
         const { leftEnd, rightEnd } = state;
         // box-shadow: inset 10px 0px 10px -10px rgba(0, 0, 0, 0.2), inset -10px 0px 10px -10px rgba(0, 0, 0, 0.2);
@@ -337,6 +332,13 @@ export function SheetBarTabs() {
     };
 
     const buttonScroll = (slideTabBar: SlideTabBar) => {
+        // If the active sheet needs to display the statistics column, it will trigger a resize, which will cover the activeTabItem. You need to slide a little distance to display the active tab.
+        const scrollX = slideTabBar.calculateActiveTabItemScrollX();
+        if (scrollX) {
+            const scrollBar = slideTabBar.getScrollbar();
+            scrollBar.scrollX(scrollBar.getScrollX() + scrollX);
+        }
+
         sheetBarService.setScroll({
             leftEnd: slideTabBar.isLeftEnd(),
             rightEnd: slideTabBar.isRightEnd(),

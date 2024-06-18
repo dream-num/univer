@@ -30,6 +30,8 @@ interface IHyperLinkPopup {
     disposable?: IDisposable;
     row: number;
     col: number;
+    editPermission: boolean;
+    copyPermission: boolean;
 }
 
 interface IHyperLinkEditing {
@@ -74,7 +76,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
         });
     }
 
-    showPopup(location: ISheetLocationBase) {
+    showPopup(location: ISheetLocationBase & { editPermission?: boolean; copyPermission?: boolean }) {
         if (this._currentPopup && isEqualLink(location, this._currentPopup)) {
             return;
         }
@@ -100,6 +102,8 @@ export class SheetsHyperLinkPopupService extends Disposable {
                 disposable,
                 row,
                 col,
+                editPermission: location.editPermission,
+                copyPermission: location.copyPermission,
             };
             this._currentPopup$.next(this._currentPopup);
         }

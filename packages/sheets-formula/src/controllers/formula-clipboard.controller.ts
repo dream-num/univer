@@ -16,6 +16,7 @@
 
 import type { ICellData, IMutationInfo, Workbook } from '@univerjs/core';
 import {
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
     isFormulaId,
     isFormulaString,
@@ -231,6 +232,13 @@ export function getSetCellFormulaMutations(
             }
         }
 
+        // If there is rich text, remove the style
+        const richText = getCellRichText(value);
+        if (richText) {
+            valueObject.p = null;
+            valueObject.v = richText;
+        }
+
         valueMatrix.setValue(range.rows[row], range.cols[col], valueObject);
     });
     // set cell value and style
@@ -259,4 +267,20 @@ export function getSetCellFormulaMutations(
         undos: undoMutationsInfo,
         redos: redoMutationsInfo,
     };
+}
+
+function getCellRichText(cell: ICellData) {
+    if (cell?.p) {
+        const body = cell?.p.body;
+
+        if (body == null) {
+            return;
+        }
+
+        const data = body.dataStream;
+        const lastString = data.substring(data.length - 2, data.length);
+        const newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
+
+        return newDataStream;
+    }
 }

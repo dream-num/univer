@@ -87,6 +87,7 @@ export class DocDrawingTransformerController extends Disposable {
 
     // Only handle one drawing transformer change.
 
+    // eslint-disable-next-line max-lines-per-function
     private _listenTransformerChange(unitId: string): void {
         const transformer = this._getSceneAndTransformerByDrawingSearch(unitId)?.transformer;
 
@@ -153,7 +154,17 @@ export class DocDrawingTransformerController extends Disposable {
 
                         if (drawingCache && drawingCache.drawing.layoutType === PositionedObjectLayoutType.INLINE) {
                             // Handle inline drawing.
-                            this._moveInlineDrawing(drawingCache.drawing, object);
+                            const { width, height, top, left } = object;
+
+                            if (width === drawingCache.width && height === drawingCache.height && top === drawingCache.top && left === drawingCache.left) {
+                                return;
+                            }
+
+                            if (width !== drawingCache.width || height !== drawingCache.height) {
+                                this._updateInlineDrawingSize(drawingCache.drawing, object);
+                            } else {
+                                this._moveInlineDrawing(drawingCache.drawing, object);
+                            }
                         } else if (drawingCache) {
                             // Handle non-inline drawing.
                         }
@@ -341,6 +352,30 @@ export class DocDrawingTransformerController extends Disposable {
         }
 
         return { lineAnchor, glyphAnchor };
+    }
+
+    private _updateInlineDrawingSize(drawing: IDocDrawingBase, object: BaseObject) {
+        const drawings: IDrawingDocTransform[] = [];
+
+        const { unitId, subUnitId } = drawing;
+        const { width, height } = object;
+
+        drawings.push({
+            drawingId: drawing.drawingId,
+            key: 'size',
+            value: {
+                width,
+                height,
+            },
+        });
+
+        if (drawings.length > 0 && unitId && subUnitId) {
+            this._commandService.executeCommand(UpdateDrawingDocTransformCommand.id, {
+                unitId,
+                subUnitId,
+                drawings,
+            });
+        }
     }
 
     private _moveInlineDrawing(drawing: IDocDrawingBase, object: BaseObject) {

@@ -76,12 +76,9 @@ export class UniverDocsUIPlugin extends Plugin {
         this._initializeCommands();
     }
 
-    override onReady(): void {
-        this._initRenderBasics();
-    }
-
     override onRendered(): void {
         this._initUI();
+        this._initRenderModules();
         this._markDocAsFocused();
     }
 
@@ -138,7 +135,7 @@ export class UniverDocsUIPlugin extends Plugin {
         this._injector.get(AppUIController);
     }
 
-    private _initRenderBasics(): void {
+    private _initRenderModules(): void {
         ([
             DocSkeletonManagerService,
             DocRenderController,

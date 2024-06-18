@@ -148,7 +148,7 @@ describe('Test FSheetHooks', () => {
         });
 
         // Trigger the Observable to emit a new value
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         hoverCurrentPosition$.next({ location: { workbook, worksheet, unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
@@ -160,7 +160,7 @@ describe('Test FSheetHooks', () => {
         });
 
         // Trigger the Observable to emit a new value
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         hoverCurrentCell$.next({ location: { workbook, worksheet, unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 } });
@@ -172,7 +172,7 @@ describe('Test FSheetHooks', () => {
         });
 
         // Trigger the Observable to emit a new value
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         dragCurrentCell$.next({ location: { workbook, worksheet, unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });
@@ -184,7 +184,7 @@ describe('Test FSheetHooks', () => {
         });
 
         // Trigger the Observable to emit a new value
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         dragEndCell$.next({ location: { workbook, worksheet, unitId, subUnitId, row: 0, col: 0 }, position: { startX: 0, endX: 1, startY: 0, endY: 1 }, dataTransfer: new MockDataTransfer() });

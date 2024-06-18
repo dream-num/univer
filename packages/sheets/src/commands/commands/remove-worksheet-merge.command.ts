@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle, sequenceExecute, Tools } from '@univerjs/core';
+import type { ICellData, ICommand, IMutationInfo, IRange, Nullable, Worksheet } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Rectangle, sequenceExecute, Tools } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import type {
@@ -29,11 +29,14 @@ import {
     RemoveWorksheetMergeMutation,
 } from '../mutations/remove-worksheet-merge.mutation';
 import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import { SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
 export const RemoveWorksheetMergeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-worksheet-merge',
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
@@ -53,17 +56,11 @@ export const RemoveWorksheetMergeCommand: ICommand = {
             ranges: selections,
         };
 
-        // 范围内没有合并单元格return
-        let hasMerge = false;
         const mergeData = worksheet.getConfig().mergeData;
-        selections.forEach((selection) => {
-            mergeData.forEach((merge) => {
-                if (Rectangle.intersects(selection, merge)) {
-                    hasMerge = true;
-                }
-            });
+        const intersectsMerges = mergeData.filter((merge) => {
+            return selections.some((selection) => Rectangle.intersects(selection, merge));
         });
-        if (!hasMerge) return false;
+        if (!intersectsMerges.length) return false;
 
         const undoredoMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
             accessor,
@@ -88,21 +85,65 @@ export const RemoveWorksheetMergeCommand: ICommand = {
             isMergedMainCell: false,
         };
 
-        const result = sequenceExecute([
-            { id: RemoveWorksheetMergeMutation.id, params: undoredoMutationParams },
-            { id: SetSelectionsOperation.id, params: { selections: redoSelections } },
+        const getSetRangeValuesParams = getSetRangeStyleParamsForRemoveMerge(worksheet, intersectsMerges);
+        const redoSetRangeValueParams: ISetRangeValuesMutationParams = {
+            unitId,
+            subUnitId,
+            cellValue: getSetRangeValuesParams.redoParams.getMatrix(),
+        };
+        const undoSetRangeValueParams: ISetRangeValuesMutationParams = {
+            unitId,
+            subUnitId,
+            cellValue: getSetRangeValuesParams.undoParams.getMatrix(),
+        };
 
-        ], commandService);
+        const redoMutations: IMutationInfo[] = [
+            { id: RemoveWorksheetMergeMutation.id, params: undoredoMutationParams },
+            { id: SetRangeValuesMutation.id, params: redoSetRangeValueParams },
+            { id: SetSelectionsOperation.id, params: { selections: redoSelections } },
+        ];
+
+        const undoMutations: IMutationInfo[] = [
+            { id: AddWorksheetMergeMutation.id, params: undoredoMutationParams },
+            { id: SetRangeValuesMutation.id, params: undoSetRangeValueParams },
+            { id: SetSelectionsOperation.id, params: { selections: undoSelections } },
+        ];
+
+        const result = sequenceExecute(redoMutations, commandService);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: AddWorksheetMergeMutation.id, params: undoredoMutationParams }, { id: SetSelectionsOperation.id, params: { selections: undoSelections } }],
-                // params should be the merged cells to be deleted accurately, rather than the selection
-                redoMutations: [{ id: RemoveWorksheetMergeMutation.id, params: undoredoMutationParams }, { id: SetSelectionsOperation.id, params: { selections: redoSelections } }],
+                undoMutations,
+                redoMutations,
             });
             return true;
         }
         return false;
     },
 };
+
+function getSetRangeStyleParamsForRemoveMerge(worksheet: Worksheet, ranges: IRange[]) {
+    const styleRedoMatrix = new ObjectMatrix<Nullable<ICellData>>();
+    const styleUndoMatrix = new ObjectMatrix<Nullable<ICellData>>();
+
+    ranges.forEach((range) => {
+        const { startRow, startColumn, endColumn, endRow } = range;
+        const cellValue = worksheet.getCellMatrix().getValue(startRow, startColumn);
+        if (cellValue?.s) {
+            for (let i = startRow; i <= endRow; i++) {
+                for (let j = startColumn; j <= endColumn; j++) {
+                    if (i !== startRow || j !== startColumn) {
+                        styleRedoMatrix.setValue(i, j, { s: cellValue.s });
+                        styleUndoMatrix.setValue(i, j, null);
+                    }
+                }
+            }
+        }
+    });
+
+    return {
+        redoParams: styleRedoMatrix,
+        undoParams: styleUndoMatrix,
+    };
+}

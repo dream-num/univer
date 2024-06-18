@@ -150,6 +150,8 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                 }
 
                 const worksheet = workbook.getActiveSheet();
+                if (!worksheet) return;
+
                 const activeDropdown = this._dropdownManagerService.activeDropdown;
                 const currLoc = activeDropdown?.location;
                 if (
@@ -184,7 +186,9 @@ export class SheetsDataValidationRenderController extends RxDisposable {
             if (!workbook) return;
 
             const unitId = workbook.getUnitId();
-            const subUnitId = workbook.getActiveSheet().getSheetId();
+            const subUnitId = workbook.getActiveSheet()?.getSheetId();
+            if (!subUnitId) return;
+
             const skeleton = this._renderManagerService.getRenderById(unitId)
                 ?.with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId)
                 ?.skeleton;
@@ -209,7 +213,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
                     priority: 200,
-                    // eslint-disable-next-line max-lines-per-function
+                    // eslint-disable-next-line max-lines-per-function, complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
                         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
@@ -336,6 +340,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                                 };
                                 return validator?.canvasRender?.calcCellAutoHeight?.(info);
                             },
+                            coverable: (cell?.coverable ?? true) && !(rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE),
                         });
                     },
                 }

@@ -55,7 +55,7 @@ export interface IPopupLayoutInfo extends Pick<IRectPopupProps, 'direction'> {
 }
 
 /** The popup should have a minimum edge to the boundary. */
-const PUSHING_MINIMUM_GAP = 4;
+const PUSHING_MINIMUM_GAP = 8;
 
 function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: number } {
     const { position, width, height, containerHeight, containerWidth, direction = 'vertical' } = layout;
@@ -63,9 +63,10 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
     // In y-axis
     if (direction === 'vertical' || direction === 'top' || direction === 'bottom') {
         const { left: startX, top: startY, right: endX, bottom: endY } = position;
-        const verticalStyle = ((endY + height) > containerHeight || direction === 'top')
-            ? { top: startY - height }
-            : { top: endY };
+        const verticalStyle = direction === 'top'
+        // const verticalStyle = ((endY + height) > containerHeight || direction === 'top')
+            ? { top: Math.max(startY - height, PUSHING_MINIMUM_GAP) }
+            : { top: Math.min(endY, containerHeight - height - PUSHING_MINIMUM_GAP) };
 
         // If the popup element exceed the visible area. We should "push" it back.
         const horizontalStyle = (startX + width) > containerWidth
@@ -77,9 +78,10 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
 
     // In x-axis
     const { left: startX, top: startY, right: endX, bottom: endY } = position;
-    const horizontalStyle = ((endX + width) > containerWidth || direction === 'left')
-        ? { left: startX - width }
-        : { left: endX };
+    // const horizontalStyle = ((endX + width) > containerWidth || direction === 'left')
+    const horizontalStyle = direction === 'left'
+        ? { left: Math.max(startX - width, PUSHING_MINIMUM_GAP) } // on left
+        : { left: Math.min(endX, containerWidth - width - PUSHING_MINIMUM_GAP) }; // on right
 
     // If the popup element exceed the visible area. We should "push" it back.
     const verticalStyle = ((startY + height) > containerHeight)
@@ -101,28 +103,23 @@ function RectPopup(props: IRectPopupProps) {
     const style = useMemo(() => ({ ...position }), [position]);
     useEffect(() => {
         requestAnimationFrame(() => {
-            if (!nodeRef.current) {
-                return;
-            }
+            if (!nodeRef.current) return;
+
             const { clientWidth, clientHeight } = nodeRef.current;
             const parent = nodeRef.current.parentElement;
-            if (!parent) {
-                return;
-            }
-            const { clientWidth: innerWidth, clientHeight: innerHeight } = parent;
+            if (!parent) return;
 
-            setPosition(
-                calcPopupPosition(
-                    {
-                        position: anchorRect,
-                        width: clientWidth,
-                        height: clientHeight,
-                        containerWidth: innerWidth,
-                        containerHeight: innerHeight,
-                        direction,
-                    }
-                )
-            );
+            const { clientWidth: innerWidth, clientHeight: innerHeight } = parent;
+            setPosition(calcPopupPosition(
+                {
+                    position: anchorRect,
+                    width: clientWidth,
+                    height: clientHeight,
+                    containerWidth: innerWidth,
+                    containerHeight: innerHeight,
+                    direction,
+                }
+            ));
         });
     },
         // eslint-disable-next-line react-hooks/exhaustive-deps

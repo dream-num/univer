@@ -1142,7 +1142,7 @@ export class PromptController extends Disposable {
 
         return {
             unitId: workbook.getUnitId(),
-            sheetId: worksheet.getSheetId(),
+            sheetId: worksheet?.getSheetId() || '',
             skeleton,
         };
     }
@@ -1719,9 +1719,7 @@ export class PromptController extends Disposable {
             eventType: DeviceInputEventType.Keyboard,
             keycode,
         });
-        this._commandService.executeCommand(MoveSelectionCommand.id, {
-            direction: Direction.DOWN,
-        });
+        // Don't move the selection here, because changeVisible will update the selection.
     }
 
     private _pressTab(params: ISelectEditorFormulaOperationParam) {
@@ -1740,9 +1738,7 @@ export class PromptController extends Disposable {
             eventType: DeviceInputEventType.Keyboard,
             keycode,
         });
-        this._commandService.executeCommand(MoveSelectionCommand.id, {
-            direction: Direction.RIGHT,
-        });
+        // Don't move the selection here, because changeVisible will update the selection.
     }
 
     private _pressEsc(params: ISelectEditorFormulaOperationParam) {

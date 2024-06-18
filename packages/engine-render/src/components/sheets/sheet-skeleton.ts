@@ -27,7 +27,7 @@ import {
     getColorStyle,
     HorizontalAlign,
     IContextService,
-    isEmptyCell,
+    isCellCoverable,
     isNullCell,
     isWhiteColor,
     LocaleService,
@@ -1521,7 +1521,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             for (let i = startColumn; i >= endColumn; i--) {
                 const column = i;
                 const cell = this._worksheet?.getCell(row, column);
-                if ((!isEmptyCell(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
+                if ((!isCellCoverable(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                     if (column === startColumn) {
                         return column;
                     }
@@ -1550,7 +1550,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         for (let i = startColumn; i <= endColumn; i++) {
             const column = i;
             const cell = this._worksheet?.getCell(row, column);
-            if ((!isEmptyCell(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
+            if ((!isCellCoverable(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                 if (column === startColumn) {
                     return column;
                 }

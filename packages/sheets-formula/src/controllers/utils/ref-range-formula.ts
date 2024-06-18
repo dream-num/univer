@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
-import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix, Tools } from '@univerjs/core';
+import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, IRangeChange } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { EffectRefRangId, handleDeleteRangeMoveLeft, handleDeleteRangeMoveUp, handleInsertCol, handleInsertRangeMoveDown, handleInsertRangeMoveRight, handleInsertRow, handleIRemoveCol, handleIRemoveRow, handleMoveCols, handleMoveRange, handleMoveRows, runRefRangeMutations, SetRangeValuesMutation } from '@univerjs/sheets';
@@ -207,97 +207,7 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
     const oldFormulaMatrix = new ObjectMatrix(currentOldFormulaData || {});
     const newFormulaMatrix = new ObjectMatrix(currentNewFormulaData || {});
 
-    // When undoing and redoing, the traversal order may be different. Record the range list of all single formula offsets, and then retrieve the traversal as needed.
-    const rangeList: IRangeChange[] = [];
-    let isReverse = false;
-    oldFormulaMatrix.forValue((row, column, cell) => {
-        if (cell == null) {
-            return true;
-        }
-
-        // Offset is only needed when there is a formula
-        if (!isFormulaDataItem(cell)) {
-            return;
-        }
-
-        const oldCell = cellToRange(row, column);
-        let newCell = null;
-
-        switch (type) {
-            case FormulaReferenceMoveType.MoveRange:
-                if (from == null || to == null) {
-                    return;
-                }
-                newCell = handleRefMoveRange(from, to, oldCell);
-                break;
-            case FormulaReferenceMoveType.MoveRows:
-                if (from == null || to == null) {
-                    return;
-                }
-                newCell = handleRefMoveRows(from, to, oldCell);
-                break;
-            case FormulaReferenceMoveType.MoveCols:
-                if (from == null || to == null) {
-                    return;
-                }
-                newCell = handleRefMoveCols(from, to, oldCell);
-                break;
-            default:
-                break;
-        }
-
-        if (Tools.isDefine(range)) {
-            switch (type) {
-                case FormulaReferenceMoveType.InsertRow:
-                    newCell = handleRefInsertRow(range, oldCell);
-                    isReverse = true;
-                    break;
-                case FormulaReferenceMoveType.InsertColumn:
-                    newCell = handleRefInsertCol(range, oldCell);
-                    isReverse = true;
-                    break;
-                case FormulaReferenceMoveType.RemoveRow:
-                    newCell = handleRefRemoveRow(range, oldCell);
-                    break;
-                case FormulaReferenceMoveType.RemoveColumn:
-                    newCell = handleRefMoveCol(range, oldCell);
-                    break;
-                case FormulaReferenceMoveType.DeleteMoveLeft:
-                    newCell = handleRefDeleteMoveLeft(range, oldCell);
-                    break;
-                case FormulaReferenceMoveType.DeleteMoveUp:
-                    newCell = handleRefDeleteMoveUp(range, oldCell);
-                    break;
-                case FormulaReferenceMoveType.InsertMoveDown:
-                    newCell = handleRefInsertMoveDown(range, oldCell);
-                    isReverse = true;
-                    break;
-                case FormulaReferenceMoveType.InsertMoveRight:
-                    newCell = handleRefInsertMoveRight(range, oldCell);
-                    isReverse = true;
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        if (newCell == null) {
-            return;
-        }
-
-        // Note: The formula may only update the reference and not offset the position. The situation where the position is not shifted cannot be intercepted here.
-        if (isReverse) {
-            rangeList.unshift({
-                oldCell,
-                newCell,
-            });
-        } else {
-            rangeList.push({
-                oldCell,
-                newCell,
-            });
-        }
-    });
+    const rangeList = processFormulaChanges(oldFormulaMatrix, type, from, to, range);
 
     redoFormulaData = getRedoFormulaData(rangeList, oldFormulaMatrix, newFormulaMatrix);
     undoFormulaData = getUndoFormulaData(rangeList, oldFormulaMatrix);
@@ -306,6 +216,97 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
         redoFormulaData,
         undoFormulaData,
     };
+}
+
+function processFormulaChanges(oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>, type: FormulaReferenceMoveType, from: Nullable<IRange>, to: Nullable<IRange>, range: Nullable<IRange>) {
+    // When undoing and redoing, the traversal order may be different. Record the range list of all single formula offsets, and then retrieve the traversal as needed.
+    const rangeList: IRangeChange[] = [];
+
+    oldFormulaMatrix.forValue((row, column, cell) => {
+        // Offset is only needed when there is a formula
+        if (cell == null || !isFormulaDataItem(cell)) return true;
+
+        const oldCell = cellToRange(row, column);
+        let newCell = null;
+        let isReverse = false;
+
+        // Handle moves
+        if ([FormulaReferenceMoveType.MoveRange, FormulaReferenceMoveType.MoveRows, FormulaReferenceMoveType.MoveCols].includes(type)) {
+            newCell = handleMove(type, from, to, oldCell);
+        } else if (range !== undefined && range !== null) { // Handle inserts and deletes
+            const result = handleInsertDelete(type, range, oldCell);
+            // When removing a cell containing a formula, newCell is null, but the formula value of oldCell is required when undoing it, newCell can be null
+            newCell = result.newCell;
+            isReverse = result.isReverse;
+        }
+
+        // Don't intercept newCell null here
+
+        // Note: The formula may only update the reference and not offset the position. The situation where the position is not shifted cannot be intercepted here.
+        isReverse ? rangeList.unshift({ oldCell, newCell }) : rangeList.push({ oldCell, newCell });
+    });
+
+    return rangeList;
+}
+
+function handleMove(type: FormulaReferenceMoveType, from: Nullable<IRange>, to: Nullable<IRange>, oldCell: IRange) {
+    if (from == null || to == null) {
+        return null;
+    }
+
+    switch (type) {
+        case FormulaReferenceMoveType.MoveRange:
+
+            return handleRefMoveRange(from, to, oldCell);
+        case FormulaReferenceMoveType.MoveRows:
+
+            return handleRefMoveRows(from, to, oldCell);
+        case FormulaReferenceMoveType.MoveCols:
+
+            return handleRefMoveCols(from, to, oldCell);
+        default:
+            return null;
+    }
+}
+
+function handleInsertDelete(type: FormulaReferenceMoveType, range: IRange, oldCell: IRange) {
+    let newCell: IRange | null = null;
+    let isReverse = false;
+
+    switch (type) {
+        case FormulaReferenceMoveType.InsertRow:
+            newCell = handleRefInsertRow(range, oldCell);
+            isReverse = true;
+            break;
+        case FormulaReferenceMoveType.InsertColumn:
+            newCell = handleRefInsertCol(range, oldCell);
+            isReverse = true;
+            break;
+        case FormulaReferenceMoveType.RemoveRow:
+            newCell = handleRefRemoveRow(range, oldCell);
+            break;
+        case FormulaReferenceMoveType.RemoveColumn:
+            newCell = handleRefRemoveCol(range, oldCell);
+            break;
+        case FormulaReferenceMoveType.DeleteMoveLeft:
+            newCell = handleRefDeleteMoveLeft(range, oldCell);
+            break;
+        case FormulaReferenceMoveType.DeleteMoveUp:
+            newCell = handleRefDeleteMoveUp(range, oldCell);
+            break;
+        case FormulaReferenceMoveType.InsertMoveDown:
+            newCell = handleRefInsertMoveDown(range, oldCell);
+            isReverse = true;
+            break;
+        case FormulaReferenceMoveType.InsertMoveRight:
+            newCell = handleRefInsertMoveRight(range, oldCell);
+            isReverse = true;
+            break;
+        default:
+            break;
+    }
+
+    return { newCell, isReverse };
 }
 
 function handleRefMoveRange(from: IRange, to: IRange, oldCell: IRange) {
@@ -380,7 +381,7 @@ function handleRefRemoveRow(range: IRange, oldCell: IRange) {
     return runRefRangeMutations(operators, oldCell);
 }
 
-function handleRefMoveCol(range: IRange, oldCell: IRange) {
+function handleRefRemoveCol(range: IRange, oldCell: IRange) {
     const operators = handleIRemoveCol(
         {
             id: EffectRefRangId.RemoveColCommandId,
@@ -453,13 +454,17 @@ function getRedoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
         const { oldCell, newCell } = item;
 
         const { startRow: oldStartRow, startColumn: oldStartColumn } = oldCell;
-        const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
 
         const newFormula = newFormulaMatrix.getValue(oldStartRow, oldStartColumn) || oldFormulaMatrix.getValue(oldStartRow, oldStartColumn);
-        const newValue = formulaDataItemToCellData(newFormula);
+        // Use the formula result value to update the data to ensure accuracy, otherwise the new formula cannot be inferred from #REF
+        const newValue = formulaDataItemToCellDataFormula(newFormula);
 
         redoFormulaData.setValue(oldStartRow, oldStartColumn, { f: null, si: null });
-        redoFormulaData.setValue(newStartRow, newStartColumn, newValue);
+
+        if (newCell) {
+            const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
+            redoFormulaData.setValue(newStartRow, newStartColumn, newValue);
+        }
     });
 
     return redoFormulaData.clone();
@@ -474,16 +479,20 @@ function getRedoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
 function getUndoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>) {
     const undoFormulaData = new ObjectMatrix<Nullable<ICellData>>({});
 
-    rangeList.forEach((item) => {
+    // Maintaining the correct assignment order prevents overwriting data
+    rangeList.reverse().forEach((item) => {
         const { oldCell, newCell } = item;
 
         const { startRow: oldStartRow, startColumn: oldStartColumn } = oldCell;
-        const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
 
         const oldFormula = oldFormulaMatrix.getValue(oldStartRow, oldStartColumn);
         const oldValue = formulaDataItemToCellData(oldFormula);
 
-        undoFormulaData.setValue(newStartRow, newStartColumn, { f: null, si: null });
+        if (newCell) {
+            const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
+            undoFormulaData.setValue(newStartRow, newStartColumn, { f: null, si: null });
+        }
+
         undoFormulaData.setValue(oldStartRow, oldStartColumn, oldValue);
     });
 
@@ -527,6 +536,50 @@ export function formulaDataItemToCellData(formulaDataItem: Nullable<IFormulaData
 
     if (checkFormulaString && x === 0 && y === 0) {
         cellData.f = f;
+    }
+
+    return cellData;
+}
+
+/**
+ * Transfer the formulaDataItem to the cellData, contains formula
+ * ┌────────────────────────────────┬─────────────────┐
+ * │        IFormulaDataItem        │     ICellData   │
+ * ├──────────────────┬─────┬───┬───┼───────────┬─────┤
+ * │ f                │ si  │ x │ y │ f         │ si  │
+ * ├──────────────────┼─────┼───┼───┼───────────┼─────┤
+ * │ =SUM(1)          │     │   │   │ =SUM(1)   │     │
+ * │                  │ id1 │   │   │           │ id1 │
+ * │ =SUM(1)          │ id1 │   │   │ =SUM(1)   │     │
+ * │ =SUM(1)          │ id1 │ 0 │ 0 │ =SUM(1)   │     │
+ * │ =SUM(1)          │ id1 │ 0 │ 1 │ =SUM(1)   │     │
+ * └──────────────────┴─────┴───┴───┴───────────┴─────┘
+ *
+ * The fifth case: The value f of the formula is already the result value. If the formula content of si contains #REF, it cannot be obtained from the formula offset of si, and the result value must be stored directly
+ */
+export function formulaDataItemToCellDataFormula(formulaDataItem: Nullable<IFormulaDataItem>): Nullable<ICellData> {
+    if (formulaDataItem == null) {
+        return;
+    }
+    const { f, si } = formulaDataItem;
+    const checkFormulaString = isFormulaString(f);
+    const checkFormulaId = isFormulaId(si);
+
+    if (!checkFormulaString && !checkFormulaId) {
+        return {
+            f: null,
+            si: null,
+        };
+    }
+
+    const cellData: ICellData = {};
+
+    if (checkFormulaString) {
+        cellData.f = f;
+    }
+
+    if (checkFormulaId && !checkFormulaString) {
+        cellData.si = si;
     }
 
     return cellData;

@@ -33,6 +33,7 @@ const commandList = [SetWorksheetActiveOperation.id, AddConditionalRuleMutation.
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 
+// eslint-disable-next-line max-lines-per-function
 export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMenuSelectorItem => {
     const commonSelections = [
         {
@@ -97,7 +98,10 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
         const ranges = selectionManagerService.getSelections()?.map((selection) => selection.range) || [];
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return;
-        const allRule = conditionalFormattingRuleModel.getSubunitRules(workbook.getUnitId(), workbook.getActiveSheet().getSheetId()) || [];
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet) return;
+
+        const allRule = conditionalFormattingRuleModel.getSubunitRules(workbook.getUnitId(), worksheet.getSheetId()) || [];
         const ruleList = allRule.filter((rule) => rule.ranges.some((ruleRange) => ranges.some((range) => Rectangle.intersects(range, ruleRange))));
         subscriber.next(!!ruleList.length);
     }));
@@ -118,7 +122,9 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             if (!workbook) return;
             const worksheet = workbook.getActiveSheet();
-            const allRule = conditionalFormattingRuleModel.getSubunitRules(workbook.getUnitId(), workbook.getActiveSheet().getSheetId()) || [];
+            if (!worksheet) return;
+
+            const allRule = conditionalFormattingRuleModel.getSubunitRules(workbook.getUnitId(), worksheet.getSheetId()) || [];
             const hasNotPermission = allRule.some((rule) => {
                 const ranges = rule.ranges;
                 return ranges.some((range) => {

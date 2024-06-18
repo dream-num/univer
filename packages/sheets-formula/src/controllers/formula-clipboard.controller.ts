@@ -84,6 +84,14 @@ export class FormulaClipboardController extends Disposable {
         payload: ICopyPastePayload,
         isSpecialPaste: boolean
     ) {
+        const pasteType = payload.pasteType;
+        if (pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE || pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT || pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH) {
+            return {
+                undos: [],
+                redos: [],
+            };
+        }
+
         const copyInfo = {
             copyType: payload.copyType || COPY_TYPE.COPY,
             copyRange: pasteFrom?.range,
@@ -93,7 +101,13 @@ export class FormulaClipboardController extends Disposable {
         const matrix = data;
         const workbook = this._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const unitId = workbook.getUnitId();
-        const subUnitId = workbook.getActiveSheet().getSheetId();
+        const subUnitId = workbook.getActiveSheet()?.getSheetId();
+        if (!unitId || !subUnitId) {
+            return {
+                undos: [],
+                redos: [],
+            };
+        }
 
         return this._injector.invoke((accessor) => getSetCellFormulaMutations(
             unitId,

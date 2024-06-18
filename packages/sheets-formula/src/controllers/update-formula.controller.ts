@@ -467,6 +467,8 @@ export class UpdateFormulaController extends Disposable {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) return null;
+
         const sheetId = worksheet.getSheetId();
 
         const from = {
@@ -505,6 +507,8 @@ export class UpdateFormulaController extends Disposable {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) return null;
+
         const sheetId = worksheet.getSheetId();
 
         const from = {
@@ -1438,7 +1442,7 @@ export class UpdateFormulaController extends Disposable {
     private _getCurrentSheetInfo() {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const unitId = workbook.getUnitId();
-        const sheetId = workbook.getActiveSheet().getSheetId();
+        const sheetId = workbook.getActiveSheet()?.getSheetId() || '';
 
         return {
             unitId,

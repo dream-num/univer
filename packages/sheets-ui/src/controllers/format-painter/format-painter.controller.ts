@@ -70,7 +70,7 @@ export class FormatPainterController extends Disposable {
                         const { rangeWithCoord } = selections[selections.length - 1];
                         this._commandService.executeCommand(ApplyFormatPainterCommand.id, {
                             unitId: this._univerInstanceService.getFocusedUnit()?.getUnitId() || '',
-                            subUnitId: (this._univerInstanceService.getFocusedUnit() as Workbook).getActiveSheet().getSheetId(),
+                            subUnitId: (this._univerInstanceService.getFocusedUnit() as Workbook).getActiveSheet()?.getSheetId() || '',
                             range: {
                                 startRow: rangeWithCoord.startRow,
                                 startColumn: rangeWithCoord.startColumn,
@@ -115,8 +115,9 @@ export class FormatPainterController extends Disposable {
         const { startRow, endRow, startColumn, endColumn } = range;
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook?.getActiveSheet();
+        if (!worksheet) return null;
         const cellData = worksheet.getCellMatrix();
-        const mergeData = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getMergeData();
+        const mergeData = worksheet.getMergeData();
 
         const styles = workbook.getStyles();
         const stylesMatrix = new ObjectMatrix<IStyleData>();

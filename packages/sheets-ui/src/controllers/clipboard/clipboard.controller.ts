@@ -673,10 +673,16 @@ export class SheetClipboardController extends RxDisposable {
             onPasteColumns(pasteTo, colProperties, payload) {
                 const workbook = self._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 const unitId = workbook.getUnitId();
-                const subUnitId = workbook.getActiveSheet().getSheetId();
+                const subUnitId = workbook.getActiveSheet()?.getSheetId();
+
+                if (!unitId || !subUnitId) {
+                    throw new Error('Cannot find unitId or subUnitId');
+                }
+
                 const redoMutations: IMutationInfo[] = [];
                 const undoMutations: IMutationInfo[] = [];
                 const currentSheet = self._getWorksheet(unitId, subUnitId);
+
                 const { range } = pasteTo;
                 // if the range is outside ot the worksheet's boundary, we should add rows
                 const maxColumn = currentSheet!.getMaxColumns();

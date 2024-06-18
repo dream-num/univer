@@ -160,6 +160,8 @@ export class ListValidator extends BaseDataValidator {
         if (!workbook) return [];
 
         const worksheet = (currentSubUnitId ? workbook.getSheetBySheetId(currentSubUnitId) : undefined) ?? workbook.getActiveSheet();
+        if (!worksheet) return [];
+
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const results = this.formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
@@ -170,10 +172,11 @@ export class ListValidator extends BaseDataValidator {
         const { formula1 = '' } = rule;
         const univerInstanceService = this.injector.get(IUniverInstanceService);
         const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
-            return [];
-        }
+        if (!workbook) return [];
+
         const worksheet = (currentSubUnitId ? workbook.getSheetBySheetId(currentSubUnitId) : undefined) ?? workbook.getActiveSheet();
+        if (!worksheet) return [];
+
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);

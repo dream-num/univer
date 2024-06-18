@@ -45,6 +45,9 @@ export class ForceStringAlertRenderController extends Disposable implements IRen
             if (cellPos) {
                 const workbook = this._context.unit;
                 const worksheet = workbook.getActiveSheet();
+
+                if (!worksheet) return;
+
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 
                 if (cellData?.t === CellValueType.FORCE_STRING && cellData.v && isRealNum(cellData.v)) {

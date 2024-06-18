@@ -145,6 +145,10 @@ export class MergeCellController extends Disposable {
                         const workbook = self._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                         const unitId = workbook.getUnitId();
                         const worksheet = workbook.getActiveSheet();
+                        if (!worksheet) {
+                            return { redos: [], undos: [] };
+                        }
+
                         const subUnitId = worksheet.getSheetId();
                         const mergeData = worksheet.getConfig().mergeData;
                         const selections = self._selectionManagerService.getSelectionRanges();
@@ -279,6 +283,8 @@ export class MergeCellController extends Disposable {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         if (workbook) {
             const sheet = workbook.getActiveSheet();
+            if (!sheet) return;
+
             registerRefRange(workbook.getUnitId(), sheet.getSheetId());
         }
     }

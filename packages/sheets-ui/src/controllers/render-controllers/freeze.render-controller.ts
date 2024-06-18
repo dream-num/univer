@@ -584,6 +584,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
             const workbook = this._context.unit;
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) return;
+
             const oldFreeze = worksheet.getConfig()?.freeze;
             let xSplit = oldFreeze?.xSplit || 0;
             let ySplit = oldFreeze?.ySplit || 0;
@@ -1073,6 +1075,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
     private _refreshCurrent() {
         const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) return;
 
         const freeze = worksheet.getConfig().freeze;
 
@@ -1125,6 +1128,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                         const workbook = this._context.unit;
                         const unitId = workbook.getUnitId();
                         const worksheet = workbook.getActiveSheet();
+                        if (!worksheet) {
+                            return empty;
+                        }
                         const subUnitId = worksheet.getSheetId();
 
                         this._refreshFreeze(
@@ -1355,7 +1361,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                     const worksheet = workbook.getActiveSheet();
                     const params = command.params as ISetFrozenMutationParams;
                     const { unitId, subUnitId } = params;
-                    if (!(unitId === workbook.getUnitId() && subUnitId === worksheet.getSheetId())) {
+                    if (!(unitId === workbook.getUnitId() && subUnitId === worksheet?.getSheetId())) {
                         return;
                     }
 

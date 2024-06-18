@@ -179,8 +179,9 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         }
         // font family
         else if (key === 'font-family') {
-            const value = textTrim(originStr.substr(originStr.indexOf(':') + 1));
-            styleList.ff = value;
+            const trimValue = textTrim(originStr);
+            const fontFamily = extractFontFamily(trimValue);
+            styleList.ff = fontFamily;
         }
         // font size
         else if (key === 'font-size') {
@@ -936,4 +937,10 @@ function getPtFontSizeByPx(size: number) {
     if (ptSize < MIN_FONT_SIZE) return MIN_FONT_SIZE;
     if (ptSize > MAX_FONT_SIZE) return MAX_FONT_SIZE;
     return ptSize;
+}
+
+function extractFontFamily(styleStr: string) {
+    const regex = /font-family:\s*(?:"([^"]+)"|'([^']+)'|([^;]+))/i;
+    const matches = styleStr.match(regex);
+    return matches ? (matches[1] || matches[2] || matches[3]).trim() : null;
 }

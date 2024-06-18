@@ -270,28 +270,42 @@ export class SheetPermissionInitController extends Disposable {
     private _initUserChange() {
         this.disposeWithMe(
             this._userManagerService.currentUser$.subscribe(() => {
+                // This is to minimize the need for access providers to update the reference to permission points when the current user changes, reducing the integration steps required.
+                // If not handled this way, the access providers would have to handle the changes in user and the resulting changes in permission point references.
+                const _map = this._permissionService.getAllPermissionPoint();
+
                 this._permissionService.clearPermissionMap();
+
                 this._worksheetProtectionRuleModel.changeRuleInitState(false);
 
                 const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 const unitId = workbook.getUnitId();
 
                 getAllWorkbookPermissionPoint().forEach((F) => {
-                    const instance = new F(unitId);
+                    let instance = new F(unitId);
+                    if (_map.has(instance.id)) {
+                        instance = _map.get(instance.id) as any;
+                    }
                     this._permissionService.addPermissionPoint(instance);
                 });
 
                 workbook.getSheets().forEach((sheet) => {
                     const subUnitId = sheet.getSheetId();
                     [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
-                        const instance = new F(unitId, subUnitId);
+                        let instance = new F(unitId, subUnitId);
+                        if (_map.has(instance.id)) {
+                            instance = _map.get(instance.id) as any;
+                        }
                         this._permissionService.addPermissionPoint(instance);
                     });
 
                     const ruleList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
                     ruleList.forEach((rule) => {
                         getAllRangePermissionPoint().forEach((F) => {
-                            const instance = new F(unitId, subUnitId, rule.permissionId);
+                            let instance = new F(unitId, subUnitId, rule.permissionId);
+                            if (_map.has(instance.id)) {
+                                instance = _map.get(instance.id) as any;
+                            }
                             this._permissionService.addPermissionPoint(instance);
                         });
                     });

@@ -328,7 +328,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                                 />
                             </div>
                             <div style={{ display: rangeDataList.length === 1 ? 'none' : 'inline-block' }} className={styles.rangeSelectorModalContainerButton}>
-                                <DeleteSingle onClick={() => removeItem(index)} />
+                                <DeleteSingle className={styles.rangeSelectorModalContainerDeleteButton} onClick={() => removeItem(index)} />
                             </div>
                         </div>
                     ))}

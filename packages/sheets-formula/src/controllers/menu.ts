@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { UniverInstanceType } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getCurrentRangeDisable$, PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
 import type { IMenuItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, IClipboardInterfaceService, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
-import { combineLatestWith, map, Observable } from 'rxjs';
+import { combineLatestWith, map, Observable, of, switchMap } from 'rxjs';
 
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
@@ -76,8 +77,20 @@ export function MoreFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
 }
 
 function menuClipboardDisabledObservable(injector: IAccessor): Observable<boolean> {
-    const clipboardDisabled$: Observable<boolean> = new Observable((subscriber) => subscriber.next(!injector.get(IClipboardInterfaceService).supportClipboard));
-    return clipboardDisabled$;
+    const univerInstanceService = injector.get(IUniverInstanceService);
+    const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    return workbook$.pipe(
+        switchMap((workbook) => {
+            if (!workbook) {
+                return of(true);
+            }
+            const clipboardInterfaceService = injector.get(IClipboardInterfaceService);
+            if (clipboardInterfaceService) {
+                return new Observable((subscriber) => subscriber.next(!injector.get(IClipboardInterfaceService).supportClipboard)) as Observable<boolean>;
+            }
+            return of(true);
+        })
+    );
 }
 
 export function PasteFormulaMenuItemFactory(accessor: IAccessor): IMenuItem {

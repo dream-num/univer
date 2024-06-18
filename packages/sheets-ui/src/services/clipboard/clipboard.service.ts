@@ -159,6 +159,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return false;
+        }
 
         const copyContent = this.generateCopyContent(workbook.getUnitId(), worksheet.getSheetId(), selection.range);
         if (!copyContent) {
@@ -333,7 +336,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
     private async _pastePlainText(text: string, pasteType: string): Promise<boolean> {
         const target = this._getPastingTarget();
-        if (!target.selection) {
+        if (!target.subUnitId || !target.selection) {
             return false;
         }
         const accessor = {
@@ -731,7 +734,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const selection = this._selectionManagerService.getLast();
         return {
             unitId: workbook.getUnitId(),
-            subUnitId: worksheet.getSheetId(),
+            subUnitId: worksheet?.getSheetId(),
             selection,
         };
     }
@@ -785,7 +788,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     ): IPasteTarget | null {
         const target = this._getPastingTarget();
         const { selection, unitId, subUnitId } = target;
-        if (!selection) {
+        if (!subUnitId || !selection) {
             return null;
         }
         const accessor = {
@@ -915,7 +918,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     private _getPastedRange(cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>) {
         const target = this._getPastingTarget();
         const { selection, unitId, subUnitId } = target;
-        if (!selection) {
+        if (!subUnitId || !selection) {
             return null;
         }
         const accessor = {

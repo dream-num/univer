@@ -24,6 +24,8 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
+import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
+
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { enUS, ruRU, zhCN } from '../locales';
 
@@ -66,7 +68,7 @@ univer.registerPlugin(UniverDocsUIPlugin, {
     },
 });
 
-// univer.registerPlugin(UniverDocsDrawingUIPlugin);
+univer.registerPlugin(UniverDocsDrawingUIPlugin);
 
 univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
 

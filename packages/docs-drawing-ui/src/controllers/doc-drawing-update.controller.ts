@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
-import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
+import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
@@ -25,8 +25,8 @@ import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
 import { docDrawingPositionToTransform, transformToDocDrawingPosition } from '@univerjs/docs-ui';
-import type { Documents } from '@univerjs/engine-render';
-import { IRenderManagerService, Liquid } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertDocImageOperation } from '../commands/operations/insert-image.operation';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
@@ -36,35 +36,25 @@ import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.c
 import { UngroupDocDrawingCommand } from '../commands/commands/ungroup-doc-drawing.command';
 import { SetDocDrawingCommand } from '../commands/commands/set-doc-drawing.command';
 
-@OnLifecycle(LifecycleStages.Rendered, DocDrawingUpdateController)
-export class DocDrawingUpdateController extends Disposable {
+export class DocDrawingUpdateRenderController extends Disposable implements IRenderModule {
     constructor(
+        private readonly _context: IRenderContext<DocumentDataModel>,
         @ICommandService private readonly _commandService: ICommandService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @IImageIoService private readonly _imageIoService: IImageIoService,
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IDocDrawingService private readonly _sheetDrawingService: IDocDrawingService,
+        @IImageIoService private readonly _imageIoService: IImageIoService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
 
-        this._init();
-    }
-
-    private _init(): void {
         this._initCommandListeners();
-
         this._updateDrawingListener();
-
         this._updateOrderListener();
-
         this._groupDrawingListener();
-
         this._focusDrawingListener();
     }
 
@@ -72,32 +62,30 @@ export class DocDrawingUpdateController extends Disposable {
      * Upload image to cell or float image
      */
     private _initCommandListeners() {
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted(async (command: ICommandInfo) => {
-                if (command.id === InsertDocImageOperation.id) {
-                    const params = command.params as IInsertImageOperationParams;
-                    if (params.files == null) {
-                        return;
-                    }
-
-                    const fileLength = params.files.length;
-
-                    if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
-                        this._messageService.show({
-                            type: MessageType.Error,
-                            content: this._localeService.t('update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
-                        });
-                        return;
-                    }
-
-                    this._imageIoService.setWaitCount(fileLength);
-
-                    params.files.forEach(async (file) => {
-                        await this._insertFloatImage(file);
-                    });
+        this.disposeWithMe(this._commandService.onCommandExecuted(async (command: ICommandInfo) => {
+            if (command.id === InsertDocImageOperation.id) {
+                const params = command.params as IInsertImageOperationParams;
+                if (params.files == null) {
+                    return;
                 }
-            })
-        );
+
+                const fileLength = params.files.length;
+
+                if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
+                    this._messageService.show({
+                        type: MessageType.Error,
+                        content: this._localeService.t('update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
+                    });
+                    return;
+                }
+
+                this._imageIoService.setWaitCount(fileLength);
+
+                params.files.forEach(async (file) => {
+                    await this._insertFloatImage(file);
+                });
+            }
+        }));
     }
 
     private async _insertFloatImage(file: File) {
@@ -129,21 +117,11 @@ export class DocDrawingUpdateController extends Disposable {
             return;
         }
 
-        const info = this._getUnitInfo();
-        if (info == null) {
-            return;
-        }
-        const { unitId, subUnitId } = info;
+        const { unitId } = this._context;
         const { imageId, imageSourceType, source, base64Cache } = imageParam;
         const { width, height, image } = await getImageSize(base64Cache || '');
 
-        const renderObject = this._renderManagerService.getRenderById(unitId);
-
-        if (renderObject == null) {
-            return;
-        }
-
-        const { width: sceneWidth, height: sceneHeight } = renderObject.scene;
+        const { width: sceneWidth, height: sceneHeight } = this._context.scene;
 
         this._imageIoService.addImageSourceCache(imageId, imageSourceType, image);
 
@@ -154,7 +132,7 @@ export class DocDrawingUpdateController extends Disposable {
             scale = Math.max(scaleWidth, scaleHeight);
         }
 
-        const docTransform = this._getImagePosition(width * scale, height * scale, sceneWidth, sceneHeight);
+        const docTransform = this._getImagePosition(width * scale, height * scale);
 
         if (docTransform == null) {
             return;
@@ -162,7 +140,7 @@ export class DocDrawingUpdateController extends Disposable {
 
         const docDrawingParam: IDocDrawing = {
             unitId,
-            subUnitId,
+            subUnitId: unitId,
             drawingId: imageId,
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType,
@@ -177,25 +155,10 @@ export class DocDrawingUpdateController extends Disposable {
             drawings: [docDrawingParam],
         } as IInsertDrawingCommandParams);
 
-        this._docSkeletonManagerService.getCurrent()?.skeleton.calculate();
+        this._docSkeletonManagerService.getSkeleton()?.calculate();
     }
 
-    private _getUnitInfo() {
-        const documentDataModel = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        if (documentDataModel == null) {
-            return;
-        }
-
-        const unitId = documentDataModel.getUnitId();
-        const subUnitId = unitId;
-
-        return {
-            unitId,
-            subUnitId,
-        };
-    }
-
-    private _getImagePosition(imageWidth: number, imageHeight: number, sceneWidth: number, sceneHeight: number): Nullable<IDocDrawingPosition> {
+    private _getImagePosition(imageWidth: number, imageHeight: number): Nullable<IDocDrawingPosition> {
         const activeTextRange = this._textSelectionManagerService.getActiveTextRange();
         const position = activeTextRange?.getAbsolutePosition() || {
             left: 0,
@@ -235,18 +198,13 @@ export class DocDrawingUpdateController extends Disposable {
 
     private _updateDrawingListener() {
         this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
-            const drawings: Partial<IDocDrawing>[] = [];
-
             if (params.length === 0) {
                 return;
             }
 
-            // const offsetInfo = this._getDocsOffsetInfo();
-
-            // const { pageMarginCache, docsLeft, docsTop } = offsetInfo;
-
+            const drawings: Partial<IDocDrawing>[] = [];
             (params as IDocDrawing[]).forEach((param) => {
-                const { unitId, subUnitId, drawingId, drawingType, transform } = param;
+                const { unitId, subUnitId, drawingId, transform } = param;
                 if (transform == null) {
                     return;
                 }
@@ -275,8 +233,9 @@ export class DocDrawingUpdateController extends Disposable {
             });
 
             if (drawings.length > 0) {
+                const unitId = params[0].unitId;
                 this._commandService.syncExecuteCommand(SetDocDrawingCommand.id, {
-                    unitId: params[0].unitId,
+                    unitId,
                     drawings,
                 } as ISetDrawingCommandParams);
 
@@ -285,97 +244,10 @@ export class DocDrawingUpdateController extends Disposable {
         });
     }
 
-    private _getDocsOffsetInfo() {
-        const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
-        if (docsSkeletonObject == null) {
-            return {
-                pageMarginCache: new Map<string, { marginLeft: number; marginTop: number }>(),
-                docsLeft: 0,
-                docsTop: 0,
-            };
-        }
-
-        const { unitId, skeleton } = docsSkeletonObject;
-
-        const currentRender = this._renderManagerService.getRenderById(unitId);
-
-        const skeletonData = skeleton?.getSkeletonData();
-
-        if (currentRender == null || !skeletonData) {
-            return {
-                pageMarginCache: new Map<string, { marginLeft: number; marginTop: number }>(),
-                docsLeft: 0,
-                docsTop: 0,
-            };
-        }
-
-        const { mainComponent } = currentRender;
-
-        const documentComponent = mainComponent as Documents;
-
-        const { left: docsLeft, top: docsTop, pageLayoutType, pageMarginLeft, pageMarginTop } = documentComponent;
-
-        const { pages } = skeletonData;
-
-        const liquid = new Liquid();
-
-        const pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
-
-        for (let i = 0, len = pages.length; i < len; i++) {
-            const page = pages[i];
-            const { skeDrawings, marginLeft, marginTop } = page;
-            // cumPageLeft + = pageWidth + documents.pageMarginLeft;
-
-            liquid.translatePagePadding(page);
-
-            skeDrawings.forEach((drawing) => {
-                const { aLeft, aTop, height, width, drawingId, drawingOrigin } = drawing;
-                // const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;
-                // floatObjects.push({
-                //     unitId,
-                //     subUnitId: DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
-                //     floatingObjectId: drawingId,
-                //     behindText,
-                //     floatingObject: {
-                //         left: aLeft + docsLeft + liquid.x,
-                //         top: aTop + docsTop + liquid.y,
-                //         width,
-                //         height,
-                //     },
-                // });
-
-                pageMarginCache.set(drawingId, {
-                    marginLeft: liquid.x,
-                    marginTop: liquid.y,
-                });
-            });
-
-            liquid.restorePagePadding(page);
-
-            liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
-        }
-
-        return { pageMarginCache, docsLeft, docsTop };
-    }
-
     private _refreshDocSkeleton() {
-        const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
-        if (docsSkeletonObject == null) {
-            return;
-        }
-
-        const { unitId, skeleton } = docsSkeletonObject;
-
-        const currentRender = this._renderManagerService.getRenderById(unitId);
-
-        if (currentRender == null) {
-            return;
-        }
-
-        const { mainComponent } = currentRender;
-
+        const skeleton = this._docSkeletonManagerService.getSkeleton();
+        const { mainComponent } = this._context;
         skeleton?.calculate();
-
         mainComponent?.makeDirty();
     }
 

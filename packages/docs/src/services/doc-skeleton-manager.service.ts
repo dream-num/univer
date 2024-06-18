@@ -70,7 +70,7 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
         });
     }
 
-    getSkeleton(): Nullable<DocumentSkeleton> {
+    getSkeleton(): DocumentSkeleton {
         return this._skeleton;
     }
 

@@ -111,7 +111,7 @@ export class IMEInputController extends Disposable {
         }
 
         const skeleton = this._renderManagerSrv.getRenderById(documentModel.getUnitId())
-            ?.with(DocSkeletonManagerService).getSkeleton()?.skeleton;
+            ?.with(DocSkeletonManagerService).getSkeleton();
 
         const { event, activeRange } = config;
 

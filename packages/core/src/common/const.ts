@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-export const DOCS_NORMAL_EDITOR_UNIT_ID_KEY = '__INTERNAL_EDITOR__DOCS_NORMAL';
+const PREFIX = '__INTERNAL_EDITOR__';
 
-export const DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY = '__INTERNAL_EDITOR__DOCS_FORMULA_BAR';
+export const DOCS_NORMAL_EDITOR_UNIT_ID_KEY = `${PREFIX}DOCS_NORMAL`;
+
+export const DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY = `${PREFIX}DOCS_FORMULA_BAR`;
 
 export const DEFAULT_EMPTY_DOCUMENT_VALUE = '\r\n';
 
 export function createInternalEditorID(id: string) {
-    return `__INTERNAL_EDITOR__${id}`;
+    return `${PREFIX}${id}`;
 }
 
 export function isInternalEditorID(id: string) {
-    return id.startsWith('__INTERNAL_EDITOR__');
+    return id.startsWith(PREFIX);
 }

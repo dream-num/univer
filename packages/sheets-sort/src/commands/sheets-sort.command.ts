@@ -125,7 +125,7 @@ function getRowCellData(
 ): Nullable<ICellData>[] {
     const result: Nullable<ICellData>[] = [];
     orderRules.forEach(({ colIndex }) => {
-        result.push(worksheet.getCell(rowIndex, colIndex));
+        result.push(worksheet.getCellRaw(rowIndex, colIndex));
     });
     return result;
 }

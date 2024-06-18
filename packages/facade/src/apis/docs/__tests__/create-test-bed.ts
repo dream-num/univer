@@ -22,15 +22,16 @@ import {
     LogLevel,
     Plugin,
     Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
 import enUS from '@univerjs/sheets-formula/locale/en-US';
 import zhCN from '@univerjs/sheets-formula/locale/zh-CN';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-
-import { DocStateChangeManagerService, IMEInputManagerService, TextSelectionManagerService } from '@univerjs/docs';
-
+import { DocSkeletonManagerService, DocStateChangeManagerService, IMEInputManagerService, TextSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService, ITextSelectionRenderManager, RenderManagerService, TextSelectionRenderManager } from '@univerjs/engine-render';
+
+import { DocsRenderService } from '@univerjs/docs-ui/services/docs-render.service.js';
 import { FUniver } from '../../facade';
 
 function getTestDocumentDataDemo(): IDocumentData {
@@ -80,9 +81,13 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
             injector.add([TextSelectionManagerService]);
             injector.add([DocStateChangeManagerService]);
             injector.add([IMEInputManagerService]);
+            injector.add([DocsRenderService]);
             injector.add([ITextSelectionRenderManager, { useClass: TextSelectionRenderManager }]);
 
             dependencies?.forEach((d) => injector.add(d));
+
+            const renderManagerService = injector.get(IRenderManagerService);
+            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_DOC, DocSkeletonManagerService);
         }
     }
 

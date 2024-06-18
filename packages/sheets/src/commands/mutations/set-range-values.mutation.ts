@@ -242,9 +242,14 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                         oldVal.s = styles.setValue(merge);
                     }
 
+                    const newValueStream = `${newVal.v}\r\n`;
                     // Only need to copy newValue.s to oldValue.p when you modify the cell style, not when you modify the cell value.
                     if (!newVal.p && oldVal.p) {
-                        mergeRichTextStyle(oldVal.p, newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
+                        if (newValueStream === oldVal.p.body?.dataStream) {
+                            mergeRichTextStyle(oldVal.p, newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
+                        } else {
+                            delete oldVal.p;
+                        }
                     }
                 }
 
@@ -269,6 +274,8 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
  */
 export function checkCellValueType(v: Nullable<CellValue>, oldType: Nullable<CellValueType>): Nullable<CellValueType> {
     if (v === null) return null;
+
+    if (oldType === CellValueType.FORCE_STRING) return oldType;
 
     if (typeof v === 'string') {
         if (isSafeNumeric(v)) {

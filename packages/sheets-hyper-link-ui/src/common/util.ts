@@ -56,6 +56,8 @@ export function serializeUrl(urlStr: string) {
         ) {
             return url.hash;
         }
+
+        return transformedUrl;
     }
 
     return urlStr;

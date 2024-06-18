@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo } from '@univerjs/core';
-import { CellValueType, Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools } from '@univerjs/core';
+import type { IMutationInfo, Workbook } from '@univerjs/core';
+import { CellValueType, Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools, UniverInstanceType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { ClearSelectionAllCommand, ClearSelectionContentCommand, getSheetCommandTarget, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
+import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
 import type { IAddHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link';
 import { AddHyperLinkCommand, AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { isLegalLink, serializeUrl } from '../common/util';
@@ -51,6 +51,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                 if (command.id === AddHyperLinkCommand.id) {
                     const params = command.params as IAddHyperLinkCommandParams;
                     const { unitId, subUnitId, link } = params;
+                    const currentCell = this._getCurrentCell(unitId, subUnitId, link.row, link.column);
                     const redoParams: ISetRangeValuesMutationParams = {
                         unitId,
                         subUnitId,
@@ -58,8 +59,9 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                             [link.row]: {
                                 [link.column]: {
                                     v: link.display,
-                                    t: CellValueType.STRING,
+                                    // t: CellValueType.STRING, // Setting a link to a number is still a number
                                     p: null,
+                                    t: currentCell?.t ?? undefined, // Keep force string type
                                 },
                             },
                         },
@@ -211,7 +213,11 @@ export class SheetHyperLinkSetRangeController extends Disposable {
     private _initClearSelectionCommandInterceptor() {
         this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
             getMutations: (command) => {
-                if (command.id === ClearSelectionContentCommand.id || command.id === ClearSelectionAllCommand.id) {
+                if (
+                    command.id === ClearSelectionContentCommand.id ||
+                    command.id === ClearSelectionAllCommand.id ||
+                    command.id === ClearSelectionFormatCommand.id
+                ) {
                     const redos: IMutationInfo[] = [];
                     const undos: IMutationInfo[] = [];
                     const selection = this._selectionManagerService.getFirst();
@@ -253,5 +259,9 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                 };
             },
         }));
+    }
+
+    private _getCurrentCell(unitId: string, subUnitId: string, row: number, col: number) {
+        return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId)?.getCell(row, col);
     }
 }

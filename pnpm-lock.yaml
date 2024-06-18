@@ -1785,6 +1785,9 @@ importers:
 
   packages/sheets-sort:
     dependencies:
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../engine-formula
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
@@ -4031,7 +4034,7 @@ packages:
     resolution: {integrity: sha512-lljVXpqXebpsijW71PZaCYeIcE5on1w5DlQy5WH6GLbFryLUrBD4932W/E2BSpfRJWseIL4v/KPgBFxDOIdKpQ==}
 
   '@protobufjs/float@1.0.2':
-    resolution: {integrity: sha512-Ddb+kVXlXst9d+R9PfTIxh1EdNkgoRe5tOX6t01f1lYWOvJnSPDBlG241QLzcyPdoNTsblLUdujGSE4RzrTZGQ==}
+    resolution: {integrity: sha1-Xp4avctz/Ap8uLKR33jIy9l7h9E=}
 
   '@protobufjs/inquire@1.1.0':
     resolution: {integrity: sha512-kdSefcPdruJiFMVSbn801t4vFK7KB/5gd2fYvrxhuJYg8ILrmn9SKSX2tZdV6V+ksulWqS7aXjBcRXl3wHoD9Q==}

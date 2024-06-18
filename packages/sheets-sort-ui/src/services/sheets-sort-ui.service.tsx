@@ -57,6 +57,7 @@ const SORT_ERROR_MESSAGE = {
     MERGE_ERROR: 'sheets-sort.error.merge-size',
     EMPTY_ERROR: 'sheets-sort.error.empty',
     SINGLE_ERROR: 'sheets-sort.error.single',
+    FORMULA_ARRAY: 'sheets-sort.error.formula-array',
 };
 
 @OnLifecycle(LifecycleStages.Ready, SheetsSortService)
@@ -82,21 +83,8 @@ export class SheetsSortUIService extends Disposable {
 
         this.setSelection(location.unitId, location.subUnitId, location.range);
 
-        const singleCheck = this._sheetsSortService.singleCheck(location);
-        if (!singleCheck) {
-            this.showCheckError(SORT_ERROR_MESSAGE.SINGLE_ERROR);
-            return false;
-        }
-
-        const mergeCheck = this._sheetsSortService.mergeCheck(location);
-        if (!mergeCheck) {
-            this.showCheckError(SORT_ERROR_MESSAGE.MERGE_ERROR);
-            return false;
-        }
-
-        const emptyCheck = this._sheetsSortService.emptyCheck(location);
-        if (!emptyCheck) {
-            this.showCheckError(SORT_ERROR_MESSAGE.EMPTY_ERROR);
+        const check = this._check(location);
+        if (!check) {
             return false;
         }
 
@@ -119,21 +107,8 @@ export class SheetsSortUIService extends Disposable {
 
         this.setSelection(location.unitId, location.subUnitId, location.range);
 
-        const singleCheck = this._sheetsSortService.singleCheck(location);
-        if (!singleCheck) {
-            this.showCheckError(SORT_ERROR_MESSAGE.SINGLE_ERROR);
-            return false;
-        }
-
-        const mergeCheck = this._sheetsSortService.mergeCheck(location);
-        if (!mergeCheck) {
-            this.showCheckError(SORT_ERROR_MESSAGE.MERGE_ERROR);
-            return false;
-        }
-
-        const emptyCheck = this._sheetsSortService.emptyCheck(location);
-        if (!emptyCheck) {
-            this.showCheckError(SORT_ERROR_MESSAGE.EMPTY_ERROR);
+        const check = this._check(location);
+        if (!check) {
             return false;
         }
 
@@ -230,6 +205,33 @@ export class SheetsSortUIService extends Disposable {
 
     closeCustomSortPanel() {
         this._customSortState$.next({ show: false });
+    }
+
+    private _check(location: ISheetSortLocation) {
+        const singleCheck = this._sheetsSortService.singleCheck(location);
+        if (!singleCheck) {
+            this.showCheckError(SORT_ERROR_MESSAGE.SINGLE_ERROR);
+            return false;
+        }
+
+        const mergeCheck = this._sheetsSortService.mergeCheck(location);
+        if (!mergeCheck) {
+            this.showCheckError(SORT_ERROR_MESSAGE.MERGE_ERROR);
+            return false;
+        }
+
+        const formulaCheck = this._sheetsSortService.formulaCheck(location);
+        if (!formulaCheck) {
+            this.showCheckError(SORT_ERROR_MESSAGE.FORMULA_ARRAY);
+            return false;
+        }
+
+        const emptyCheck = this._sheetsSortService.emptyCheck(location);
+        if (!emptyCheck) {
+            this.showCheckError(SORT_ERROR_MESSAGE.EMPTY_ERROR);
+            return false;
+        }
+        return true;
     }
 
     private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetSortLocation >> {

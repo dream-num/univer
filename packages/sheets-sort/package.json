@@ -59,6 +59,7 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",

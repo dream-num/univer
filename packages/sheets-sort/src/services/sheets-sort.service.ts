@@ -24,6 +24,8 @@ import { Disposable, ICommandService,
 import type { ISheetRangeLocation } from '@univerjs/sheets-ui';
 
 import { getSheetCommandTarget } from '@univerjs/sheets';
+import { Inject } from '@wendellhu/redi';
+import { FormulaDataModel } from '@univerjs/engine-formula';
 import { type ICellValueCompareFn, SortRangeCommand } from '../commands/sheets-sort.command';
 import { isNullValue } from '../controllers/utils';
 import type { ISortOption } from './interface';
@@ -34,7 +36,9 @@ export class SheetsSortService extends Disposable {
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService) {
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
+    ) {
         super();
     }
 
@@ -71,6 +75,21 @@ export class SheetsSortService extends Disposable {
     singleCheck(location: ISheetRangeLocation) {
         if (location.range.startRow === location.range.endRow) {
             return false;
+        }
+        return true;
+    }
+
+    formulaCheck(location: ISheetRangeLocation) {
+        const { unitId, subUnitId, range } = location;
+        const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange()?.[unitId]?.[subUnitId];
+        for (const row in arrayFormulaRange) {
+            const rowData = arrayFormulaRange[Number(row)];
+            for (const col in rowData) {
+                const arrayFormula = rowData[Number(col)];
+                if (arrayFormula && Rectangle.intersects(range, arrayFormula)) {
+                    return false;
+                }
+            }
         }
         return true;
     }

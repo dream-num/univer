@@ -65,7 +65,7 @@ export class NormalInputController extends Disposable {
             const e = event as InputEvent;
 
             const skeleton = this._renderManagerService.getRenderById(documentModel.getUnitId())
-                ?.with(DocSkeletonManagerService).getSkeleton()?.skeleton;
+                ?.with(DocSkeletonManagerService).getSkeleton();
 
             if (e.data == null || skeleton == null) {
                 return;

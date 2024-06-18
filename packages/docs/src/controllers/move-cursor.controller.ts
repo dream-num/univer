@@ -99,7 +99,7 @@ export class MoveCursorController extends Disposable {
         }
 
         const skeleton = this._renderManagerService.getRenderById(docDataModel.getUnitId())
-            ?.with(DocSkeletonManagerService).getSkeleton()?.skeleton;
+            ?.with(DocSkeletonManagerService).getSkeleton();
         const docObject = this._getDocObject();
 
         if (activeRange == null || skeleton == null || docObject == null) {
@@ -203,7 +203,7 @@ export class MoveCursorController extends Disposable {
         }
 
         const skeleton = this._renderManagerService.getRenderById(docDataModel.getUnitId())
-            ?.with(DocSkeletonManagerService).getSkeleton()?.skeleton;
+            ?.with(DocSkeletonManagerService).getSkeleton();
         const docObject = this._getDocObject();
 
         if (activeRange == null || skeleton == null || docObject == null || allRanges == null) {

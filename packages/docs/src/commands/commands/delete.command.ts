@@ -55,7 +55,7 @@ export const DeleteLeftCommand: ICommand = {
         const docSkeletonManagerService = getCommandSkeleton(accessor, unitId);
         const activeRange = textSelectionManagerService.getActiveRange();
         const ranges = textSelectionManagerService.getSelections();
-        const skeleton = docSkeletonManagerService?.getSkeleton()?.skeleton;
+        const skeleton = docSkeletonManagerService?.getSkeleton();
         if (activeRange == null || skeleton == null || ranges == null) {
             return false;
         }
@@ -202,7 +202,7 @@ export const DeleteRightCommand: ICommand = {
 
         const activeRange = textSelectionManagerService.getActiveRange();
         const ranges = textSelectionManagerService.getSelections();
-        const skeleton = docSkeletonManagerService?.getSkeleton()?.skeleton;
+        const skeleton = docSkeletonManagerService?.getSkeleton();
         if (activeRange == null || skeleton == null || ranges == null) {
             return false;
         }

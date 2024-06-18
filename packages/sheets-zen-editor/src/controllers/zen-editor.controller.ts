@@ -126,7 +126,7 @@ export class ZenEditorController extends RxDisposable {
 
             const { engine } = editorObject;
 
-            const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.skeleton;
+            const skeleton = this._renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.with(DocSkeletonManagerService).getSkeleton();
 
             // Update page size when container resized.
             // zenEditorDataModel.updateDocumentDataPageSize(width);
@@ -220,7 +220,7 @@ export class ZenEditorController extends RxDisposable {
             DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
         ];
 
-        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService).getSkeleton();
         const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
         const docViewModel = this._docViewModelManagerService.getViewModel(unitId);
 
@@ -245,7 +245,6 @@ export class ZenEditorController extends RxDisposable {
         docViewModel.reset(docDataModel);
 
         const currentRender = this._getDocObject();
-
         if (currentRender == null) {
             return;
         }

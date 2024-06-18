@@ -50,7 +50,7 @@ export interface IRenderManagerService extends IDisposable {
     /** @deprecated */
     createRender$: Observable<string>;
     /** @deprecated this design is very very weird! Remove it. */
-    create(unitId: Nullable<string>): void;
+    create(unitId: string): void;
 
     /** @deprecated There will be multi units to render at the same time, so there is no *current*. */
     getCurrent(): Nullable<IRender>;
@@ -127,7 +127,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return Array.from(this._renderControllers.get(type) ?? []);
     }
 
-    create(unitId: Nullable<string>) {
+    create(unitId: string) {
         this._createRender$.next(unitId);
     }
 

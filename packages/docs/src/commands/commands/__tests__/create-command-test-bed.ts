@@ -14,21 +14,30 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
+/* eslint-disable ts/no-explicit-any */
+
+import type { DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
 import {
     BooleanNumber,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ILogService,
     IUniverInstanceService,
     LogLevel,
     Plugin,
+    RxDisposable,
     Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
-import type { Dependency } from '@wendellhu/redi';
+import type { Ctor, Dependency, DependencyIdentifier } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
+import type { DocumentSkeleton, IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { DocumentViewModel, IRenderManagerService } from '@univerjs/engine-render';
 
+import { BehaviorSubject, takeUntil } from 'rxjs';
 import { TextSelectionManagerService } from '../../../services/text-selection-manager.service';
 import { DocStateChangeManagerService } from '../../../services/doc-state-change-manager.service';
 import { IMEInputManagerService } from '../../../services/ime-input-manager.service';
+import { DocSkeletonManagerService } from '../../../services/doc-skeleton-manager.service';
 import { ITextSelectionRenderManager, TextSelectionRenderManager } from './mock-text-selection-render-manager';
 
 const TEST_DOCUMENT_DATA_EN: IDocumentData = {
@@ -91,13 +100,13 @@ export function createCommandTestBed(workbookData?: IDocumentData, dependencies?
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
 
-    /**
-     * This plugin hooks into Doc's DI system to expose API to test scripts
-     */
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
 
-        constructor(_config: undefined, @Inject(Injector) override readonly _injector: Injector) {
+        constructor(
+            _config: undefined,
+            @Inject(Injector) override readonly _injector: Injector
+        ) {
             super();
         }
 
@@ -105,12 +114,7 @@ export function createCommandTestBed(workbookData?: IDocumentData, dependencies?
             injector.add([TextSelectionManagerService]);
             injector.add([DocStateChangeManagerService]);
             injector.add([IMEInputManagerService]);
-            injector.add([
-                ITextSelectionRenderManager,
-                {
-                    useClass: TextSelectionRenderManager,
-                },
-            ]);
+            injector.add([ITextSelectionRenderManager, { useClass: TextSelectionRenderManager }]);
 
             dependencies?.forEach((d) => injector.add(d));
         }
@@ -119,15 +123,112 @@ export function createCommandTestBed(workbookData?: IDocumentData, dependencies?
     univer.registerPlugin(TestPlugin);
 
     const doc = univer.createUniverDoc(workbookData || TEST_DOCUMENT_DATA_EN);
+
     const univerInstanceService = get(IUniverInstanceService);
+
+    // NOTE: This is pretty hack for the test. But with these hacks we can avoid to create
+    // real canvas-environment in univerjs/docs. If some we have to do that, this hack could be removed.
+    // Refer to packages/sheets-ui/src/services/clipboard/__tests__/clipboard-test-bed.ts
+    const fakeDocSkeletonManager = new MockDocSkeletonManagerService({
+        unit: doc,
+        unitId: 'test-doc',
+        type: UniverInstanceType.UNIVER_DOC,
+        engine: null as any,
+        scene: null as any,
+        mainComponent: null as any,
+        components: null as any,
+        isMainScene: true,
+    }, univerInstanceService);
+
+    injector.add([DocSkeletonManagerService, { useValue: fakeDocSkeletonManager as unknown as DocSkeletonManagerService }]);
+    injector.add([IRenderManagerService, { useClass: MockRenderManagerService as unknown as Ctor<IRenderManagerService> }]);
+
     univerInstanceService.focusUnit('test-doc');
 
     const logService = get(ILogService);
-    logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
+    logService.setLogLevel(LogLevel.SILENT);
 
     return {
         univer,
         get,
         doc,
     };
+}
+
+// These services are for document build and manage doc skeletons.
+
+export class MockRenderManagerService implements Pick<IRenderManagerService, 'getRenderById'> {
+    constructor(
+        @Inject(Injector) private readonly _injector: Injector
+    ) {}
+
+    getRenderById(_unitId: string): Nullable<IRender> {
+        return {
+            with: <T>(identifier: DependencyIdentifier<T>) => this._injector.get(identifier),
+        } as unknown as IRender;
+    }
+}
+
+export class MockDocSkeletonManagerService extends RxDisposable implements IRenderModule {
+    private _docViewModel: DocumentViewModel;
+
+    private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<DocumentSkeleton>>(null);
+    readonly currentSkeleton$ = this._currentSkeleton$.asObservable();
+
+    // CurrentSkeletonBefore for pre-triggered logic during registration
+    private readonly _currentSkeletonBefore$ = new BehaviorSubject<Nullable<DocumentSkeleton>>(null);
+    readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
+
+    constructor(
+        private readonly _context: IRenderContext<DocumentDataModel>,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+    ) {
+        super();
+
+        this._update();
+
+        this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((documentModel) => {
+                if (documentModel?.getUnitId() === this._context.unitId) {
+                    this._update();
+                }
+            });
+    }
+
+    override dispose(): void {
+        super.dispose();
+
+        this._currentSkeletonBefore$.complete();
+        this._currentSkeleton$.complete();
+    }
+
+    private _update() {
+        const documentDataModel = this._context.unit;
+        const unitId = this._context.unitId;
+
+        // No need to build view model, if data model has no body.
+        if (documentDataModel.getBody() == null) {
+            return;
+        }
+
+        // Always need to reset document data model, because cell editor change doc instance every time.
+        if (this._docViewModel && unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+            this._docViewModel.reset(documentDataModel);
+        } else if (!this._docViewModel) {
+            this._docViewModel = this._buildDocViewModel(documentDataModel);
+        }
+    }
+
+    getSkeleton(): DocumentSkeleton {
+        throw new Error('[MockDocSkeletonManagerService]: cannot access to doc skeleton in unit tests!');
+    }
+
+    getViewModel(): DocumentViewModel {
+        return this._docViewModel;
+    }
+
+    private _buildDocViewModel(documentDataModel: DocumentDataModel) {
+        return new DocumentViewModel(documentDataModel);
+    }
 }

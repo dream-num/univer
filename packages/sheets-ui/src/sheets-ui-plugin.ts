@@ -177,7 +177,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             SheetSkeletonManagerService,
             SheetRenderController,
         ]).forEach((m) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, m));
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });
     }
 
@@ -218,7 +218,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             SheetPermissionInterceptorFormulaRenderController,
             SheetPermissionRenderController,
         ]).forEach((m) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, m));
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });
     }
 

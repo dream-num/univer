@@ -751,24 +751,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
         return getEditorObject(this._editorBridgeService.getCurrentEditorId(), this._renderManagerService);
     }
 
-    // private _init() {
-    //     this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC)
-    //         .pipe(takeUntil(this.dispose$))
-    //         .subscribe((docDataModel) => {
-    //             if (docDataModel == null) {
-    //                 return;
-    //             }
-
-    //             const unitId = docDataModel.getUnitId();
-
-    //             // Clear undo redo stack of cell editor when lose focus.
-    //             // WTF@wzhudev: this should be implemented in end-editor controller.
-    //             if (unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
-    //                 this._undoRedoService.clearUndoRedo(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-    //             }
-    //         });
-    // }
-
     private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
         const { keycode } = param;
 

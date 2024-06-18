@@ -147,7 +147,7 @@ export class UniverDocsUIPlugin extends Plugin {
             DocFloatingObjectRenderController,
             DocTextSelectionRenderController,
         ]).forEach((m) => {
-            this._renderManagerSrv.registerRenderController(UniverInstanceType.UNIVER_DOC, m);
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
         });
     }
 }

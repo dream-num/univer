@@ -89,8 +89,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
                 });
 
                 e.preventDefault();
-            })
-            );
+            }));
         });
     }
 

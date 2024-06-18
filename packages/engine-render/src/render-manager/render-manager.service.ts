@@ -59,7 +59,7 @@ export interface IRenderManagerService extends IDisposable {
 
     has(unitId: string): boolean;
     withCurrentTypeOfUnit<T>(type: UniverInstanceType, id: DependencyIdentifier<T>): Nullable<T>;
-    registerRenderController<T extends UnitModel>(type: UnitType, ctor: IRenderModuleCtor<T>): IDisposable;
+    registerRenderModule<T extends UnitModel>(type: UnitType, ctor: IRenderModuleCtor<T>): IDisposable;
 }
 
 const DEFAULT_SCENE_SIZE = { width: 1500, height: 1000 };
@@ -105,7 +105,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         this._currentRender$.complete();
     }
 
-    registerRenderController(type: UnitType, ctor: IRenderModuleCtor): IDisposable {
+    registerRenderModule(type: UnitType, ctor: IRenderModuleCtor): IDisposable {
         if (!this._renderControllers.has(type)) {
             this._renderControllers.set(type, new Set());
         }

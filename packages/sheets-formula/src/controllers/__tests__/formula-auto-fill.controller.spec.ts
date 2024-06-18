@@ -41,6 +41,7 @@ import {
     IAutoFillService,
     ISelectionRenderService,
     SelectionRenderService,
+    SheetsRenderService,
 } from '@univerjs/sheets-ui';
 import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/ui';
 import type { Injector } from '@wendellhu/redi';
@@ -52,6 +53,11 @@ import { createCommandTestBed } from './create-command-test-bed';
 const theme = {
     colorBlack: '#35322b',
 };
+
+class mockSheetsRenderService {
+    registerSkeletonChangingMutations(id: string) {
+    }
+}
 
 describe('Test auto fill with formula', () => {
     let univer: Univer;
@@ -77,6 +83,7 @@ describe('Test auto fill with formula', () => {
             [RangeProtectionRuleModel],
             [RangeProtectionService],
             [RangeProtectionRenderModel],
+            [SheetsRenderService, { useClass: mockSheetsRenderService }],
         ]);
         univer = testBed.univer;
         get = testBed.get;

@@ -46,11 +46,17 @@ import { ISelectionRenderService, SelectionRenderService } from '../../../servic
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { RefillCommand } from '../refill.command';
 import { AutoClearContentCommand, AutoFillCommand } from '../auto-fill.command';
+import { SheetsRenderService } from '../../../services/sheets-render.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
     colorBlack: '#35322b',
 };
+
+class mockSheetsRenderService {
+    registerSkeletonChangingMutations(id: string) {
+    }
+}
 
 const TEST_WORKBOOK_DATA = {
     id: 'test',
@@ -285,6 +291,7 @@ describe('Test auto fill rules in controller', () => {
             [IRenderManagerService, { useClass: RenderManagerService }],
             [SheetSkeletonManagerService],
             [AutoFillController],
+            [SheetsRenderService, { useClass: mockSheetsRenderService }],
         ]);
         univer = testBed.univer;
         get = testBed.get;

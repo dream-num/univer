@@ -15,8 +15,6 @@
             "cache": false
         },
 
-        "build:demo": {},
-
         "build:e2e": {},
 
         "dev:demo": {

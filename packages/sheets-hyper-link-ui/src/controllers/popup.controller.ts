@@ -19,7 +19,7 @@ import { HoverManagerService, SheetPermissionInterceptorBaseController, SheetSke
 import { Inject } from '@wendellhu/redi';
 import { debounceTime } from 'rxjs';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, WorkbookCopyPermission, WorkbookEditablePermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookViewPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetsHyperLinkPopupController)
@@ -64,7 +64,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                 }
 
                 const viewPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
-                    workbookTypes: [WorkbookEditablePermission],
+                    workbookTypes: [WorkbookViewPermission],
                     worksheetTypes: [WorksheetViewPermission],
                     rangeTypes: [RangeProtectionPermissionViewPoint],
                 }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);

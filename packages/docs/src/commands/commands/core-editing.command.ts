@@ -15,6 +15,7 @@
  */
 
 import type {
+    DocumentDataModel,
     ICommand,
     IDocumentBody,
     IDocumentData,
@@ -22,12 +23,12 @@ import type {
     ITextRange,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import { CommandType, ICommandService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import { isCustomRangeSplitSymbol } from '../../basics/custom-range';
 
 export interface IInsertCommandParams {
     unitId: string;
@@ -105,7 +106,6 @@ export interface IDeleteCommandParams {
     unitId: string;
     range: ITextRange;
     direction: DeleteDirection;
-    textRanges: ITextRangeWithStyle[];
     len?: number;
     segmentId?: string;
 }
@@ -115,39 +115,55 @@ export interface IDeleteCommandParams {
  */
 export const DeleteCommand: ICommand<IDeleteCommandParams> = {
     id: 'doc.command.delete-text',
-
     type: CommandType.COMMAND,
-
     handler: async (accessor, params: IDeleteCommandParams) => {
         const commandService = accessor.get(ICommandService);
-
-        const { range, segmentId, unitId, direction, textRanges, len = 1 } = params;
-
+        const { range, segmentId, unitId, direction, len = 1 } = params;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const { startOffset } = range;
 
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        if (!documentDataModel) {
+            return false;
+        }
+
+        const dataStream = documentDataModel.getBody()!.dataStream;
+        const start = direction === DeleteDirection.LEFT ? startOffset - len : startOffset;
+        let count = 0;
+
+        while (isCustomRangeSplitSymbol(dataStream[start - (count + 1)]) && isCustomRangeSplitSymbol(dataStream[start + len + count])) {
+            count++;
+        }
+
+        const deleteStart = start - (count + 1);
+        const deleteLen = len + (count * 2);
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
                 actions: [],
-                textRanges,
+                textRanges: [{
+                    startOffset: deleteStart,
+                    endOffset: deleteStart,
+                    collapsed: true,
+                }],
             },
         };
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
-        if (startOffset > 0) {
+        if (deleteStart > 0) {
             textX.push({
                 t: TextXActionType.RETAIN,
-                len: direction === DeleteDirection.LEFT ? startOffset - len : startOffset,
+                len: deleteStart,
                 segmentId,
             });
         }
 
         textX.push({
             t: TextXActionType.DELETE,
-            len,
+            len: deleteLen,
             line: 0,
             segmentId,
         });

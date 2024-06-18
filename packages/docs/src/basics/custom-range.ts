@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '@univerjs/core';
-import type { ITextActiveRange } from '../services/text-selection-manager.service';
+import { DataStreamTreeTokenType } from '@univerjs/core';
 
-export function transformDeleteRange(range: ITextActiveRange, body: IDocumentBody) {
-    const { customRanges } = body;
-    const { startOffset, endOffset, collapsed } = range;
+export function isCustomRangeSplitSymbol(text: string) {
+    return text === DataStreamTreeTokenType.CUSTOM_RANGE_END || text === DataStreamTreeTokenType.CUSTOM_RANGE_START;
 }

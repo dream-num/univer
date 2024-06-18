@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { Documents, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
 import { CURSOR_TYPE, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
@@ -29,11 +29,12 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
+        @IEditorService private readonly _editorService: IEditorService,
+        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @IEditorService private readonly _editorService: IEditorService
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
@@ -79,9 +80,13 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
                 return;
             }
 
-            this._textSelectionRenderManager.eventTrigger(evt);
+            // FIXME:@Jocs: editor status should not be coupled with the instance service.
+            const currentDocInstance = this._instanceSrv.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+            if (currentDocInstance?.getUnitId() !== unitId) {
+                this._instanceSrv.setCurrentUnitForType(unitId);
+            }
 
-            const { offsetX, offsetY } = evt;
+            this._textSelectionRenderManager.eventTrigger(evt);
 
             if (this._editorService.getEditor(unitId)) {
                 /**
@@ -93,6 +98,8 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
                  * Translate the above text into English.
                  */
                 this._setEditorFocus(unitId);
+                const { offsetX, offsetY } = evt;
+
                 setTimeout(() => {
                     this._setEditorFocus(unitId);
                     this._textSelectionRenderManager.setCursorManually(offsetX, offsetY);
@@ -117,8 +124,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
                 return;
             }
             this._textSelectionRenderManager.handleTripleClick(evt);
-        })
-        );
+        }));
     }
 
     private _isEditorReadOnly(unitId: string) {
@@ -142,7 +148,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
         //     // this._editorService.setOperationSheetSubUnitId(workbook.getActiveSheet().getSheetId());
         // }
 
-        // this._editorService.focusStyle(unitId);
+        this._editorService.focusStyle(unitId);
     }
 
     private _commandExecutedListener() {

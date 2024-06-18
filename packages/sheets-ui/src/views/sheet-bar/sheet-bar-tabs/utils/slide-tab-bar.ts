@@ -442,6 +442,7 @@ export class SlideTabBar {
      */
     protected _rightMoveX: number = 0;
 
+    // eslint-disable-next-line max-lines-per-function
     constructor(config: Partial<SlideTabBarConfig>) {
         if (config.slideTabBarContainer == null) {
             throw new Error('not found slide-tab-bar root element');
@@ -463,10 +464,17 @@ export class SlideTabBar {
         let lastPageX = 0;
         let lastPageY = 0;
         let lastTime = 0;
+        // eslint-disable-next-line max-lines-per-function
         this._downAction = (downEvent: MouseEvent) => {
             // Waiting for the rename of the previous TAB
             if (this._activeTabItem?.isEditMode()) {
                 return;
+            }
+
+            // Clear timer
+            if (this._longPressTimer) {
+                clearTimeout(this._longPressTimer);
+                this._longPressTimer = null;
             }
 
             const slideItemId = (downEvent.target as HTMLElement)
@@ -529,9 +537,10 @@ export class SlideTabBar {
 
             // Set a timer to delay dragging for 300 milliseconds
             this._longPressTimer = setTimeout(() => {
+                if (!activeSlideItemElement || this._activeTabItem?.isEditMode()) return;
+
                 this._activeTabItem?.enableFixed();
                 this._startAutoScroll();
-                if (!activeSlideItemElement) return;
                 // Set the mouse cursor to drag
                 activeSlideItemElement.setPointerCapture((downEvent as PointerEvent).pointerId);
                 activeSlideItemElement.style.cursor = 'move';
@@ -540,6 +549,10 @@ export class SlideTabBar {
         };
 
         this._upAction = (upEvent: MouseEvent) => {
+            if (this._activeTabItem?.isEditMode()) {
+                return;
+            }
+
             // Clear timer
             if (this._longPressTimer) {
                 clearTimeout(this._longPressTimer);

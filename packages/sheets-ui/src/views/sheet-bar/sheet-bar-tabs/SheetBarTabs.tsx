@@ -392,7 +392,7 @@ export function SheetBarTabs() {
             )}
             onVisibleChange={onVisibleChange}
         >
-            <div className={styles.slideTabBarContainer} ref={slideTabBarContainerRef}>
+            <div className={styles.slideTabBarContainer} ref={slideTabBarContainerRef} onDragStart={(e) => e.preventDefault()}>
                 <div className={styles.slideTabBar} style={{ boxShadow }}>
                     {sheetList.map((item) => (
                         <SheetBarItem {...item} key={item.sheetId} selected={activeKey === item.sheetId} />

@@ -1812,10 +1812,10 @@ importers:
         version: 5.4.5
       vite:
         specifier: ^5.2.10
-        version: 5.2.13(@types/node@20.14.2)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+        version: 5.3.1(@types/node@20.14.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
       vitest:
         specifier: ^1.5.2
-        version: 1.6.0(@types/node@20.14.2)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+        version: 1.6.0(@types/node@20.14.4)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/sheets-sort-ui:
     dependencies:
@@ -1876,10 +1876,10 @@ importers:
         version: 5.4.5
       vite:
         specifier: ^5.2.10
-        version: 5.2.13(@types/node@20.14.2)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+        version: 5.3.1(@types/node@20.14.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
       vitest:
         specifier: ^1.5.2
-        version: 1.6.0(@types/node@20.14.2)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+        version: 1.6.0(@types/node@20.14.4)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/sheets-thread-comment:
     dependencies:

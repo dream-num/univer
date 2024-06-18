@@ -632,9 +632,10 @@ export class EditingRenderController extends Disposable implements IRenderModule
             this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
                 const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
                 const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
-                const unitId = this._univerInstanceService.getCurrentUniverDocInstance()!.getUnitId();
 
-                if (isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
+                // TODO@Jocs: should get editor instead of current doc
+                const unitId = this._univerInstanceService.getCurrentUniverDocInstance()?.getUnitId();
+                if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
                     this._showEditorByKeyboard(config);
                 }
             })

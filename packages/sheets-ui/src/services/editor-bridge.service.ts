@@ -213,6 +213,8 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) return;
+
         const location = {
             workbook,
             worksheet,

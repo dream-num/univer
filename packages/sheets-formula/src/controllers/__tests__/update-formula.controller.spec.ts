@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import { CellValueType, Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
 import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, NORMAL_SELECTION_PLUGIN_NAME, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SelectionManagerService, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation } from '@univerjs/sheets';
@@ -67,6 +67,137 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
                         t: CellValueType.NUMBER,
                     },
                 },
+                7: {
+                    0: {
+                        v: 1,
+                        t: CellValueType.NUMBER,
+                    },
+                    1: {
+                        v: 1,
+                        t: CellValueType.NUMBER,
+                    },
+                    2: {
+                        v: 1,
+                        t: CellValueType.NUMBER,
+                    },
+                    3: {
+                        f: '=SUM(A8)',
+                    },
+                    4: {
+                        f: '=SUM(B8)',
+                    },
+                    5: {
+                        f: '=SUM(C8)',
+                    },
+                    7: {
+                        f: '=SUM(A8:C10)',
+                    },
+                    8: {
+                        f: '=SUM(B8:D10)',
+                        si: 'CarNau',
+                    },
+                    9: {
+                        f: 'CarNau',
+                    },
+                },
+                8: {
+                    0: {
+                        v: 1,
+                        t: CellValueType.NUMBER,
+                    },
+                    1: {
+                        v: 1,
+                        t: CellValueType.NUMBER,
+                    },
+                    2: {
+                        v: 1,
+                        t: CellValueType.NUMBER,
+                    },
+                    3: {
+                        f: '=SUM(A9)',
+                    },
+                    4: {
+                        f: '=SUM(B9)',
+                    },
+                    5: {
+                        f: '=SUM(C9)',
+                    },
+                    7: {
+                        f: '=SUM(A9:C11)',
+                        si: 'y0gLJX',
+                    },
+                    8: {
+                        si: 'y0gLJX',
+                    },
+                    9: {
+                        f: 'y0gLJX',
+                    },
+                },
+                9: {
+                    0: {
+                        v: 1,
+                        t: CellValueType.NUMBER,
+                    },
+                    1: {
+                        v: 1,
+                        t: CellValueType.NUMBER,
+                    },
+                    2: {
+                        v: 1,
+                        t: CellValueType.NUMBER,
+                    },
+                    3: {
+                        f: '=SUM(A10)',
+                    },
+                    4: {
+                        f: '=SUM(B10)',
+                    },
+                    5: {
+                        f: '=SUM(C10)',
+                    },
+                    7: {
+                        si: 'y0gLJX',
+                    },
+                    8: {
+                        si: 'y0gLJX',
+                    },
+                    9: {
+                        f: 'y0gLJX',
+                    },
+                },
+                10: {
+                    0: {
+                        f: '=SUM(A8)',
+                    },
+                    1: {
+                        f: '=SUM(B8)',
+                    },
+                    2: {
+                        f: '=SUM(C8)',
+                    },
+                },
+                11: {
+                    0: {
+                        f: '=SUM(A9)',
+                    },
+                    1: {
+                        f: '=SUM(B9)',
+                    },
+                    2: {
+                        f: '=SUM(C9)',
+                    },
+                },
+                12: {
+                    0: {
+                        f: '=SUM(A10)',
+                    },
+                    1: {
+                        f: '=SUM(B10)',
+                    },
+                    2: {
+                        f: '=SUM(C10)',
+                    },
+                },
                 14: {
                     0: {
                         f: '=A1:B2',
@@ -101,6 +232,7 @@ describe('Test insert function operation', () => {
         endRow: number,
         endColumn: number
     ) => Array<Array<Nullable<ICellData>>> | undefined;
+    let getCellData: () => IObjectMatrixPrimitiveType<Nullable<ICellData>> | undefined;
 
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA_DEMO(), [
@@ -157,6 +289,11 @@ describe('Test insert function operation', () => {
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();
+
+        getCellData = () => {
+            return get(IUniverInstanceService).getUniverSheetInstance('test')
+                ?.getSheetBySheetId('sheet1')?.getCellMatrix().clone();
+        };
     });
 
     afterEach(() => {
@@ -484,6 +621,32 @@ describe('Test insert function operation', () => {
             expect(valuesRedo2).toStrictEqual([[{ f: '=SUM(A1:B3)' }], [{ v: 1, t: CellValueType.NUMBER }]]);
         });
 
+        it('Insert row, update reference and position, adjacent formula', async () => {
+            const params: IInsertRowCommandParams = {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: {
+                    startRow: 8,
+                    endRow: 8,
+                    startColumn: 0,
+                    endColumn: 19,
+                },
+                direction: Direction.UP,
+            };
+
+            expect(await commandService.executeCommand(InsertRowCommand.id, params)).toBeTruthy();
+            const values = getValues(10, 0, 13, 0);
+            expect(values).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }], [{ f: '=SUM(A8)' }], [{ f: '=SUM(A10)' }], [{ f: '=SUM(A11)' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(10, 0, 13, 0);
+            expect(valuesUndo).toStrictEqual([[{ f: '=SUM(A8)' }], [{ f: '=SUM(A9)' }], [{ f: '=SUM(A10)' }], [{}]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(10, 0, 13, 0);
+            expect(valuesRedo).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }], [{ f: '=SUM(A8)' }], [{ f: '=SUM(A10)' }], [{ f: '=SUM(A11)' }]]);
+        });
+
         it('Insert column, update reference', async () => {
             const params: IInsertColCommandParams = {
                 unitId: 'test',
@@ -530,18 +693,24 @@ describe('Test insert function operation', () => {
             expect(values).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }, { f: '=A1:C2' }]]);
             const values2 = getValues(5, 3, 5, 4);
             expect(values2).toStrictEqual([[{ f: '=SUM(A1:C2)' }, { v: 1, t: CellValueType.NUMBER }]]);
+            const values3 = getValues(7, 2, 7, 6);
+            expect(values3).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }, { v: 1, t: CellValueType.NUMBER }, { f: '=SUM(A8)' }, { f: '=SUM(C8)' }, { f: '=SUM(D8)' }]]);
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             const valuesUndo = getValues(2, 1, 2, 2);
             expect(valuesUndo).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }, { f: '=A1:B2' }]]);
             const valuesUndo2 = getValues(5, 2, 5, 3);
             expect(valuesUndo2).toStrictEqual([[{ f: '=SUM(A1:B2)' }, { v: 1, t: CellValueType.NUMBER }]]);
+            const valuesUndo3 = getValues(7, 2, 7, 6);
+            expect(valuesUndo3).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }, { f: '=SUM(A8)' }, { f: '=SUM(B8)' }, { f: '=SUM(C8)' }, {}]]);
 
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             const valuesRedo = getValues(2, 2, 2, 3);
             expect(valuesRedo).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }, { f: '=A1:C2' }]]);
             const valuesRedo2 = getValues(5, 3, 5, 4);
             expect(valuesRedo2).toStrictEqual([[{ f: '=SUM(A1:C2)' }, { v: 1, t: CellValueType.NUMBER }]]);
+            const valuesRedo3 = getValues(7, 2, 7, 6);
+            expect(valuesRedo3).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }, { v: 1, t: CellValueType.NUMBER }, { f: '=SUM(A8)' }, { f: '=SUM(C8)' }, { f: '=SUM(D8)' }]]);
         });
 
         it('Remove row, update reference', async () => {
@@ -596,6 +765,52 @@ describe('Test insert function operation', () => {
             expect(valuesRedo2).toStrictEqual([[{ f: '=SUM(A1:B1)' }], [{ v: 1, t: CellValueType.NUMBER }]]);
         });
 
+        it('Remove row, update reference and position, adjacent formula', async () => {
+            const params: IRemoveRowColCommandParams = {
+                range: {
+                    startRow: 8,
+                    endRow: 8,
+                    startColumn: 0,
+                    endColumn: 19,
+                },
+            };
+
+            expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
+            const values = getValues(9, 0, 12, 0);
+            expect(values).toStrictEqual([[{ f: '=SUM(A8)' }], [{ f: '=SUM(#REF!)' }], [{ f: '=SUM(A9)' }], [{}]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(9, 0, 12, 0);
+            expect(valuesUndo).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }], [{ f: '=SUM(A8)' }], [{ f: '=SUM(A9)' }], [{ f: '=SUM(A10)' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(9, 0, 12, 0);
+            expect(valuesRedo).toStrictEqual([[{ f: '=SUM(A8)' }], [{ f: '=SUM(#REF!)' }], [{ f: '=SUM(A9)' }], [{}]]);
+        });
+
+        it('Remove row, removed row contains formula', async () => {
+            const params: IRemoveRowColCommandParams = {
+                range: {
+                    startRow: 10,
+                    endRow: 10,
+                    startColumn: 0,
+                    endColumn: 19,
+                },
+            };
+
+            expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
+            const values = getValues(10, 0, 10, 0);
+            expect(values).toStrictEqual([[{ f: '=SUM(A9)' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(10, 0, 10, 0);
+            expect(valuesUndo).toStrictEqual([[{ f: '=SUM(A8)' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(10, 0, 10, 0);
+            expect(valuesRedo).toStrictEqual([[{ f: '=SUM(A9)' }]]);
+        });
+
         it('Remove column, update reference', async () => {
             const params: IRemoveRowColCommandParams = {
                 range: {
@@ -634,18 +849,47 @@ describe('Test insert function operation', () => {
             expect(values).toStrictEqual([[{ f: '=A1:A2' }, {}]]);
             const values2 = getValues(5, 1, 5, 2);
             expect(values2).toStrictEqual([[{ f: '=SUM(A1:A2)' }, { v: 1, t: CellValueType.NUMBER }]]);
+            const values3 = getValues(7, 2, 7, 5);
+            expect(values3).toStrictEqual([[{ f: '=SUM(A8)' }, { f: '=SUM(#REF!)' }, { f: '=SUM(B8)' }, {}]]);
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             const valuesUndo = getValues(2, 1, 2, 2);
             expect(valuesUndo).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }, { f: '=A1:B2' }]]);
             const valuesUndo2 = getValues(5, 2, 5, 3);
             expect(valuesUndo2).toStrictEqual([[{ f: '=SUM(A1:B2)' }, { v: 1, t: CellValueType.NUMBER }]]);
+            const valuesUndo3 = getValues(7, 2, 7, 5);
+            expect(valuesUndo3).toStrictEqual([[{ v: 1, t: CellValueType.NUMBER }, { f: '=SUM(A8)' }, { f: '=SUM(B8)' }, { f: '=SUM(C8)' }]]);
 
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             const valuesRedo = getValues(2, 1, 2, 2);
             expect(valuesRedo).toStrictEqual([[{ f: '=A1:A2' }, {}]]);
             const valuesRedo2 = getValues(5, 1, 5, 2);
             expect(valuesRedo2).toStrictEqual([[{ f: '=SUM(A1:A2)' }, { v: 1, t: CellValueType.NUMBER }]]);
+            const valuesRedo3 = getValues(7, 2, 7, 5);
+            expect(valuesRedo3).toStrictEqual([[{ f: '=SUM(A8)' }, { f: '=SUM(#REF!)' }, { f: '=SUM(B8)' }, {}]]);
+        });
+
+        it('Remove column, removed column contains formula', async () => {
+            const params: IRemoveRowColCommandParams = {
+                range: {
+                    startColumn: 3,
+                    endColumn: 3,
+                    startRow: 0,
+                    endRow: 2,
+                },
+            };
+
+            expect(await commandService.executeCommand(RemoveColCommand.id, params)).toBeTruthy();
+            const values = getValues(7, 3, 7, 3);
+            expect(values).toStrictEqual([[{ f: '=SUM(B8)' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(7, 3, 7, 3);
+            expect(valuesUndo).toStrictEqual([[{ f: '=SUM(A8)' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(7, 3, 7, 3);
+            expect(valuesRedo).toStrictEqual([[{ f: '=SUM(B8)' }]]);
         });
 
         it('Delete move left, value on the left', async () => {

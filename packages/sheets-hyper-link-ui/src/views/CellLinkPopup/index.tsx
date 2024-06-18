@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 import { CancelHyperLinkCommand, HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import React from 'react';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import cs from 'clsx';
 import { MessageType, Tooltip } from '@univerjs/design';
-import { IMessageService } from '@univerjs/ui';
+import { IMessageService, useObservable } from '@univerjs/ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { OpenHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';

@@ -473,9 +473,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             return;
         }
         const { unitId, subUnitId } = info;
-        const map = this._ensureMap(unitId, subUnitId);
         this._domLayerInfoMap.delete(id);
-        map.delete(id);
+
         info.dispose.dispose();
         const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
         if (renderObject) {
@@ -483,6 +482,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         }
 
         if (removeDrawing) {
+            const map = this._ensureMap(unitId, subUnitId);
+            map.delete(id);
             const param = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId: id });
             if (!param) {
                 return;

@@ -20,15 +20,9 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { ILogService } from '../services/log/log.service';
 import type { Nullable } from '../shared';
 import { Tools } from '../shared';
-import { DEFAULT_RANGE_ARRAY } from '../types/const';
 import { BooleanNumber } from '../types/enum';
 import type {
-    IColumnStartEndData,
-    IGridRange,
-    IRangeArrayData,
-    IRangeStringData,
     IRangeType,
-    IRowStartEndData,
     IWorkbookData,
     IWorksheetData,
 } from '../types/interfaces';
@@ -211,26 +205,25 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
     }
 
     /**
-     *
-     * @returns
+     * Get the active sheet
      */
-    getRawActiveSheet(): Nullable<Worksheet> {
+    getActiveSheet(): Nullable<Worksheet> {
         return this._activeSheet;
     }
 
     /**
-     * Get the active sheet. If there is no active sheet, the first sheet would
+     * If there is no active sheet, the first sheet would
      * be set active.
+     * @returns
      */
-    getActiveSheet(): Worksheet {
-        const currentActive = this.getRawActiveSheet();
+    ensureActiveSheet() {
+        const currentActive = this.getActiveSheet();
         if (currentActive) {
             return currentActive;
         }
-
-        /**
-         * If the first sheet is hidden, we should set the first unhidden sheet to be active.
-         */
+         /**
+          * If the first sheet is hidden, we should set the first unhidden sheet to be active.
+          */
         const sheetOrder = this._snapshot.sheetOrder;
         for (let i = 0, len = sheetOrder.length; i < len; i++) {
             const worksheet = this._worksheets.get(sheetOrder[i]);
@@ -335,68 +328,6 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
             .map((s) => s.getConfig().id);
     }
 
-    /**
-     * transform any range type to range data
-     *
-     * @remarks
-     * e.g.,
-     * "A1:B1", "Sheet2!A1:B1"
-     *
-     * or
-     *
-     * {
-     *  row:[0,1],
-     *  column:[0,1]
-     * }
-     *
-     * or
-     *
-     * {
-     *    startRow:0 ,
-     *    startColumn:0,
-     *    endRow:1,
-     *    endColumn:1,
-     * }
-     *
-     * to
-     *
-     * {
-     *    startRow:0 ,
-     *    startColumn:0,
-     *    endRow:1,
-     *    endColumn:1,
-     * }
-     *
-     *   IRangeType[] is to prevent type detection
-     *
-     * @param range support all range types
-     *
-     * @returns range data
-     */
-    transformRangeType(range: IRangeType | IRangeType[]): IGridRange {
-        if (typeof range === 'string') {
-            const gridRange = this._getCellRange(range);
-            return gridRange;
-        }
-        if (typeof range !== 'string' && 'row' in range) {
-            const rangeArrayData = range as IRangeArrayData;
-            return {
-                sheetId: '',
-                range: {
-                    startRow: rangeArrayData.row[0],
-                    startColumn: rangeArrayData.column[0],
-                    endRow: rangeArrayData.row[1],
-                    endColumn: rangeArrayData.column[1],
-                },
-            };
-            // ref : https://www.typescriptlang.org/docs/handbook/advanced-types.html#using-the-in-operator
-        }
-        if (typeof range !== 'string' && 'startRow' in range) {
-            return { sheetId: '', range };
-        }
-        return DEFAULT_RANGE_ARRAY;
-    }
-
     load(config: IWorkbookData) {
         // TODO: new Command
         this._snapshot = config;
@@ -440,88 +371,6 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         return output;
     }
 
-    /**
-     * Get the range array based on the range string and sheet id
-     *
-     * @param txt - range string
-     * @returns
-     */
-    private _getCellRange(txt: IRangeStringData): IGridRange {
-        let sheetTxt: string = '';
-        let rangeTxt: string | string[] = '';
-        if (txt.indexOf('!') > -1) {
-            const val = txt.split('!');
-            sheetTxt = val[0];
-            rangeTxt = val[1];
-            sheetTxt = sheetTxt.replace(/\\'/g, "'").replace(/''/g, "'");
-            if (sheetTxt.substring(0, 1) === "'" && sheetTxt.substring(sheetTxt.length - 1, 1) === "'") {
-                sheetTxt = sheetTxt.substring(1, sheetTxt.length - 1);
-            }
-        } else {
-            rangeTxt = txt;
-        }
-        if (rangeTxt.indexOf(':') === -1) {
-            const row = Number.parseInt(rangeTxt.replace(/[^0-9]/g, ''), 10) - 1;
-            const col = Tools.ABCatNum(rangeTxt.replace(/[^A-Za-z]/g, ''));
-
-            if (!Number.isNaN(row) && !Number.isNaN(col)) {
-                const item = {
-                    sheetId: sheetTxt,
-                    range: {
-                        startRow: row,
-                        endRow: row,
-                        startColumn: col,
-                        endColumn: col,
-                    },
-                };
-                return item;
-            }
-            return DEFAULT_RANGE_ARRAY;
-        }
-        rangeTxt = rangeTxt.split(':');
-
-        const row: IRowStartEndData = [0, 0];
-        const col: IColumnStartEndData = [0, 0];
-        const maxRow = this.getSheetBySheetName(sheetTxt)?.getMaxRows() || this.getActiveSheet()?.getMaxRows();
-        const maxCol = this.getSheetBySheetName(sheetTxt)?.getMaxColumns() || this.getActiveSheet()?.getMaxColumns();
-        row[0] = Number.parseInt(rangeTxt[0].replace(/[^0-9]/g, ''), 10) - 1;
-        row[1] = Number.parseInt(rangeTxt[1].replace(/[^0-9]/g, ''), 10) - 1;
-
-        if (Number.isNaN(row[0])) {
-            row[0] = 0;
-        }
-
-        if (Number.isNaN(row[1])) {
-            row[1] = maxRow!;
-        }
-
-        if (row[0] > row[1]) {
-            return DEFAULT_RANGE_ARRAY;
-        }
-        col[0] = Tools.ABCatNum(rangeTxt[0].replace(/[^A-Za-z]/g, ''));
-        col[1] = Tools.ABCatNum(rangeTxt[1].replace(/[^A-Za-z]/g, ''));
-        if (Number.isNaN(col[0])) {
-            col[0] = 0;
-        }
-        if (Number.isNaN(col[1])) {
-            col[1] = maxCol!;
-        }
-        if (col[0] > col[1]) {
-            return DEFAULT_RANGE_ARRAY;
-        }
-
-        const item = {
-            sheetId: this.getSheetBySheetName(sheetTxt)?.getSheetId() || '',
-            range: {
-                startRow: row[0],
-                endRow: row[1],
-                startColumn: col[0],
-                endColumn: col[1],
-            },
-        };
-        return item;
-    }
-
     // FIXME: now we always create worksheet from DEFAULT_WORKSHEET?
 
     /**
@@ -554,5 +403,8 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
                 sheetOrder.push(sheetId);
             }
         }
+
+        // Active the first sheet.
+        this.ensureActiveSheet();
     }
 }

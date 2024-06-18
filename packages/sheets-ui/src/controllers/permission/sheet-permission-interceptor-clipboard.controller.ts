@@ -60,6 +60,10 @@ export class SheetPermissionInterceptorClipboardController extends Disposable {
 
                     const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                     const worksheet = workbook.getActiveSheet();
+                    if (!worksheet) {
+                        return false;
+                    }
+
                     const { startRow, endRow, startColumn, endColumn } = targetRange;
 
                     let hasPermission = true;

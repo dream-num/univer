@@ -49,6 +49,10 @@ export class ConditionalFormattingClearController extends Disposable {
                     }
                     const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                     const worksheet = workbook.getActiveSheet();
+                    if (!worksheet) {
+                        return defaultV;
+                    }
+
                     const allRules = this._conditionalFormattingRuleModel.getSubunitRules(workbook.getUnitId(), worksheet.getSheetId());
                     if (!allRules || !allRules.length) {
                         return defaultV;

@@ -243,6 +243,9 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
     private _getSelectionOnColumn(column: number): ISetSelectionsOperationParams {
         const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            throw new Error('No active worksheet');
+        }
 
         return {
             unitId: workbook.getUnitId(),

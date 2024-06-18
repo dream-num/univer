@@ -23,7 +23,7 @@ export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from './comman
 export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from './commands/operations/cell-edit.operation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
-export { deriveStateFromActiveSheet$, getCurrentRangeDisable$, getCommentDisable$ } from './controllers/menu/menu-util';
+export { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from './controllers/menu/menu-util';
 export { SheetsRenderService } from './services/sheets-render.service';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export {

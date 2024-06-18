@@ -24,7 +24,7 @@ export function getSheetRangeValueSet(grid: IUnitRangeName, univerInstanceServic
     const workbook = univerInstanceService.getUniverSheetInstance(unitId) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheet = workbook.getSheetBySheetName(grid.sheetName) ?? workbook.getSheetBySheetId(currSubUnitId) ?? workbook.getActiveSheet();
     Range.foreach(grid.range, (row, col) => {
-        const data = worksheet.getCellRaw(row, col);
+        const data = worksheet?.getCellRaw(row, col);
         if (!data) {
             return;
         }

@@ -68,8 +68,6 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
     const unitId = workbook.getUnitId();
 
-    const sheetId = workbook.getActiveSheet().getSheetId();
-
     const [nameValue, setNameValue] = useState(name);
 
     const [formulaOrRefStringValue, setFormulaOrRefStringValue] = useState(formulaOrRefString);

@@ -74,7 +74,8 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         const sheetObject = this._getSheetObject();
         const { scene, engine } = sheetObject;
         const unitId = this._context.unitId;
-        const sheetId = this._context.unit.getActiveSheet().getSheetId();
+        const sheetId = this._context.unit.getActiveSheet()?.getSheetId();
+        if (!sheetId) return;
 
         this._commandService.executeCommand<ICurrentEditCellParam>(SetActivateCellEditOperation.id, {
             scene,
@@ -203,6 +204,8 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                 const selectionWithStyle = this._selectionManagerService.getSelections();
                 const { unitId, sheetId, sheetName } = this._getCurrentUnitIdAndSheetId();
 
+                if (!sheetId || !sheetName) return;
+
                 const ranges = selectionWithStyle?.map((value: ISelectionWithStyle) => {
                     return { range: value.range, unitId, sheetId, sheetName };
                 });
@@ -221,6 +224,8 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
 
         const { unitId, sheetId, sheetName } = this._getCurrentUnitIdAndSheetId();
 
+        if (!sheetId || !sheetName) return;
+
         const ranges = selectionWithStyle.map((value: ISelectionWithStyle) => {
             return { range: value.range, unitId, sheetId, sheetName };
         });
@@ -233,8 +238,8 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         const worksheet = workbook.getActiveSheet();
         return {
             unitId: workbook.getUnitId(),
-            sheetId: worksheet.getSheetId(),
-            sheetName: worksheet.getName(),
+            sheetId: worksheet?.getSheetId(),
+            sheetName: worksheet?.getName(),
         };
     }
 

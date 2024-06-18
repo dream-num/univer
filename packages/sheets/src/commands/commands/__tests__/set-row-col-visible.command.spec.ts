@@ -76,26 +76,26 @@ describe('Test row col hide/unhine commands', () => {
     function getRowCount(): number {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         return worksheet.getRowCount();
     }
 
     function getColCount(): number {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         return worksheet.getColumnCount();
     }
 
     function getRowRawVisible(row: number): boolean {
         const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         return worksheet.getRowRawVisible(row);
     }
 
     function getColVisible(col: number): boolean {
         const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         return worksheet.getColVisible(col);
     }
 
@@ -176,6 +176,34 @@ describe('Test row col hide/unhine commands', () => {
             expect(getRowRawVisible(0)).toBeFalsy();
             expect(getRowRawVisible(2)).toBeFalsy();
         });
+
+        it('should skip over already hidden rows', async () => {
+            expect(getRowRawVisible(0)).toBeTruthy();
+
+            selectRow(2, 2);
+            await commandService.executeCommand(SetRowHiddenCommand.id);
+            expect(getRowRawVisible(2)).toBeFalsy();
+
+            selectRow(1, 4);
+            await commandService.executeCommand(SetRowHiddenCommand.id);
+            expect(getRowRawVisible(1)).toBeFalsy();
+            expect(getRowRawVisible(2)).toBeFalsy();
+            expect(getRowRawVisible(3)).toBeFalsy();
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getRowRawVisible(1)).toBeTruthy();
+            expect(getRowRawVisible(2)).toBeFalsy();
+            expect(getRowRawVisible(3)).toBeTruthy();
+
+            selectRow(1, 2);
+            await commandService.executeCommand(SetRowHiddenCommand.id);
+            expect(getRowRawVisible(1)).toBeFalsy();
+            expect(getRowRawVisible(2)).toBeFalsy();
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getRowRawVisible(1)).toBeTruthy();
+            expect(getRowRawVisible(2)).toBeFalsy();
+        });
     });
 
     describe('hide / unhide columns', () => {
@@ -205,6 +233,34 @@ describe('Test row col hide/unhine commands', () => {
 
             await commandService.executeCommand(UndoCommand.id);
             expect(getColVisible(0)).toBeFalsy();
+            expect(getColVisible(2)).toBeFalsy();
+        });
+
+        it('should skip over already hidden cols', async () => {
+            expect(getColVisible(0)).toBeTruthy();
+
+            selectColumn(2, 2);
+            await commandService.executeCommand(SetColHiddenCommand.id);
+            expect(getColVisible(2)).toBeFalsy();
+
+            selectColumn(1, 4);
+            await commandService.executeCommand(SetColHiddenCommand.id);
+            expect(getColVisible(1)).toBeFalsy();
+            expect(getColVisible(2)).toBeFalsy();
+            expect(getColVisible(3)).toBeFalsy();
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getColVisible(1)).toBeTruthy();
+            expect(getColVisible(2)).toBeFalsy();
+            expect(getColVisible(3)).toBeTruthy();
+
+            selectColumn(1, 2);
+            await commandService.executeCommand(SetColHiddenCommand.id);
+            expect(getColVisible(1)).toBeFalsy();
+            expect(getColVisible(2)).toBeFalsy();
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getColVisible(1)).toBeTruthy();
             expect(getColVisible(2)).toBeFalsy();
         });
     });

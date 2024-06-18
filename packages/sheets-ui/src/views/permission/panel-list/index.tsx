@@ -176,7 +176,7 @@ export const SheetPermissionPanelList = () => {
                 label: UNIVER_SHEET_PERMISSION_PANEL,
                 showDetail: true,
             },
-            width: 320,
+            width: 330,
             footer: {
                 label: UNIVER_SHEET_PERMISSION_PANEL_FOOTER,
                 showDetail: true,
@@ -249,6 +249,9 @@ export const SheetPermissionPanelList = () => {
                                     onMouseMove={() => {
                                         const { subUnitId, unitType } = rule;
                                         const activeSheet = workbook.getActiveSheet();
+                                        if (!activeSheet) {
+                                            return false;
+                                        }
                                         const activeSubUnitId = activeSheet.getSheetId();
                                         if (subUnitId !== activeSubUnitId) {
                                             return false;

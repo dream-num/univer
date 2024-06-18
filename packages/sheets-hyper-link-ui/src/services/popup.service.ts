@@ -102,8 +102,8 @@ export class SheetsHyperLinkPopupService extends Disposable {
                 disposable,
                 row,
                 col,
-                editPermission: location.editPermission,
-                copyPermission: location.copyPermission,
+                editPermission: !!location.editPermission,
+                copyPermission: !!location.copyPermission,
             };
             this._currentPopup$.next(this._currentPopup);
         }

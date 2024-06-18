@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocDrawingBase, IMutationInfo, IObjectPositionH, IObjectPositionV, ISize, JSONXActions, WrapTextType } from '@univerjs/core';
+import type { ICommand, IDocDrawingBase, IDocDrawingPosition, IMutationInfo, IObjectPositionH, IObjectPositionV, ISize, JSONXActions, WrapTextType } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -576,6 +576,181 @@ export const IMoveInlineDrawingCommand: ICommand = {
                 unitId,
                 actions: [],
                 textRanges: null,
+            },
+        };
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        transformer.refreshControls();
+
+        return Boolean(result);
+    },
+};
+
+export interface ITransformNonInlineDrawingParams {
+    unitId: string;
+    subUnitId: string;
+    drawing: IDocDrawingBase;
+    offset: number;
+    docTransform: IDocDrawingPosition;
+    noHistory?: boolean;
+}
+
+/**
+ * The command to transform non-inline drawing.
+ */
+export const ITransformNonInlineDrawingCommand: ICommand = {
+    id: 'doc.command.transform-non-inline-drawing',
+
+    type: CommandType.COMMAND,
+
+    // eslint-disable-next-line max-lines-per-function
+    handler: (accessor: IAccessor, params?: ITransformNonInlineDrawingParams) => {
+        if (params == null) {
+            return false;
+        }
+
+        const renderManagerService = accessor.get(IRenderManagerService);
+        const renderObject = renderManagerService.getRenderById(params.unitId);
+        const scene = renderObject?.scene;
+        if (scene == null) {
+            return false;
+        }
+        const transformer = scene.getTransformerByCreate();
+
+        const commandService = accessor.get(ICommandService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (documentDataModel == null) {
+            return false;
+        }
+
+        const { drawing, unitId, offset, docTransform, noHistory } = params;
+
+        const textX = new TextX();
+        const jsonX = JSONX.getInstance();
+        const rawActions: JSONXActions = [];
+
+        const { drawingId } = drawing;
+
+        // TODO: @JOCS update segmentId when in header and footer.
+        const segmentId = '';
+        const oldOffset = documentDataModel.getBody()?.customBlocks?.find((block) => block.blockId === drawingId)?.startIndex;
+
+        if (oldOffset == null) {
+            return false;
+        }
+
+        if (offset < oldOffset) {
+            // Insert first.
+            if (offset > 0) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: offset,
+                    segmentId,
+                });
+            }
+
+            textX.push({
+                t: TextXActionType.INSERT,
+                body: {
+                    dataStream: '\b',
+                    customBlocks: [{
+                        startIndex: 0,
+                        blockId: drawing.drawingId,
+                    }],
+                },
+                len: 1,
+                line: 0,
+                segmentId,
+            });
+
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: oldOffset - offset,
+                segmentId,
+            });
+
+            textX.push({
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+                segmentId: '',
+            });
+        } else {
+            // Delete first.
+            if (oldOffset > 0) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: oldOffset,
+                    segmentId,
+                });
+            }
+
+            textX.push({
+                t: TextXActionType.DELETE,
+                len: 1,
+                line: 0,
+                segmentId: '',
+            });
+
+            if (offset - oldOffset - 1 > 0) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: offset - oldOffset - 1,
+                    segmentId,
+                });
+            }
+
+            textX.push({
+                t: TextXActionType.INSERT,
+                body: {
+                    dataStream: '\b',
+                    customBlocks: [{
+                        startIndex: 0,
+                        blockId: drawing.drawingId,
+                    }],
+                },
+                len: 1,
+                line: 0,
+                segmentId,
+            });
+        }
+
+        const action = jsonX.editOp(textX.serialize());
+        rawActions.push(action!);
+
+        const { drawings: oldDrawings = {} } = documentDataModel.getSnapshot();
+        const oldDocTransform = oldDrawings[drawingId].docTransform;
+        const { positionH: oldPositionH, positionV: oldPositionV } = oldDocTransform;
+
+        if (!Tools.diffValue(oldPositionH, docTransform.positionH)) {
+            const updateAction = jsonX.replaceOp(['drawings', drawingId, 'docTransform', 'positionH'], oldPositionH, docTransform.positionH);
+
+            rawActions.push(updateAction!);
+        }
+
+        if (!Tools.diffValue(oldPositionV, docTransform.positionV)) {
+            const updateAction = jsonX.replaceOp(['drawings', drawingId, 'docTransform', 'positionV'], oldPositionV, docTransform.positionV);
+
+            rawActions.push(updateAction!);
+        }
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges: null,
+                noHistory: !!noHistory,
             },
         };
 

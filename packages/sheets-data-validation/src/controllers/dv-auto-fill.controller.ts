@@ -103,6 +103,19 @@ export class DataValidationAutoFillController extends Disposable {
         };
         const hook: ISheetAutoFillHook = {
             id: DATA_VALIDATION_PLUGIN_NAME,
+            onBeforeFillData: (location) => {
+                const { source: sourceRange, unitId, subUnitId } = location;
+                const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
+                for (const row of sourceRange.rows) {
+                    for (const col of sourceRange.cols) {
+                        const dv = manager.getRuleByLocation(row, col);
+                        if (dv) {
+                            this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, true);
+                            return;
+                        }
+                    }
+                }
+            },
             onFillData: (location, direction, applyType) => {
                 if (
                     applyType === APPLY_TYPE.COPY ||
@@ -113,6 +126,9 @@ export class DataValidationAutoFillController extends Disposable {
                 }
 
                 return noopReturnFunc();
+            },
+            onAfterFillData: () => {
+                this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, false);
             },
         };
         this.disposeWithMe(this._autoFillService.addHook(hook));

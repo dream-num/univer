@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import { LocaleService, LocaleType } from '@univerjs/core';
+import { LocaleService, LocaleType, throttle } from '@univerjs/core';
 import React, { useCallback, useState } from 'react';
 import { type IOrderRule, SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { Button, Checkbox, DraggableList, Dropdown, Radio, RadioGroup } from '@univerjs/design';
@@ -60,14 +60,14 @@ export function CustomSortPanel() {
         setList(newList as IOrderRule[]);
     }, [list]);
 
-    const newItem = useCallback(() => {
+    const newItem = useCallback(throttle(() => {
         const newList = [...list];
         const nextColIndex = findNextColIndex(range, list);
         if (nextColIndex !== null) {
             newList.push({ type: SortType.ASC, colIndex: nextColIndex });
             setList(newList);
         }
-    }, [list, range]);
+    }, 200), [list, range]);
 
     const apply = useCallback((orderRules: IOrderRule[], hasTitle: boolean) => {
         sheetsSortService.applySort({ range, orderRules, hasTitle });

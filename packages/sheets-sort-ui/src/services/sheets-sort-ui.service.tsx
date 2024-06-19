@@ -81,8 +81,6 @@ export class SheetsSortUIService extends Disposable {
             return false;
         }
 
-        this.setSelection(location.unitId, location.subUnitId, location.range);
-
         const check = this._check(location);
         if (!check) {
             return false;
@@ -104,8 +102,6 @@ export class SheetsSortUIService extends Disposable {
         if (!location) {
             return false;
         }
-
-        this.setSelection(location.unitId, location.subUnitId, location.range);
 
         const check = this._check(location);
         if (!check) {
@@ -237,6 +233,8 @@ export class SheetsSortUIService extends Disposable {
     private async _detectSortLocation(extend?: boolean): Promise<Nullable<ISheetSortLocation >> {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET) as Workbook;
         const worksheet = workbook.getActiveSheet() as Worksheet;
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
         const selection = this._selectionManagerService.getLast();
         if (!selection) {
             return null;
@@ -244,6 +242,7 @@ export class SheetsSortUIService extends Disposable {
         let range: IRange;
         if (extend === true) {
             range = expandToContinuousRange(selection.range, { up: true, down: true, left: true, right: true }, worksheet);
+            this.setSelection(unitId, subUnitId, range);
         } else if (extend === false) {
             range = selection.range;
         } else {
@@ -255,6 +254,7 @@ export class SheetsSortUIService extends Disposable {
                 range = selection.range;
             } else {
                 range = expandToContinuousRange(selection.range, { up: true, down: true, left: true, right: true }, worksheet);
+                this.setSelection(unitId, subUnitId, range);
             }
         }
         const primary = this._selectionManagerService.getLast()?.primary;
@@ -264,8 +264,8 @@ export class SheetsSortUIService extends Disposable {
 
         return {
             range,
-            unitId: workbook.getUnitId(),
-            subUnitId: worksheet.getSheetId(),
+            unitId,
+            subUnitId,
             colIndex: primary.actualColumn,
         };
     }

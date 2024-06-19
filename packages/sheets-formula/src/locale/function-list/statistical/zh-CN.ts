@@ -897,10 +897,10 @@ export default {
         ],
         functionParameter: {
             maxRange: { name: '最大值范围', detail: '确定最大值的实际单元格区域。' },
-            criteriaRange1: { name: '条件范围 1', detail: '条件1 一组用于条件计算的单元格。' },
-            criteria1: { name: '条件 1', detail: '条件 1 用于确定哪些单元格是最大值的条件，格式为数字、表达式或文本。' },
-            criteriaRange2: { name: '条件范围 2', detail: '附加区域及其关联条件。 最多可以输入 127 个区域/条件对。' },
-            criteria2: { name: '条件 2', detail: '附加区域及其关联条件。 最多可以输入 127 个区域/条件对。' },
+            criteriaRange1: { name: '条件范围 1', detail: '是一组用于条件计算的单元格。' },
+            criteria1: { name: '条件 1', detail: '用于确定哪些单元格是最大值的条件，格式为数字、表达式或文本。 一组相同的条件适用于 MINIFS、SUMIFS 和 AVERAGEIFS 函数。' },
+            criteriaRange2: { name: '条件范围 2', detail: '附加区域。 最多可以输入 126 个区域。' },
+            criteria2: { name: '条件 2', detail: '附加关联条件。 最多可以输入 126 个条件。' },
         },
     },
     MEDIAN: {
@@ -953,7 +953,7 @@ export default {
     },
     MINIFS: {
         description: '返回一组给定条件或标准指定的单元格之间的最小值。',
-        abstract: '返回一组给定条件或标准指定的单元格之间的最小值。',
+        abstract: '返回一组给定条件或标准指定的单元格之间的最小值',
         links: [
             {
                 title: '教学',
@@ -961,8 +961,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            minRange: { name: '最小值范围', detail: '确定最小值的实际单元格区域。' },
+            criteriaRange1: { name: '条件范围 1', detail: '是一组用于条件计算的单元格。' },
+            criteria1: { name: '条件 1', detail: '用于确定哪些单元格是最小值的条件，格式为数字、表达式或文本。 一组相同的条件适用于 MAXIFS、SUMIFS 和 AVERAGEIFS 函数。' },
+            criteriaRange2: { name: '条件范围 2', detail: '附加区域。 最多可以输入 126 个区域。' },
+            criteria2: { name: '条件 2', detail: '附加关联条件。 最多可以输入 126 个条件。' },
         },
     },
     MODE_MULT: {

@@ -22,17 +22,17 @@ import type { BaseValueObject, IArrayValueObject } from '../../../engine/value-o
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
-export class Maxifs extends BaseFunction {
+export class Minifs extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 255;
 
-    override calculate(maxRange: BaseValueObject, ...variants: BaseValueObject[]) {
-        if (maxRange.isError()) {
+    override calculate(minRange: BaseValueObject, ...variants: BaseValueObject[]) {
+        if (minRange.isError()) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        if (!maxRange.isArray()) {
+        if (!minRange.isArray()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -46,8 +46,8 @@ export class Maxifs extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const sumRowLength = (maxRange as ArrayValueObject).getRowCount();
-        const sumColumnLength = (maxRange as ArrayValueObject).getColumnCount();
+        const sumRowLength = (minRange as ArrayValueObject).getRowCount();
+        const sumColumnLength = (minRange as ArrayValueObject).getColumnCount();
         // The size of the extended range is determined by the maximum width and height of the criteria range.
         let maxRowLength = 0;
         let maxColumnLength = 0;
@@ -100,18 +100,18 @@ export class Maxifs extends BaseFunction {
             });
         }
 
-        return this._aggregateResults(maxRange, booleanResults);
+        return this._aggregateResults(minRange, booleanResults);
     }
 
-    private _aggregateResults(maxRange: BaseValueObject, booleanResults: BaseValueObject[][]): ArrayValueObject {
+    private _aggregateResults(minRange: BaseValueObject, booleanResults: BaseValueObject[][]): ArrayValueObject {
         const maxResults = booleanResults.map((row) => {
             return row.map((booleanResult) => {
-                const picked = (maxRange as ArrayValueObject).pick(booleanResult as ArrayValueObject);
+                const picked = (minRange as ArrayValueObject).pick(booleanResult as ArrayValueObject);
                 if (picked.getColumnCount() === 0) {
                     return ArrayValueObject.create('0');
                 }
 
-                return picked.max();
+                return picked.min();
             });
         });
 

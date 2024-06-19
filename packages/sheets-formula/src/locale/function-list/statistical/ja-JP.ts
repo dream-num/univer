@@ -916,7 +916,7 @@ export default {
     },
     MINIFS: {
         description: '条件セットで指定されたセルの中の最小値を返します。',
-        abstract: '条件セットで指定されたセルの中の最小値を返します。',
+        abstract: '条件セットで指定されたセルの中の最小値を返します',
         links: [
             {
                 title: '指導',
@@ -924,8 +924,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            minRange: { name: '最少範囲', detail: '最小値を求めるセルの実際の範囲です。' },
+            criteriaRange1: { name: '条件範囲 1', detail: '条件で評価するセルのセットです。' },
+            criteria1: { name: '条件 1', detail: '最小として評価されるセルを定義する、数値、式、またはテキストの形式での条件です。 同じ条件セットを、MAXIFS、SUMIFS、および AVERAGEIFS 関数に対して使用できます。' },
+            criteriaRange2: { name: '条件範囲 2', detail: '追加の範囲と対応する条件です。 最大 126 個の範囲/条件ペアを入力できます。' },
+            criteria2: { name: '条件 2', detail: '追加の範囲と対応する条件です。 最大 126 個の範囲/条件ペアを入力できます。' },
         },
     },
     MODE_MULT: {

@@ -887,7 +887,7 @@ export default {
         },
     },
     MAXIFS: {
-        description: 'Returns the maximum value among cells specified by a given set of conditions or criteria',
+        description: 'Returns the maximum value among cells specified by a given set of conditions or criteria.',
         abstract: 'Returns the maximum value among cells specified by a given set of conditions or criteria',
         links: [
             {
@@ -899,8 +899,8 @@ export default {
             maxRange: { name: 'sum_range', detail: 'The range of cells to max.' },
             criteriaRange1: { name: 'criteria_range1 ', detail: 'Is the set of cells to evaluate with the criteria.' },
             criteria1: { name: 'criteria1', detail: 'Is the criteria in the form of a number, expression, or text that defines which cells will be evaluated as maximum. ' },
-            criteriaRange2: { name: 'criteriaRange2', detail: 'Additional ranges. You can enter up to 127 range pairs.' },
-            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 127 criteria pairs.' },
+            criteriaRange2: { name: 'criteriaRange2', detail: 'Additional ranges. You can enter up to 127 ranges.' },
+            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 127 criteria.' },
         },
     },
     MEDIAN: {
@@ -953,7 +953,7 @@ export default {
     },
     MINIFS: {
         description: 'Returns the minimum value among cells specified by a given set of conditions or criteria.',
-        abstract: 'Returns the minimum value among cells specified by a given set of conditions or criteria.',
+        abstract: 'Returns the minimum value among cells specified by a given set of conditions or criteria',
         links: [
             {
                 title: 'Instruction',
@@ -961,8 +961,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            minRange: { name: 'min_range', detail: 'The actual range of cells in which the minimum value will be determined.' },
+            criteriaRange1: { name: 'criteria_range1', detail: 'Is the set of cells to evaluate with the criteria.' },
+            criteria1: { name: 'criteria1', detail: 'Is the criteria in the form of a number, expression, or text that defines which cells will be evaluated as minimum. The same set of criteria works for the MAXIFS, SUMIFS and AVERAGEIFS functions.' },
+            criteriaRange2: { name: 'criteria_range2', detail: 'Additional ranges. You can enter up to 126 range.' },
+            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 126 criteria.' },
         },
     },
     MODE_MULT: {

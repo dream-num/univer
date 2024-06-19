@@ -101,6 +101,10 @@ export class Sumifs extends BaseFunction {
             });
         }
 
+        return this._aggregateResults(sumRange, booleanResults);
+    }
+
+    private _aggregateResults(sumRange: BaseValueObject, booleanResults: BaseValueObject[][]): ArrayValueObject {
         const sumResults = booleanResults.map((row) => {
             return row.map((booleanResult) => {
                 return (sumRange as ArrayValueObject).pick(booleanResult as ArrayValueObject).sum();

@@ -193,6 +193,10 @@ export interface IUnitDrawingService<T extends IDrawingParam> extends IUnitNorma
     getDrawingOKey(oKey: string): Nullable<T>;
 
     applyJson1(unitId: string, subUnitId: string, jsonOp: unknown): void;
+    getDrawingEditable(): boolean;
+    getDrawingVisible(): boolean;
+    setDrawingVisible(visible: boolean): void;
+    setDrawingEditable(editable: boolean): void;
 }
 
 export interface IDrawingManagerService extends IUnitDrawingService<IDrawingParam> {}

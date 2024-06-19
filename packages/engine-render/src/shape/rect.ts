@@ -42,27 +42,16 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
     }
 
     static override drawWith(ctx: UniverRenderingContext, props: IRectProps | Rect) {
-        let { radius, left, top, width, height } = props;
+        let { radius, width, height } = props;
 
         radius = radius ?? 0;
         width = width ?? 0;
         height = height ?? 0;
-        left = left ?? 0;
-        top = top ?? 0;
 
         ctx.beginPath();
-
-        if (props.strokeDashArray) {
-            ctx.setLineDash(props.strokeDashArray);
-        } else {
-            // only dashrect needs top & left(which relative to topleft of viewport)
-            top = 0;
-            left = 0;
-        }
-
         if (!radius) {
             // simple rect - don't bother doing all that complicated maths stuff.
-            ctx.rect(left, top, width, height);
+            ctx.rect(0, 0, width, height);
         } else {
             let topLeft = 0;
             let topRight = 0;

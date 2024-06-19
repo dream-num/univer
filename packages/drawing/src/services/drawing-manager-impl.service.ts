@@ -19,7 +19,7 @@ import type { Nullable } from '@univerjs/core';
 import { sortRules, sortRulesByDesc } from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
 import * as json1 from 'ot-json1';
-import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
+import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
 
 export interface IDrawingJsonUndo1 {
     undo: JSONOp;
@@ -189,6 +189,11 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
     getDrawingData(unitId: string, subUnitId: string) {
         return this._getDrawingData(unitId, subUnitId);
+    }
+
+    // Use in doc only.
+    setDrawingData(unitId: string, subUnitId: string, data: IDrawingMapItemData<T>) {
+        this.drawingManagerData[unitId][subUnitId].data = data;
     }
 
     getBatchAddOp(insertParams: T[]): IDrawingJsonUndo1 {
@@ -483,6 +488,11 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
     getDrawingOrder(unitId: string, subUnitId: string) {
         return this._getDrawingOrder(unitId, subUnitId);
+    }
+
+    // Use in doc only.
+    setDrawingOrder(unitId: string, subUnitId: string, order: string[]) {
+        this.drawingManagerData[unitId][subUnitId].order = order;
     }
 
     orderUpdateNotification(orderParams: IDrawingOrderMapParam) {

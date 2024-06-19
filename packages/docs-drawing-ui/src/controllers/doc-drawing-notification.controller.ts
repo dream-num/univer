@@ -146,4 +146,8 @@ export class DocDrawingAddRemoveController extends Disposable {
         drawingManagerService.removeNotification(objects as IDrawingSearch[]);
         docDrawingService.removeNotification(objects as IDrawingSearch[]);
     }
+
+    private _updateDrawingsOrder() {
+
+    }
 }

@@ -34,6 +34,7 @@ import {
 } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import clsx from 'clsx';
 import { UnitGridService } from '../../services/unit-grid/unit-grid.service';
 import styles from './workbench.module.less';
 
@@ -70,6 +71,12 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
 
     const unitGrid = useObservable(unitGridService.unitGrid$, undefined, true);
+    const focused = useObservable(instanceService.focused$);
+
+    const focusUnit = useCallback((unitId: string) => {
+        instanceService.focusUnit(unitId);
+        instanceService.setCurrentUnitForType(unitId);
+    }, [instanceService]);
 
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
@@ -146,6 +153,8 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
                                     <UnitRenderer
                                         key={unitId}
                                         unitId={unitId}
+                                        focused={focused === unitId}
+                                        onFocus={focusUnit}
                                         gridService={unitGridService}
                                         instanceService={instanceService}
                                     />
@@ -178,19 +187,21 @@ export function UniWorkbench(props: IUniWorkbenchProps) {
 
 interface IUnitRendererProps {
     unitId: string;
+    focused: boolean;
 
     gridService: UnitGridService;
     instanceService: IUniverInstanceService;
+
+    onFocus?: (unitId: string) => void;
 }
 
 function UnitRenderer(props: IUnitRendererProps) {
-    const { unitId, instanceService, gridService } = props;
+    const { unitId, gridService, focused, onFocus } = props;
     const mountRef = useRef<HTMLDivElement>(null);
 
     const focus = useCallback(() => {
-        instanceService.focusUnit(unitId);
-        instanceService.setCurrentUnitForType(unitId);
-    }, [unitId, instanceService]);
+        !focused && onFocus?.(unitId);
+    }, [focused, onFocus, unitId]);
 
     useEffect(() => {
         if (mountRef.current) {
@@ -200,9 +211,12 @@ function UnitRenderer(props: IUnitRendererProps) {
 
     return (
         <div
-            className={styles.workbenchContainerCanvas}
+            className={clsx(styles.workbenchContainerCanvas, {
+                [styles.workbenchContainerCanvasFocused]: focused,
+            })}
             ref={mountRef}
             onPointerDownCapture={focus}
+            onWheelCapture={focus}
         >
         </div>
     );

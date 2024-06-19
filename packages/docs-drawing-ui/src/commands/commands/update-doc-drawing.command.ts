@@ -685,7 +685,7 @@ export const ITransformNonInlineDrawingCommand: ICommand = {
                 line: 0,
                 segmentId: '',
             });
-        } else {
+        } else if (offset > oldOffset) {
             // Delete first.
             if (oldOffset > 0) {
                 textX.push({
@@ -725,8 +725,10 @@ export const ITransformNonInlineDrawingCommand: ICommand = {
             });
         }
 
-        const action = jsonX.editOp(textX.serialize());
-        rawActions.push(action!);
+        if (offset !== oldOffset) {
+            const action = jsonX.editOp(textX.serialize());
+            rawActions.push(action!);
+        }
 
         const { drawings: oldDrawings = {} } = documentDataModel.getSnapshot();
         const oldDocTransform = oldDrawings[drawingId].docTransform;

@@ -200,7 +200,7 @@ export class DocDrawingTransformUpdateController extends Disposable {
 
             this._liquid.translatePagePadding(page);
             skeDrawings.forEach((drawing) => {
-                const { aLeft, aTop, height, width, drawingId, drawingOrigin } = drawing;
+                const { aLeft, aTop, height, width, angle, drawingId, drawingOrigin } = drawing;
                 const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;
 
                 updateDrawings.push({
@@ -213,6 +213,7 @@ export class DocDrawingTransformUpdateController extends Disposable {
                         top: aTop + docsTop + this._liquid.y,
                         width,
                         height,
+                        angle,
                     },
                 });
 

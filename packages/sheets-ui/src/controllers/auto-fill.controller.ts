@@ -53,6 +53,7 @@ import {
     RemoveSheetMutation,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
+    SetRangeValuesCommand,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SetSelectionsOperation,
@@ -130,9 +131,9 @@ export class AutoFillController extends Disposable {
         const quitCommands = [
             SetCellEditVisibleOperation.id,
             AutoClearContentCommand.id,
+            SetRangeValuesCommand.id,
             SetZoomRatioOperation.id,
             SetWorksheetActiveOperation.id,
-            SetRangeValuesMutation.id,
             MoveRangeMutation.id,
             RemoveRowMutation.id,
             RemoveColMutation.id,

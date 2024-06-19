@@ -154,11 +154,6 @@ export class Font extends SheetExtension {
                     //     return true;
                     // }
 
-                    const cellData = worksheet.getCell(rowIndex, columnIndex) as ICellData & ISheetFontRenderExtension || {};
-                    if (cellData.fontRenderExtension?.isSkip) {
-                        return true;
-                    }
-
                     // If the cell is overflowing, but the overflowRectangle has not been set,
                     // then overflowRectangle is set to undefined.
                     const overflowRectangle = overflowCache.getValue(rowIndex, columnIndex);
@@ -182,6 +177,11 @@ export class Font extends SheetExtension {
                         } else if ((vertexAngle > 0 && vertexAngle !== VERTICAL_ROTATE_ANGLE) || vertexAngle === -VERTICAL_ROTATE_ANGLE) {
                             horizontalAlignOverFlow = HorizontalAlign.RIGHT;
                         }
+                    }
+
+                    const cellData = worksheet.getCell(rowIndex, columnIndex) as ICellData & ISheetFontRenderExtension || {};
+                    if (cellData.fontRenderExtension?.isSkip) {
+                        return true;
                     }
 
                     ctx.save();

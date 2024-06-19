@@ -156,6 +156,9 @@ export class HtmlToUSMService {
                 let cellDataStream;
                 if (i === starts.length - 1) {
                     cellDataStream = `${dataStream.substring(starts[i])}\r\n`;
+                    if (cellDataStream === '\r\n') {
+                        continue;
+                    }
                 } else {
                     cellDataStream = `${dataStream.substring(starts[i], starts[i + 1] - 1)}\r\n`;
                 }
@@ -177,7 +180,8 @@ export class HtmlToUSMService {
                         paragraphs: generateParagraphs(cellDataStream),
                     },
                 });
-                valueMatrix.setValue(valueMatrix.getLength(), 0, {
+                const isEmptyMatrix = Object.keys(valueMatrix.getMatrix()).length === 0;
+                valueMatrix.setValue(isEmptyMatrix ? 0 : valueMatrix.getLength(), 0, {
                     v: cellDataStream,
                     p,
                 });

@@ -135,7 +135,7 @@ export class Spreadsheet extends SheetComponent {
         const extensions = this.getExtensionsByOrder();
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
         for (const extension of extensions) {
-            // const timeKey = `extension ${viewportInfo.viewPortKey}:${extension.constructor.name}`;
+            const _timeKey = `extension ${viewportInfo.viewportKey}:${extension.constructor.name}`;
             extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges, {
                 viewRanges,
                 checkOutOfViewBound: true,
@@ -377,9 +377,14 @@ export class Spreadsheet extends SheetComponent {
 
         const { viewportKey } = viewportInfo;
             // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet
-            // zIndex 0 spreadsheet  this.getObjectsByOrder() ---> [spreadsheet]
-            // zIndex 2 rowHeader & colHeader & freezeBorder this.getObjectsByOrder() ---> [SpreadsheetRowHeader, SpreadsheetColumnHeader, _Rect]
-            // zIndex 3 selection  this.getObjectsByOrder() ---> [group]
+            // SHEET_COMPONENT_MAIN_LAYER_INDEX = 0;
+            // SHEET_COMPONENT_SELECTION_LAYER_INDEX = 1;
+            // SHEET_COMPONENT_HEADER_LAYER_INDEX = 10;
+            // SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX = 11;
+            // ......
+            // SHEET_COMPONENT_MAIN_LAYER_INDEX spreadsheet  this.getObjectsByOrder() ---> [spreadsheet]
+            // SHEET_COMPONENT_HEADER_LAYER_INDEX rowHeader & colHeader & freezeBorder this.getObjectsByOrder() ---> [SpreadsheetRowHeader, SpreadsheetColumnHeader, _Rect..., HeaderMenuResizeShape]
+            // SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX selection  this.getObjectsByOrder() ---> [_Rect, Group]
 
             // SpreadsheetRowHeader SpreadsheetColumnHeader is not render by spreadsheet
         if (this.sheetContentViewport().includes(viewportKey as SHEET_VIEWPORT_KEY)) {

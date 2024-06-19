@@ -24,6 +24,8 @@ import type { ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleComma
 import {
     InsertColMutation,
     InsertRowMutation,
+    MoveColsMutation,
+    MoveRowsMutation,
     RemoveColMutation,
     RemoveRowMutation,
     SetColHiddenMutation,
@@ -50,6 +52,8 @@ const RENDER_COMMANDS: string[] = [
     InsertRowMutation.id,
     RemoveColMutation.id,
     RemoveRowMutation.id,
+    MoveColsMutation.id,
+    MoveRowsMutation.id,
     SetWorksheetColWidthMutation.id,
     SetWorksheetRowIsAutoHeightMutation.id,
     SetRowHiddenMutation.id,

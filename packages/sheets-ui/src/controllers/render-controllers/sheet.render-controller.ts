@@ -398,7 +398,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const activeViewports = viewports.filter((vp) => vp.isActive && vp.cacheBound);
         for (const vp of activeViewports) {
             for (const b of dirtyBounds) {
-                if (Rectangle.hasIntersectionBetweenTwoBounds(vp.cacheBound!, b)) {
+                if (Rectangle.hasIntersectionBetweenTwoRect(vp.cacheBound!, b)) {
                     vp.markDirty(true);
                 }
             }

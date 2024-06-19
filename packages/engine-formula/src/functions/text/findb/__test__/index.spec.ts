@@ -28,6 +28,12 @@ describe('Test find function', () => {
     describe('Find', () => {
         it('Find text in single cell', () => {
             const findText = StringValueObject.create('Univer');
+            const withinText = StringValueObject.create('你好 Univer');
+            const result = findFunction.calculate(findText, withinText);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[6]]); // Indexing is 1-based
+        });
+        it('Find text in single cell', () => {
+            const findText = StringValueObject.create('Univer');
             const withinText = StringValueObject.create('Hello Univer');
             const result = findFunction.calculate(findText, withinText);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[7]]); // Indexing is 1-based

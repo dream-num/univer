@@ -199,6 +199,7 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                         };
                     };
                     this._rangeDisableMap.set(id, this._refRangeService.registerRefRange(range, handleRangeChange, unitId, subUnitId));
+
                     if (!silent) {
                         this._rangeWatcherMap.set(id, this._refRangeService.watchRange(unitId, subUnitId, range, (before, after) => {
                             this._hyperLinkModel.updateHyperLink(unitId, subUnitId, id, {
@@ -253,6 +254,7 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                         this._unregisterPosition(option.payload.id);
                         this._unwatchPosition(option.payload.id);
                         this._unregisterRange(option.payload.id);
+                        this._unwatchRange(option.payload.id);
                         break;
                     }
                     case 'updateRef': {
@@ -261,7 +263,6 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                         if (!link) {
                             return;
                         }
-
                         this._unregisterPosition(id);
                         this._registerPosition(unitId, subUnitId, link);
                         if (!silent) {
@@ -276,7 +277,9 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
                             const { links } = subUnitData;
                             links.forEach((link) => {
                                 this._unregisterPosition(link.id);
+                                this._unwatchPosition(link.id);
                                 this._unregisterRange(link.id);
+                                this._unwatchRange(link.id);
                             });
                         });
                         break;

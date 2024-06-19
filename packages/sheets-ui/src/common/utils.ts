@@ -89,18 +89,21 @@ export function getClearContentMutationParamsForRanges(
     };
 }
 
-export function getClearContentMutationParamForRange(
-    worksheet: Worksheet,
-    range: IRange
-): ObjectMatrix<Nullable<ICellData>> {
+function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRange): ObjectMatrix<Nullable<ICellData>> {
     const { startRow, startColumn, endColumn, endRow } = range;
     const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn);
     const redoMatrix = new ObjectMatrix<Nullable<ICellData>>();
+    let leftTopCellValue: Nullable<ICellData> = null;
     cellMatrix.forValue((row, col, cellData) => {
-        if (cellData && (row !== startRow || col !== startColumn)) {
+        if (cellData) {
+            if (!leftTopCellValue && cellData.v !== undefined) {
+                leftTopCellValue = cellData;
+            }
             redoMatrix.setValue(row, col, null);
         }
     });
+
+    redoMatrix.setValue(startRow, startColumn, leftTopCellValue);
 
     return redoMatrix;
 }
@@ -185,9 +188,9 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
     }
     const freeze = worksheet.getFreeze();
     const { startColumn, startRow, xSplit, ySplit } = freeze;
-     // freeze start
+    // freeze start
     const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(startRow - ySplit, startColumn - xSplit);
-     // freeze end
+    // freeze end
     const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(startRow, startColumn);
     const { rowHeaderWidth, columnHeaderHeight } = skeleton;
     const freezeWidth = endSheetView.startX - startSheetView.startX;

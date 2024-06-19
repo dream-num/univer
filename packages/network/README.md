@@ -18,3 +18,7 @@ npm install @univerjs/network
 # Using pnpm
 pnpm add @univerjs/network
 ```
+
+## Credit
+
+This package is inspired by [Angular's implementation](https://github.com/angular/angular/tree/main/packages/common/http). Removed zone.js dependency and features that are not necessary for Univer.

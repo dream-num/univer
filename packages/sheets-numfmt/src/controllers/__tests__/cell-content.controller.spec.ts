@@ -53,7 +53,7 @@ describe('test cell-content', () => {
             },
         };
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         testBed.get(SheetsNumfmtCellContentController);
         const value = worksheet.getCell(0, 0);
         expect(value).toEqual({ v: 0, t: 2 });

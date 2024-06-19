@@ -47,7 +47,7 @@ export const TestEditorContainer = () => {
 
     const unitId = workbook.getUnitId();
 
-    const sheetId = workbook.getActiveSheet().getSheetId();
+    const sheetId = workbook.getActiveSheet()?.getSheetId();
 
     const [readonly, setReadonly] = useState(false);
 

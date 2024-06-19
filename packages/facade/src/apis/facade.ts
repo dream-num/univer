@@ -48,6 +48,7 @@ import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FDocument } from './docs/f-document';
 import { FWorkbook } from './sheets/f-workbook';
 import { FSheetHooks } from './sheets/f-sheet-hooks';
+import { FHooks } from './f-hooks';
 
 export class FUniver {
     /**
@@ -294,6 +295,8 @@ export class FUniver {
         });
     }
 
+    // #endregion
+
     /**
      * Execute command
      * @param id Command id
@@ -330,6 +333,13 @@ export class FUniver {
      */
     getSheetHooks() {
         return this._injector.createInstance(FSheetHooks);
+    }
+
+    /**
+     * Get hooks
+     */
+    getHooks() {
+        return this._injector.createInstance(FHooks);
     }
 
     /**
@@ -395,6 +405,4 @@ export class FUniver {
             );
         }, 10);
     }
-
-    // @endregion
 }

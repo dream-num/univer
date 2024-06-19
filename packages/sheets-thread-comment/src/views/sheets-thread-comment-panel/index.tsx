@@ -17,7 +17,8 @@
 import type { Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ThreadCommentPanel, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { map } from 'rxjs';
 import { type IThreadComment, ThreadCommentModel } from '@univerjs/thread-comment';
@@ -38,7 +39,7 @@ export const SheetsThreadCommentPanel = () => {
     const unitId = workbook.getUnitId();
     const commandService = useDependency(ICommandService);
     const subUnitId$ = useMemo(() => workbook.activeSheet$.pipe(map((i) => i?.getSheetId())), [workbook.activeSheet$]);
-    const subUnitId = useObservable(subUnitId$, workbook.getActiveSheet().getSheetId());
+    const subUnitId = useObservable(subUnitId$, workbook.getActiveSheet()?.getSheetId());
     const activeShapeId = useRef<string | null>();
     const panelService = useDependency(ThreadCommentPanelService);
     const activeCommentId = useObservable(panelService.activeCommentId$);

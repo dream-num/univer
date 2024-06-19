@@ -847,10 +847,6 @@ export interface IBoundRect {
 }
 
 export interface IBoundRectNoAngle {
-    /**
-     * 冻结区域相对 MainCanvas 的物理位置,
-     * left = n * colWidth + rowHeaderWidth
-     */
     left: number;
     top: number;
     right: number;

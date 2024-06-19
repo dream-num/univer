@@ -83,6 +83,10 @@ export interface ICellDataForSheetInterceptor extends ICellData {
     markers?: ICellMarks;
     customRender?: Nullable<ICellCustomRender[]>;
     interceptorAutoHeight?: number;
+    /**
+     * can cell be covered when sibling is overflow
+     */
+    coverable?: boolean;
 }
 
 export function isICellData(value: any): value is ICellData {

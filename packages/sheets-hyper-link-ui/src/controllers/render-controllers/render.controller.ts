@@ -38,7 +38,12 @@ export class SheetsHyperLinkRenderController extends Disposable implements IRend
         const markSkeletonDirty = () => {
             const workbook = this._context.unit;
             const unitId = workbook.getUnitId();
-            const subUnitId = workbook.getActiveSheet().getSheetId();
+            const subUnitId = workbook.getActiveSheet()?.getSheetId();
+            if (!subUnitId) {
+                // TODO@zhangw: handle this case
+                console.warn('No active sheet found');
+                return;
+            }
             const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({ sheetId: subUnitId });
             const currentRender = this._renderManagerService.getRenderById(unitId);
 

@@ -37,6 +37,7 @@ describe('Test "Filter Interceptor"', () => {
         get = testBed.get;
         sheetsFilterService = testBed.sheetsFilterService;
         commandService = testBed.commandService;
+        univer.__getInjector();
     });
 
     afterEach(() => {

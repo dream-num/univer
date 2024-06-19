@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Workbook } from '@univerjs/core';
+import type { ICommand, IMutationInfo, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
-    ObjectMatrix,
     sequenceExecute,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -30,6 +29,7 @@ import { SelectionManagerService } from '../../services/selection-manager.servic
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { generateNullCellStyle } from '../../basics/utils';
 
 /**
  * The command to clear content in current selected ranges.
@@ -51,6 +51,8 @@ export const ClearSelectionFormatCommand: ICommand = {
 
         const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
+        if (!worksheet) return false;
+
         const subUnitId = worksheet.getSheetId();
         const selections = selectionManagerService.getSelectionRanges();
         if (!selections?.length) {
@@ -64,7 +66,7 @@ export const ClearSelectionFormatCommand: ICommand = {
         const clearMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: generateNullCellValue(selections),
+            cellValue: generateNullCellStyle(selections),
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,
@@ -104,21 +106,3 @@ export const ClearSelectionFormatCommand: ICommand = {
     },
 };
 
-// Generate cellValue from range and set s to null
-export function generateNullCellValue(ranges: IRange[]): IObjectMatrixPrimitiveType<ICellData> {
-    const cellValue = new ObjectMatrix<ICellData>();
-
-    ranges.forEach((range: IRange) => {
-        const { startRow, startColumn, endRow, endColumn } = range;
-
-        for (let i = startRow; i <= endRow; i++) {
-            for (let j = startColumn; j <= endColumn; j++) {
-                cellValue.setValue(i, j, {
-                    s: null,
-                });
-            }
-        }
-    });
-
-    return cellValue.clone();
-}

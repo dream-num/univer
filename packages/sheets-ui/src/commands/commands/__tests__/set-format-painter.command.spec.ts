@@ -268,11 +268,15 @@ describe('Test format painter rules in controller', () => {
                     ],
                 });
                 await commandService.executeCommand(SetOnceFormatPainterCommand.id);
-                await (formatPainterController as any)._applyFormatPainter({
-                    startRow: 0,
-                    endRow: 4,
-                    startColumn: 2,
-                    endColumn: 3,
+                await commandService.executeCommand(ApplyFormatPainterCommand.id, {
+                    range: {
+                        startRow: 0,
+                        endRow: 4,
+                        startColumn: 2,
+                        endColumn: 3,
+                    },
+                    unitId: 'workbook-01',
+                    subUnitId: 'sheet-0011',
                 });
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(0, 2)?.s).toBe('yifA1t');
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(0, 3)?.s).toBe('M5JbP2');
@@ -320,11 +324,15 @@ describe('Test format painter rules in controller', () => {
                 });
 
                 await commandService.executeCommand(SetOnceFormatPainterCommand.id);
-                await (formatPainterController as any)._applyFormatPainter({
-                    startRow: 10,
-                    endRow: 13,
-                    startColumn: 12,
-                    endColumn: 13,
+                await commandService.executeCommand(ApplyFormatPainterCommand.id, {
+                    range: {
+                        startRow: 10,
+                        endRow: 13,
+                        startColumn: 12,
+                        endColumn: 13,
+                    },
+                    unitId: 'workbook-01',
+                    subUnitId: 'sheet-0011',
                 });
                 const mergeData = workbook.getSheetBySheetId('sheet-0011')?.getMergeData();
                 expect(mergeData?.length).toBe(5);

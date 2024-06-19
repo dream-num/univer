@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/engine-numfmt",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "private": false,
     "description": "UniverSheet normal plugin UI manager",
     "author": "DreamNum <developer@univer.ai>",
@@ -56,16 +56,16 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "tsc && vite build",
+        "sync:cnpm": "cnpm sync"
     },
-    "peerDependencies": {},
     "dependencies": {
         "numfmt": "^2.5.2"
     },
     "devDependencies": {
         "@univerjs/shared": "workspace:*",
         "typescript": "^5.4.5",
-        "vite": "^5.2.12",
+        "vite": "^5.3.1",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

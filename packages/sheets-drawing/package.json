@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-drawing",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -54,22 +54,22 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "tsc && vite build",
+        "sync:cnpm": "cnpm sync"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*",
-        "@wendellhu/redi": "0.15.2"
+        "@wendellhu/redi": "0.15.4"
     },
-    "dependencies": {},
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "^0.15.2",
+        "@wendellhu/redi": "^0.15.4",
         "typescript": "^5.4.5",
-        "vite": "^5.2.12",
+        "vite": "^5.3.1",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

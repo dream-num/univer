@@ -15,14 +15,14 @@
             "cache": false
         },
 
-        "build:demo": {},
-
         "build:e2e": {},
 
         "dev:demo": {
             "cache": false
         },
 
-        "lint:types": {}
+        "lint:types": {},
+
+        "sync:cnpm": {}
     }
 }

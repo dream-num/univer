@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-numfmt",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "private": false,
     "description": "UniverSheet numfmt plugin",
     "author": "DreamNum <developer@univer.ai>",
@@ -61,7 +61,8 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build"
+        "build": "tsc && vite build",
+        "sync:cnpm": "cnpm sync"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
@@ -71,12 +72,12 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.56"
+        "@univerjs/icons": "^0.1.57"
     },
     "devDependencies": {
         "@types/react": "^18.3.3",
@@ -89,12 +90,12 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "less": "^4.2.0",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.12",
+        "vite": "^5.3.1",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

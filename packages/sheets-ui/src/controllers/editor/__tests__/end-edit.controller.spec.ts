@@ -89,7 +89,7 @@ describe('Test EndEditController', () => {
         contextService = get(IContextService);
         lexerTreeBuilder = new LexerTreeBuilder();
 
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet()!;
         const config = worksheet.getConfig();
         spreadsheetSkeleton = new SpreadsheetSkeleton(
             worksheet,

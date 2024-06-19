@@ -16,9 +16,7 @@
 
 import {
     Disposable,
-    ICommandService,
     IResourceManagerService,
-    IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     UniverInstanceType } from '@univerjs/core';
@@ -30,11 +28,8 @@ const SHEET_DEFINED_NAME_PLUGIN = 'SHEET_DEFINED_NAME_PLUGIN';
 @OnLifecycle(LifecycleStages.Ready, DefinedNameDataController)
 export class DefinedNameDataController extends Disposable {
     constructor(
-        @ICommandService private readonly _commandService: ICommandService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @IResourceManagerService private _resourceManagerService: IResourceManagerService
-
     ) {
         super();
 

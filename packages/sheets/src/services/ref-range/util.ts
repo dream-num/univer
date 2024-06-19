@@ -1148,7 +1148,7 @@ export function getEffectedRangesOnMutation(mutation: IMutationInfo<MutationsAff
                 {
                     ...params.targetRange,
                     startColumn: params.targetRange.startColumn - 0.5,
-                    endColumn: params.targetRange.endColumn - 0.5,
+                    endColumn: params.targetRange.startColumn - 0.5,
                 },
             ];
         }
@@ -1175,7 +1175,7 @@ export function getEffectedRangesOnMutation(mutation: IMutationInfo<MutationsAff
                 {
                     ...range,
                     startColumn: range.startColumn - 0.5,
-                    endColumn: range.endColumn - 0.5,
+                    endColumn: range.startColumn - 0.5,
                 },
             ];
         }
@@ -1186,7 +1186,7 @@ export function getEffectedRangesOnMutation(mutation: IMutationInfo<MutationsAff
                 {
                     ...range,
                     startRow: range.startRow - 0.5,
-                    endRow: range.endRow - 0.5,
+                    endRow: range.startRow - 0.5,
                 },
             ];
         }

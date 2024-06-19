@@ -19,6 +19,7 @@ import {
     Direction,
     Disposable,
     DisposableCollection,
+    getCellInfoInMergeData,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
@@ -29,7 +30,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DeviceInputEventType, getCellInfoInMergeData } from '@univerjs/engine-render';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 import type {
     IAddWorksheetMergeMutationParams,
     IRemoveSheetMutationParams,
@@ -52,6 +53,7 @@ import {
     RemoveSheetMutation,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
+    SetRangeValuesCommand,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SetSelectionsOperation,
@@ -80,7 +82,7 @@ import { ISelectionRenderService } from '../services/selection/selection-render.
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import type { IDiscreteRange } from './utils/range-tools';
-import { discreteRangeToRange, generateNullCellValue, rangeToDiscreteRange } from './utils/range-tools';
+import { discreteRangeToRange, generateNullCellValueRowCol, rangeToDiscreteRange } from './utils/range-tools';
 
 @OnLifecycle(LifecycleStages.Steady, AutoFillController)
 export class AutoFillController extends Disposable {
@@ -129,9 +131,9 @@ export class AutoFillController extends Disposable {
         const quitCommands = [
             SetCellEditVisibleOperation.id,
             AutoClearContentCommand.id,
+            SetRangeValuesCommand.id,
             SetZoomRatioOperation.id,
             SetWorksheetActiveOperation.id,
-            SetRangeValuesMutation.id,
             MoveRangeMutation.id,
             RemoveRowMutation.id,
             RemoveColMutation.id,
@@ -335,7 +337,9 @@ export class AutoFillController extends Disposable {
         if (!workbook) return;
 
         const unitId = workbook.getUnitId();
-        const subUnitId = workbook.getActiveSheet().getSheetId();
+        const subUnitId = workbook.getActiveSheet()?.getSheetId();
+        if (!subUnitId) return;
+
         this._autoFillService.direction = direction;
         const accessor = {
             get: this._injector.get.bind(this._injector),
@@ -539,10 +543,15 @@ export class AutoFillController extends Disposable {
         //     endRow: copyEndRow,
         //     endColumn: copyEndColumn,
         // } = source;
-        const currentCellDatas = this._univerInstanceService
+        const worksheet = this._univerInstanceService
             .getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!
-            .getActiveSheet()
-            .getCellMatrix();
+            .getActiveSheet();
+
+        if (!worksheet) {
+            throw new Error('No active sheet found');
+        }
+
+        const currentCellDatas = worksheet.getCellMatrix();
         const rules = this._autoFillService.getRules();
         const copyData: ICopyDataPiece[] = [];
         const isVertical = direction === Direction.DOWN || direction === Direction.UP;
@@ -610,7 +619,13 @@ export class AutoFillController extends Disposable {
     }
 
     private _getMergeApplyData(source: IRange, target: IRange, direction: Direction, csLen: number) {
-        const mergeData = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getMergeData();
+        const worksheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
+
+        if (!worksheet) {
+            throw new Error('No active sheet found');
+        }
+
+        const mergeData = worksheet.getMergeData();
         const applyMergeRanges = [];
         for (let i = source.startRow; i <= source.endRow; i++) {
             for (let j = source.startColumn; j <= source.endColumn; j++) {
@@ -682,10 +697,15 @@ export class AutoFillController extends Disposable {
     private _presetAndCacheData(location: IAutoFillLocation, direction: Direction) {
         const { source, target } = location;
         // cache original data of apply range
-        const currentCellDatas = this._univerInstanceService
+        const worksheet = this._univerInstanceService
             .getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!
-            .getActiveSheet()
-            .getCellMatrix();
+            .getActiveSheet();
+
+        if (!worksheet) {
+            throw new Error('No active sheet found');
+        }
+
+        const currentCellDatas = worksheet.getCellMatrix();
         // cache the original data in currentCellDatas in apply range for later use / refill
         const applyData: Nullable<ICellData>[][] = [];
         target.rows.forEach((i) => {
@@ -851,7 +871,7 @@ export class AutoFillController extends Disposable {
         const clearMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: generateNullCellValue([target]),
+            cellValue: generateNullCellValueRowCol([target]),
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,

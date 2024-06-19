@@ -133,7 +133,7 @@ export namespace FilterConditionItems {
         getDefaultFormParams: () => { throw new Error('[FilterConditionItems.NOT_EMPTY]: should not have initial form params!'); },
         testMappingParams: ({ operator1 }) => operator1 === ExtendCustomFilterOperator.NOT_EMPTY,
 
-        mapToFilterColumn: () => ({ customFilters: { customFilters: [{ val: ' ', operator: CustomFilterOperator.NOT_EQUALS }] } }),
+        mapToFilterColumn: () => ({ customFilters: { customFilters: [{ val: '', operator: CustomFilterOperator.NOT_EQUALS }] } }),
         testMappingFilterColumn: (filterColumn) => {
             if (filterColumn.customFilters?.customFilters.length !== 1) {
                 return false;

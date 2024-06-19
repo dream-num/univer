@@ -54,8 +54,9 @@ const SingleCanvasPopup = ({ popup, children }: { popup: IPopup; children?: Reac
 
 export function CanvasPopup() {
     const popupService = useDependency(ICanvasPopupService);
-    const popups = useObservable(popupService.popups$, undefined, true);
     const componentManager = useDependency(ComponentManager);
+    const popups = useObservable(popupService.popups$, undefined, true);
+
     return popups.map((item) => {
         const [key, popup] = item;
         const Component = componentManager.get(popup.componentKey);

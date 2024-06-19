@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/umd",
-    "version": "0.1.14",
+    "version": "0.1.15",
     "private": false,
     "description": "UMD bundle for Univer",
     "author": "DreamNum <developer@univer.ai>",
@@ -34,7 +34,8 @@
         "lib"
     ],
     "scripts": {
-        "build:umd": "node ./scripts/index.mjs"
+        "build:umd": "node ./scripts/index.mjs",
+        "sync:cnpm": "cnpm sync"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
@@ -52,7 +53,7 @@
         "@univerjs/facade": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/network": "workspace:*",
-        "@univerjs/protocol": "^0.1.37",
+        "@univerjs/protocol": "0.1.38-alpha.4",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
@@ -68,6 +69,7 @@
         "@univerjs/sheets-hyper-link-ui": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",
+        "@univerjs/sheets-thread-comment-base": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/sheets-zen-editor": "workspace:*",
         "@univerjs/slides": "workspace:*",
@@ -76,7 +78,7 @@
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
-        "@wendellhu/redi": "0.15.2",
+        "@wendellhu/redi": "0.15.4",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.11",
         "lodash": "^4.17.21",

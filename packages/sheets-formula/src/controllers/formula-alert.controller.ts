@@ -59,6 +59,8 @@ export class FormulaAlertController extends Disposable {
             if (cellPos) {
                 const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 const worksheet = workbook.getActiveSheet();
+                if (!worksheet) return;
+
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 
                 if (cellData) {

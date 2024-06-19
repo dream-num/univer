@@ -16,9 +16,9 @@
 
 /* eslint-disable max-lines-per-function */
 import type { IFreeze, IRangeWithCoord, Nullable, Observer, ThemeService } from '@univerjs/core';
-import { ColorKit } from '@univerjs/core';
+import { ColorKit, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import { CURSOR_TYPE, isRectIntersect, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, IRenderManagerService, isRectIntersect, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 
@@ -103,8 +103,10 @@ export class SelectionShapeExtension {
     }
 
     private _getFreeze() {
-        const sheetSkeletonManagerService = this._injector.get(SheetSkeletonManagerService);
-        return sheetSkeletonManagerService.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const freeze = renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)
+            ?.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+        return freeze;
     }
 
     private _isSelectionInViewport(selection: IRangeWithCoord, viewport: Viewport) {
@@ -585,7 +587,7 @@ export class SelectionShapeExtension {
         const { fillControl } = this._control;
 
         fillControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            const permissionCheck = this._injector.get(ISelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_FILL_PERMISSION_CHECK)(false, { x: evt.offsetX, y: evt.offsetY, skeleton: this._skeleton });
+            const permissionCheck = this._injector.get(ISelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_FILL_PERMISSION_CHECK)(false, { x: evt.offsetX, y: evt.offsetY, skeleton: this._skeleton, scene: this._scene });
 
             if (!permissionCheck) {
                 return;
@@ -824,7 +826,7 @@ export class SelectionShapeExtension {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             const currentViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 
-            const permissionCheck = this._injector.get(ISelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_FILL_PERMISSION_CHECK)(false, { x: evt.offsetX, y: evt.offsetY, skeleton: this._skeleton });
+            const permissionCheck = this._injector.get(ISelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_FILL_PERMISSION_CHECK)(false, { x: evt.offsetX, y: evt.offsetY, skeleton: this._skeleton, scene: this._scene });
 
             if (!permissionCheck) {
                 return;

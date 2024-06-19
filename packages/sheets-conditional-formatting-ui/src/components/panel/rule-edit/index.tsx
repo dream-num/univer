@@ -48,7 +48,7 @@ interface IRuleEditProps {
 }
 
 const getUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-const getSubUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();
+const getSubUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
 
 export const RuleEdit = (props: IRuleEditProps) => {
     const localeService = useDependency(LocaleService);
@@ -185,6 +185,9 @@ export const RuleEdit = (props: IRuleEditProps) => {
         const beforeSubmitResult = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().beforeSubmit)(true, null);
         const getRanges = () => {
             const worksheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
+            if (!worksheet) {
+                throw new Error('No active sheet found');
+            }
             const ranges = rangeResult.current.map((range) => setEndForRange(range, worksheet.getRowCount(), worksheet.getColumnCount()));
             const result = ranges.filter((range) => !(Number.isNaN(range.startRow) || Number.isNaN(range.startColumn)));
             return result;
@@ -197,6 +200,9 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 // When you switch the child table, you need to fetch it again here, instead of using the
                 const unitId = getUnitId(univerInstanceService);
                 const subUnitId = getSubUnitId(univerInstanceService);
+                if (!unitId || !subUnitId) {
+                    throw new Error('No active sheet found');
+                }
                 let rule = {} as IConditionFormattingRule;
                 if (props.rule && props.rule.cfId) {
                     rule = { ...props.rule, ranges, rule: result };

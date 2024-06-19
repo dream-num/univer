@@ -23,7 +23,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 
-import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SelectionManagerService, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SelectionManagerService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { merge } from 'rxjs';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -60,13 +60,15 @@ export function FormulaBar() {
         ).subscribe(() => {
             const unitId = workbook.getUnitId();
             const worksheet = workbook.getActiveSheet();
+            if (!worksheet) return;
             const subUnitId = worksheet.getSheetId();
             const range = selectionManager.getLast()?.range;
             if (!range) return;
-            const worksheetSetCellValuePermission = permissionService.getPermissionPoint(new WorksheetSetCellValuePermission(unitId, subUnitId).id);
-            const worksheetEditPermission = permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id);
+            const workbookEditPermission = permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value;
+            const worksheetSetCellValuePermission = permissionService.getPermissionPoint(new WorksheetSetCellValuePermission(unitId, subUnitId).id)?.value;
+            const worksheetEditPermission = permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value;
 
-            if (!worksheetSetCellValuePermission || !worksheetEditPermission) {
+            if (!workbookEditPermission || !worksheetSetCellValuePermission || !worksheetEditPermission) {
                 setDisable(true);
                 return;
             }
@@ -94,7 +96,7 @@ export function FormulaBar() {
             }
         }
         );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const INITIAL_SNAPSHOT = {

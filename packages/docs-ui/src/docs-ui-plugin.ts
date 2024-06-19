@@ -17,7 +17,6 @@
 import {
     ILogService,
     IUniverInstanceService,
-    LocaleService,
     Plugin,
     Tools,
     UniverInstanceType,
@@ -65,7 +64,6 @@ export class UniverDocsUIPlugin extends Plugin {
     constructor(
         private readonly _config: IUniverDocsUIConfig,
         @Inject(Injector) override _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @ILogService private _logService: ILogService
     ) {
@@ -74,6 +72,10 @@ export class UniverDocsUIPlugin extends Plugin {
         this._config = Tools.deepMerge({}, DefaultDocUiConfig, this._config);
         this._initDependencies(_injector);
         this._initializeCommands();
+    }
+
+    override onReady(): void {
+        this._initRenderBasics();
     }
 
     override onRendered(): void {
@@ -135,11 +137,18 @@ export class UniverDocsUIPlugin extends Plugin {
         this._injector.get(AppUIController);
     }
 
-    private _initRenderModules(): void {
+    private _initRenderBasics(): void {
         ([
             DocSkeletonManagerService,
             DocRenderController,
             DocZoomRenderController,
+        ]).forEach((m) => {
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m);
+        });
+    }
+
+    private _initRenderModules(): void {
+        ([
             DocBackScrollRenderController,
             DocFloatingObjectRenderController,
             DocTextSelectionRenderController,

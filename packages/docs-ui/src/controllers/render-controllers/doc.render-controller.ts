@@ -79,8 +79,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             }
         });
 
+        // TODO@wzhudev: this shouldn't be a config, because we may render different units at the same time.
         const hasScroll = this._configService.getConfig('hasScroll') as Nullable<boolean>;
-
         if (hasScroll !== false) {
             new ScrollBar(viewMain);
         }

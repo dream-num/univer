@@ -86,18 +86,16 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     }];
 
     const [disabled, setDisabled] = useState(true);
-
     const [hPosition, setHPosition] = useState<IObjectPositionH>({
         relativeFrom: ObjectRelativeFromH.PAGE,
         posOffset: 0,
     });
-
     const [vPosition, setVPosition] = useState<IObjectPositionV>({
         relativeFrom: ObjectRelativeFromV.PAGE,
         posOffset: 0,
     });
-
     const [followTextMove, setFollowTextMove] = useState(true);
+    const [showPanel, setShowPanel] = useState(true);
 
     function handlePositionChange(direction: 'positionH' | 'positionV', value: IObjectPositionH | IObjectPositionV) {
         if (direction === 'positionH') {
@@ -292,8 +290,6 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
 
         handleVerticalRelativeFromChange(val ? String(ObjectRelativeFromV.PARAGRAPH) : String(ObjectRelativeFromV.PAGE));
     }
-
-    const [showPanel, setShowPanel] = useState(true);
 
     useEffect(() => {
         // Get the init focus drawing position.

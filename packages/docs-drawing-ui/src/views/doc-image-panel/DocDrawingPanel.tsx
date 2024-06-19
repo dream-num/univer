@@ -37,11 +37,12 @@ export const DocDrawingPanel = () => {
         return () => {
             focusDispose.unsubscribe();
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return !!drawings?.length && (
         <div className={styles.imageCommonPanel}>
-            <DrawingCommonPanel drawings={drawings} />
+            <DrawingCommonPanel drawings={drawings} hasAlign={false} hasCropper={false} hasGroup={false} />
             <DocDrawingTextWrap drawings={drawings} />
             <DocDrawingPosition drawings={drawings} />
         </div>

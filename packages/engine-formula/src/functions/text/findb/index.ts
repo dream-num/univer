@@ -20,6 +20,7 @@ import { ArrayValueObject } from '../../../engine/value-object/array-value-objec
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { charLenByte } from '../../../engine/utils/char-kit';
 
 export class Findb extends BaseFunction {
     override minParams = 2;
@@ -131,21 +132,19 @@ export class Findb extends BaseFunction {
     }
 
     private _findByteIndexOf(findTextString: string, withinTextString: string, startIndex: number): number {
-        const withinTextBytes = new TextEncoder().encode(withinTextString);
-        const findTextBytes = new TextEncoder().encode(findTextString);
+        let byteIndex = 0;
+        let foundIndex = -1;
 
-        for (let i = startIndex; i <= withinTextBytes.length - findTextBytes.length; i++) {
-            let found = true;
-            for (let j = 0; j < findTextBytes.length; j++) {
-                if (withinTextBytes[i + j] !== findTextBytes[j]) {
-                    found = false;
+        for (let i = 0; i < withinTextString.length; i++) {
+            if (i >= startIndex) {
+                if (withinTextString.slice(i, i + findTextString.length) === findTextString) {
+                    foundIndex = i;
                     break;
                 }
             }
-            if (found) {
-                return i;
-            }
+            byteIndex += charLenByte(withinTextString[i]);
         }
-        return -1;
+
+        return foundIndex === -1 ? -1 : byteIndex;
     }
 }

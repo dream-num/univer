@@ -26,7 +26,7 @@ describe('Test find function', () => {
     const findFunction = new Findb(FUNCTION_NAMES_TEXT.FINDB);
 
     describe('Find', () => {
-        it('Find text in single cell', () => {
+        it('Find text in single cell for Chinese Language', () => {
             const findText = StringValueObject.create('Univer');
             const withinText = StringValueObject.create('你好 Univer');
             const result = findFunction.calculate(findText, withinText);

@@ -88,7 +88,7 @@ export const DeleteWorksheetProtectionCommand: ICommand<IDeleteWorksheetProtecti
         });
 
         const redoMutations = [{ id: DeleteWorksheetProtectionMutation.id, params: { unitId, subUnitId } }];
-        const undoMutations = [{ id: AddWorksheetProtectionMutation.id, params: { unitId, rule, subUnitId: rule.subUnitId } }];
+        const undoMutations = [{ id: AddWorksheetProtectionMutation.id, params: { unitId, rule, subUnitId } }];
         undoRedoService.pushUndoRedo({
             unitID: unitId,
             redoMutations,

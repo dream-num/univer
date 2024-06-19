@@ -169,7 +169,7 @@ function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHe
         return newAtop + height;
     }
     // 旋转的情况，要考虑行首位与drawing旋转后得到的最大区域
-    let { top: sTop = 0, height: sHeight = 0 } = __getBoundingBox(angle, aLeft, width, aTop, height);
+    let { top: sTop = 0, height: sHeight = 0 } = getBoundingBox(angle, aLeft, width, aTop, height);
 
     sTop -= distT;
     sHeight += distB;
@@ -290,7 +290,7 @@ function _calculateSplit(
     }
 
     // 旋转的情况，要考虑行首位与drawing旋转后得到的最大区域
-    const boundingBox = __getBoundingBox(angle, aLeft, width, aTop, height);
+    const boundingBox = getBoundingBox(angle, aLeft, width, aTop, height);
 
     if (layoutType === PositionedObjectLayoutType.WRAP_SQUARE) {
         // WRAP_SQUARE的情况下，旋转后的图形会重新有一个rect，用这个新rect来决定split
@@ -311,10 +311,16 @@ function _calculateSplit(
     return __getCrossPoint(boundingBox.points, lineTop, lineHeight, columnWidth);
 }
 
-function __getBoundingBox(angle: number, left: number, width: number, top: number, height: number) {
+export function getBoundingBox(angle: number, left: number, width: number, top: number, height: number) {
     // 旋转的情况，要考虑行首位与drawing旋转后得到的最大区域
-    const transform = new Transform().rotate(angle); // 建一个旋转后的变换类
-    // 把drawing四个端点分别进行旋转
+    const centerX = left + width / 2;
+    const centerY = top + height / 2;
+    // 建一个旋转后的变换类
+    const transform = new Transform()
+        .translate(centerX, centerY)
+        .rotate(angle)
+        .translate(-centerX, -centerY);
+    // 把 drawing 四个端点分别进行旋转
     const lt = new Vector2(left, top);
     const lb = new Vector2(left, top + height);
     const rt = new Vector2(left + width, top);

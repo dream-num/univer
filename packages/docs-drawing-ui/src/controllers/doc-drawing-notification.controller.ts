@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+/* eslint-disable ts/no-explicit-any */
+
 import type { ICommandInfo, JSONXActions, Nullable } from '@univerjs/core';
-import {
-    Disposable,
+import { Disposable,
     ICommandService,
+    IUniverInstanceService,
     JSONX,
     LifecycleStages,
     OnLifecycle,
@@ -26,7 +28,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
-import type { IDrawingJsonUndo1, IDrawingSearch } from '@univerjs/drawing';
+import type { IDrawingJsonUndo1, IDrawingOrderMapParam, IDrawingSearch } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
 
 interface IAddOrRemoveDrawing {
@@ -68,9 +70,45 @@ function getAddOrRemoveDrawings(actions: JSONXActions): Nullable<IAddOrRemoveDra
 
     return drawings;
 }
+
+// ReOrderedActions data like bellow:
+// [
+//     "drawingsOrder",
+//     [  4,
+//         {
+//             "d": 0
+//         }
+//     ],
+//     [  5,
+//         {
+//             "p": 0
+//         }
+//     ]
+// ]
+function getReOrderedDrawings(actions: JSONXActions): number[] {
+    if (!Array.isArray(actions) || actions.length < 3 || actions[0] !== 'drawingsOrder') {
+        return [];
+    }
+
+    const drawingIndexes: number[] = [];
+
+    for (let i = 1; i < actions.length; i++) {
+        const action = actions[i];
+        if (Array.isArray(action) && typeof action[0] === 'number' && typeof action[1] === 'object') {
+            drawingIndexes.push(action[0]);
+        } else {
+            drawingIndexes.length = 0;
+            break;
+        }
+    }
+
+    return drawingIndexes;
+}
+
 @OnLifecycle(LifecycleStages.Steady, DocDrawingAddRemoveController)
 export class DocDrawingAddRemoveController extends Disposable {
     constructor(
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IDocDrawingService private readonly _docDrawingService: IDocDrawingService
@@ -92,20 +130,33 @@ export class DocDrawingAddRemoveController extends Disposable {
                 }
 
                 const params = command.params as IRichTextEditingMutationParams;
-
                 const { unitId, actions } = params;
                 const addOrRemoveDrawings = getAddOrRemoveDrawings(actions);
 
-                if (addOrRemoveDrawings == null) {
+                if (addOrRemoveDrawings != null) {
+                    for (const { type, drawingId, drawing } of addOrRemoveDrawings) {
+                        if (type === 'add') {
+                            this._addDrawings(unitId, [drawing!]);
+                        } else {
+                            this._removeDrawings(unitId, [drawingId]);
+                        }
+                    }
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id !== RichTextEditingMutation.id) {
                     return;
                 }
 
-                for (const { type, drawingId, drawing } of addOrRemoveDrawings) {
-                    if (type === 'add') {
-                        this._addDrawings(unitId, [drawing!]);
-                    } else {
-                        this._removeDrawings(unitId, [drawingId]);
-                    }
+                const params = command.params as IRichTextEditingMutationParams;
+                const { unitId, actions } = params;
+                const reOrderedDrawings = getReOrderedDrawings(actions);
+
+                if (reOrderedDrawings.length > 0) {
+                    this._updateDrawingsOrder(unitId, reOrderedDrawings);
                 }
             })
         );
@@ -147,7 +198,34 @@ export class DocDrawingAddRemoveController extends Disposable {
         docDrawingService.removeNotification(objects as IDrawingSearch[]);
     }
 
-    private _updateDrawingsOrder() {
+    private _updateDrawingsOrder(unitId: string, drawingIndexes: number[]) {
+        const documentDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
 
+        if (documentDataModel == null) {
+            return;
+        }
+
+        const drawingsOrder = documentDataModel.getSnapshot().drawingsOrder;
+
+        if (drawingsOrder == null) {
+            return;
+        }
+
+        const drawingManagerService = this._drawingManagerService;
+        const docDrawingService = this._docDrawingService;
+
+        drawingManagerService.setDrawingOrder(unitId, unitId, drawingsOrder);
+        docDrawingService.setDrawingOrder(unitId, unitId, drawingsOrder);
+
+        const objects: IDrawingOrderMapParam = {
+            unitId,
+            subUnitId: unitId,
+            drawingIds: drawingIndexes.map((index) => {
+                return drawingsOrder[index];
+            }),
+        };
+
+        drawingManagerService.orderNotification(objects);
+        docDrawingService.orderNotification(objects);
     }
 }

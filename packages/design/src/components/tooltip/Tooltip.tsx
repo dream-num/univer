@@ -76,7 +76,7 @@ export const Tooltip = forwardRef<NullableTooltipRef, ITooltipProps>((props, ref
             placement={placement}
             mouseEnterDelay={0.2}
             showArrow
-            destroyTooltipOnHide
+            destroyTooltipOnHide={false}
             onVisibleChange={onVisibleChange}
             overlayStyle={style}
         >

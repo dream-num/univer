@@ -26,10 +26,6 @@ export const DocDrawingPanel = () => {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const focusDrawings = drawingManagerService.getFocusDrawings();
 
-    if (focusDrawings == null || focusDrawings.length === 0) {
-        return;
-    }
-
     const [drawings, setDrawings] = useState<IDrawingParam[]>(focusDrawings);
 
     useEffect(() => {
@@ -42,7 +38,7 @@ export const DocDrawingPanel = () => {
         };
     }, []);
 
-    return (
+    return !!drawings?.length && (
         <div className={styles.imageCommonPanel}>
             <DrawingCommonPanel drawings={drawings} />
             <DocDrawingAnchor drawings={drawings} />

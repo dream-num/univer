@@ -19,7 +19,8 @@ import {
     ICommandService,
     LifecycleStages,
     OnLifecycle,
-    RxDisposable } from '@univerjs/core';
+    RxDisposable,
+} from '@univerjs/core';
 import type { DocBackground, Documents, DocumentSkeleton, IRender } from '@univerjs/engine-render';
 import { IRenderManagerService, PageLayoutType } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
@@ -157,7 +158,6 @@ export class DocRenderController extends RxDisposable {
                     }
 
                     skeleton.calculate();
-
                     if (this._editorService.isEditor(unitId)) {
                         currentRender.mainComponent?.makeDirty();
 

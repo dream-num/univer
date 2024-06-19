@@ -61,6 +61,7 @@ import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { Hyphen } from './hyphenation/hyphen';
 import type { LanguageDetector } from './hyphenation/language-detector';
+import { getCustomRangeStyle } from './style/custom-range';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages[pages.length - 1];
@@ -760,6 +761,12 @@ export function getFontCreateConfig(
     const textRun = isRenderStyle === BooleanNumber.FALSE
         ? { ts: {}, st: 0, ed: 0 }
         : bodyModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
+    const customRange = bodyModel.getCustomRange(index + startIndex);
+    const customRangeStyle = customRange ? getCustomRangeStyle(customRange.rangeType) : null;
+    if (customRange) {
+        // console.log('===index', customRange, index + startIndex);
+    }
+
     const { st, ed } = textRun;
     let { ts: textStyle = {} } = textRun;
     const cache = fontCreateConfigCache.getValue(st, ed);
@@ -768,8 +775,7 @@ export function getFontCreateConfig(
     }
 
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
-
-    textStyle = { ...documentTextStyle, ...textStyle };
+    textStyle = { ...documentTextStyle, ...textStyle, ...customRangeStyle };
 
     const fontStyle = getFontStyleString(textStyle, localeService);
 

@@ -589,6 +589,7 @@ export interface ITextStyle extends IStyleBase {
     sc?: number; // spacing
     pos?: number; // position
     sa?: number; // scale
+
 }
 
 export interface IIndentStart {

@@ -134,13 +134,12 @@ export class SheetDrawingPermissionController extends Disposable {
                     const unitId = workbook.getUnitId();
                     const subUnitId = sheet.getSheetId();
                     let initialViewPermission = true;
-                    const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
-                    const drawingDataValues = Object.values(drawingData);
                     const renderObject = this._renderManagerService.getRenderById(unitId);
                     const scene = renderObject?.scene;
                     if (scene == null) {
                         return;
                     }
+                    const transformer = scene.getTransformerByCreate();
                     const worksheetViewPermission$ = this._permissionService.composePermission$([new WorkbookViewPermission(unitId).id, new WorksheetViewPermission(unitId, subUnitId).id]).pipe(map((permissions) => permissions.every((item) => item.value)));
                     worksheetViewPermission$?.pipe(
                         filter((permission) => permission !== initialViewPermission),
@@ -150,17 +149,17 @@ export class SheetDrawingPermissionController extends Disposable {
                             initialViewPermission = permission;
                             this._drawingManagerService.setDrawingVisible(permission);
                             const objects = scene.getAllObjects();
-
+                            const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
+                            const drawingDataValues = Object.values(drawingData);
                             if (permission) {
-                                const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
-                                const drawingDataValues = Object.values(drawingData);
                                 this._drawingManagerService.addNotification(drawingDataValues);
                             } else {
                                 objects.forEach((object) => {
-                                    if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => item.drawingId === object.oKey)) {
+                                    if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => object.oKey.includes(item.drawingId))) {
                                         scene.removeObject(object);
                                     }
                                 });
+                                transformer.clearSelectedObjects();
                             }
                         },
                     });
@@ -195,13 +194,12 @@ export class SheetDrawingPermissionController extends Disposable {
                     const unitId = workbook.getUnitId();
                     const subUnitId = sheet.getSheetId();
                     let initialEditPermission = true;
-                    const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
-                    const drawingDataValues = Object.values(drawingData);
                     const renderObject = this._renderManagerService.getRenderById(unitId);
                     const scene = renderObject?.scene;
                     if (scene == null) {
                         return;
                     }
+                    const transformer = scene.getTransformerByCreate();
                     const composeWorksheetEditPermission = this._permissionService.composePermission$([new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id]).pipe(map((permissions) => permissions.every((item) => item.value)));
                     composeWorksheetEditPermission?.pipe(
                         filter((permission) => permission !== initialEditPermission),
@@ -211,22 +209,23 @@ export class SheetDrawingPermissionController extends Disposable {
                             initialEditPermission = permission;
                             this._drawingManagerService.setDrawingEditable(permission);
                             const objects = scene.getAllObjects();
-
+                            const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
+                            const drawingDataValues = Object.values(drawingData);
                             if (permission) {
                                 objects.forEach((object) => {
-                                    if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => item.drawingId === object.oKey)) {
+                                    if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => object.oKey.includes(item.drawingId))) {
                                         scene.attachTransformerTo(object);
                                     }
                                 });
-                                const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
-                                const drawingDataValues = Object.values(drawingData);
+
                                 this._drawingManagerService.addNotification(drawingDataValues);
                             } else {
                                 objects.forEach((object) => {
-                                    if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => item.drawingId === object.oKey)) {
+                                    if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => object.oKey.includes(item.drawingId))) {
                                         scene.detachTransformerFrom(object);
                                     }
                                 });
+                                transformer.clearSelectedObjects();
                             }
                         },
                     });
@@ -248,7 +247,7 @@ export class SheetDrawingPermissionController extends Disposable {
                             this._drawingManagerService.setDrawingEditable(true);
                             const objects = scene.getAllObjects();
                             objects.forEach((object) => {
-                                if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => item.drawingId === object.oKey)) {
+                                if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => object.oKey.includes(item.drawingId))) {
                                     scene.detachTransformerFrom(object);
                                 }
                             });

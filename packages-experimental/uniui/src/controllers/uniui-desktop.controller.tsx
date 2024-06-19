@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-import { Disposable, isInternalEditorID, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
+import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IWorkbenchOptions } from '@univerjs/ui';
+import { BuiltInUIPart, CanvasPopup, FloatDom, ILayoutService, IUIPartsService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Optional } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
-import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import React from 'react';
 import { delay, filter, take } from 'rxjs';
+import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 
-import { ILayoutService } from '../../services/layout/layout.service';
-import { Workbench } from '../../views/workbench/Workbench';
-import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
-import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
-import { FloatDom } from '../../views/components/dom/FloatDom';
-import type { IWorkbenchOptions } from './ui.controller';
+import { UniWorkbench } from '../views/workbench/UniWorkbench';
 
 const STEADY_TIMEOUT = 3000;
 
-export class DesktopUIController extends Disposable {
+export class UniverUniUIController extends Disposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(Injector) private readonly _injector: Injector,
@@ -46,30 +43,12 @@ export class DesktopUIController extends Disposable {
 
     bootstrapWorkbench(options: IWorkbenchOptions): void {
         this.disposeWithMe(
-            bootstrap(this._injector, options, (canvasElement, containerElement) => {
-                if (this._layoutService) {
-                    this.disposeWithMe(this._layoutService.registerRootContainerElement(containerElement));
-                    this.disposeWithMe(this._layoutService.registerCanvasElement(canvasElement as HTMLCanvasElement));
-                }
-
-                // TODO: this is subject to change in the future for Uni-mode
-                this._renderManagerService.currentRender$.subscribe((renderId) => {
-                    if (renderId) {
-                        const render = this._renderManagerService.getRenderById(renderId)!;
-                        if (!render.unitId) return;
-                        if (isInternalEditorID(render.unitId)) return;
-
-                        render.engine.setContainer(canvasElement);
-                    }
-                });
-
+            bootstrap(this._injector, options, () => {
                 this._lifecycleService.lifecycle$.pipe(
                     filter((lifecycle) => lifecycle === LifecycleStages.Ready),
                     delay(300),
                     take(1)
                 ).subscribe(() => {
-                    const engine = this._renderManagerService.getFirst()?.engine;
-                    engine?.setContainer(canvasElement);
                     this._lifecycleService.stage = LifecycleStages.Rendered;
                     setTimeout(() => this._lifecycleService.stage = LifecycleStages.Steady, STEADY_TIMEOUT);
                 });
@@ -86,7 +65,7 @@ export class DesktopUIController extends Disposable {
 function bootstrap(
     injector: Injector,
     options: IWorkbenchOptions,
-    callback: (canvasEl: HTMLElement, containerElement: HTMLElement) => void
+    callback: () => void
 ): IDisposable {
     let mountContainer: HTMLElement;
 
@@ -104,15 +83,13 @@ function bootstrap(
         mountContainer = createContainer('univer');
     }
 
-    const ConnectedApp = connectInjector(Workbench, injector);
-    const onRendered = (canvasElement: HTMLElement) => callback(canvasElement, mountContainer);
-
+    const ConnectedApp = connectInjector(UniWorkbench, injector);
     function render() {
         createRoot(
             <ConnectedApp
                 {...options}
                 mountContainer={mountContainer}
-                onRendered={onRendered}
+                onRendered={callback}
             />,
             mountContainer
         );

@@ -50,6 +50,7 @@
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
+        "@univerjs/uniui": "workspace:*",
         "@wendellhu/redi": "0.15.4",
         "clsx": "^2.1.1",
         "monaco-editor": "0.49.0",

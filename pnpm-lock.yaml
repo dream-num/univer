@@ -315,6 +315,9 @@ importers:
       '@univerjs/uniscript':
         specifier: workspace:*
         version: link:../packages/uniscript
+      '@univerjs/uniui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uniui
       '@wendellhu/redi':
         specifier: 0.15.4
         version: 0.15.4
@@ -370,6 +373,55 @@ importers:
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
+
+  packages-experimental/uniui:
+    dependencies:
+      '@univerjs/icons':
+        specifier: ^0.1.46
+        version: 0.1.57(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      rc-util:
+        specifier: ^5.43.0
+        version: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../../packages/engine-render
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@wendellhu/redi':
+        specifier: ^0.15.2
+        version: 0.15.4
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
+      vite:
+        specifier: ^5.2.11
+        version: 5.3.1(@types/node@20.14.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.0(@types/node@20.14.4)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/core:
     dependencies:

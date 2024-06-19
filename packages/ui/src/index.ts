@@ -27,7 +27,6 @@ export {
     SharedController,
     UndoShortcutItem,
 } from './controllers/shared-shortcut.controller';
-export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { IUIPartsService, BuiltInUIPart, UIPartsService } from './services/parts/parts.service';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
@@ -77,7 +76,7 @@ export { DesktopShortcutService, type IShortcutItem, IShortcutService } from './
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 export { ISidebarService } from './services/sidebar/sidebar.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';
-export { UniverUIPlugin, DISABLE_AUTO_FOCUS_KEY } from './ui-plugin';
+export { UNIVER_UI_PLUGIN_NAME, UniverUIPlugin, DISABLE_AUTO_FOCUS_KEY } from './ui-plugin';
 export * from './utils';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
 export { ComponentContainer, useComponentsOfPart, type IComponentContainerProps } from './views/components/ComponentContainer';
@@ -85,14 +84,11 @@ export { IEditorService, EditorService } from './services/editor/editor.service'
 export { TextEditor } from './components/editor/TextEditor';
 export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';
 export { RangeSelector } from './components/range-selector/RangeSelector';
-export { IRangeSelectorService } from './services/range-selector/range-selector.service';
-export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
-export { CanvasPopupService, ICanvasPopupService, type IPopup } from './services/popup/canvas-popup.service';
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { type IMenuGroup, useToolbarGroups, useToolbarItemStatus, useToolbarCollapseObserver } from './views/components/doc-bars/hook';
+export { Toolbar } from './views/components/doc-bars/Toolbar';
+export { FloatDom } from './views/components/dom/FloatDom';
 export { mergeMenuConfigs } from './common/menu-merge-configs';
-export { IProgressService, ProgressService } from './services/progress/progress.service';
-export type { IProgressStep } from './services/progress/progress.service';
 
 // #region - workbench components
 
@@ -106,3 +102,20 @@ export { CanvasFloatDomService, type IFloatDomLayout } from './services/dom/canv
 
 // #endregion
 
+// #region - controllers
+
+export { ErrorController } from './controllers/error/error.controller';
+export { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
+export { IUIController, type IUniverUIConfig, type IWorkbenchOptions } from './controllers/ui/ui.controller';
+
+// #endregion
+
+// #region - services
+
+export { RangeSelectorService, IRangeSelectorService } from './services/range-selector/range-selector.service';
+export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
+export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
+export { CanvasPopupService, ICanvasPopupService, type IPopup } from './services/popup/canvas-popup.service';
+export { IProgressService, ProgressService } from './services/progress/progress.service';
+export type { IProgressStep } from './services/progress/progress.service';
+export { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';

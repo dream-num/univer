@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DependentOn, IContextService, ILocalStorageService, LocaleService, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
+import { DependentOn, IContextService, ILocalStorageService, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
@@ -57,49 +57,36 @@ import { IProgressService, ProgressService } from './services/progress/progress.
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 
-const PLUGIN_NAME = 'ui';
-
-export const DefaultUiConfig = {};
-
+export const UNIVER_UI_PLUGIN_NAME = 'UNIVER_UI_PLUGIN';
 export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
+
+const UI_BOOTSTRAP_DELAY = 16;
 
 /**
  * UI plugin provides basic interaction with users. Including workbench (menus, UI parts, notifications etc.), copy paste, shortcut.
  */
 @DependentOn(UniverRenderEnginePlugin)
 export class UniverUIPlugin extends Plugin {
-    static override pluginName = PLUGIN_NAME;
+    static override pluginName = UNIVER_UI_PLUGIN_NAME;
 
     constructor(
         private _config: Partial<IUniverUIConfig> = {},
         @IContextService private readonly _contextService: IContextService,
-        @Inject(Injector) protected readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, DefaultUiConfig, this._config);
-
+        this._config = Tools.deepMerge({}, this._config);
         if (this._config.disableAutoFocus) {
             this._contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);
         }
     }
 
-    override onStarting(_injector: Injector): void {
-        this._initDependencies(_injector);
-    }
-
-    override onReady(): void {
-        // TODO@Jocs: this has to be on Ready hook because of editor related modules' sequence problem.
-        this._initUI();
-    }
-
-    private _initDependencies(injector: Injector): void {
+    override onStarting(injector: Injector): void {
         const dependencies: Dependency[] = mergeOverrideWithDependencies([
             [ComponentManager],
             [ZIndexManager],
 
-            // services
             [ShortcutPanelService],
             [IUIPartsService, { useClass: UIPartsService }],
             [ILayoutService, { useClass: DesktopLayoutService }],
@@ -122,28 +109,17 @@ export class UniverUIPlugin extends Plugin {
             [ICanvasPopupService, { useClass: CanvasPopupService }],
             [IProgressService, { useClass: ProgressService }],
             [CanvasFloatDomService],
-            // controllers
-            [IUIController, { useClass: DesktopUIController }],
-            [
-                SharedController,
-                {
-                    useFactory: () => this._injector.createInstance(SharedController, this._config),
-                },
-            ],
-            [ErrorController],
-            [
-                ShortcutPanelController,
-                {
-                    useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config),
-                },
-            ],
-        ], this._config.override);
 
+            [IUIController, { useClass: DesktopUIController }],
+            [SharedController, { useFactory: () => this._injector.createInstance(SharedController, this._config) }],
+            [ErrorController],
+            [ShortcutPanelController, { useFactory: () => this._injector.createInstance(ShortcutPanelController, this._config) }],
+        ], this._config.override);
         dependencies.forEach((dependency) => injector.add(dependency));
     }
 
-    private _initUI(): void {
+    override onReady(): void {
         // We need to run this async to let other modules do their `onReady` jobs first.
-        setTimeout(() => this._injector.get(IUIController).bootstrapWorkbench(this._config), 16);
+        setTimeout(() => this._injector.get(IUIController).bootstrapWorkbench(this._config), UI_BOOTSTRAP_DELAY);
     }
 }

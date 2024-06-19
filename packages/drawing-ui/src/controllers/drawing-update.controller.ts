@@ -702,7 +702,12 @@ export class DrawingUpdateController extends Disposable {
                         return true;
                     }
 
-                    const { left = 0, top = 0, width = 0, height = 0, angle = 0, flipX = false, flipY = false, skewX = 0, skewY = 0 } = transform;
+                    const {
+                        left = 0, top = 0, width = 0, height = 0,
+                        angle = 0,
+                        flipX = false, flipY = false,
+                        skewX = 0, skewY = 0,
+                    } = transform;
 
                     drawingShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                 });

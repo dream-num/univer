@@ -21412,11 +21412,20 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     4: {
                         s: '46',
                     },
+                    5: {
+                        s: '46',
+                    },
                     6: {
                         s: '46',
                         v: 'Entourage',
                     },
                     7: {
+                        s: '47',
+                    },
+                    8: {
+                        s: '47',
+                    },
+                    9: {
                         s: '47',
                     },
                     10: {
@@ -21433,6 +21442,27 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         v: '                      To                      To                      To',
                         s: '48',
                     },
+                    3: {
+                        s: '48',
+                    },
+                    4: {
+                        s: '48',
+                    },
+                    5: {
+                        s: '48',
+                    },
+                    6: {
+                        s: '48',
+                    },
+                    7: {
+                        s: '48',
+                    },
+                    8: {
+                        s: '48',
+                    },
+                    9: {
+                        s: '48',
+                    },
                 },
                 4: {
                     1: {
@@ -21443,8 +21473,26 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         v: '(Capital)         万        仟        佰        拾        元        角        分',
                         s: '49',
                     },
+                    3: {
+                        s: '49',
+                    },
+                    4: {
+                        s: '49',
+                    },
+                    5: {
+                        s: '49',
+                    },
+                    6: {
+                        s: '49',
+                    },
                     7: {
                         v: '(Lower) ¥',
+                        s: '48',
+                    },
+                    8: {
+                        s: '48',
+                    },
+                    9: {
                         s: '48',
                     },
                 },
@@ -21460,7 +21508,16 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         v: 'ETR',
                         s: '50',
                     },
+                    4: {
+                        s: '50',
+                    },
                     5: {
+                        s: '50',
+                    },
+                    6: {
+                        s: '50',
+                    },
+                    7: {
                         s: '50',
                     },
                     8: {
@@ -21479,6 +21536,27 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     2: {
                         s: '48',
                     },
+                    3: {
+                        s: '48',
+                    },
+                    4: {
+                        s: '48',
+                    },
+                    5: {
+                        s: '48',
+                    },
+                    6: {
+                        s: '48',
+                    },
+                    7: {
+                        s: '48',
+                    },
+                    8: {
+                        s: '48',
+                    },
+                    9: {
+                        s: '48',
+                    },
                 },
                 7: {
                     1: {
@@ -21495,11 +21573,17 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     4: {
                         s: '50',
                     },
+                    5: {
+                        s: '50',
+                    },
                     6: {
                         v: 'Financial Manager',
                         s: '50',
                     },
                     7: {
+                        s: '50',
+                    },
+                    8: {
                         s: '50',
                     },
                     9: {
@@ -21522,11 +21606,17 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     4: {
                         s: '50',
                     },
+                    5: {
+                        s: '50',
+                    },
                     6: {
                         v: 'Cashier',
                         s: '50',
                     },
                     7: {
+                        s: '50',
+                    },
+                    8: {
                         s: '50',
                     },
                     9: {
@@ -21536,6 +21626,30 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 9: {
                     1: {
                         v: 'Record: The loan is used exclusively for travel expenses, and the travel expenses will not be written off without a business trip application.',
+                        s: '45',
+                    },
+                    2: {
+                        s: '45',
+                    },
+                    3: {
+                        s: '45',
+                    },
+                    4: {
+                        s: '45',
+                    },
+                    5: {
+                        s: '45',
+                    },
+                    6: {
+                        s: '45',
+                    },
+                    7: {
+                        s: '45',
+                    },
+                    8: {
+                        s: '45',
+                    },
+                    9: {
                         s: '45',
                     },
                 },
@@ -22051,6 +22165,9 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     },
                 },
                 20: {
+                    1: {
+                        s: '37',
+                    },
                     5: {
                         v: 'Tax',
                         s: '39',
@@ -22060,6 +22177,9 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     },
                 },
                 21: {
+                    1: {
+                        s: '37',
+                    },
                     5: {
                         v: 'Freight',
                         s: '39',
@@ -22069,6 +22189,18 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     },
                 },
                 22: {
+                    1: {
+                        s: '37',
+                    },
+                    2: {
+                        s: '37',
+                    },
+                    3: {
+                        s: '37',
+                    },
+                    4: {
+                        s: '37',
+                    },
                     5: {
                         v: 'Total ',
                         s: '39',

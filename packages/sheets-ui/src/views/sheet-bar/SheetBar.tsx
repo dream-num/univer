@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import { ICommandService, IPermissionService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { ICommandService, IPermissionService, UserManagerService } from '@univerjs/core';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
 import { InsertSheetCommand, WorkbookCreateSheetPermission, WorkbookEditablePermission } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -23,6 +22,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useObservable } from '@univerjs/ui';
 import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
+import { useActiveWorkbook } from '../../components/hook';
 import styles from './index.module.less';
 import { SheetBarButton } from './sheet-bar-button/SheetBarButton';
 import { SheetBarMenu } from './sheet-bar-menu/SheetBarMenu';
@@ -39,11 +39,10 @@ export const SheetBar = () => {
     const sheetBarService = useDependency(ISheetBarService);
 
     const permissionService = useDependency(IPermissionService);
-    const univerInstanceService = useDependency(IUniverInstanceService);
     const userManagerService = useDependency(UserManagerService);
     const currentUser = useObservable(userManagerService.currentUser$);
 
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = useActiveWorkbook()!;
     const unitId = workbook.getUnitId();
 
     const workbookEditablePermission = useObservable(permissionService.getPermissionPoint$(new WorkbookEditablePermission(unitId)?.id));

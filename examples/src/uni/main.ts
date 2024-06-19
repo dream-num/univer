@@ -31,7 +31,7 @@ import { FUniver } from '@univerjs/facade';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { enUS } from '../locales';
-import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
+import { DEFAULT_WORKBOOK_DATA_DEMO1 } from '../data';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -71,8 +71,8 @@ univer.registerPlugin(UniverSheetsFormulaPlugin);
 // create univer sheet instance
 if (!IS_E2E) {
     univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
-    // univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO1);
-    univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO1);
+    // univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
 }
 
 // debugger plugin

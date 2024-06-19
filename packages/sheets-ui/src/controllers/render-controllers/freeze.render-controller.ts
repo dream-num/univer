@@ -69,7 +69,7 @@ import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../common/keys';
 
-import { ScrollManagerService } from '../../services/scroll-manager.service';
+import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset, getSheetObject } from '../utils/component-tools';
 
@@ -147,7 +147,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         @ICommandService private readonly _commandService: ICommandService,
         // @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
+        @Inject(SheetScrollManagerService) private readonly _scrollManagerService: SheetScrollManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(Injector) private _injector: Injector

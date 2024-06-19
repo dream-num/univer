@@ -16,9 +16,9 @@
 
 import type { IOperation } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
-
+import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IScrollManagerInsertParam } from '../../services/scroll-manager.service';
-import { ScrollManagerService } from '../../services/scroll-manager.service';
+import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 
 export const SetScrollOperation: IOperation<IScrollManagerInsertParam> = {
     id: 'sheet.operation.set-scroll',
@@ -29,7 +29,8 @@ export const SetScrollOperation: IOperation<IScrollManagerInsertParam> = {
             return false;
         }
 
-        const scrollManagerService = accessor.get(ScrollManagerService);
+        const renderManagerService = accessor.get(IRenderManagerService);
+        const scrollManagerService = renderManagerService.getRenderById(params.unitId)!.with(SheetScrollManagerService);
         const currentService = accessor.get(IUniverInstanceService);
         const workbook = currentService.getUniverSheetInstance(params!.unitId);
         const worksheet = workbook!.getSheetBySheetId(params!.sheetId);

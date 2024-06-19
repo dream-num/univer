@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, type Nullable, UniverInstanceType } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IScrollManagerParam {
@@ -43,20 +44,18 @@ export type IScrollInfo = Map<string, Map<string, IScrollManagerParam>>;
  *
  * ScrollController subscribes to the changes in service data to refresh the view scrolling.
  */
-export class ScrollManagerService {
+export class SheetScrollManagerService implements IRenderModule {
     private readonly _scrollInfo: IScrollInfo = new Map();
-
     private readonly _scrollInfo$ = new BehaviorSubject<Nullable<IScrollManagerParam>>(null);
     readonly scrollInfo$ = this._scrollInfo$.asObservable();
 
     private _searchParamForScroll: Nullable<IScrollManagerSearchParam> = null;
 
     constructor(
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        // @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        private readonly _context: IRenderContext<Workbook>,
+        @Inject(SheetSkeletonManagerService) private readonly _skeletonManagerService: SheetSkeletonManagerService
     ) {
-        // init
+        // empty
     }
 
     dispose(): void {
@@ -84,8 +83,9 @@ export class ScrollManagerService {
         if (this._searchParamForScroll == null) {
             return;
         }
-        const { unitId, sheetId } = this._searchParamForScroll;
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+
+        const { sheetId } = this._searchParamForScroll;
+        const workbook = this._context.unit;
         const worksheet = workbook?.getSheetBySheetId(sheetId);
         const snapshot = worksheet?.getConfig();
         if (snapshot) {
@@ -141,16 +141,6 @@ export class ScrollManagerService {
         this._clearByParam(this._searchParamForScroll);
     }
 
-    // scrollToCell(startRow: number, startColumn: number) {
-    //     const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-    //     const scene = this._renderManagerService.getCurrent()?.scene;
-    //     if (skeleton == null || scene == null) {
-    //         return;
-    //     }
-
-    //     const {} = skeleton.getCellByIndex(startRow, startColumn);
-    // }
-
     calcViewportScrollFromOffset(scrollInfo: IScrollManagerInsertParam) {
         const { unitId } = scrollInfo;
         const workbookScrollInfo = this._scrollInfo.get(unitId);
@@ -166,7 +156,7 @@ export class ScrollManagerService {
         offsetY = offsetY || 0;
 
         // const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        const skeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentSkeleton();
+        const skeleton = this._skeletonManagerService.getCurrentSkeleton();
         const rowAcc = skeleton?.rowHeightAccumulation[sheetViewStartRow - 1] || 0;
         const colAcc = skeleton?.columnWidthAccumulation[sheetViewStartColumn - 1] || 0;
         const viewportScrollX = colAcc + offsetX;

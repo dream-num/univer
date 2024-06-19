@@ -118,6 +118,9 @@ export const isNullValue = (cell: Nullable<ICellData>) => {
     if (Object.keys(cell).length === 0) {
         return true;
     }
+    if (cell?.v == null && cell?.p == null) {
+        return true;
+    }
     return false;
 };
 

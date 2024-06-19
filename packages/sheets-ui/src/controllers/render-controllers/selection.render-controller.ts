@@ -320,7 +320,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
     private _initSelectionChangeListener() {
         this.disposeWithMe(
             toDisposable(
-                this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
+                this._selectionManagerService.selectionMoveEndBefore$.subscribe((params) => {
                     this._selectionRenderService.reset();
                     if (params == null) {
                         return;

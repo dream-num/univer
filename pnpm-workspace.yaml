@@ -1,4 +1,5 @@
 packages:
     - common/*
     - packages/*
+    - packages-experimental/*
     - examples

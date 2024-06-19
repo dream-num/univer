@@ -171,6 +171,10 @@ export class Engine extends ThinEngine<Scene> {
     }
 
     setContainer(elem: HTMLElement, resize = true) {
+        if (this._container === elem) {
+            return;
+        }
+
         this._container = elem;
         this._container.appendChild(this.getCanvasElement());
 
@@ -235,6 +239,7 @@ export class Engine extends ThinEngine<Scene> {
 
     override dispose() {
         super.dispose();
+
         const eventPrefix = getPointerPrefix();
         const canvasEle = this.getCanvasElement();
         canvasEle.removeEventListener(`${eventPrefix}leave`, this._pointerLeaveEvent);

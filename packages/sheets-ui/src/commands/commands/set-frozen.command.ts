@@ -19,7 +19,7 @@ import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService,
 import type { ISetFrozenMutationParams } from '@univerjs/sheets';
 import { getSheetCommandTarget, SelectionManagerService, SetFrozenMutation, SetFrozenMutationFactory } from '@univerjs/sheets';
 
-import { ScrollManagerService } from '../../services/scroll-manager.service';
+import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 
 export enum SetSelectionFrozenType {
     RowColumn = 0,
@@ -50,7 +50,7 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
         }
         const currentSelection = selections[selections?.length - 1];
         const { range } = currentSelection;
-        const scrollManagerService = accessor.get(ScrollManagerService);
+        const scrollManagerService = accessor.get(SheetScrollManagerService);
         const { sheetViewStartRow = 0, sheetViewStartColumn = 0 } = scrollManagerService.getCurrentScrollInfo() || {};
         let startRow;
         let startColumn;

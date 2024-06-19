@@ -43,7 +43,7 @@ test('no error on constructing and disposing', async ({ page }) => {
     await page.waitForTimeout(2000);
 
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(6000); // wait for features loaded in STEADY stage (5s)
 
     await page.evaluate(() => window.E2EControllerAPI.disposeUniver());
     await page.waitForTimeout(2000);

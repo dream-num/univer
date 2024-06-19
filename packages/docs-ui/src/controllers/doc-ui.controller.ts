@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
-import { BuiltInUIPart, ComponentManager, IEditorService, ILayoutService, IMenuService, IUIPartsService } from '@univerjs/ui';
+import { ComponentManager, ILayoutService, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 import {
@@ -30,7 +28,6 @@ import {
     FontFamilyItem,
 } from '../components/font-family';
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
-import { DocBackground } from '../views/doc-background/DocBackground';
 import type { IUniverDocsUIConfig } from '../basics';
 import {
     AlignCenterMenuItemFactory,
@@ -60,10 +57,7 @@ export class DocUIController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ILayoutService private readonly _layoutService: ILayoutService,
-        @IEditorService private readonly _editorService: IEditorService,
-        @IMenuService private readonly _menuService: IMenuService,
-        @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IMenuService private readonly _menuService: IMenuService
     ) {
         super();
 
@@ -110,22 +104,7 @@ export class DocUIController extends Disposable {
     private _init(): void {
         this._initCustomComponents();
         this._initMenus();
-        this._initDocBackground();
         this._initFocusHandler();
-    }
-
-    private _initDocBackground() {
-        const firstDocUnitId = this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)[0].getUnitId();
-        if (firstDocUnitId == null) {
-            return;
-        }
-
-        const embedded = this._editorService.isEditor(firstDocUnitId);
-        if (!embedded) {
-            this.disposeWithMe(
-                this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(DocBackground, this._injector))
-            );
-        }
     }
 
     private _initFocusHandler(): void {

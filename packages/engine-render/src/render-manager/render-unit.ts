@@ -15,8 +15,9 @@
  */
 
 import type { Nullable, UnitModel, UnitType } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
-import type { DependencyIdentifier, IDisposable, Injector } from '@wendellhu/redi';
+import { Disposable, ILogService, IUniverInstanceService } from '@univerjs/core';
+import type { DependencyIdentifier, IDisposable } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import type { Engine } from '../engine';
 import type { Scene } from '../scene';
 import type { RenderComponentType } from './render-manager.service';
@@ -68,15 +69,16 @@ export class RenderUnit extends Disposable implements IRender {
     get components() { return this._renderContext.components; }
 
     constructor(
-        parentInjector: Injector,
-        init: Pick<IRenderContext, 'engine' | 'scene' | 'isMainScene' | 'unit' >
+        init: Pick<IRenderContext, 'engine' | 'scene' | 'isMainScene' | 'unit' >,
+        @Inject(Injector) parentInjector: Injector,
+        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
+        @ILogService private readonly _logSrv: ILogService
     ) {
         super();
 
         this._injector = parentInjector.createChild();
-
         this._renderContext = {
-            unit: init.unit, // model
+            unit: init.unit,
             unitId: init.unit.getUnitId(),
             type: init.unit.type,
             components: new Map(),
@@ -89,7 +91,6 @@ export class RenderUnit extends Disposable implements IRender {
 
     override dispose() {
         this._injector.dispose();
-
         super.dispose();
     }
 

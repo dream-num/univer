@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Workbook } from '@univerjs/core';
-import { ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import type { ICommandInfo } from '@univerjs/core';
+import { ICommandService, IPermissionService, LocaleService } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import {
     InsertSheetMutation,
@@ -42,6 +42,7 @@ import { SheetMenuPosition } from '../../../controllers/menu/menu';
 import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
+import { useActiveWorkbook } from '../../../components/hook';
 import styles from './index.module.less';
 import type { IBaseSheetBarProps } from './SheetBarItem';
 import { SheetBarItem } from './SheetBarItem';
@@ -59,7 +60,6 @@ export function SheetBarTabs() {
     const slideTabBarRef = useRef<{ slideTabBar: SlideTabBar | null }>({ slideTabBar: null });
     const slideTabBarContainerRef = useRef<HTMLDivElement>(null);
 
-    const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const sheetBarService = useDependency(ISheetBarService);
     const localeService = useDependency(LocaleService);
@@ -70,7 +70,7 @@ export function SheetBarTabs() {
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
     const resetOrder = useObservable(worksheetProtectionRuleModel.resetOrder$);
 
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const workbook = useActiveWorkbook()!;
     const permissionService = useDependency(IPermissionService);
 
     const statusInit = useCallback(() => {
@@ -120,7 +120,7 @@ export function SheetBarTabs() {
             slideTabBar.destroy();
             subscribeList.forEach((subscribe) => subscribe.unsubscribe());
         };
-    }, [resetOrder]);
+    }, [resetOrder, workbook]);
 
     useEffect(() => {
         if (sheetList.length > 0) {
@@ -205,6 +205,8 @@ export function SheetBarTabs() {
         return slideTabBar;
     };
 
+    // TODO@Dushusir: the following callback functions should be wrapped by `useCallback`.
+
     const nameEmptyCheck = (name: string) => {
         if (name.trim() === '') {
             const id = 'sheetNameEmptyAlert';
@@ -230,7 +232,6 @@ export function SheetBarTabs() {
     };
 
     const nameRepeatCheck = (name: string) => {
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const currenSheetName = worksheet?.getName();
         // TODO@Dushusir: no need trigger save

@@ -1,4 +1,4 @@
-.app {
+.workbench {
     &-layout {
         display: flex;
         flex-direction: column;
@@ -45,9 +45,19 @@
             border-bottom: 1px solid rgb(var(--border-color));
         }
 
+        &-canvas-container {
+            display: flex;
+        }
+
         &-canvas {
+            flex: 1;
             position: relative;
             overflow: hidden;
+            border: 1px solid transparent;
+
+            &-focused {
+                border: 1px solid rgb(var(--primary-color));
+            }
         }
 
         &-left-sidebar {

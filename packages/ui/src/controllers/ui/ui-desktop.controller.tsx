@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, IUniverInstanceService, LifecycleService, LifecycleStages, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { Disposable, isInternalEditorID, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Optional } from '@wendellhu/redi';
@@ -24,7 +24,7 @@ import React from 'react';
 import { delay, filter, take } from 'rxjs';
 
 import { ILayoutService } from '../../services/layout/layout.service';
-import { App } from '../../views/App';
+import { Workbench } from '../../views/workbench/Workbench';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { FloatDom } from '../../views/components/dom/FloatDom';
@@ -34,7 +34,6 @@ const STEADY_TIMEOUT = 3000;
 
 export class DesktopUIController extends Disposable {
     constructor(
-        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
@@ -53,14 +52,12 @@ export class DesktopUIController extends Disposable {
                     this.disposeWithMe(this._layoutService.registerCanvasElement(canvasElement as HTMLCanvasElement));
                 }
 
-                // TODO: this is subject to change in the future
+                // TODO: this is subject to change in the future for Uni-mode
                 this._renderManagerService.currentRender$.subscribe((renderId) => {
                     if (renderId) {
                         const render = this._renderManagerService.getRenderById(renderId)!;
                         if (!render.unitId) return;
-
-                        const unitType = this._instanceService.getUnitType(render.unitId);
-                        if (unitType !== UniverInstanceType.UNIVER_SHEET) return;
+                        if (isInternalEditorID(render.unitId)) return;
 
                         render.engine.setContainer(canvasElement);
                     }
@@ -107,7 +104,7 @@ function bootstrap(
         mountContainer = createContainer('univer');
     }
 
-    const ConnectedApp = connectInjector(App, injector);
+    const ConnectedApp = connectInjector(Workbench, injector);
     const onRendered = (canvasElement: HTMLElement) => callback(canvasElement, mountContainer);
 
     function render() {

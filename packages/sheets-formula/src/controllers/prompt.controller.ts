@@ -45,7 +45,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import {
-    DocViewModelManagerService,
+    DocSkeletonManagerService,
     MoveCursorOperation,
     ReplaceContentCommand,
     TextSelectionManagerService,
@@ -168,7 +168,6 @@ export class PromptController extends Disposable {
         @Inject(ISelectionRenderService) private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @IEditorService private readonly _editorService: IEditorService
     ) {
@@ -1340,13 +1339,11 @@ export class PromptController extends Disposable {
         const documentDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
 
         const editorUnitId = documentDataModel!.getUnitId();
-
         if (!this._editorService.isEditor(editorUnitId)) {
             return;
         }
 
-        const docViewModel = this._docViewModelManagerService.getViewModel(editorUnitId);
-
+        const docViewModel = this._renderManagerService.getRenderById(editorUnitId)?.with(DocSkeletonManagerService).getViewModel();
         if (docViewModel == null || documentDataModel == null) {
             return;
         }

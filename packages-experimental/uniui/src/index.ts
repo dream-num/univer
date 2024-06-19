@@ -14,15 +14,4 @@
  * limitations under the License.
  */
 
-import React from 'react';
-
-import styles from './index.module.less';
-
-/**
- * Doc standalone background
- */
-export const DocBackground = () => {
-    return (
-        <div className={styles.docsUiCanvasBackground}></div>
-    );
-};
+export { UniverUniUIPlugin } from './plugin';

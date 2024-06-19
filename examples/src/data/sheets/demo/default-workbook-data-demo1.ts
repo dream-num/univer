@@ -18,7 +18,7 @@ import type { IWorkbookData } from '@univerjs/core';
 import { BooleanNumber, BorderStyleTypes, LocaleType } from '@univerjs/core';
 
 export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
-    id: 'workbook-01',
+    id: 'workbook-001',
     locale: LocaleType.ZH_CN,
     name: 'universheet',
     sheetOrder: ['sheet-0003'],

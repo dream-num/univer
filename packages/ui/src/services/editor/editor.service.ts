@@ -17,7 +17,7 @@
 import type { DocumentDataModel, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable, Workbook } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, IContextService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
+import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import type { IRender, ISuccinctTextRangeParam, Scene } from '@univerjs/engine-render';
@@ -353,7 +353,6 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     private _spreadsheetFocusState: boolean = false;
 
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
@@ -617,10 +616,11 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     register(config: IEditorConfigParam, container: HTMLDivElement): IDisposable {
         const { initialSnapshot, editorUnitId, canvasStyle = {} } = config;
 
-        const documentDataModel = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, initialSnapshot || this._getBlank(editorUnitId));
+        const documentDataModel = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(
+            UniverInstanceType.UNIVER_DOC, initialSnapshot || this._getBlank(editorUnitId)
+        );
 
         let render = this._renderManagerService.getRenderById(editorUnitId);
-
         if (render == null) {
             this._renderManagerService.create(editorUnitId);
             render = this._renderManagerService.getRenderById(editorUnitId)!;
@@ -633,6 +633,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._editors.set(editorUnitId, editor);
 
         // Delete scroll bar
+        // FIXME@Jocs: should add a configuration when creating a renderer, not delete it.
         (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0].getScrollBar()?.dispose();
 
         if (!editor.isSheetEditor()) {
@@ -754,6 +755,4 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 }
 
-export const IEditorService = createIdentifier<IEditorService>(
-    'univer.editor.service'
-);
+export const IEditorService = createIdentifier<IEditorService>('univer.editor.service');

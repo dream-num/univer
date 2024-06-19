@@ -31,7 +31,6 @@ import type { IDocObjectParam, IRichTextEditingMutationParams } from '@univerjs/
 import {
     VIEWPORT_KEY as DOC_VIEWPORT_KEY,
     DocSkeletonManagerService,
-    DocViewModelManagerService,
     getDocObject,
     RichTextEditingMutation,
     TextSelectionManagerService,
@@ -60,9 +59,7 @@ export class ZenEditorController extends RxDisposable {
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
@@ -127,7 +124,7 @@ export class ZenEditorController extends RxDisposable {
 
             const { engine } = editorObject;
 
-            const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.skeleton;
+            const skeleton = this._renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.with(DocSkeletonManagerService).getSkeleton();
 
             // Update page size when container resized.
             // zenEditorDataModel.updateDocumentDataPageSize(width);
@@ -221,11 +218,12 @@ export class ZenEditorController extends RxDisposable {
             DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
         ];
 
-        const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
+        const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+        const skeleton = docSkeletonManagerService?.getSkeleton();
         const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
-        const docViewModel = this._docViewModelManagerService.getViewModel(unitId);
+        const docViewModel = docSkeletonManagerService?.getViewModel();
 
-        if (docDataModel == null || docViewModel == null || docsSkeletonObject == null) {
+        if (docDataModel == null || docViewModel == null || skeleton == null) {
             return;
         }
 
@@ -245,10 +243,7 @@ export class ZenEditorController extends RxDisposable {
 
         docViewModel.reset(docDataModel);
 
-        const { skeleton } = docsSkeletonObject;
-
         const currentRender = this._getDocObject();
-
         if (currentRender == null) {
             return;
         }

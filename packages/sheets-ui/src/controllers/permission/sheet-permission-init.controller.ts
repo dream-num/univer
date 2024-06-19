@@ -278,42 +278,44 @@ export class SheetPermissionInitController extends Disposable {
 
                 this._worksheetProtectionRuleModel.changeRuleInitState(false);
 
-                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                const unitId = workbook.getUnitId();
+                const workbooks = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+                workbooks.forEach((workbook) => {
+                    const unitId = workbook.getUnitId();
 
-                getAllWorkbookPermissionPoint().forEach((F) => {
-                    let instance = new F(unitId);
-                    if (_map.has(instance.id)) {
-                        instance = _map.get(instance.id) as any;
-                    }
-                    this._permissionService.addPermissionPoint(instance);
-                });
-
-                workbook.getSheets().forEach((sheet) => {
-                    const subUnitId = sheet.getSheetId();
-                    [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
-                        let instance = new F(unitId, subUnitId);
+                    getAllWorkbookPermissionPoint().forEach((F) => {
+                        let instance = new F(unitId);
                         if (_map.has(instance.id)) {
                             instance = _map.get(instance.id) as any;
                         }
                         this._permissionService.addPermissionPoint(instance);
                     });
 
-                    const ruleList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
-                    ruleList.forEach((rule) => {
-                        getAllRangePermissionPoint().forEach((F) => {
-                            let instance = new F(unitId, subUnitId, rule.permissionId);
+                    workbook.getSheets().forEach((sheet) => {
+                        const subUnitId = sheet.getSheetId();
+                        [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
+                            let instance = new F(unitId, subUnitId);
                             if (_map.has(instance.id)) {
                                 instance = _map.get(instance.id) as any;
                             }
                             this._permissionService.addPermissionPoint(instance);
                         });
-                    });
-                });
 
-                this._initWorkbookPermissionChange();
-                this._initWorksheetPermissionFromSnapshot();
-                this._initRangePermissionFromSnapshot();
+                        const ruleList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
+                        ruleList.forEach((rule) => {
+                            getAllRangePermissionPoint().forEach((F) => {
+                                let instance = new F(unitId, subUnitId, rule.permissionId);
+                                if (_map.has(instance.id)) {
+                                    instance = _map.get(instance.id) as any;
+                                }
+                                this._permissionService.addPermissionPoint(instance);
+                            });
+                        });
+                    });
+
+                    this._initWorkbookPermissionChange();
+                    this._initWorksheetPermissionFromSnapshot();
+                    this._initRangePermissionFromSnapshot();
+                });
             })
         );
     }

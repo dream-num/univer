@@ -16,7 +16,6 @@
 
 import type { ICommandInfo, Nullable, Workbook } from '@univerjs/core';
 import { checkForSubstrings, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
 import { IRenderManagerService, ITextSelectionRenderManager, ScrollBar } from '@univerjs/engine-render';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { CoverContentCommand, DocSkeletonManagerService, RichTextEditingMutation, VIEWPORT_KEY } from '@univerjs/docs';
@@ -29,12 +28,10 @@ export class DocEditorBridgeController extends Disposable {
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IEditorService private readonly _editorService: IEditorService,
         @ICommandService private readonly _commandService: ICommandService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
-
     ) {
         super();
         this._initialize();
@@ -78,10 +75,13 @@ export class DocEditorBridgeController extends Disposable {
             return;
         }
 
-        const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
-
         const editorDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
+        if (!editorDataModel) {
+            return;
+        }
 
+        const skeleton = this._renderManagerService.getRenderById(editorDataModel.getUnitId())
+            ?.with(DocSkeletonManagerService).getSkeleton();
         if (editor == null || editor.render == null || skeleton == null || editorDataModel == null) {
             return;
         }

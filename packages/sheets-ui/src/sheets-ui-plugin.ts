@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { DependentOn, IUniverInstanceService, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IUniverInstanceService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
@@ -26,10 +26,8 @@ import { UniverUIPlugin } from '@univerjs/ui';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
-import { EditingController } from './controllers/editor/editing.controller';
-import { EndEditController } from './controllers/editor/end-edit.controller';
 import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
-import { StartEditController } from './controllers/editor/start-edit.controller';
+import { EditingRenderController } from './controllers/editor/editing.render-controller';
 import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
 import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 import { HeaderMenuRenderController } from './controllers/render-controllers/header-menu.render-controller';
@@ -52,13 +50,13 @@ import {
 import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
-import { ScrollManagerService } from './services/scroll-manager.service';
+import { SheetScrollManagerService } from './services/scroll-manager.service';
 import { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
 import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
-import { SheetRenderController } from './controllers/render-controllers/sheet-render.controller';
+import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 import { HoverRenderController } from './controllers/hover-render.controller';
 import { HoverManagerService } from './services/hover-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
@@ -94,7 +92,6 @@ export class UniverSheetsUIPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverSheetsUIConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
@@ -117,7 +114,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [IAutoFillService, { useClass: AutoFillService }],
                 [SheetPrintInterceptorService],
 
-                [ScrollManagerService],
                 // This would be removed from global injector and moved into RenderUnit provider.
                 // [SheetSkeletonManagerService],
                 [ISelectionRenderService, { useClass: SelectionRenderService }],
@@ -131,7 +127,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 // controllers
                 [ActiveWorksheetController],
                 [AutoHeightController],
-                [EndEditController],
                 [FormulaEditorController],
                 [HeaderFreezeRenderController],
                 [SheetClipboardController],
@@ -142,9 +137,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                         useFactory: () => this._injector.createInstance(SheetUIController, this._config),
                     },
                 ],
-                [StartEditController],
                 [StatusBarController],
-                [EditingController],
                 [AutoFillController],
                 [FormatPainterController],
 
@@ -175,22 +168,24 @@ export class UniverSheetsUIPlugin extends Plugin {
     }
 
     override onRendered(): void {
-        this._registerRenderControllers();
+        this._registerRenderModules();
     }
 
     private _registerRenderBasics(): void {
         ([
             SheetSkeletonManagerService,
             SheetRenderController,
-        ]).forEach((controller) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
+        ]).forEach((m) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });
     }
 
     // We have to let render basics get bootstrapped before. Because some render controllers relies on
     // a correct skeleton when they get loaded.
-    private _registerRenderControllers(): void {
+    private _registerRenderModules(): void {
         ([
+            SheetScrollManagerService,
+
             // https://github.com/dream-num/univer-pro/issues/669
             // HeaderMoveRenderController(HMRC) must be initialized before SelectionRenderController(SRC).
             // Before HMRC expected selections remain unchanged when user clicks on the header. If we don't initialize HMRC before SRC,
@@ -214,13 +209,17 @@ export class UniverSheetsUIPlugin extends Plugin {
             ForceStringRenderController,
             CellCustomRenderController,
             SheetContextMenuRenderController,
-            EditorBridgeRenderController,
 
+            // editor
+            EditorBridgeRenderController,
+            EditingRenderController,
+
+            // permission
             SheetPermissionInterceptorCanvasRenderController,
             SheetPermissionInterceptorFormulaRenderController,
             SheetPermissionRenderController,
-        ]).forEach((controller) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
+        ]).forEach((m) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });
     }
 
@@ -228,8 +227,6 @@ export class UniverSheetsUIPlugin extends Plugin {
         const univerInstanceService = this._univerInstanceService;
         univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(filter((v) => !!v))
-            .subscribe((workbook) => {
-                univerInstanceService.focusUnit(workbook!.getUnitId());
-            });
+            .subscribe((workbook) => univerInstanceService.focusUnit(workbook!.getUnitId()));
     }
 }

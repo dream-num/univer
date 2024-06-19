@@ -20,7 +20,7 @@ import { SetFrozenMutation, SetSelectionsOperation } from '@univerjs/sheets';
 // FIXME: should not import from the inside of the package
 
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { ScrollManagerService } from '../../../services/scroll-manager.service';
+import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import { ShortcutExperienceService } from '../../../services/shortcut-experience.service';
 import {
     CancelFrozenCommand,
@@ -51,7 +51,7 @@ export function createSelectionCommandTestBed(workbookData?: IWorkbookData) {
 export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
     const { univer, get, sheet } = createCommandTestBed(workbookData || SIMPLE_SELECTION_WORKBOOK_DATA, [
         [ShortcutExperienceService],
-        [ScrollManagerService],
+        [SheetScrollManagerService],
         [IRenderManagerService, { useClass: RenderManagerService }],
     ]);
 

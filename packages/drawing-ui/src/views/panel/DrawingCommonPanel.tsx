@@ -127,6 +127,7 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
             onClearControlObserver?.dispose();
             onFocusObserver?.unsubscribe();
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

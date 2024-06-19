@@ -50,7 +50,7 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
     const drawingParam = drawings[0] as IDocDrawing;
 
     if (drawingParam == null) {
-        return;
+        return null;
     }
 
     const { unitId } = drawingParam;
@@ -60,14 +60,21 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
     const renderObject = renderManagerService.getRenderById(unitId);
     const scene = renderObject?.scene;
     if (scene == null) {
-        return;
+        return null;
     }
 
     const [disableWrapText, setDisableWrapText] = useState(true);
     const [disableDistTB, setDisableDistTB] = useState(true);
     const [disableDistLR, setDisableDistLR] = useState(true);
-
     const [wrappingStyle, setWrappingStyle] = useState(TextWrappingStyle.INLINE);
+    const [wrapText, setWrapText] = useState('');
+    const [distToText, setDistToText] = useState<IDistToText>({
+        distT: 0,
+        distL: 0,
+        distB: 0,
+        distR: 0,
+    });
+    const [showPanel, setShowPanel] = useState(true);
 
     function handleWrappingStyleChange(value: number | string | boolean) {
         setWrappingStyle(value as TextWrappingStyle);
@@ -93,8 +100,6 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
         });
     }
 
-    const [wrapText, setWrapText] = useState('');
-
     function handleWrapTextChange(value: number | string | boolean) {
         setWrapText(value as string);
 
@@ -118,13 +123,6 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
             wrapText: value as WrapTextType,
         });
     }
-
-    const [distToText, setDistToText] = useState<IDistToText>({
-        distT: 0,
-        distL: 0,
-        distB: 0,
-        distR: 0,
-    });
 
     function handleDistToTextChange(value: Nullable<number>, direction: keyof IDistToText) {
         if (value == null) {
@@ -232,8 +230,6 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
             }
         }
     }
-
-    const [showPanel, setShowPanel] = useState(true);
 
     useEffect(() => {
         updateFocusDrawingState();

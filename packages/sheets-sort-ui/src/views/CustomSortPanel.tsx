@@ -16,7 +16,7 @@
 
 import type { IRange, Nullable } from '@univerjs/core';
 import { LocaleService, LocaleType, throttle } from '@univerjs/core';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { type IOrderRule, SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { Button, Checkbox, DraggableList, Dropdown, Radio, RadioGroup } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -36,6 +36,8 @@ export function CustomSortPanel() {
     const localeService = useDependency(LocaleService);
 
     const [hasTitle, setHasTitle] = useState(false);
+    const [scrollPosition, setScrollPosition] = useState(0);
+    const listEndRef = useRef<HTMLDivElement>(null);
 
     const state = sheetsSortUIService.customSortState();
     if (!state || !state.location) {
@@ -60,14 +62,15 @@ export function CustomSortPanel() {
         setList(newList as IOrderRule[]);
     }, [list]);
 
-    const newItem = useCallback(throttle(() => {
-        const newList = [...list];
-        const nextColIndex = findNextColIndex(range, list);
-        if (nextColIndex !== null) {
-            newList.push({ type: SortType.ASC, colIndex: nextColIndex });
-            setList(newList);
-        }
-    }, 200), [list, range]);
+    const newItem = useCallback(
+        throttle(() => {
+            const newList = [...list];
+            const nextColIndex = findNextColIndex(range, list);
+            if (nextColIndex !== null) {
+                newList.push({ type: SortType.ASC, colIndex: nextColIndex });
+                setList(newList);
+            }
+        }, 200), [list, range]);
 
     const apply = useCallback((orderRules: IOrderRule[], hasTitle: boolean) => {
         sheetsSortService.applySort({ range, orderRules, hasTitle });
@@ -86,6 +89,12 @@ export function CustomSortPanel() {
             sheetsSortUIService.setSelection(unitId, subUnitId, range);
         }
     }, [sheetsSortUIService, range, subUnitId, unitId]);
+
+    useEffect(() => {
+        if (listEndRef.current && list.length > 5) {
+            listEndRef.current.scrollTop = listEndRef.current.scrollHeight;
+        }
+    }, [list]);
 
     const canNew = list.length < titles.length;
 
@@ -115,7 +124,14 @@ export function CustomSortPanel() {
                         )}
 
                 </div>
-                <div className={styles.conditionList}>
+                <div
+                    className={styles.conditionList}
+                    onScroll={(e) => {
+                        const position = e.currentTarget.scrollTop;
+                        setScrollPosition(position);
+                    }}
+                    ref={listEndRef}
+                >
                     <DraggableList
                         list={dragList}
                         onListChange={setList}
@@ -127,6 +143,7 @@ export function CustomSortPanel() {
                                 list={dragList}
                                 item={item}
                                 onChange={(value, index) => onItemChange(index, value)}
+                                scrollPosition={scrollPosition}
                             />
                         )}
                         rowHeight={32}
@@ -142,14 +159,35 @@ export function CustomSortPanel() {
     );
 }
 
-export function SortOptionItem(props: { titles: { index: number; label: string }[]; list: IOrderRule[]; item: IOrderRule; onChange: (value: Nullable<IOrderRule>, index: number) => void }) {
-    const { list, item, titles, onChange } = props;
+interface ISortOptionItemProps {
+    titles: { index: number; label: string }[];
+    list: IOrderRule[];
+    item: IOrderRule;
+    scrollPosition: number;
+    onChange: (value: Nullable<IOrderRule>, index: number) => void;
+}
+
+export function SortOptionItem(props: ISortOptionItemProps) {
+    const { list, item, titles, onChange, scrollPosition } = props;
     const localeService = useDependency(LocaleService);
+
     const availableMenu = titles.filter((title) => (!list.some((item) => item.colIndex === title.index)) || title.index === item.colIndex);
     const currentIndex = list.findIndex((listItem) => listItem.colIndex === item.colIndex);
+
     const handleChangeColIndex = useCallback((menuItem: { index: number; label: string }) => {
         onChange({ ...item, colIndex: menuItem.index }, currentIndex);
+        setVisible(false);
     }, [currentIndex, item, onChange]);
+
+    const [visible, setVisible] = useState(false);
+
+    const onVisibleChange = (visible: boolean) => {
+        setVisible(visible);
+    };
+
+    useEffect(() => {
+        setVisible(false);
+    }, [scrollPosition]);
 
     const showDelete = list.length > 1;
     const itemLabel = titles.find((title) => title.index === item.colIndex)?.label;
@@ -165,6 +203,8 @@ export function SortOptionItem(props: { titles: { index: number; label: string }
                     <Dropdown
                         placement="bottomLeft"
                         trigger={['click']}
+                        visible={visible}
+                        onVisibleChange={onVisibleChange}
                         overlay={(
                             <ul className={styles.customSortColMenu}>
                                 {availableMenu.map((menuItem) => (

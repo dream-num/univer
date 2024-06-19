@@ -17,6 +17,7 @@
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { booleanObjectIntersection, valueObjectCompare } from '../../../engine/utils/object-compare';
+import { calculateMaxDimensions } from '../../../engine/utils/value-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject, IArrayValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -46,24 +47,10 @@ export class Minifs extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const sumRowLength = (minRange as ArrayValueObject).getRowCount();
-        const sumColumnLength = (minRange as ArrayValueObject).getColumnCount();
-        // The size of the extended range is determined by the maximum width and height of the criteria range.
-        let maxRowLength = 0;
-        let maxColumnLength = 0;
+        const { maxRowLength, maxColumnLength } = calculateMaxDimensions(variants);
 
-        variants.forEach((variant, i) => {
-            if (i % 2 === 1) {
-                if (variant.isArray()) {
-                    const arrayValue = variant as ArrayValueObject;
-                    maxRowLength = Math.max(maxRowLength, arrayValue.getRowCount());
-                    maxColumnLength = Math.max(maxColumnLength, arrayValue.getColumnCount());
-                } else {
-                    maxRowLength = Math.max(maxRowLength, 1);
-                    maxColumnLength = Math.max(maxColumnLength, 1);
-                }
-            }
-        });
+        const minRowLength = (minRange as ArrayValueObject).getRowCount();
+        const minColumnLength = (minRange as ArrayValueObject).getColumnCount();
 
         const booleanResults: BaseValueObject[][] = [];
 
@@ -74,7 +61,7 @@ export class Minifs extends BaseFunction {
 
             const rangeRowLength = range.getRowCount();
             const rangeColumnLength = range.getColumnCount();
-            if (rangeRowLength !== sumRowLength || rangeColumnLength !== sumColumnLength) {
+            if (rangeRowLength !== minRowLength || rangeColumnLength !== minColumnLength) {
                 return expandArrayValueObject(maxRowLength, maxColumnLength, ErrorValueObject.create(ErrorType.NA));
             }
 

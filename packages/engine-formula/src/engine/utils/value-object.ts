@@ -129,3 +129,28 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
         };
     }
 }
+
+/**
+ * The size of the extended range is determined by the maximum width and height of the criteria range.
+ * @param variants
+ * @returns
+ */
+export function calculateMaxDimensions(variants: BaseValueObject[]) {
+    let maxRowLength = 0;
+    let maxColumnLength = 0;
+
+    variants.forEach((variant, i) => {
+        if (i % 2 === 1) {
+            if (variant.isArray()) {
+                const arrayValue = variant as ArrayValueObject;
+                maxRowLength = Math.max(maxRowLength, arrayValue.getRowCount());
+                maxColumnLength = Math.max(maxColumnLength, arrayValue.getColumnCount());
+            } else {
+                maxRowLength = Math.max(maxRowLength, 1);
+                maxColumnLength = Math.max(maxColumnLength, 1);
+            }
+        }
+    });
+
+    return { maxRowLength, maxColumnLength };
+}

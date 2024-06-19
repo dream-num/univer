@@ -25,7 +25,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
-import { ArrangeTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
+import { ArrangeTypeEnum } from '@univerjs/drawing';
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetDrawingArrangeCommandParams extends IDrawingOrderMapParam {
@@ -43,7 +43,6 @@ export const SetDocDrawingArrangeCommand: ICommand = {
     handler: (accessor: IAccessor, params?: ISetDrawingArrangeCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const docDrawingService = accessor.get(IDocDrawingService);
-        const drawingManagerService = accessor.get(IDrawingManagerService);
 
         if (params == null) {
             return false;
@@ -68,17 +67,11 @@ export const SetDocDrawingArrangeCommand: ICommand = {
             return false;
         }
 
-        const { objects, redo } = jsonOp;
+        const { redo } = jsonOp;
 
         if (redo == null) {
             return false;
         }
-
-        // TODO: @JOCS, Data model changes, automatically notifying drawingManagerService of modifications, and then updating the render layer？
-        drawingManagerService.applyJson1(unitId, subUnitId, redo);
-        docDrawingService.applyJson1(unitId, subUnitId, redo);
-        drawingManagerService.orderNotification(objects as IDrawingOrderMapParam);
-        docDrawingService.orderNotification(objects as IDrawingOrderMapParam);
 
         const rawActions: JSONXActions = [];
 

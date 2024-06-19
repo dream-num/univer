@@ -26,6 +26,7 @@ import { StartAddCommentOperation } from '../../commands/operations/show-comment
 import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
 import type { IAddDocCommentComment } from '../../commands/commands/add-doc-comment.command';
 import { AddDocCommentComment } from '../../commands/commands/add-doc-comment.command';
+import { DeleteDocCommentComment, type IDeleteDocCommentComment } from '../../commands/commands/delete-doc-comment.command';
 
 export const DocThreadCommentPanel = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -68,6 +69,17 @@ export const DocThreadCommentPanel = () => {
                     return false;
                 }
 
+                return true;
+            }}
+            onDeleteComment={(comment) => {
+                if (!comment.parentId) {
+                    const params: IDeleteDocCommentComment = {
+                        unitId,
+                        commentId: comment.id,
+                    };
+                    commandService.executeCommand(DeleteDocCommentComment.id, params);
+                    return false;
+                }
                 return true;
             }}
         />

@@ -135,7 +135,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             count++;
         }
 
-        const deleteStart = start - (count + 1);
+        const deleteStart = start - (count);
         const deleteLen = len + (count * 2);
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,

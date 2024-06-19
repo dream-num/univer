@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { CustomRangeType, IMutationInfo, ITextRange } from '@univerjs/core';
-import { DataStreamTreeTokenType, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import type { CustomRangeType, DocumentDataModel, IMutationInfo, ITextRange } from '@univerjs/core';
+import { DataStreamTreeTokenType, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
@@ -110,7 +110,7 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
         return false;
     }
 
-    const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+    const documentDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     if (!documentDataModel) {
         return false;
     }
@@ -132,7 +132,69 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     return doMutation;
 }
 
-export interface IRemoveCustomRangeParam {
+export interface IDeleteCustomRangeParam {
     unitId: string;
     rangeId: string;
+    segmentId?: string;
+}
+
+export function deleteCustomRange(accessor: IAccessor, params: IDeleteCustomRangeParam) {
+    const { unitId, rangeId, segmentId } = params;
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+
+    const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
+    if (!documentDataModel) {
+        return false;
+    }
+
+    const range = documentDataModel.getBody()?.customRanges?.find((r) => r.rangeId === rangeId);
+    if (!range) {
+        return false;
+    }
+    const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+        id: RichTextEditingMutation.id,
+        params: {
+            unitId,
+            actions: [],
+            textRanges: undefined,
+        },
+    };
+
+    const { startIndex, endIndex } = range;
+    const textX = new TextX();
+    const jsonX = JSONX.getInstance();
+    const len = endIndex - startIndex + 1;
+
+    if (startIndex > 0) {
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: startIndex,
+            segmentId,
+        });
+    }
+
+    textX.push({
+        t: TextXActionType.DELETE,
+        len: 1,
+        segmentId,
+        line: 0,
+    });
+
+    if (len - 2 > 0) {
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: len - 2,
+            segmentId,
+        });
+    }
+
+    textX.push({
+        t: TextXActionType.DELETE,
+        len: 1,
+        segmentId,
+        line: 0,
+    });
+
+    doMutation.params.actions = jsonX.editOp(textX.serialize());
+    return doMutation;
 }

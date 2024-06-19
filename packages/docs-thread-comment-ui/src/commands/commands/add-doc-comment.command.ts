@@ -16,8 +16,7 @@
 
 import type { ICommand, ITextRange } from '@univerjs/core';
 import { CommandType, CustomRangeType, ICommandService, sequenceExecuteAsync } from '@univerjs/core';
-import { addCustomRangeFactory, serializeTextRange } from '@univerjs/docs';
-import type { TextRange } from '@univerjs/engine-render';
+import { addCustomRangeFactory } from '@univerjs/docs';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { AddCommentMutation, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';

@@ -21,6 +21,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DocThreadCommentPanel } from '../views/doc-thread-comment-panel';
 import { ShowCommentPanelOperation, StartAddCommentOperation } from '../commands/operations/show-comment-panel.operation';
+import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
 import { AddDocCommentMenuItemFactory } from './menu';
 
 export interface IDocThreadCommentUIConfig {
@@ -45,6 +46,7 @@ export class DocThreadCommentUIController extends Disposable {
     private _initCommands() {
         [
             AddDocCommentComment,
+            DeleteDocCommentComment,
             ShowCommentPanelOperation,
             StartAddCommentOperation,
         ].forEach((command) => {

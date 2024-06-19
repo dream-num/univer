@@ -32,7 +32,7 @@ import type { ITextActiveRange } from '../../services/text-selection-manager.ser
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { isCustomRangeSplitSymbol } from '../../basics/custom-range';
+import { getRangeWithSpecialCharacter, isCustomRangeSplitSymbol } from '../../basics/custom-range';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, DeleteDirection, UpdateCommand } from './core-editing.command';
 
@@ -49,7 +49,7 @@ export const DeleteLeftCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const activeRange = textSelectionManagerService.getActiveRange();
+        let activeRange = textSelectionManagerService.getActiveRange();
         const ranges = textSelectionManagerService.getSelections();
         const skeleton = docSkeletonManagerService.getCurrent()?.skeleton;
 
@@ -59,9 +59,15 @@ export const DeleteLeftCommand: ICommand = {
             return false;
         }
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!docDataModel) {
+        const body = docDataModel?.getBody();
+        if (!docDataModel || !body) {
             return false;
         }
+
+        activeRange = {
+            ...activeRange,
+            ...getRangeWithSpecialCharacter(activeRange, body),
+        };
 
         const { startOffset, collapsed, segmentId, style } = activeRange;
 
@@ -158,11 +164,10 @@ export const DeleteLeftCommand: ICommand = {
 
                     if (glyph) {
                         const deleteRange = {
-                            startOffset: cursor,
-                            endOffset: cursor,
+                            startOffset: cursor + glyph.count,
+                            endOffset: cursor + glyph.count,
                             collapsed: true,
                         };
-                        cursor -= glyph.count;
                         result = await commandService.executeCommand(DeleteCommand.id, {
                             unitId: docDataModel.getUnitId(),
                             range: deleteRange,
@@ -214,7 +219,7 @@ export const DeleteRightCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const activeRange = textSelectionManagerService.getActiveRange();
+        let activeRange = textSelectionManagerService.getActiveRange();
         const ranges = textSelectionManagerService.getSelections();
         const skeleton = docSkeletonManagerService.getCurrent()?.skeleton;
 
@@ -224,10 +229,15 @@ export const DeleteRightCommand: ICommand = {
         }
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!docDataModel) {
+        const body = docDataModel?.getBody();
+        if (!docDataModel || !body) {
             return false;
         }
 
+        activeRange = {
+            ...activeRange,
+            ...getRangeWithSpecialCharacter(activeRange, body),
+        };
         const { startOffset, collapsed, segmentId, style } = activeRange;
 
         // No need to delete when the cursor is at the last position of the last paragraph.

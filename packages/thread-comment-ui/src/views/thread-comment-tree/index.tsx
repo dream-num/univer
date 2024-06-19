@@ -234,6 +234,10 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     };
 
     const handleDeleteRoot = () => {
+        if (comments?.root && (onDeleteComment?.(comments.root) === false)) {
+            return;
+        }
+
         commandService.executeCommand(
             DeleteCommentTreeCommand.id,
             {

@@ -103,9 +103,8 @@ export class ConditionalFormattingRuleModel {
             const conditionalFormattingService = this._injector.get(ConditionalFormattingService);
 
             Object.assign(oldRule, rule);
-
             const dispose = conditionalFormattingService.interceptorManager.intercept(conditionalFormattingService.interceptorManager.getInterceptPoints().beforeUpdateRuleResult, {
-                handler: (config) => {
+                handler: (config, _, next) => {
                     if (unitId === config?.unitId && subUnitId === config.subUnitId && oldRule.cfId === config.cfId) {
                         cloneRange.forEach((range) => {
                             Range.foreach(range, (row, col) => {
@@ -119,7 +118,9 @@ export class ConditionalFormattingRuleModel {
                             });
                         });
                         dispose();
+                        return;
                     }
+                    next(config);
                 },
             });
 

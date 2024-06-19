@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import { LocaleService } from '@univerjs/core';
+import { LocaleService, LocaleType } from '@univerjs/core';
 import React, { useCallback, useState } from 'react';
 import { type IOrderRule, SheetsSortService, SortType } from '@univerjs/sheets-sort';
 import { Button, Checkbox, DraggableList, Dropdown, Radio, RadioGroup } from '@univerjs/design';
@@ -153,6 +153,8 @@ export function SortOptionItem(props: { titles: { index: number; label: string }
 
     const showDelete = list.length > 1;
     const itemLabel = titles.find((title) => title.index === item.colIndex)?.label;
+
+    const radioClass = localeService.getCurrentLocale() === LocaleType.ZH_CN ? styles.customSortPanelItemOrderRadioCn : styles.customSortPanelItemOrderRadio;
     return (
         <div className={styles.customSortPanelItem}>
             <div className={styles.customSortPanelItemHead}>
@@ -193,7 +195,7 @@ export function SortOptionItem(props: { titles: { index: number; label: string }
             </div>
             <div className={styles.customSortPanelItemOrder}>
                 <RadioGroup
-                    className={styles.customSortPanelItemOrderRadio}
+                    className={radioClass}
                     value={item.type}
                     onChange={(value) => {
                         onChange({ ...item, type: value as SortType }, currentIndex);

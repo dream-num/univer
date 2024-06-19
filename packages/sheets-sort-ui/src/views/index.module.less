@@ -41,7 +41,6 @@
     .custom-sort-panel-item {
         display: flex;
         align-items: center;
-        justify-content: space-between;
         border-bottom: 1px solid var(--gray-200);
 
         &-head {
@@ -63,6 +62,8 @@
             cursor: pointer;
             width: 14px;
             height: 14px;
+            position: absolute;
+            right: 0;
         }
         &-column-input {
             display: flex;
@@ -95,8 +96,11 @@
         }
         &-order-radio {
             display: flex;
-            gap: 16px;
-            padding: 0 16px;
+            padding: 0 10px;
+        }
+        &-order-radio-cn {
+            display: flex;
+            padding: 0 20px;
         }
     }
 

@@ -19,6 +19,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SheetsRenderService } from '@univerjs/sheets-ui';
 import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import { FormulaDataModel } from '@univerjs/engine-formula';
 import { enUS } from '../../locale';
 import { SheetsSortService } from '../../services/sheets-sort.service';
 import { SheetsSortController } from '../../controllers/sheets-sort.controller';
@@ -146,6 +147,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([SheetsRenderService, { useClass: mockSheetsRenderService }]);
             injector.add([SelectionManagerService, { useClass: mockSelectionManagerService as any }]);
             injector.add([SheetInterceptorService]);
+            injector.add([FormulaDataModel, { useClass: mockFormulaDataModel }]);
 
             dependencies?.forEach((d) => injector.add(d));
         }
@@ -177,5 +179,10 @@ class mockSheetsRenderService {
 
 class mockSelectionManagerService {
     replace() {
+    }
+}
+
+class mockFormulaDataModel {
+    getArrayFormulaRange() {
     }
 }

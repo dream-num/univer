@@ -16,3 +16,4 @@
 
 export { type ITooltipProps, Tooltip } from './Tooltip';
 export { resizeObserverCtor } from './hooks';
+export { type ITooltipAutoProps, TooltipAuto } from './TooltipAuto';

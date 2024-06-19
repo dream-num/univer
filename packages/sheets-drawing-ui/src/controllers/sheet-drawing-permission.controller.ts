@@ -18,9 +18,9 @@ import type { Workbook } from '@univerjs/core';
 import { Disposable, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
-import { WorksheetEditPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { WorkbookEditablePermission, WorkbookViewPermission, WorksheetEditPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-import { combineLatest, distinctUntilChanged, filter } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, map } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingPermissionController)
 export class SheetDrawingPermissionController extends Disposable {
@@ -53,8 +53,8 @@ export class SheetDrawingPermissionController extends Disposable {
                     }
                     const unitId = workbook.getUnitId();
                     const subUnitId = sheet.getSheetId();
-                    const worksheetViewPermission = this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id);
-                    if (worksheetViewPermission?.value) {
+                    const worksheetViewPermission = this._permissionService.composePermission([new WorkbookViewPermission(unitId).id, new WorksheetViewPermission(unitId, subUnitId).id]).every((permission) => permission.value);
+                    if (worksheetViewPermission) {
                         this._drawingManagerService.setDrawingVisible(true);
                     } else {
                         this._drawingManagerService.setDrawingVisible(false);
@@ -94,8 +94,8 @@ export class SheetDrawingPermissionController extends Disposable {
                     }
                     const unitId = workbook.getUnitId();
                     const subUnitId = sheet.getSheetId();
-                    const worksheetEditPermission = this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id);
-                    if (worksheetEditPermission?.value) {
+                    const worksheetEditPermission = this._permissionService.composePermission([new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id]).every((permission) => permission.value);
+                    if (worksheetEditPermission) {
                         this._drawingManagerService.setDrawingEditable(true);
                     } else {
                         this._drawingManagerService.setDrawingEditable(false);
@@ -141,17 +141,17 @@ export class SheetDrawingPermissionController extends Disposable {
                     if (scene == null) {
                         return;
                     }
-                    const worksheetViewPermission$ = this._permissionService.getPermissionPoint$(new WorksheetViewPermission(unitId, subUnitId).id);
+                    const worksheetViewPermission$ = this._permissionService.composePermission$([new WorkbookViewPermission(unitId).id, new WorksheetViewPermission(unitId, subUnitId).id]).pipe(map((permissions) => permissions.every((item) => item.value)));
                     worksheetViewPermission$?.pipe(
-                        filter((permission) => permission.value !== initialViewPermission),
+                        filter((permission) => permission !== initialViewPermission),
                         distinctUntilChanged()
                     ).subscribe({
                         next: (permission) => {
-                            initialViewPermission = permission.value;
-                            this._drawingManagerService.setDrawingVisible(permission.value);
+                            initialViewPermission = permission;
+                            this._drawingManagerService.setDrawingVisible(permission);
                             const objects = scene.getAllObjects();
 
-                            if (permission.value) {
+                            if (permission) {
                                 const drawingData = this._drawingManagerService.getDrawingData(unitId, subUnitId);
                                 const drawingDataValues = Object.values(drawingData);
                                 this._drawingManagerService.addNotification(drawingDataValues);
@@ -163,6 +163,11 @@ export class SheetDrawingPermissionController extends Disposable {
                                 });
                             }
                         },
+                    });
+                    this._permissionService.getPermissionPoint$(new WorksheetViewPermission(unitId, subUnitId).id)?.pipe(
+                        filter((permission) => permission.value !== initialViewPermission),
+                        distinctUntilChanged()
+                    ).subscribe({
                         complete: () => {
                             initialViewPermission = true;
                             this._drawingManagerService.setDrawingVisible(true);
@@ -197,17 +202,17 @@ export class SheetDrawingPermissionController extends Disposable {
                     if (scene == null) {
                         return;
                     }
-                    const worksheetEditPermission$ = this._permissionService.getPermissionPoint$(new WorksheetEditPermission(unitId, subUnitId).id);
-                    worksheetEditPermission$?.pipe(
-                        filter((permission) => permission.value !== initialEditPermission),
+                    const composeWorksheetEditPermission = this._permissionService.composePermission$([new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id]).pipe(map((permissions) => permissions.every((item) => item.value)));
+                    composeWorksheetEditPermission?.pipe(
+                        filter((permission) => permission !== initialEditPermission),
                         distinctUntilChanged()
                     ).subscribe({
                         next: (permission) => {
-                            initialEditPermission = permission.value;
-                            this._drawingManagerService.setDrawingVisible(permission.value);
+                            initialEditPermission = permission;
+                            this._drawingManagerService.setDrawingEditable(permission);
                             const objects = scene.getAllObjects();
 
-                            if (permission.value) {
+                            if (permission) {
                                 objects.forEach((object) => {
                                     if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => item.drawingId === object.oKey)) {
                                         scene.attachTransformerTo(object);
@@ -224,6 +229,11 @@ export class SheetDrawingPermissionController extends Disposable {
                                 });
                             }
                         },
+                    });
+                    this._permissionService.getPermissionPoint$(new WorksheetEditPermission(unitId, subUnitId).id)?.pipe(
+                        filter((permission) => permission.value !== initialEditPermission),
+                        distinctUntilChanged()
+                    ).subscribe({
                         complete: () => {
                             initialEditPermission = true;
                             const unitId = workbook.getUnitId();
@@ -235,7 +245,7 @@ export class SheetDrawingPermissionController extends Disposable {
                             if (scene == null) {
                                 return;
                             }
-                            this._drawingManagerService.setDrawingVisible(true);
+                            this._drawingManagerService.setDrawingEditable(true);
                             const objects = scene.getAllObjects();
                             objects.forEach((object) => {
                                 if (object.classType === RENDER_CLASS_TYPE.IMAGE && drawingDataValues.some((item) => item.drawingId === object.oKey)) {

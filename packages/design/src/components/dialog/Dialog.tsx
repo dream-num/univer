@@ -87,6 +87,10 @@ export interface IDialogProps {
      */
     onClose?: () => void;
 
+    /**
+     *  Whether the dialog should show a mask.
+     */
+    mask?: boolean;
     className?: string;
 }
 
@@ -105,6 +109,7 @@ export function Dialog(props: IDialogProps) {
         preservePositionOnDestroy = false,
         footer,
         onClose,
+        mask,
     } = props;
     const [dragDisabled, setDragDisabled] = useState(false);
     const [positionOffset, setPositionOffset] = useState<{ x: number; y: number } | null>(null);
@@ -184,12 +189,14 @@ export function Dialog(props: IDialogProps) {
             : modal;
     };
 
+    const needMask = mask ?? !draggable;
+
     return mountContainer && (
         <RcDialog
             className={className}
             width={width}
             prefixCls={styles.dialog}
-            rootClassName={draggable ? styles.dialogRootDraggable : styles.dialogRoot}
+            rootClassName={!needMask ? styles.dialogRootDraggable : styles.dialogRoot}
             getContainer={() => mountContainer}
             visible={visible}
             title={TitleIfDraggable}
@@ -197,7 +204,7 @@ export function Dialog(props: IDialogProps) {
             closeIcon={closeIcon}
             destroyOnClose={destroyOnClose}
             footer={footer}
-            mask={!draggable}
+            mask={needMask}
             style={style}
             onClose={onClose}
         >

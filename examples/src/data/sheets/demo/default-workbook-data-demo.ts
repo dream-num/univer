@@ -14007,6 +14007,12 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         s: '1',
                         v: 'A Schedule of Items',
                     },
+                    10: {
+                        v: 10,
+                    },
+                    11: {
+                        v: 234,
+                    },
                 },
                 1: {
                     0: {
@@ -14017,10 +14023,30 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         },
                         v: 1,
                     },
+                    10: {
+                        v: 12313,
+                    },
+                    11: {
+                        v: 123,
+                    },
                 },
                 2: {
                     0: {
                         f: '=A2',
+                    },
+                    10: {
+                        v: 0,
+                    },
+                    11: {
+                        v: 235,
+                    },
+                },
+                4: {
+                    10: {
+                        v: 123,
+                    },
+                    11: {
+                        v: 632,
                     },
                 },
                 5: {
@@ -14040,6 +14066,9 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     9: {
                         s: 'uJSelZ22',
                     },
+                    11: {
+                        v: 126,
+                    },
                 },
                 6: {
                     5: {
@@ -14055,8 +14084,18 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     8: {
                         s: 'uJSelZ22',
                     },
+                    10: {
+                        v: 'ewe',
+                    },
+                    11: {
+                        v: 893,
+                    },
                 },
-                10: {},
+                10: {
+                    11: {
+                        v: 12,
+                    },
+                },
                 11: {
                     4: {
                         v: 123,
@@ -14169,7 +14208,13 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             scrollLeft: 0,
             defaultColumnWidth: 73,
             defaultRowHeight: 19,
-            mergeData: [],
+            mergeData: [
+                { startRow: 0, endRow: 1, startColumn: 10, endColumn: 10 },
+                { startRow: 2, endRow: 3, startColumn: 10, endColumn: 10 },
+                { startRow: 4, endRow: 5, startColumn: 10, endColumn: 10 },
+                { startRow: 6, endRow: 7, startColumn: 10, endColumn: 10 },
+                { startRow: 8, endRow: 9, startColumn: 10, endColumn: 10 },
+            ],
             rowData: {
                 11: {
                     hd: 0,

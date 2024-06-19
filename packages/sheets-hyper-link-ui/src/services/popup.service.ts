@@ -93,6 +93,9 @@ export class SheetsHyperLinkPopupService extends Disposable {
             componentKey: CellLinkPopup.componentKey,
             direction: 'bottom',
             closeOnSelfTarget: true,
+            onClickOutside: () => {
+                this.hideCurrentPopup();
+            },
         });
         if (disposable) {
             this._currentPopup = {

@@ -20,7 +20,7 @@ import React from 'react';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import cs from 'clsx';
-import { MessageType, Tooltip, TooltipAuto } from '@univerjs/design';
+import { MessageType, Tooltip } from '@univerjs/design';
 import { IMessageService, useObservable } from '@univerjs/ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
@@ -62,9 +62,9 @@ export const CellLinkPopup = () => {
                 <div className={styles.cellLinkType}>
                     {iconsMap[linkObj.type]}
                 </div>
-                <TooltipAuto wrapperClass={styles.cellLinkUrl} title={linkObj.name}>
-                    {linkObj.name}
-                </TooltipAuto>
+                <Tooltip showIfEllipsis title={linkObj.name}>
+                    <span className={styles.cellLinkUrl}>{linkObj.name}</span>
+                </Tooltip>
             </div>
             <div className={styles.cellLinkOperations}>
                 {currentPopup.copyPermission && (

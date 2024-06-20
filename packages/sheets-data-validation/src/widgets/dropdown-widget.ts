@@ -189,14 +189,14 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
     private _drawDownIcon(ctx: UniverRenderingContext2D, cellBounding: { startX: number; startY: number }, cellWidth: number, cellHeight: number, vt: VerticalAlign) {
         const left = cellWidth - ICON_PLACE + 4;
-        let top = 4;
+        let top = 9;
 
         switch (vt) {
             case VerticalAlign.MIDDLE:
-                top = (cellHeight - ICON_PLACE) / 2 + 4;
+                top = ((cellHeight - ICON_PLACE) / 2) + 4;
                 break;
             case VerticalAlign.BOTTOM:
-                top = (cellHeight - ICON_PLACE) + 4;
+                top = (cellHeight - ICON_PLACE) - 1;
                 break;
             default:
                 break;

@@ -103,8 +103,6 @@ export class DataValidationAutoFillController extends Disposable {
         };
         const disabledDataVallation = [
             DataValidationType.CHECKBOX,
-            DataValidationType.LIST,
-            DataValidationType.LIST_MULTIPLE,
         ];
         const hook: ISheetAutoFillHook = {
             id: DATA_VALIDATION_PLUGIN_NAME,

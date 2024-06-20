@@ -280,17 +280,59 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         });
     }
 
+    private _getCurrentSceneAndTransformer() {
+        const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
+        if (docsSkeletonObject == null) {
+            return;
+        }
+
+        const { unitId } = docsSkeletonObject;
+
+        const renderObject = this._renderManagerService.getRenderById(unitId);
+
+        if (renderObject == null) {
+            return;
+        }
+
+        const { scene, mainComponent } = renderObject;
+
+        if (scene == null || mainComponent == null) {
+            return;
+        }
+
+        const transformer = scene.getTransformerByCreate();
+
+        const { docsLeft, docsTop } = (mainComponent as Documents).getOffsetConfig();
+
+        return { scene, transformer, docsLeft, docsTop };
+    }
+
     private _focusDrawingListener() {
         this.disposeWithMe(
             this._drawingManagerService.focus$.subscribe((params) => {
+                const { transformer, docsLeft, docsTop } = this._getCurrentSceneAndTransformer() ?? {};
                 if (params == null || params.length === 0) {
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
                     this._docDrawingService.focusDrawing([]);
+
+                    if (transformer) {
+                        transformer.resetProps({
+                            zeroTop: 0,
+                            zeroLeft: 0,
+                        });
+                    }
                 } else {
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
                     this._docDrawingService.focusDrawing(params);
                     // Need to remove text selections when focus drawings.
                     this._textSelectionManager.replaceTextRanges([]);
+
+                    if (transformer) {
+                        transformer.resetProps({
+                            zeroTop: docsTop,
+                            zeroLeft: docsLeft,
+                        });
+                    }
                 }
             })
         );

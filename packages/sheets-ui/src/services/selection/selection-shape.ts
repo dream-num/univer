@@ -29,7 +29,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX, SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { SelectionRenderModel } from './selection-render-model';
 
-enum SELECTION_MANAGER_KEY {
+export enum SELECTION_MANAGER_KEY {
     Selection = '__SpreadsheetSelectionShape__',
     top = '__SpreadsheetSelectionTopControl__',
     bottom = '__SpreadsheetSelectionBottomControl__',
@@ -40,6 +40,7 @@ enum SELECTION_MANAGER_KEY {
     backgroundMiddleRight = '__SpreadsheetSelectionBackgroundControlMiddleRight__',
     backgroundBottom = '__SpreadsheetSelectionBackgroundControlBottom__',
     fill = '__SpreadsheetSelectionFillControl__',
+    // fillTopLeft & fillBottomRight are used for mobile selection
     fillTopLeft = '__SpreadsheetSelectionFillControlTopLeft__',
     fillBottomRight = '__SpreadsheetSelectionFillControlBottomRight__',
     lineMain = '__SpreadsheetDragLineMainControl__',
@@ -71,53 +72,51 @@ const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
  * The main selection canvas component
  */
 export class SelectionControl extends Disposable {
-    private _leftControl!: Rect;
-    private _rightControl!: Rect;
-    private _topControl!: Rect;
-    private _bottomControl!: Rect;
+    protected _leftControl!: Rect;
+    protected _rightControl!: Rect;
+    protected _topControl!: Rect;
+    protected _bottomControl!: Rect;
 
-    private _backgroundControlTop!: Rect;
-    private _backgroundControlBottom!: Rect;
-    private _backgroundControlMiddleLeft!: Rect;
-    private _backgroundControlMiddleRight!: Rect;
+    protected _backgroundControlTop!: Rect;
+    protected _backgroundControlBottom!: Rect;
+    protected _backgroundControlMiddleLeft!: Rect;
+    protected _backgroundControlMiddleRight!: Rect;
 
     /**
      * right bottom small rect
      */
-    private _fillControl: Rect;
-    private _fillControlTopLeft: Rect | null;
-    private _fillControlBottomRight: Rect | null;
+    protected _fillControl: Rect;
 
-    private _selectionShapeGroup!: Group;
+    protected _selectionShapeGroup!: Group;
 
-    private _rowHeaderBackground!: Rect;
-    private _rowHeaderBorder!: Rect;
-    private _rowHeaderGroup!: Group;
-    private _rowHeaderHighlight!: Rect;
-    private _columnHeaderBackground!: Rect;
-    private _columnHeaderBorder!: Rect;
-    private _columnHeaderGroup!: Group;
-    private _columnHeaderHighlight!: Rect;
+    protected _rowHeaderBackground!: Rect;
+    protected _rowHeaderBorder!: Rect;
+    protected _rowHeaderGroup!: Group;
+    protected _rowHeaderHighlight!: Rect;
+    protected _columnHeaderBackground!: Rect;
+    protected _columnHeaderBorder!: Rect;
+    protected _columnHeaderGroup!: Group;
+    protected _columnHeaderHighlight!: Rect;
 
-    private _topLeftWidget!: Rect;
-    private _topCenterWidget!: Rect;
-    private _topRightWidget!: Rect;
-    private _middleLeftWidget!: Rect;
-    private _middleRightWidget!: Rect;
-    private _bottomLeftWidget!: Rect;
-    private _bottomCenterWidget!: Rect;
-    private _bottomRightWidget!: Rect;
+    protected _topLeftWidget!: Rect;
+    protected _topCenterWidget!: Rect;
+    protected _topRightWidget!: Rect;
+    protected _middleLeftWidget!: Rect;
+    protected _middleRightWidget!: Rect;
+    protected _bottomLeftWidget!: Rect;
+    protected _bottomCenterWidget!: Rect;
+    protected _bottomRightWidget!: Rect;
 
-    private _dashRect!: Rect;
+    protected _dashRect!: Rect;
 
-    private _selectionModel!: SelectionRenderModel;
+    protected _selectionModel!: SelectionRenderModel;
 
-    private _selectionStyle: Nullable<ISelectionStyle>;
+    protected _selectionStyle: Nullable<ISelectionStyle>;
 
-    private _rowHeaderWidth: number = 0;
-    private _columnHeaderHeight: number = 0;
+    protected _rowHeaderWidth: number = 0;
+    protected _columnHeaderHeight: number = 0;
 
-    private _widgetRects: Rect[] = [];
+    protected _widgetRects: Rect[] = [];
 
     private _dispose$ = new BehaviorSubject<SelectionControl>(this);
     readonly dispose$ = this._dispose$.asObservable();
@@ -132,17 +131,16 @@ export class SelectionControl extends Disposable {
 
     readonly selectionFilled$ = this._selectionFilled$.asObservable();
 
-    private _defaultStyle!: ISelectionStyle;
+    protected _defaultStyle!: ISelectionStyle;
 
-    private _currentStyle: Nullable<ISelectionStyle>;
+    protected _currentStyle: Nullable<ISelectionStyle>;
 
-    private _isHelperSelection: boolean = true;
+    protected _isHelperSelection: boolean = true;
 
     constructor(
         private _scene: Scene,
         private _zIndex: number,
         private _isHeaderHighlight: boolean = true,
-        private _isMobile: boolean = false,
         private readonly _themeService: ThemeService
     ) {
         super();
@@ -171,22 +169,6 @@ export class SelectionControl extends Disposable {
 
     get fillControl() {
         return this._fillControl;
-    }
-
-    get fillControlTopLeft(): Rect<IRectProps> | null {
-        return this._fillControlTopLeft;
-    }
-
-    set fillControlTopLeft(value: Rect) {
-        this._fillControlTopLeft = value;
-    }
-
-    get fillControlBottomRight(): Rect<IRectProps> | null {
-        return this._fillControlBottomRight;
-    }
-
-    set fillControlBottomRight(value: Rect) {
-        this._fillControlBottomRight = value;
     }
 
     get backgroundControlTop() {
@@ -245,16 +227,64 @@ export class SelectionControl extends Disposable {
         return this._bottomRightWidget;
     }
 
+    get themeService() {
+        return this._themeService;
+    }
+
     get selectionStyle() {
         return this._selectionStyle;
+    }
+
+    set selectionStyle(style: Nullable<ISelectionStyle>) {
+        this._selectionStyle = style;
+    }
+
+    get selectionModel() {
+        return this._selectionModel;
+    }
+
+    set selectionModel(model: SelectionRenderModel) {
+        this._selectionModel = model;
+    }
+
+    get defaultStyle() {
+        return this._defaultStyle;
+    }
+
+    set defaultStyle(style: ISelectionStyle) {
+        this._defaultStyle = style;
     }
 
     get dashRect() {
         return this._dashRect;
     }
 
+    get currentStyle() {
+        return this._currentStyle;
+    }
+
+    set currentStyle(style: Nullable<ISelectionStyle>) {
+        this._currentStyle = style;
+    }
+
     get isHelperSelection() {
         return this._isHelperSelection;
+    }
+
+    get rowHeaderWidth() {
+        return this._rowHeaderWidth;
+    }
+
+    set rowHeaderWidth(width: number) {
+        this._rowHeaderWidth = width;
+    }
+
+    get columnHeaderHeight() {
+        return this._columnHeaderHeight;
+    }
+
+    set columnHeaderHeight(height: number) {
+        this._columnHeaderHeight = height;
     }
 
     setEvent(state: boolean) {
@@ -419,7 +449,7 @@ export class SelectionControl extends Disposable {
      * inner update
      */
     // eslint-disable-next-line max-lines-per-function
-    private _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
+    protected _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
         // startX startY shares same coordinate with viewport.(include row & colheader)
         const { startX, startY, endX, endY } = this._selectionModel;
         const defaultStyle = this._defaultStyle;
@@ -558,26 +588,26 @@ export class SelectionControl extends Disposable {
             this.fillControl.transformByState(sizeState);
             this.fillControl.show();
 
-            if (this._isMobile) {
-                this.fillControlTopLeft!.setProps({ ...fillProps, ...{ fill: 'black' } });
-                this.fillControlTopLeft!.transformByState({
-                    left: -expandCornerSize / 2,
-                    top: -expandCornerSize / 2,
-                });
+            // if (this._isMobile) {
+                // this.fillControlTopLeft!.setProps({ ...fillProps, ...{ fill: 'black' } });
+                // this.fillControlTopLeft!.transformByState({
+                //     left: -expandCornerSize / 2,
+                //     top: -expandCornerSize / 2,
+                // });
 
-                this.fillControlBottomRight!.setProps({ ...fillProps, ...{ fill: 'red' } });
-                this.fillControlBottomRight!.transformByState({
-                    left: endX - startX - expandCornerSize / 2,
-                    top: endY - startY - expandCornerSize / 2,
-                });
+                // this.fillControlBottomRight!.setProps({ ...fillProps, ...{ fill: 'red' } });
+                // this.fillControlBottomRight!.transformByState({
+                //     left: endX - startX - expandCornerSize / 2,
+                //     top: endY - startY - expandCornerSize / 2,
+                // });
 
-                this.fillControlTopLeft!.show();
-                this.fillControlBottomRight!.show();
-            }
+                // this.fillControlTopLeft!.show();
+                // this.fillControlBottomRight!.show();
+            // }
         } else {
             this.fillControl.hide();
-            this.fillControlTopLeft?.hide();
-            this.fillControlBottomRight?.hide();
+            // this.fillControlTopLeft?.hide();
+            // this.fillControlBottomRight?.hide();
         }
 
         this._updateBackgroundControl(style);
@@ -599,7 +629,7 @@ export class SelectionControl extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _initialize() {
+    protected _initialize() {
         this._defaultStyle = getNormalSelectionStyle(this._themeService);
 
         this._selectionModel = new SelectionRenderModel();
@@ -643,24 +673,24 @@ export class SelectionControl extends Disposable {
             zIndex: zIndex + 1,
         });
 
-        const expandCornerSize = this._defaultStyle!.expandCornerSize || 0;
-        const AutofillStrokeWidth = this._defaultStyle!.AutofillStrokeWidth || 0;
-        if (this._isMobile) {
-            this.fillControlTopLeft = new Rect(SELECTION_MANAGER_KEY.fillTopLeft + zIndex, {
-                zIndex: zIndex + 1.5,
-                width: expandCornerSize,
-                height: expandCornerSize,
-                radius: expandCornerSize / 2,
-                strokeWidth: AutofillStrokeWidth,
-            });
-            this.fillControlBottomRight = new Rect(SELECTION_MANAGER_KEY.fillBottomRight + zIndex, {
-                zIndex: zIndex + 1.5,
-                width: expandCornerSize,
-                height: expandCornerSize,
-                radius: expandCornerSize / 2,
-                strokeWidth: AutofillStrokeWidth,
-            });
-        }
+        // const expandCornerSize = this._defaultStyle!.expandCornerSize || 0;
+        // const AutofillStrokeWidth = this._defaultStyle!.AutofillStrokeWidth || 0;
+        // if (this._isMobile) {
+            // this.fillControlTopLeft = new Rect(SELECTION_MANAGER_KEY.fillTopLeft + zIndex, {
+            //     zIndex: zIndex + 1.5,
+            //     width: expandCornerSize,
+            //     height: expandCornerSize,
+            //     radius: expandCornerSize / 2,
+            //     strokeWidth: AutofillStrokeWidth,
+            // });
+            // this.fillControlBottomRight = new Rect(SELECTION_MANAGER_KEY.fillBottomRight + zIndex, {
+            //     zIndex: zIndex + 1.5,
+            //     width: expandCornerSize,
+            //     height: expandCornerSize,
+            //     radius: expandCornerSize / 2,
+            //     strokeWidth: AutofillStrokeWidth,
+            // });
+        // }
 
         this._dashRect = new Rect(SELECTION_MANAGER_KEY.dash + zIndex, {
             zIndex: zIndex + 2,
@@ -675,9 +705,9 @@ export class SelectionControl extends Disposable {
             this._backgroundControlMiddleRight, this._backgroundControlBottom,
             this._dashRect,
         ];
-        if (this._isMobile) {
-            shapes.push(this.fillControlTopLeft!, this.fillControlBottomRight!);
-        }
+        // if (this._isMobile) {
+            // shapes.push(this.fillControlTopLeft!, this.fillControlBottomRight!);
+        // }
 
         // for (let index = 0; index < shapes.length; index++) {
         //     const shape = shapes[index];
@@ -711,7 +741,7 @@ export class SelectionControl extends Disposable {
         this._initialTitle();
     }
 
-    private _initialTitle() {
+    protected _initialTitle() {
         const zIndex = this._zIndex;
         this._rowHeaderBackground = new Rect(SELECTION_MANAGER_KEY.rowHeaderBackground + zIndex, {
             zIndex: zIndex - 1,
@@ -761,7 +791,7 @@ export class SelectionControl extends Disposable {
         scene.addObjects([this._rowHeaderGroup, this._columnHeaderGroup], SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX);
     }
 
-    private _initialWidget() {
+    protected _initialWidget() {
         const zIndex = this._zIndex;
         this._topLeftWidget = new Rect(SELECTION_MANAGER_KEY.topLeftWidget + zIndex, {
             zIndex: zIndex + 1,
@@ -807,7 +837,7 @@ export class SelectionControl extends Disposable {
         ];
     }
 
-    private _updateBackgroundTitle(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
+    protected _updateBackgroundTitle(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
         const { startX, startY, endX, endY, rangeType } = this._selectionModel;
         const defaultStyle = this._defaultStyle;
 
@@ -887,7 +917,7 @@ export class SelectionControl extends Disposable {
         this._rowHeaderGroup.makeDirty(true);
     }
 
-    private _updateBackgroundControl(style: Nullable<ISelectionStyle>) {
+    protected _updateBackgroundControl(style: Nullable<ISelectionStyle>) {
         const { startX, startY, endX, endY } = this._selectionModel;
 
         const defaultStyle = this._defaultStyle;
@@ -968,7 +998,7 @@ export class SelectionControl extends Disposable {
         this._backgroundControlBottom.setProps({ fill });
     }
 
-    private _updateWidgets(style: Nullable<ISelectionStyle>) {
+    protected _updateWidgets(style: Nullable<ISelectionStyle>) {
         const { startX, startY, endX, endY } = this._selectionModel;
         const defaultStyle = this._defaultStyle;
 
@@ -1047,7 +1077,7 @@ export class SelectionControl extends Disposable {
         }
     }
 
-    private _hasWidgets(widgets: ISelectionWidgetConfig) {
+    protected _hasWidgets(widgets: ISelectionWidgetConfig) {
         if (widgets == null) {
             return false;
         }
@@ -1067,7 +1097,7 @@ export class SelectionControl extends Disposable {
         return true;
     }
 
-    private _getScale() {
+    protected _getScale() {
         const { scaleX, scaleY } = this._scene.getAncestorScale();
         return Math.max(scaleX, scaleY);
     }
@@ -1076,12 +1106,12 @@ export class SelectionControl extends Disposable {
 
     private _antRequestNewFrame: number = -1;
 
-    private _stopAntLineAnimation() {
+    protected _stopAntLineAnimation() {
         this._antLineOffset = 0;
         cancelRequestFrame(this._antRequestNewFrame);
     }
 
-    private _startAntLineAnimation() {
+    protected _startAntLineAnimation() {
         const scale = this._getScale();
         this._antLineOffset += 0.6 / scale;
         if (this._antLineOffset > 160 / scale) {

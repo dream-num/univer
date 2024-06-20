@@ -779,65 +779,7 @@ export class Spreadsheet extends SheetComponent {
         return color;
     }
 
-    private _lastPointerPos: IPoint;
-    private _pointerScrolling: boolean;
     initUserEvents() {
         // control spreadsheet scrolling
-
-        // move to scroll.render-controller
-
-        // scene.input-manager@triggerPointerDown --> this.onPointerMoveObserver.notifyObservers
-        // this.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
-        //     const e = evt as IPointerEvent | IMouseEvent;
-        //     // console.log('....', e, this.width, this.height);
-        //     // this._view.scrollTo({
-        //     //     x: e.offsetX - this._view.left - this.horizontalThumbWidth / 2,
-        //     // });
-        //     this._lastPointerPos = { x: e.offsetX, y: e.offsetY };
-        //     this._pointerScrolling = true;
-        //     state.stopPropagation();
-        // });
-
-        // this.on(EVENT_TYPE.PointerMove, (evt: unknown, state: EventState) => {
-        //     if (!this._pointerScrolling) return;
-        //     console.log('spreadsheet moving...........');
-        //     const e = evt as IPointerEvent | IMouseEvent;
-        //     const viewMain = (this.getScene() as Scene).getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        //     if (!viewMain) return;
-        //     const deltaX = -(e.offsetX - this._lastPointerPos.x);
-        //     const deltaY = -(e.offsetY - this._lastPointerPos.y);
-        //     // const viewportScrollX = viewMain.viewportScrollX + deltaX;
-        //     // const viewportScrollY = viewMain.viewportScrollY + deltaY;
-        //     if (deltaX !== 0 || deltaY !== 0) {
-        //         console.log('....delta', deltaX, deltaY);
-        //     }
-
-        //     viewMain.scrollByViewportScroll({
-        //         deltaX,
-        //         deltaY,
-        //     });
-        //     this._lastPointerPos = { x: e.offsetX, y: e.offsetY };
-        //     state.stopPropagation();
-        // });
-
-        // this.on(EVENT_TYPE.PointerUp, (evt: unknown, state: EventState) => {
-        //     this._pointerScrolling = false;
-        //     console.log('%c moving end!! PointerUp', 'color: red');
-        // });
-        // this.on(EVENT_TYPE.PointerUp, (evt: unknown, state: EventState) => {
-        //     this._pointerScrolling = false;
-        //     console.log('%c moving end!! PointerUp', 'color: red');
-        // });
-        // this.on(EVENT_TYPE.PointerOut, (evt: unknown, state: EventState) => {
-        //     this._pointerScrolling = false;
-        //     console.log('%c moving end!! PointerOut', 'color: red');
-        // });
-        // this.on(EVENT_TYPE.PointerLeave, (evt: unknown, state: EventState) => {
-        //     // this._pointerScrolling = false;
-        //     console.log('%c moving end!! PointerLeave', 'color: red', this._pointerScrolling);
-        // });
-        // this.on(EVENT_TYPE.PointerCancel, (evt: unknown, state: EventState) => {
-        //     this._pointerScrolling = false;
-        // });
     }
 }

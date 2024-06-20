@@ -372,6 +372,12 @@ export class Scene extends ThinScene {
         this._layers.push(...argument);
     }
 
+    override addObjects(objects: BaseObject[], zIndex: number = 1) {
+        this.getLayer(zIndex)?.addObjects(objects);
+        this._addObject$.next(this);
+        return this;
+    }
+
     override addObject(o: BaseObject, zIndex: number = 1) {
         // objects.forEach((o) => {
         //     if (o.oKey === '__SpreadsheetSelectionFillControlTopLeft__0') {
@@ -392,18 +398,6 @@ export class Scene extends ThinScene {
         //     o.scaleCacheCanvas();
         // });
         o.onIsAddedToParentObserver.notifyObservers(this);
-    }
-
-    override addObjects(objects: BaseObject[], zIndex: number = 1) {
-        objects.forEach((o) => {
-            if (o.oKey === '__SpreadsheetSelectionFillControlTopLeft__0') {
-                // eslint-disable-next-line no-debugger
-                debugger;
-            }
-        });
-        this.getLayer(zIndex)?.addObjects(objects);
-        this._addObject$.next(this);
-        return this;
     }
 
     removeObject(object?: BaseObject | string) {

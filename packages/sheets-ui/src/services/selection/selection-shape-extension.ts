@@ -35,6 +35,10 @@ export interface ISelectionShapeTargetSelection {
     targetSelection: IRangeWithCoord;
 }
 
+/**
+ * for auto-fill (crosshair expand selection range)
+ * drag selection range
+ */
 export class SelectionShapeExtension {
     private _startOffsetX: number = 0;
 
@@ -80,11 +84,11 @@ export class SelectionShapeExtension {
         private readonly _themeService: ThemeService,
         private readonly _injector: Injector
     ) {
-        // this._initialControl();
+        this._initialControl();
 
-        // this._initialWidget();
+        this._initialWidget();
 
-        // this._initialFill();
+        this._initialFill();
 
         this._control.dispose$.subscribe(() => {
             this.dispose();
@@ -330,7 +334,6 @@ export class SelectionShapeExtension {
 
         scene.disableEvent();
 
-        // TODO used for?
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 

@@ -38,8 +38,9 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import type { SelectionRenderModel } from './selection-render-model';
-import { SelectionControl } from './selection-shape';
+import type { SelectionControl } from './selection-shape';
 import { type IControlFillConfig, type ISelectionRenderService, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './selection-render.service';
+import { MobileSelectionControl } from './mobile-selection-shape';
 
 enum ExpandingCorner {
     BOTTOM_RIGHT = 'bottom-right',
@@ -264,7 +265,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         if (scene == null || skeleton == null) {
             return;
         }
-        const control = new SelectionControl(scene, currentControls.length, this._isHeaderHighlight, true, this._themeService);
+        const control = new MobileSelectionControl(scene, currentControls.length, this._isHeaderHighlight, this._themeService);
 
         // new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
 
@@ -686,11 +687,10 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
             /**
              * The default behavior is to clear previous selections and always create new selections.
              */
-            activeSelectionControl = new SelectionControl(
+            activeSelectionControl = new MobileSelectionControl(
                 scene,
                 curControls.length + zIndex,
                 this._isHeaderHighlight,
-                true,
                 this._themeService
             );
 
@@ -1148,7 +1148,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
             return false;
         }
 
-        const { startRow: startRowOfActiveCell, startColumn: startColumnOfActiveCell, endRow: endRowOfActiveCell, endColumn: endColOfActiveCell } = activeSelectionControl?.model.currentCell?.mergeInfo || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 }; ;
+        const { startRow: startRowOfActiveCell, startColumn: startColumnOfActiveCell, endRow: endRowOfActiveCell, endColumn: endColOfActiveCell } = activeSelectionControl?.model.currentCell?.mergeInfo || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
 
         const {
             startRow: currSelCtrlStartRow,

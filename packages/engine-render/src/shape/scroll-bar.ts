@@ -362,24 +362,19 @@ export class ScrollBar extends BaseScrollBar {
             this.makeViewDirty(true);
             state.stopPropagation();
         });
-        this._verticalPointerMoveObserver = mainScene.onPointerMoveObserver.add((evt: unknown, state: EventState) => {
+        this._verticalPointerMoveObserver = mainScene.onPointerMoveObserver.add((evt: unknown, _state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             if (!this._isVerticalMove) {
-                // console.log('delta', this._lastY);
-                // this._view.scrollToByViewportScroll({
-                //     viewportScrollY: -(e.offsetY - this._lastY),
-                // });
                 return;
-            } else {
-                this._view.scrollByBar({
-                    y: e.offsetY - this._lastY,
-                });
             }
+            this._view.scrollByBar({
+                y: e.offsetY - this._lastY,
+            });
+
             this._lastY = e.offsetY;
             mainScene.getEngine()?.setRemainCapture();
         });
-        this._verticalPointerUpObserver = mainScene.onPointerUpObserver.add((evt: unknown, state: EventState) => {
-            const e = evt as IPointerEvent | IMouseEvent;
+        this._verticalPointerUpObserver = mainScene.onPointerUpObserver.add((evt: unknown, _state: EventState) => {
             const srcElement = this.verticalThumbRect;
             this._isVerticalMove = false;
             // srcElement.fill = this._thumbBackgroundColor!;

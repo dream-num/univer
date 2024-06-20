@@ -232,7 +232,7 @@ describe('Test indirect', () => {
             selectionServiceUsable = param;
         });
 
-        selectionRenderService.expandSelectionEventTrigger(mockEvent);
+        selectionRenderService.eventTrigger(mockEvent);
 
         scene.triggerPointerMove({ ...mockEvent, offsetX: 200 });
 

@@ -323,7 +323,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             return;
         }
 
-        const control = new SelectionShape(scene, currentControls.length, this._isHeaderHighlight, false, this._themeService);
+        const control = new SelectionShape(scene, currentControls.length, this._isHeaderHighlight, this._themeService);
 
         // eslint-disable-next-line no-new
         new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
@@ -741,7 +741,6 @@ export class SelectionRenderService implements ISelectionRenderService {
                 scene,
                 curControls.length + zIndex,
                 this._isHeaderHighlight,
-                false,
                 this._themeService
             );
 

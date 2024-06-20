@@ -548,11 +548,14 @@ export class Viewport {
 
     /**
      * current position plus offset, relative
+     * normally triggered by scroll-timer(in sheet)
      * @param pos
      * @returns isLimited
      */
     scrollBy(pos: IScrollBarPosition, isTrigger = true) {
-        return this._scrollToScrollbarPos(SCROLL_TYPE.scrollBy, pos, isTrigger);
+        pos.x = this.scrollX + (pos.x || 0);
+        pos.y = this.scrollY + (pos.y || 0);
+        return this._scrollToScrollbarPos(SCROLL_TYPE.scrollTo, pos, isTrigger);
     }
 
     /**
@@ -561,8 +564,8 @@ export class Viewport {
      * @param isTrigger
      */
     scrollByBar(pos: IScrollBarPosition, isTrigger = true) {
-        // pos.x = this.scrollX + (pos.x || 0);
-        // pos.y = this.scrollY + (pos.y || 0);
+        pos.x = this.scrollX + (pos.x || 0);
+        pos.y = this.scrollY + (pos.y || 0);
         this._scrollToScrollbarPos(SCROLL_TYPE.scrollTo, pos, isTrigger);
         const { x, y } = pos;
         this.onScrollByBarObserver.notifyObservers({
@@ -987,6 +990,12 @@ export class Viewport {
         return svCoord;
     }
 
+    /**
+     * At f7140a7c11, only doc need this method.
+     * In sheet, wheel event is handled by scroll-manager.service@setScrollInfo
+     * @param evt
+     * @param state
+     */
     // eslint-disable-next-line complexity, max-lines-per-function
     onMouseWheel(evt: IWheelEvent, state: EventState) {
         if (!this._scrollBar || this.isActive === false) {

@@ -156,7 +156,7 @@ export class InputManager extends Disposable {
         }
     }
 
-    pointerId = 0;
+    private _pointerId = 0;
 
     // eslint-disable-next-line max-lines-per-function
     attachControl(
@@ -238,7 +238,7 @@ export class InputManager extends Disposable {
             if (evt.pointerId === undefined) {
                 (evt as any).pointerId = 0;
             }
-            this.pointerId = evt.pointerId;
+            this._pointerId = evt.pointerId;
             const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
 
             console.log('!!!scene _onPointerDown', currentObject?.oKey);

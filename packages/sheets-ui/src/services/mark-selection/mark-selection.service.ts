@@ -99,7 +99,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             if (!scene || !skeleton) return;
 
             const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-            const control = new SelectionControl(scene, zIndex, false, false, this._themeService);
+            const control = new SelectionControl(scene, zIndex, false, this._themeService);
             control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
             shape.control = control;
         });

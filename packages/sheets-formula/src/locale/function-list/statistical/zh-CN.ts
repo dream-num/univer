@@ -339,7 +339,7 @@ export default {
         },
     },
     COUNTIF: {
-        description: '计算区域内符合给定条件的单元格的数量',
+        description: '计算区域内符合给定条件的单元格的数量。',
         abstract: '计算区域内符合给定条件的单元格的数量',
         links: [
             {
@@ -348,8 +348,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: '范围', detail: '要进行计数的单元格组。 区域可以包括数字、数组、命名区域或包含数字的引用。 空白和文本值将被忽略。' },
+            criteria: { name: '条件', detail: '用于决定要统计哪些单元格的数量的数字、表达式、单元格引用或文本字符串。\n例如，可以使用 32 之类数字，“>32”之类比较，B4 之类单元格，或“苹果”之类单词。\nCOUNTIF 仅使用一个条件。 如果要使用多个条件，请使用 COUNTIFS。' },
         },
     },
     COUNTIFS: {

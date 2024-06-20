@@ -94,3 +94,17 @@ export function booleanObjectIntersection(valueObject1: BaseValueObject, valueOb
         return BooleanValueObject.create(false);
     });
 }
+
+export function isNumericComparison(condition: string | number | boolean): boolean {
+    if (typeof condition === 'number') {
+        return true;
+    } else if (typeof condition === 'boolean') {
+        return false;
+    }
+
+    // Combined regular expression for numeric comparisons
+    const numericComparisonPattern = /^[<>]?=?\s*\d+(\.\d+)?$/;
+
+    // Test the condition against the pattern
+    return numericComparisonPattern.test(condition.trim());
+}

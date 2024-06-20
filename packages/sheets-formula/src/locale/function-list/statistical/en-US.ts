@@ -339,7 +339,7 @@ export default {
         },
     },
     COUNTIF: {
-        description: 'Counts the number of cells within a range that meet the given criteria',
+        description: 'Counts the number of cells within a range that meet the given criteria.',
         abstract: 'Counts the number of cells within a range that meet the given criteria',
         links: [
             {
@@ -348,8 +348,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: 'range', detail: 'The group of cells you want to count. Range can contain numbers, arrays, a named range, or references that contain numbers. Blank and text values are ignored.' },
+            criteria: { name: 'criteria', detail: 'A number, expression, cell reference, or text string that determines which cells will be counted.\nFor example, you can use a number like 32, a comparison like ">32", a cell like B4, or a word like "apples".\nCOUNTIF uses only a single criteria. Use COUNTIFS if you want to use multiple criteria.' },
         },
     },
     COUNTIFS: {

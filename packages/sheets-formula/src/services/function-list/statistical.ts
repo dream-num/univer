@@ -518,16 +518,16 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
         abstract: 'formula.functionList.COUNTIF.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.COUNTIF.functionParameter.number1.name',
-                detail: 'formula.functionList.COUNTIF.functionParameter.number1.detail',
+                name: 'formula.functionList.COUNTIF.functionParameter.range.name',
+                detail: 'formula.functionList.COUNTIF.functionParameter.range.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.COUNTIF.functionParameter.number2.name',
-                detail: 'formula.functionList.COUNTIF.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.COUNTIF.functionParameter.criteria.name',
+                detail: 'formula.functionList.COUNTIF.functionParameter.criteria.detail',
+                example: '">5"',
                 require: 1,
                 repeat: 0,
             },

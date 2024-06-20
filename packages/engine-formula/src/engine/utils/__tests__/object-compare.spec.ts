@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ArrayValueObject, transformToValue } from '../../value-object/array-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../value-object/primitive-object';
-import { valueObjectCompare } from '../object-compare';
+import { isNumericComparison, valueObjectCompare } from '../object-compare';
 import { compareToken } from '../../../basics/token';
 
 const range = ArrayValueObject.create(/*ts*/ `{
@@ -207,6 +207,17 @@ describe('Test object compare', () => {
                 const value = valueObjectCompare(num, bool, token);
                 expect(value.getValue()).toStrictEqual(result[i]);
             });
+        });
+        it('Function isNumericComparison', () => {
+            expect(isNumericComparison('>40')).toBe(true);
+            expect(isNumericComparison('<=100')).toBe(true);
+            expect(isNumericComparison('=5')).toBe(true);
+            expect(isNumericComparison('test*')).toBe(false);
+            expect(isNumericComparison('=test')).toBe(false);
+            expect(isNumericComparison('> 40')).toBe(true);
+            expect(isNumericComparison('>=3.14')).toBe(true);
+            expect(isNumericComparison(5)).toBe(true);
+            expect(isNumericComparison(true)).toBe(false);
         });
     });
 });

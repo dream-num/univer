@@ -315,7 +315,7 @@ export default {
     },
     COUNTIF: {
         description: '指定された範囲に含まれるセルのうち、検索条件に一致するセルの個数を返します。',
-        abstract: '指定された範囲に含まれるセルのうち、検索条件に一致するセルの個数を返します。',
+        abstract: '指定された範囲に含まれるセルのうち、検索条件に一致するセルの個数を返します',
         links: [
             {
                 title: '指導',
@@ -323,8 +323,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: '範囲', detail: '数えるセルのグループ。 範囲には、数値、配列、名前付き範囲、(数値を含む) 参照が入ります。 空の値とテキスト値は無視されます。' },
+            criteria: { name: '検索条件', detail: '個数の計算対象となるセルを決定する条件を、数値、式、セル参照、または文字列で指定します。\nたとえば、数値として 32、比較演算子として ">32"、セル参照として B4、文字列として "リンゴ" などを指定できます。\nCOUNTIF で指定できるのは、単一の検索条件のみです。 複数の検索条件を指定する場合は、COUNTIFS を使います。' },
         },
     },
     COUNTIFS: {

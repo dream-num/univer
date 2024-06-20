@@ -20,7 +20,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { SheetsRenderService } from '@univerjs/sheets-ui';
 import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import { FormulaDataModel } from '@univerjs/engine-formula';
-import { enUS } from '../../locale';
+import enUS from '../../locale/en-US';
 import { SheetsSortService } from '../../services/sheets-sort.service';
 import { SheetsSortController } from '../../controllers/sheets-sort.controller';
 

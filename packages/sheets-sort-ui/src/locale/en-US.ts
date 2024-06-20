@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     'sheets-sort': {
         general: {
             sort: 'Sort',
@@ -44,3 +46,5 @@ export default {
         },
     },
 };
+
+export default locale;

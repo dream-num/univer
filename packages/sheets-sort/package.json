@@ -41,7 +41,8 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./lib/*": "./lib/*"
+            "./lib/*": "./lib/*",
+            "./locale/*": "./lib/locale/*.json"
         }
     },
     "directories": {
@@ -62,20 +63,32 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.15.2",
-        "rxjs": ">=7.0.0"
-    },
-    "dependencies": {
+        "@wendellhu/redi": "0.15.4"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "^0.15.2",
+        "@univerjs/sheets-ui": "workspace:*",
+        "@wendellhu/redi": "^0.15.4",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.10",
-        "vitest": "^1.5.2"
+        "vite": "^5.3.1",
+        "vitest": "^1.6.0"
+    },
+    "univerSpace": {
+        ".": {
+            "import": "./lib/es/index.js",
+            "require": "./lib/cjs/index.js",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./*": {
+            "import": "./lib/es/*",
+            "require": "./lib/cjs/*",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./lib/*": "./lib/*",
+        "./locale/*": "./lib/locale/*.json"
     }
 }

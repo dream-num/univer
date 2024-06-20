@@ -19,7 +19,6 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
-import { enUS, zhCN } from './locale';
 import { SheetsSortUIService } from './services/sheets-sort-ui.service';
 import type { IUniverSheetsSortUIConfig } from './controllers/sheets-sort-ui.controller';
 import { DefaultSheetsSortUIConfig, SheetsSortUIController } from './controllers/sheets-sort-ui.controller';
@@ -37,10 +36,6 @@ export class UniverSheetsSortUIPlugin extends Plugin {
     ) {
         super();
 
-        this._localeService.load({
-            zhCN,
-            enUS,
-        });
         this._config = Tools.deepMerge({}, DefaultSheetsSortUIConfig, this._config);
     }
 

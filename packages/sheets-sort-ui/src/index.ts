@@ -15,5 +15,3 @@
  */
 
 export { UniverSheetsSortUIPlugin } from './plugin';
-export { default as enUS } from './locale/en-US';
-export { default as zhCN } from './locale/zh-CN';

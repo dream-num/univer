@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SheetsSortController } from './controllers/sheets-sort.controller';
 import { SheetsSortService } from './services/sheets-sort.service';
-import { enUS, zhCN } from './locale';
 
 const NAME = 'UNIVER_SHEETS_SORT_PLUGIN';
 
@@ -30,8 +29,7 @@ export class UniverSheetsSortPlugin extends Plugin {
 
     constructor(
         _config: unknown,
-        @Inject(Injector) protected readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();
     }
@@ -41,10 +39,5 @@ export class UniverSheetsSortPlugin extends Plugin {
             [SheetsSortController],
             [SheetsSortService],
         ] as Dependency[]).forEach((d) => injector.add(d));
-
-        this._localeService.load({
-            zhCN,
-            enUS,
-        });
     }
 }

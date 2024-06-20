@@ -70,7 +70,7 @@ export default {
         },
     },
     AVERAGEIF: {
-        description: 'Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria',
+        description: 'Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria.',
         abstract: 'Returns the average (arithmetic mean) of all the cells in a range that meet a given criteria',
         links: [
             {
@@ -79,8 +79,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: 'range', detail: 'One or more cells to average, including numbers or names, arrays, or references that contain numbers.' },
+            criteria: { name: 'criteria', detail: 'The criteria in the form of a number, expression, cell reference, or text that defines which cells are averaged. For example, criteria can be expressed as 32, "32", ">32", "apples", or B4.' },
+            averageRange: { name: 'average_range', detail: 'The actual set of cells to average. If omitted, range is used.' },
         },
     },
     AVERAGEIFS: {

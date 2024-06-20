@@ -70,7 +70,7 @@ export default {
         },
     },
     AVERAGEIF: {
-        description: '返回区域中满足给定条件的所有单元格的平均值（算术平均值）',
+        description: '返回区域中满足给定条件的所有单元格的平均值（算术平均值）。',
         abstract: '返回区域中满足给定条件的所有单元格的平均值（算术平均值）',
         links: [
             {
@@ -79,8 +79,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: '范围', detail: '要计算平均值的一个或多个单元格，其中包含数字或包含数字的名称、数组或引用。' },
+            criteria: { name: '条件', detail: '形式为数字、表达式、单元格引用或文本的条件，用来定义将计算平均值的单元格。 例如，条件可以表示为 32、"32"、">32"、"苹果" 或 B4。' },
+            averageRange: { name: '平均范围', detail: '计算平均值的实际单元格组。 如果省略，则使用 range。' },
         },
     },
     AVERAGEIFS: {

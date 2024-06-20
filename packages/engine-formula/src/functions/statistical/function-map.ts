@@ -31,10 +31,12 @@ import { Varpa } from './varpa';
 import { Maxifs } from './maxifs';
 import { Averagea } from './averagea';
 import { Minifs } from './minifs';
+import { Averageif } from './averageif';
 
 export const functionStatistical = [
     [Average, FUNCTION_NAMES_STATISTICAL.AVERAGE],
     [Averagea, FUNCTION_NAMES_STATISTICAL.AVERAGEA],
+    [Averageif, FUNCTION_NAMES_STATISTICAL.AVERAGEIF],
     [Count, FUNCTION_NAMES_STATISTICAL.COUNT],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Min, FUNCTION_NAMES_STATISTICAL.MIN],

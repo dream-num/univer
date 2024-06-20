@@ -54,7 +54,6 @@ export class Border extends docExtension {
             return;
         }
 
-        // console.log('===borderData', borderData, glyph);
         const precisionScale = this._getScale(ctx.getScale());
 
         const borderCache = this._createBorderCache(borderData);

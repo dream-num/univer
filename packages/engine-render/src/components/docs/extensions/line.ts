@@ -49,12 +49,16 @@ export class Line extends docExtension {
         const { sp: strikeoutPosition, spo, sbo, bd } = bBox;
         const scale = getScale(parentScale);
         const DELTA = 0.5;
-        const { ul: underline, st: strikethrough, ol: overline, va: baselineOffset } = textStyle;
+        const { ul: underline, st: strikethrough, ol: overline, va: baselineOffset, bbl: bottomBorderLine } = textStyle;
 
         if (underline) {
             const startY = asc + dsc;
-
             this._drawLine(ctx, glyph, underline, startY, scale);
+        }
+
+        if (bottomBorderLine) {
+            const startY = asc + dsc + 4;
+            this._drawLine(ctx, glyph, bottomBorderLine, startY, scale, 2);
         }
 
         if (strikethrough) {
@@ -93,7 +97,8 @@ export class Line extends docExtension {
         glyph: IDocumentSkeletonGlyph,
         line: ITextDecoration,
         startY: number,
-        _scale: number
+        _scale: number,
+        lineWidth = 1
     ) {
         const { s: show, cl: colorStyle, t: lineType, c = BooleanNumber.TRUE } = line;
 
@@ -121,6 +126,7 @@ export class Line extends docExtension {
         const color =
             (c === BooleanNumber.TRUE ? getColorStyle(glyph.ts?.cl) : getColorStyle(colorStyle)) || COLOR_BLACK_RGB;
         ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
 
         this._setLineType(ctx, lineType || TextDecoration.SINGLE);
 

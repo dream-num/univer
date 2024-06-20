@@ -15,22 +15,18 @@
  */
 
 import type { ITextStyle, Nullable } from '@univerjs/core';
-import { BooleanNumber, BorderStyleTypes, CustomRangeType } from '@univerjs/core';
+import { BooleanNumber, CustomRangeType } from '@univerjs/core';
 
 export function getCustomRangeStyle(rangeType: CustomRangeType): Nullable<ITextStyle> {
     if (rangeType === CustomRangeType.COMMENT) {
         return {
-            bd: {
-                b: {
-                    s: BorderStyleTypes.MEDIUM,
-                    cl: {
-                        rgb: '#fcdf7e',
-                    },
+            bbl: {
+                s: BooleanNumber.TRUE,
+                cl: {
+                    rgb: '#fcdf7e',
                 },
+                c: BooleanNumber.FALSE,
             },
-            // ul: {
-            //     s: BooleanNumber.TRUE,
-            // },
         };
     }
 

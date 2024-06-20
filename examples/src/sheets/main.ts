@@ -36,9 +36,10 @@ import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validati
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { FUniver } from '@univerjs/facade';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
+import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
+import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { enUS, ruRU, zhCN } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
-
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
 
@@ -89,6 +90,10 @@ univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
 
 // data validation
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
+
+// sort
+univer.registerPlugin(UniverSheetsSortPlugin);
+univer.registerPlugin(UniverSheetsSortUIPlugin);
 
 // sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);

@@ -17,10 +17,12 @@
 import React, { useCallback, useMemo } from 'react';
 import { Button, type ISegmentedProps, Segmented } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useObservable } from '@univerjs/ui';
+import { ComponentContainer, useComponentsOfPart, useObservable } from '@univerjs/ui';
 import { ICommandService, LocaleService } from '@univerjs/core';
 
 import { of } from 'rxjs';
+import { SheetsFilterService } from '@univerjs/sheets-filter';
+import { SheetsUIPart } from '@univerjs/sheets-ui';
 import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { FilterBy, SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/sheets-filter.operation';
@@ -64,8 +66,17 @@ export function FilterPanel() {
         commandService.executeCommand(CloseFilterPanelOperation.id);
     }, [filterByModel, commandService]);
 
+    const filterService = useDependency(SheetsFilterService);
+    const range = filterService.activeFilterModel?.getRange();
+    const colIndex = sheetsFilterPanelService.col;
+    const FilterPanelEmbedPointPart = useComponentsOfPart(SheetsUIPart.FILTER_PANEL_EMBED_POINT);
+
     return (
         <div className={styles.sheetsFilterPanel}>
+            <ComponentContainer
+                components={FilterPanelEmbedPointPart}
+                sharedProps={{ range, colIndex, onClose: onCancel }}
+            />
             <div className={styles.sheetsFilterPanelHeader}>
                 <Segmented value={filterBy} options={options} onChange={(value) => onFilterByTypeChange(value as FilterBy)}></Segmented>
             </div>
@@ -98,3 +109,4 @@ function useFilterByOptions(localeService: LocaleService): ISegmentedProps['opti
     // eslint-disable-next-line react-hooks/exhaustive-deps
     , [locale, localeService]);
 }
+

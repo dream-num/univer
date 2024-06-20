@@ -22,11 +22,11 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { CommentSingle } from '@univerjs/icons';
 import { SetActiveCommentOperation, THREAD_COMMENT_PANEL, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { SelectionMoveType, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { RangeProtectionPermissionViewPoint, SelectionMoveType, SetSelectionsOperation, SetWorksheetActiveOperation, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
 import { DeleteCommentMutation } from '@univerjs/thread-comment';
-import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
+import { ScrollToRangeOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
@@ -56,7 +56,8 @@ export class SheetsThreadCommentController extends Disposable {
         @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel,
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController
     ) {
         super();
         this._initMenu();
@@ -157,6 +158,17 @@ export class SheetsThreadCommentController extends Disposable {
                 }
 
                 const location = singleReferenceToGrid(comment.ref);
+
+                const { row, column: col } = location;
+                const commentPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+                    workbookTypes: [WorkbookCommentPermission],
+                    worksheetTypes: [WorksheetViewPermission],
+                    rangeTypes: [RangeProtectionPermissionViewPoint],
+                }, [{ startRow: row, startColumn: col, endRow: row, endColumn: col }]);
+                if (!commentPermission) {
+                    return;
+                }
+
                 const GAP = 5;
                 await this._commandService.executeCommand(ScrollToRangeOperation.id, {
                     range: {

@@ -15,3 +15,4 @@
  */
 
 export * from './plugin-name';
+export * from './ui-name.ts';

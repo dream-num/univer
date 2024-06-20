@@ -432,6 +432,7 @@ function updateTables(
     return removeTables;
 }
 
+// retain
 function updateCustomRanges(
     body: IDocumentBody,
     updateBody: IDocumentBody,
@@ -455,7 +456,7 @@ function updateCustomRanges(
         removeCustomRanges = deleteCustomRanges(body, textLength, currentIndex);
     }
 
-    insertCustomRanges(body, updateBody, textLength, currentIndex);
-
+    // retain
+    insertCustomRanges(body, updateBody, 0, currentIndex);
     return removeCustomRanges;
 }

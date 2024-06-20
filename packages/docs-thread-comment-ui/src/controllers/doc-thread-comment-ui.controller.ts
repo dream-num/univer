@@ -18,6 +18,7 @@ import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univ
 import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
+import { CommentSingle } from '@univerjs/icons';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DocThreadCommentPanel } from '../views/doc-thread-comment-panel';
 import { ShowCommentPanelOperation, StartAddCommentOperation } from '../commands/operations/show-comment-panel.operation';
@@ -64,5 +65,7 @@ export class DocThreadCommentUIController extends Disposable {
         [DocThreadCommentPanel].forEach((comp) => {
             this.disposeWithMe(this._componentManager.register(comp.componentKey, comp));
         });
+
+        this.disposeWithMe(this._componentManager.register('CommentSingle', CommentSingle));
     }
 }

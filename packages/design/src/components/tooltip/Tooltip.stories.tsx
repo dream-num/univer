@@ -19,7 +19,6 @@ import React from 'react';
 
 import { Button } from '../button/Button';
 import { Tooltip } from './Tooltip';
-import { TooltipAuto } from './TooltipAuto';
 
 const meta: Meta<typeof Tooltip> = {
     title: 'Components / Tooltip',
@@ -47,9 +46,11 @@ export const Playground = {
                     </Tooltip>
                 </div>
                 <div>
-                    <TooltipAuto title="hello world" placement="bottom">
-                        奇奇怪怪乖乖跟琪琪去上课就开始丹江口市的是卡拉斯科独立思考独立思考
-                    </TooltipAuto>
+                    <Tooltip showIfEllipsis title="hello world" placement="bottom">
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            showIfEllipsis: 奇奇怪怪乖乖跟琪琪去上课就开始丹江口市的是卡拉斯科独立思考独立思考
+                        </span>
+                    </Tooltip>
                 </div>
             </>
         );

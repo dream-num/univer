@@ -370,7 +370,6 @@ export interface IUpdateDrawingDocTransformParams {
     unitId: string;
     subUnitId: string;
     drawings: IDrawingDocTransform[];
-    noHistory?: boolean;
 }
 
 /**
@@ -394,7 +393,7 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
             return false;
         }
 
-        const { drawings, unitId, noHistory } = params;
+        const { drawings, unitId } = params;
 
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];
@@ -420,7 +419,7 @@ export const UpdateDrawingDocTransformCommand: ICommand = {
                 unitId,
                 actions: [],
                 textRanges: null,
-                noHistory: !!noHistory,
+                debounce: true,
             },
         };
 
@@ -600,7 +599,6 @@ export interface ITransformNonInlineDrawingParams {
     drawing: IDocDrawingBase;
     offset: number;
     docTransform: IDocDrawingPosition;
-    noHistory?: boolean;
 }
 
 /**
@@ -633,7 +631,7 @@ export const ITransformNonInlineDrawingCommand: ICommand = {
             return false;
         }
 
-        const { drawing, unitId, offset, docTransform, noHistory } = params;
+        const { drawing, unitId, offset, docTransform } = params;
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
@@ -752,7 +750,7 @@ export const ITransformNonInlineDrawingCommand: ICommand = {
                 unitId,
                 actions: [],
                 textRanges: null,
-                noHistory: !!noHistory,
+                debounce: true,
             },
         };
 

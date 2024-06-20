@@ -15,13 +15,11 @@
  */
 
 import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, throttle, toDisposable } from '@univerjs/core';
-import { DocSkeletonManagerService, getDocObject, TextSelectionManagerService } from '@univerjs/docs';
-import { IDocDrawingService } from '@univerjs/docs-drawing';
-import { IDrawingManagerService, IImageIoService } from '@univerjs/drawing';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, throttle, toDisposable } from '@univerjs/core';
+import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Documents, IDocumentSkeletonGlyph } from '@univerjs/engine-render';
 import { getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor } from '@univerjs/engine-render';
-import { IMessageService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
@@ -52,16 +50,9 @@ export class DocDrawingTransformerController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @IImageIoService private readonly _imageIoService: IImageIoService,
-        @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IContextService private readonly _contextService: IContextService,
-        @IMessageService private readonly _messageService: IMessageService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManager: TextSelectionManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -142,7 +133,7 @@ export class DocDrawingTransformerController extends Disposable {
                     const { objects } = state;
 
                     if (objects.size > 1) {
-                        throttleMultipleDrawingUpdate(objects, true);
+                        throttleMultipleDrawingUpdate(objects);
                     } else if (objects.size === 1) {
                         const drawingCache: IDrawingCache = this._transformerCache.values().next().value;
                         const object: BaseObject = objects.values().next().value;
@@ -160,9 +151,9 @@ export class DocDrawingTransformerController extends Disposable {
 
                         if (drawingCache && drawingCache.drawing.layoutType !== PositionedObjectLayoutType.INLINE) {
                             if (width !== drawingCache.width || height !== drawingCache.height || angle !== drawingCache.angle) {
-                                throttleDrawingSizeAndAngleUpdate(drawingCache, object, true);
+                                throttleDrawingSizeAndAngleUpdate(drawingCache, object);
                             } else {
-                                throttleNonInlineMoveUpdate(drawingCache.drawing, object, true);
+                                throttleNonInlineMoveUpdate(drawingCache.drawing, object);
                             }
                         }
                     }
@@ -216,7 +207,7 @@ export class DocDrawingTransformerController extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _updateMultipleDrawingDocTransform(objects: Map<string, BaseObject>, noHistory = false): void {
+    private _updateMultipleDrawingDocTransform(objects: Map<string, BaseObject>): void {
         if (objects.size < 1) {
             return;
         }
@@ -300,7 +291,6 @@ export class DocDrawingTransformerController extends Disposable {
                 unitId,
                 subUnitId,
                 drawings,
-                noHistory,
             });
         }
     }
@@ -483,7 +473,7 @@ export class DocDrawingTransformerController extends Disposable {
     }
 
     // Update drawing when use transformer to resize it.
-    private _updateDrawingSize(drawingCache: IDrawingCache, object: BaseObject, noHistory = false) {
+    private _updateDrawingSize(drawingCache: IDrawingCache, object: BaseObject) {
         const drawings: IDrawingDocTransform[] = [];
         const { drawing, width: oldWidth, height: oldHeight, angle: oldAngle } = drawingCache;
         const { unitId, subUnitId } = drawing;
@@ -513,7 +503,6 @@ export class DocDrawingTransformerController extends Disposable {
                 unitId,
                 subUnitId,
                 drawings,
-                noHistory,
             });
         }
     }
@@ -534,7 +523,7 @@ export class DocDrawingTransformerController extends Disposable {
         });
     }
 
-    private _moveNonInlineDrawing(drawing: IDocDrawingBase, object: BaseObject, noHistory = false) {
+    private _moveNonInlineDrawing(drawing: IDocDrawingBase, object: BaseObject) {
         const anchor = this._getDrawingAnchor(drawing, object, false);
         const { offset, docTransform } = anchor ?? {};
         if (offset == null || docTransform == null) {
@@ -547,7 +536,6 @@ export class DocDrawingTransformerController extends Disposable {
             drawing,
             offset,
             docTransform,
-            noHistory,
         });
     }
 

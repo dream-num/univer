@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 import { CancelHyperLinkCommand, HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import React from 'react';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import { ICommandService, LocaleService } from '@univerjs/core';
 import cs from 'clsx';
 import { MessageType, Tooltip } from '@univerjs/design';
-import { IMessageService } from '@univerjs/ui';
+import { IMessageService, useObservable } from '@univerjs/ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { OpenHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
@@ -62,64 +62,70 @@ export const CellLinkPopup = () => {
                 <div className={styles.cellLinkType}>
                     {iconsMap[linkObj.type]}
                 </div>
-                <div className={styles.cellLinkUrl}>
-                    {linkObj.name}
-                </div>
+                <Tooltip showIfEllipsis title={linkObj.name}>
+                    <span className={styles.cellLinkUrl}>{linkObj.name}</span>
+                </Tooltip>
             </div>
             <div className={styles.cellLinkOperations}>
-                <div
-                    className={cs(styles.cellLinkOperation, { [styles.cellLinkOperationError]: isError })}
-                    onClick={() => {
-                        if (isError) {
-                            return;
-                        }
-                        if (linkObj.type !== 'outer') {
-                            const url = new URL(window.location.href);
-                            url.hash = linkObj.url.slice(1);
-                            navigator.clipboard.writeText(url.href);
-                        } else {
-                            navigator.clipboard.writeText(linkObj.url);
-                        }
-                        messageService.show({
-                            content: localeService.t('hyperLink.message.coped'),
-                            type: MessageType.Info,
-                        });
-                    }}
-                >
-                    <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.copy')}>
-                        <CopySingle />
-                    </Tooltip>
+                {currentPopup.copyPermission && (
+                    <div
+                        className={cs(styles.cellLinkOperation, { [styles.cellLinkOperationError]: isError })}
+                        onClick={() => {
+                            if (isError) {
+                                return;
+                            }
+                            if (linkObj.type !== 'outer') {
+                                const url = new URL(window.location.href);
+                                url.hash = linkObj.url.slice(1);
+                                navigator.clipboard.writeText(url.href);
+                            } else {
+                                navigator.clipboard.writeText(linkObj.url);
+                            }
+                            messageService.show({
+                                content: localeService.t('hyperLink.message.coped'),
+                                type: MessageType.Info,
+                            });
+                        }}
+                    >
+                        <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.copy')}>
+                            <CopySingle />
+                        </Tooltip>
 
-                </div>
-                <div
-                    className={styles.cellLinkOperation}
-                    onClick={() => {
-                        commandService.executeCommand(OpenHyperLinkSidebarOperation.id, {
-                            unitId,
-                            subUnitId,
-                            row: link.row,
-                            column: link.column,
-                        });
-                    }}
-                >
-                    <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.edit')}>
-                        <WriteSingle />
-                    </Tooltip>
-                </div>
-                <div
-                    className={styles.cellLinkOperation}
-                    onClick={() => {
-                        commandService.executeCommand(CancelHyperLinkCommand.id, {
-                            unitId,
-                            subUnitId,
-                            id: link.id,
-                        });
-                    }}
-                >
-                    <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.cancel')}>
-                        <UnlinkSingle />
-                    </Tooltip>
-                </div>
+                    </div>
+                )}
+                {currentPopup.editPermission && (
+                    <>
+                        <div
+                            className={styles.cellLinkOperation}
+                            onClick={() => {
+                                commandService.executeCommand(OpenHyperLinkSidebarOperation.id, {
+                                    unitId,
+                                    subUnitId,
+                                    row: link.row,
+                                    column: link.column,
+                                });
+                            }}
+                        >
+                            <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.edit')}>
+                                <WriteSingle />
+                            </Tooltip>
+                        </div>
+                        <div
+                            className={styles.cellLinkOperation}
+                            onClick={() => {
+                                commandService.executeCommand(CancelHyperLinkCommand.id, {
+                                    unitId,
+                                    subUnitId,
+                                    id: link.id,
+                                });
+                            }}
+                        >
+                            <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.cancel')}>
+                                <UnlinkSingle />
+                            </Tooltip>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );

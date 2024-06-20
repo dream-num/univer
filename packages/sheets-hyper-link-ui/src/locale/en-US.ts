@@ -28,7 +28,7 @@ const enUS: typeof zhCN = {
             range: 'Range',
             worksheet: 'Worksheet',
             definedName: 'Defined Name',
-            ok: 'OK',
+            ok: 'Confirm',
             cancel: 'Cancel',
             labelPlaceholder: 'Enter label',
             inputError: 'Please enter',

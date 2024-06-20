@@ -63,20 +63,17 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.56",
+        "@univerjs/icons": "^0.1.57",
         "ot-json1": "^1.0.2"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.15.4",
         "less": "^4.2.0",
-        "ot-json1": "^1.0.2",
-        "react": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.13",
+        "vite": "^5.3.1",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

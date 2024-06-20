@@ -34,6 +34,7 @@ import type {
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
     IRemoveSheetMutationParams,
+    IReorderRangeMutationParams,
     ISetDefinedNameCommandParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
@@ -45,6 +46,7 @@ import {
     RemoveColMutation,
     RemoveRowMutation,
     RemoveSheetMutation,
+    ReorderRangeMutation,
     SetDefinedNameCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
@@ -149,6 +151,16 @@ export class ActiveDirtyController extends Disposable {
                 const params = command.params as IMoveColumnsMutationParams;
                 return {
                     dirtyRanges: this._getMoveRowsMutationDirtyRange(params),
+                };
+            },
+        });
+
+        this._activeDirtyManagerService.register(ReorderRangeMutation.id, {
+            commandId: ReorderRangeMutation.id,
+            getDirtyData: (command: ICommandInfo) => {
+                const params = command.params as IReorderRangeMutationParams;
+                return {
+                    dirtyRanges: this._getReorderRangeMutationDirtyRange(params),
                 };
             },
         });
@@ -282,6 +294,15 @@ export class ActiveDirtyController extends Disposable {
 
         dirtyRanges.push(...this._getDirtyRangesForArrayFormula(unitId, sheetId, targetMatrix));
 
+        return dirtyRanges;
+    }
+
+    private _getReorderRangeMutationDirtyRange(params: IReorderRangeMutationParams) {
+        const { unitId, subUnitId: sheetId, range } = params;
+        const matrix = this._rangeToMatrix(range).getData();
+        const dirtyRanges: IUnitRange[] = [];
+        dirtyRanges.push(...this._getDirtyRangesByCellValue(unitId, sheetId, matrix));
+        dirtyRanges.push(...this._getDirtyRangesForArrayFormula(unitId, sheetId, matrix));
         return dirtyRanges;
     }
 

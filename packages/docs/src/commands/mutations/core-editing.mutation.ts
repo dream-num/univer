@@ -25,13 +25,15 @@ import { IMEInputManagerService } from '../../services/ime-input-manager.service
 
 export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     unitId: string;
-    segmentId?: string;
     actions: JSONXActions;
     textRanges: Nullable<ITextRangeWithStyle[]>;
+    segmentId?: string;
     prevTextRanges?: Nullable<ITextRangeWithStyle[]>;
     noNeedSetTextRange?: boolean;
     isCompositionEnd?: boolean;
     noHistory?: boolean;
+    // Do you need to compose the undo and redo of history, and compose of the change states.
+    debounce?: boolean;
 }
 
 const RichTextEditingMutationId = 'doc.mutation.rich-text-editing';
@@ -57,6 +59,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             noHistory,
             isCompositionEnd,
             noNeedSetTextRange,
+            debounce,
         } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
@@ -114,6 +117,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             segmentId,
             trigger,
             noHistory,
+            debounce,
             redoState: {
                 actions,
                 textRanges,

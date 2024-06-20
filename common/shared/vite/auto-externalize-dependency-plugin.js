@@ -164,7 +164,9 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
                     }
                 });
 
-            pkg.peerDependencies = peerDependencies;
+            if (Object.keys(peerDependencies).length) {
+                pkg.peerDependencies = peerDependencies;
+            }
             if (optionalDependencies) {
                 pkg.optionalDependencies = optionalDependencies;
             }

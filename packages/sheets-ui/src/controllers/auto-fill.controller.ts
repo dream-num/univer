@@ -53,13 +53,13 @@ import {
     RemoveSheetMutation,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
+    SetRangeValuesCommand,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SetSelectionsOperation,
     SetWorksheetActiveOperation,
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
-    SheetInterceptorService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -80,6 +80,7 @@ import { IEditorBridgeService } from '../services/editor-bridge.service';
 import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
+import { SheetsRenderService } from '../services/sheets-render.service';
 import type { IDiscreteRange } from './utils/range-tools';
 import { discreteRangeToRange, generateNullCellValueRowCol, rangeToDiscreteRange } from './utils/range-tools';
 
@@ -96,9 +97,9 @@ export class AutoFillController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IAutoFillService private readonly _autoFillService: IAutoFillService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(SheetsRenderService) private _sheetsRenderService: SheetsRenderService
     ) {
         super();
         this._defaultHook = {
@@ -120,6 +121,11 @@ export class AutoFillController extends Disposable {
         this._onSelectionControlFillChanged();
         this._onApplyTypeChanged();
         this._initQuitListener();
+        this._initSkeletonChange();
+    }
+
+    private _initSkeletonChange() {
+        this.disposeWithMe(this._sheetsRenderService.registerSkeletonChangingMutations(AutoFillCommand.id));
     }
 
     private _initDefaultHook() {
@@ -130,9 +136,9 @@ export class AutoFillController extends Disposable {
         const quitCommands = [
             SetCellEditVisibleOperation.id,
             AutoClearContentCommand.id,
+            SetRangeValuesCommand.id,
             SetZoomRatioOperation.id,
             SetWorksheetActiveOperation.id,
-            SetRangeValuesMutation.id,
             MoveRangeMutation.id,
             RemoveRowMutation.id,
             RemoveColMutation.id,

@@ -46,11 +46,17 @@ import { ISelectionRenderService, SelectionRenderService } from '../../../servic
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { RefillCommand } from '../refill.command';
 import { AutoClearContentCommand, AutoFillCommand } from '../auto-fill.command';
+import { SheetsRenderService } from '../../../services/sheets-render.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
     colorBlack: '#35322b',
 };
+
+class mockSheetsRenderService {
+    registerSkeletonChangingMutations(id: string) {
+    }
+}
 
 const TEST_WORKBOOK_DATA = {
     id: 'test',
@@ -285,6 +291,7 @@ describe('Test auto fill rules in controller', () => {
             [IRenderManagerService, { useClass: RenderManagerService }],
             [SheetSkeletonManagerService],
             [AutoFillController],
+            [SheetsRenderService, { useClass: mockSheetsRenderService }],
         ]);
         univer = testBed.univer;
         get = testBed.get;
@@ -648,9 +655,9 @@ describe('Test auto fill rules in controller', () => {
                 endRow: 10,
                 endColumn: 1,
             });
-            expect(workbook.getSheetBySheetId('sheet1')?.getCell(11, 1)?.v).toBe(3);
-            expect(workbook.getSheetBySheetId('sheet1')?.getCell(12, 1)?.v).toBe(4);
-            expect(workbook.getSheetBySheetId('sheet1')?.getCell(13, 1)?.v).toBe(5);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(11, 1)?.v).toBe(2);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(12, 1)?.v).toBe(2);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(13, 1)?.v).toBe(2);
 
             // undo redo
             await commandService.executeCommand(UndoCommand.id);
@@ -659,9 +666,9 @@ describe('Test auto fill rules in controller', () => {
             expect(workbook.getSheetBySheetId('sheet1')?.getCell(13, 1)?.v).toBe(undefined);
 
             await commandService.executeCommand(RedoCommand.id);
-            expect(workbook.getSheetBySheetId('sheet1')?.getCell(11, 1)?.v).toBe(3);
-            expect(workbook.getSheetBySheetId('sheet1')?.getCell(12, 1)?.v).toBe(4);
-            expect(workbook.getSheetBySheetId('sheet1')?.getCell(13, 1)?.v).toBe(5);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(11, 1)?.v).toBe(2);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(12, 1)?.v).toBe(2);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(13, 1)?.v).toBe(2);
         });
     });
 
@@ -831,8 +838,8 @@ describe('Test auto fill rules in controller', () => {
                     endColumn: 4,
                 }
             );
-            expect(workbook.getSheetBySheetId('sheet1')?.getCell(16, 3)?.v).toBe(3);
-            expect(workbook.getSheetBySheetId('sheet1')?.getCell(16, 4)?.v).toBe(4);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(16, 3)?.v).toBe(2);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(16, 4)?.v).toBe(2);
             // test left
             (autoFillController as any)._triggerAutoFill(
                 {
@@ -848,8 +855,8 @@ describe('Test auto fill rules in controller', () => {
                     endColumn: 2,
                 }
             );
-            expect(workbook.getSheetBySheetId('sheet1')?.getCell(16, 1)?.v).toBe(1);
-            expect(workbook.getSheetBySheetId('sheet1')?.getCell(16, 0)?.v).toBe(0);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(16, 1)?.v).toBe(2);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(16, 0)?.v).toBe(2);
             // test up
             (autoFillController as any)._triggerAutoFill(
                 {
@@ -865,7 +872,7 @@ describe('Test auto fill rules in controller', () => {
                     endColumn: 2,
                 }
             );
-            expect(workbook.getSheetBySheetId('sheet1')?.getCell(15, 2)?.v).toBe(1);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(15, 2)?.v).toBe(2);
             // test down
             (autoFillController as any)._triggerAutoFill(
                 {
@@ -881,7 +888,7 @@ describe('Test auto fill rules in controller', () => {
                     endColumn: 2,
                 }
             );
-            expect(workbook.getSheetBySheetId('sheet1')?.getCell(17, 2)?.v).toBe(3);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(17, 2)?.v).toBe(2);
         });
     });
 });

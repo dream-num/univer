@@ -84,6 +84,14 @@ export class FormulaClipboardController extends Disposable {
         payload: ICopyPastePayload,
         isSpecialPaste: boolean
     ) {
+        const pasteType = payload.pasteType;
+        if (pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE || pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT || pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH) {
+            return {
+                undos: [],
+                redos: [],
+            };
+        }
+
         const copyInfo = {
             copyType: payload.copyType || COPY_TYPE.COPY,
             copyRange: pasteFrom?.range,

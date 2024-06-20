@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import { DisposableCollection, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import { getSheetCommandTarget, RangeProtectionRuleModel } from '@univerjs/sheets';
+import { getSheetCommandTarget, RangeProtectionRenderModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { UnitAction } from '@univerjs/protocol';
 import { NullValueObject } from '@univerjs/engine-formula';
 import { StatusBarController } from '../status-bar.controller';
-
-type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
@@ -36,8 +34,8 @@ export class SheetPermissionInterceptorFormulaRenderController extends RxDisposa
         @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
-        @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
-        @Inject(StatusBarController) private readonly _statusBarController: StatusBarController
+        @Inject(StatusBarController) private readonly _statusBarController: StatusBarController,
+        @Inject(RangeProtectionRenderModel) private _rangeProtectionRenderModel: RangeProtectionRenderModel
     ) {
         super();
         this._initStatusBarPermissionInterceptor();
@@ -52,20 +50,36 @@ export class SheetPermissionInterceptorFormulaRenderController extends RxDisposa
                     if (!target) {
                         return defaultValue ?? [];
                     }
-                    const { worksheet } = target;
-                    originValue.forEach((item) => {
-                        const itemValue = item.getArrayValue();
-                        const startRow = item.getCurrentRow();
-                        const startCol = item.getCurrentColumn();
-                        itemValue.forEach((row, rowIndex) => {
-                            row.forEach((col, colIndex) => {
-                                const permission = (worksheet.getCell(rowIndex + startRow, colIndex + startCol) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                                if (permission?.[UnitAction.View] === false) {
+                    const { worksheet, unitId, subUnitId } = target;
+                    const sheetViewPermission = this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id)?.value;
+                    if (sheetViewPermission === false) {
+                        originValue.forEach((item) => {
+                            const itemValue = item.getArrayValue();
+                            itemValue.forEach((row, rowIndex) => {
+                                row.forEach((col, colIndex) => {
                                     itemValue[rowIndex][colIndex] = NullValueObject.create();
-                                }
+                                });
                             });
                         });
-                    });
+                    } else {
+                        originValue.forEach((item) => {
+                            const itemValue = item.getArrayValue();
+                            const startRow = item.getCurrentRow();
+                            const startCol = item.getCurrentColumn();
+                            itemValue.forEach((row, rowIndex) => {
+                                row.forEach((col, colIndex) => {
+                                    const cellValue = worksheet.getCellRaw(rowIndex + startRow, colIndex + startCol)?.v;
+                                    if (cellValue === undefined) {
+                                        return;
+                                    }
+                                    const permission = this._rangeProtectionRenderModel.getCellInfo(unitId, subUnitId, rowIndex + startRow, colIndex + startCol)?.[0];
+                                    if (permission?.[UnitAction.View] === false) {
+                                        itemValue[rowIndex][colIndex] = NullValueObject.create();
+                                    }
+                                });
+                            });
+                        });
+                    }
                     return originValue;
                 },
             })

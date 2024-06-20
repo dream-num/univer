@@ -171,6 +171,8 @@ export {
     SetWorksheetRowIsAutoHeightCommand,
 } from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
+export { ReorderRangeCommand, type IReorderRangeCommandParams } from './commands/commands/reorder-range.command';
+export { ReorderRangeMutation, type IReorderRangeMutationParams } from './commands/mutations/reorder-range.mutation';
 export { followSelectionOperation, getPrimaryForRange } from './commands/commands/utils/selection-utils';
 export {
     AddMergeUndoMutationFactory,
@@ -305,6 +307,7 @@ export { SetDefinedNameCommand, type ISetDefinedNameCommandParams } from './comm
 export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';
 export type { FormatType } from './services/numfmt/type';
 export { getMoveRangeUndoRedoMutations } from './commands/commands/move-range.command';
+export { expandToContinuousRange } from './basics/utils';
 
 // permission
 export { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './services/permission';

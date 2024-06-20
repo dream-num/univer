@@ -45,6 +45,13 @@ export const Playground = {
                         <Button>bottom</Button>
                     </Tooltip>
                 </div>
+                <div>
+                    <Tooltip showIfEllipsis title="hello world" placement="bottom">
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            showIfEllipsis: 奇奇怪怪乖乖跟琪琪去上课就开始丹江口市的是卡拉斯科独立思考独立思考
+                        </span>
+                    </Tooltip>
+                </div>
             </>
         );
     },

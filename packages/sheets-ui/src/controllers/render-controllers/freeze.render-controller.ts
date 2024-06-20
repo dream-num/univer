@@ -18,6 +18,7 @@ import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullab
 import {
     ColorKit,
     createInterceptorKey,
+    Direction,
     Disposable,
     ICommandService,
     InterceptorManager,
@@ -1157,9 +1158,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
                     if (command.id === InsertRowCommand.id) {
                         const params = command.params as IInsertRowCommandParams;
-                        const range = params.range;
+                        const { range, direction } = params;
                         const insertCount = range.endRow - range.startRow + 1;
-                        if (range.startRow <= freeze.startRow) {
+                        if (range.startRow + 1 < freeze.startRow || (range.startRow + 1 === freeze.startRow && direction === Direction.UP)) {
                             const newFreeze: IFreeze = {
                                 ...freeze,
                                 startRow: Math.max(1, freeze.startRow + insertCount),
@@ -1172,9 +1173,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
                     if (command.id === InsertColCommand.id) {
                         const params = command.params as IInsertColCommandParams;
-                        const range = params.range;
+                        const { range, direction } = params;
                         const insertCount = range.endColumn - range.startColumn + 1;
-                        if (range.startColumn <= freeze.startColumn) {
+                        if (range.startColumn + 1 < freeze.startColumn || (range.startColumn + 1 === freeze.startColumn && direction === Direction.LEFT)) {
                             const newFreeze: IFreeze = {
                                 ...freeze,
                                 startColumn: Math.max(1, freeze.startColumn + insertCount),

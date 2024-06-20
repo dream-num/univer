@@ -36,6 +36,8 @@ describe('test "SetRangeValuesMutation" ', () => {
 
             expect(checkCellValueType(1, CellValueType.BOOLEAN)).toBe(CellValueType.BOOLEAN); // it is valid boolean value
             expect(checkCellValueType(0, CellValueType.BOOLEAN)).toBe(CellValueType.BOOLEAN); // it is valid boolean value
+
+            expect(checkCellValueType('2', CellValueType.FORCE_STRING)).toBe(CellValueType.FORCE_STRING); // do not change cell value type when it is force string
         });
 
         it('should be able to cast values that can be casted to boolean', () => {

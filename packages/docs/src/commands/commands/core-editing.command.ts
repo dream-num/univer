@@ -60,6 +60,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
                 unitId,
                 actions: [],
                 textRanges,
+                debounce: true,
             },
         };
 
@@ -147,6 +148,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
                     endOffset: deleteStart,
                     collapsed: true,
                 }],
+                debounce: true,
             },
         };
 

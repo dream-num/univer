@@ -16,11 +16,12 @@
 
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
-import type { IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
+import type { ICustomRange, IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
 import type { IRetainAction } from './action-types';
 import { coverTextRuns } from './apply-utils/update-apply';
 
 // TODO: Support other properties like custom ranges, tables, etc.
+
 export function getBodySlice(
     body: IDocumentBody,
     startOffset: number,
@@ -93,7 +94,35 @@ export function getBodySlice(
         }));
     }
 
+    docBody.customRanges = getDeleteCustomRange(body, startOffset, endOffset);
+
     return docBody;
+}
+
+export function getDeleteCustomRange(body: IDocumentBody, startOffset: number, endOffset: number) {
+    const { customRanges = [] } = body;
+
+    const deletedCustomRange: ICustomRange[] = [];
+    customRanges.forEach((range) => {
+        // delete custom-range start tag, only happened in cancel custom-range
+        if (startOffset === endOffset - 1 && startOffset === range.startIndex) {
+            const copy = Tools.deepClone(range);
+            deletedCustomRange.push({
+                ...copy,
+                startIndex: copy.startIndex - startOffset,
+                endIndex: Math.min(copy.endIndex - 1 - startOffset),
+            });
+        } else if (startOffset <= range.startIndex && endOffset >= range.startIndex) {
+            const copy = Tools.deepClone(range);
+            deletedCustomRange.push({
+                ...copy,
+                startIndex: copy.startIndex - startOffset,
+                endIndex: Math.min(copy.endIndex - startOffset, endOffset - 1 - startOffset),
+            });
+        }
+    });
+
+    return deletedCustomRange;
 }
 
 export function composeBody(
@@ -153,7 +182,6 @@ export function composeBody(
     if (paragraphs.length) {
         retBody.paragraphs = paragraphs;
     }
-
     return retBody;
 }
 

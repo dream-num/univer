@@ -662,7 +662,8 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
         for (let i = 0, len = customRanges.length; i < len; i++) {
             const customRange = customRanges[i];
             const { startIndex: st, endIndex: ed } = customRange;
-            if (startIndex === endIndex && (startIndex === st || startIndex === ed)) {
+            // delete custom-range start means delete custom-range
+            if (startIndex === endIndex && (startIndex === st)) {
                 removeCustomRanges.push({
                     ...customRange,
                     startIndex: st - currentIndex,

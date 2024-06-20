@@ -90,6 +90,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         this._initDefinedNameListener();
 
         const unitId = workbook.getUnitId();
+        if (!worksheet) return;
         const sheetId = worksheet.getSheetId();
         this._selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
@@ -321,7 +322,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
                 const selectionWithStyle = this._getAllRange(skeleton);
 
                 const selectionData = this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
-                this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
+                this._selectionRenderService.addControlToCurrentBySelectionData(selectionData);
 
                 this._selectionRenderService.refreshSelectionMoveStart();
 
@@ -349,7 +350,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
                         }
                         const selectionData =
                             this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
-                        this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
+                        this._selectionRenderService.addControlToCurrentBySelectionData(selectionData);
                     }
 
                     this._syncDefinedNameRange(params);

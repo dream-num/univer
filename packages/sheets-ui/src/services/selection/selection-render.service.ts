@@ -76,13 +76,13 @@ export interface ISelectionRenderService {
     enableSkipRemainLast(): void;
     disableSkipRemainLast(): void;
 
-    addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle): void;
+    addControlToCurrentBySelectionData(data: ISelectionWithCoordAndStyle): void;
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]): void;
     changeRuntime(skeleton: Nullable<SpreadsheetSkeleton>, scene: Nullable<Scene>, viewport?: Viewport): void;
 
     /** @deprecated This should not be provided by the selection render service. */
     getViewPort(): Viewport;
-    getCurrentControls(): SelectionShape[];
+    getSelectionControls(): SelectionShape[];
     getActiveSelections(): Nullable<ISelection[]>;
     getActiveRange(): Nullable<IRange>;
     getActiveSelectionControl(): Nullable<SelectionShape>;
@@ -301,8 +301,8 @@ export class SelectionRenderService implements ISelectionRenderService {
      * @param selectionRange
      * @param curCellRange
      */
-    addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle) {
-        const currentControls = this.getCurrentControls();
+    addControlToCurrentBySelectionData(data: ISelectionWithCoordAndStyle) {
+        const currentControls = this.getSelectionControls();
 
         if (!currentControls) {
             return;
@@ -342,7 +342,7 @@ export class SelectionRenderService implements ISelectionRenderService {
     }
 
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]) {
-        const currentControls = this.getCurrentControls();
+        const currentControls = this.getSelectionControls();
         if (!currentControls) {
             return;
         }
@@ -380,7 +380,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         return selectionControls.map((control) => control.getValue());
     }
 
-    getCurrentControls() {
+    getSelectionControls() {
         return this._selectionControls;
     }
 
@@ -397,7 +397,7 @@ export class SelectionRenderService implements ISelectionRenderService {
     // }
 
     private _clearSelectionControls() {
-        const curControls = this.getCurrentControls();
+        const curControls = this.getSelectionControls();
 
         if (curControls.length > 0) {
             for (const control of curControls) {
@@ -447,7 +447,7 @@ export class SelectionRenderService implements ISelectionRenderService {
      * @returns
      */
     getActiveSelections(): Nullable<ISelection[]> {
-        const controls = this.getCurrentControls();
+        const controls = this.getSelectionControls();
         if (controls && controls.length > 0) {
             const selections = controls?.map((control: SelectionShape) => {
                 const model: SelectionRenderModel = control.model;
@@ -485,7 +485,7 @@ export class SelectionRenderService implements ISelectionRenderService {
      * @returns
      */
     getActiveRange(): Nullable<IRange> {
-        const controls = this.getCurrentControls();
+        const controls = this.getSelectionControls();
         const model = controls && controls[controls.length - 1].model;
         return (
             model && {
@@ -502,7 +502,7 @@ export class SelectionRenderService implements ISelectionRenderService {
      * @returns
      */
     getActiveSelectionControl(): Nullable<SelectionShape> {
-        const controls = this.getCurrentControls();
+        const controls = this.getSelectionControls();
         return controls && controls[controls.length - 1];
     }
 
@@ -609,7 +609,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         let selectionControl: Nullable<SelectionShape> = this.getActiveSelectionControl();
 
-        const curControls = this.getCurrentControls();
+        const curControls = this.getSelectionControls();
 
         if (!curControls) {
             return false;

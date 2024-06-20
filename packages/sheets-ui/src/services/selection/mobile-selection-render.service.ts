@@ -37,6 +37,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { getSheetObject } from '../../controllers/utils/component-tools';
+import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import type { SelectionRenderModel } from './selection-render-model';
 import type { SelectionControl } from './selection-shape';
 import { type IControlFillConfig, type ISelectionRenderService, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './selection-render.service';
@@ -146,6 +147,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
+        // @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
@@ -244,10 +246,10 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
      * @param selectionRange
      * @param curCellRange
      */
-    addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle) {
-        const currentControls = this.getCurrentControls();
+    addControlToCurrentBySelectionData(data: ISelectionWithCoordAndStyle) {
+        const selectionControls = this.getSelectionControls();
 
-        if (!currentControls) {
+        if (!selectionControls) {
             return;
         }
         const { rangeWithCoord, primaryWithCoord } = data;
@@ -265,7 +267,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         if (scene == null || skeleton == null) {
             return;
         }
-        const control = new MobileSelectionControl(scene, currentControls.length, this._isHeaderHighlight, this._themeService);
+        const control = new MobileSelectionControl(scene, selectionControls.length, this._isHeaderHighlight, this._themeService);
 
         // new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
 
@@ -273,9 +275,10 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
             console.log('current cell', this.getActiveSelectionControl()?.model.currentCell);
             this.expandingSelection = true;
             this.expandingControlShape = ExpandingCorner.TOP_LEFT;
+            this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
             this.eventTrigger(
                 evt,
-                currentControls.length + 1,
+                selectionControls.length + 1,
                 RANGE_TYPE.NORMAL,
                 this._activeViewport!,
                 ScrollTimerType.ALL
@@ -286,9 +289,10 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
             console.log('current cell', this.getActiveSelectionControl()?.model.currentCell);
             this.expandingSelection = true;
             this.expandingControlShape = ExpandingCorner.BOTTOM_RIGHT;
+            this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
             this.eventTrigger(
                 evt,
-                currentControls.length + 1,
+                selectionControls.length + 1,
                 RANGE_TYPE.NORMAL,
                 this._activeViewport!
                 // this._getActiveViewport(evt)
@@ -305,11 +309,11 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         } else {
             control.disableHeaderHighlight();
         }
-        currentControls.push(control);
+        selectionControls.push(control);
     }
 
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]) {
-        const currentControls = this.getCurrentControls();
+        const currentControls = this.getSelectionControls();
         if (!currentControls) {
             return;
         }
@@ -347,7 +351,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         return selectionControls.map((control) => control.getValue());
     }
 
-    getCurrentControls() {
+    getSelectionControls() {
         return this._selectionControls;
     }
 
@@ -364,14 +368,14 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
     // }
 
     private _clearSelectionControls() {
-        const curControls = this.getCurrentControls();
+        const selectionControls = this.getSelectionControls();
 
-        if (curControls.length > 0) {
-            for (const control of curControls) {
+        if (selectionControls.length > 0) {
+            for (const control of selectionControls) {
                 control.dispose();
             }
 
-            curControls.length = 0; // clear currentSelectionControls
+            selectionControls.length = 0; // clear currentSelectionControls
         }
     }
 
@@ -414,7 +418,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
      * @returns
      */
     getActiveSelections(): Nullable<ISelection[]> {
-        const controls = this.getCurrentControls();
+        const controls = this.getSelectionControls();
         if (controls && controls.length > 0) {
             const selections = controls?.map((control: SelectionControl) => {
                 const model: SelectionRenderModel = control.model;
@@ -452,8 +456,8 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
      * @returns
      */
     getActiveRange(): Nullable<IRange> {
-        const controls = this.getCurrentControls();
-        const model = controls && controls[controls.length - 1].model;
+        const control = this.getActiveSelectionControl();
+        const model = control?.model;
         return (
             model && {
                 startRow: model.startRow,
@@ -469,7 +473,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
      * @returns
      */
     getActiveSelectionControl(): Nullable<SelectionControl> {
-        const controls = this.getCurrentControls();
+        const controls = this.getSelectionControls();
         return controls && controls[controls.length - 1];
     }
 
@@ -567,14 +571,14 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
 
         let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelectionControl();
 
-        const curControls = this.getCurrentControls();
+        const selectionControls = this.getSelectionControls();
         const expandingMode = this.expandingSelection || evt.shiftKey;
 
-        if (!curControls) {
+        if (!selectionControls) {
             return false;
         }
 
-        for (const control of curControls) {
+        for (const control of selectionControls) {
             // right click
             if (evt.button === 2 && control.model.isInclude(cursorCellRangeWithRangeType)) {
                 activeSelectionControl = control;
@@ -593,16 +597,16 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         }
 
         // In addition to pressing the ctrl or shift key, we must clear the previous selection
-        // if (curControls.length > 0 && !expandingMode) {
-        //     const condition1 = !evt.ctrlKey &&
-        //     !this._isShowPreviousEnable &&
-        //     !this._isRemainLastEnable;
-        //     const condition2 = this._isSingleSelection;
+        if (selectionControls.length > 0) {
+            const condition1 = !evt.ctrlKey &&
+            !this._isShowPreviousEnable &&
+            !this._isRemainLastEnable;
+            const condition2 = this._isSingleSelection;
 
-        //     if (condition1 || condition2) {
-        //         this._clearSelectionControls();
-        //     }
-        // }
+            if (condition1 || condition2) {
+                this._clearSelectionControls();
+            }
+        }
         if (!activeSelectionControl) return;
 
         /**
@@ -689,7 +693,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
              */
             activeSelectionControl = new MobileSelectionControl(
                 scene,
-                curControls.length + zIndex,
+                selectionControls.length + zIndex,
                 this._isHeaderHighlight,
                 this._themeService
             );
@@ -704,7 +708,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
                 primaryCursorCellRange
             );
 
-            curControls.push(activeSelectionControl);
+            selectionControls.push(activeSelectionControl);
         }
 
         this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
@@ -873,7 +877,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
             this._endSelection();
             this.expandingSelection = false;
             this.expandingControlShape = ExpandingCorner.BOTTOM_RIGHT;
-            // this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+            this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
 
             // when selection mouse up, enable the short cut service
             this._shortcutService.setDisable(false);
@@ -950,7 +954,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
 
         let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelectionControl();
 
-        const curControls = this.getCurrentControls();
+        const curControls = this.getSelectionControls();
         const expandingMode = this.expandingSelection || evt.shiftKey;
 
         if (!curControls) {
@@ -1003,6 +1007,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
              */
             // console.log('selectionControl', startSelectionRange);
 
+            this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
             // when pointer up, a new selection range
             activeSelectionControl.update(
                 cursorCellRangeWithRangeType,

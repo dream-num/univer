@@ -74,7 +74,7 @@ export default {
     },
     AVERAGEIFS: {
         description: '複数の検索条件に一致するすべてのセルの平均値 (算術平均) を返します。',
-        abstract: '複数の検索条件に一致するすべてのセルの平均値 (算術平均) を返します。',
+        abstract: '複数の検索条件に一致するすべてのセルの平均値 (算術平均) を返します',
         links: [
             {
                 title: '指導',
@@ -82,8 +82,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            averageRange: { name: '平均範囲', detail: '平均する 1 つまたは複数のセル (数値、または数値を含む名前、配列、セル参照) を指定します。' },
+            criteriaRange1: { name: '条件範囲 1', detail: '条件で評価するセルのセットです。' },
+            criteria1: { name: '条件 1', detail: '平均を計算するセルを定義するために使用されます。 たとえば、条件は 32、"32"、">32"、"apple"、または B4 のように表現できます。' },
+            criteriaRange2: { name: '条件範囲 2', detail: '追加エリア。 エリアは最大126エリアまで入力できます。' },
+            criteria2: { name: '条件 2', detail: '追加の関連付け条件。 条件は126個まで入力できます。' },
         },
     },
     BETA_DIST: {

@@ -21,17 +21,17 @@ import type { BaseValueObject, IArrayValueObject } from '../../../engine/value-o
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
-export class Maxifs extends BaseFunction {
+export class Averageifs extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 255;
 
-    override calculate(maxRange: BaseValueObject, ...variants: BaseValueObject[]) {
-        if (maxRange.isError()) {
+    override calculate(averageRange: BaseValueObject, ...variants: BaseValueObject[]) {
+        if (averageRange.isError()) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        if (!maxRange.isArray()) {
+        if (!averageRange.isArray()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -47,7 +47,7 @@ export class Maxifs extends BaseFunction {
 
         const { maxRowLength, maxColumnLength } = calculateMaxDimensions(variants);
 
-        const errorArray = getErrorArray(variants, maxRange, maxRowLength, maxColumnLength);
+        const errorArray = getErrorArray(variants, averageRange, maxRowLength, maxColumnLength);
 
         if (errorArray) {
             return errorArray;
@@ -55,18 +55,16 @@ export class Maxifs extends BaseFunction {
 
         const booleanResults = getBooleanResults(variants, maxRowLength, maxColumnLength);
 
-        return this._aggregateResults(maxRange, booleanResults);
+        return this._aggregateResults(averageRange, booleanResults);
     }
 
-    private _aggregateResults(maxRange: BaseValueObject, booleanResults: BaseValueObject[][]): ArrayValueObject {
+    private _aggregateResults(averageRange: BaseValueObject, booleanResults: BaseValueObject[][]): ArrayValueObject {
         const maxResults = booleanResults.map((row) => {
             return row.map((booleanResult) => {
-                const picked = (maxRange as ArrayValueObject).pick(booleanResult as ArrayValueObject);
-                if (picked.getColumnCount() === 0) {
-                    return ArrayValueObject.create('0');
-                }
-
-                return picked.max();
+                const picked = (averageRange as ArrayValueObject).pick(booleanResult as ArrayValueObject);
+                const sum = picked.sum();
+                const count = picked.count();
+                return sum.divided(count);
             });
         });
 
@@ -83,4 +81,3 @@ export class Maxifs extends BaseFunction {
         return ArrayValueObject.create(arrayValueObjectData);
     }
 }
-

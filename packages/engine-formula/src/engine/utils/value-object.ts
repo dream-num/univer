@@ -18,8 +18,12 @@ import type { ICellData, Nullable } from '@univerjs/core';
 import { CellValueType } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { ArrayValueObject } from '../value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
+import { ErrorValueObject } from '../value-object/base-value-object';
 import { NumberValueObject } from '../value-object/primitive-object';
+import { ErrorType } from '../../basics/error-type';
+import { expandArrayValueObject } from './array-object';
+import { booleanObjectIntersection, valueObjectCompare } from './object-compare';
 
 export function convertTonNumber(valueObject: BaseValueObject) {
     const currentValue = valueObject.getValue();
@@ -153,4 +157,56 @@ export function calculateMaxDimensions(variants: BaseValueObject[]) {
     });
 
     return { maxRowLength, maxColumnLength };
+}
+
+export function getErrorArray(variants: BaseValueObject[], sumRange: BaseValueObject, maxRowLength: number, maxColumnLength: number) {
+    const sumRowLength = (sumRange as ArrayValueObject).getRowCount();
+    const sumColumnLength = (sumRange as ArrayValueObject).getColumnCount();
+
+    for (let i = 0; i < variants.length; i++) {
+        if (i % 2 === 1) continue;
+
+        const range = variants[i];
+
+        const rangeRowLength = (range as ArrayValueObject).getRowCount();
+        const rangeColumnLength = (range as ArrayValueObject).getColumnCount();
+        if (rangeRowLength !== sumRowLength || rangeColumnLength !== sumColumnLength) {
+            return expandArrayValueObject(maxRowLength, maxColumnLength, ErrorValueObject.create(ErrorType.NA));
+        }
+    }
+
+    return null;
+}
+
+export function getBooleanResults(variants: BaseValueObject[], maxRowLength: number, maxColumnLength: number) {
+    const booleanResults: BaseValueObject[][] = [];
+
+    for (let i = 0; i < variants.length; i++) {
+        if (i % 2 === 1) continue;
+
+        const range = variants[i];
+        const criteria = variants[i + 1];
+        const criteriaArray = expandArrayValueObject(maxRowLength, maxColumnLength, criteria, ErrorValueObject.create(ErrorType.NA));
+
+        criteriaArray.iterator((criteriaValueObject, rowIndex, columnIndex) => {
+            if (!criteriaValueObject) {
+                return;
+            }
+
+            const resultArrayObject = valueObjectCompare(range, criteriaValueObject);
+
+            if (booleanResults[rowIndex] === undefined) {
+                booleanResults[rowIndex] = [];
+            }
+
+            if (booleanResults[rowIndex][columnIndex] === undefined) {
+                booleanResults[rowIndex][columnIndex] = resultArrayObject;
+                return;
+            }
+
+            booleanResults[rowIndex][columnIndex] = booleanObjectIntersection(booleanResults[rowIndex][columnIndex], resultArrayObject);
+        });
+    }
+
+    return booleanResults;
 }

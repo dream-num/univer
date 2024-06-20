@@ -85,7 +85,7 @@ export default {
         },
     },
     AVERAGEIFS: {
-        description: 'Returns the average (arithmetic mean) of all cells that meet multiple criteria',
+        description: 'Returns the average (arithmetic mean) of all cells that meet multiple criteria.',
         abstract: 'Returns the average (arithmetic mean) of all cells that meet multiple criteria',
         links: [
             {
@@ -94,8 +94,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            averageRange: { name: 'average_range', detail: 'One or more cells to average, including numbers or names, arrays, or references that contain numbers.' },
+            criteriaRange1: { name: 'criteria_range1', detail: 'Is the set of cells to evaluate with the criteria.' },
+            criteria1: { name: 'criteria1', detail: 'Used to define the cells for which the average will be calculated. For example, the criteria can be expressed as 32, "32", ">32", "apple", or B4' },
+            criteriaRange2: { name: 'criteria_range2', detail: 'Additional ranges. You can enter up to 126 range.' },
+            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 126 criteria.' },
         },
     },
     BETA_DIST: {

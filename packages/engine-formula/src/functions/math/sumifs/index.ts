@@ -15,9 +15,7 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { booleanObjectIntersection, valueObjectCompare } from '../../../engine/utils/object-compare';
-import { calculateMaxDimensions } from '../../../engine/utils/value-object';
+import { calculateMaxDimensions, getBooleanResults, getErrorArray } from '../../../engine/utils/value-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject, IArrayValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -49,44 +47,13 @@ export class Sumifs extends BaseFunction {
 
         const { maxRowLength, maxColumnLength } = calculateMaxDimensions(variants);
 
-        const sumRowLength = (sumRange as ArrayValueObject).getRowCount();
-        const sumColumnLength = (sumRange as ArrayValueObject).getColumnCount();
+        const errorArray = getErrorArray(variants, sumRange, maxRowLength, maxColumnLength);
 
-        const booleanResults: BaseValueObject[][] = [];
-
-        for (let i = 0; i < variants.length; i++) {
-            if (i % 2 === 1) continue;
-
-            const range = variants[i];
-
-            const rangeRowLength = (range as ArrayValueObject).getRowCount();
-            const rangeColumnLength = (range as ArrayValueObject).getColumnCount();
-            if (rangeRowLength !== sumRowLength || rangeColumnLength !== sumColumnLength) {
-                return expandArrayValueObject(maxRowLength, maxColumnLength, ErrorValueObject.create(ErrorType.NA));
-            }
-
-            const criteria = variants[i + 1];
-            const criteriaArray = expandArrayValueObject(maxRowLength, maxColumnLength, criteria, ErrorValueObject.create(ErrorType.NA));
-
-            criteriaArray.iterator((criteriaValueObject, rowIndex, columnIndex) => {
-                if (!criteriaValueObject) {
-                    return;
-                }
-
-                const resultArrayObject = valueObjectCompare(range, criteriaValueObject);
-
-                if (booleanResults[rowIndex] === undefined) {
-                    booleanResults[rowIndex] = [];
-                }
-
-                if (booleanResults[rowIndex][columnIndex] === undefined) {
-                    booleanResults[rowIndex][columnIndex] = resultArrayObject;
-                    return;
-                }
-
-                booleanResults[rowIndex][columnIndex] = booleanObjectIntersection(booleanResults[rowIndex][columnIndex], resultArrayObject);
-            });
+        if (errorArray) {
+            return errorArray;
         }
+
+        const booleanResults = getBooleanResults(variants, maxRowLength, maxColumnLength);
 
         return this._aggregateResults(sumRange, booleanResults);
     }

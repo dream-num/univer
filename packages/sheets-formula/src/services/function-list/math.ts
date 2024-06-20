@@ -1649,7 +1649,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.SUMIFS.functionParameter.criteria2.name',
                 detail: 'formula.functionList.SUMIFS.functionParameter.criteria2.detail',
-                example: '"<100"',
+                example: '"<20"',
                 require: 0,
                 repeat: 1,
             },

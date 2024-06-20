@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
+import { DataValidationType, Disposable, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
 import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
@@ -101,6 +101,11 @@ export class DataValidationAutoFillController extends Disposable {
                 redos: redoMutations,
             };
         };
+        const disabledDataVallation = [
+            DataValidationType.CHECKBOX,
+            DataValidationType.LIST,
+            DataValidationType.LIST_MULTIPLE,
+        ];
         const hook: ISheetAutoFillHook = {
             id: DATA_VALIDATION_PLUGIN_NAME,
             onBeforeFillData: (location) => {
@@ -109,7 +114,7 @@ export class DataValidationAutoFillController extends Disposable {
                 for (const row of sourceRange.rows) {
                     for (const col of sourceRange.cols) {
                         const dv = manager.getRuleByLocation(row, col);
-                        if (dv) {
+                        if (dv && disabledDataVallation.indexOf(dv.type) > -1) {
                             this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, true);
                             return;
                         }

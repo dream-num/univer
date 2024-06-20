@@ -782,18 +782,12 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@wendellhu/redi':
         specifier: 0.15.4
         version: 0.15.4
       less:
         specifier: ^4.2.0
         version: 4.2.0
-      react:
-        specifier: 18.3.1
-        version: 18.3.1
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -994,7 +988,7 @@ importers:
         specifier: ^2.5.2
         version: 2.5.2
       jsdom:
-        specifier: ^24.0.0
+        specifier: ^24.1.0
         version: 24.1.0
       rxjs:
         specifier: ^7.8.1
@@ -1784,28 +1778,24 @@ importers:
         version: 1.6.0(@types/node@20.14.4)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/sheets-sort:
-    dependencies:
-      '@univerjs/engine-formula':
-        specifier: workspace:*
-        version: link:../engine-formula
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../engine-formula
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../sheets-ui
       '@wendellhu/redi':
-        specifier: ^0.15.2
+        specifier: ^0.15.4
         version: 0.15.4
       rxjs:
         specifier: ^7.8.1
@@ -1814,10 +1804,10 @@ importers:
         specifier: ^5.4.5
         version: 5.4.5
       vite:
-        specifier: ^5.2.10
+        specifier: ^5.3.1
         version: 5.3.1(@types/node@20.14.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
       vitest:
-        specifier: ^1.5.2
+        specifier: ^1.6.0
         version: 1.6.0(@types/node@20.14.4)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/sheets-sort-ui:
@@ -1826,14 +1816,11 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/icons':
-        specifier: ^0.1.56
+        specifier: ^0.1.57
         version: 0.1.57(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-virtual-list:
-        specifier: ^3.11.5
-        version: 3.14.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react-dom:
-        specifier: 18.3.1
-        version: 18.3.1(react@18.3.1)
+        specifier: ^3.14.3
+        version: 3.14.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1860,7 +1847,7 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.15.2
+        specifier: ^0.15.4
         version: 0.15.4
       clsx:
         specifier: ^2.1.1
@@ -1878,10 +1865,10 @@ importers:
         specifier: ^5.4.5
         version: 5.4.5
       vite:
-        specifier: ^5.2.10
+        specifier: ^5.3.1
         version: 5.3.1(@types/node@20.14.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
       vitest:
-        specifier: ^1.5.2
+        specifier: ^1.6.0
         version: 1.6.0(@types/node@20.14.4)(happy-dom@13.3.8)(jsdom@24.1.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
 
   packages/sheets-thread-comment:
@@ -2194,15 +2181,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@wendellhu/redi':
         specifier: 0.15.4
         version: 0.15.4
@@ -2276,6 +2257,9 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.57
         version: 0.1.57(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: 'link:'
       localforage:
         specifier: ^1.10.0
         version: 1.10.0
@@ -4034,7 +4018,7 @@ packages:
     resolution: {integrity: sha512-lljVXpqXebpsijW71PZaCYeIcE5on1w5DlQy5WH6GLbFryLUrBD4932W/E2BSpfRJWseIL4v/KPgBFxDOIdKpQ==}
 
   '@protobufjs/float@1.0.2':
-    resolution: {integrity: sha1-Xp4avctz/Ap8uLKR33jIy9l7h9E=}
+    resolution: {integrity: sha512-Ddb+kVXlXst9d+R9PfTIxh1EdNkgoRe5tOX6t01f1lYWOvJnSPDBlG241QLzcyPdoNTsblLUdujGSE4RzrTZGQ==}
 
   '@protobufjs/inquire@1.1.0':
     resolution: {integrity: sha512-kdSefcPdruJiFMVSbn801t4vFK7KB/5gd2fYvrxhuJYg8ILrmn9SKSX2tZdV6V+ksulWqS7aXjBcRXl3wHoD9Q==}
@@ -9077,6 +9061,13 @@ packages:
 
   rc-virtual-list@3.14.2:
     resolution: {integrity: sha512-rA+W5xryhklJAcmswNyuKB3ZGeB855io+yOFQK5u/RXhjdshGblfKpNkQr4/9fBhZns0+uiL/0/s6IP2krtSmg==}
+    engines: {node: '>=8.x'}
+    peerDependencies:
+      react: '>=16.9.0'
+      react-dom: '>=16.9.0'
+
+  rc-virtual-list@3.14.3:
+    resolution: {integrity: sha512-6+6wiEhdqakNBnbRJymgMlh+90qpkgqherTRo1l1cX7mK6F9hWsazPczmP0lA+64yhC9/t+M9Dh5pjvDWimn8A==}
     engines: {node: '>=8.x'}
     peerDependencies:
       react: '>=16.9.0'
@@ -18323,6 +18314,15 @@ snapshots:
       react-is: 18.3.1
 
   rc-virtual-list@3.14.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+    dependencies:
+      '@babel/runtime': 7.24.7
+      classnames: 2.5.1
+      rc-resize-observer: 1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      rc-util: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
+  rc-virtual-list@3.14.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.24.7
       classnames: 2.5.1

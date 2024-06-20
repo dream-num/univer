@@ -70,9 +70,7 @@
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.15.4",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",

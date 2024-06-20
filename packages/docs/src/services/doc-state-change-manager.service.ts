@@ -20,24 +20,26 @@ import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
-import { DeleteCommand, InsertCommand } from '../commands/commands/core-editing.command';
 
 interface IDocChangeState {
     actions: JSONXActions;
     textRanges: Nullable<ITextRangeWithStyle[]>;
 }
 
+type ChangeStateCacheType = 'history' | 'collaboration';
+
 export interface IDocStateChangeParams {
     commandId: string;
     unitId: string;
-    segmentId?: string;
     trigger: Nullable<string>;
     redoState: IDocChangeState;
     undoState: IDocChangeState;
+    segmentId?: string;
     noHistory?: boolean;
+    debounce?: boolean;
 }
 
-const HISTORY_DELAY = 300;
+const DEBOUNCE_DELAY = 300;
 
 // This class sends out state-changing events, what is the state, the data model,
 // and the cursor & selection, and this class mainly serves the History(undo/redo) module and
@@ -45,9 +47,12 @@ const HISTORY_DELAY = 300;
 export class DocStateChangeManagerService extends RxDisposable {
     private readonly _docStateChange$ = new BehaviorSubject<Nullable<IDocStateChangeParams>>(null);
     readonly docStateChange$ = this._docStateChange$.asObservable();
-
-    private _stateCache: Map<string, IDocStateChangeParams[]> = new Map();
-    private _timer: Nullable<ReturnType<typeof setTimeout>> = null;
+    // This cache used for history compose.
+    private _historyStateCache: Map<string, IDocStateChangeParams[]> = new Map();
+    // This cache used for collaboration state compose.
+    private _changeStateCache: Map<string, IDocStateChangeParams[]> = new Map();
+    private _historyTimer: Nullable<ReturnType<typeof setTimeout>> = null;
+    private _changeStateCacheTimer: Nullable<ReturnType<typeof setTimeout>> = null;
 
     constructor(
         @Inject(IUndoRedoService) private _undoRedoService: IUndoRedoService,
@@ -60,16 +65,9 @@ export class DocStateChangeManagerService extends RxDisposable {
     }
 
     setChangeState(changeState: IDocStateChangeParams) {
-        const { trigger, noHistory } = changeState;
-        // No need to emit stateChange when the mutation is from collaboration.
-        if (trigger == null) {
-            return;
-        }
-        this._cacheChangeState(changeState);
+        this._cacheChangeState(changeState, 'history');
         // Mutations by user or historyService need collaboration.
-        if (!noHistory) {
-            this._docStateChange$.next(changeState);
-        }
+        this._cacheChangeState(changeState, 'collaboration');
     }
 
     private _initialize() {
@@ -84,42 +82,65 @@ export class DocStateChangeManagerService extends RxDisposable {
                     const unitId = univerDoc.getUnitId();
 
                     this._pushHistory(unitId);
+                    this._emitChangeState(unitId);
                 }
             })
         );
     }
 
-    private _cacheChangeState(changeState: IDocStateChangeParams) {
-        const { trigger, unitId, noHistory } = changeState;
+    private _cacheChangeState(changeState: IDocStateChangeParams, type: ChangeStateCacheType = 'history') {
+        const { trigger, unitId, noHistory, debounce = false } = changeState;
 
-        if (trigger === RedoCommandId || trigger === UndoCommandId || noHistory) {
+        if (noHistory) {
             return;
         }
 
-        if (this._stateCache.has(unitId)) {
-            const cacheStates = this._stateCache.get(unitId);
+        if (type === 'history' && (trigger === RedoCommandId || trigger === UndoCommandId)) {
+            return;
+        }
+
+        const stateCache = type === 'history'
+            ? this._historyStateCache
+            : this._changeStateCache;
+
+        const cb = type === 'history'
+            ? this._pushHistory.bind(this)
+            : this._emitChangeState.bind(this);
+
+        if (stateCache.has(unitId)) {
+            const cacheStates = stateCache.get(unitId);
 
             cacheStates?.push(changeState);
         } else {
-            this._stateCache.set(unitId, [changeState]);
+            stateCache.set(unitId, [changeState]);
         }
 
-        if (trigger === InsertCommand.id || trigger === DeleteCommand.id) {
-            if (this._timer) {
-                clearTimeout(this._timer);
-            }
+        if (debounce) {
+            if (type === 'history') {
+                if (this._historyTimer) {
+                    clearTimeout(this._historyTimer);
+                }
 
-            this._timer = setTimeout(() => {
-                this._pushHistory(unitId);
-            }, HISTORY_DELAY);
+                this._historyTimer = setTimeout(() => {
+                    cb(unitId);
+                }, DEBOUNCE_DELAY);
+            } else {
+                if (this._changeStateCacheTimer) {
+                    clearTimeout(this._changeStateCacheTimer);
+                }
+
+                this._changeStateCacheTimer = setTimeout(() => {
+                    cb(unitId);
+                }, DEBOUNCE_DELAY);
+            }
         } else {
-            this._pushHistory(unitId);
+            cb(unitId);
         }
     }
 
     private _pushHistory(unitId: string) {
         const undoRedoService = this._undoRedoService;
-        const cacheStates = this._stateCache.get(unitId);
+        const cacheStates = this._historyStateCache.get(unitId);
 
         if (!Array.isArray(cacheStates) || cacheStates.length === 0) {
             return;
@@ -153,5 +174,49 @@ export class DocStateChangeManagerService extends RxDisposable {
 
         // Empty the cacheState.
         cacheStates.length = 0;
+    }
+
+    private _emitChangeState(unitId: string) {
+        const cacheStates = this._changeStateCache.get(unitId);
+
+        if (!Array.isArray(cacheStates) || cacheStates.length === 0) {
+            return;
+        }
+
+        const len = cacheStates.length;
+        // Use the first state.commandId as commandId, because we will only have one core mutation type.
+        const { commandId, trigger, segmentId, noHistory, debounce } = cacheStates[0];
+
+        const firstState = cacheStates[0];
+        const lastState = cacheStates[len - 1];
+
+        const redoState: IRichTextEditingMutationParams = {
+            unitId,
+            actions: cacheStates.reduce((acc, cur) => JSONX.compose(acc, cur.redoState.actions), null as JSONXActions),
+            textRanges: lastState.redoState.textRanges,
+        };
+
+        const undoState: IRichTextEditingMutationParams = {
+            unitId,
+            // Always need to put undoParams after redoParams, because `reverse` will change the `cacheStates` order.
+            actions: cacheStates.reverse().reduce((acc, cur) => JSONX.compose(acc, cur.undoState.actions), null as JSONXActions),
+            textRanges: firstState.undoState.textRanges,
+        };
+
+        const changeState: IDocStateChangeParams = {
+            commandId,
+            unitId,
+            trigger,
+            redoState,
+            undoState,
+            segmentId,
+            noHistory,
+            debounce,
+        };
+
+        // Empty the cacheState.
+        cacheStates.length = 0;
+
+        this._docStateChange$.next(changeState);
     }
 }

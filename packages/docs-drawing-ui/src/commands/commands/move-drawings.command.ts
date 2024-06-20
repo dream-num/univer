@@ -17,7 +17,6 @@
 import type { ICommand } from '@univerjs/core';
 import { CommandType, Direction, ICommandService, IUniverInstanceService, PositionedObjectLayoutType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
-
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';

@@ -97,8 +97,8 @@ export default {
             averageRange: { name: 'average_range', detail: 'One or more cells to average, including numbers or names, arrays, or references that contain numbers.' },
             criteriaRange1: { name: 'criteria_range1', detail: 'Is the set of cells to evaluate with the criteria.' },
             criteria1: { name: 'criteria1', detail: 'Used to define the cells for which the average will be calculated. For example, the criteria can be expressed as 32, "32", ">32", "apple", or B4' },
-            criteriaRange2: { name: 'criteria_range2', detail: 'Additional ranges. You can enter up to 126 range.' },
-            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 126 criteria.' },
+            criteriaRange2: { name: 'criteria_range2', detail: 'Additional ranges. You can enter up to 127 range.' },
+            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 127 criteria.' },
         },
     },
     BETA_DIST: {
@@ -353,7 +353,7 @@ export default {
         },
     },
     COUNTIFS: {
-        description: 'Counts the number of cells within a range that meet multiple criteria',
+        description: 'Counts the number of cells within a range that meet multiple criteria.',
         abstract: 'Counts the number of cells within a range that meet multiple criteria',
         links: [
             {
@@ -362,8 +362,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            criteriaRange1: { name: 'criteria_range1', detail: 'The first range in which to evaluate the associated criteria.' },
+            criteria1: { name: 'criteria1', detail: 'The criteria in the form of a number, expression, cell reference, or text that define which cells will be counted. For example, criteria can be expressed as 32, ">32", B4, "apples", or "32".' },
+            criteriaRange2: { name: 'criteria_range2', detail: 'Additional ranges. You can enter up to 127 range.' },
+            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 127 criteria.' },
         },
     },
     COVARIANCE_P: {
@@ -968,8 +970,8 @@ export default {
             minRange: { name: 'min_range', detail: 'The actual range of cells in which the minimum value will be determined.' },
             criteriaRange1: { name: 'criteria_range1', detail: 'Is the set of cells to evaluate with the criteria.' },
             criteria1: { name: 'criteria1', detail: 'Is the criteria in the form of a number, expression, or text that defines which cells will be evaluated as minimum. The same set of criteria works for the MAXIFS, SUMIFS and AVERAGEIFS functions.' },
-            criteriaRange2: { name: 'criteria_range2', detail: 'Additional ranges. You can enter up to 126 range.' },
-            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 126 criteria.' },
+            criteriaRange2: { name: 'criteria_range2', detail: 'Additional ranges. You can enter up to 127 range.' },
+            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 127 criteria.' },
         },
     },
     MODE_MULT: {

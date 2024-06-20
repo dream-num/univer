@@ -85,8 +85,8 @@ export default {
             averageRange: { name: '平均範囲', detail: '平均する 1 つまたは複数のセル (数値、または数値を含む名前、配列、セル参照) を指定します。' },
             criteriaRange1: { name: '条件範囲 1', detail: '条件で評価するセルのセットです。' },
             criteria1: { name: '条件 1', detail: '平均を計算するセルを定義するために使用されます。 たとえば、条件は 32、"32"、">32"、"apple"、または B4 のように表現できます。' },
-            criteriaRange2: { name: '条件範囲 2', detail: '追加エリア。 エリアは最大126エリアまで入力できます。' },
-            criteria2: { name: '条件 2', detail: '追加の関連付け条件。 条件は126個まで入力できます。' },
+            criteriaRange2: { name: '条件範囲 2', detail: '追加の範囲。 最大 127 の範囲のペアを入力できます。' },
+            criteria2: { name: '条件 2', detail: '追加対応する条件です。 最大 127 条件のペアを入力できます。' },
         },
     },
     BETA_DIST: {
@@ -329,7 +329,7 @@ export default {
     },
     COUNTIFS: {
         description: '指定された範囲に含まれるセルのうち、複数の検索条件に一致するセルの個数を返します。',
-        abstract: '指定された範囲に含まれるセルのうち、複数の検索条件に一致するセルの個数を返します。',
+        abstract: '指定された範囲に含まれるセルのうち、複数の検索条件に一致するセルの個数を返します',
         links: [
             {
                 title: '指導',
@@ -337,8 +337,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            criteriaRange1: { name: '条件範囲 1', detail: '対応する条件による評価の対象となる最初の範囲を指定します。' },
+            criteria1: { name: '検索条件 1', detail: '計算の対象となるセルを定義する条件を数値、式、セル参照、または文字列で指定します。 たとえば、条件は 32、">32"、B4、"Windows"、または "32" のようになります。' },
+            criteriaRange2: { name: '条件範囲 2', detail: '追加の範囲。 最大 127 の範囲のペアを入力できます。' },
+            criteria2: { name: '条件 2', detail: '追加対応する条件です。 最大 127 条件のペアを入力できます。' },
         },
     },
     COVARIANCE_P: {
@@ -931,8 +933,8 @@ export default {
             minRange: { name: '最少範囲', detail: '最小値を求めるセルの実際の範囲です。' },
             criteriaRange1: { name: '条件範囲 1', detail: '条件で評価するセルのセットです。' },
             criteria1: { name: '条件 1', detail: '最小として評価されるセルを定義する、数値、式、またはテキストの形式での条件です。 同じ条件セットを、MAXIFS、SUMIFS、および AVERAGEIFS 関数に対して使用できます。' },
-            criteriaRange2: { name: '条件範囲 2', detail: '追加の範囲と対応する条件です。 最大 126 個の範囲/条件ペアを入力できます。' },
-            criteria2: { name: '条件 2', detail: '追加の範囲と対応する条件です。 最大 126 個の範囲/条件ペアを入力できます。' },
+            criteriaRange2: { name: '条件範囲 2', detail: '追加の範囲。 最大 127 の範囲のペアを入力できます。' },
+            criteria2: { name: '条件 2', detail: '追加対応する条件です。 最大 127 条件のペアを入力できます。' },
         },
     },
     MODE_MULT: {

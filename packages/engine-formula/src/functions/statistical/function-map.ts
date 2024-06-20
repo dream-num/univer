@@ -34,6 +34,7 @@ import { Minifs } from './minifs';
 import { Averageif } from './averageif';
 import { Averageifs } from './averageifs';
 import { Countif } from './countif';
+import { Countifs } from './countifs';
 
 export const functionStatistical = [
     [Average, FUNCTION_NAMES_STATISTICAL.AVERAGE],
@@ -42,6 +43,7 @@ export const functionStatistical = [
     [Averageifs, FUNCTION_NAMES_STATISTICAL.AVERAGEIFS],
     [Count, FUNCTION_NAMES_STATISTICAL.COUNT],
     [Countif, FUNCTION_NAMES_STATISTICAL.COUNTIF],
+    [Countifs, FUNCTION_NAMES_STATISTICAL.COUNTIFS],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Min, FUNCTION_NAMES_STATISTICAL.MIN],
     [Min, FUNCTION_NAMES_STATISTICAL.MIN],

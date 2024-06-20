@@ -97,8 +97,8 @@ export default {
             averageRange: { name: '平均值范围', detail: '要计算平均值的一个或多个单元格，其中包含数字或包含数字的名称、数组或引用。' },
             criteriaRange1: { name: '条件范围 1', detail: '是一组用于条件计算的单元格。' },
             criteria1: { name: '条件 1', detail: '用来定义将计算平均值的单元格。 例如，条件可以表示为 32、"32"、">32"、"苹果" 或 B4' },
-            criteriaRange2: { name: '条件范围 2', detail: '附加区域。 最多可以输入 126 个区域。' },
-            criteria2: { name: '条件 2', detail: '附加关联条件。 最多可以输入 126 个条件。' },
+            criteriaRange2: { name: '条件范围 2', detail: '附加区域。 最多可以输入 127 个区域。' },
+            criteria2: { name: '条件 2', detail: '附加关联条件。 最多可以输入 127 个条件。' },
         },
     },
     BETA_DIST: {
@@ -353,7 +353,7 @@ export default {
         },
     },
     COUNTIFS: {
-        description: '计算区域内符合多个条件的单元格的数量',
+        description: '计算区域内符合多个条件的单元格的数量。',
         abstract: '计算区域内符合多个条件的单元格的数量',
         links: [
             {
@@ -362,8 +362,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            criteriaRange1: { name: '条件范围 1', detail: '在其中计算关联条件的第一个区域。' },
+            criteria1: { name: '条件 1', detail: '条件的形式为数字、表达式、单元格引用或文本，它定义了要计数的单元格范围。 例如，条件可以表示为 32、">32"、B4、"apples"或 "32"。' },
+            criteriaRange2: { name: '条件范围 2', detail: '附加区域。 最多可以输入 127 个区域。' },
+            criteria2: { name: '条件 2', detail: '附加关联条件。 最多可以输入 127 个条件。' },
         },
     },
     COVARIANCE_P: {
@@ -903,8 +905,8 @@ export default {
             maxRange: { name: '最大值范围', detail: '确定最大值的实际单元格区域。' },
             criteriaRange1: { name: '条件范围 1', detail: '是一组用于条件计算的单元格。' },
             criteria1: { name: '条件 1', detail: '用于确定哪些单元格是最大值的条件，格式为数字、表达式或文本。 一组相同的条件适用于 MINIFS、SUMIFS 和 AVERAGEIFS 函数。' },
-            criteriaRange2: { name: '条件范围 2', detail: '附加区域。 最多可以输入 126 个区域。' },
-            criteria2: { name: '条件 2', detail: '附加关联条件。 最多可以输入 126 个条件。' },
+            criteriaRange2: { name: '条件范围 2', detail: '附加区域。 最多可以输入 127 个区域。' },
+            criteria2: { name: '条件 2', detail: '附加关联条件。 最多可以输入 127 个条件。' },
         },
     },
     MEDIAN: {
@@ -968,8 +970,8 @@ export default {
             minRange: { name: '最小值范围', detail: '确定最小值的实际单元格区域。' },
             criteriaRange1: { name: '条件范围 1', detail: '是一组用于条件计算的单元格。' },
             criteria1: { name: '条件 1', detail: '用于确定哪些单元格是最小值的条件，格式为数字、表达式或文本。 一组相同的条件适用于 MAXIFS、SUMIFS 和 AVERAGEIFS 函数。' },
-            criteriaRange2: { name: '条件范围 2', detail: '附加区域。 最多可以输入 126 个区域。' },
-            criteria2: { name: '条件 2', detail: '附加关联条件。 最多可以输入 126 个条件。' },
+            criteriaRange2: { name: '条件范围 2', detail: '附加区域。 最多可以输入 127 个区域。' },
+            criteria2: { name: '条件 2', detail: '附加关联条件。 最多可以输入 127 个条件。' },
         },
     },
     MODE_MULT: {

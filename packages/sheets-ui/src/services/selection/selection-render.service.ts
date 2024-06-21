@@ -62,8 +62,7 @@ export interface ISelectionRenderService {
 
     enableHeaderHighlight(): void;
     disableHeaderHighlight(): void;
-    enableDetectMergedCell(): void;
-    disableDetectMergedCell(): void;
+
     setStyle(style: ISelectionStyle): void;
     resetStyle(): void;
     enableSelection(): void;
@@ -233,14 +232,6 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     disableHeaderHighlight() {
         this._isHeaderHighlight = false;
-    }
-
-    enableDetectMergedCell() {
-        this._isDetectMergedCell = true;
-    }
-
-    disableDetectMergedCell() {
-        this._isDetectMergedCell = false;
     }
 
     setStyle(style: ISelectionStyle) {
@@ -548,12 +539,11 @@ export class SelectionRenderService implements ISelectionRenderService {
             return;
         }
 
+        this._isDetectMergedCell = rangeType === RANGE_TYPE.NORMAL;
+
         const skeleton = this._skeleton;
-
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-
         const scene = this._scene;
-
         if (scene == null || skeleton == null) {
             return;
         }

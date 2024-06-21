@@ -200,8 +200,6 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         this.disposeWithMe(
             toDisposable(
                 spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-                    this._selectionRenderService.enableDetectMergedCell();
-
                     this._selectionRenderService.eventTrigger(
                         evt,
                         spreadsheet.zIndex + 1,
@@ -250,7 +248,6 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
         this.disposeWithMe(
             spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-                this._selectionRenderService.disableDetectMergedCell();
                 this._selectionRenderService.eventTrigger(
                     evt,
                     (spreadsheet?.zIndex || 1) + 1,
@@ -273,8 +270,6 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
         this.disposeWithMe(
             spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-                this._selectionRenderService.disableDetectMergedCell();
-
                 this._selectionRenderService.eventTrigger(
                     evt,
                     (spreadsheet?.zIndex || 1) + 1,

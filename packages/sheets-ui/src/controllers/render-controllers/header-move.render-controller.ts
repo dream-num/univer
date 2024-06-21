@@ -144,19 +144,13 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
         this._rowOrColumnMoveObservers.push(
             eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                if (skeleton == null) {
-                    return;
-                }
+                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
 
                 const selectionRange = this._selectionManagerService.getLast()?.range;
                 if (!selectionRange) return;
 
                 const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_MOVE_PERMISSION_CHECK)(false, selectionRange);
-
-                if (!permissionCheck) {
-                    return;
-                }
+                if (!permissionCheck) return;
 
                 const { row, column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
 
@@ -172,8 +166,6 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
                 }
 
                 scene.setCursor(CURSOR_TYPE.GRAB);
-
-                this._selectionRenderService.disableSelection();
             })
         );
 
@@ -189,16 +181,12 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         this._rowOrColumnDownObservers.push(
             // eslint-disable-next-line max-lines-per-function
             eventBindingObject?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                if (skeleton == null) {
-                    return;
-                }
-
                 const selectionRange = this._selectionManagerService.getLast()?.range;
                 if (!selectionRange) return;
 
-                const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_MOVE_PERMISSION_CHECK)(false, selectionRange);
+                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
 
+                const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_MOVE_PERMISSION_CHECK)(false, selectionRange);
                 if (!permissionCheck) {
                     return;
                 }

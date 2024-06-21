@@ -23,12 +23,12 @@ import { Istext } from '../index';
 import { StringValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test istext function', () => {
-    const textFunction = new Istext(FUNCTION_NAMES_INFORMATION.ISTEXT);
+    const testFunction = new Istext(FUNCTION_NAMES_INFORMATION.ISTEXT);
 
     describe('Istext', () => {
         it('value text', () => {
             const value = StringValueObject.create('test');
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(result.getValue()).toBe(true);
         });
 
@@ -45,7 +45,7 @@ describe('Test istext function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [false, true, false, false, false, false, false, false, false, false],
                 [false, false, false, true, false, false, false, false, false, false],

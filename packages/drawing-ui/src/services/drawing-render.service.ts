@@ -32,6 +32,10 @@ export class DrawingRenderService {
             return;
         }
 
+        if (!this._drawingManagerService.getDrawingVisible()) {
+            return;
+        }
+
         if (transform == null) {
             return;
         }
@@ -73,7 +77,14 @@ export class DrawingRenderService {
             this._imageIoService.addImageSourceCache(source, imageSourceType, image.getNative());
         }
 
-        scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(image);
+        if (!this._drawingManagerService.getDrawingVisible()) {
+            return;
+        }
+
+        const imageObject = scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX);
+        if (this._drawingManagerService.getDrawingEditable()) {
+            imageObject.attachTransformerTo(image);
+        }
 
         groupId && insertGroupObject({ drawingId: groupId, unitId, subUnitId }, image, scene, this._drawingManagerService);
 

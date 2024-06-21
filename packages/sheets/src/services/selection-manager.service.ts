@@ -72,6 +72,9 @@ export class SelectionManagerService implements IDisposable {
     private readonly _selectionMoveEnd$ = new BehaviorSubject<Nullable<ISelectionWithStyle[]>>(null);
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
 
+    private readonly _selectionMoveEndBefore$ = new BehaviorSubject<Nullable<ISelectionWithStyle[]>>(null);
+    readonly selectionMoveEndBefore$ = this._selectionMoveEndBefore$.asObservable();
+
     private _dirty: boolean = true;
 
     // FIMXE: this dependency is not correct!
@@ -340,6 +343,7 @@ export class SelectionManagerService implements IDisposable {
     }
 
     private _refresh(param?: ISelectionManagerSearchParam): void {
+        this._selectionMoveEndBefore$.next(this._getSelectionDatas(param));
         this._selectionMoveEnd$.next(this._getSelectionDatas(param));
     }
 

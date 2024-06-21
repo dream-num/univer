@@ -24,7 +24,7 @@ import {
     SetWorksheetHideCommand,
     SetWorksheetHideMutation,
     SetWorksheetShowCommand,
-    WorkbookCopySheetPermission,
+    WorkbookCreateSheetPermission,
     WorkbookDeleteSheetPermission,
     WorkbookEditablePermission,
     WorkbookHideSheetPermission,
@@ -86,7 +86,7 @@ export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.copy',
-        disabled$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookCopySheetPermission]),
+        disabled$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookCreateSheetPermission]),
     };
 }
 

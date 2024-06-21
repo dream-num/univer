@@ -16,7 +16,7 @@
 
 import type { TooltipRef } from 'rc-tooltip';
 import RcTooltip from 'rc-tooltip';
-import React, { forwardRef, useContext, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useCallback, useContext, useImperativeHandle, useRef, useState } from 'react';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
@@ -53,14 +53,22 @@ export const Tooltip = forwardRef<NullableTooltipRef, ITooltipProps>((props, ref
     } = props;
 
     const { mountContainer } = useContext(ConfigContext);
+    const [tooltipEl, setTooltipEl] = useState<HTMLElement>();
     const tooltipRef = useRef<NullableTooltipRef>(null);
+    const refHandler = useCallback((ref: NullableTooltipRef) => {
+        if (ref?.nativeElement) {
+            setTooltipEl(ref.nativeElement);
+        }
+        tooltipRef.current = ref;
+    }, []);
     useImperativeHandle<NullableTooltipRef, NullableTooltipRef>(ref, () => tooltipRef.current);
 
-    const isEllipsis = useIsEllipsis(showIfEllipsis ? tooltipRef.current?.nativeElement : null);
+    const isEllipsis = useIsEllipsis(showIfEllipsis ? tooltipEl : null);
+
     return mountContainer && (
         <RcTooltip
             visible={(showIfEllipsis && !isEllipsis) ? false : visible}
-            ref={tooltipRef}
+            ref={refHandler}
             prefixCls={styles.tooltip}
             getTooltipContainer={() => mountContainer}
             overlay={<div className={styles.tooltipContent}>{typeof title === 'function' ? title() : title}</div>}
@@ -68,7 +76,7 @@ export const Tooltip = forwardRef<NullableTooltipRef, ITooltipProps>((props, ref
             placement={placement}
             mouseEnterDelay={0.2}
             showArrow
-            destroyTooltipOnHide
+            destroyTooltipOnHide={false}
             onVisibleChange={onVisibleChange}
             overlayStyle={style}
         >

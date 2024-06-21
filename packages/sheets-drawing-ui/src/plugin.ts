@@ -27,6 +27,7 @@ import { DefaultSheetsDrawingConfig, SheetDrawingUIController } from './controll
 import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
 import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 import { SheetDrawingPrintingController } from './controllers/sheet-drawing-printing.controller';
+import { SheetDrawingPermissionController } from './controllers/sheet-drawing-permission.controller';
 
 const PLUGIN_NAME = 'SHEET_IMAGE_UI_PLUGIN';
 
@@ -68,6 +69,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [DrawingPopupMenuController],
             [SheetDrawingTransformAffectedController],
             [SheetDrawingPrintingController],
+            [SheetDrawingPermissionController],
 
         ];
 

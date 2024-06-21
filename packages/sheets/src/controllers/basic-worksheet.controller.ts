@@ -129,6 +129,8 @@ import { AddRangeProtectionMutation } from '../commands/mutations/add-range-prot
 import { DeleteRangeProtectionMutation } from '../commands/mutations/delete-range-protection.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
+import { ReorderRangeCommand } from '../commands/commands/reorder-range.command';
+import { ReorderRangeMutation } from '../commands/mutations/reorder-range.mutation';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './config';
 
@@ -167,6 +169,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorkbookNameMutation,
             SetWorksheetNameMutation,
             SetNumfmtMutation,
+            ReorderRangeMutation,
             EmptyMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
@@ -199,6 +202,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 RemoveColCommand,
                 RemoveRowCommand,
                 RemoveSheetCommand,
+                ReorderRangeCommand,
 
                 RemoveWorksheetMergeCommand,
                 ResetBackgroundColorCommand,

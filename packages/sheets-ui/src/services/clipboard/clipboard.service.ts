@@ -933,6 +933,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const rowCount = endRow - startRow + 1;
         const colCount = endColumn - startColumn + 1;
 
+        if (rowCount <= 0 || colCount <= 0) return null;
+
         const pasteSelectionRangeRowLen = discreteRange.rows.length;
         const pasteSelectionRangeColLen = discreteRange.cols.length;
 

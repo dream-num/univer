@@ -267,6 +267,22 @@ export class RefRangeService extends Disposable {
                             };
                             return this._checkRange([effectRange], unitId, subUnitId);
                         }
+                        case EffectRefRangId.ReorderRangeCommandId: {
+                            const params = command;
+                            const { range, order } = params.params!;
+                            const effectRanges = [];
+                            for (let row = range.startRow; row <= range.endRow; row++) {
+                                if (row in order) {
+                                    effectRanges.push({
+                                        startRow: row,
+                                        endRow: row,
+                                        startColumn: range.startColumn,
+                                        endColumn: range.endColumn,
+                                    });
+                                }
+                            }
+                            return this._checkRange(effectRanges, unitId, subUnitId);
+                        }
                     }
                 };
                 const cbList = getEffectsCbList() || [];

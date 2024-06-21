@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IMutationInfo, IObjectArrayPrimitiveType, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IMutationInfo, IObjectArrayPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, LifecycleStages, moveMatrixArray, OnLifecycle, Rectangle } from '@univerjs/core';
-import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import { EffectRefRangId, getSheetCommandTarget, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, MoveRowsCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
+import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import { EffectRefRangId, expandToContinuousRange, getSheetCommandTarget, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, MoveRowsCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { SheetsFilterService } from '../services/sheet-filter.service';
@@ -694,7 +694,7 @@ export class SheetsFilterController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
             const { unitId, subUnitId } = command.params as unknown as ISheetCommandSharedParams || {};
 
             const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
@@ -737,58 +737,59 @@ export class SheetsFilterController extends Disposable {
                 filterModel.filteredOutRows = new Set(newFilteredOutRows);
             }
 
-            // if (command.id === DeleteRangeMoveLeftCommand.id || command.id === DeleteRangeMoveUpCommand.id || command.id === InsertRangeMoveRightCommand.id || command.id === InsertRangeMoveDownCommand.id) {
-            //     const { range } = command.params as (IDeleteRangeMoveUpCommandParams | IDeleteRangeMoveLeftCommandParams | InsertRangeMoveDownCommandParams | InsertRangeMoveRightCommandParams);
-            //     const { startRow } = range;
-            //     const { endRow: filterEndRow } = filterModel.getRange();
-            //     if (startRow <= filterEndRow) {
-            //         filterModel.reCalc();
-            //     }
-            // }
-
-            // InsertRowsOrCols / RemoveRowsOrCols Mutations
-            // if (mutationIdByRowCol.includes(command.id)) {
-            //     const params = command.params as IInsertRowCommandParams;
-            //     if (!params) return;
-            //     const { range } = params;
-
-            //     const isRowOperation = command.id.includes('row');
-            //     const isAddOperation = command.id.includes('insert');
-
-            //     const operationStart = isRowOperation ? range.startRow : range.startColumn;
-            //     const operationEnd = isRowOperation ? range.endRow : range.endColumn;
-            //     const operationCount = operationEnd - operationStart + 1;
-
-            //     let { startRow, endRow, startColumn, endColumn } = filterModel.getRange();
-
-            //     if (isAddOperation) {
-            //         if (isRowOperation) {
-            //             if (operationStart <= startRow) {
-            //                 startRow += operationCount;
-            //                 endRow += operationCount;
-            //             }
-            //         } else {
-            //             if (operationStart <= startColumn) {
-            //                 startColumn += operationCount;
-            //                 endColumn += operationCount;
-            //             }
-            //         }
-            //     } else {
-            //         if (isRowOperation) {
-            //             if (operationEnd < startRow) {
-            //                 startRow -= operationCount;
-            //                 endRow -= operationCount;
-            //             }
-            //         } else {
-            //             if (operationEnd < startColumn) {
-            //                 startColumn -= operationCount;
-            //                 endColumn -= operationCount;
-            //             }
-            //         }
-            //     }
-            //     filterModel.setRange({ startRow, endRow, startColumn, endColumn });
-            // }
+            // extend filter range when set range values
+            if (command.id === SetRangeValuesMutation.id && !options?.fromCollab && !options?.onlyLocal) {
+                const extendRegion = this._getExtendRegion(unitId, subUnitId);
+                if (extendRegion) {
+                    const cellValue = (command.params as ISetRangeValuesMutationParams).cellValue;
+                    if (cellValue) {
+                        for (let col = extendRegion.startColumn; col <= extendRegion.endColumn; col++) {
+                            const cell = cellValue?.[extendRegion.startRow]?.[col];
+                            if (cell && Object.keys(cell).length !== 0) {
+                                const worksheet = (this._univerInstanceService.getUnit(unitId) as Workbook)?.getSheetBySheetId(subUnitId);
+                                if (worksheet) {
+                                    const extendedRange = expandToContinuousRange(extendRegion, { down: true }, worksheet);
+                                    const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId)!;
+                                    const filterRange = filterModel.getRange();
+                                    filterModel.setRange({
+                                        ...filterRange,
+                                        endRow: extendedRange.endRow,
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }));
+    }
+
+    private _getExtendRegion(unitId: string, subUnitId: string): Nullable<IRange> {
+        const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
+        if (!filterModel) {
+            return null;
+        }
+        const worksheet = (this._univerInstanceService.getUnit(unitId) as Workbook)?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return null;
+        }
+        const filterRange = filterModel.getRange();
+        if (!filterRange) {
+            return null;
+        }
+        const maxRowIndex = worksheet.getRowCount() - 1;
+        const rowManager = worksheet.getRowManager();
+        for (let row = filterRange.endRow + 1; row <= maxRowIndex; row++) {
+            if (rowManager.getRowRawVisible(row)) {
+                return {
+                    startRow: row,
+                    endRow: row,
+                    startColumn: filterRange.startColumn,
+                    endColumn: filterRange.endColumn,
+                };
+            }
+        }
+        return null;
     }
 
     private _initErrorHandling() {

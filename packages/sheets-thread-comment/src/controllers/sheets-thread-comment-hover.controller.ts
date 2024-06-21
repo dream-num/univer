@@ -15,10 +15,11 @@
  */
 
 import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { HoverManagerService } from '@univerjs/sheets-ui';
+import { HoverManagerService, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { debounceTime } from 'rxjs';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
+import { RangeProtectionPermissionViewPoint, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetsThreadCommentHoverController)
@@ -26,7 +27,8 @@ export class SheetsThreadCommentHoverController extends Disposable {
     constructor(
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(SheetsThreadCommentPopupService) private readonly _sheetsThreadCommentPopupService: SheetsThreadCommentPopupService,
-        @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel
+        @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel,
+        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController
     ) {
         super();
         this._initHoverEvent();
@@ -42,6 +44,14 @@ export class SheetsThreadCommentHoverController extends Disposable {
                     const commentId = this._sheetsThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
 
                     if (commentId) {
+                        const commentPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+                            workbookTypes: [WorkbookCommentPermission],
+                            worksheetTypes: [WorksheetViewPermission],
+                            rangeTypes: [RangeProtectionPermissionViewPoint],
+                        }, [{ startRow: row, startColumn: col, endRow: row, endColumn: col }]);
+                        if (!commentPermission) {
+                            return;
+                        }
                         const comment = this._sheetsThreadCommentModel.getComment(unitId, subUnitId, commentId);
                         if (comment && !comment.resolved) {
                             this._sheetsThreadCommentPopupService.showPopup({

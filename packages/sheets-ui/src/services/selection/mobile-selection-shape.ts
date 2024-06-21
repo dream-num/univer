@@ -15,6 +15,7 @@
  */
 
 import type { Nullable, ThemeService } from '@univerjs/core';
+import { RANGE_TYPE } from '@univerjs/core';
 import type { BaseObject, IRectProps, Scene } from '@univerjs/engine-render';
 import { Rect } from '@univerjs/engine-render';
 import type { ISelectionStyle } from '@univerjs/sheets';
@@ -75,7 +76,8 @@ export class MobileSelectionControl extends SelectionControl {
         };
         this._fillControlTopLeftInner!.setProps({ ...fillProps });//...{ fill: 'black' } });
         this._fillControlBottomRightInner!.setProps({ ...fillProps });// ...{ fill: 'red' } });
-
+        this.fillControlTopLeft!.setProps({ ...fillProps, ...{ fill: 'red' } });
+        this.fillControlBottomRight!.setProps({ ...fillProps, ...{ fill: 'black' } });
         // put into scene
         this._selectionShapeGroup.addObjects(this._fillControlTopLeft, this._fillControlBottomRight, this._fillControlTopLeftInner, this._fillControlBottomRightInner);
         const objs = [this._fillControlTopLeft, this._fillControlBottomRight, this._fillControlTopLeftInner, this._fillControlBottomRightInner] as BaseObject[];
@@ -107,7 +109,7 @@ export class MobileSelectionControl extends SelectionControl {
         super.dispose();
     }
 
-    protected override _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
+    protected override _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number, rangeType: RANGE_TYPE) {
         super._updateControl(style, rowHeaderWidth, columnHeaderHeight);
         // startX startY shares same coordinate with viewport.(include row & colheader)
         const { startX, startY, endX, endY } = this.selectionModel;
@@ -153,6 +155,19 @@ export class MobileSelectionControl extends SelectionControl {
             this.fillControlBottomRight?.hide();
             this._fillControlTopLeftInner?.hide();
             this._fillControlBottomRightInner?.hide();
+        }
+        if (rangeType) {
+            this.selectionModel.setRangeType(rangeType);
+            if (rangeType === RANGE_TYPE.COLUMN) {
+                this.fillControlTopLeft!.transformByState({
+                    left: -expandCornerSize / 2,
+                    top: (endY - startY) / 2,
+                });
+                this.fillControlBottomRight!.transformByState({
+                    left: endX - startX - expandCornerSize / 2,
+                    top: (endY - startY) / 2,
+                });
+            }
         }
     }
 }

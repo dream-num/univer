@@ -620,17 +620,26 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
             // console.log('selectionControl', startSelectionRange);
 
             this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
+            // no use!
+            // if (rangeType === RANGE_TYPE.ROW || rangeType === RANGE_TYPE.COLUMN) {
+            //     this._movingHandler(newEvtOffsetX, newEvtOffsetY, activeSelectionControl, rangeType);
+            // }
+
+            // eslint-disable-next-line no-new
+            new SelectionShapeExtension(activeSelectionControl, skeleton, scene, this._themeService, this._injector);
+
             // when pointer up, a new selection range
             activeSelectionControl.update(
                 cursorCellRangeWithRangeType,
                 rowHeaderWidth,
                 columnHeaderHeight,
                 this._selectionStyle,
-                primaryCursorCellRange
+                primaryCursorCellRange,
+                rangeType
             );
         }
 
-        this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
+        // this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
         this.hasSelection = true;
         this._endSelection();
         this.expandingSelection = false;
@@ -1175,23 +1184,27 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
                 currSelCtrlEndRow !== endRowAfterMerge) &&
             activeSelectionControl != null
         ) {
-            const activeCellRange = activeSelectionControl.model.currentCell!;
-            let {
-                startRow: activeCellStartRow,
-                startColumn: activeCellStartColumn,
-                endRow: activeCellEndRow,
-                endColumn: activeCellEndColumn,
-            } = activeCellRange.mergeInfo;
-
-            activeCellStartRow = Tools.clamp(activeCellStartRow, startRowAfterMerge, endRowAfterMerge);
-            activeCellStartColumn = Tools.clamp(activeCellStartColumn, startColumnAfterMerge, endColumnAfterMerge);
-            // activeCellEndRow = Tools.clamp(activeCellEndRow, startRowAfterMerge, endRowAfterMerge);
-            // activeCellEndColumn = Tools.clamp(activeCellEndColumn, startColumnAfterMerge, endColumnAfterMerge);
-
-            const primaryCursorCellRange = skeleton.getCellByIndex(activeCellStartRow, activeCellStartColumn);
             activeSelectionControl.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight);
 
             this._selectionMoving$.next(this.getSelectionDataWithStyle());
+
+            // const activeCellRange = activeSelectionControl.model.currentCell;
+            // if (activeCellRange) {
+            //     // const {
+            //     //     startRow: activeCellStartRow,
+            //     //     startColumn: activeCellStartColumn,
+            //     //     endRow: activeCellEndRow,
+            //     //     endColumn: activeCellEndColumn,
+            //     // } = activeCellRange.mergeInfo;
+
+            //     // activeCellStartRow = Tools.clamp(activeCellStartRow, startRowAfterMerge, endRowAfterMerge);
+            //     // activeCellStartColumn = Tools.clamp(activeCellStartColumn, startColumnAfterMerge, endColumnAfterMerge);
+            //     // activeCellEndRow = Tools.clamp(activeCellEndRow, startRowAfterMerge, endRowAfterMerge);
+            //     // activeCellEndColumn = Tools.clamp(activeCellEndColumn, startColumnAfterMerge, endColumnAfterMerge);
+
+            //     // const primaryCursorCellRange = skeleton.getCellByIndex(activeCellStartRow, activeCellStartColumn);
+
+            // }
         }
     }
 

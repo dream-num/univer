@@ -318,18 +318,23 @@ export class SelectionControl extends Disposable {
         this._updateControl(null, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
+    updateRangeType(rangeType: RANGE_TYPE) {
+        this._selectionModel.setRangeType(rangeType);
+    }
+
     update(
         newSelectionRange: IRangeWithCoord,
         rowHeaderWidth: number = 0,
         columnHeaderHeight: number = 0,
         style?: Nullable<ISelectionStyle>,
-        highlight?: Nullable<ISelectionCellWithMergeInfo>
+        highlight?: Nullable<ISelectionCellWithMergeInfo>,
+        rangeType?: RANGE_TYPE
     ) {
         this._selectionModel.setValue(newSelectionRange, highlight);
         if (style == null) {
             style = this._selectionStyle;
         }
-        this._updateControl(style, rowHeaderWidth, columnHeaderHeight);
+        this._updateControl(style, rowHeaderWidth, columnHeaderHeight, rangeType);
     }
 
     updateCurrCell(highlight?: Nullable<ISelectionCellWithMergeInfo>) {
@@ -452,7 +457,7 @@ export class SelectionControl extends Disposable {
      * inner update
      */
     // eslint-disable-next-line max-lines-per-function
-    protected _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
+    protected _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number, _rangeType?: RANGE_TYPE) {
         // startX startY shares same coordinate with viewport.(include row & colheader)
         const { startX, startY, endX, endY } = this._selectionModel;
         const defaultStyle = this._defaultStyle;

@@ -142,6 +142,7 @@ Thanks to our sponsors, just part of them are listed here because of the space l
 
 ### Community
 
+- [Stack Overflow](https://stackoverflow.com/questions/tagged/univer)
 - [Discord community](https://discord.gg/z3NKNT6D2f)
 
 ## License

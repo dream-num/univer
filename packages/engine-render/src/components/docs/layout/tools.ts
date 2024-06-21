@@ -437,7 +437,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
     }
 }
 
-export function spanIterator(
+export function glyphIterator(
     pages: IDocumentSkeletonPage[],
     cb: (
         glyph: IDocumentSkeletonGlyph,

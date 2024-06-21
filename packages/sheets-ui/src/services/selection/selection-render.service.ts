@@ -65,8 +65,6 @@ export interface ISelectionRenderService {
 
     setStyle(style: ISelectionStyle): void;
     resetStyle(): void;
-    enableSelection(): void;
-    disableSelection(): void;
     enableShowPrevious(): void;
     disableShowPrevious(): void;
     enableRemainLast(): void;
@@ -124,8 +122,6 @@ export const RANGE_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('
 export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>('rangeFillPermissionCheck');
 
 export class SelectionRenderService implements ISelectionRenderService {
-    hasSelection: boolean = false;
-
     private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
@@ -240,14 +236,6 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     resetStyle() {
         this.setStyle(getNormalSelectionStyle(this._themeService));
-    }
-
-    enableSelection() {
-        this._isSelectionEnabled = true;
-    }
-
-    disableSelection() {
-        this._isSelectionEnabled = false;
     }
 
     enableShowPrevious() {
@@ -733,7 +721,8 @@ export class SelectionRenderService implements ISelectionRenderService {
                 this._themeService
             );
 
-            new SelectionShapeExtension(selectionControl, skeleton, scene, this._themeService, this._injector);
+            // TODO@wzhudev: this will not be disposed?
+            // new SelectionShapeExtension(selectionControl, skeleton, scene, this._themeService, this._injector);
 
             selectionControl.update(
                 startSelectionRange,
@@ -748,9 +737,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
 
-        this.hasSelection = true;
-
-        this._endSelection();
+        // this._endSelection();
 
         scene.disableEvent();
 

@@ -35,7 +35,6 @@ import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyl
 import {
     MoveColsCommand,
     MoveRowsCommand,
-    NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
@@ -44,6 +43,7 @@ import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common
 import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset } from '../utils/component-tools';
+import { checkInHeaderRanges } from '../utils/selections-tools';
 
 const HEADER_MOVE_CONTROLLER_BACKGROUND = '__SpreadsheetHeaderMoveControllerBackground__';
 
@@ -54,11 +54,6 @@ const HEADER_MOVE_CONTROLLER_BACKGROUND_FILL = 'rgba(0, 0, 0, 0.1)';
 const HEADER_MOVE_CONTROLLER_LINE_FILL = 'rgb(119, 119, 119)';
 
 const HEADER_MOVE_CONTROLLER_LINE_SIZE = 4;
-
-enum HEADER_MOVE_TYPE {
-    ROW,
-    COLUMN,
-}
 
 export const HEADER_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, IRange>('headerMovePermissionCheck');
 
@@ -129,18 +124,18 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
     }
 
     private _initialize() {
-        this._initialRowOrColumn(HEADER_MOVE_TYPE.ROW);
+        this._initialRowOrColumn(RANGE_TYPE.ROW);
 
-        this._initialRowOrColumn(HEADER_MOVE_TYPE.COLUMN);
+        this._initialRowOrColumn(RANGE_TYPE.COLUMN);
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _initialRowOrColumn(initialType: HEADER_MOVE_TYPE = HEADER_MOVE_TYPE.ROW) {
+    private _initialRowOrColumn(initialType: RANGE_TYPE.ROW | RANGE_TYPE.COLUMN = RANGE_TYPE.ROW) {
         const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
         const scene = this._context.scene;
         const eventBindingObject =
-            initialType === HEADER_MOVE_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
+            initialType === RANGE_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
 
         this._rowOrColumnMoveObservers.push(
             eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
@@ -154,14 +149,14 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
                 const { row, column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
 
-                const matchSelectionData = this._checkInHeaderRange(
-                    initialType === HEADER_MOVE_TYPE.ROW ? row : column,
+                const matchSelectionData = checkInHeaderRanges(
+                    this._selectionManagerService,
+                    initialType === RANGE_TYPE.ROW ? row : column,
                     initialType
                 );
 
                 if (matchSelectionData === false) {
                     scene.resetCursor();
-                    this._selectionRenderService.enableSelection();
                     return;
                 }
 
@@ -174,7 +169,6 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
                 this._moveHelperBackgroundShape?.hide();
                 this._moveHelperLineShape?.hide();
                 scene.resetCursor();
-                this._selectionRenderService.enableSelection();
             })
         );
 
@@ -205,7 +199,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
                 let scrollType: ScrollTimerType;
 
-                if (initialType === HEADER_MOVE_TYPE.ROW) {
+                if (initialType === RANGE_TYPE.ROW) {
                     this._changeFromRow = row;
                     scrollType = ScrollTimerType.Y;
                 } else {
@@ -213,8 +207,9 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
                     scrollType = ScrollTimerType.X;
                 }
 
-                const matchSelectionData = this._checkInHeaderRange(
-                    initialType === HEADER_MOVE_TYPE.ROW ? row : column,
+                const matchSelectionData = checkInHeaderRanges(
+                    this._selectionManagerService,
+                    initialType === RANGE_TYPE.ROW ? row : column,
                     initialType
                 );
 
@@ -290,7 +285,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
                     // `changeFromRow`
                     const selections = this._selectionManagerService.getSelections();
 
-                    if (initialType === HEADER_MOVE_TYPE.ROW) {
+                    if (initialType === RANGE_TYPE.ROW) {
                         if (this._changeFromRow !== this._changeToRow && this._changeToRow !== -1) {
                             const filteredSelections =
                                 selections?.filter(
@@ -351,7 +346,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
             x: number;
             y: number;
         },
-        initialType: HEADER_MOVE_TYPE
+        initialType: RANGE_TYPE.ROW | RANGE_TYPE.COLUMN
     ) {
         const scene = this._context.scene;
         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
@@ -399,7 +394,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
             endColumn: selectedEndColumn,
         } = selectionWithCoord;
 
-        if (initialType === HEADER_MOVE_TYPE.ROW) {
+        if (initialType === RANGE_TYPE.ROW) {
             this._moveHelperBackgroundShape?.transformByState({
                 height: selectedEndY - selectedStartY,
                 width: columnTotalWidth + rowHeaderWidth,
@@ -419,7 +414,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
         const HEADER_MOVE_CONTROLLER_LINE_SIZE_SCALE = HEADER_MOVE_CONTROLLER_LINE_SIZE / scale;
 
-        if (initialType === HEADER_MOVE_TYPE.ROW) {
+        if (initialType === RANGE_TYPE.ROW) {
             let top = 0;
             if (row <= selectedStartRow) {
                 top = cellStartY - HEADER_MOVE_CONTROLLER_LINE_SIZE_SCALE / 2;
@@ -458,46 +453,6 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         }
 
         this._moveHelperLineShape?.show();
-    }
-
-    private _checkInHeaderRange(rowOrColumn: number, type: HEADER_MOVE_TYPE = HEADER_MOVE_TYPE.ROW) {
-        const selections = this._selectionManagerService.getSelections();
-
-        const pluginName = this._selectionManagerService.getCurrent()?.pluginName;
-
-        if (pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-            return false;
-        }
-
-        const matchSelectionData = selections?.find((data) => {
-            const range = data.range;
-            const { startRow, endRow, startColumn, endColumn, rangeType } = range;
-            if (type === HEADER_MOVE_TYPE.COLUMN) {
-                if (rowOrColumn >= startColumn && rowOrColumn <= endColumn && RANGE_TYPE.COLUMN === rangeType) {
-                    return true;
-                }
-                return false;
-            }
-
-            if (rowOrColumn >= startRow && rowOrColumn <= endRow && RANGE_TYPE.ROW === rangeType) {
-                return true;
-            }
-            return false;
-        });
-
-        const range = matchSelectionData?.range;
-        if (
-            matchSelectionData == null ||
-            range == null ||
-            range.rangeType === RANGE_TYPE.ALL ||
-            range.rangeType === RANGE_TYPE.NORMAL ||
-            (range.rangeType === RANGE_TYPE.ROW && type !== HEADER_MOVE_TYPE.ROW) ||
-            (range.rangeType === RANGE_TYPE.COLUMN && type !== HEADER_MOVE_TYPE.COLUMN)
-        ) {
-            return false;
-        }
-
-        return matchSelectionData;
     }
 
     private _clearObserverEvent() {

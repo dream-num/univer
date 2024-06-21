@@ -45,7 +45,8 @@ import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.
 import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import type { ISheetObjectParam } from '../utils/component-tools';
-import { getSheetObject } from '../utils/component-tools';
+import { getCoordByOffset, getSheetObject } from '../utils/component-tools';
+import { checkInHeaderRanges } from '../utils/selections-tools';
 
 export class SelectionRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -80,8 +81,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         const sheetObject = this._getSheetObject();
 
         this._initViewMainListener(sheetObject);
-        this._initRowHeader(sheetObject);
-        this._initColumnHeader(sheetObject);
+        this._initHeaders(sheetObject);
         this._initLeftTop(sheetObject);
         this._initSelectionChangeListener();
         this._initThemeChangeListener();
@@ -243,11 +243,19 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         this._selectionRenderService.updateControlForCurrentByRangeData(selections);
     }
 
-    private _initRowHeader(sheetObject: ISheetObjectParam) {
-        const { spreadsheetRowHeader, spreadsheet } = sheetObject;
+    private _initHeaders(sheetObject: ISheetObjectParam) {
+        const { spreadsheetRowHeader, spreadsheetColumnHeader, spreadsheet } = sheetObject;
+        const { scene } = this._context;
 
         this.disposeWithMe(
             spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                // If the pointer down is in the selected range, we shu
+                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+                const { row } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
+
+                const matchSelectionData = checkInHeaderRanges(this._selectionManagerService, row, RANGE_TYPE.ROW);
+                if (matchSelectionData) return;
+
                 this._selectionRenderService.eventTrigger(
                     evt,
                     (spreadsheet?.zIndex || 1) + 1,
@@ -262,14 +270,14 @@ export class SelectionRenderController extends Disposable implements IRenderModu
             })
         );
 
-        // spreadsheetRowHeader?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {});
-    }
-
-    private _initColumnHeader(sheetObject: ISheetObjectParam) {
-        const { spreadsheetColumnHeader, spreadsheet } = sheetObject;
-
         this.disposeWithMe(
             spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+                const { column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
+
+                const matchSelectionData = checkInHeaderRanges(this._selectionManagerService, column, RANGE_TYPE.COLUMN);
+                if (matchSelectionData) return;
+
                 this._selectionRenderService.eventTrigger(
                     evt,
                     (spreadsheet?.zIndex || 1) + 1,
@@ -303,7 +311,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
                 this._selectionRenderService.refreshSelectionMoveStart();
 
-                    // this._selectionManagerService.replace([selectionWithStyle]);
+                // this._selectionManagerService.replace([selectionWithStyle]);
 
                 if (evt.button !== 2) {
                     state.stopPropagation();

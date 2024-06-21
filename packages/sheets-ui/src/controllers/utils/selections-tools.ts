@@ -15,8 +15,9 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
-import { RangeProtectionRuleModel, SelectionManagerService } from '@univerjs/sheets';
+import { IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
+import { NORMAL_SELECTION_PLUGIN_NAME, RangeProtectionRuleModel, SelectionManagerService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import { combineLatest, map } from 'rxjs';
 
@@ -56,4 +57,31 @@ export function getSheetSelectionsDisabled$(accessor: IAccessor) {
             return false;
         })
     );
+}
+
+export function checkInHeaderRanges(
+    selectionManagerService: SelectionManagerService,
+    num: number,
+    rType: RANGE_TYPE.ROW | RANGE_TYPE.COLUMN
+): false | ISelectionWithStyle {
+    const pluginName = selectionManagerService.getCurrent()?.pluginName;
+    if (pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+        return false;
+    }
+
+    const selections = selectionManagerService.getSelections();
+    const matchSelectionData = selections?.find((sel) => {
+        const range = sel.range;
+        const { startRow, endRow, startColumn, endColumn, rangeType } = range;
+
+        if (rangeType === RANGE_TYPE.ALL || rangeType === RANGE_TYPE.NORMAL) return false;
+
+        if (rType === RANGE_TYPE.COLUMN && RANGE_TYPE.COLUMN === rangeType) {
+            return num >= startColumn && num <= endColumn;
+        }
+
+        return rangeType === RANGE_TYPE.ROW && num >= startRow && num <= endRow;
+    });
+
+    return matchSelectionData ?? false;
 }

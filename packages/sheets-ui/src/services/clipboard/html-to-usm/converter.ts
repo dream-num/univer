@@ -42,26 +42,25 @@ export interface IParsedTablesInfo {
 
 const sheetStyleRules: string[] =
     [
-        'color_color',
-        'background_background',
-        'font-size_fontSize',
-        'text-align_textAlign',
-        'vertical-align_verticalAlign',
-        'font-weight_fontWeight',
-        'font-style_fontStyle',
-        'font-family_fontFamily',
-        'text-decoration_textDecoration',
-        'white-space_whiteSpace',
-        'word-wrap_wordWrap',
+        // Rich Text Style Rules,
+        'color',
+        'background',
+        'font-size',
+        'text-align',
+        'vertical-align',
+        'font-weight',
+        'font-style',
+        'font-family',
+        'text-decoration',
+        'white-space',
+        'word-wrap',
+        // Border Style Rules,
+        'border-left',
+        'border-right',
+        'border-top',
+        'border-bottom',
+        // Custom Style Rules, '--' needs to be used as a prefix.
         '--data-rotate',
-    ];
-
-const borderRules: string[] =
-    [
-        'border-left_borderLeft',
-        'border-right_borderRight',
-        'border-top_borderTop',
-        'border-bottom_borderBottom',
     ];
 
 function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
@@ -120,11 +119,8 @@ export class HtmlToUSMService {
         this._dom = parseToDom(html);
         // Convert stylesheets to map
         const style = this._dom.querySelector('style');
-
         if (style) {
             document.head.appendChild(style);
-            // const style = document.createElement('style');
-            // style.sheet!.insertRule(styleEl!.textContent!, 0);
             for (const rule of style.sheet!.cssRules) {
                 const cssRule = rule as CSSStyleRule;
                 const selectorText = cssRule.selectorText;
@@ -248,36 +244,34 @@ export class HtmlToUSMService {
     private _getStyle(node: HTMLElement, styleStr: string) {
         const recordStyle: Record<string, string> = turnToStyleObject(styleStr);
         const style = node.style;
-        const styleList = sheetStyleRules.concat(borderRules);
         // style represents inline styles with the highest priority, followed by selectorText which corresponds to stylesheet rules, and recordStyle pertains to inherited styles with the lowest priority.
         let newStyleStr = '';
-        for (let l = 0; l < styleList.length; l++) {
-            const key1 = styleList[l].split('_')[0];
-            const key2 = styleList[l].split('_')[1];
+        for (let l = 0; l < sheetStyleRules.length; l++) {
+            const key = sheetStyleRules[l];
 
             // retrieve multiple sources for a node and compile them into a cohesive new style string.
-            if (key1 === 'background') {
+            if (key === 'background') {
                 const bgColor = style.getPropertyValue('background-color') || this._getStyleBySelectorText(`.${node.className}`, 'background-color') ||
-                    this._getStyleBySelectorText(`.${node.className}`, key1 || key2) ||
-                    this._getStyleBySelectorText(node.nodeName.toLowerCase(), key1 || key2) || this._getStyleBySelectorText(node.nodeName, 'background-color') || recordStyle['background-color'] || '';
+                    this._getStyleBySelectorText(`.${node.className}`, key) ||
+                    this._getStyleBySelectorText(node.nodeName.toLowerCase(), key) || this._getStyleBySelectorText(node.nodeName, 'background-color') || recordStyle['background-color'] || '';
                 bgColor && (newStyleStr += `background:${bgColor};`);
                 continue;
             }
-            if (key1 === 'text-decoration') {
+            if (key === 'text-decoration') {
                 const textDecoration = style.getPropertyValue('text-decoration-line') || style.getPropertyValue('text-decoration') || this._getStyleBySelectorText(`.${node.className}`, 'text-decoration-line') ||
-                    this._getStyleBySelectorText(`.${node.className}`, key1 || key2) ||
-                    this._getStyleBySelectorText(node.nodeName.toLowerCase(), key1 || key2) || this._getStyleBySelectorText(node.nodeName, 'text-decoration-line') || recordStyle['text-decoration-line'] || '';
+                    this._getStyleBySelectorText(`.${node.className}`, key) ||
+                    this._getStyleBySelectorText(node.nodeName.toLowerCase(), key) || this._getStyleBySelectorText(node.nodeName, 'text-decoration-line') || recordStyle['text-decoration-line'] || '';
                 textDecoration && (newStyleStr += `text-decoration:${textDecoration};`);
                 continue;
             }
 
             const value =
-                style.getPropertyValue(key1 || key2) ||
-                this._getStyleBySelectorText(`.${node.className}`, key1 || key2) ||
-                this._getStyleBySelectorText(node.nodeName.toLowerCase(), key1 || key2) ||
-                recordStyle[key1 || key2] ||
+                style.getPropertyValue(key) ||
+                this._getStyleBySelectorText(`.${node.className}`, key) ||
+                this._getStyleBySelectorText(node.nodeName.toLowerCase(), key) ||
+                recordStyle[key] ||
                 '';
-            value && (newStyleStr += `${key1 || key2}:${value};`);
+            value && (newStyleStr += `${key}:${value};`);
         }
         return newStyleStr;
     }
@@ -335,7 +329,7 @@ export class HtmlToUSMService {
         if (!tableEle) {
             return cellMatrix;
         }
-        //user agent stylesheet
+        // user agent stylesheet can be provided here
         const tableStyle = this._getStyle(tableEle, '');
         const rows = tableEle?.querySelectorAll('tr');
 
@@ -359,7 +353,7 @@ export class HtmlToUSMService {
                 // Check and remove borders based on adjacent merged cells
                 if (rowIndex > 0) {
                     const cellValueAbove = cellMatrix.getValue(rowIndex - 1, colSetValueIndex);
-                    if (cellValueAbove?.style?.includes('border-bottom')) {
+                    if (cellValueAbove?.style?.includes('border-bottom') && cellStyle.includes('border-top')) {
                         const borderBottom = extractStyleProperty(cellValueAbove.style!, 'border-bottom');
                         if (borderBottom && textTrim(borderBottom.substr(borderBottom.indexOf(':') + 1)) !== 'none') {
                             cellStyle = cellStyle.replace(/border-top:[^;]+;/, '');
@@ -369,7 +363,7 @@ export class HtmlToUSMService {
 
                 if (colIndex > 0) {
                     const cellValueLeft = cellMatrix.getValue(rowIndex, colSetValueIndex - 1);
-                    if (cellValueLeft?.style?.includes('border-right')) {
+                    if (cellValueLeft?.style?.includes('border-right') && cellStyle.includes('border-left')) {
                         const borderRight = extractStyleProperty(cellValueLeft.style!, 'border-right');
                         if (borderRight && textTrim(borderRight.substr(borderRight.indexOf(':') + 1)) !== 'none') {
                             cellStyle = cellStyle.replace(/border-left:[^;]+;/, '');
@@ -433,7 +427,6 @@ export class HtmlToUSMService {
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 const currentNodeStyle = this._getStyle(node as HTMLElement, styleStr);
                 const parentStyles = parent ? styleCache.get(parent) : {};
-                // const predefinedStyles = getComputedStyle(node as HTMLElement);
                 const predefinedStyles = turnToStyleObject(currentNodeStyle);
                 const nodeStyles = extractNodeStyle(node as HTMLElement, predefinedStyles);
 
@@ -677,8 +670,7 @@ function extractStyleProperty(styleString?: string, propertyName?: string) {
 function setMergedCellStyle(
     cellMatrix: ObjectMatrix<IParsedCellValueByClipboard>,
     cellStyle: string,
-    cellValue:
-    {
+    cellValue: {
         content: string;
         style: string;
         richTextParma: {
@@ -687,7 +679,6 @@ function setMergedCellStyle(
         };
         rowSpan?: number;
         colSpan?: number;
-
     },
     indexParams: {
         colSpan: number;
@@ -697,21 +688,14 @@ function setMergedCellStyle(
         colSetValueIndex: number;
     }) {
     const { rowSpan, colSpan, rowIndex, colSetValueIndex } = indexParams;
-    for (let i = colSetValueIndex; i < colSetValueIndex + colSpan; i++) {
-        cellMatrix.setValue(rowIndex, i, { style: cellStyle });
-        cellMatrix.setValue(rowIndex + rowSpan - 1, i, { style: cellStyle });
-    }
-    for (let i = rowIndex; i < rowIndex + rowSpan; i++) {
-        cellMatrix.setValue(i, colSetValueIndex, { style: cellStyle });
-        cellMatrix.setValue(i, colSetValueIndex + colSpan - 1, { style: cellStyle });
-    }
-    cellMatrix.setValue(rowIndex + rowSpan - 1, colSetValueIndex, { style: cellStyle });
-    cellMatrix.setValue(rowIndex, colSetValueIndex + colSpan - 1, { style: cellStyle });
-    cellMatrix.setValue(rowIndex + rowSpan - 1, colSetValueIndex + colSpan - 1, { style: cellStyle });
-    cellMatrix.setValue(rowIndex, colSetValueIndex, { ...cellValue, style: cellStyle });
+
     for (let i = rowIndex; i < rowIndex + rowSpan; i++) {
         for (let j = colSetValueIndex; j < colSetValueIndex + colSpan; j++) {
-            if (!cellMatrix.getValue(i, j)) {
+            // Set the value of the top-left cell with cellValue and style
+            if (i === rowIndex && j === colSetValueIndex) {
+                cellMatrix.setValue(i, j, { ...cellValue, style: cellStyle });
+            } else {
+                // Set the style for all other cells
                 cellMatrix.setValue(i, j, { style: cellStyle });
             }
         }

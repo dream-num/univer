@@ -23,7 +23,7 @@ import { BaseFunction } from '../../base-function';
 export class Countif extends BaseFunction {
     override minParams = 2;
 
-    override maxParams = 3;
+    override maxParams = 2;
 
     override calculate(range: BaseValueObject, criteria: BaseValueObject) {
         if (range.isError() || criteria.isError()) {
@@ -41,22 +41,10 @@ export class Countif extends BaseFunction {
         return this._handleSingleObject(range, criteria);
     }
 
-    private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject, averageRange?: BaseValueObject) {
+    private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject) {
         const resultArrayObject = valueObjectCompare(range, criteria);
 
-        // averageRange has the same dimensions as range
-        const averageRangeArray = averageRange
-            ? (averageRange as ArrayValueObject).slice(
-                [0, (range as ArrayValueObject).getRowCount()],
-                [0, (range as ArrayValueObject).getColumnCount()]
-            )
-            : (range as ArrayValueObject);
-
-        if (!averageRangeArray) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
-
-        const picked = averageRangeArray.pick(resultArrayObject as ArrayValueObject);
+        const picked = (range as ArrayValueObject).pick(resultArrayObject as ArrayValueObject);
         // If the condition is a numeric comparison, only numbers are counted, otherwise text is counted.
         const isNumeric = isNumericComparison(criteria.getValue());
         return isNumeric ? picked.count() : picked.countA();

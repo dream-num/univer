@@ -270,7 +270,37 @@ export class BooleanValueObject extends BaseValueObject {
     }
 
     override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
-        return this._convertTonNumber().compare(valueObject, operator);
+        if (valueObject.isArray()) {
+            return valueObject.compare(this, reverseCompareOperator(operator));
+        }
+
+        return this.compareBy(valueObject.getValue(), operator);
+    }
+
+    override compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {
+        let result = false;
+        // FALSE > 0 and FALSE > "Univer" get TRUE
+        if (typeof value === 'string' || typeof value === 'number') {
+            result = this._compareString(operator);
+        } else if (typeof value === 'boolean') {
+            const booleanNumber = NumberValueObject.create(value ? 1 : 0);
+            return this._convertTonNumber().compare(booleanNumber, operator);
+        }
+
+        return BooleanValueObject.create(result);
+    }
+
+    private _compareString(operator: compareToken): boolean {
+        switch (operator) {
+            case compareToken.EQUALS:
+            case compareToken.GREATER_THAN:
+            case compareToken.GREATER_THAN_OR_EQUAL:
+                return true;
+            case compareToken.LESS_THAN:
+            case compareToken.LESS_THAN_OR_EQUAL:
+            case compareToken.NOT_EQUAL:
+                return false;
+        }
     }
 
     override concatenateFront(valueObject: BaseValueObject): BaseValueObject {

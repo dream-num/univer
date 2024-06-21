@@ -20,10 +20,10 @@ import type { BaseReferenceObject, FunctionVariantType } from '../reference-obje
 import type { ArrayValueObject } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
-import { NumberValueObject } from '../value-object/primitive-object';
+import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
 import { ErrorType } from '../../basics/error-type';
 import { expandArrayValueObject } from './array-object';
-import { booleanObjectIntersection, valueObjectCompare } from './object-compare';
+import { booleanObjectIntersection, isNumericComparison, valueObjectCompare } from './object-compare';
 
 export function convertTonNumber(valueObject: BaseValueObject) {
     const currentValue = valueObject.getValue();
@@ -171,14 +171,14 @@ export function getErrorArray(variants: BaseValueObject[], sumRange: BaseValueOb
         const rangeRowLength = (range as ArrayValueObject).getRowCount();
         const rangeColumnLength = (range as ArrayValueObject).getColumnCount();
         if (rangeRowLength !== sumRowLength || rangeColumnLength !== sumColumnLength) {
-            return expandArrayValueObject(maxRowLength, maxColumnLength, ErrorValueObject.create(ErrorType.NA));
+            return expandArrayValueObject(maxRowLength, maxColumnLength, ErrorValueObject.create(ErrorType.VALUE));
         }
     }
 
     return null;
 }
 
-export function getBooleanResults(variants: BaseValueObject[], maxRowLength: number, maxColumnLength: number) {
+export function getBooleanResults(variants: BaseValueObject[], maxRowLength: number, maxColumnLength: number, isNumberSensitive: boolean = false) {
     const booleanResults: BaseValueObject[][] = [];
 
     for (let i = 0; i < variants.length; i++) {
@@ -193,7 +193,14 @@ export function getBooleanResults(variants: BaseValueObject[], maxRowLength: num
                 return;
             }
 
-            const resultArrayObject = valueObjectCompare(range, criteriaValueObject);
+            // range must be an ArrayValueObject, criteria must be a BaseValueObject
+            let resultArrayObject = valueObjectCompare(range, criteriaValueObject);
+
+            // When comparing non-numbers and numbers, countifs does not take the result
+            const isNumeric = isNumericComparison(criteriaValueObject.getValue());
+            if (isNumberSensitive && isNumeric) {
+                resultArrayObject = removeNonNumberValueObject(resultArrayObject as ArrayValueObject, range as ArrayValueObject);
+            }
 
             if (booleanResults[rowIndex] === undefined) {
                 booleanResults[rowIndex] = [];
@@ -209,4 +216,14 @@ export function getBooleanResults(variants: BaseValueObject[], maxRowLength: num
     }
 
     return booleanResults;
+}
+
+function removeNonNumberValueObject(array: ArrayValueObject, range: ArrayValueObject) {
+    return array.mapValue((valueObject, r, c) => {
+        if (range.get(r, c)?.isNumber()) {
+            return valueObject;
+        } else {
+            return BooleanValueObject.create(false);
+        }
+    });
 }

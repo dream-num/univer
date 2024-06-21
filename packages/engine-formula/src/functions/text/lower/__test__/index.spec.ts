@@ -23,24 +23,24 @@ import { ArrayValueObject, transformToValue, transformToValueObject } from '../.
 import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test lower function', () => {
-    const textFunction = new Lower(FUNCTION_NAMES_TEXT.LOWER);
+    const testFunction = new Lower(FUNCTION_NAMES_TEXT.LOWER);
 
     describe('Lower', () => {
         it('Value is normal', () => {
             const value = StringValueObject.create('Apt. 2B');
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(result.getValue()).toBe('apt. 2b');
         });
 
         it('Value is number', () => {
             const value = NumberValueObject.create(1);
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(result.getValue()).toBe('1');
         });
 
         it('Value is boolean', () => {
             const value = BooleanValueObject.create(true);
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(result.getValue()).toBe('true');
         });
 
@@ -57,7 +57,7 @@ describe('Test lower function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(text);
+            const result = testFunction.calculate(text);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 ['1', ' ', '1.23', 'true', 'false', '', 'univer表格シート繁體한국인'],
                 ['0', '100', '2.34', 'test', '-3', '#VALUE!', ''],

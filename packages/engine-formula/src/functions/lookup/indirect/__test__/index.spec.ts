@@ -35,7 +35,7 @@ import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Indirect } from '../index';
 
 describe('Test indirect', () => {
-    // const textFunction = new Makearray(FUNCTION_NAMES_LOGICAL.MAKEARRAY);
+    // const testFunction = new Makearray(FUNCTION_NAMES_LOGICAL.MAKEARRAY);
     let get: Injector['get'];
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;

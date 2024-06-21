@@ -195,7 +195,7 @@ export class RowHeaderLayout extends SheetExtension {
         const rowHeaderWidthFix = rowHeaderWidth - 0.5 / scale;
         ctx.beginPath();
         ctx.moveToByPrecision(rowHeaderWidthFix, 0);
-        ctx.lineToByPrecision(0, rowTotalHeight);
+        ctx.lineToByPrecision(rowHeaderWidthFix, rowTotalHeight);
         ctx.stroke();
     }
 }

@@ -21,8 +21,8 @@ import { Disposable, ICommandService,
     OnLifecycle,
     Rectangle,
 } from '@univerjs/core';
-import type { ISheetRangeLocation } from '@univerjs/sheets-ui';
 
+import type { ISheetRangeLocation } from '@univerjs/sheets';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { FormulaDataModel } from '@univerjs/engine-formula';

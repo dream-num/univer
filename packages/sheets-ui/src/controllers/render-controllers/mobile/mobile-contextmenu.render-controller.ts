@@ -16,7 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import { Disposable, Rectangle } from '@univerjs/core';
-import type { IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { type IPointerEvent, type IRenderContext, type IRenderModule, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { IContextMenuService, ILayoutService, MenuPosition } from '@univerjs/ui';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
@@ -58,11 +58,17 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
 
             const canvasRect = this._layoutService.getCanvasElement().getBoundingClientRect();
             const range = this._selectionRenderService.attachSelectionWithCoord(selectionRange);
+
+            const { scene } = this._context;
+            const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+            const viewportScrollX = viewMain?.viewportScrollX || 0;
+            const viewportScrollY = viewMain?.viewportScrollY || 0;
+
+            const clientX = range.rangeWithCoord.startX + canvasRect.left - viewportScrollX;
+            const clientY = range.rangeWithCoord.endY + canvasRect.top - viewportScrollY;
             this._contextMenuService.triggerContextMenu({
-                // TODO@wzhudev: there is an offset with the rangeWithCoord.endX and rangeWithCoord.endY
-                // with the client rect
-                clientX: range.rangeWithCoord.startX + canvasRect.left,
-                clientY: range.rangeWithCoord.endY + canvasRect.top,
+                clientX,
+                clientY,
                 preventDefault: () => {},
                 stopPropagation: () => {},
             } as unknown as IPointerEvent, MenuPosition.CONTEXT_MENU);

@@ -43,6 +43,9 @@ export enum SELECTION_MANAGER_KEY {
     // fillTopLeft & fillBottomRight are used for mobile selection
     fillTopLeft = '__SpreadsheetSelectionFillControlTopLeft__',
     fillBottomRight = '__SpreadsheetSelectionFillControlBottomRight__',
+    fillTopLeftInner = '__SpreadsheetSelectionFillControlTopLeftInner__',
+    fillBottomRightInner = '__SpreadsheetSelectionFillControlBottomRightInner__',
+
     lineMain = '__SpreadsheetDragLineMainControl__',
     lineContent = '__SpreadsheetDragLineContentControl__',
     line = '__SpreadsheetDragLineControl__',
@@ -475,7 +478,6 @@ export class SelectionControl extends Disposable {
             strokeWidth = defaultStyle.strokeWidth!,
             AutofillSize = defaultStyle.AutofillSize!,
             AutofillStrokeWidth = defaultStyle.AutofillStrokeWidth!,
-            expandCornerSize = defaultStyle.expandCornerSize!,
         } = style;
 
         const scale = this._getScale();
@@ -587,27 +589,8 @@ export class SelectionControl extends Disposable {
             this.fillControl.setProps(fillProps);
             this.fillControl.transformByState(sizeState);
             this.fillControl.show();
-
-            // if (this._isMobile) {
-                // this.fillControlTopLeft!.setProps({ ...fillProps, ...{ fill: 'black' } });
-                // this.fillControlTopLeft!.transformByState({
-                //     left: -expandCornerSize / 2,
-                //     top: -expandCornerSize / 2,
-                // });
-
-                // this.fillControlBottomRight!.setProps({ ...fillProps, ...{ fill: 'red' } });
-                // this.fillControlBottomRight!.transformByState({
-                //     left: endX - startX - expandCornerSize / 2,
-                //     top: endY - startY - expandCornerSize / 2,
-                // });
-
-                // this.fillControlTopLeft!.show();
-                // this.fillControlBottomRight!.show();
-            // }
         } else {
             this.fillControl.hide();
-            // this.fillControlTopLeft?.hide();
-            // this.fillControlBottomRight?.hide();
         }
 
         this._updateBackgroundControl(style);
@@ -673,25 +656,6 @@ export class SelectionControl extends Disposable {
             zIndex: zIndex + 1,
         });
 
-        // const expandCornerSize = this._defaultStyle!.expandCornerSize || 0;
-        // const AutofillStrokeWidth = this._defaultStyle!.AutofillStrokeWidth || 0;
-        // if (this._isMobile) {
-            // this.fillControlTopLeft = new Rect(SELECTION_MANAGER_KEY.fillTopLeft + zIndex, {
-            //     zIndex: zIndex + 1.5,
-            //     width: expandCornerSize,
-            //     height: expandCornerSize,
-            //     radius: expandCornerSize / 2,
-            //     strokeWidth: AutofillStrokeWidth,
-            // });
-            // this.fillControlBottomRight = new Rect(SELECTION_MANAGER_KEY.fillBottomRight + zIndex, {
-            //     zIndex: zIndex + 1.5,
-            //     width: expandCornerSize,
-            //     height: expandCornerSize,
-            //     radius: expandCornerSize / 2,
-            //     strokeWidth: AutofillStrokeWidth,
-            // });
-        // }
-
         this._dashRect = new Rect(SELECTION_MANAGER_KEY.dash + zIndex, {
             zIndex: zIndex + 2,
             evented: false,
@@ -705,16 +669,6 @@ export class SelectionControl extends Disposable {
             this._backgroundControlMiddleRight, this._backgroundControlBottom,
             this._dashRect,
         ];
-        // if (this._isMobile) {
-            // shapes.push(this.fillControlTopLeft!, this.fillControlBottomRight!);
-        // }
-
-        // for (let index = 0; index < shapes.length; index++) {
-        //     const shape = shapes[index];
-        //     if (![this.fillControlTopLeft, this.fillControlBottomRight].includes(shape)) {
-        //         // shape.evented = false;
-        //     }
-        // }
 
         this._widgetRects = this._initialWidget();
         this._selectionShapeGroup = new Group(SELECTION_MANAGER_KEY.Selection + zIndex, ...shapes, ...this._widgetRects);

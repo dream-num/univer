@@ -173,7 +173,7 @@ export {
 } from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
 export { ReorderRangeCommand, type IReorderRangeCommandParams } from './commands/commands/reorder-range.command';
-export { ReorderRangeMutation, type IReorderRangeMutationParams } from './commands/mutations/reorder-range.mutation';
+export { ReorderRangeMutation, ReorderRangeUndoMutationFactory, type IReorderRangeMutationParams } from './commands/mutations/reorder-range.mutation';
 export { followSelectionOperation, getPrimaryForRange } from './commands/commands/utils/selection-utils';
 export {
     AddMergeUndoMutationFactory,

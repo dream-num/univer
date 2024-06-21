@@ -26,9 +26,9 @@ import { Disposable, ICommandService,
     UniverInstanceType,
 } from '@univerjs/core';
 
+import type { ISheetRangeLocation } from '@univerjs/sheets';
 import { getPrimaryForRange, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-import type { ISheetRangeLocation } from '@univerjs/sheets-ui';
 import { expandToContinuousRange } from '@univerjs/sheets-ui';
 
 import type { ISortOption } from '@univerjs/sheets-sort';

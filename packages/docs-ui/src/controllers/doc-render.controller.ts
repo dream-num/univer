@@ -128,6 +128,38 @@ export class DocRenderController extends RxDisposable {
         }
     }
 
+    reRender(unitId: string) {
+        const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
+
+        if (docsSkeletonObject == null) {
+            return;
+        }
+
+        const { skeleton } = docsSkeletonObject;
+
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+
+        if (currentRender == null) {
+            return;
+        }
+
+        // TODO: `disabled` is only used for read only demo, and will be removed in the future.
+        const disabled = !!skeleton.getViewModel().getDataModel().getSnapshot().disabled;
+
+        if (disabled) {
+            return;
+        }
+
+        skeleton.calculate();
+        if (this._editorService.isEditor(unitId)) {
+            currentRender.mainComponent?.makeDirty();
+
+            return;
+        }
+
+        this._recalculateSizeBySkeleton(currentRender, skeleton);
+    }
+
     private _commandExecutedListener() {
         const updateCommandList = [RichTextEditingMutation.id];
 
@@ -136,35 +168,7 @@ export class DocRenderController extends RxDisposable {
                 if (updateCommandList.includes(command.id)) {
                     const params = command.params as IRichTextEditingMutationParams;
                     const { unitId } = params;
-                    const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
-
-                    if (docsSkeletonObject == null) {
-                        return;
-                    }
-
-                    const { skeleton } = docsSkeletonObject;
-
-                    const currentRender = this._renderManagerService.getRenderById(unitId);
-
-                    if (currentRender == null) {
-                        return;
-                    }
-
-                    // TODO: `disabled` is only used for read only demo, and will be removed in the future.
-                    const disabled = !!skeleton.getViewModel().getDataModel().getSnapshot().disabled;
-
-                    if (disabled) {
-                        return;
-                    }
-
-                    skeleton.calculate();
-                    if (this._editorService.isEditor(unitId)) {
-                        currentRender.mainComponent?.makeDirty();
-
-                        return;
-                    }
-
-                    this._recalculateSizeBySkeleton(currentRender, skeleton);
+                    this.reRender(unitId);
                 }
             })
         );

@@ -73,3 +73,5 @@ export { CutContentCommand, InnerPasteCommand } from './commands/commands/clipbo
 export { SetDocZoomRatioOperation, type ISetDocZoomRatioOperationParams } from './commands/operations/set-doc-zoom-ratio.operation';
 export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 export { addCustomRangeFactory, addCustomRangeBySelectionFactory, deleteCustomRange } from './basics/custom-range-factory';
+export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
+export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';

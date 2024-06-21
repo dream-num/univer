@@ -22,6 +22,8 @@ import { PLUGIN_NAME } from './common/const';
 import type { IDocThreadCommentUIConfig } from './controllers/doc-thread-comment-ui.controller';
 import { DocThreadCommentUIController } from './controllers/doc-thread-comment-ui.controller';
 import { DocThreadCommentService } from './services/doc-thread-comment.service';
+import { DocThreadCommentSelectionController } from './controllers/doc-thread-comment-selection.controller';
+import { DocThreadCommentRenderController } from './controllers/render-controllers/render.controller';
 
 @DependentOn(UniverThreadCommentUIPlugin)
 export class UniverDocsCommentUIPlugin extends Plugin {
@@ -43,6 +45,9 @@ export class UniverDocsCommentUIPlugin extends Plugin {
                     useFactory: () => this._injector.createInstance(DocThreadCommentUIController, this._config),
                 },
             ],
+            [DocThreadCommentSelectionController],
+            [DocThreadCommentRenderController],
+
             [DocThreadCommentService],
         ] as Dependency[]).forEach((dep) => {
             injector.add(dep);

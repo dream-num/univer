@@ -272,6 +272,10 @@ export interface ICustomRange {
     rangeType: CustomRangeType;
 }
 
+export interface ICustomRangeForInterceptor extends ICustomRange {
+    active?: boolean;
+}
+
 export enum CustomRangeType {
     HYPERLINK,
     FIELD, // 17.16 Fields and Hyperlinks
@@ -589,7 +593,6 @@ export interface ITextStyle extends IStyleBase {
     sc?: number; // spacing
     pos?: number; // position
     sa?: number; // scale
-
 }
 
 export interface IIndentStart {

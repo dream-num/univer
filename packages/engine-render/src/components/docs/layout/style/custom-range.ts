@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ITextStyle, Nullable } from '@univerjs/core';
+import type { ICustomRangeForInterceptor, ITextStyle, Nullable } from '@univerjs/core';
 import { BooleanNumber, CustomRangeType } from '@univerjs/core';
 
-export function getCustomRangeStyle(rangeType: CustomRangeType): Nullable<ITextStyle> {
-    if (rangeType === CustomRangeType.COMMENT) {
+export function getCustomRangeStyle(customRange: ICustomRangeForInterceptor): Nullable<ITextStyle> {
+    if (customRange.rangeType === CustomRangeType.COMMENT) {
         return {
             bbl: {
                 s: BooleanNumber.TRUE,
@@ -27,6 +27,7 @@ export function getCustomRangeStyle(rangeType: CustomRangeType): Nullable<ITextS
                 },
                 c: BooleanNumber.FALSE,
             },
+            ...customRange.active ? { bg: { rgb: '#faedc2' } } : null,
         };
     }
 

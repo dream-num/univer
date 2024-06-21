@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-export * from './basics';
-export * from './docs-ui-plugin';
-export { DocCanvasView } from './views/doc-canvas-view';
-export * from './services';
-export { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
-export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
-export { DocRenderController } from './controllers/doc-render.controller';
+import type { ICustomRangeForInterceptor } from '@univerjs/core';
+import { createInterceptorKey } from '@univerjs/core';
+
+const CUSTOM_RANGE = createInterceptorKey<ICustomRangeForInterceptor, { index: number; unitId: string }>('CELL_CONTENT');
+
+export const DOC_INTERCEPTOR_POINT = {
+    CUSTOM_RANGE,
+};

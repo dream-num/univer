@@ -17,7 +17,7 @@
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocumentViewModel } from '@univerjs/engine-render';
-import { BehaviorSubject, takeUntil } from 'rxjs';
+import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 
 export interface IDocumentViewModelManagerParam {
     unitId: string;
@@ -32,6 +32,9 @@ export class DocViewModelManagerService extends RxDisposable {
 
     private readonly _currentDocViewModel$ = new BehaviorSubject<Nullable<IDocumentViewModelManagerParam>>(null);
     readonly currentDocViewModel$ = this._currentDocViewModel$.asObservable();
+
+    private readonly _docViewModelAdd$ = new Subject<DocumentViewModel>();
+    readonly docViewModelAdd$ = this._docViewModelAdd$.asObservable();
 
     constructor(@IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService) {
         super();
@@ -116,6 +119,9 @@ export class DocViewModelManagerService extends RxDisposable {
     }
 
     private _buildDocViewModel(documentDataModel: DocumentDataModel) {
-        return new DocumentViewModel(documentDataModel);
+        const model = new DocumentViewModel(documentDataModel);
+        this._docViewModelAdd$.next(model);
+
+        return model;
     }
 }

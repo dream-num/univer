@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/umd",
-    "version": "0.1.15",
+    "version": "0.1.16",
     "private": false,
     "description": "UMD bundle for Univer",
     "author": "DreamNum <developer@univer.ai>",

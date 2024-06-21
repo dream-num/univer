@@ -1791,9 +1791,6 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
       '@wendellhu/redi':
         specifier: ^0.15.4
         version: 0.15.4

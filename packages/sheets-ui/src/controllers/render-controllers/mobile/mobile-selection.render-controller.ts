@@ -221,7 +221,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
                 return;
             }
             this._selectionRenderService.enableDetectMergedCell();
-            (this._selectionRenderService as MobileSelectionRenderService).moveSelectionToCursor(
+            (this._selectionRenderService as MobileSelectionRenderService).eventTrigger(
                 evt,
                 spreadsheet.zIndex + 1,
                 RANGE_TYPE.NORMAL,

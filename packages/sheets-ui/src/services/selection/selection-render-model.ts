@@ -157,6 +157,10 @@ export class SelectionRenderModel implements IRangeWithCoord {
         return this._rangeType;
     }
 
+    setRangeType(rangeType: RANGE_TYPE) {
+        this._rangeType = rangeType;
+    }
+
     getValue(): ISelectionWithCoord {
         return {
             rangeWithCoord: {

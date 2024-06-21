@@ -15,8 +15,9 @@
  */
 
 import type { Nullable, ThemeService } from '@univerjs/core';
+import { RANGE_TYPE } from '@univerjs/core';
 import type { BaseObject, IRectProps, Scene } from '@univerjs/engine-render';
-import { Rect } from '@univerjs/engine-render';
+import { Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import type { ISelectionStyle } from '@univerjs/sheets';
 
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
@@ -29,9 +30,13 @@ export class MobileSelectionControl extends SelectionControl {
     private _fillControlBottomRightInner: Rect | null;
 
     constructor(
-        ...parentArgs: [Scene, number, boolean, ThemeService]
+        protected override _scene: Scene,
+        protected override _zIndex: number,
+        protected override _isHeaderHighlight: boolean = true,
+        protected override readonly _themeService: ThemeService,
+        protected rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL
     ) {
-        super(...parentArgs);
+        super(_scene, _zIndex, _isHeaderHighlight, _themeService);
         const defaultStyle = this.defaultStyle!;
         const expandCornerSize = defaultStyle.expandCornerSize || 0;
         const expandCornerInnerSize = (defaultStyle.expandCornerSize || 0) / 4;
@@ -39,6 +44,8 @@ export class MobileSelectionControl extends SelectionControl {
         const stroke = defaultStyle.stroke!;
         const AutofillStroke = defaultStyle.AutofillStroke!;
         const zIndex = this.zIndex;
+
+        // @transformControlPoint takes care of left & top
         this._fillControlTopLeft = new Rect(SELECTION_MANAGER_KEY.fillTopLeft + zIndex, {
             zIndex: zIndex + 2,
             width: expandCornerSize,
@@ -73,12 +80,14 @@ export class MobileSelectionControl extends SelectionControl {
             stroke: AutofillStroke,
             strokeScaleEnabled: false,
         };
-        this._fillControlTopLeftInner!.setProps({ ...fillProps });//...{ fill: 'black' } });
-        this._fillControlBottomRightInner!.setProps({ ...fillProps });// ...{ fill: 'red' } });
+        this._fillControlTopLeftInner!.setProps({ ...fillProps });
+        this._fillControlBottomRightInner!.setProps({ ...fillProps });
+        this.fillControlTopLeft!.setProps({ ...fillProps, ...{ fill: 'red' } });
+        this.fillControlBottomRight!.setProps({ ...fillProps, ...{ fill: 'black' } });
 
         // put into scene
-        this._selectionShapeGroup.addObjects(this._fillControlTopLeft, this._fillControlBottomRight, this._fillControlTopLeftInner, this._fillControlBottomRightInner);
         const objs = [this._fillControlTopLeft, this._fillControlBottomRight, this._fillControlTopLeftInner, this._fillControlBottomRightInner] as BaseObject[];
+        this._selectionShapeGroup.addObjects(...objs);
         const scene = this.getScene();
         scene.addObjects(objs, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
 
@@ -107,10 +116,10 @@ export class MobileSelectionControl extends SelectionControl {
         super.dispose();
     }
 
-    protected override _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
+    protected override _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number, rangeType: RANGE_TYPE) {
         super._updateControl(style, rowHeaderWidth, columnHeaderHeight);
         // startX startY shares same coordinate with viewport.(include row & colheader)
-        const { startX, startY, endX, endY } = this.selectionModel;
+        // const { startX, startY, endX, endY } =  this.selectionModel;
         const defaultStyle = this.defaultStyle;
         if (style == null) {
             style = defaultStyle;
@@ -121,28 +130,15 @@ export class MobileSelectionControl extends SelectionControl {
         const {
             widgets = defaultStyle.widgets!,
             hasAutoFill: autoFillEnabled = defaultStyle.hasAutoFill!,
-            expandCornerSize = defaultStyle.expandCornerSize!,
         } = style;
-        const expandCornerSizeInner = defaultStyle.expandCornerSize! / 4;
 
+        // this condition is derived from selection-shape
         if (autoFillEnabled === true && !super._hasWidgets(widgets)) {
-            this.fillControlTopLeft!.transformByState({
-                left: -expandCornerSize / 2,
-                top: -expandCornerSize / 2,
-            });
-            this._fillControlTopLeftInner!.transformByState({
-                left: -expandCornerSizeInner / 2,
-                top: -expandCornerSizeInner / 2,
-            });
+            if (rangeType) {
+                this.selectionModel.setRangeType(rangeType);
+            }
 
-            this.fillControlBottomRight!.transformByState({
-                left: endX - startX - expandCornerSize / 2,
-                top: endY - startY - expandCornerSize / 2,
-            });
-            this._fillControlBottomRightInner!.transformByState({
-                left: endX - startX - expandCornerSizeInner / 2,
-                top: endY - startY - expandCornerSizeInner / 2,
-            });
+            this.transformControlPoint(style, this.selectionModel.rangeType);
 
             this.fillControlTopLeft!.show();
             this.fillControlBottomRight!.show();
@@ -153,6 +149,77 @@ export class MobileSelectionControl extends SelectionControl {
             this.fillControlBottomRight?.hide();
             this._fillControlTopLeftInner?.hide();
             this._fillControlBottomRightInner?.hide();
+        }
+        // if (rangeType) {
+        //     this.selectionModel.setRangeType(rangeType);
+        //     if (rangeType === RANGE_TYPE.COLUMN) {
+        //         this.fillControlTopLeft!.transformByState({
+        //             left: -expandCornerSize / 2,
+        //             top: (endY - startY) / 2,
+        //         });
+        //         this.fillControlBottomRight!.transformByState({
+        //             left: endX - startX - expandCornerSize / 2,
+        //             top: (endY - startY) / 2,
+        //         });
+        //     }
+        // }
+    }
+
+    transformControlPoint(style: ISelectionStyle, rangeType: RANGE_TYPE) {
+        const expandCornerSizeInner = style.expandCornerSize! / 4;
+        const expandCornerSize = style.expandCornerSize!;
+        const { startX, startY, endX, endY } = this.selectionModel;
+
+        const scene = this.getScene();
+        const viewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        const viewportW = viewport?.width || 0;
+        const viewportH = viewport?.height || 0;
+        const viewportScrollX = viewport?.viewportScrollX || 0;
+        const viewportScrollY = viewport?.viewportScrollY || 0;
+
+        switch (rangeType) {
+            case RANGE_TYPE.NORMAL:
+                this.fillControlTopLeft!.transformByState({
+                    left: -expandCornerSize / 2,
+                    top: -expandCornerSize / 2,
+                });
+                this._fillControlTopLeftInner!.transformByState({
+                    left: -expandCornerSizeInner / 2,
+                    top: -expandCornerSizeInner / 2,
+                });
+
+                this.fillControlBottomRight!.transformByState({
+                    left: endX - startX - expandCornerSize / 2,
+                    top: endY - startY - expandCornerSize / 2,
+                });
+                this._fillControlBottomRightInner!.transformByState({
+                    left: endX - startX - expandCornerSizeInner / 2,
+                    top: endY - startY - expandCornerSizeInner / 2,
+                });
+                break;
+
+            case RANGE_TYPE.ROW:
+                this.fillControlTopLeft!.transformByState({
+                    left: -expandCornerSize / 2 + viewportW / 2 + viewportScrollX / 2,
+                    top: -expandCornerSize / 2,
+                });
+                this.fillControlBottomRight!.transformByState({
+                    left: -expandCornerSize / 2 + viewportW / 2 + viewportScrollX / 2 + expandCornerSize,
+                    top: endY - startY - expandCornerSize / 2,
+                });
+                break;
+            case RANGE_TYPE.COLUMN:
+                this.fillControlTopLeft!.transformByState({
+                    left: -expandCornerSize / 2,
+                    top: -expandCornerSize / 2 + viewportH / 2 + viewportScrollY / 2,
+                });
+                this.fillControlBottomRight!.transformByState({
+                    left: endX - startX - expandCornerSize / 2,
+                    top: -expandCornerSize / 2 + viewportH / 2 + viewportScrollY / 2,
+                });
+                break;
+            default:
+                console.error('unknown range type');
         }
     }
 }

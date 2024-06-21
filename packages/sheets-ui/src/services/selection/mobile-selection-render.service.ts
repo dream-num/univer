@@ -44,9 +44,13 @@ import { type IControlFillConfig, type ISelectionRenderService, RANGE_FILL_PERMI
 import { MobileSelectionControl } from './mobile-selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
 
-enum ExpandingCorner {
+enum ExpandingControl {
     BOTTOM_RIGHT = 'bottom-right',
     TOP_LEFT = 'top-left',
+    LEFT = 'left',
+    RIGHT = 'right',
+    TOP = 'top',
+    BOTTOM = 'bottom',
 }
 export class MobileSelectionRenderService implements ISelectionRenderService {
     hasSelection: boolean = false;
@@ -140,7 +144,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
 
     readonly usable$ = this._usable$.asObservable();
     public interceptor = new InterceptorManager({ RANGE_MOVE_PERMISSION_CHECK, RANGE_FILL_PERMISSION_CHECK });
-    expandingControlShape: ExpandingCorner = ExpandingCorner.BOTTOM_RIGHT;
+    expandingControlMode: ExpandingControl = ExpandingControl.BOTTOM_RIGHT;
 
     constructor(
         // private readonly _context: IRenderContext<Workbook>,
@@ -256,7 +260,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
      *
      * @param data
      */
-    addControlToCurrentBySelectionData(data: ISelectionWithCoordAndStyle) {
+    addCellSelectionControlBySelectionData(data: ISelectionWithCoordAndStyle) {
         const selectionControls = this.getSelectionControls();
 
         if (!selectionControls) {
@@ -277,49 +281,78 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         if (scene == null || skeleton == null) {
             return;
         }
-        const control = new MobileSelectionControl(scene, selectionControls.length, this._isHeaderHighlight, this._themeService);
+        const control = this.addSelectionControl(scene);
 
-        // new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
-
-        control.fillControlTopLeft!.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            console.log('current cell', this.getActiveSelectionControl()?.model.currentCell);
-            this.expandingSelection = true;
-            this.expandingControlShape = ExpandingCorner.TOP_LEFT;
-            this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
-            this._fillControlPointerDownHandler(
-                evt,
-                RANGE_TYPE.ALL,
-                this._activeViewport!
-                // ScrollTimerType.ALL
-                // this._getActiveViewport(evt)
-            );
-        });
-        control.fillControlBottomRight!.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            console.log('current cell', this.getActiveSelectionControl()?.model.currentCell);
-            this.expandingSelection = true;
-            this.expandingControlShape = ExpandingCorner.BOTTOM_RIGHT;
-            this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
-            this._fillControlPointerDownHandler(
-                evt,
-                RANGE_TYPE.ALL,
-                this._activeViewport!
-                // this._getActiveViewport(evt)
-            );
-        });
+        // eslint-disable-next-line no-new
+        new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
         // update control
         control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
-
-        if (this._isHeaderHighlight) {
-            control.enableHeaderHighlight();
-        } else {
-            control.disableHeaderHighlight();
-        }
-        selectionControls.push(control);
     }
 
+    addSelectionControl(scene: Scene, rangeType: RANGE_TYPE) {
+        const selectionControls = this.getSelectionControls();
+
+        const control = new MobileSelectionControl(scene, selectionControls.length, this._isHeaderHighlight, this._themeService, rangeType);
+        this._selectionControls.push(control);
+
+        const { expandingModeForTopLeft, expandingModeForBottomRight } = (() => {
+            switch (rangeType) {
+                case RANGE_TYPE.NORMAL:
+                    return {
+                        expandingModeForTopLeft: ExpandingControl.TOP_LEFT,
+                        expandingModeForBottomRight: ExpandingControl.BOTTOM_RIGHT,
+                    };
+                case RANGE_TYPE.ROW:
+                    return {
+                        expandingModeForTopLeft: ExpandingControl.TOP,
+                        expandingModeForBottomRight: ExpandingControl.BOTTOM,
+                    };
+                case RANGE_TYPE.COLUMN:
+                    return {
+                        expandingModeForTopLeft: ExpandingControl.LEFT,
+                        expandingModeForBottomRight: ExpandingControl.RIGHT,
+                    };
+                case RANGE_TYPE.ALL:
+                    return {
+                        expandingModeForTopLeft: ExpandingControl.TOP_LEFT,
+                        expandingModeForBottomRight: ExpandingControl.BOTTOM_RIGHT,
+                    };
+                default:
+                    return {
+                        expandingModeForTopLeft: ExpandingControl.TOP_LEFT,
+                        expandingModeForBottomRight: ExpandingControl.BOTTOM_RIGHT,
+                    };
+            }
+        })();
+
+        control.fillControlTopLeft!.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this.expandingSelection = true;
+            this.expandingControlMode = expandingModeForTopLeft;
+            this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
+            this._fillControlPointerDownHandler(
+                evt,
+                rangeType,
+                this._activeViewport!
+            );
+        });
+        control.fillControlBottomRight!.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            this.expandingSelection = true;
+            this.expandingControlMode = expandingModeForBottomRight;
+            this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
+            this._fillControlPointerDownHandler(
+                evt,
+                rangeType,
+                this._activeViewport!
+            );
+        });
+
+        return control;
+    }
+
+    // in dev  branch
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]) {
         const currentControls = this.getSelectionControls();
         if (!currentControls) {
@@ -371,7 +404,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
                 control.dispose();
             }
 
-            selectionControls.length = 0; // clear currentSelectionControls
+            this._selectionControls.length = 0; // clear currentSelectionControls
         }
     }
 
@@ -603,6 +636,11 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
             }
         }
 
+        if (activeSelectionControl?.model.rangeType !== rangeType) {
+            this._clearSelectionControls();
+            activeSelectionControl = this.addSelectionControl(scene, rangeType);
+        }
+
         // const activeCellOfCurrSelection = activeSelectionControl && activeSelectionControl.model.currentCell;
 
         if (
@@ -620,22 +658,28 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
             // console.log('selectionControl', startSelectionRange);
 
             this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
-            // when pointer up, a new selection range
+
+            // eslint-disable-next-line no-new
+            new SelectionShapeExtension(activeSelectionControl, skeleton, scene, this._themeService, this._injector);
+
             activeSelectionControl.update(
                 cursorCellRangeWithRangeType,
                 rowHeaderWidth,
                 columnHeaderHeight,
                 this._selectionStyle,
-                primaryCursorCellRange
+                primaryCursorCellRange,
+                rangeType
             );
         }
 
-        this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
+        this._selectionMoveStart$.next(this.getSelectionDataWithStyle()); // old function call
         this.hasSelection = true;
         this._endSelection();
         this.expandingSelection = false;
 
+        // old function call
         if (rangeType === RANGE_TYPE.ROW || rangeType === RANGE_TYPE.COLUMN) {
+            // _movingHandler would update activeSelectionControl range
             this._movingHandler(newEvtOffsetX, newEvtOffsetY, activeSelectionControl, rangeType);
         }
     }
@@ -648,6 +692,8 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
      * @param rangeType Determines whether the selection is made normally according to the range or by rows and columns
      *
      * invoked by selection.render-controller@pointerDownObserver
+     *
+     * derived from eventTrigger
      */
     private _fillControlPointerDownHandler(
         evt: IPointerEvent | IMouseEvent,
@@ -749,18 +795,40 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
          * getActiveSelectionControl() --> activeSelectionControl.model.currentCell
          */
 
+        // switch active cell when expanding selection!!
         if (activeSelectionControl && expandingMode) {
             const activeCellOfCurrSelectCtrl = activeSelectionControl.model.currentCell;
             if (!activeCellOfCurrSelectCtrl) return;
             let primaryCursorCellRangeByControlShape: ISelectionCellWithMergeInfo;
-            if (this.expandingControlShape === ExpandingCorner.TOP_LEFT) {
-                const { endRow, endColumn } = activeSelectionControl.model;
-                primaryCursorCellRangeByControlShape =
-                skeleton.getCellByIndex(endRow, endColumn);
-            } else {
-                const { startRow, startColumn } = activeSelectionControl.model;
-                primaryCursorCellRangeByControlShape =
-                skeleton.getCellByIndex(startRow, startColumn);
+
+            const { startRow, startColumn, endRow, endColumn } = activeSelectionControl.model;
+            switch (this.expandingControlMode) {
+                case ExpandingControl.TOP_LEFT:
+                    primaryCursorCellRangeByControlShape = skeleton.getCellByIndex(endRow, endColumn);
+                    break;
+                case ExpandingControl.BOTTOM_RIGHT:
+                    primaryCursorCellRangeByControlShape =
+                        skeleton.getCellByIndex(startRow, startColumn);
+                    break;
+                case ExpandingControl.LEFT:
+                    primaryCursorCellRangeByControlShape =
+                        skeleton.getCellByIndex(startRow, endColumn);
+                    break;
+                case ExpandingControl.RIGHT:
+                    primaryCursorCellRangeByControlShape =
+                        skeleton.getCellByIndex(startRow, startColumn);
+                    break;
+                case ExpandingControl.TOP:
+                    primaryCursorCellRangeByControlShape =
+                        skeleton.getCellByIndex(endRow, startColumn);
+                    break;
+                case ExpandingControl.BOTTOM:
+                    primaryCursorCellRangeByControlShape =
+                        skeleton.getCellByIndex(startRow, startColumn);
+                    break;
+                default:
+                    primaryCursorCellRangeByControlShape =
+                        skeleton.getCellByIndex(startRow, startColumn);
             }
             activeSelectionControl.updateCurrCell(
                 primaryCursorCellRangeByControlShape
@@ -933,7 +1001,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         this._upObserver = scene.onPointerUpObserver.add((_evt: IPointerEvent | IMouseEvent) => {
             this._endSelection();
             this.expandingSelection = false;
-            this.expandingControlShape = ExpandingCorner.BOTTOM_RIGHT;
+            this.expandingControlMode = ExpandingControl.BOTTOM_RIGHT;
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
 
             // when selection mouse up, enable the short cut service
@@ -1073,18 +1141,16 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
             return false;
         }
 
-        const { startRow: startRowOfActiveCell, startColumn: startColumnOfActiveCell, endRow: endRowOfActiveCell, endColumn: endColOfActiveCell } = activeSelectionControl?.model.currentCell?.mergeInfo || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
-
-        const {
-            startRow: currSelCtrlStartRow,
-            endRow: currSelCtrlEndRow,
-            startColumn: currSelCtrlStartColumn,
-            endColumn: currSelCtrlEndColumn,
-        } = activeSelectionControl?.model || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
+        const activeSelectionRange: IRange = {
+            startRow: activeSelectionControl?.model.startRow ?? -1,
+            endRow: activeSelectionControl?.model.endRow ?? -1,
+            startColumn: activeSelectionControl?.model.startColumn ?? -1,
+            endColumn: activeSelectionControl?.model.endColumn ?? -1,
+        };
 
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
 
-        const targetViewport = this._getViewportByCell(currSelCtrlEndRow, currSelCtrlEndColumn) ?? viewportMain;
+        const targetViewport = this._getViewportByCell(activeSelectionRange.endRow, activeSelectionRange.endColumn) ?? viewportMain;
 
         const scrollXY = scene.getScrollXYByRelativeCoords(
             Vector2.FromArray([this._startOffsetX, this._startOffsetY]),
@@ -1115,83 +1181,58 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
             endRow: cursorEndRow,
         } = cursorCellRange;
 
+        const currCellOfActiveSelctionControl = activeSelectionControl?.model.currentCell;
+        const startRowOfActiveCell = currCellOfActiveSelctionControl?.mergeInfo.startRow ?? -1;
+        const endRowOfActiveCell = currCellOfActiveSelctionControl?.mergeInfo.endRow ?? -1;
+        const startColumnOfActiveCell = currCellOfActiveSelctionControl?.mergeInfo.startColumn ?? -1;
+        const endColOfActiveCell = currCellOfActiveSelctionControl?.mergeInfo.endColumn ?? -1;
+
         // startRowCol  endRowCol from _activeCellRangeOfCurrSelection
-        const startRow = Math.min(cursorStartRow, startRowOfActiveCell);
-        const startColumn = Math.min(cursorStartColumn, startColumnOfActiveCell);
-        const endRow = Math.max(cursorEndRow, endRowOfActiveCell);
-        const endColumn = Math.max(cursorEndColumn, endColOfActiveCell);
-        // if (this.expandingControlShape === ExpandingCorner.TOP_LEFT) {
-        //     startRow = cursorStartRow;
-        //     startColumn = cursorStartColumn;
-        //     endRow = Math.max(cursorEndRow, startRowOfActiveCell, currSelCtrlEndRow);
-        //     endColumn = Math.max(cursorEndColumn, startColumnOfActiveCell, currSelCtrlEndColumn);
-        // } else {
-        //     startRow = Math.min(cursorStartRow, startRowOfActiveCell, currSelCtrlStartRow);
-        //     startColumn = Math.min(cursorStartColumn, startColumnOfActiveCell, currSelCtrlStartColumn);
-        //     endRow = Math.max(cursorEndRow, endRowOfActiveCell);
-        //     endColumn = Math.max(cursorEndColumn, endColOfActiveCell);
-        // }
-        console.log(this.expandingControlShape, 'end col', cursorEndColumn, endColOfActiveCell, currSelCtrlEndRow, endRow);
-        let selectionRangeAfterMerge = {
-            startRow,
-            startColumn,
-            endRow,
-            endColumn,
+        const expandStartRow = Math.min(cursorStartRow, startRowOfActiveCell);
+        const expandStartColumn = Math.min(cursorStartColumn, startColumnOfActiveCell);
+        const expandEndRow = Math.max(cursorEndRow, endRowOfActiveCell);
+        const expandEndColumn = Math.max(cursorEndColumn, endColOfActiveCell);
+
+        // console.log(this.expandingControlMode, 'end col', cursorEndColumn, endColOfActiveCell, currSelCtrlEndRow, cursorEndRow);
+        let newSelectionRange: IRange = {
+            startRow: expandStartRow,
+            startColumn: expandStartColumn,
+            endRow: expandEndRow,
+            endColumn: expandEndColumn,
         };
 
         if (this._isDetectMergedCell) {
-            selectionRangeAfterMerge = skeleton.getSelectionBounding(startRow, startColumn, endRow, endColumn);
+            newSelectionRange = skeleton.getSelectionBounding(expandStartRow, expandStartColumn, expandEndRow, expandEndColumn);
         }
 
-        if (!selectionRangeAfterMerge) {
+        if (!newSelectionRange) {
             return false;
         }
-        const {
-            startRow: startRowAfterMerge,
-            startColumn: startColumnAfterMerge,
-            endRow: endRowAfterMerge,
-            endColumn: endColumnAfterMerge,
-        } = selectionRangeAfterMerge;
 
-        const startCell = skeleton.getNoMergeCellPositionByIndex(startRowAfterMerge, startColumnAfterMerge);
-        const endCell = skeleton.getNoMergeCellPositionByIndex(endRowAfterMerge, endColumnAfterMerge);
+        const startCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.startRow, newSelectionRange.startColumn);
+        const endCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.endRow, newSelectionRange.endColumn);
 
-        const newSelectionRange: IRangeWithCoord = {
-            startColumn: startColumnAfterMerge,
-            startRow: startRowAfterMerge,
-            endColumn: endColumnAfterMerge,
-            endRow: endRowAfterMerge,
-            startY: startCell?.startY || 0,
-            endY: endCell?.endY || 0,
-            startX: startCell?.startX || 0,
-            endX: endCell?.endX || 0,
+        const newSelectionRangeWithCoord: IRangeWithCoord = {
+            startColumn: newSelectionRange.startColumn,
+            startRow: newSelectionRange.startRow,
+            endColumn: newSelectionRange.endColumn,
+            endRow: newSelectionRange.endRow,
+            startY: startCellXY?.startY || 0,
+            endY: endCellXY?.endY || 0,
+            startX: startCellXY?.startX || 0,
+            endX: endCellXY?.endX || 0,
         };
-        // Only notify when the selection changes
 
         if (
-            (currSelCtrlStartColumn !== startColumnAfterMerge ||
-                currSelCtrlStartRow !== startRowAfterMerge ||
-                currSelCtrlEndColumn !== endColumnAfterMerge ||
-                currSelCtrlEndRow !== endRowAfterMerge) &&
-            activeSelectionControl != null
+            activeSelectionRange.startRow !== newSelectionRange.startRow ||
+            activeSelectionRange.startColumn !== newSelectionRange.startColumn ||
+            activeSelectionRange.endRow !== newSelectionRange.endRow ||
+            activeSelectionRange.endColumn !== newSelectionRange.endColumn
         ) {
-            const activeCellRange = activeSelectionControl.model.currentCell!;
-            let {
-                startRow: activeCellStartRow,
-                startColumn: activeCellStartColumn,
-                endRow: activeCellEndRow,
-                endColumn: activeCellEndColumn,
-            } = activeCellRange.mergeInfo;
-
-            activeCellStartRow = Tools.clamp(activeCellStartRow, startRowAfterMerge, endRowAfterMerge);
-            activeCellStartColumn = Tools.clamp(activeCellStartColumn, startColumnAfterMerge, endColumnAfterMerge);
-            // activeCellEndRow = Tools.clamp(activeCellEndRow, startRowAfterMerge, endRowAfterMerge);
-            // activeCellEndColumn = Tools.clamp(activeCellEndColumn, startColumnAfterMerge, endColumnAfterMerge);
-
-            const primaryCursorCellRange = skeleton.getCellByIndex(activeCellStartRow, activeCellStartColumn);
-            activeSelectionControl.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight);
-
-            this._selectionMoving$.next(this.getSelectionDataWithStyle());
+            if (activeSelectionControl) {
+                activeSelectionControl.update(newSelectionRangeWithCoord, rowHeaderWidth, columnHeaderHeight, null, null, activeSelectionControl.model.rangeType);
+                this._selectionMoving$.next(this.getSelectionDataWithStyle());
+            }
         }
     }
 

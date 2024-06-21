@@ -76,7 +76,7 @@ export interface ISelectionRenderService {
     enableSkipRemainLast(): void;
     disableSkipRemainLast(): void;
 
-    addControlToCurrentBySelectionData(data: ISelectionWithCoordAndStyle): void;
+    addCellSelectionControlBySelectionData(data: ISelectionWithCoordAndStyle): void;
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]): void;
     changeRuntime(skeleton: Nullable<SpreadsheetSkeleton>, scene: Nullable<Scene>, viewport?: Viewport): void;
 
@@ -301,7 +301,7 @@ export class SelectionRenderService implements ISelectionRenderService {
      * @param selectionRange
      * @param curCellRange
      */
-    addControlToCurrentBySelectionData(data: ISelectionWithCoordAndStyle) {
+    addCellSelectionControlBySelectionData(data: ISelectionWithCoordAndStyle) {
         const currentControls = this.getSelectionControls();
 
         if (!currentControls) {
@@ -639,7 +639,8 @@ export class SelectionRenderService implements ISelectionRenderService {
                 !evt.ctrlKey &&
                 !evt.shiftKey &&
                 !this._isShowPreviousEnable &&
-                !this._isRemainLastEnable) || (curControls.length > 0 && this._isSingleSelection && !evt.shiftKey)
+                !this._isRemainLastEnable) ||
+                (curControls.length > 0 && this._isSingleSelection && !evt.shiftKey)
         ) {
             for (const control of curControls) {
                 control.dispose();

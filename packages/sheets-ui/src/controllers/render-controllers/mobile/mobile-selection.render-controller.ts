@@ -322,7 +322,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
                 const selectionWithStyle = this._getAllRange(skeleton);
 
                 const selectionData = this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
-                this._selectionRenderService.addControlToCurrentBySelectionData(selectionData);
+                this._selectionRenderService.addCellSelectionControlBySelectionData(selectionData);
 
                 this._selectionRenderService.refreshSelectionMoveStart();
 
@@ -339,7 +339,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         this.disposeWithMe(
             toDisposable(
                 this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
-                    this._selectionRenderService.reset();
+                    // this._selectionRenderService.reset();
                     if (params == null) {
                         return;
                     }
@@ -348,9 +348,9 @@ export class MobileSelectionRenderController extends Disposable implements IRend
                         if (selectionWithStyle == null) {
                             continue;
                         }
-                        const selectionData =
-                            this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
-                        this._selectionRenderService.addControlToCurrentBySelectionData(selectionData);
+                        // const selectionData =
+                            // this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
+                        // this._selectionRenderService.addCellSelectionControlBySelectionData(selectionData);
                     }
 
                     this._syncDefinedNameRange(params);

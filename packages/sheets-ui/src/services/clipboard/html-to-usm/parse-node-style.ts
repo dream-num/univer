@@ -61,160 +61,75 @@ export function extractNodeStyle(node: HTMLElement, predefinedStyles?: Record<st
     return docStyles;
 }
 
-// eslint-disable-next-line complexity, max-lines-per-function
 function parseStyleByProperty(styles: CSSStyleDeclaration | Record<string, string>, docStyles: ITextStyle) {
     if (styles instanceof CSSStyleDeclaration) {
         for (let i = 0; i < styles.length; i++) {
             const cssRule = styles[i];
             const cssValue = styles.getPropertyValue(cssRule);
-            switch (cssRule) {
-                case 'font-family': {
-                    docStyles.ff = cssValue;
-                    break;
-                }
-                case 'font-size': {
-                    const fontSize = Number.parseInt(cssValue);
-                    if (!Number.isNaN(fontSize)) {
-                        // TODO: @ybzky need other font size unit support
-                        if (cssValue.endsWith('pt')) {
-                            docStyles.fs = fontSize;
-                        } else if (cssValue.endsWith('px')) {
-                            const transformedFontSize = fontSize * 0.75;
-                            docStyles.fs = transformedFontSize;
-                        }
-                    }
-                    break;
-                }
-                case 'font-style': {
-                    if (cssValue === 'italic') {
-                        docStyles.it = BooleanNumber.TRUE;
-                    }
-                    break;
-                }
-                case 'font-weight': {
-                    const MIDDLE_FONT_WEIGHT = 400;
-                    if (Number(cssValue) > MIDDLE_FONT_WEIGHT || cssValue === 'bold') {
-                        docStyles.bl = BooleanNumber.TRUE;
-                    }
-                    break;
-                }
-                case 'text-decoration': {
-                    // TODO: @JOCS， Parse CSS values like: underline dotted;
-                    if (/underline/.test(cssValue)) {
-                        docStyles.ul = {
-                            s: BooleanNumber.TRUE,
-                        };
-                    } else if (/overline/.test(cssValue)) {
-                        docStyles.ol = {
-                            s: BooleanNumber.TRUE,
-                        };
-                    } else if (/line-through/.test(cssValue)) {
-                        docStyles.st = {
-                            s: BooleanNumber.TRUE,
-                        };
-                    }
-                    break;
-                }
-                case 'color': {
-                    const color = new ColorKit(cssValue);
-                    if (color.isValid) {
-                        docStyles.cl = {
-                            rgb: color.toRgbString(),
-                        };
-                    }
-                    break;
-                }
-                case 'background-color': {
-                    const color = new ColorKit(cssValue);
-                    const bgColor = color.isValid ? color.toRgbString() : '';
-                    if (bgColor !== DEFAULT_BACKGROUND_COLOR_RGB && bgColor !== DEFAULT_BACKGROUND_COLOR_RGBA) {
-                        docStyles.bg = {
-                            rgb: color.toRgbString(),
-                        };
-                    }
-                    break;
-                }
-                default: {
-                    // console.log(`Unhandled css rule ${cssRule}`);
-                    break;
-                }
-            }
+            handleStyle(cssRule, cssValue, docStyles);
         }
     } else {
         for (const cssRule in styles) {
             const cssValue = styles[cssRule];
-            switch (cssRule) {
-                case 'font-family': {
-                    docStyles.ff = cssValue;
-                    break;
-                }
-                case 'font-size': {
-                    const fontSize = Number.parseInt(cssValue);
-                    if (!Number.isNaN(fontSize)) {
-                        // TODO: @ybzky need other font size unit support
-                        if (cssValue.endsWith('pt')) {
-                            docStyles.fs = fontSize;
-                        } else if (cssValue.endsWith('px')) {
-                            const transformedFontSize = fontSize * 0.75;
-                            docStyles.fs = transformedFontSize;
-                        }
-                    }
-                    break;
-                }
-                case 'font-style': {
-                    if (cssValue === 'italic') {
-                        docStyles.it = BooleanNumber.TRUE;
-                    }
-                    break;
-                }
-                case 'font-weight': {
-                    const MIDDLE_FONT_WEIGHT = 400;
-                    if (Number(cssValue) > MIDDLE_FONT_WEIGHT || cssValue === 'bold') {
-                        docStyles.bl = BooleanNumber.TRUE;
-                    }
-                    break;
-                }
-                case 'text-decoration': {
-                    // TODO: @JOCS， Parse CSS values like: underline dotted;
-                    if (/underline/.test(cssValue)) {
-                        docStyles.ul = {
-                            s: BooleanNumber.TRUE,
-                        };
-                    } else if (/overline/.test(cssValue)) {
-                        docStyles.ol = {
-                            s: BooleanNumber.TRUE,
-                        };
-                    } else if (/line-through/.test(cssValue)) {
-                        docStyles.st = {
-                            s: BooleanNumber.TRUE,
-                        };
-                    }
-                    break;
-                }
-                case 'color': {
-                    const color = new ColorKit(cssValue);
-                    if (color.isValid) {
-                        docStyles.cl = {
-                            rgb: color.toRgbString(),
-                        };
-                    }
-                    break;
-                }
-                case 'background-color': {
-                    const color = new ColorKit(cssValue);
-                    const bgColor = color.isValid ? color.toRgbString() : '';
-                    if (bgColor !== DEFAULT_BACKGROUND_COLOR_RGB && bgColor !== DEFAULT_BACKGROUND_COLOR_RGBA) {
-                        docStyles.bg = {
-                            rgb: color.toRgbString(),
-                        };
-                    }
-                    break;
-                }
-                default: {
-                    // console.log(`Unhandled css rule ${cssRule}`);
-                    break;
-                }
-            }
+            handleStyle(cssRule, cssValue, docStyles);
         }
     }
 }
+
+function handleStyle(cssRule: string, cssValue: string, docStyles: ITextStyle) {
+    switch (cssRule) {
+        case 'font-family':
+            docStyles.ff = cssValue;
+            break;
+        case 'font-size': {
+            const fontSize = Number.parseInt(cssValue);
+            if (!Number.isNaN(fontSize)) {
+                if (cssValue.endsWith('pt')) {
+                    docStyles.fs = fontSize;
+                } else if (cssValue.endsWith('px')) {
+                    docStyles.fs = fontSize * 0.75;
+                }
+            }
+            break;
+        }
+        case 'font-style':
+            if (cssValue === 'italic') {
+                docStyles.it = BooleanNumber.TRUE;
+            }
+            break;
+        case 'font-weight': {
+            const MIDDLE_FONT_WEIGHT = 400;
+            if (Number(cssValue) > MIDDLE_FONT_WEIGHT || cssValue === 'bold') {
+                docStyles.bl = BooleanNumber.TRUE;
+            }
+            break;
+        }
+        case 'text-decoration': {
+            if (/underline/.test(cssValue)) {
+                docStyles.ul = { s: BooleanNumber.TRUE };
+            } else if (/overline/.test(cssValue)) {
+                docStyles.ol = { s: BooleanNumber.TRUE };
+            } else if (/line-through/.test(cssValue)) {
+                docStyles.st = { s: BooleanNumber.TRUE };
+            }
+            break;
+        }
+        case 'color': {
+            const color = new ColorKit(cssValue);
+            if (color.isValid) {
+                docStyles.cl = { rgb: color.toRgbString() };
+            }
+            break;
+        }
+        case 'background-color': {
+            const color = new ColorKit(cssValue);
+            const bgColor = color.isValid ? color.toRgbString() : '';
+            if (bgColor !== DEFAULT_BACKGROUND_COLOR_RGB && bgColor !== DEFAULT_BACKGROUND_COLOR_RGBA) {
+                docStyles.bg = { rgb: bgColor };
+            }
+            break;
+        }
+        default:
+            break;
+    }
+};

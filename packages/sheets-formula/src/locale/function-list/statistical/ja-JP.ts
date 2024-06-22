@@ -301,7 +301,7 @@ export default {
     },
     COUNTBLANK: {
         description: '指定された範囲に含まれる空白セルの個数を返します。',
-        abstract: '指定された範囲に含まれる空白セルの個数を返します。',
+        abstract: '指定された範囲に含まれる空白セルの個数を返します',
         links: [
             {
                 title: '指導',
@@ -309,8 +309,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: '範囲', detail: '空白セルの個数を求めるセル範囲を指定します。' },
         },
     },
     COUNTIF: {

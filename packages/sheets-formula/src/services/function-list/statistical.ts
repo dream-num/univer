@@ -496,15 +496,8 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
         abstract: 'formula.functionList.COUNTBLANK.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.COUNTBLANK.functionParameter.number1.name',
-                detail: 'formula.functionList.COUNTBLANK.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.COUNTBLANK.functionParameter.number2.name',
-                detail: 'formula.functionList.COUNTBLANK.functionParameter.number2.detail',
+                name: 'formula.functionList.COUNTBLANK.functionParameter.range.name',
+                detail: 'formula.functionList.COUNTBLANK.functionParameter.range.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,

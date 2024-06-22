@@ -892,11 +892,9 @@ export class ArrayValueObject extends BaseValueObject {
     override countBlank() {
         let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         this.iterator((valueObject) => {
-            if (valueObject != null && !valueObject.isNull()) {
-                return true; // continue
+            if (valueObject == null || valueObject.isNull() || (valueObject.getValue() === '')) {
+                accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
             }
-
-            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
         });
 
         return accumulatorAll;

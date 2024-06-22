@@ -325,7 +325,7 @@ export default {
         },
     },
     COUNTBLANK: {
-        description: '计算区域内空白单元格的数量',
+        description: '计算区域内空白单元格的数量。',
         abstract: '计算区域内空白单元格的数量',
         links: [
             {
@@ -334,8 +334,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: '范围', detail: '需要计算其中空白单元格个数的区域。' },
         },
     },
     COUNTIF: {

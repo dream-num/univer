@@ -325,7 +325,7 @@ export default {
         },
     },
     COUNTBLANK: {
-        description: 'Counts the number of blank cells within a range',
+        description: 'Counts the number of blank cells within a range.',
         abstract: 'Counts the number of blank cells within a range',
         links: [
             {
@@ -334,8 +334,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: 'range', detail: 'The range from which you want to count the blank cells.' },
         },
     },
     COUNTIF: {

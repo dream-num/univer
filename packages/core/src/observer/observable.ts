@@ -103,12 +103,25 @@ export class EventSubject<T> extends Subject<[T, EventState]> {
         this._sortedObservers.length = 0;
     }
 
-    subscribeEvent(observer: IEventObserver<T>): Subscription {
-        const subscription = super.subscribe(observer);
-        this._sortedObservers.push(observer);
+    override complete(): void {
+        super.complete();
+
+        this._sortedObservers.length = 0;
+    }
+
+    subscribeEvent(observer: IEventObserver<T> | ((evt: T, state: EventState) => unknown)): Subscription {
+        let ob: IEventObserver<T>;
+        if (typeof observer === 'function') {
+            ob = { next: ([evt, state]: [T, EventState]) => observer(evt, state) };
+        } else {
+            ob = observer;
+        }
+
+        const subscription = super.subscribe(ob);
+        this._sortedObservers.push(ob);
         this._sortedObservers.sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
 
-        subscription.add(() => this._sortedObservers = this._sortedObservers.filter((o) => o !== observer));
+        subscription.add(() => this._sortedObservers = this._sortedObservers.filter((o) => o !== ob));
         return subscription;
     }
 

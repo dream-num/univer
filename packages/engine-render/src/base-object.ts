@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IKeyValue, ITransformState, Nullable, Observer } from '@univerjs/core';
-import { Disposable, Observable } from '@univerjs/core';
+import { Disposable, EventSubject, Observable } from '@univerjs/core';
 
 import type { EVENT_TYPE } from './basics/const';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
@@ -49,14 +49,12 @@ export abstract class BaseObject extends Disposable {
     isInGroup: boolean = false;
 
     onTransformChangeObservable = new Observable<ITransformChangeState>();
-    onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
+    pointerDown$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerMoveObserver = new Observable<IPointerEvent | IMouseEvent>();
     onPointerUpObserver = new Observable<IPointerEvent | IMouseEvent>();
     onDblclickObserver = new Observable<IPointerEvent | IMouseEvent>();
     onTripleClickObserver = new Observable<IPointerEvent | IMouseEvent>();
     onMouseWheelObserver = new Observable<IWheelEvent>();
-    // onKeyDownObservable = new Observable<IKeyboardEvent>();
-    // onKeyUpObservable = new Observable<IKeyboardEvent>();
 
     onPointerOutObserver = new Observable<IPointerEvent | IMouseEvent>();
     onPointerLeaveObserver = new Observable<IPointerEvent | IMouseEvent>();
@@ -636,7 +634,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerPointerDown(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onPointerDownObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.pointerDown$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerPointerDown(evt);
             return false;
         }
@@ -756,7 +754,7 @@ export abstract class BaseObject extends Disposable {
     override dispose() {
         super.dispose();
         this.onTransformChangeObservable.clear();
-        this.onPointerDownObserver.clear();
+        this.pointerDown$.complete();
         this.onPointerMoveObserver.clear();
         this.onPointerUpObserver.clear();
         this.onMouseWheelObserver.clear();

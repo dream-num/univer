@@ -17,6 +17,7 @@
 import type { IAbsoluteTransform, IKeyValue, Nullable, Observer } from '@univerjs/core';
 import { Disposable, MOVE_BUFFER_VALUE, Observable, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
 
+import type { Subscription } from 'rxjs';
 import type { BaseObject } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
 import type { IMouseEvent, IPointerEvent } from './basics/i-events';
@@ -169,7 +170,10 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _transformerControlMap = new Map<string, Group>();
     private _selectedObjectMap = new Map<string, BaseObject>();
+
     private _observerObjectMap = new Map<string, Nullable<Observer<IPointerEvent | IMouseEvent>>>();
+    private _subscriptionObjectMap = new Map<string, Nullable<Subscription>>();
+
     private _copperControl: Nullable<Group>;
     private _copperSelectedObject: Nullable<BaseObject>;
 
@@ -314,7 +318,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             this.hoverLeaveFunc && applyObject.onPointerLeaveObserver.add(this.hoverLeaveFunc);
         }
 
-        const observer = applyObject.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+        const observer = applyObject.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
             this._startOffsetX = evtOffsetX;
             this._startOffsetY = evtOffsetY;
@@ -395,17 +399,22 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         this.disposeWithMe(toDisposable(observer));
 
-        this._observerObjectMap.set(applyObject.oKey, observer);
+        this._subscriptionObjectMap.set(applyObject.oKey, observer);
 
         return applyObject;
     }
 
     detachFrom(applyObject: BaseObject) {
         const observer = this._observerObjectMap.get(applyObject.oKey);
-
         if (observer) {
             observer.dispose();
             this._observerObjectMap.delete(applyObject.oKey);
+        }
+
+        const subscription = this._subscriptionObjectMap.get(applyObject.oKey);
+        if (subscription) {
+            subscription.unsubscribe();
+            this._subscriptionObjectMap.delete(applyObject.oKey);
         }
 
         return applyObject;
@@ -865,7 +874,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _attachEventToAnchor(anchor: BaseObject, type = TransformerManagerType.RESIZE_LT, applyObject: BaseObject) {
         this.disposeWithMe(
             toDisposable(
-                anchor.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                anchor.pointerDown$.subscribeEvent((evt, state) => {
                     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
                     this._startOffsetX = evtOffsetX;
                     this._startOffsetY = evtOffsetY;
@@ -970,7 +979,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _attachEventToRotate(rotateControl: Rect, applyObject: BaseObject) {
         this.disposeWithMe(
             toDisposable(
-                rotateControl.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                rotateControl.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
                     this._startOffsetX = evtOffsetX;
@@ -1502,7 +1511,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
             const rotateLine = new Rect(`${TransformerManagerType.ROTATE_LINE}_${zIndex}`, {
                 zIndex: zIndex - 1, evented: false, left: lineLeft, top: lineTop, height: rotateAnchorOffset, width: 1,
-                strokeWidth: borderStrokeWidth, stroke: borderStroke });
+                strokeWidth: borderStrokeWidth, stroke: borderStroke,
+            });
 
             const { left, top } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, applyObject);
 
@@ -1510,7 +1520,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
             const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
                 zIndex: zIndex - 1, left, top, height: rotateSize, width: rotateSize,
-                radius: rotateCornerRadius, strokeWidth: borderStrokeWidth * 2, stroke: borderStroke });
+                radius: rotateCornerRadius, strokeWidth: borderStrokeWidth * 2, stroke: borderStroke,
+            });
             this._attachEventToRotate(rotate, applyObject);
             this._attachHover(rotate, cursor, CURSOR_TYPE.DEFAULT);
             groupElements.push(rotateLine, rotate);

@@ -364,29 +364,40 @@ export function insertCustomRanges(
     textLength: number,
     currentIndex: number
 ) {
-    const { customRanges } = body;
-
-    if (customRanges == null) {
-        return;
+    if (!body.customRanges) {
+        body.customRanges = [];
     }
 
+    const { customRanges } = body;
+    const customRangeMap: Record<string, ICustomRange> = {};
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];
+        customRangeMap[customRange.rangeId] = customRange;
         const { startIndex, endIndex } = customRange;
         if (startIndex > currentIndex) {
             customRange.startIndex += textLength;
             customRange.endIndex += textLength;
-        } else if (endIndex >= currentIndex - 1) {
+        } else if (endIndex > currentIndex - 1) {
             customRange.endIndex += textLength;
         }
     }
 
-    const insertCustomRanges = insertBody.customRanges;
-    if (insertCustomRanges) {
-        for (let i = 0, len = insertCustomRanges.length; i < len; i++) {
-            const customRange = insertCustomRanges[i];
-            customRange.startIndex += currentIndex;
-            customRange.endIndex += currentIndex;
+    const insertCustomRanges: ICustomRange[] = [];
+    if (insertBody.customRanges) {
+        for (let i = 0, len = insertBody.customRanges.length; i < len; i++) {
+            const customRange = insertBody.customRanges[i];
+            const oldCustomRange = customRangeMap[customRange.rangeId];
+            if (oldCustomRange) {
+                if (insertBody.dataStream === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
+                    oldCustomRange.endIndex = customRange.endIndex + currentIndex;
+                } else if (insertBody.dataStream === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
+                    oldCustomRange.startIndex = customRange.startIndex + currentIndex;
+                }
+            } else {
+                insertCustomRanges.push(customRange);
+                customRange.startIndex += currentIndex;
+                customRange.endIndex += currentIndex;
+            }
         }
 
         customRanges.push(...insertCustomRanges);
@@ -663,14 +674,7 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
             const customRange = customRanges[i];
             const { startIndex: st, endIndex: ed } = customRange;
             // delete custom-range start means delete custom-range
-            if (startIndex === endIndex && (startIndex === st)) {
-                removeCustomRanges.push({
-                    ...customRange,
-                    startIndex: st - currentIndex,
-                    endIndex: ed - currentIndex,
-                });
-                continue;
-            } else if (startIndex <= st && endIndex >= ed) {
+            if (startIndex <= st && endIndex >= st) {
                 removeCustomRanges.push({
                     ...customRange,
                     startIndex: st - currentIndex,

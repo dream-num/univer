@@ -24,7 +24,6 @@ import type {
 } from '@univerjs/core';
 import {
     CommandType,
-    DataStreamTreeTokenType,
     getDocsUpdateBody,
     ICommandService,
     IUniverInstanceService,
@@ -38,7 +37,7 @@ import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { getRangeWithSpecialCharacter, isCustomRangeSplitSymbol } from '../../basics/custom-range';
+import { getRangeWithSpecialCharacter, isCustomRangeSplitSymbol, isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
 
 export interface IInnerPasteCommandParams {
     segmentId: string;
@@ -98,7 +97,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                     segmentId,
                 });
             } else {
-                textX.push(...getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor));
+                textX.push(...getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor, body));
             }
 
             textX.push({
@@ -205,6 +204,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
 
 // If the selection contains line breaks,
 // paragraph information needs to be preserved when performing the CUT operation
+// eslint-disable-next-line max-lines-per-function
 function getRetainAndDeleteAndExcludeLineBreak(
     range: ITextRange,
     body: IDocumentBody,
@@ -214,7 +214,7 @@ function getRetainAndDeleteAndExcludeLineBreak(
     const { startOffset, endOffset } = getRangeWithSpecialCharacter(range, body);
     const dos: Array<IRetainAction | IDeleteAction> = [];
 
-    const { paragraphs = [], customRanges = [] } = body;
+    const { paragraphs = [], dataStream } = body;
 
     const textStart = startOffset - memoryCursor;
     const textEnd = endOffset - memoryCursor;
@@ -223,9 +223,15 @@ function getRetainAndDeleteAndExcludeLineBreak(
         (p) => p.startIndex - memoryCursor >= textStart && p.startIndex - memoryCursor <= textEnd
     );
 
+    const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, startOffset, endOffset));
+    const toDeleteRanges = new Set(relativeCustomRanges?.filter((customRange) => shouldDeleteCustomRange(startOffset, endOffset - startOffset, customRange, dataStream)));
     const retainPoints = new Set<number>();
 
-    customRanges.forEach((range) => {
+    relativeCustomRanges?.forEach((range) => {
+        if (toDeleteRanges.has(range)) {
+            return;
+        }
+
         if (range.startIndex - memoryCursor >= textStart &&
             range.startIndex - memoryCursor <= textEnd &&
             range.endIndex - memoryCursor > textEnd) {
@@ -255,7 +261,7 @@ function getRetainAndDeleteAndExcludeLineBreak(
 
     let cursor = textStart;
     sortedRetains.forEach((pos) => {
-        const len = pos - textStart;
+        const len = pos - cursor;
         if (len > 0) {
             dos.push({
                 t: TextXActionType.DELETE,
@@ -272,7 +278,7 @@ function getRetainAndDeleteAndExcludeLineBreak(
         cursor = pos + 1;
     });
 
-    if (cursor !== textEnd) {
+    if (cursor < textEnd) {
         dos.push({
             t: TextXActionType.DELETE,
             len: textEnd - cursor,
@@ -280,6 +286,5 @@ function getRetainAndDeleteAndExcludeLineBreak(
             segmentId,
         });
     }
-
     return dos;
 }

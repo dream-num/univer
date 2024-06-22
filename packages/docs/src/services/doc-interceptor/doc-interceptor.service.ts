@@ -29,7 +29,6 @@ export class DocInterceptorService extends Disposable {
         @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
     ) {
         super();
-
         this.disposeWithMe(this._docViewModelManagerService.docViewModelAdd$.subscribe((viewModel) => {
             this.interceptDocumentViewModel(viewModel);
         }));
@@ -73,6 +72,7 @@ export class DocInterceptorService extends Disposable {
                     {
                         index,
                         unitId: viewModel.getDataModel().getUnitId(),
+                        customRanges: viewModel.getDataModel().getCustomRanges() ?? [],
                     }
                 );
             },

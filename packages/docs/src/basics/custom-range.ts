@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, ITextRange } from '@univerjs/core';
+import type { ICustomRange, IDocumentBody, ITextRange } from '@univerjs/core';
 import { DataStreamTreeTokenType } from '@univerjs/core';
 
 export function isCustomRangeSplitSymbol(text: string) {
@@ -35,4 +35,37 @@ export function getRangeWithSpecialCharacter(range: ITextRange, body: IDocumentB
         startOffset,
         endOffset,
     };
+}
+
+export function isIntersecting(line1Start: number, line1End: number, line2Start: number, line2End: number) {
+    if ((line1Start <= line2Start && line1End >= line2Start) ||
+        (line1Start >= line2Start && line1Start <= line2End)) {
+        return true;
+    }
+    return false;
+}
+
+export function shouldDeleteCustomRange(deleteStart: number, deleteLen: number, customRange: ICustomRange, dataStream: string) {
+    const dataStreamSlice = dataStream.slice(customRange.startIndex + 1, customRange.endIndex);
+    const start = Math.max(deleteStart - (customRange.startIndex + 1), 0);
+    const end = (deleteStart + deleteLen - 1) - (customRange.startIndex + 1);
+
+    if (end < 0) {
+        return false;
+    }
+
+    if (start === 0 && end >= dataStreamSlice.length) {
+        return true;
+    }
+
+    const result = dataStreamSlice.slice(0, start) + dataStreamSlice.slice(start + deleteLen);
+
+    for (let i = 0, len = result.length; i < len; i++) {
+        const letter = result[i];
+        if (!isCustomRangeSplitSymbol(letter)) {
+            return false;
+        }
+    }
+
+    return true;
 }

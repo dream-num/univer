@@ -17,6 +17,7 @@
 import type {
     DocumentDataModel,
     ICommand,
+    ICustomRange,
     IDocumentBody,
     IDocumentData,
     IMutationInfo,
@@ -28,7 +29,7 @@ import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { isCustomRangeSplitSymbol } from '../../basics/custom-range';
+import { isCustomRangeSplitSymbol, isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
 
 export interface IInsertCommandParams {
     unitId: string;
@@ -76,7 +77,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
                 });
             }
         } else {
-            textX.push(...getRetainAndDeleteFromReplace(range, segmentId));
+            textX.push(...getRetainAndDeleteFromReplace(range, segmentId, 0, body));
         }
 
         textX.push({
@@ -128,16 +129,24 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             return false;
         }
 
-        const dataStream = documentDataModel.getBody()!.dataStream;
-        const start = direction === DeleteDirection.LEFT ? startOffset - len : startOffset;
-        let count = 0;
-
-        while (isCustomRangeSplitSymbol(dataStream[start - (count + 1)]) && isCustomRangeSplitSymbol(dataStream[start + len + count])) {
-            count++;
+        const body = documentDataModel.getBody();
+        if (!body) {
+            return false;
         }
-
-        const deleteStart = start - (count);
-        const deleteLen = len + (count * 2);
+        const dataStream = body.dataStream;
+        const start = direction === DeleteDirection.LEFT ? startOffset - len : startOffset;
+        const end = start + len - 1;
+        const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, start, end));
+        const toDeleteRanges = relativeCustomRanges?.filter((customRange) => shouldDeleteCustomRange(start, len, customRange, dataStream));
+        const deleteIndexes: number[] = [];
+        for (let i = 0; i < len; i++) {
+            deleteIndexes.push(start + i);
+        }
+        toDeleteRanges?.forEach((range) => {
+            deleteIndexes.push(range.startIndex, range.endIndex);
+        });
+        deleteIndexes.sort();
+        const deleteStart = deleteIndexes[0];
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
@@ -155,20 +164,24 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
-        if (deleteStart > 0) {
+        let cursor = 0;
+        for (let i = 0; i < deleteIndexes.length; i++) {
+            const deleteIndex = deleteIndexes[i];
+            if (deleteIndex - cursor > 0) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: deleteIndex - cursor,
+                    segmentId,
+                });
+            }
             textX.push({
-                t: TextXActionType.RETAIN,
-                len: deleteStart,
+                t: TextXActionType.DELETE,
+                len: 1,
                 segmentId,
+                line: 0,
             });
+            cursor = deleteIndex + 1;
         }
-
-        textX.push({
-            t: TextXActionType.DELETE,
-            len: deleteLen,
-            line: 0,
-            segmentId,
-        });
 
         doMutation.params.actions = jsonX.editOp(textX.serialize());
 

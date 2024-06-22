@@ -58,6 +58,14 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam) {
         t: TextXActionType.INSERT,
         body: {
             dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_START,
+            customRanges: [
+                {
+                    rangeId,
+                    rangeType,
+                    startIndex: 0,
+                    endIndex: 0,
+                },
+            ],
         },
         len: 1,
         line: 0,
@@ -67,14 +75,6 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam) {
         t: TextXActionType.RETAIN,
         body: {
             dataStream: '',
-            customRanges: [
-                {
-                    rangeId,
-                    rangeType,
-                    startIndex: -1,
-                    endIndex: end - start - 1,
-                },
-            ],
         },
         len: end - start,
         segmentId,
@@ -84,6 +84,14 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam) {
         t: TextXActionType.INSERT,
         body: {
             dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_END,
+            customRanges: [
+                {
+                    rangeId,
+                    rangeType,
+                    startIndex: 0,
+                    endIndex: 0,
+                },
+            ],
         },
         len: 1,
         line: 0,

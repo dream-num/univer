@@ -43,8 +43,14 @@ export class DocThreadCommentSelectionController extends Disposable {
                     const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
                     const primary = ranges[0];
                     if (primary && doc) {
-                        const { startOffset, endOffset } = primary;
-                        const customRange = doc.getBody()?.customRanges?.find((value) => value.startIndex <= startOffset && value.endIndex >= (endOffset - 1));
+                        const { startOffset, endOffset, collapsed } = primary;
+                        let customRange;
+
+                        if (collapsed) { // cursor
+                            customRange = doc.getBody()?.customRanges?.find((value) => value.startIndex <= startOffset - 2 && value.endIndex >= (endOffset + 1));
+                        } else { // range
+                            customRange = doc.getBody()?.customRanges?.find((value) => value.startIndex <= startOffset && value.endIndex >= (endOffset - 1));
+                        }
 
                         if (customRange) {
                             this._threadCommentPanelService.setActiveComment({

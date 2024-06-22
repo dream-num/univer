@@ -248,6 +248,7 @@ export const DeleteRightCommand: ICommand = {
         if (collapsed === true) {
             const needDeleteSpan = skeleton.findNodeByCharIndex(startOffset)!;
 
+            // skip custom-range-split-symbol
             if (isCustomRangeSplitSymbol(needDeleteSpan.raw)) {
                 let glyph: Nullable<IDocumentSkeletonGlyph> = needDeleteSpan;
                 let cursor = startOffset;

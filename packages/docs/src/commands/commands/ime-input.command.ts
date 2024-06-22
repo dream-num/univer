@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand, ICommandInfo } from '@univerjs/core';
-import { CommandType, ICommandService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, ICommandInfo } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
@@ -41,8 +41,10 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const imeInputManagerService = accessor.get(IMEInputManagerService);
         const previousActiveRange = imeInputManagerService.getActiveRange();
-
-        if (previousActiveRange == null) {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId);
+        const body = doc?.getBody();
+        if (!previousActiveRange || !body) {
             return false;
         }
 
@@ -71,7 +73,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const jsonX = JSONX.getInstance();
 
         if (!previousActiveRange.collapsed && isCompositionStart) {
-            textX.push(...getRetainAndDeleteFromReplace(previousActiveRange, segmentId));
+            textX.push(...getRetainAndDeleteFromReplace(previousActiveRange, segmentId, 0, body));
         } else {
             textX.push({
                 t: TextXActionType.RETAIN,

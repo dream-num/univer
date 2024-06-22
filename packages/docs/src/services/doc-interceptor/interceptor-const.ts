@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICustomRangeForInterceptor } from '@univerjs/core';
+import type { ICustomRange, ICustomRangeForInterceptor } from '@univerjs/core';
 import { createInterceptorKey } from '@univerjs/core';
 
-const CUSTOM_RANGE = createInterceptorKey<ICustomRangeForInterceptor, { index: number; unitId: string }>('CELL_CONTENT');
+const CUSTOM_RANGE = createInterceptorKey<ICustomRangeForInterceptor, { index: number; unitId: string; customRanges: ICustomRange[] }>('CELL_CONTENT');
 
 export const DOC_INTERCEPTOR_POINT = {
     CUSTOM_RANGE,

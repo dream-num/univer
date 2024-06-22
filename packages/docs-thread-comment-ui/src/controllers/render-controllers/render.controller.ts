@@ -56,15 +56,18 @@ export class DocThreadCommentRenderController extends Disposable {
                 if (!data) {
                     return next(data);
                 }
-
+                const { unitId, index, customRanges } = pos;
                 const activeComment = this._threadCommentPanelService.activeCommentId;
                 if (!activeComment) {
                     return next(data);
                 }
-                const isActive = activeComment.unitId === pos.unitId && data.rangeId === activeComment.commentId;
+                const activeCustomRange = customRanges.find((i) => i.rangeId === activeComment.commentId);
+                const isActiveIndex = activeCustomRange && index >= activeCustomRange.startIndex && index <= activeCustomRange.endIndex;
+                const isActive = activeComment.unitId === unitId && data.rangeId === activeComment.commentId;
+
                 return next({
                     ...data,
-                    active: isActive,
+                    active: isActive || isActiveIndex,
                 });
             },
         });

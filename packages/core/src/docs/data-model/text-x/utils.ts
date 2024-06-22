@@ -21,7 +21,6 @@ import type { IRetainAction } from './action-types';
 import { coverTextRuns } from './apply-utils/update-apply';
 
 // TODO: Support other properties like custom ranges, tables, etc.
-
 export function getBodySlice(
     body: IDocumentBody,
     startOffset: number,
@@ -104,20 +103,27 @@ export function getDeleteCustomRange(body: IDocumentBody, startOffset: number, e
 
     const deletedCustomRange: ICustomRange[] = [];
     customRanges.forEach((range) => {
-        // delete custom-range start tag, only happened in cancel custom-range
-        if (startOffset === endOffset - 1 && startOffset === range.startIndex) {
+        if (startOffset <= range.startIndex && endOffset > range.endIndex) {
             const copy = Tools.deepClone(range);
             deletedCustomRange.push({
                 ...copy,
                 startIndex: copy.startIndex - startOffset,
-                endIndex: Math.min(copy.endIndex - 1 - startOffset),
+                endIndex: copy.endIndex - startOffset,
             });
-        } else if (startOffset <= range.startIndex && endOffset >= range.startIndex) {
+        // delete custom-range start tag, only happened in cancel custom-range
+        } else if (startOffset <= range.startIndex && endOffset > range.startIndex) {
             const copy = Tools.deepClone(range);
             deletedCustomRange.push({
                 ...copy,
                 startIndex: copy.startIndex - startOffset,
-                endIndex: Math.min(copy.endIndex - startOffset, endOffset - 1 - startOffset),
+                endIndex: copy.startIndex - startOffset,
+            });
+        } else if (endOffset > range.endIndex && range.endIndex >= startOffset) {
+            const copy = Tools.deepClone(range);
+            deletedCustomRange.push({
+                ...copy,
+                startIndex: copy.endIndex - startOffset,
+                endIndex: copy.endIndex - startOffset,
             });
         }
     });

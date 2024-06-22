@@ -97,7 +97,10 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     const [followTextMove, setFollowTextMove] = useState(true);
     const [showPanel, setShowPanel] = useState(true);
 
-    function handlePositionChange(direction: 'positionH' | 'positionV', value: IObjectPositionH | IObjectPositionV) {
+    function handlePositionChange(
+        direction: 'positionH' | 'positionV',
+        value: IObjectPositionH | IObjectPositionV
+    ) {
         if (direction === 'positionH') {
             setHPosition(value as IObjectPositionH);
         } else {

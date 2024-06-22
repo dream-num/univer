@@ -96,7 +96,7 @@ export function decodeDocOriginalMeta(buffer: Uint8Array | string): Partial<IDoc
     return JSON.parse(textDecoder.decode(buffer));
 }
 
-const FRAGMENT_ROW_COUNT = 256;
+const FRAGMENT_ROW_COUNT = 256 * 8;
 export function splitCellDataToBlocks(
     cellData: IObjectMatrixPrimitiveType<ICellData>,
     maxColumn: number

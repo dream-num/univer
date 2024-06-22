@@ -17,21 +17,21 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
-import { Mina } from '../index';
+import { Maxa } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
-describe('Test mina function', () => {
-    const testFunction = new Mina(FUNCTION_NAMES_STATISTICAL.MINA);
+describe('Test maxa function', () => {
+    const testFunction = new Maxa(FUNCTION_NAMES_STATISTICAL.MAXA);
 
-    describe('Mina', () => {
+    describe('Maxa', () => {
         it('Var1 is number, var2 is number', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = NumberValueObject.create(2);
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1);
+            expect(result.getValue()).toBe(2);
         });
         it('Var1 is number, var2 is string', () => {
             const var1 = NumberValueObject.create(1);
@@ -40,13 +40,13 @@ describe('Test mina function', () => {
             expect(result.getValue()).toBe(ErrorType.VALUE);
         });
         it('Var1 is number, var2 is string number', () => {
-            const var1 = NumberValueObject.create(2);
-            const var2 = StringValueObject.create('1');
+            const var1 = NumberValueObject.create(1);
+            const var2 = StringValueObject.create('2');
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1);
+            expect(result.getValue()).toBe(2);
         });
         it('Var1 is number, var2 is boolean', () => {
-            const var1 = NumberValueObject.create(2);
+            const var1 = NumberValueObject.create(-2);
 
             let var2 = BooleanValueObject.create(true);
             let result = testFunction.calculate(var1, var2);
@@ -89,7 +89,7 @@ describe('Test mina function', () => {
         it('Var1 is array not includes error, includes boolean value ', () => {
             const var1 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    [3, null],
+                    [-3, null],
                     [false, true],
                 ]),
                 rowCount: 2,
@@ -100,7 +100,7 @@ describe('Test mina function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1);
-            expect(result.getValue()).toBe(0);
+            expect(result.getValue()).toBe(1);
         });
         it('Var1 is array not includes error, includes string ', () => {
             const var1 = ArrayValueObject.create({
@@ -116,7 +116,7 @@ describe('Test mina function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1);
-            expect(result.getValue()).toBe(0);
+            expect(result.getValue()).toBe(3);
         });
         it('Var1 is array not includes error, includes null', () => {
             const var1 = ArrayValueObject.create({
@@ -150,7 +150,7 @@ describe('Test mina function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(-3);
+            expect(result.getValue()).toBe(100);
         });
         it('Var1 is array, var2 is array', () => {
             const var1 = ArrayValueObject.create({

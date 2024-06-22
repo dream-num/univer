@@ -878,7 +878,7 @@ export default {
         },
     },
     MAXA: {
-        description: 'Returns the maximum value in a list of arguments, including numbers, text, and logical values',
+        description: 'Returns the maximum value in a list of arguments, including numbers, text, and logical values.',
         abstract: 'Returns the maximum value in a list of arguments, including numbers, text, and logical values',
         links: [
             {
@@ -887,8 +887,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: 'value1', detail: 'The first number argument for which you want to find the largest value.' },
+            value2: { name: 'value2', detail: 'Number arguments 2 to 255 for which you want to find the largest value.' },
         },
     },
     MAXIFS: {

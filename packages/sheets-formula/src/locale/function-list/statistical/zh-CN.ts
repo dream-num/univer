@@ -878,7 +878,7 @@ export default {
         },
     },
     MAXA: {
-        description: '返回参数列表中的最大值，包括数字、文本和逻辑值',
+        description: '返回参数列表中的最大值，包括数字、文本和逻辑值。',
         abstract: '返回参数列表中的最大值，包括数字、文本和逻辑值',
         links: [
             {
@@ -887,8 +887,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '值 1', detail: '要从中找出最大值的第一个数值参数。' },
+            value2: { name: '值 2', detail: '要从中找出最大值的 2 到 255 个数值参数。' },
         },
     },
     MAXIFS: {

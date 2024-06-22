@@ -834,7 +834,7 @@ export default {
     },
     MAX: {
         description: '引数リストに含まれる最大の数値を返します。',
-        abstract: '引数リストに含まれる最大の数値を返します。',
+        abstract: '引数リストに含まれる最大の数値を返します',
         links: [
             {
                 title: '指導',
@@ -842,13 +842,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '数値 1', detail: '最大の値を見つけるため、最初の数値引数を指定します。' },
+            value2: { name: '数値 2', detail: '最大の値を見つけるため、2 ～ 255 個までの数値引数を指定します。' },
         },
     },
     MAXA: {
         description: '数値、文字列、および論理値を含む引数リストから最大の数値を返します。',
-        abstract: '数値、文字列、および論理値を含む引数リストから最大の数値を返します。',
+        abstract: '数値、文字列、および論理値を含む引数リストから最大の数値を返します',
         links: [
             {
                 title: '指導',
@@ -856,8 +856,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '値 1', detail: '最大の値を見つけるため、最初の数値引数を指定します。' },
+            value2: { name: '値 2', detail: '最大の値を見つけるため、2 ～ 255 個までの数値引数を指定します。' },
         },
     },
     MAXIFS: {

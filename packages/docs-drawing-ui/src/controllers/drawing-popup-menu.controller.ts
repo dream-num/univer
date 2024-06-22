@@ -79,6 +79,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
         return false;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _popupMenuListener(unitId: string) {
         const scene = this._renderManagerService.getRenderById(unitId)?.scene;
         if (!scene) {
@@ -99,8 +100,9 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                     }
 
                     const selectedObjects = transformer.getSelectedObjectMap();
+                    disposePopups.forEach((dispose) => dispose.dispose());
+                    disposePopups.length = 0;
                     if (selectedObjects.size > 1) {
-                        disposePopups.forEach((dispose) => dispose.dispose());
                         return;
                     }
 
@@ -139,6 +141,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             toDisposable(
                 transformer.onClearControlObservable.add(() => {
                     disposePopups.forEach((dispose) => dispose.dispose());
+                    disposePopups.length = 0;
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
                     this._drawingManagerService.focusDrawing(null);
                 })
@@ -148,6 +151,16 @@ export class DocDrawingPopupMenuController extends RxDisposable {
             toDisposable(
                 transformer.onChangingObservable.add(() => {
                     disposePopups.forEach((dispose) => dispose.dispose());
+                    disposePopups.length = 0;
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                transformer.onChangeStartObservable.add(() => {
+                    disposePopups.forEach((dispose) => dispose.dispose());
+                    disposePopups.length = 0;
                 })
             )
         );

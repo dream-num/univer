@@ -315,8 +315,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
     // eslint-disable-next-line max-lines-per-function
     attachTo(applyObject: BaseObject) {
         if (this.hoverEnabled) {
-            this.hoverEnterFunc && applyObject.onPointerEnterObserver.add(this.hoverEnterFunc);
-            this.hoverLeaveFunc && applyObject.onPointerLeaveObserver.add(this.hoverLeaveFunc);
+            this.hoverEnterFunc && applyObject.onPointerEnter$.subscribeEvent(this.hoverEnterFunc);
+            this.hoverLeaveFunc && applyObject.onPointerLeave$.subscribeEvent(this.hoverLeaveFunc);
         }
 
         const observer = applyObject.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
@@ -1462,7 +1462,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _attachHover(o: BaseObject, cursorIn: CURSOR_TYPE, cursorOut: CURSOR_TYPE) {
         this.disposeWithMe(
             toDisposable(
-                o.onPointerEnterObserver.add(() => {
+                o.onPointerEnter$.subscribeEvent(() => {
                     o.cursor = cursorIn;
                 })
             )
@@ -1470,7 +1470,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         this.disposeWithMe(
             toDisposable(
-                o.onPointerLeaveObserver.add(() => {
+                o.onPointerLeave$.subscribeEvent(() => {
                     o.cursor = cursorOut;
                 })
             )

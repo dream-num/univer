@@ -89,6 +89,8 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
     private _rowHeaderPointerMoveSub: Nullable<Subscription>;
     private _columnHeaderPointerMoveSub: Nullable<Subscription>;
+    private _rowHeaderPointerLeaveSub: Subscription;
+    private _columnHeaderPointerLeaveSub: Subscription;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -107,16 +109,18 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
         this._columnResizeRect?.dispose();
         this._columnResizeRect = null;
 
-        const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
-        const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
-        this._observers.forEach((observer) => {
+        // const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+        // const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
+        // this._observers.forEach((observer) => {
             // spreadsheetRowHeader.onPointerMove$.remove(observer);
-            spreadsheetRowHeader.onPointerLeaveObserver.remove(observer);
+            // spreadsheetRowHeader.onPointerLeave$.remove(observer);
             // spreadsheetColumnHeader.onPointerMove$.remove(observer);
-            spreadsheetColumnHeader.onPointerLeaveObserver.remove(observer);
-        });
+            // spreadsheetColumnHeader.onPointerLeave$.remove(observer);
+        // });
         this._rowHeaderPointerMoveSub?.unsubscribe();
         this._columnHeaderPointerMoveSub?.unsubscribe();
+        this._rowHeaderPointerLeaveSub?.unsubscribe();
+        this._columnHeaderPointerLeaveSub?.unsubscribe();
 
         this._observers = [];
     }
@@ -152,15 +156,16 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
         const scene = this._context.scene;
 
-        const eventBindingObject =
-            initialType === HEADER_RESIZE_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
+        // const eventBindingObject =
+        //     initialType === HEADER_RESIZE_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
 
-        this._observers.push(
-            eventBindingObject?.onPointerLeaveObserver.add((_evt: IPointerEvent | IMouseEvent, _state: EventState) => {
-                this._rowResizeRect?.hide();
-                this._columnResizeRect?.hide();
-            })
-        );
+        // this._observers.push(
+        //     eventBindingObject?.onPointerLeave$.subscribeEvent()
+        // );
+        const pointerLeaveEvent = (_evt: IPointerEvent | IMouseEvent, _state: EventState) => {
+            this._rowResizeRect?.hide();
+            this._columnResizeRect?.hide();
+        };
 
         const pointerMoveEvent = (evt: IPointerEvent | IMouseEvent, _state: EventState) => {
             const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
@@ -268,8 +273,10 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
         };
         if (initialType === HEADER_RESIZE_TYPE.ROW) {
             this._rowHeaderPointerMoveSub = spreadsheetRowHeader?.onPointerMove$.subscribeEvent(pointerMoveEvent);
+            this._rowHeaderPointerLeaveSub = spreadsheetRowHeader?.onPointerLeave$.subscribeEvent(pointerLeaveEvent);
         } else {
-            this._columnHeaderPointerMoveSub = spreadsheetRowHeader?.onPointerMove$.subscribeEvent(pointerMoveEvent);
+            this._columnHeaderPointerMoveSub = spreadsheetColumnHeader?.onPointerMove$.subscribeEvent(pointerMoveEvent);
+            this._columnHeaderPointerLeaveSub = spreadsheetColumnHeader?.onPointerLeave$.subscribeEvent(pointerLeaveEvent);
         }
     }
 
@@ -285,7 +292,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
         this.disposeWithMe(
             toDisposable(
-                eventBindingObject.onPointerEnterObserver.add(() => {
+                eventBindingObject.onPointerEnter$.subscribeEvent(() => {
                     if (eventBindingObject == null) {
                         return;
                     }
@@ -301,7 +308,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
         this.disposeWithMe(
             toDisposable(
-                eventBindingObject.onPointerLeaveObserver.add(() => {
+                eventBindingObject.onPointerLeave$.subscribeEvent(() => {
                     if (eventBindingObject == null) {
                         return;
                     }

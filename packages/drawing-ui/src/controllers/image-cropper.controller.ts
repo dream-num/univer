@@ -417,7 +417,7 @@ export class ImageCropperController extends Disposable {
     private _addHoverForImageCopper(o: ImageCropperObject) {
         this.disposeWithMe(
             toDisposable(
-                o.onPointerEnterObserver.add(() => {
+                o.onPointerEnter$.subscribeEvent(() => {
                     o.cursor = CURSOR_TYPE.MOVE;
                 })
             )
@@ -425,7 +425,7 @@ export class ImageCropperController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                o.onPointerLeaveObserver.add(() => {
+                o.onPointerLeave$.subscribeEvent(() => {
                     o.cursor = CURSOR_TYPE.DEFAULT;
                 })
             )

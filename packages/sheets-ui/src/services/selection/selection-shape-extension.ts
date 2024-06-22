@@ -153,7 +153,7 @@ export class SelectionShapeExtension {
         const { leftControl, rightControl, topControl, bottomControl } = this._control;
 
         [leftControl, rightControl, topControl, bottomControl].forEach((control) => {
-            control.onPointerEnterObserver.add(() => {
+            control.onPointerEnter$.subscribeEvent(() => {
                 const permissionCheck = this._injector.get(ISelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_MOVE_PERMISSION_CHECK)(false, null);
 
                 if (!permissionCheck) {
@@ -163,7 +163,7 @@ export class SelectionShapeExtension {
                 control.setCursor(CURSOR_TYPE.MOVE);
             });
 
-            control.onPointerLeaveObserver.add(() => {
+            control.onPointerLeave$.subscribeEvent(() => {
                 control.resetCursor();
             });
 
@@ -401,11 +401,11 @@ export class SelectionShapeExtension {
             bottomCenterWidget,
             bottomRightWidget,
         ].forEach((control, index) => {
-            control.onPointerEnterObserver.add(() => {
+            control.onPointerEnter$.subscribeEvent(() => {
                 control.setCursor(cursors[index]);
             });
 
-            control.onPointerLeaveObserver.add(() => {
+            control.onPointerLeave$.subscribeEvent(() => {
                 control.resetCursor();
             });
 
@@ -589,7 +589,7 @@ export class SelectionShapeExtension {
     private _initialFill() {
         const { fillControl } = this._control;
 
-        fillControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        fillControl.onPointerEnter$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             const permissionCheck = this._injector.get(ISelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_FILL_PERMISSION_CHECK)(false, { x: evt.offsetX, y: evt.offsetY, skeleton: this._skeleton, scene: this._scene });
 
             if (!permissionCheck) {
@@ -598,7 +598,7 @@ export class SelectionShapeExtension {
             fillControl.setCursor(CURSOR_TYPE.CROSSHAIR);
         });
 
-        fillControl.onPointerLeaveObserver.add(() => {
+        fillControl.onPointerLeave$.subscribeEvent(() => {
             fillControl.resetCursor();
         });
 

@@ -58,7 +58,13 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
 
     private _observers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
     private _rowHeaderPointerMoveSub: Nullable<Subscription>;
-    private _colHeaderPointerMoveSub: Nullable<Subscription>; ;
+    private _colHeaderPointerMoveSub: Nullable<Subscription>;
+    private _rowHeaderPointerLeaveSub: Subscription;
+    private _colHeaderPointerLeaveSub: Subscription;
+    private _rowHeaderPointerEnterSub: Subscription;
+    private _colHeaderPointerEnterSub: Subscription;
+    private _rowHeaderPointerSubs: Array<Subscription> = [];
+    private _colHeaderPointerSubs: Array<Subscription> = [];
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -76,18 +82,18 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
         this._hoverRect?.dispose();
         this._hoverMenu?.dispose();
 
-        const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
-        const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
+        // const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+        // const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
 
-        this._observers.forEach((observer) => {
+        [...this._rowHeaderPointerSubs, ...this._colHeaderPointerSubs].forEach((s) => {
+            s.unsubscribe();
             // spreadsheetRowHeader.onPointerEnterObserver.remove(observer);
-            spreadsheetRowHeader.onPointerLeaveObserver.remove(observer);
+            // spreadsheetRowHeader.onPointerMoveObserver.remove(observer);
+            // spreadsheetRowHeader.onPointerLeaveObserver.remove(observer);
             // spreadsheetColumnHeader.onPointerEnterObserver.remove(observer);
-            spreadsheetColumnHeader.onPointerLeaveObserver.remove(observer);
+            // spreadsheetColumnHeader.onPointerMoveObserver.remove(observer);
+            // spreadsheetColumnHeader.onPointerLeaveObserver.remove(observer);
         });
-
-        this._rowHeaderPointerMoveSub?.unsubscribe();
-        this._colHeaderPointerMoveSub?.unsubscribe();
     }
 
     private _initialize() {
@@ -109,18 +115,13 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
         this._initialHoverMenu();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initialHover(initialType: HEADER_HOVER_TYPE = HEADER_HOVER_TYPE.ROW) {
         const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
 
-        const eventBindingObject =
-            initialType === HEADER_HOVER_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
-
-        this._observers.push(
-            eventBindingObject?.onPointerEnterObserver.add(() => {
-                this._hoverRect?.show();
-            })
-        );
+        // const eventBindingObject =
+        //     initialType === HEADER_HOVER_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
 
         const pointerMoveHandler = (evt: IPointerEvent | IMouseEvent) => {
             const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
@@ -176,18 +177,34 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
             }
         };
 
+        const pointerEnterHandler = () => {
+            this._hoverRect?.show();
+        };
+
+        const pointerLeaveHandler = () => {
+            this._hoverRect?.hide();
+            this._hoverMenu?.hide();
+        };
+
         if (initialType === HEADER_HOVER_TYPE.ROW) {
             this._rowHeaderPointerMoveSub = spreadsheetRowHeader.onPointerMove$.subscribeEvent(pointerMoveHandler);
+            this._rowHeaderPointerEnterSub = spreadsheetColumnHeader.onPointerEnter$.subscribeEvent(pointerEnterHandler);
+            this._rowHeaderPointerLeaveSub = spreadsheetRowHeader.onPointerLeave$.subscribeEvent(pointerLeaveHandler);
+            this._rowHeaderPointerSubs.push(this._rowHeaderPointerMoveSub, this._rowHeaderPointerEnterSub, this._rowHeaderPointerLeaveSub);
         } else {
             this._colHeaderPointerMoveSub = spreadsheetColumnHeader.onPointerMove$.subscribeEvent(pointerMoveHandler);
+            this._colHeaderPointerEnterSub = spreadsheetColumnHeader.onPointerEnter$.subscribeEvent(pointerEnterHandler);
+            this._colHeaderPointerLeaveSub = spreadsheetColumnHeader.onPointerLeave$.subscribeEvent(pointerLeaveHandler);
+            this._colHeaderPointerSubs.push(this._colHeaderPointerMoveSub, this._colHeaderPointerEnterSub, this._colHeaderPointerLeaveSub);
         }
-
-        this._observers.push(
-            eventBindingObject?.onPointerLeaveObserver.add(() => {
-                this._hoverRect?.hide();
-                this._hoverMenu?.hide();
-            })
-        );
+        // this._observers.push(
+        //     eventBindingObject?.onPointerEnter$.subscribeEvent(() => {
+        //         this._hoverRect?.show();
+        //     })
+        // );
+        // this._observers.push(
+            // eventBindingObject?.onPointerLeave$.subscribeEvent(})
+        // );
     }
 
     private _initialHoverMenu() {
@@ -195,7 +212,7 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
         if (this._hoverMenu == null) {
             return;
         }
-        this._hoverMenu.onPointerEnterObserver.add(() => {
+        this._hoverMenu.onPointerEnter$.subscribeEvent(() => {
             if (this._hoverMenu == null) {
                 return;
             }
@@ -208,7 +225,7 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
             this._context.scene.setCursor(CURSOR_TYPE.POINTER);
         });
 
-        this._hoverMenu.onPointerLeaveObserver.add(() => {
+        this._hoverMenu.onPointerLeave$.subscribeEvent(() => {
             if (this._hoverMenu == null) {
                 return;
             }

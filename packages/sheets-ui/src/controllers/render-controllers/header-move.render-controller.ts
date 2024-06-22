@@ -110,14 +110,16 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         //     spreadsheetRowHeader.onPointerMoveObserver.remove(obs);
         //     spreadsheetColumnHeader.onPointerMoveObserver.remove(obs);
         // });
+
+        // this._rowOrColumnLeaveObservers.forEach((obs) => {
+            //     spreadsheetRowHeader.onPointerLeave$.remove(obs);
+            //     spreadsheetColumnHeader.onPointerLeave$.remove(obs);
+            // });
+
         this._rowHeaderPointerMoveSub?.unsubscribe();
         this._colHeaderPointerMoveSub?.unsubscribe();
-
-        this._rowOrColumnLeaveObservers.forEach((obs) => {
-            spreadsheetRowHeader.onPointerLeaveObserver.remove(obs);
-            spreadsheetColumnHeader.onPointerLeaveObserver.remove(obs);
-        });
-
+        // this._rowHeaderPointerLeaveSub?.unsubscribe();
+        // this._colHeaderPointerLeaveSub?.unsubscribe();
         this._downSubscriptions?.unsubscribe();
         this._downSubscriptions = null;
 
@@ -194,7 +196,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         }
 
         this._rowOrColumnLeaveObservers.push(
-            eventBindingObject?.onPointerLeaveObserver.add(() => {
+            eventBindingObject?.onPointerLeave$.subscribeEvent(() => {
                 this._moveHelperBackgroundShape?.hide();
                 this._moveHelperLineShape?.hide();
                 scene.resetCursor();

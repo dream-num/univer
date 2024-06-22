@@ -52,8 +52,8 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
             this.setShapeProps(props);
         }
 
-        this.onPointerEnterObserver.add(() => this.setShapeProps({ hovered: true }));
-        this.onPointerLeaveObserver.add(() => this.setShapeProps({ hovered: false }));
+        this.onPointerEnter$.subscribeEvent(() => this.setShapeProps({ hovered: true }));
+        this.onPointerLeave$.subscribeEvent(() => this.setShapeProps({ hovered: false }));
         this.pointerDown$.subscribeEvent(() => onClick?.());
     }
 

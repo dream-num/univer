@@ -267,7 +267,7 @@ export class ImageUpdateController extends Disposable {
     private _addHoverForImage(o: Image) {
         this.disposeWithMe(
             toDisposable(
-                o.onPointerEnterObserver.add(() => {
+                o.onPointerEnter$.subscribeEvent(() => {
                     o.cursor = CURSOR_TYPE.GRAB;
                 })
             )
@@ -275,7 +275,7 @@ export class ImageUpdateController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                o.onPointerLeaveObserver.add(() => {
+                o.onPointerLeave$.subscribeEvent(() => {
                     o.cursor = CURSOR_TYPE.DEFAULT;
                 })
             )

@@ -17,7 +17,6 @@
 import type { EventState, IKeyValue, Nullable } from '@univerjs/core';
 
 import { Subscription } from 'rxjs';
-import { EVENT_TYPE } from '../basics/const';
 import type { IMouseEvent, IPointerEvent } from '../basics/i-events';
 import { Transform } from '../basics/transform';
 import type { Vector2 } from '../basics/vector2';
@@ -331,14 +330,20 @@ export class ScrollBar extends BaseScrollBar {
 
         const mainScene = this._mainScene || this._view.scene;
 
-        this.verticalThumbRect?.on(
-            EVENT_TYPE.PointerEnter,
-            this._hoverFunc(this.thumbHoverBackgroundColor!, this.verticalThumbRect)
-        );
-        this.verticalThumbRect?.on(
-            EVENT_TYPE.PointerLeave,
-            this._hoverFunc(this.thumbBackgroundColor!, this.verticalThumbRect)
-        );
+        // this.verticalThumbRect?.on(
+        //     EVENT_TYPE.PointerEnter,
+        //     this._hoverFunc(this.thumbHoverBackgroundColor!, this.verticalThumbRect)
+        // );
+        // this.verticalThumbRect?.on(
+        //     EVENT_TYPE.PointerLeave,
+        //     this._hoverFunc(this.thumbBackgroundColor!, this.verticalThumbRect)
+        // );
+        this.verticalThumbRect && this._eventSub.add(this.verticalThumbRect.onPointerEnter$.subscribeEvent((_evt: unknown, _state: EventState) => {
+            this._hoverFunc(this.thumbHoverBackgroundColor!, this.verticalThumbRect!);
+        }));
+        this.verticalThumbRect && this._eventSub.add(this.verticalThumbRect.onPointerLeave$.subscribeEvent((_evt: unknown, _state: EventState) => {
+            this._hoverFunc(this.thumbHoverBackgroundColor!, this.verticalThumbRect!);
+        }));
 
         this.verticalBarRect && this._eventSub.add(this.verticalBarRect.pointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
@@ -413,14 +418,20 @@ export class ScrollBar extends BaseScrollBar {
 
         const mainScene = this._mainScene || this._view.scene;
 
-        this.horizonThumbRect?.on(
-            EVENT_TYPE.PointerEnter,
-            this._hoverFunc(this.thumbHoverBackgroundColor!, this.horizonThumbRect)
-        );
-        this.horizonThumbRect?.on(
-            EVENT_TYPE.PointerLeave,
-            this._hoverFunc(this.thumbBackgroundColor!, this.horizonThumbRect)
-        );
+        // this.horizonThumbRect?.on(
+        //     EVENT_TYPE.PointerEnter,
+        //     this._hoverFunc(this.thumbHoverBackgroundColor!, this.horizonThumbRect)
+        // );
+        // this.horizonThumbRect?.on(
+        //     EVENT_TYPE.PointerLeave,
+        //     this._hoverFunc(this.thumbBackgroundColor!, this.horizonThumbRect)
+        // );
+        this.horizonThumbRect && this._eventSub.add(this.horizonThumbRect.onPointerEnter$.subscribeEvent((_evt: unknown, _state: EventState) => {
+            this._hoverFunc(this.thumbHoverBackgroundColor!, this.horizonThumbRect!);
+        }));
+        this.horizonThumbRect && this._eventSub.add(this.horizonThumbRect.onPointerLeave$.subscribeEvent((_evt: unknown, _state: EventState) => {
+            this._hoverFunc(this.thumbHoverBackgroundColor!, this.horizonThumbRect!);
+        }));
 
         // 水平滚动条槽的点击滚动事件
         this.horizonBarRect && this._eventSub.add(this.horizonBarRect.pointerDown$.subscribeEvent((evt: unknown, state: EventState) => {

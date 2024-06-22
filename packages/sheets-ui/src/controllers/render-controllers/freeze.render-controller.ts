@@ -112,9 +112,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
     private _freezeDownSubs: Array<Subscription> = [];
 
-    private _freezeMoveObservers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
+    private _freezeMainPointerMoveSubs: Array<Subscription> = [];
 
-    private _freezeLeaveObservers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
+    private _freezeHeaderPointerLeaveSubs: Array<Subscription> = [];
 
     private _scenePointerMoveSub: Nullable<Subscription>;
 
@@ -141,6 +141,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
     private _lastFreeze: IFreeze | undefined = undefined;
 
     public interceptor = new InterceptorManager({ FREEZE_PERMISSION_CHECK });
+    private _freezeObjHeaderPointerLeaveSub: Subscription | undefined;
+    private _freezeObjHeaderPointerEnterSub: Subscription | undefined;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -298,8 +300,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         const { scene } = sheetObject;
 
-        this._freezeMoveObservers.push(
-            freezeObjectHeaderRect?.onPointerEnterObserver.add(() => {
+        if (freezeObjectMainRect) {
+            const _freezeObjHeaderPointerEnterSub = freezeObjectMainRect.onPointerEnter$.subscribeEvent(() => {
                 const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
                 if (!permissionCheck) {
                     return false;
@@ -309,42 +311,43 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                     zIndex: 4,
                 });
                 scene.setCursor(CURSOR_TYPE.GRAB);
-            })
-        );
+            });
+            this._freezeMainPointerMoveSubs.push(_freezeObjHeaderPointerEnterSub);
+        }
 
-        this._freezeMoveObservers.push(
-            freezeObjectMainRect?.onPointerEnterObserver.add(() => {
-                const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
-                if (!permissionCheck) {
-                    return false;
-                }
-                freezeObjectHeaderRect?.setProps({
-                    fill: this._freezeHoverColor,
-                    zIndex: 4,
-                });
-                scene.setCursor(CURSOR_TYPE.GRAB);
-            })
-        );
-
-        this._freezeLeaveObservers.push(
-            freezeObjectHeaderRect?.onPointerLeaveObserver.add(() => {
+        if (freezeObjectHeaderRect) {
+            const _freezeObjHeaderPointerLeaveSub = freezeObjectHeaderRect.onPointerLeave$.subscribeEvent(() => {
                 freezeObjectHeaderRect?.setProps({
                     fill: this._freezeNormalHeaderColor,
                     zIndex: 3,
                 });
                 scene.resetCursor();
-            })
-        );
+            });
+            this._freezeHeaderPointerLeaveSubs.push(_freezeObjHeaderPointerLeaveSub);
+        }
 
-        this._freezeLeaveObservers.push(
-            freezeObjectMainRect?.onPointerLeaveObserver.add(() => {
-                freezeObjectHeaderRect?.setProps({
-                    fill: this._freezeNormalHeaderColor,
-                    zIndex: 3,
-                });
-                scene.resetCursor();
-            })
-        );
+        // this._freezeMoveObservers.push(
+        //     freezeObjectMainRect?.onPointerEnter$.subscribeEvent(() => {
+        //         const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
+        //         if (!permissionCheck) {
+        //             return false;
+        //         }
+        //         freezeObjectHeaderRect?.setProps({
+        //             fill: this._freezeHoverColor,
+        //             zIndex: 4,
+        //         });
+        //         scene.setCursor(CURSOR_TYPE.GRAB);
+        //     })
+        // );
+        // this._freezeLeaveObservers.push(
+        //     freezeObjectMainRect?.onPointerLeave$.subscribeEvent(() => {
+        //         freezeObjectHeaderRect?.setProps({
+        //             fill: this._freezeNormalHeaderColor,
+        //             zIndex: 3,
+        //         });
+        //         scene.resetCursor();
+        //     })
+        // );
 
         const s1 = freezeObjectHeaderRect?.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             this._freezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
@@ -1475,15 +1478,15 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         this._freezeDownSubs.forEach((s) => s.unsubscribe());
         this._freezeDownSubs = [];
 
-        const { scene } = sheetObject;
-        [...this._freezeMoveObservers, ...this._freezeLeaveObservers].forEach((obs) => {
-            // scene.onPointerMove$.remove(obs);
-            this._scenePointerMoveSub?.unsubscribe();
-            scene.onPointerLeaveObserver.remove(obs);
+        [...this._freezeMainPointerMoveSubs, ...this._freezeHeaderPointerLeaveSubs].forEach((s) => {
+            s.unsubscribe();
         });
+        this._freezeMainPointerMoveSubs = [];
+        this._freezeHeaderPointerLeaveSubs = [];
 
-        // TODO @lumixraku scene.onPointerEnterObserver bind ponterMove?
-        // scene.onPointerEnterObserver.remove(this._sceneOnPointerMoveSub);
+        // const { scene } = sheetObject;
+        // TODO @lumixraku scene.onPointerEnter$ bind ponterMove?
+        // scene.onPointerEnter$.remove(this._sceneOnPointerMoveSub);
         // scene.onPointerMove$.remove(this._upObserver);
         this._scenePointerMoveSub?.unsubscribe();
     }

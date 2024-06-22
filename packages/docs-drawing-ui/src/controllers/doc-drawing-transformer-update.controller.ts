@@ -290,7 +290,7 @@ export class DocDrawingTransformerController extends Disposable {
         }
     }
 
-    // Use to draw and update the drawing anchor.
+    // TODO: @JOCS, Use to draw and update the drawing anchor.
     private _updateDrawingAnchor(objects: Map<string, BaseObject>) {
         if (this._transformerCache.size !== 1) {
             return;

@@ -609,6 +609,7 @@ export abstract class BaseObject extends Disposable {
         return false;
     }
 
+    /** @deprecated subscribe to specific event.  */
     on(eventType: EVENT_TYPE, func: (evt: unknown, state: EventState) => void) {
         const observable = (this as IKeyValue)[`on${eventType}Observer`] as Observable<unknown>;
         const observer = observable.add(func.bind(this));

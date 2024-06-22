@@ -103,7 +103,7 @@ export interface ISectionBreakConfig extends IDocStyleBase, ISectionBreakBase, I
     headerIds?: IHeaderIds;
     footerIds?: IFooterIds;
     useFirstPageHeaderFooter?: BooleanNumber;
-    useEvenPageHeaderFooter?: BooleanNumber;
+    evenAndOddHeaders?: BooleanNumber;
 }
 
 export interface IParagraphConfig {
@@ -138,7 +138,7 @@ export interface IFontCreateConfig {
 //     footers?: IFooters;
 //     headers?: IHeaders;
 //     useFirstPageHeaderFooter?: boolean;
-//     useEvenPageHeaderFooter?: boolean;
+//     evenAndOddHeaders?: boolean;
 // }
 
 export interface INodeInfo {

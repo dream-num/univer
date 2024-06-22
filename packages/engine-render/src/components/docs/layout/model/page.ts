@@ -49,7 +49,7 @@ export function createSkeletonPage(
         headerIds = {},
         footerIds = {},
         useFirstPageHeaderFooter,
-        useEvenPageHeaderFooter,
+        evenAndOddHeaders,
         footerTreeMap,
         headerTreeMap,
         columnProperties = [],
@@ -88,7 +88,7 @@ export function createSkeletonPage(
     if (pageNumber === pageNumberStart && useFirstPageHeaderFooter) {
         headerId = firstPageHeaderId ?? '';
         footerId = firstPageFooterId ?? '';
-    } else if (pageNumber % 2 === 0 && useEvenPageHeaderFooter) {
+    } else if (pageNumber % 2 === 0 && evenAndOddHeaders) {
         headerId = evenPageHeaderId ?? '';
         footerId = evenPageFooterId ?? '';
     }

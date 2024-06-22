@@ -323,14 +323,14 @@ export enum BlockType {
 }
 
 export interface IHeaderAndFooterBase {
-    defaultHeaderId?: string; // defaultHeaderId
-    defaultFooterId?: string; // defaultFooterId
+    defaultHeaderId?: string; // defaultHeaderId or the odd page header id
+    defaultFooterId?: string; // defaultFooterId or the odd page footer id
     evenPageHeaderId?: string; // evenPageHeaderId
     evenPageFooterId?: string; // evenPageFooterId
     firstPageHeaderId?: string; // firstPageHeaderId
     firstPageFooterId?: string; // firstPageFooterId
     useFirstPageHeaderFooter?: BooleanNumber; // useFirstPageHeaderFooter
-    useEvenPageHeaderFooter?: BooleanNumber; // useEvenPageHeaderFooter,
+    evenAndOddHeaders?: BooleanNumber; // useEvenPageHeaderFooter,
 }
 
 /**

@@ -17,7 +17,7 @@
 import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
 import {
     Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectRelativeFromH, ObjectRelativeFromV,
-    OnLifecycle, PositionedObjectLayoutType, throttle, toDisposable,
+    OnLifecycle, PositionedObjectLayoutType, throttle, toDisposable, Tools,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
@@ -152,7 +152,7 @@ export class DocDrawingTransformerController extends Disposable {
                         }
 
                         if (drawingCache && drawingCache.drawing.layoutType !== PositionedObjectLayoutType.INLINE) {
-                            throttleNonInlineMoveUpdate(drawingCache.drawing, object);
+                            throttleNonInlineMoveUpdate(drawingCache.drawing, object, true);
                         }
                     }
                 })
@@ -346,12 +346,12 @@ export class DocDrawingTransformerController extends Disposable {
                         const { left: columnLeft, width } = column;
 
                         if (
-                            left >= columnLeft + this._liquid.x + docsLeft &&
+                            left > columnLeft + this._liquid.x + docsLeft &&
                             left <= columnLeft + this._liquid.x + width + docsLeft &&
-                            top >= lineTop + this._liquid.y + docsTop &&
+                            top > lineTop + this._liquid.y + docsTop &&
                             top <= lineTop + this._liquid.y + lineHeight + docsTop
                         ) {
-                            const paragraphStartLine = lines.find((l) => l.paragraphIndex === line.paragraphIndex && l.paragraphStart);
+                            const paragraphStartLine = lines.find((l) => l.paragraphIndex === line.paragraphIndex && l.paragraphStart) ?? lines[0];
                             if (paragraphStartLine == null) {
                                 continue;
                             }
@@ -406,9 +406,9 @@ export class DocDrawingTransformerController extends Disposable {
                                 for (const glyph of glyphGroup) {
                                     const { left: glyphLeft, width: glyphWidth } = glyph;
                                     if (
-                                        left >= glyphLeft + this._liquid.x + docsLeft &&
+                                        left > glyphLeft + this._liquid.x + docsLeft &&
                                         left <= glyphLeft + this._liquid.x + glyphWidth + docsLeft &&
-                                        top >= lineTop + this._liquid.y + docsTop &&
+                                        top > lineTop + this._liquid.y + docsTop &&
                                         top <= lineTop + this._liquid.y + lineHeight + docsTop
                                     ) {
                                         glyphAnchor = glyph;
@@ -479,8 +479,6 @@ export class DocDrawingTransformerController extends Disposable {
         const { unitId, subUnitId } = drawing;
         const { width, height, angle } = object;
 
-        // console.log('width', width, 'height', height);
-
         if (width !== oldWidth || height !== oldHeight) {
             drawings.push({
                 drawingId: drawing.drawingId,
@@ -525,8 +523,82 @@ export class DocDrawingTransformerController extends Disposable {
         });
     }
 
-    private _nonInlineDrawingTransform(drawing: IDocDrawingBase, object: BaseObject) {
-        const anchor = this._getDrawingAnchor(drawing, object, false);
+    // Limit the drawing to the page area, mainly in the vertical direction,
+    // and the upper and lower limits cannot exceed the page margin area.
+    private _limitDrawingInPage(drawing: IDocDrawingBase, object: BaseObject) {
+        const { left, top, width, height, angle } = object;
+        const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(drawing.unitId);
+        const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
+        const skeletonData = skeleton?.skeleton.getSkeletonData();
+        const { pages } = skeletonData ?? {};
+
+        if (skeletonData == null || currentRender == null || pages == null) {
+            return {
+                left,
+                top,
+                width,
+                height,
+                angle,
+            };
+        }
+
+        const { mainComponent } = currentRender;
+        const documentComponent = mainComponent as Documents;
+        const { top: docsTop, pageLayoutType, pageMarginLeft, pageMarginTop } = documentComponent;
+        let newTop = top;
+        this._liquid.reset();
+
+        for (const page of pages) {
+            // this._liquid.translatePagePadding(page);
+            const { marginBottom, pageHeight } = page;
+            const index = pages.indexOf(page);
+            const nextPage = pages[index + 1];
+
+            if (nextPage == null) {
+                continue;
+            }
+
+            // Determines whether the image is between two pages, spanning two pages,
+            // but does not belong entirely to a page
+            const isBetweenPages = Tools.hasIntersectionBetweenTwoRanges(
+                top,
+                top + height,
+                this._liquid.y + docsTop + pageHeight - marginBottom,
+                this._liquid.y + docsTop + pageHeight + pageMarginTop + nextPage.marginTop
+            );
+
+            if (isBetweenPages) {
+                const drawingVMiddle = top + height / 2;
+                const pagesMiddle = this._liquid.y + docsTop + pageHeight + pageMarginTop / 2;
+
+                if (drawingVMiddle < pagesMiddle) {
+                    newTop = Math.min(top, this._liquid.y + docsTop + pageHeight - marginBottom - height);
+                } else {
+                    newTop = Math.max(top, this._liquid.y + docsTop + pageHeight + pageMarginTop + nextPage.marginTop);
+                }
+            }
+
+            // this._liquid.restorePagePadding(page);
+            this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+        }
+
+        return {
+            left,
+            top: newTop,
+            width,
+            height,
+            angle,
+        };
+    }
+
+    private _nonInlineDrawingTransform(drawing: IDocDrawingBase, object: BaseObject, isMoving = false) {
+        const objectPosition = this._limitDrawingInPage(drawing, object);
+
+        if (isMoving && objectPosition.top !== object.top) {
+            return;
+        }
+
+        const anchor = this._getDrawingAnchor(drawing, objectPosition as BaseObject, false);
         const { offset, docTransform } = anchor ?? {};
         if (offset == null || docTransform == null) {
             return;

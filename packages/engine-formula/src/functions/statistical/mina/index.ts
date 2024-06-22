@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Min extends BaseFunction {
+export class Mina extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 255;
@@ -36,12 +37,32 @@ export class Min extends BaseFunction {
                 variant = variant.convertToNumberObjectValue();
             }
 
-            if (variant.isArray()) {
-                variant = variant.min();
-            }
-
             if (variant.isError()) {
                 return variant as ErrorValueObject;
+            }
+
+            if (variant.isArray()) {
+                (variant as ArrayValueObject).iterator((valueObject) => {
+                    // Empty cells and text values in the array or reference are ignored.
+                    if (valueObject == null || valueObject.isNull() || valueObject.isString()) {
+                        valueObject = NumberValueObject.create(0);
+                    }
+
+                    if (valueObject.isBoolean()) {
+                        valueObject = valueObject.convertToNumberObjectValue();
+                    }
+
+                    if (valueObject.isError()) {
+                        accumulatorAll = valueObject;
+                        return false; // break
+                    }
+
+                    accumulatorAll = this._validator(accumulatorAll, valueObject as BaseValueObject);
+                });
+            }
+
+            if (accumulatorAll.isError()) {
+                return accumulatorAll;
             }
 
             accumulatorAll = this._validator(accumulatorAll, variant as BaseValueObject);

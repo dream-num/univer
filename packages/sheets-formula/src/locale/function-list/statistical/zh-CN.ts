@@ -943,7 +943,7 @@ export default {
         },
     },
     MINA: {
-        description: '返回参数列表中的最小值，包括数字、文本和逻辑值',
+        description: '返回参数列表中的最小值，包括数字、文本和逻辑值。',
         abstract: '返回参数列表中的最小值，包括数字、文本和逻辑值',
         links: [
             {
@@ -952,8 +952,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '值 1', detail: '要计算最小值的第一个数字、单元格引用或单元格区域。' },
+            value2: { name: '值 2', detail: '要计算最小值的其他数字、单元格引用或单元格区域，最多可包含 255 个。' },
         },
     },
     MINIFS: {

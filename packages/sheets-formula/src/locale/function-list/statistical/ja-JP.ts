@@ -901,8 +901,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: '最小値を計算する最初の数値、セル参照、またはセル範囲。' },
+            number2: { name: 'number2', detail: '最小値を計算するために、最大 255 個の追加の数値、セル参照、またはセル範囲を含めることができます。' },
         },
     },
     MINA: {
@@ -915,8 +915,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '値 1', detail: '最小値を計算する最初の数値、セル参照、またはセル範囲。' },
+            value2: { name: '値 2', detail: '最小値を計算するために、最大 255 個の追加の数値、セル参照、またはセル範囲を含めることができます。' },
         },
     },
     MINIFS: {

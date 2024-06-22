@@ -952,8 +952,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: 'value1', detail: 'The first number, cell reference, or range to calculate the minimum value from.' },
+            value2: { name: 'value2', detail: 'Additional numbers, cell references or ranges to calculate the minimum value from, up to a maximum of 255.' },
         },
     },
     MINIFS: {

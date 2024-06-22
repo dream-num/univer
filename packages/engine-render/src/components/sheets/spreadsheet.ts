@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IRange, ISelectionCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { EventState, IRange, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
 import { BooleanNumber, sortRules } from '@univerjs/core';
 
-import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
+import { EVENT_TYPE, FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 
 // import { clearLineByBorderType } from '../../basics/draw';
 import { getCellPositionByIndex, getColor } from '../../basics/tools';
-import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IPoint, IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext } from '../../context';
 import type { Engine } from '../../engine';
@@ -29,6 +29,7 @@ import type { Scene } from '../../scene';
 import type { SceneViewer } from '../../scene-viewer';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
+import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
@@ -67,7 +68,7 @@ export class Spreadsheet extends SheetComponent {
     ) {
         super(oKey, spreadsheetSkeleton);
         this._initialDefaultExtension();
-
+        this.initUserEvents();
         this.makeDirty(true);
     }
 
@@ -135,7 +136,7 @@ export class Spreadsheet extends SheetComponent {
         const extensions = this.getExtensionsByOrder();
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)
         for (const extension of extensions) {
-            // const timeKey = `extension ${viewportInfo.viewPortKey}:${extension.constructor.name}`;
+            const _timeKey = `extension ${viewportInfo.viewportKey}:${extension.constructor.name}`;
             extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges, {
                 viewRanges,
                 checkOutOfViewBound: true,
@@ -377,9 +378,14 @@ export class Spreadsheet extends SheetComponent {
 
         const { viewportKey } = viewportInfo;
             // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet
-            // zIndex 0 spreadsheet  this.getObjectsByOrder() ---> [spreadsheet]
-            // zIndex 2 rowHeader & colHeader & freezeBorder this.getObjectsByOrder() ---> [SpreadsheetRowHeader, SpreadsheetColumnHeader, _Rect]
-            // zIndex 3 selection  this.getObjectsByOrder() ---> [group]
+            // SHEET_COMPONENT_MAIN_LAYER_INDEX = 0;
+            // SHEET_COMPONENT_SELECTION_LAYER_INDEX = 1;
+            // SHEET_COMPONENT_HEADER_LAYER_INDEX = 10;
+            // SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX = 11;
+            // ......
+            // SHEET_COMPONENT_MAIN_LAYER_INDEX spreadsheet  this.getObjectsByOrder() ---> [spreadsheet]
+            // SHEET_COMPONENT_HEADER_LAYER_INDEX rowHeader & colHeader & freezeBorder this.getObjectsByOrder() ---> [SpreadsheetRowHeader, SpreadsheetColumnHeader, _Rect..., HeaderMenuResizeShape]
+            // SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX selection  this.getObjectsByOrder() ---> [_Rect, Group]
 
             // SpreadsheetRowHeader SpreadsheetColumnHeader is not render by spreadsheet
         if (this.sheetContentViewport().includes(viewportKey as SHEET_VIEWPORT_KEY)) {
@@ -675,7 +681,7 @@ export class Spreadsheet extends SheetComponent {
         }
     }
 
-    private _clearBackground(ctx: UniverRenderingContext, backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>) {
+    private _clearBackground(ctx: UniverRenderingContext, backgroundPositions?: ObjectMatrix<ISelectionCellWithMergeInfo>) {
         backgroundPositions?.forValue((row, column, cellInfo) => {
             let { startY, endY, startX, endX } = cellInfo;
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
@@ -763,7 +769,6 @@ export class Spreadsheet extends SheetComponent {
             color += letters[Math.floor(Math.random() * 6)];
         }
 
-        // 确保生成的颜色足够亮
         const r = Number.parseInt(color.substring(1, 3), 16);
         const g = Number.parseInt(color.substring(3, 5), 16);
         const b = Number.parseInt(color.substring(5, 7), 16);
@@ -772,5 +777,9 @@ export class Spreadsheet extends SheetComponent {
         }
 
         return color;
+    }
+
+    initUserEvents() {
+        // control spreadsheet scrolling
     }
 }

@@ -37,6 +37,10 @@ export abstract class ThinScene extends Disposable {
 
     onPointerUpObserver = new Observable<IPointerEvent | IMouseEvent>();
 
+    onPointerOutObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onPointerCancelObserver = new Observable<IPointerEvent | IMouseEvent>();
+
     onPointerEnterObserver = new Observable<IPointerEvent | IMouseEvent>();
 
     onPointerLeaveObserver = new Observable<IPointerEvent | IMouseEvent>();
@@ -208,6 +212,8 @@ export abstract class ThinScene extends Disposable {
         this.onPointerDownObserver.clear();
         this.onPointerMoveObserver.clear();
         this.onPointerUpObserver.clear();
+        this.onPointerOutObserver.clear();
+        this.onPointerCancelObserver.clear();
         this.onPointerEnterObserver.clear();
         this.onPointerLeaveObserver.clear();
         this.onDragEnterObserver.clear();

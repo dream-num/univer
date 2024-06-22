@@ -252,14 +252,17 @@ export class Group extends BaseObject {
         return this._objects;
     }
 
-    override render(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
+    override render(ctx: UniverRenderingContext, bounds: IViewportInfo) {
         ctx.save();
         const m = this.transform.getMatrix();
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         const objects = this.getObjectsByOrder();
-        for (const object of objects) {
-            object.render(ctx, this._transformBounds(bounds));
+
+        for (let i = 0; i < objects.length; i++) {
+            const object = objects[i];
+            object.render(ctx, bounds);
         }
+
         ctx.restore();
     }
 

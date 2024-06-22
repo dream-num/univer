@@ -223,3 +223,12 @@ export interface IOptionData {
  * Option of copyTo function
  */
 export interface ICopyToOptionsData extends IOptionData {}
+
+export interface IRectLTRB {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    width?: number;
+    height?: number;
+}

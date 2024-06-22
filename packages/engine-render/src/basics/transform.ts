@@ -111,8 +111,8 @@ export class Transform {
         this._m[1] *= sx;
         this._m[2] *= sy;
         this._m[3] *= sy;
-        this._m[4] *= sx;
-        this._m[5] *= sy;
+        // this._m[4] *= sx;
+        // this._m[5] *= sy;
         return this;
     }
 

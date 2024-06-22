@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IKeyValue, IScale, Nullable } from '@univerjs/core';
+import type { IKeyValue, IOffset, IScale, ISize, Nullable } from '@univerjs/core';
 
 import { BASE_OBJECT_ARRAY, BaseObject } from '../base-object';
 import { SHAPE_TYPE } from '../basics/const';
@@ -26,7 +26,7 @@ export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';
 export type PaintFirst = 'fill' | 'stroke';
 
-export interface IShapeProps extends IObjectFullState {
+export interface IShapeProps extends IObjectFullState, ISize, IOffset, IScale {
     hoverCursor?: Nullable<string>;
     moveCursor?: string | null;
     fillRule?: string;
@@ -333,7 +333,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         const m = this.transform.getMatrix();
         mainCtx.save();
         mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        this._draw(mainCtx);
+        this._draw(mainCtx, bounds);
         mainCtx.restore();
         this.makeDirty(false);
         return this;
@@ -374,7 +374,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         };
     }
 
-    protected _draw(ctx: UniverRenderingContext) {
+    protected _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         /** abstract */
     }
 

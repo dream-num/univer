@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import type { IKeyValue } from '@univerjs/core';
+import { type IKeyValue, Rectangle } from '@univerjs/core';
 
 import type { UniverRenderingContext } from '../context';
+import type { IViewportInfo } from '../basics/vector2';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
 export interface IRectProps extends IShapeProps {
     radius?: number;
+    startX?: number;
+    startY?: number;
+    endX?: number;
+    endY?: number;
 }
 
 export const RECT_OBJECT_ARRAY = ['radius'];
@@ -41,21 +46,27 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
     }
 
     static override drawWith(ctx: UniverRenderingContext, props: IRectProps | Rect) {
-        let { radius, width, height } = props;
+        let { radius, left, top, width, height } = props;
 
         radius = radius ?? 0;
-        width = width ?? 30;
-        height = height ?? 30;
+        width = width ?? 0;
+        height = height ?? 0;
+        left = left ?? 0;
+        top = top ?? 0;
 
         ctx.beginPath();
 
         if (props.strokeDashArray) {
             ctx.setLineDash(props.strokeDashArray);
+        } else {
+            // only dashrect needs top & left(which relative to topleft of viewport)
+            top = 0;
+            left = 0;
         }
 
         if (!radius) {
             // simple rect - don't bother doing all that complicated maths stuff.
-            ctx.rect(0, 0, width, height);
+            ctx.rect(left, top, width, height);
         } else {
             let topLeft = 0;
             let topRight = 0;
@@ -92,7 +103,32 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         };
     }
 
-    protected override _draw(ctx: UniverRenderingContext) {
-        Rect.drawWith(ctx, this);
+    /**
+     * invoked by viewport@render --> group@render --> shape@render
+     * @param ctx
+     * @param viewportInfo
+     */
+    protected override _draw(ctx: UniverRenderingContext, viewportInfo?: IViewportInfo) {
+        const { radius, paintFirst, stroke, strokeWidth, fill, strokeScaleEnabled, fillRule, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, strokeDashArray } = this;
+        if (!strokeDashArray) {
+            Rect.drawWith(ctx, this);
+        } else {
+            // use parent trasnform to get startXY, and add width&height to get endXY
+            const { startX, startY, endX, endY } = this;
+            const rect = { left: startX, top: startY, right: endX, bottom: endY };
+            let { left, top, right, bottom } = rect;
+            let width = right - left;
+            let height = bottom - top;
+            if (viewportInfo && Rectangle.hasIntersectionBetweenTwoRect(rect, viewportInfo.cacheBound)) {
+                const intersectRect = Rectangle.getIntersectionBetweenTwoRect(rect, viewportInfo.cacheBound)!;
+                left = intersectRect.left - startX;
+                top = intersectRect.top - startY;
+                right = intersectRect.right;
+                bottom = intersectRect.bottom;
+                width = intersectRect.width;
+                height = intersectRect.height;
+            }
+            Rect.drawWith(ctx, { ...{ radius, width, height, paintFirst, stroke, strokeWidth, fill, strokeScaleEnabled, fillRule, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, strokeDashArray }, ...{ width, height, left, top } });
+        }
     }
 }

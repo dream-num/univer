@@ -17,7 +17,7 @@
 import type {
     IRange,
     ISelection,
-    ISelectionCellWithCoord,
+    ISelectionCellWithMergeInfo,
     ISelectionWithCoord,
     Nullable,
     ThemeService,
@@ -135,6 +135,8 @@ export interface ISelectionStyle {
     columnHeaderFill?: string;
     columnHeaderStroke?: string;
     columnHeaderStrokeWidth?: number;
+
+    expandCornerSize?: number;
 }
 
 export interface ISelectionWithCoordAndStyle extends ISelectionWithCoord {
@@ -174,6 +176,8 @@ export function getNormalSelectionStyle(themeService: ThemeService): ISelectionS
         columnHeaderFill: fill,
         columnHeaderStroke: styleSheet.primaryColor,
         columnHeaderStrokeWidth: 1,
+
+        expandCornerSize: 40,
     };
 }
 
@@ -206,7 +210,7 @@ export function convertSelectionDataToRange(
     return result;
 }
 
-export function convertPrimaryWithCoordToPrimary(primaryWithCoord: ISelectionCellWithCoord) {
+export function convertPrimaryWithCoordToPrimary(primaryWithCoord: ISelectionCellWithMergeInfo) {
     const { actualRow, actualColumn, isMerged, isMergedMainCell } = primaryWithCoord;
     const { startRow, startColumn, endRow, endColumn } = primaryWithCoord.mergeInfo;
     return {

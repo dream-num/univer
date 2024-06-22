@@ -129,7 +129,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
-    private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerMoveSub: Nullable<Subscription>;
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
@@ -515,11 +515,11 @@ export class SelectionRenderService implements ISelectionRenderService {
     reset() {
         this._clearSelectionControls();
 
-        this._moveObserver?.dispose();
+        this._scenePointerMoveSub?.unsubscribe();
         this._upObserver?.dispose();
         this._downObserver?.dispose();
 
-        this._moveObserver = null;
+        this._scenePointerMoveSub = null;
         this._upObserver = null;
         this._downObserver = null;
     }
@@ -783,7 +783,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         let lastX = newEvtOffsetX;
         let lastY = newEvtOffsetY;
 
-        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
             const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
@@ -1157,7 +1157,8 @@ export class SelectionRenderService implements ISelectionRenderService {
             return;
         }
 
-        scene.onPointerMoveObserver.remove(this._moveObserver);
+        // scene.onPointerMove$.remove(this._scenePointerMoveSub);
+        this._scenePointerMoveSub?.unsubscribe();
         scene.onPointerUpObserver.remove(this._upObserver);
         scene.enableEvent();
 

@@ -80,7 +80,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
     private _rowOrColumnLeaveObservers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
 
-    private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerMoveSub: Nullable<Subscription>;
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
@@ -95,6 +95,8 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
     private _changeToRow = -1;
 
     public interceptor = new InterceptorManager({ HEADER_MOVE_PERMISSION_CHECK });
+    private _colHeaderPointerMoveSub: Nullable<Subscription>;
+    private _rowHeaderPointerMoveSub: Nullable<Subscription>;
 
     override dispose(): void {
         this._moveHelperBackgroundShape?.dispose();
@@ -104,10 +106,12 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
         const scene = this._context.scene;
 
-        this._rowOrColumnMoveObservers.forEach((obs) => {
-            spreadsheetRowHeader.onPointerMoveObserver.remove(obs);
-            spreadsheetColumnHeader.onPointerMoveObserver.remove(obs);
-        });
+        // this._rowOrColumnMoveObservers.forEach((obs) => {
+        //     spreadsheetRowHeader.onPointerMoveObserver.remove(obs);
+        //     spreadsheetColumnHeader.onPointerMoveObserver.remove(obs);
+        // });
+        this._rowHeaderPointerMoveSub?.unsubscribe();
+        this._colHeaderPointerMoveSub?.unsubscribe();
 
         this._rowOrColumnLeaveObservers.forEach((obs) => {
             spreadsheetRowHeader.onPointerLeaveObserver.remove(obs);
@@ -117,7 +121,8 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         this._downSubscriptions?.unsubscribe();
         this._downSubscriptions = null;
 
-        scene.onPointerMoveObserver.remove(this._moveObserver);
+        // scene.onPointerMove$.remove(this._scenePointerMoveSub);
+        this._scenePointerMoveSub?.unsubscribe();
         scene.onPointerUpObserver.remove(this._upObserver);
 
         this._scrollTimer?.dispose();
@@ -149,40 +154,43 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         const eventBindingObject =
             initialType === HEADER_MOVE_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
 
-        this._rowOrColumnMoveObservers.push(
-            eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                if (skeleton == null) {
-                    return;
-                }
+        const pointerMoveHandler = (evt: IPointerEvent | IMouseEvent) => {
+            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            if (skeleton == null) {
+                return;
+            }
 
-                const selectionRange = this._selectionManagerService.getLast()?.range;
-                if (!selectionRange) return;
+            const selectionRange = this._selectionManagerService.getLast()?.range;
+            if (!selectionRange) return;
 
-                const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_MOVE_PERMISSION_CHECK)(false, selectionRange);
+            const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_MOVE_PERMISSION_CHECK)(false, selectionRange);
 
-                if (!permissionCheck) {
-                    return;
-                }
+            if (!permissionCheck) {
+                return;
+            }
 
-                const { row, column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
+            const { row, column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
 
-                const matchSelectionData = this._checkInHeaderRange(
-                    initialType === HEADER_MOVE_TYPE.ROW ? row : column,
-                    initialType
-                );
+            const matchSelectionData = this._checkInHeaderRange(
+                initialType === HEADER_MOVE_TYPE.ROW ? row : column,
+                initialType
+            );
 
-                if (matchSelectionData === false) {
-                    scene.resetCursor();
-                    this._selectionRenderService.enableSelection();
-                    return;
-                }
+            if (matchSelectionData === false) {
+                scene.resetCursor();
+                this._selectionRenderService.enableSelection();
+                return;
+            }
 
-                scene.setCursor(CURSOR_TYPE.GRAB);
+            scene.setCursor(CURSOR_TYPE.GRAB);
 
-                this._selectionRenderService.disableSelection();
-            })
-        );
+            this._selectionRenderService.disableSelection();
+        };
+        if (initialType === HEADER_MOVE_TYPE.ROW) {
+            this._rowHeaderPointerMoveSub = spreadsheetRowHeader.onPointerMove$.subscribeEvent(pointerMoveHandler);
+        } else {
+            this._colHeaderPointerMoveSub = spreadsheetColumnHeader.onPointerMove$.subscribeEvent(pointerMoveHandler);
+        }
 
         this._rowOrColumnLeaveObservers.push(
             eventBindingObject?.onPointerLeaveObserver.add(() => {
@@ -270,7 +278,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
                     scrollTimerInitd = true;
                 };
 
-                this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
                     initScrollTimer();
                     const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
@@ -522,9 +530,10 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
     private _clearObserverEvent() {
         const scene = this._context.scene;
-        scene.onPointerMoveObserver.remove(this._moveObserver);
+        // scene.onPointerMove$.remove(this._scenePointerMoveSub);
+        this._scenePointerMoveSub?.unsubscribe();
         scene.onPointerUpObserver.remove(this._upObserver);
-        this._moveObserver = null;
+        this._scenePointerMoveSub = null;
         this._upObserver = null;
     }
 

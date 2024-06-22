@@ -46,7 +46,7 @@ export class HoverRenderController extends Disposable implements IRenderModule {
             }
 
             const { mainComponent } = this._context;
-            const observer = mainComponent?.onPointerMoveObserver.add((evt) => {
+            const observer = mainComponent?.onPointerMove$.subscribeEvent((evt) => {
                 this._hoverManagerService.onMouseMove(evt.offsetX, evt.offsetY);
             });
 

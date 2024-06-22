@@ -116,7 +116,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
     private _freezeLeaveObservers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
 
-    private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _sceneOnPointerMoveSub: Nullable<Subscription>;
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
@@ -448,7 +448,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             this._changeToColumn = oldFreeze.startColumn;
             this._changeToRow = oldFreeze.startRow;
         }
-        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._sceneOnPointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const activeViewport = this._getActiveViewport(moveEvt);
 
             const { startX, startY, row, column } = getCoordByOffset(
@@ -1453,9 +1453,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
         const { scene } = sheetObject;
-        scene.onPointerMoveObserver.remove(this._moveObserver);
+        // scene.onPointerMove$.remove(this._moveObserver);
+        this._sceneOnPointerMoveSub?.unsubscribe();
         scene.onPointerUpObserver.remove(this._upObserver);
-        this._moveObserver = null;
+        this._sceneOnPointerMoveSub = null;
         this._upObserver = null;
     }
 
@@ -1475,11 +1476,15 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         const { scene } = sheetObject;
         [...this._freezeMoveObservers, ...this._freezeLeaveObservers].forEach((obs) => {
-            scene.onPointerMoveObserver.remove(obs);
+            // scene.onPointerMove$.remove(obs);
+            this._sceneOnPointerMoveSub?.unsubscribe();
             scene.onPointerLeaveObserver.remove(obs);
         });
-        scene.onPointerEnterObserver.remove(this._moveObserver);
-        scene.onPointerMoveObserver.remove(this._upObserver);
+
+        // TODO @lumixraku scene.onPointerEnterObserver bind ponterMove?
+        // scene.onPointerEnterObserver.remove(this._sceneOnPointerMoveSub);
+        // scene.onPointerMove$.remove(this._upObserver);
+        this._sceneOnPointerMoveSub?.unsubscribe();
     }
 
     private _getPositionByIndex(row: number, column: number) {

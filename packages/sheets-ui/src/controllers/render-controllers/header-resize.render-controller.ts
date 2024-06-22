@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { Nullable, Observer, Workbook } from '@univerjs/core';
+import type { EventState, Nullable, Observer, Workbook } from '@univerjs/core';
 import {
     createInterceptorKey,
     Disposable,
@@ -34,6 +34,7 @@ import type {
 import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
+import type { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
@@ -73,7 +74,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
     private _observers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
 
-    private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerMoveSub: Nullable<Subscription>;
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
@@ -84,6 +85,10 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
     private _startOffsetY: number = Number.POSITIVE_INFINITY;
 
     public interceptor = new InterceptorManager({ HEADER_RESIZE_PERMISSION_CHECK });
+    private _pointerMoveSub: Nullable<Subscription>;
+
+    private _rowHeaderPointerMoveSub: Nullable<Subscription>;
+    private _columnHeaderPointerMoveSub: Nullable<Subscription>;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -105,11 +110,13 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
         const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
         this._observers.forEach((observer) => {
-            spreadsheetRowHeader.onPointerMoveObserver.remove(observer);
+            // spreadsheetRowHeader.onPointerMove$.remove(observer);
             spreadsheetRowHeader.onPointerLeaveObserver.remove(observer);
-            spreadsheetColumnHeader.onPointerMoveObserver.remove(observer);
+            // spreadsheetColumnHeader.onPointerMove$.remove(observer);
             spreadsheetColumnHeader.onPointerLeaveObserver.remove(observer);
         });
+        this._rowHeaderPointerMoveSub?.unsubscribe();
+        this._columnHeaderPointerMoveSub?.unsubscribe();
 
         this._observers = [];
     }
@@ -149,118 +156,121 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
             initialType === HEADER_RESIZE_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
 
         this._observers.push(
-            eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                if (skeleton == null || this._rowResizeRect == null || this._columnResizeRect == null) {
-                    return;
-                }
-
-                const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-
-                const { startX, startY, endX, endY, row, column } = getCoordByOffset(
-                    evt.offsetX,
-                    evt.offsetY,
-                    scene,
-                    skeleton
-                );
-
-                const transformCoord = getTransformCoord(evt.offsetX, evt.offsetY, scene, skeleton);
-
-                const { scaleX, scaleY } = scene.getAncestorScale();
-
-                const scale = Math.max(scaleX, scaleY);
-
-                const HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE = HEADER_MENU_SHAPE_WIDTH_HEIGHT / scale;
-
-                if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                    let top = startY - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
-
-                    if (
-                        transformCoord.y <= startY + HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2 &&
-                        transformCoord.y >= startY
-                    ) {
-                        this._currentRow = row - 1;
-                    } else if (
-                        transformCoord.y >= endY - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2 &&
-                        transformCoord.y <= endY
-                    ) {
-                        this._currentRow = row;
-                        top = endY - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
-                    } else {
-                        this._rowResizeRect.hide();
-                        return;
-                    }
-
-                    if (this._currentRow === -1) {
-                        return;
-                    }
-
-                    const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_RESIZE_PERMISSION_CHECK)(null, { row: this._currentRow });
-                    if (!permissionCheck) {
-                        return false;
-                    }
-
-                    const rowSize = rowHeaderWidth / 3;
-
-                    this._rowResizeRect.transformByState({
-                        left: rowHeaderWidth / 2 - rowSize / 2,
-                        top,
-                    });
-
-                    this._rowResizeRect.setShapeProps({
-                        size: rowSize,
-                    });
-
-                    this._rowResizeRect.show();
-                } else {
-                    let left = startX - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
-
-                    if (
-                        transformCoord.x <= startX + HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2 &&
-                        transformCoord.x >= startX
-                    ) {
-                        this._currentColumn = column - 1;
-                    } else if (
-                        transformCoord.x >= endX - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2 &&
-                        transformCoord.x <= endX
-                    ) {
-                        this._currentColumn = column;
-                        left = endX - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
-                    } else {
-                        this._columnResizeRect.hide();
-                        return;
-                    }
-
-                    if (this._currentColumn === -1) {
-                        return;
-                    }
-
-                    const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_RESIZE_PERMISSION_CHECK)(null, { col: this._currentColumn });
-                    if (!permissionCheck) {
-                        return false;
-                    }
-
-                    // TODO: @jocs remove magic number.
-                    const columnSize = columnHeaderHeight * 0.7;
-
-                    this._columnResizeRect.transformByState({
-                        left,
-                        top: columnHeaderHeight / 2 - columnSize / 2,
-                    });
-                    this._columnResizeRect.setShapeProps({
-                        size: columnSize,
-                    });
-                    this._columnResizeRect.show();
-                }
-            })
-        );
-
-        this._observers.push(
-            eventBindingObject?.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            eventBindingObject?.onPointerLeaveObserver.add((_evt: IPointerEvent | IMouseEvent, _state: EventState) => {
                 this._rowResizeRect?.hide();
                 this._columnResizeRect?.hide();
             })
         );
+
+        const pointerMoveEvent = (evt: IPointerEvent | IMouseEvent, _state: EventState) => {
+            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            if (skeleton == null || this._rowResizeRect == null || this._columnResizeRect == null) {
+                return;
+            }
+
+            const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+
+            const { startX, startY, endX, endY, row, column } = getCoordByOffset(
+                evt.offsetX,
+                evt.offsetY,
+                scene,
+                skeleton
+            );
+
+            const transformCoord = getTransformCoord(evt.offsetX, evt.offsetY, scene, skeleton);
+
+            const { scaleX, scaleY } = scene.getAncestorScale();
+
+            const scale = Math.max(scaleX, scaleY);
+
+            const HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE = HEADER_MENU_SHAPE_WIDTH_HEIGHT / scale;
+
+            if (initialType === HEADER_RESIZE_TYPE.ROW) {
+                let top = startY - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
+
+                if (
+                    transformCoord.y <= startY + HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2 &&
+                    transformCoord.y >= startY
+                ) {
+                    this._currentRow = row - 1;
+                } else if (
+                    transformCoord.y >= endY - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2 &&
+                    transformCoord.y <= endY
+                ) {
+                    this._currentRow = row;
+                    top = endY - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
+                } else {
+                    this._rowResizeRect.hide();
+                    return;
+                }
+
+                if (this._currentRow === -1) {
+                    return;
+                }
+
+                const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_RESIZE_PERMISSION_CHECK)(null, { row: this._currentRow });
+                if (!permissionCheck) {
+                    return false;
+                }
+
+                const rowSize = rowHeaderWidth / 3;
+
+                this._rowResizeRect.transformByState({
+                    left: rowHeaderWidth / 2 - rowSize / 2,
+                    top,
+                });
+
+                this._rowResizeRect.setShapeProps({
+                    size: rowSize,
+                });
+
+                this._rowResizeRect.show();
+            } else {
+                let left = startX - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
+
+                if (
+                    transformCoord.x <= startX + HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2 &&
+                    transformCoord.x >= startX
+                ) {
+                    this._currentColumn = column - 1;
+                } else if (
+                    transformCoord.x >= endX - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2 &&
+                    transformCoord.x <= endX
+                ) {
+                    this._currentColumn = column;
+                    left = endX - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
+                } else {
+                    this._columnResizeRect.hide();
+                    return;
+                }
+
+                if (this._currentColumn === -1) {
+                    return;
+                }
+
+                const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_RESIZE_PERMISSION_CHECK)(null, { col: this._currentColumn });
+                if (!permissionCheck) {
+                    return false;
+                }
+
+                // TODO: @jocs remove magic number.
+                const columnSize = columnHeaderHeight * 0.7;
+
+                this._columnResizeRect.transformByState({
+                    left,
+                    top: columnHeaderHeight / 2 - columnSize / 2,
+                });
+                this._columnResizeRect.setShapeProps({
+                    size: columnSize,
+                });
+                this._columnResizeRect.show();
+            }
+        };
+        if (initialType === HEADER_RESIZE_TYPE.ROW) {
+            this._rowHeaderPointerMoveSub = spreadsheetRowHeader?.onPointerMove$.subscribeEvent(pointerMoveEvent);
+        } else {
+            this._columnHeaderPointerMoveSub = spreadsheetRowHeader?.onPointerMove$.subscribeEvent(pointerMoveEvent);
+        }
     }
 
     private _initialHoverResize(initialType: HEADER_RESIZE_TYPE = HEADER_RESIZE_TYPE.ROW) {
@@ -379,7 +389,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                     //     eventType: DeviceInputEventType.PointerDown,
                     // });
 
-                    this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                    this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
                         const relativeCoords = scene.getRelativeCoord(
                             Vector2.FromArray([this._startOffsetX, this._startOffsetY])
                         );
@@ -514,9 +524,10 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
     private _clearObserverEvent() {
         const scene = this._context.scene;
 
-        scene.onPointerMoveObserver.remove(this._moveObserver);
+        // scene.onPointerMove$.remove(this._scenePointerMoveSub);
+        this._scenePointerMoveSub?.unsubscribe();
         scene.onPointerUpObserver.remove(this._upObserver);
-        this._moveObserver = null;
+        this._scenePointerMoveSub = null;
         this._upObserver = null;
     }
 }

@@ -216,10 +216,8 @@ export class InputManager extends Disposable {
             this.mouseLeaveEnterHandler(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
-                if (this._scene.onPointerMoveObserver.hasObservers()) {
-                    this._scene.onPointerMoveObserver.notifyObservers(evt);
-                    this._scene.getEngine()?.setRemainCapture();
-                }
+                this._scene.onPointerMove$.emitEvent(evt);
+                this._scene.getEngine()?.setRemainCapture();
             }
         };
 

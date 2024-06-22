@@ -22,6 +22,7 @@ import { CURSOR_TYPE, IRenderManagerService, isRectIntersect, Rect, ScrollTimer,
 import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 
+import type { Subscription } from 'rxjs';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { SelectionShape } from './selection-shape';
 import { ISelectionRenderService, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './selection-render.service';
@@ -48,7 +49,7 @@ export class SelectionShapeExtension {
 
     private _relativeSelectionColumnLength = 0;
 
-    private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerMoveSub: Nullable<Subscription>;
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
@@ -140,9 +141,10 @@ export class SelectionShapeExtension {
     }
 
     private _clearObserverEvent() {
-        this._scene.onPointerMoveObserver.remove(this._moveObserver);
+        // this._scene.onPointerMove$.remove(this._scenePointerMoveSub);
+        this._scenePointerMoveSub?.unsubscribe();
         this._scene.onPointerUpObserver.remove(this._upObserver);
-        this._moveObserver = null;
+        this._scenePointerMoveSub = null;
         this._upObserver = null;
     }
 
@@ -332,7 +334,7 @@ export class SelectionShapeExtension {
 
         scene.disableEvent();
 
-        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
             const permissionCheck = this._injector.get(ISelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_MOVE_PERMISSION_CHECK)(false, null);
@@ -557,7 +559,7 @@ export class SelectionShapeExtension {
 
         scene.disableEvent();
 
-        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
             const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
@@ -822,7 +824,7 @@ export class SelectionShapeExtension {
             this._fillControlColors.push(o.fill as string);
         });
 
-        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             const currentViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 

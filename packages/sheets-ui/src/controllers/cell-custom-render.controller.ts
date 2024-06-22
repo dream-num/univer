@@ -146,7 +146,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                     }
                 });
 
-                const moveDisposable = spreadsheet.onPointerMoveObserver.add((evt) => {
+                const moveDisposable = spreadsheet.onPointerMove$.subscribeEvent((evt) => {
                     const activeRenderInfo = getActiveRender(evt);
                     if (activeRenderInfo) {
                         const [activeRender, cellContext] = activeRenderInfo;

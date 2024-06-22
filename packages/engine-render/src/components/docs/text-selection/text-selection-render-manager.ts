@@ -17,7 +17,7 @@
 import type { Nullable, Observer } from '@univerjs/core';
 import { DataStreamTreeTokenType, ILogService, RxDisposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
-import type { Observable } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
 
 import { CURSOR_TYPE } from '../../../basics/const';
@@ -252,6 +252,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _scene: Nullable<Scene>;
 
     private _document: Nullable<Documents>;
+    private _scenePointerMoveSub: Nullable<Subscription>;
 
     constructor(@ILogService private readonly _logService: ILogService) {
         super();
@@ -525,7 +526,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         let preMoveOffsetY = evtOffsetY;
 
-        this._moveObservers.push(scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             scene.setCursor(CURSOR_TYPE.TEXT);
 
@@ -541,7 +542,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
             preMoveOffsetX = moveOffsetX;
             preMoveOffsetY = moveOffsetY;
-        }));
+        });
+        // this._moveObservers.push();
 
         this._upObservers.push(scene.onPointerUpObserver.add(() => {
             // scene.onPointerMoveObserver.remove(this._moveObserver);
@@ -550,6 +552,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             this._moveObservers.forEach((obs) => {
                 obs?.dispose();
             });
+            this._scenePointerMoveSub?.unsubscribe();
 
             this._upObservers.forEach((obs) => {
                 obs?.dispose();

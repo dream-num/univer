@@ -42,7 +42,8 @@
         "release": "release-it",
         "release:alpha": "release-it preminor --preRelease=alpha",
         "release:beta": "release-it preminor --preRelease=beta",
-        "release:rc": "release-it prerelease --preRelease=rc"
+        "release:rc": "release-it prerelease --preRelease=rc",
+        "merge-coverage": "node merge-coverage.cjs"
     },
     "devDependencies": {
         "@antfu/eslint-config": "^2.20.0",
@@ -68,6 +69,7 @@
         "eslint-plugin-react-refresh": "^0.4.7",
         "husky": "^9.0.11",
         "lint-staged": "^15.2.5",
+        "nyc": "^17.0.0",
         "react": "18.3.1",
         "react-dom": "18.3.1",
         "release-it": "^17.3.0",

@@ -37,7 +37,8 @@ import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { getRangeWithSpecialCharacter, isCustomRangeSplitSymbol, isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
+import { isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
+import { getDeleteSelection } from '../../basics/selection';
 
 export interface IInnerPasteCommandParams {
     segmentId: string;
@@ -206,12 +207,12 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
 // paragraph information needs to be preserved when performing the CUT operation
 // eslint-disable-next-line max-lines-per-function
 function getRetainAndDeleteAndExcludeLineBreak(
-    range: ITextRange,
+    selection: ITextRange,
     body: IDocumentBody,
     segmentId: string = '',
     memoryCursor: number = 0
 ): Array<IRetainAction | IDeleteAction> {
-    const { startOffset, endOffset } = getRangeWithSpecialCharacter(range, body);
+    const { startOffset, endOffset } = getDeleteSelection(selection, body);
     const dos: Array<IRetainAction | IDeleteAction> = [];
 
     const { paragraphs = [], dataStream } = body;

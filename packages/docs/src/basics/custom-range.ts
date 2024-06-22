@@ -14,27 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, IDocumentBody, ITextRange } from '@univerjs/core';
+import type { ICustomRange } from '@univerjs/core';
 import { DataStreamTreeTokenType } from '@univerjs/core';
 
 export function isCustomRangeSplitSymbol(text: string) {
     return text === DataStreamTreeTokenType.CUSTOM_RANGE_END || text === DataStreamTreeTokenType.CUSTOM_RANGE_START;
-}
-
-export function getRangeWithSpecialCharacter(range: ITextRange, body: IDocumentBody) {
-    let { startOffset, endOffset } = range;
-    while (isCustomRangeSplitSymbol(body.dataStream[startOffset - 1])) {
-        startOffset -= 1;
-    }
-
-    while (isCustomRangeSplitSymbol(body.dataStream[endOffset + 2])) {
-        endOffset += 1;
-    }
-
-    return {
-        startOffset,
-        endOffset,
-    };
 }
 
 export function isIntersecting(line1Start: number, line1End: number, line2Start: number, line2End: number) {

@@ -24,7 +24,7 @@ import {
     TextXActionType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IActiveTextRange, IDocumentSkeletonGlyph, ITextRangeWithStyle, TextRange } from '@univerjs/engine-render';
+import type { IActiveTextRange, ITextRangeWithStyle, TextRange } from '@univerjs/engine-render';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
 
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
@@ -32,7 +32,7 @@ import type { ITextActiveRange } from '../../services/text-selection-manager.ser
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { getRangeWithSpecialCharacter, isCustomRangeSplitSymbol } from '../../basics/custom-range';
+import { getDeleteSelection, getInsertSelection } from '../../basics/selection';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, DeleteDirection, UpdateCommand } from './core-editing.command';
 
@@ -49,7 +49,7 @@ export const DeleteLeftCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        let activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveRange();
         const ranges = textSelectionManagerService.getSelections();
         const skeleton = docSkeletonManagerService.getCurrent()?.skeleton;
 
@@ -64,13 +64,9 @@ export const DeleteLeftCommand: ICommand = {
             return false;
         }
 
-        activeRange = {
-            ...activeRange,
-            ...getRangeWithSpecialCharacter(activeRange, body),
-        };
-
-        const { startOffset, collapsed, segmentId, style } = activeRange;
-
+        const actualRange = getDeleteSelection(activeRange, body);
+        const { startOffset, collapsed } = actualRange;
+        const { segmentId, style } = activeRange;
         const curGlyph = skeleton.findNodeByCharIndex(startOffset);
 
         // is in bullet list?
@@ -153,46 +149,26 @@ export const DeleteLeftCommand: ICommand = {
                 if (preGlyph == null) {
                     return true;
                 }
-
-                // move to the first char, than delete
-                if (isCustomRangeSplitSymbol(preGlyph.raw)) {
-                    let glyph: Nullable<IDocumentSkeletonGlyph> = preGlyph;
-                    while (glyph && isCustomRangeSplitSymbol(glyph.raw)) {
-                        cursor -= glyph.count;
-                        glyph = skeleton.findNodeByCharIndex(cursor);
-                    }
-
-                    if (glyph) {
-                        const deleteRange = {
-                            startOffset: cursor + glyph.count,
-                            endOffset: cursor + glyph.count,
-                            collapsed: true,
-                        };
-                        result = await commandService.executeCommand(DeleteCommand.id, {
-                            unitId: docDataModel.getUnitId(),
-                            range: deleteRange,
-                            segmentId,
-                            direction: DeleteDirection.LEFT,
-                            len: preGlyph.count,
-                        });
-                    }
-                } else if (preGlyph.content === '\r') {
+                if (preGlyph.content === '\r') {
                     result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
                         direction: DeleteDirection.LEFT,
-                        range: activeRange,
+                        range: actualRange,
                     });
                 } else {
                     cursor -= preGlyph.count;
                     result = await commandService.executeCommand(DeleteCommand.id, {
                         unitId: docDataModel.getUnitId(),
-                        range: activeRange,
+                        range: actualRange,
                         segmentId,
                         direction: DeleteDirection.LEFT,
                         len: preGlyph.count,
                     });
                 }
             } else {
-                const textRanges = getTextRangesWhenDelete(activeRange, ranges);
+                const textRanges = getTextRangesWhenDelete({
+                    ...activeRange,
+                    ...actualRange,
+                }, ranges);
                 // If the selection is not closed, the effect of Delete and
                 // BACKSPACE is the same as CUT, so the CUT command is executed.
                 result = await commandService.executeCommand(CutContentCommand.id, {
@@ -212,14 +188,13 @@ export const DeleteRightCommand: ICommand = {
 
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const docSkeletonManagerService = accessor.get(DocSkeletonManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        let activeRange = textSelectionManagerService.getActiveRange();
+        const activeRange = textSelectionManagerService.getActiveRange();
         const ranges = textSelectionManagerService.getSelections();
         const skeleton = docSkeletonManagerService.getCurrent()?.skeleton;
 
@@ -234,12 +209,9 @@ export const DeleteRightCommand: ICommand = {
             return false;
         }
 
-        activeRange = {
-            ...activeRange,
-            ...getRangeWithSpecialCharacter(activeRange, body),
-        };
-        const { startOffset, collapsed, segmentId, style } = activeRange;
-
+        const actualRange = getInsertSelection(activeRange, body);
+        const { startOffset, collapsed } = actualRange;
+        const { segmentId, style } = activeRange;
         // No need to delete when the cursor is at the last position of the last paragraph.
         if (startOffset === docDataModel.getBody()!.dataStream.length - 2 && collapsed) {
             return true;
@@ -249,30 +221,7 @@ export const DeleteRightCommand: ICommand = {
             const needDeleteSpan = skeleton.findNodeByCharIndex(startOffset)!;
 
             // skip custom-range-split-symbol
-            if (isCustomRangeSplitSymbol(needDeleteSpan.raw)) {
-                let glyph: Nullable<IDocumentSkeletonGlyph> = needDeleteSpan;
-                let cursor = startOffset;
-                while (glyph && isCustomRangeSplitSymbol(glyph.raw)) {
-                    cursor += glyph.count;
-                    glyph = skeleton.findNodeByCharIndex(cursor);
-                }
-
-                if (glyph) {
-                    const deleteRange = {
-                        startOffset: cursor,
-                        endOffset: cursor,
-                        collapsed: true,
-                    };
-
-                    result = await commandService.executeCommand(DeleteCommand.id, {
-                        unitId: docDataModel.getUnitId(),
-                        range: deleteRange,
-                        segmentId,
-                        direction: DeleteDirection.RIGHT,
-                        len: glyph.count,
-                    });
-                }
-            } else if (needDeleteSpan.content === '\r') {
+            if (needDeleteSpan.content === '\r') {
                 result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
                     direction: DeleteDirection.RIGHT,
                     range: activeRange,

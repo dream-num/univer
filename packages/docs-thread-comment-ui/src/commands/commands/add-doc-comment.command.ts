@@ -16,7 +16,7 @@
 
 import type { ICommand, ITextRange } from '@univerjs/core';
 import { CommandType, CustomRangeType, ICommandService, sequenceExecuteAsync } from '@univerjs/core';
-import { addCustomRangeFactory } from '@univerjs/docs';
+import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { AddCommentMutation, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
@@ -34,18 +34,18 @@ export const AddDocCommentComment: ICommand<IAddDocCommentComment> = {
         if (!params) {
             return false;
         }
-        const { comment: originComment, unitId, range } = params;
+        const { comment: originComment, unitId } = params;
         const dataSourceService = accessor.get(IThreadCommentDataSourceService);
         const comment = await dataSourceService.addComment(originComment);
         const commandService = accessor.get(ICommandService);
 
-        const doMutation = addCustomRangeFactory({
-            rangeId: comment.id,
-            rangeType: CustomRangeType.COMMENT,
-            unitId,
-            range,
-        });
-
+        const doMutation = addCustomRangeBySelectionFactory(
+            accessor,
+            {
+                rangeId: comment.id,
+                rangeType: CustomRangeType.COMMENT,
+            }
+        );
         if (doMutation) {
             const commentMutation = {
                 id: AddCommentMutation.id,

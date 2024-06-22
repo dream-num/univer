@@ -374,7 +374,7 @@ export function insertCustomRanges(
         const customRange = customRanges[i];
         customRangeMap[customRange.rangeId] = customRange;
         const { startIndex, endIndex } = customRange;
-        if (startIndex > currentIndex) {
+        if (startIndex >= currentIndex) {
             customRange.startIndex += textLength;
             customRange.endIndex += textLength;
         } else if (endIndex > currentIndex - 1) {

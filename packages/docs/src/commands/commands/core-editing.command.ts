@@ -17,7 +17,6 @@
 import type {
     DocumentDataModel,
     ICommand,
-    ICustomRange,
     IDocumentBody,
     IDocumentData,
     IMutationInfo,
@@ -29,13 +28,15 @@ import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { isCustomRangeSplitSymbol, isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
+import { isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
+import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import { getInsertSelection } from '../../basics/selection';
 
 export interface IInsertCommandParams {
     unitId: string;
     body: IDocumentBody;
     range: ITextRange;
-    textRanges: ITextRangeWithStyle[];
+    textRanges?: ITextRangeWithStyle[];
     segmentId?: string;
 }
 
@@ -52,15 +53,35 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
 
-        const { range, segmentId, body, unitId, textRanges } = params;
-        const { startOffset, collapsed } = range;
+        const { range, segmentId, body, unitId, textRanges: propTextRanges } = params;
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        const originBody = doc?.getBody();
+        const activeRange = textSelectionManagerService.getActiveRange();
+        if (activeRange == null) {
+            return false;
+        }
+        if (!originBody) {
+            return false;
+        }
+        const actualRange = getInsertSelection(range, originBody);
+        const { startOffset, collapsed } = actualRange;
+        const textRanges = [
+            {
+                startOffset: startOffset + body.dataStream.length,
+                endOffset: startOffset + body.dataStream.length,
+                style: activeRange.style,
+                collapsed,
+            },
+        ];
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
                 actions: [],
-                textRanges,
+                textRanges: propTextRanges ?? textRanges,
                 debounce: true,
             },
         };
@@ -77,7 +98,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
                 });
             }
         } else {
-            textX.push(...getRetainAndDeleteFromReplace(range, segmentId, 0, body));
+            textX.push(...getRetainAndDeleteFromReplace(actualRange, segmentId, 0, body));
         }
 
         textX.push({
@@ -123,7 +144,6 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         const { range, segmentId, unitId, direction, len = 1 } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const { startOffset } = range;
-
         const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         if (!documentDataModel) {
             return false;

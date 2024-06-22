@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { CustomRangeType, DocumentDataModel, IMutationInfo, ITextRange } from '@univerjs/core';
+import type { CustomRangeType, DocumentDataModel, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
 import { DataStreamTreeTokenType, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
+import { getSelectionForAddCustomRange } from './selection';
 
 interface IAddCustomRangeParam {
     unitId: string;
@@ -29,11 +30,14 @@ interface IAddCustomRangeParam {
     rangeType: CustomRangeType;
 }
 
-export function addCustomRangeFactory(param: IAddCustomRangeParam) {
+export function addCustomRangeFactory(param: IAddCustomRangeParam, body: IDocumentBody) {
     const { unitId, range, rangeId, rangeType, segmentId } = param;
-    const { startOffset, endOffset } = range;
-    const start = Math.min(startOffset, endOffset);
-    const end = Math.max(startOffset, endOffset);
+    const actualRange = getSelectionForAddCustomRange(range, body);
+    if (!actualRange) {
+        return null;
+    }
+
+    const { startOffset: start, endOffset: end } = actualRange;
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
         id: RichTextEditingMutation.id,
         params: {
@@ -112,8 +116,7 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
-    const selection = textSelectionManagerService.getSelections()?.[0];
-
+    const selection = textSelectionManagerService.getActiveRange();
     if (!selection) {
         return false;
     }
@@ -122,20 +125,26 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     if (!documentDataModel) {
         return false;
     }
-
+    const body = documentDataModel.getBody();
     const unitId = documentDataModel.getUnitId();
+    if (!body) {
+        return false;
+    }
 
-    const doMutation = addCustomRangeFactory({
-        unitId,
-        range: {
-            startOffset: selection.startOffset!,
-            endOffset: selection.endOffset!,
-            collapsed: true,
+    const doMutation = addCustomRangeFactory(
+        {
+            unitId,
+            range: {
+                startOffset: selection.startOffset,
+                endOffset: selection.endOffset,
+                collapsed: true,
+            },
+            rangeId,
+            rangeType,
+            segmentId,
         },
-        rangeId,
-        rangeType,
-        segmentId,
-    });
+        body
+    );
 
     return doMutation;
 }

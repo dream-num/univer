@@ -103,6 +103,7 @@ export class DocumentSkeleton extends Skeleton {
 
         // const start = +new Date();
         this._skeletonData = this._createSkeleton(ctx, bounds);
+        // console.log(this._skeletonData);
         // console.log('skeleton calculate cost', +new Date() - start);
     }
 
@@ -219,7 +220,7 @@ export class DocumentSkeleton extends Skeleton {
         };
     }
 
-    findNodeByCharIndex(charIndex: number): Nullable<IDocumentSkeletonGlyph> {
+    findGlyphByCharIndex(charIndex: number): Nullable<IDocumentSkeletonGlyph> {
         const nodes = this._findNodeIterator(charIndex);
 
         return nodes?.glyph;

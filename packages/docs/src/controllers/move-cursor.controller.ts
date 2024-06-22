@@ -139,8 +139,8 @@ export class MoveCursorController extends Disposable {
         const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
-            const preGlyph = skeleton.findNodeByCharIndex(focusOffset - 1);
-            const curGlyph = skeleton.findNodeByCharIndex(focusOffset)!;
+            const preGlyph = skeleton.findGlyphByCharIndex(focusOffset - 1);
+            const curGlyph = skeleton.findGlyphByCharIndex(focusOffset)!;
 
             focusOffset =
                 direction === Direction.RIGHT ? focusOffset + curGlyph.count : focusOffset - (preGlyph?.count ?? 0);
@@ -155,7 +155,7 @@ export class MoveCursorController extends Disposable {
                 },
             ], false);
         } else {
-            const focusSpan = skeleton.findNodeByCharIndex(focusOffset);
+            const focusSpan = skeleton.findGlyphByCharIndex(focusOffset);
 
             const documentOffsetConfig = docObject.document.getOffsetConfig();
 
@@ -230,8 +230,8 @@ export class MoveCursorController extends Disposable {
 
                 cursor = direction === Direction.LEFT ? min : max;
             } else {
-                const preSpan = skeleton.findNodeByCharIndex(startOffset - 1);
-                const curSpan = skeleton.findNodeByCharIndex(startOffset)!;
+                const preSpan = skeleton.findGlyphByCharIndex(startOffset - 1);
+                const curSpan = skeleton.findGlyphByCharIndex(startOffset)!;
 
                 if (direction === Direction.LEFT) {
                     cursor = Math.max(0, startOffset - (preSpan?.count ?? 0));
@@ -249,8 +249,8 @@ export class MoveCursorController extends Disposable {
                 },
             ], false);
         } else {
-            const startNode = skeleton.findNodeByCharIndex(startOffset);
-            const endNode = skeleton.findNodeByCharIndex(endOffset);
+            const startNode = skeleton.findGlyphByCharIndex(startOffset);
+            const endNode = skeleton.findGlyphByCharIndex(endOffset);
 
             const documentOffsetConfig = docObject.document.getOffsetConfig();
 

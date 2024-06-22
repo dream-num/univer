@@ -210,47 +210,44 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             return;
         }
 
-        const drawingId = focusDrawings[0].drawingId;
+        const { drawingId, unitId } = focusDrawings[0];
+        const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const { skeleton } = docSkeletonManagerService.getSkeletonByUnitId(unitId) ?? {};
 
-        let drawing: Nullable<IDocumentSkeletonDrawing> = null;
-        let pageMarginTop = 0;
-        const skeleton = docSkeletonManagerService.getCurrent();
-        const skeletonData = skeleton?.skeleton.getSkeletonData();
+        const drawing = documentDataModel?.getBody()?.customBlocks?.find((c) => c.blockId === drawingId);
 
-        if (skeletonData == null) {
+        if (drawing == null || skeleton == null) {
             return;
         }
 
-        for (const page of skeletonData.pages) {
-            const { marginTop, skeDrawings } = page;
+        const { startIndex } = drawing;
 
-            if (skeDrawings.has(drawingId)) {
-                drawing = skeDrawings.get(drawingId);
-                pageMarginTop = marginTop;
-                break;
-            }
-        }
+        const glyph = skeleton.findGlyphByCharIndex(startIndex);
+        const line = glyph?.parent?.parent;
+        const column = line?.parent;
+        const paragraphStartLine = column?.lines.find((l) => l.paragraphIndex === line?.paragraphIndex && l.paragraphStart);
+        const page = column?.parent?.parent;
 
-        if (drawing == null) {
+        if (glyph == null || line == null || paragraphStartLine == null || column == null || page == null) {
             return;
         }
 
         let delta = 0;
 
         if (prevRelativeFrom === ObjectRelativeFromV.PARAGRAPH) {
-            delta -= drawing.blockAnchorTop;
+            delta -= paragraphStartLine.top;
         } else if (prevRelativeFrom === ObjectRelativeFromV.LINE) {
-            delta -= drawing.lineTop;
+            delta -= line.top;
         } else if (prevRelativeFrom === ObjectRelativeFromV.PAGE) {
-            delta += pageMarginTop;
+            delta += page.marginTop;
         }
 
         if (relativeFrom === ObjectRelativeFromV.PARAGRAPH) {
-            delta += drawing.blockAnchorTop;
+            delta += paragraphStartLine.top;
         } else if (relativeFrom === ObjectRelativeFromV.LINE) {
-            delta += drawing.lineTop;
+            delta += line.top;
         } else if (relativeFrom === ObjectRelativeFromV.PAGE) {
-            delta -= pageMarginTop;
+            delta -= page.marginTop;
         }
 
         const newPositionV = {

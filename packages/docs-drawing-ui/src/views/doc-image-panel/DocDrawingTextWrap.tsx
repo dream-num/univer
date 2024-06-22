@@ -84,17 +84,17 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
             return;
         }
 
-        const drawings = focusDrawings.map((drawing) => {
-            return {
-                unitId: drawing.unitId,
-                subUnitId: drawing.subUnitId,
-                drawingId: drawing.drawingId,
-            };
-        });
+        const { unitId, subUnitId } = focusDrawings[0];
+
+        const drawings = focusDrawings.map(({ unitId, subUnitId, drawingId }) => ({
+            unitId,
+            subUnitId,
+            drawingId,
+        }));
 
         commandService.executeCommand(UpdateDocDrawingWrappingStyleCommand.id, {
-            unitId: focusDrawings[0].unitId,
-            subUnitId: focusDrawings[0].unitId,
+            unitId,
+            subUnitId,
             drawings,
             wrappingStyle: value as TextWrappingStyle,
         });

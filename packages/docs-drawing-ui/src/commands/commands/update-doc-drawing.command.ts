@@ -94,6 +94,14 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
             return false;
         }
 
+        const renderManagerService = accessor.get(IRenderManagerService);
+        const renderObject = renderManagerService.getRenderById(params.unitId);
+        const scene = renderObject?.scene;
+        if (scene == null) {
+            return false;
+        }
+        const transformer = scene.getTransformerByCreate();
+
         const { pages } = skeletonData;
 
         const jsonX = JSONX.getInstance();
@@ -207,6 +215,8 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
+
+        transformer.refreshControls();
 
         return Boolean(result);
     },

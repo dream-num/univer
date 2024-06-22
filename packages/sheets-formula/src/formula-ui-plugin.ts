@@ -77,7 +77,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
 
             FormulaAlertRenderController,
         ]).forEach((controller) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller));
         });
     }
 

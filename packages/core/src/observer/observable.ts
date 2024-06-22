@@ -41,6 +41,8 @@ export class EventState {
 }
 
 interface INotifyObserversReturn {
+    /** If the event has been handled by any event handler. */
+    handled: boolean;
     lastReturnValue: unknown;
     stopPropagation: boolean;
 }
@@ -87,10 +89,12 @@ export interface IEventObserver<T> extends Partial<RxObserver<[T, EventState]>> 
 export class EventSubject<T> extends Subject<[T, EventState]> {
     private _sortedObservers: IEventObserver<T>[] = [];
 
+    /** @deprecated Use `subscribeEvent` instead. */
     override subscribe(): Subscription {
         throw new Error('[EventSubject]: please use `subscribeEvent` instead of `subscribe` method for `EventSubject`.');
     }
 
+    /** @deprecated Use `emitEvent` instead. */
     override next() {
         throw new Error('[EventSubject]: please use `emitEvent` instead of `next` method for `EventSubject`.');
     }
@@ -102,7 +106,6 @@ export class EventSubject<T> extends Subject<[T, EventState]> {
 
     override complete(): void {
         super.complete();
-
         this._sortedObservers.length = 0;
     }
 
@@ -127,7 +130,7 @@ export class EventSubject<T> extends Subject<[T, EventState]> {
         this._sortedObservers.length = 0;
     }
 
-    emitEvent(event: T) {
+    emitEvent(event: T): INotifyObserversReturn {
         if (!this.closed) {
             const state = new EventState();
             state.lastReturnValue = event;
@@ -138,6 +141,7 @@ export class EventSubject<T> extends Subject<[T, EventState]> {
 
                 if (state.skipNextObservers) {
                     return {
+                        handled: true,
                         lastReturnValue: state.lastReturnValue,
                         stopPropagation: state.isStopPropagation,
                     };
@@ -145,10 +149,13 @@ export class EventSubject<T> extends Subject<[T, EventState]> {
             }
 
             return {
+                handled: this._sortedObservers.length > 0,
                 lastReturnValue: state.lastReturnValue,
                 stopPropagation: state.isStopPropagation,
             };
         }
+
+        throw new Error('[EventSubject]: cannot emit event on a closed subject.');
     }
 }
 
@@ -251,12 +258,15 @@ export class Observable<T> {
 
             if (state.skipNextObservers) {
                 return {
+                    handled: true,
                     lastReturnValue: state.lastReturnValue,
                     stopPropagation: _isStopPropagation,
                 };
             }
         }
+
         return {
+            handled: this._observers.length > 0,
             lastReturnValue: state.lastReturnValue,
             stopPropagation: _isStopPropagation,
         };

@@ -6,7 +6,7 @@ Name: Univer
 
 URL: [https://github.com/dream-num/univer](https://github.com/dream-num/univer)
 
-Number of lines of code and the tool used to count it: 226237
+Number of lines of code and the tool used to count it: 226237 counted through Lizard
 
 Programming language: Typescript
 

@@ -24,54 +24,54 @@ import { Product } from '../index';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test product function', () => {
-    const textFunction = new Product(FUNCTION_NAMES_MATH.PRODUCT);
+    const testFunction = new Product(FUNCTION_NAMES_MATH.PRODUCT);
 
     describe('Product', () => {
         it('Var1 is number, var2 is number', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = NumberValueObject.create(2);
-            const result = textFunction.calculate(var1, var2);
+            const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(2);
         });
         it('Var1 is string number, var2 is string number', () => {
             const var1 = new StringValueObject('1');
             const var2 = new StringValueObject('2');
-            const result = textFunction.calculate(var1, var2);
+            const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(2);
         });
         it('Var1 is number, var2 is string', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = StringValueObject.create('test');
-            const result = textFunction.calculate(var1, var2);
+            const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(ErrorType.VALUE);
         });
         it('Var1 is number, var2 is string number', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = StringValueObject.create('2');
-            const result = textFunction.calculate(var1, var2);
+            const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(2);
         });
         it('Var1 is number, var2 is boolean', () => {
             const var1 = NumberValueObject.create(2);
 
             let var2 = BooleanValueObject.create(true);
-            let result = textFunction.calculate(var1, var2);
+            let result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(2);
 
             var2 = BooleanValueObject.create(false);
-            result = textFunction.calculate(var1, var2);
+            result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(0);
         });
         it('Var1 is number, var2 is null', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = NullValueObject.create();
-            const result = textFunction.calculate(var1, var2);
+            const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(1);
         });
         it('Var1 is number, var2 is error', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = ErrorValueObject.create(ErrorType.NA);
-            const result = textFunction.calculate(var1, var2);
+            const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(ErrorType.NA);
         });
 
@@ -89,7 +89,7 @@ describe('Test product function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(var1, var2);
+            const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(ErrorType.VALUE);
         });
 
@@ -107,7 +107,7 @@ describe('Test product function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(var1, var2);
+            const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(-1726.92);
         });
     });

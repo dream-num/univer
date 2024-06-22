@@ -63,11 +63,11 @@ const matchArrayValueObject = ArrayValueObject.create(/*ts*/ `{
 }`);
 
 describe('Test vlookup', () => {
-    const textFunction = new Lookup(FUNCTION_NAMES_LOOKUP.LOOKUP);
+    const testFunction = new Lookup(FUNCTION_NAMES_LOOKUP.LOOKUP);
 
     describe('Vector', () => {
         it('Search eight', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(8),
                 arrayValueObject2,
                 arrayValueObject3
@@ -76,7 +76,7 @@ describe('Test vlookup', () => {
         });
 
         it('Exceeding columns', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(11),
                 arrayValueObject2,
                 arrayValueObject3
@@ -85,7 +85,7 @@ describe('Test vlookup', () => {
         });
 
         it('Match string', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 StringValueObject.create('999'),
                 arrayValueObject2,
                 arrayValueObject3
@@ -96,7 +96,7 @@ describe('Test vlookup', () => {
 
     describe('Array', () => {
         it('Search two', async () => {
-            const resultObject = textFunction.calculate(NumberValueObject.create(2), arrayValueObject1) as BaseValueObject;
+            const resultObject = testFunction.calculate(NumberValueObject.create(2), arrayValueObject1) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('Second');
         });
     });

@@ -20,7 +20,6 @@ import type { IDiscreteRange } from '@univerjs/sheets-ui';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidationModel } from '@univerjs/data-validation';
-import { SPECIAL_PASTE_FORMULA } from '@univerjs/sheets-formula';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
@@ -108,7 +107,7 @@ export class DataValidationCopyPasteController extends Disposable {
                 PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
                 PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
                 PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
-                SPECIAL_PASTE_FORMULA,
+                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
             ].includes(
                 copyInfo.pasteType
             )

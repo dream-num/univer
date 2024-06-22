@@ -164,7 +164,6 @@ class MockEngine extends ThinEngine<Scene> {
 }
 
 describe('Test indirect', () => {
-    // const textFunction = new Makearray(FUNCTION_NAMES_LOGICAL.MAKEARRAY);
     let get: Injector['get'];
 
     let themeService: ThemeService;

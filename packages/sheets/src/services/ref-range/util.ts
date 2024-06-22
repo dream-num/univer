@@ -258,10 +258,9 @@ export const handleMoveRowsCommon = (params: IMoveRowsCommand, targetRange: IRan
         return [targetRange];
     }
 
-    const { startRow: fromRow } = fromRange;
-    const { startRow: toRow } = toRange;
-
-    const count = toRange.endRow - toRange.startRow + 1;
+    const fromRow = fromRange.startRow;
+    const count = fromRange.endRow - fromRange.startRow + 1;
+    const toRow = toRange.startRow;
 
     const matrix = new ObjectMatrix();
 
@@ -336,10 +335,9 @@ export const handleMoveColsCommon = (params: IMoveColsCommand, targetRange: IRan
         return [targetRange];
     }
 
-    const { startColumn: fromCol } = fromRange;
-    const { startColumn: toCol } = toRange;
-
-    const count = toRange.endColumn - toRange.startColumn + 1;
+    const fromCol = fromRange.startColumn;
+    const count = fromRange.endColumn - fromRange.startColumn + 1;
+    const toCol = toRange.startColumn;
 
     const matrix = new ObjectMatrix();
 

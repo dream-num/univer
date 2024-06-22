@@ -28,8 +28,8 @@ import {
     SetWorksheetNameMutation,
     SetWorksheetOrderCommand,
     SetWorksheetOrderMutation,
-    WorkbookEditablePermission,
     WorkbookManageCollaboratorPermission,
+    WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { IConfirmService, Menu, useObservable } from '@univerjs/ui';
@@ -192,7 +192,7 @@ export function SheetBarTabs() {
                 if (worksheetRule || selectionRule) {
                     return permissionService.getPermissionPoint(new WorkbookManageCollaboratorPermission(unitId).id)?.value ?? false;
                 } else {
-                    return permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value ?? false;
+                    return permissionService.getPermissionPoint(new WorkbookRenameSheetPermission(unitId).id)?.value ?? false;
                 }
             },
         });

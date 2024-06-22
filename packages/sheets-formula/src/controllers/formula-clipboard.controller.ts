@@ -16,6 +16,7 @@
 
 import type { ICellData, IMutationInfo, Workbook } from '@univerjs/core';
 import {
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
     isFormulaId,
     isFormulaString,
@@ -26,15 +27,13 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { FormulaDataModel, LexerTreeBuilder } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { COPY_TYPE, ISheetClipboardService, PREDEFINED_HOOK_NAME } from '@univerjs/sheets-ui';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, IDiscreteRange, ISheetClipboardHook, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-
-import { SPECIAL_PASTE_FORMULA } from '../commands/commands/formula-clipboard.command';
 
 export const DEFAULT_PASTE_FORMULA = 'default-paste-formula';
 
@@ -44,7 +43,8 @@ export class FormulaClipboardController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverSheet: IUniverInstanceService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
 
@@ -62,7 +62,7 @@ export class FormulaClipboardController extends Disposable {
 
     private _pasteFormulaHook(): ISheetClipboardHook {
         return {
-            id: SPECIAL_PASTE_FORMULA,
+            id: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
             priority: 10,
             specialPasteInfo: { label: 'specialPaste.formula' },
             onPasteCells: (pasteFrom, pasteTo, data, payload) => this._onPasteCells(pasteFrom, pasteTo, data, payload, true),
@@ -85,6 +85,8 @@ export class FormulaClipboardController extends Disposable {
         isSpecialPaste: boolean
     ) {
         const pasteType = payload.pasteType;
+
+        // Intercept scenarios where formulas do not need to be processed, and only process default paste and paste formulas only
         if (pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE || pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT || pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH) {
             return {
                 undos: [],
@@ -100,8 +102,8 @@ export class FormulaClipboardController extends Disposable {
         const pastedRange = pasteTo.range;
         const matrix = data;
         const workbook = this._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const unitId = workbook.getUnitId();
-        const subUnitId = workbook.getActiveSheet()?.getSheetId();
+        const unitId = pasteTo.unitId || workbook.getUnitId();
+        const subUnitId = pasteTo.subUnitId || workbook.getActiveSheet()?.getSheetId();
         if (!unitId || !subUnitId) {
             return {
                 undos: [],
@@ -117,11 +119,14 @@ export class FormulaClipboardController extends Disposable {
             accessor,
             copyInfo,
             this._lexerTreeBuilder,
-            isSpecialPaste
+            this._formulaDataModel,
+            isSpecialPaste,
+            pasteFrom
         ));
     }
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function getSetCellFormulaMutations(
     unitId: string,
     subUnitId: string,
@@ -134,7 +139,9 @@ export function getSetCellFormulaMutations(
         pasteType: string;
     },
     lexerTreeBuilder: LexerTreeBuilder,
-    isSpecialPaste = false
+    formulaDataModel: FormulaDataModel,
+    isSpecialPaste = false,
+    pasteFrom: ISheetDiscreteRangeLocation | null
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
@@ -153,14 +160,16 @@ export function getSetCellFormulaMutations(
         }
     }
 
+    // eslint-disable-next-line complexity
     matrix.forValue((row, col, value) => {
         const originalFormula = value.f || '';
         const originalFormulaId = value.si || '';
 
         let valueObject: ICellDataWithSpanInfo = {};
-        // Paste the formula only, you also need to process some regular values
+        // Paste the formula only, you also need to process some regular values, but style information is not needed
         if (isSpecialPaste) {
             valueObject = Tools.deepClone(value);
+            valueObject.s = null;
         }
 
         if (!copyRowLength || !copyColumnLength) {
@@ -169,11 +178,31 @@ export function getSetCellFormulaMutations(
 
         // Directly reuse when there is a formula id
         if (isFormulaId(originalFormulaId)) {
-            valueObject.si = originalFormulaId;
-            valueObject.f = null;
-            valueObject.v = null;
-            valueObject.p = null;
-        } else if (isFormulaString(originalFormula) && copyInfo.pasteType === PREDEFINED_HOOK_NAME.DEFAULT_PASTE) {
+            const { unitId: pasteFromUnitId = '', subUnitId: pasteFromSubUnitId = '', range: pasteFromRange } = pasteFrom || {};
+
+            if (((pasteFromUnitId && unitId !== pasteFromUnitId) || (pasteFromSubUnitId && subUnitId !== pasteFromSubUnitId)) && pasteFromRange?.rows && pasteFromRange?.cols) {
+                const formulaString = formulaDataModel.getFormulaStringByCell(pasteFromRange.rows[row], pasteFromRange.cols[col], pasteFromSubUnitId, pasteFromUnitId);
+
+                const rowIndex = row % copyRowLength;
+                const colIndex = col % copyColumnLength;
+
+                const copyX = copyInfo?.copyRange ? copyInfo?.copyRange?.cols[colIndex] : colIndex;
+                const copyY = copyInfo?.copyRange ? copyInfo?.copyRange?.rows[rowIndex] : rowIndex;
+                const offsetX = range.cols[col] - copyX;
+                const offsetY = range.rows[row] - copyY;
+                const shiftedFormula = lexerTreeBuilder.moveFormulaRefOffset(formulaString || '', offsetX, offsetY);
+
+                valueObject.si = null;
+                valueObject.f = shiftedFormula;
+                valueObject.v = null;
+                valueObject.p = null;
+            } else {
+                valueObject.si = originalFormulaId;
+                valueObject.f = null;
+                valueObject.v = null;
+                valueObject.p = null;
+            }
+        } else if (isFormulaString(originalFormula)) {
             const rowIndex = row % copyRowLength;
             const colIndex = col % copyColumnLength;
 
@@ -201,6 +230,13 @@ export function getSetCellFormulaMutations(
                 valueObject.v = null;
                 valueObject.p = null;
             }
+        }
+
+        // If there is rich text, remove the style
+        const richText = getCellRichText(value);
+        if (richText) {
+            valueObject.p = null;
+            valueObject.v = richText;
         }
 
         valueMatrix.setValue(range.rows[row], range.cols[col], valueObject);
@@ -231,4 +267,20 @@ export function getSetCellFormulaMutations(
         undos: undoMutationsInfo,
         redos: redoMutationsInfo,
     };
+}
+
+function getCellRichText(cell: ICellData) {
+    if (cell?.p) {
+        const body = cell?.p.body;
+
+        if (body == null) {
+            return;
+        }
+
+        const data = body.dataStream;
+        const lastString = data.substring(data.length - 2, data.length);
+        const newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
+
+        return newDataStream;
+    }
 }

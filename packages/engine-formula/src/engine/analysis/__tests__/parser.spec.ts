@@ -36,7 +36,6 @@ import { Minus } from '../../../functions/meta/minus';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test indirect', () => {
-    // const textFunction = new Makearray(FUNCTION_NAMES_LOGICAL.MAKEARRAY);
     let get: Injector['get'];
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;

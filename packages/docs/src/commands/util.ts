@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import type { IOperation, Nullable } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-
-export interface IInsertImageOperationParams {
-    files: Nullable<File[]>;
-};
+import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IAccessor } from '@wendellhu/redi';
+import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 
 /**
- * @deprecated Do not use command as event!
+ * Get the skeleton of the command's target.
+ * @param accessor The injection accessor.
+ * @param unitId Unit ID.
  */
-export const InsertDocImageOperation: IOperation<IInsertImageOperationParams> = {
-    id: 'doc.operation.insert-float-image',
-    type: CommandType.OPERATION,
-    handler: () => true,
-};
+export function getCommandSkeleton(accessor: IAccessor, unitId: string) {
+    const renderManagerService = accessor.get(IRenderManagerService);
+    return renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+}

@@ -118,7 +118,7 @@ export class DocDrawingController extends Disposable {
             return false;
         }
 
-        // TODO@wzhudev: should move to docs-drawing
+        // TODO@wzhudev: should move to docs-drawing.
 
         Object.keys(drawingDataModels).forEach((drawingId) => {
             const drawingDataModel = drawingDataModels[drawingId];

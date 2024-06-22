@@ -90,8 +90,8 @@ function _changeDrawingToSkeletonFormat(
     return skeDrawings;
 }
 
-function _getDrawingSkeletonFormat(drawingOrigin: IDocDrawingBase) {
-    const drawingId = drawingOrigin.drawingId;
+function _getDrawingSkeletonFormat(drawingOrigin: IDocDrawingBase): IDocumentSkeletonDrawing {
+    const { drawingId } = drawingOrigin;
 
     return {
         drawingId,
@@ -102,6 +102,11 @@ function _getDrawingSkeletonFormat(drawingOrigin: IDocDrawingBase) {
         angle: 0,
         initialState: false,
         drawingOrigin,
+        columnLeft: 0,
+        lineHeight: 0,
+        lineTop: 0,
+        blockAnchorTop: 0,
+        isPageBreak: false,
     };
 }
 
@@ -163,10 +168,11 @@ export function lineBreaking(
 
         const { blockId } = customBlock;
         const drawingOrigin = drawings[blockId];
-        if (drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE) {
-            paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
-        } else {
+
+        if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
             paragraphInlineSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
+        } else {
+            paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
         }
     }
 

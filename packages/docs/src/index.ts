@@ -28,7 +28,7 @@ export {
     UpdateCommand,
     EditorInsertTextCommandId,
 } from './commands/commands/core-editing.command';
-export { DeleteLeftCommand, DeleteRightCommand } from './commands/commands/delete.command';
+export { DeleteLeftCommand, DeleteRightCommand, DeleteCustomBlockCommand, type IDeleteCustomBlockParams } from './commands/commands/delete.command';
 export { type IIMEInputCommandParams, IMEInputCommand } from './commands/commands/ime-input.command';
 export {
     SetInlineFormatBoldCommand,
@@ -72,3 +72,4 @@ export { SelectAllOperation } from './commands/operations/select-all.operation';
 export { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 export { SetDocZoomRatioOperation, type ISetDocZoomRatioOperationParams } from './commands/operations/set-doc-zoom-ratio.operation';
 export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
+export { getRetainAndDeleteFromReplace } from './basics/retain-delete-params';

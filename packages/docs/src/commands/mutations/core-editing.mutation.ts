@@ -93,9 +93,16 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             };
         }
 
+        // console.log(params);
+
         // Step 1: Update Doc Data Model.
         const undoActions = JSONX.invertWithDoc(actions, documentDataModel.getSnapshot());
         documentDataModel.apply(actions);
+
+        // console.log('trigger', trigger);
+        // console.log('redoActions', actions);
+        // // console.log('undoActions', undoActions);
+        // console.log(documentDataModel);
 
         // Step 2: Update Doc View Model.
         const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);

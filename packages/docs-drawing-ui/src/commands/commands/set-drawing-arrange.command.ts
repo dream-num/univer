@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICommand, Nullable } from '@univerjs/core';
+import type { ICommand, IMutationInfo, JSONXActions, Nullable } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
-    IUndoRedoService,
+    JSONX,
+    Tools,
 } from '@univerjs/core';
-import { DocDrawingApplyType, IDocDrawingService, SetDocDrawingApplyMutation } from '@univerjs/docs-drawing';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import { RichTextEditingMutation } from '@univerjs/docs';
+import { IDocDrawingService } from '@univerjs/docs-drawing';
 import type { IDrawingJsonUndo1, IDrawingOrderMapParam } from '@univerjs/drawing';
 import { ArrangeTypeEnum } from '@univerjs/drawing';
 import type { IAccessor } from '@wendellhu/redi';
@@ -30,18 +33,20 @@ export interface ISetDrawingArrangeCommandParams extends IDrawingOrderMapParam {
 }
 
 /**
- * The command to insert new defined name
+ * The command to arrange drawings.
  */
 export const SetDocDrawingArrangeCommand: ICommand = {
     id: 'doc.command.set-drawing-arrange',
+
     type: CommandType.COMMAND,
+
     handler: (accessor: IAccessor, params?: ISetDrawingArrangeCommandParams) => {
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-
-        if (!params) return false;
-
         const docDrawingService = accessor.get(IDocDrawingService);
+
+        if (params == null) {
+            return false;
+        }
 
         const { unitId, subUnitId, drawingIds, arrangeType } = params;
 
@@ -62,24 +67,38 @@ export const SetDocDrawingArrangeCommand: ICommand = {
             return false;
         }
 
-        const { objects, redo, undo } = jsonOp;
+        const { redo } = jsonOp;
 
-        const result = commandService.syncExecuteCommand(SetDocDrawingApplyMutation.id, { op: redo, unitId, subUnitId, objects, type: DocDrawingApplyType.ARRANGE });
-
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                unitID: unitId,
-                undoMutations: [
-                    { id: SetDocDrawingApplyMutation.id, params: { op: undo, unitId, subUnitId, objects, type: DocDrawingApplyType.ARRANGE } },
-                ],
-                redoMutations: [
-                    { id: SetDocDrawingApplyMutation.id, params: { op: redo, unitId, subUnitId, objects, type: DocDrawingApplyType.ARRANGE } },
-                ],
-            });
-
-            return true;
+        if (redo == null) {
+            return false;
         }
 
-        return false;
+        const rawActions: JSONXActions = [];
+
+        // TODO: @JOCS, It's best to build the actions yourself.
+        let redoCopy = Tools.deepClone(redo)! as JSONXActions;
+        redoCopy = redoCopy!.slice(3)! as JSONXActions;
+        redoCopy!.unshift('drawingsOrder');
+        rawActions.push(redoCopy!);
+
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                actions: [],
+                textRanges: null,
+            },
+        };
+
+        doMutation.params.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        return Boolean(result);
     },
 };

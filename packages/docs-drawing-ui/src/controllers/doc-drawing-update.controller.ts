@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
-import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType, WrapTextType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
@@ -43,13 +43,14 @@ export class DocDrawingUpdateController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
-        @IDocDrawingService private readonly _sheetDrawingService: IDocDrawingService,
+        @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManager: TextSelectionManagerService
     ) {
         super();
 
@@ -92,19 +93,18 @@ export class DocDrawingUpdateController extends Disposable {
 
                     this._imageIoService.setWaitCount(fileLength);
 
-                    params.files.forEach(async (file) => {
-                        await this._insertFloatImage(file);
-                    });
+                    await this._insertFloatImages(params.files);
                 }
             })
         );
     }
 
-    private async _insertFloatImage(file: File) {
-        let imageParam: Nullable<IImageIoServiceParam>;
+    // eslint-disable-next-line max-lines-per-function
+    private async _insertFloatImages(files: File[]) {
+        let imageParams: Nullable<IImageIoServiceParam>[] = [];
 
         try {
-            imageParam = await this._imageIoService.saveImage(file);
+            imageParams = await Promise.all(files.map((file) => this._imageIoService.saveImage(file)));
         } catch (error) {
             const type = (error as Error).message;
             if (type === ImageUploadStatusType.ERROR_EXCEED_SIZE) {
@@ -125,7 +125,7 @@ export class DocDrawingUpdateController extends Disposable {
             }
         }
 
-        if (imageParam == null) {
+        if (imageParams.length === 0) {
             return;
         }
 
@@ -133,9 +133,9 @@ export class DocDrawingUpdateController extends Disposable {
         if (info == null) {
             return;
         }
+
         const { unitId, subUnitId } = info;
-        const { imageId, imageSourceType, source, base64Cache } = imageParam;
-        const { width, height, image } = await getImageSize(base64Cache || '');
+        const docDrawingParams: IDocDrawing[] = [];
 
         const renderObject = this._renderManagerService.getRenderById(unitId);
 
@@ -143,41 +143,57 @@ export class DocDrawingUpdateController extends Disposable {
             return;
         }
 
-        const { width: sceneWidth, height: sceneHeight } = renderObject.scene;
+        for (const imageParam of imageParams) {
+            if (imageParam == null) {
+                continue;
+            }
+            const { imageId, imageSourceType, source, base64Cache } = imageParam;
+            const { width, height, image } = await getImageSize(base64Cache || '');
 
-        this._imageIoService.addImageSourceCache(imageId, imageSourceType, image);
+            const { width: sceneWidth, height: sceneHeight } = renderObject.scene;
 
-        let scale = 1;
-        if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
-            const scaleWidth = DRAWING_IMAGE_WIDTH_LIMIT / width;
-            const scaleHeight = DRAWING_IMAGE_HEIGHT_LIMIT / height;
-            scale = Math.max(scaleWidth, scaleHeight);
+            this._imageIoService.addImageSourceCache(imageId, imageSourceType, image);
+
+            let scale = 1;
+            if (width > DRAWING_IMAGE_WIDTH_LIMIT || height > DRAWING_IMAGE_HEIGHT_LIMIT) {
+                const scaleWidth = DRAWING_IMAGE_WIDTH_LIMIT / width;
+                const scaleHeight = DRAWING_IMAGE_HEIGHT_LIMIT / height;
+                scale = Math.max(scaleWidth, scaleHeight);
+            }
+
+            const docTransform = this._getImagePosition(width * scale, height * scale, sceneWidth, sceneHeight);
+
+            if (docTransform == null) {
+                return;
+            }
+
+            const docDrawingParam: IDocDrawing = {
+                unitId,
+                subUnitId,
+                drawingId: imageId,
+                drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                imageSourceType,
+                source,
+                transform: docDrawingPositionToTransform(docTransform),
+                docTransform,
+                behindDoc: BooleanNumber.FALSE,
+                title: '',
+                description: '',
+                layoutType: PositionedObjectLayoutType.INLINE,
+                wrapText: WrapTextType.BOTH_SIDES,
+                distB: 0,
+                distL: 0,
+                distR: 0,
+                distT: 0,
+            };
+
+            docDrawingParams.push(docDrawingParam);
         }
-
-        const docTransform = this._getImagePosition(width * scale, height * scale, sceneWidth, sceneHeight);
-
-        if (docTransform == null) {
-            return;
-        }
-
-        const docDrawingParam: IDocDrawing = {
-            unitId,
-            subUnitId,
-            drawingId: imageId,
-            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
-            imageSourceType,
-            source,
-            transform: docDrawingPositionToTransform(docTransform),
-            docTransform,
-            title: '', description: '', layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
-        };
 
         this._commandService.executeCommand(InsertDocDrawingCommand.id, {
             unitId,
-            drawings: [docDrawingParam],
+            drawings: docDrawingParams,
         } as IInsertDrawingCommandParams);
-
-        this._docSkeletonManagerService.getCurrent()?.skeleton.calculate();
     }
 
     private _getUnitInfo() {
@@ -195,7 +211,9 @@ export class DocDrawingUpdateController extends Disposable {
         };
     }
 
-    private _getImagePosition(imageWidth: number, imageHeight: number, sceneWidth: number, sceneHeight: number): Nullable<IDocDrawingPosition> {
+    private _getImagePosition(
+        imageWidth: number, imageHeight: number, _sceneWidth: number, _sceneHeight: number
+    ): Nullable<IDocDrawingPosition> {
         const activeTextRange = this._textSelectionManagerService.getActiveTextRange();
         const position = activeTextRange?.getAbsolutePosition() || {
             left: 0,
@@ -209,11 +227,11 @@ export class DocDrawingUpdateController extends Disposable {
                 height: imageHeight,
             },
             positionH: {
-                relativeFrom: ObjectRelativeFromH.MARGIN,
+                relativeFrom: ObjectRelativeFromH.PAGE,
                 posOffset: position.left,
             },
             positionV: {
-                relativeFrom: ObjectRelativeFromV.PAGE,
+                relativeFrom: ObjectRelativeFromV.MARGIN,
                 posOffset: position.top,
             },
             angle: 0,
@@ -234,6 +252,7 @@ export class DocDrawingUpdateController extends Disposable {
     }
 
     private _updateDrawingListener() {
+        // REFACTOR: @JOCS  需要修改，移除 transformer 修改，不需要跟新了，单独处理了。
         this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
             const drawings: Partial<IDocDrawing>[] = [];
 
@@ -246,20 +265,20 @@ export class DocDrawingUpdateController extends Disposable {
             // const { pageMarginCache, docsLeft, docsTop } = offsetInfo;
 
             (params as IDocDrawing[]).forEach((param) => {
-                const { unitId, subUnitId, drawingId, drawingType, transform } = param;
+                const { unitId, subUnitId, drawingId, transform } = param;
                 if (transform == null) {
                     return;
                 }
 
-                const sheetDrawing = this._sheetDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
+                const docDrawing = this._docDrawingService.getDrawingByParam({ unitId, subUnitId, drawingId });
 
-                if (sheetDrawing == null) {
+                if (docDrawing == null) {
                     return;
                 }
 
                 // const { marginLeft, marginTop } = pageMarginCache.get(drawingId) || { marginLeft: 0, marginTop: 0 };
 
-                const docTransform = transformToDocDrawingPosition({ ...sheetDrawing.transform, ...transform });
+                const docTransform = transformToDocDrawingPosition({ ...docDrawing.transform, ...transform });
 
                 if (docTransform == null) {
                     return;
@@ -389,15 +408,59 @@ export class DocDrawingUpdateController extends Disposable {
         });
     }
 
+    private _getCurrentSceneAndTransformer() {
+        const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
+        if (docsSkeletonObject == null) {
+            return;
+        }
+
+        const { unitId } = docsSkeletonObject;
+
+        const renderObject = this._renderManagerService.getRenderById(unitId);
+
+        if (renderObject == null) {
+            return;
+        }
+
+        const { scene, mainComponent } = renderObject;
+
+        if (scene == null || mainComponent == null) {
+            return;
+        }
+
+        const transformer = scene.getTransformerByCreate();
+
+        const { docsLeft, docsTop } = (mainComponent as Documents).getOffsetConfig();
+
+        return { scene, transformer, docsLeft, docsTop };
+    }
+
     private _focusDrawingListener() {
         this.disposeWithMe(
             this._drawingManagerService.focus$.subscribe((params) => {
+                const { transformer, docsLeft, docsTop } = this._getCurrentSceneAndTransformer() ?? {};
                 if (params == null || params.length === 0) {
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
-                    this._sheetDrawingService.focusDrawing([]);
+                    this._docDrawingService.focusDrawing([]);
+
+                    if (transformer) {
+                        transformer.resetProps({
+                            zeroTop: 0,
+                            zeroLeft: 0,
+                        });
+                    }
                 } else {
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
-                    this._sheetDrawingService.focusDrawing(params);
+                    this._docDrawingService.focusDrawing(params);
+                    // Need to remove text selections when focus drawings.
+                    this._textSelectionManager.replaceTextRanges([]);
+
+                    if (transformer) {
+                        transformer.resetProps({
+                            zeroTop: docsTop,
+                            zeroLeft: docsLeft,
+                        });
+                    }
                 }
             })
         );

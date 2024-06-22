@@ -34,9 +34,9 @@ export enum SHAPE_TYPE {
 // POINTERCANCEL = 'pointercancel',
 // LOSTPOINTERCAPTURE = 'lostpointercapture',
 
+/** @deprecated subscribe to specific event API. */
 export enum EVENT_TYPE {
     PointerMove = 'PointerMove',
-    PointerDown = 'PointerDown',
     PointerUp = 'PointerUp',
     PointerOut = 'PointerOut',
     PointerLeave = 'PointerLeave',

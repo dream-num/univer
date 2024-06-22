@@ -45,15 +45,12 @@ interface INotifyObserversReturn {
     stopPropagation: boolean;
 }
 
+/** @deprecated */
 export function isObserver(value: any) {
     return value instanceof Observer;
 }
 
 /**
- * Represent an WorkBookObserver registered to a given Observable object.
- * The current implementation of the rendering layer is still in use.
- *
- * @deprecated use rxjs instead
  */
 export class Observer<T = void> {
     dispose() {
@@ -156,17 +153,7 @@ export class EventSubject<T> extends Subject<[T, EventState]> {
 }
 
 /**
- * The Observable class is a simple implementation of the Observable pattern.
- *
- * The current implementation of the rendering layer is still in use.
- *
- * @deprecated use rxjs instead
- *
- * @remarks
- * There's one slight particularity though: a given Observable can notify its observer using a particular mask value, only the Observers registered with this mask value will be notified.
- * This enable a more fine grained execution without having to rely on multiple different Observable objects.
- * For instance you may have a given Observable that have four different types of notifications: Move (mask = 0x01), Stop (mask = 0x02), Turn Right (mask = 0X04), Turn Left (mask = 0X08).
- * A given observer can register itself with only Move and Stop (mask = 0x03), then it will only be notified when one of these two occurs and will never be for Turn Left/Right.
+ * @deprecated Use `EventSubject` instead.
  */
 export class Observable<T> {
     protected _observers = new Array<Observer<T>>();

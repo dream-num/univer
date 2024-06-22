@@ -150,7 +150,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         this.disposeWithMe(
             toDisposable(
-                renderConfig.document.onPointerDownObserver.add(() => {
+                renderConfig.document.pointerDown$.subscribeEvent(() => {
                     // fix https://github.com/dream-num/univer/issues/628, need to recalculate the cell editor size after it acquire focus.
                     if (this._editorBridgeService.isVisible()) {
                         const param = this._editorBridgeService.getEditCellState();

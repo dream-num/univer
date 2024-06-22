@@ -166,7 +166,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-    private _cancelFocusObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _cancelFocusSubscription: Nullable<Subscription>;
 
     private _transformerControlMap = new Map<string, Group>();
     private _selectedObjectMap = new Map<string, BaseObject>();
@@ -231,7 +231,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     clearSelectedObjects() {
         this._selectedObjectMap.clear();
-        this._cancelFocusObserver?.dispose();
+        this._cancelFocusSubscription?.unsubscribe();
+        this._cancelFocusSubscription = null;
         this._clearControls(true);
     }
 
@@ -424,11 +425,12 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._moveObserver?.dispose();
         this._upObserver?.dispose();
 
-        this._cancelFocusObserver?.dispose();
+        this._cancelFocusSubscription?.unsubscribe();
+        this._cancelFocusSubscription = null;
 
         this._moveObserver = null;
         this._upObserver = null;
-        this._cancelFocusObserver = null;
+        this._cancelFocusSubscription = null;
 
         this._transformerControlMap.forEach((control) => {
             control.dispose();
@@ -1606,8 +1608,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _addCancelObserver(scene: Scene) {
-        this._cancelFocusObserver?.dispose();
-        this._cancelFocusObserver = scene.onPointerDownObserver.add(() => {
+        this._cancelFocusSubscription?.unsubscribe();
+        this._cancelFocusSubscription = scene.pointerDown$.subscribeEvent(() => {
             this.clearSelectedObjects();
         });
     }

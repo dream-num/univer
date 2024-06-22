@@ -196,7 +196,8 @@ export class FormulaEditorController extends RxDisposable {
 
         this.disposeWithMe(
             toDisposable(
-                documentComponent.onPointerDownObserver.add(() => {
+                documentComponent.pointerDown$.subscribeEvent(() => {
+
                     // When clicking on the formula bar, the cell editor also needs to enter the edit state
                     const visibleState = this._editorBridgeService.isVisible();
                     if (visibleState.visible === false) {

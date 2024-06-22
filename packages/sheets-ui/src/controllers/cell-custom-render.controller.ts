@@ -138,7 +138,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                     return [activeRender, info] as const;
                 };
 
-                const disposable = spreadsheet.onPointerDownObserver.add((evt) => {
+                const disposable = spreadsheet.pointerDown$.subscribeEvent((evt) => {
                     const activeRenderInfo = getActiveRender(evt);
                     if (activeRenderInfo) {
                         const [activeRender, cellContext] = activeRenderInfo;

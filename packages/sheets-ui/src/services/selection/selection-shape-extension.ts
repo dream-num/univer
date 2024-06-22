@@ -164,7 +164,7 @@ export class SelectionShapeExtension {
                 control.resetCursor();
             });
 
-            control.onPointerDownObserver.add(this._controlEvent.bind(this));
+            control.pointerDown$.subscribeEvent(this._controlEvent.bind(this));
         });
     }
 
@@ -406,7 +406,7 @@ export class SelectionShapeExtension {
                 control.resetCursor();
             });
 
-            control.onPointerDownObserver.add((evt: IMouseEvent | IPointerEvent) => {
+            control.pointerDown$.subscribeEvent((evt: IMouseEvent | IPointerEvent) => {
                 this._widgetEvent(evt, cursors[index]);
             });
         });
@@ -599,7 +599,7 @@ export class SelectionShapeExtension {
             fillControl.resetCursor();
         });
 
-        fillControl.onPointerDownObserver.add(this._fillEvent.bind(this));
+        fillControl.pointerDown$.subscribeEvent(this._fillEvent.bind(this));
     }
 
     private _fillMoving(moveOffsetX: number, moveOffsetY: number) {

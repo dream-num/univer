@@ -19,7 +19,6 @@ import type {
 import {
     Disposable,
     RANGE_TYPE,
-    toDisposable,
 } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import { SelectionManagerService } from '@univerjs/sheets';
@@ -47,10 +46,10 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
     }
 
     private _init(): void {
-        const spreadsheetPointerDownObserver = (this._context?.mainComponent as Spreadsheet)?.onPointerDownObserver;
+        const spreadsheetPointerDownObserver = (this._context?.mainComponent as Spreadsheet)?.pointerDown$;
 
         // Content range context menu
-        const spreadsheetObserver = spreadsheetPointerDownObserver.add((event) => {
+        const spreadsheetSubscription = spreadsheetPointerDownObserver.subscribeEvent((event) => {
             if (event.button === 2) {
                 const selections = this._selectionManagerService.getSelections();
                 const currentSelection = selections?.[0];
@@ -89,26 +88,25 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
                 }
             }
         });
-        this.disposeWithMe(toDisposable(() => spreadsheetPointerDownObserver.remove(spreadsheetObserver)));
+        this.disposeWithMe(spreadsheetSubscription);
 
         // Row header context menu
         const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
-        const rowHeaderPointerDownObserver = spreadsheetRowHeader.onPointerDownObserver;
-        const rowHeaderObserver = rowHeaderPointerDownObserver.add((event) => {
+        const rowHeaderSub = spreadsheetRowHeader.pointerDown$.subscribeEvent((event) => {
             if (event.button === 2) {
                 this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU);
             }
         });
-        this.disposeWithMe(toDisposable(() => spreadsheetPointerDownObserver.remove(rowHeaderObserver)));
+        this.disposeWithMe(rowHeaderSub);
 
         // Col header context menu
-        const colHeaderPointerDownObserver = spreadsheetColumnHeader.onPointerDownObserver;
-        const colHeaderObserver = colHeaderPointerDownObserver.add((event) => {
+        const colHeaderPointerDownObserver = spreadsheetColumnHeader.pointerDown$;
+        const colHeaderObserver = colHeaderPointerDownObserver.subscribeEvent((event) => {
             if (event.button === 2) {
                 this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
             }
         });
-        this.disposeWithMe(toDisposable(() => spreadsheetPointerDownObserver.remove(colHeaderObserver)));
+        this.disposeWithMe(colHeaderObserver);
     }
 }

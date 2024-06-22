@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
-import { Disposable, Observable } from '@univerjs/core';
+import { Disposable, EventSubject, Observable } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import type { CURSOR_TYPE, EVENT_TYPE } from './basics/const';
@@ -31,7 +31,7 @@ export abstract class ThinScene extends Disposable {
 
     onFileLoadedObservable = new Observable<string>();
 
-    onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
+    pointerDown$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
     onPointerMoveObserver = new Observable<IPointerEvent | IMouseEvent>();
 
@@ -205,7 +205,7 @@ export abstract class ThinScene extends Disposable {
     override dispose(): void {
         this.onTransformChangeObservable.clear();
         this.onFileLoadedObservable.clear();
-        this.onPointerDownObserver.clear();
+        this.pointerDown$.complete();
         this.onPointerMoveObserver.clear();
         this.onPointerUpObserver.clear();
         this.onPointerEnterObserver.clear();
@@ -233,9 +233,9 @@ export abstract class ThinScene extends Disposable {
 
     abstract setObjectBehavior(o: BaseObject): void;
 
-    attachTransformerTo(o: BaseObject) {}
+    attachTransformerTo(o: BaseObject) { }
 
-    detachTransformerFrom(o: BaseObject) {}
+    detachTransformerFrom(o: BaseObject) { }
 
     makeDirtyNoParent(state: boolean = true): ThinScene {
         return this;

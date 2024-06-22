@@ -213,7 +213,7 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
             this._context.scene.resetCursor();
         });
 
-        this._hoverMenu.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        this._hoverMenu.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             const currentColumn = this._currentColumn;
             const currentSelectionDatas = this._selectionManagerService.getSelectionRanges();
             const menuInSelections: boolean = !!currentSelectionDatas
@@ -229,7 +229,6 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
             if (!menuInSelections) {
                 // Fix #1089
                 // Here we just change the selection here without any other operations.
-                // sheetObject.spreadsheetColumnHeader.onPointerDownObserver.notifyObservers(evt);
                 const selection = this._getSelectionOnColumn(currentColumn);
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, selection);
             }

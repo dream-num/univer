@@ -35,7 +35,7 @@ import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle 
 import { getNormalSelectionStyle } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
-import type { Observable } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -157,8 +157,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     private _scrollTimer!: ScrollTimer;
 
-    private _cancelDownObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
+    private _pointerdownSub: Nullable<Subscription>;
     private _cancelUpObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _skeleton: Nullable<SpreadsheetSkeleton>;
@@ -1165,8 +1164,10 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._scrollTimer?.dispose();
 
         const mainScene = scene.getEngine()?.activeScene;
-        mainScene?.onPointerDownObserver.remove(this._cancelDownObserver);
         mainScene?.onPointerUpObserver.remove(this._cancelUpObserver);
+
+        this._pointerdownSub?.unsubscribe();
+        this._pointerdownSub = null;
     }
 
     private _addCancelObserver() {
@@ -1180,10 +1181,11 @@ export class SelectionRenderService implements ISelectionRenderService {
             return;
         }
 
-        mainScene.onPointerDownObserver.remove(this._cancelDownObserver);
         mainScene.onPointerUpObserver.remove(this._cancelUpObserver);
-        this._cancelDownObserver = mainScene.onPointerDownObserver.add(() => this._endSelection());
         this._cancelUpObserver = mainScene.onPointerUpObserver.add(() => this._endSelection());
+
+        this._pointerdownSub?.unsubscribe();
+        this._pointerdownSub = mainScene.pointerDown$.subscribeEvent(() => this._endSelection());
     }
 
     private _getSelectedRangeWithMerge(

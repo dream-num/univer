@@ -40,6 +40,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
+import { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
@@ -71,6 +72,8 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
     private _moveHelperLineShape: Nullable<Rect>;
 
+    private _downSubscriptions: Nullable<Subscription>;
+    /** @deprecated */
     private _rowOrColumnDownObservers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
 
     private _rowOrColumnMoveObservers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
@@ -101,14 +104,18 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
         const scene = this._context.scene;
 
-        [
-            ...this._rowOrColumnDownObservers,
-            ...this._rowOrColumnMoveObservers,
-            ...this._rowOrColumnLeaveObservers,
-        ].forEach((obs) => {
-            spreadsheetRowHeader.onPointerDownObserver.remove(obs);
-            spreadsheetColumnHeader.onPointerDownObserver.remove(obs);
+        this._rowOrColumnMoveObservers.forEach((obs) => {
+            spreadsheetRowHeader.onPointerMoveObserver.remove(obs);
+            spreadsheetColumnHeader.onPointerMoveObserver.remove(obs);
         });
+
+        this._rowOrColumnLeaveObservers.forEach((obs) => {
+            spreadsheetRowHeader.onPointerLeaveObserver.remove(obs);
+            spreadsheetColumnHeader.onPointerLeaveObserver.remove(obs);
+        });
+
+        this._downSubscriptions?.unsubscribe();
+        this._downSubscriptions = null;
 
         scene.onPointerMoveObserver.remove(this._moveObserver);
         scene.onPointerUpObserver.remove(this._upObserver);
@@ -186,9 +193,10 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
             })
         );
 
-        this._rowOrColumnDownObservers.push(
+        this._downSubscriptions = new Subscription();
+        this._downSubscriptions.add(
             // eslint-disable-next-line max-lines-per-function
-            eventBindingObject?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            eventBindingObject?.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                 if (skeleton == null) {
                     return;

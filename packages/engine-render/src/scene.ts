@@ -715,7 +715,7 @@ export class Scene extends ThinScene {
         this._inputManager = null;
         this._transformer?.dispose();
         this._transformer = null;
-        this.onPointerDownObserver.clear();
+        this.pointerDown$.complete();
         this.onPointerMoveObserver.clear();
         this.onPointerUpObserver.clear();
         this.onPointerEnterObserver.clear();
@@ -866,7 +866,7 @@ export class Scene extends ThinScene {
 
     override triggerPointerDown(evt: IPointerEvent | IMouseEvent) {
         if (
-            !this.onPointerDownObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.pointerDown$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerPointerDown(evt);

@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { COLORS, Observable } from '@univerjs/core';
+import { COLORS, EventSubject } from '@univerjs/core';
 
 import { CURSOR_TYPE } from '../../basics/const';
 import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
@@ -35,7 +35,7 @@ const arrowPath =
     'M512 1024C229.248 1024 0 794.752 0 512S229.248 0 512 0s512 229.248 512 512-229.248 512-512 512z m200.746667-478.506667l1.749333-1.664 30.165333-30.165333-330.496-330.581333a42.837333 42.837333 0 0 0-60.288 0 42.538667 42.538667 0 0 0 0 60.330666l270.08 270.165334-270.08 269.952a42.496 42.496 0 0 0 0 60.288c16.64 16.64 43.861333 16.469333 60.288 0.042666l298.581334-298.368z';
 
 export class Slide extends SceneViewer {
-    onSlideChangePageByNavigationObservable = new Observable<Nullable<string>>();
+    slideChangePageByNavigation$ = new EventSubject<Nullable<string>>();
 
     private _navigationEnabled = false;
 
@@ -196,18 +196,18 @@ export class Slide extends SceneViewer {
     }
 
     private _addNavTrigger(leftArrow: Path, rightArrow: Path) {
-        leftArrow.pointerDown$.add(() => {
+        leftArrow.pointerDown$.subscribeEvent(() => {
             const result = this._getSubScenesIndex(this.getActiveSubScene()?.sceneKey);
             const prevKey = result?.previousScene.sceneKey;
             this.changePage(prevKey);
-            this.onSlideChangePageByNavigationObservable.notifyObservers(prevKey);
+            this.slideChangePageByNavigation$.emitEvent(prevKey);
         });
 
-        rightArrow.pointerDown$.add(() => {
+        rightArrow.pointerDown$.subscribeEvent(() => {
             const result = this._getSubScenesIndex(this.getActiveSubScene()?.sceneKey);
             const nextKey = result?.nextScene.sceneKey;
             this.changePage(nextKey);
-            this.onSlideChangePageByNavigationObservable.notifyObservers(nextKey);
+            this.slideChangePageByNavigation$.emitEvent(nextKey);
         });
     }
 

@@ -305,7 +305,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
         this.disposeWithMe(
             toDisposable(
-                eventBindingObject.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                eventBindingObject.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                     const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                     if (skeleton == null) return;
 

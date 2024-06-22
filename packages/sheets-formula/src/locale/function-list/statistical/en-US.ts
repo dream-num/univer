@@ -16,7 +16,7 @@
 
 export default {
     AVEDEV: {
-        description: 'Returns the average of the absolute deviations of data points from their mean',
+        description: 'Returns the average of the absolute deviations of data points from their mean.',
         abstract: 'Returns the average of the absolute deviations of data points from their mean',
         links: [
             {
@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want the average.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want the average, up to a maximum of 255.' },
         },
     },
     AVERAGE: {

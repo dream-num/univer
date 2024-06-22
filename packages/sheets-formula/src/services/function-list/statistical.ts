@@ -34,9 +34,9 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.AVEDEV.functionParameter.number2.name',
                 detail: 'formula.functionList.AVEDEV.functionParameter.number2.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
+                example: 'B1:B20',
+                require: 0,
+                repeat: 1,
             },
         ],
     },

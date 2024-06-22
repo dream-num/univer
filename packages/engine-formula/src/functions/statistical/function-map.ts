@@ -38,8 +38,10 @@ import { Countifs } from './countifs';
 import { Countblank } from './countblank';
 import { Mina } from './mina';
 import { Maxa } from './maxa';
+import { Avedev } from './avedev';
 
 export const functionStatistical = [
+    [Avedev, FUNCTION_NAMES_STATISTICAL.AVEDEV],
     [Average, FUNCTION_NAMES_STATISTICAL.AVERAGE],
     [Averagea, FUNCTION_NAMES_STATISTICAL.AVERAGEA],
     [Averageif, FUNCTION_NAMES_STATISTICAL.AVERAGEIF],

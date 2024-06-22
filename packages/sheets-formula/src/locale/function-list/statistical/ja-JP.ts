@@ -17,7 +17,7 @@
 export default {
     AVEDEV: {
         description: 'データ全体の平均値に対するそれぞれのデータの絶対偏差の平均を返します。',
-        abstract: 'データ全体の平均値に対するそれぞれのデータの絶対偏差の平均を返します。',
+        abstract: 'データ全体の平均値に対するそれぞれのデータの絶対偏差の平均を返します',
         links: [
             {
                 title: '指導',
@@ -25,13 +25,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '平均を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 21', detail: '平均を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     AVERAGE: {
         description: '引数の平均値を返します。',
-        abstract: '引数の平均値を返します。',
+        abstract: '引数の平均値を返します',
         links: [
             {
                 title: '指導',
@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '平均を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '平均を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     AVERAGEA: {

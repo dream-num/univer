@@ -15,7 +15,7 @@
  */
 
 /* eslint-disable max-lines-per-function */
-import type { IFreeze, IRangeWithCoord, Nullable, Observer, ThemeService } from '@univerjs/core';
+import type { IFreeze, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import { ColorKit, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, isRectIntersect, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
@@ -51,7 +51,7 @@ export class SelectionShapeExtension {
 
     private _scenePointerMoveSub: Nullable<Subscription>;
 
-    private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerUpSub: Nullable<Subscription>;
 
     private _helperSelection: Nullable<Rect>;
 
@@ -142,10 +142,11 @@ export class SelectionShapeExtension {
 
     private _clearObserverEvent() {
         // this._scene.onPointerMove$.remove(this._scenePointerMoveSub);
+        // this._scene.onPointerUp$.remove(this._scenePointerUpSub);
         this._scenePointerMoveSub?.unsubscribe();
-        this._scene.onPointerUpObserver.remove(this._upObserver);
+        this._scenePointerUpSub?.unsubscribe();
         this._scenePointerMoveSub = null;
-        this._upObserver = null;
+        this._scenePointerUpSub = null;
     }
 
     private _initialControl() {
@@ -356,7 +357,7 @@ export class SelectionShapeExtension {
             });
         });
 
-        this._upObserver = scene.onPointerUpObserver.add(() => {
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
             this._helperSelection?.dispose();
             const scene = this._scene;
             scene.resetCursor();
@@ -575,7 +576,7 @@ export class SelectionShapeExtension {
             });
         });
 
-        this._upObserver = scene.onPointerUpObserver.add(() => {
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
             const scene = this._scene;
             scene.resetCursor();
             this._clearObserverEvent();
@@ -886,7 +887,7 @@ export class SelectionShapeExtension {
             });
         });
 
-        this._upObserver = scene.onPointerUpObserver.add(() => {
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
             this._helperSelection?.dispose();
             const scene = this._scene;
             scene.resetCursor();

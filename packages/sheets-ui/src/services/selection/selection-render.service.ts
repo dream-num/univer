@@ -131,7 +131,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     private _scenePointerMoveSub: Nullable<Subscription>;
 
-    private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerUpSub: Nullable<Subscription>;
 
     private _controlFillConfig$: BehaviorSubject<IControlFillConfig | null> =
         new BehaviorSubject<IControlFillConfig | null>(null);
@@ -158,7 +158,7 @@ export class SelectionRenderService implements ISelectionRenderService {
     private _scrollTimer!: ScrollTimer;
 
     private _pointerdownSub: Nullable<Subscription>;
-    private _cancelUpObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _mainScenePointerUpSub: Nullable<Subscription>;
 
     private _skeleton: Nullable<SpreadsheetSkeleton>;
 
@@ -516,11 +516,11 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._clearSelectionControls();
 
         this._scenePointerMoveSub?.unsubscribe();
-        this._upObserver?.dispose();
+        this._scenePointerUpSub?.unsubscribe();
         this._downObserver?.dispose();
 
         this._scenePointerMoveSub = null;
-        this._upObserver = null;
+        this._scenePointerUpSub = null;
         this._downObserver = null;
     }
 
@@ -914,7 +914,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             });
         });
 
-        this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent((_upEvt: IPointerEvent | IMouseEvent) => {
             this._endSelection();
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
 
@@ -1158,14 +1158,16 @@ export class SelectionRenderService implements ISelectionRenderService {
         }
 
         // scene.onPointerMove$.remove(this._scenePointerMoveSub);
+        // scene.onPointerUp$.remove(this._scenePointerUpSub);
         this._scenePointerMoveSub?.unsubscribe();
-        scene.onPointerUpObserver.remove(this._upObserver);
+        this._scenePointerUpSub?.unsubscribe();
         scene.enableEvent();
 
         this._scrollTimer?.dispose();
 
-        const mainScene = scene.getEngine()?.activeScene;
-        mainScene?.onPointerUpObserver.remove(this._cancelUpObserver);
+        // const mainScene = scene.getEngine()?.activeScene;
+        // mainScene?.onPointerUp$.remove(this._mainScenePointerUpSub);
+        this._mainScenePointerUpSub?.unsubscribe();
 
         this._pointerdownSub?.unsubscribe();
         this._pointerdownSub = null;
@@ -1182,8 +1184,9 @@ export class SelectionRenderService implements ISelectionRenderService {
             return;
         }
 
-        mainScene.onPointerUpObserver.remove(this._cancelUpObserver);
-        this._cancelUpObserver = mainScene.onPointerUpObserver.add(() => this._endSelection());
+        // mainScene.onPointerUp$.remove(this._mainScenePointerUpSub);
+        this._mainScenePointerUpSub?.unsubscribe();
+        this._mainScenePointerUpSub = mainScene.onPointerUp$.subscribeEvent(() => this._endSelection());
 
         this._pointerdownSub?.unsubscribe();
         this._pointerdownSub = mainScene.pointerDown$.subscribeEvent(() => this._endSelection());

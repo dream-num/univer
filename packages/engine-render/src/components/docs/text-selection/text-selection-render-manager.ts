@@ -252,7 +252,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _scene: Nullable<Scene>;
 
     private _document: Nullable<Documents>;
-    private _scenePointerMoveSub: Nullable<Subscription>;
+    private _scenePointerMoveSubs: Array<Subscription> = [];
+    private _scenePointerUpSubs: Array<Subscription> = [];
 
     constructor(@ILogService private readonly _logService: ILogService) {
         super();
@@ -526,7 +527,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         let preMoveOffsetY = evtOffsetY;
 
-        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSubs.push(scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             scene.setCursor(CURSOR_TYPE.TEXT);
 
@@ -542,25 +543,14 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
             preMoveOffsetX = moveOffsetX;
             preMoveOffsetY = moveOffsetY;
-        });
-        // this._moveObservers.push();
+        }));
 
-        this._upObservers.push(scene.onPointerUpObserver.add(() => {
+        this._scenePointerUpSubs.push(scene.onPointerUp$.subscribeEvent(() => {
             // scene.onPointerMoveObserver.remove(this._moveObserver);
             // scene.onPointerUpObserver.remove(this._upObserver);
-
-            this._moveObservers.forEach((obs) => {
-                obs?.dispose();
+            [...this._scenePointerMoveSubs, ...this._scenePointerUpSubs].forEach((e) => {
+                e.unsubscribe();
             });
-            this._scenePointerMoveSub?.unsubscribe();
-
-            this._upObservers.forEach((obs) => {
-                obs?.dispose();
-            });
-
-            this._moveObservers = [];
-
-            this._upObservers = [];
 
             scene.enableEvent();
 

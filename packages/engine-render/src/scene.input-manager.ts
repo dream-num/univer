@@ -246,9 +246,7 @@ export class InputManager extends Disposable {
             const isStop = currentObject?.triggerPointerUp(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
-                if (this._scene.onPointerUpObserver.hasObservers()) {
-                    this._scene.onPointerUpObserver.notifyObservers(evt);
-                }
+                this._scene.onPointerUp$.emitEvent(evt);
             }
 
             this._prePointerDoubleOrTripleClick(evt);

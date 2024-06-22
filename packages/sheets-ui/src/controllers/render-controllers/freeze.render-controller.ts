@@ -116,9 +116,9 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
     private _freezeLeaveObservers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
 
-    private _sceneOnPointerMoveSub: Nullable<Subscription>;
+    private _scenePointerMoveSub: Nullable<Subscription>;
 
-    private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerUpSub: Nullable<Subscription>;
 
     private _changeToRow: number = -1;
 
@@ -448,7 +448,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             this._changeToColumn = oldFreeze.startColumn;
             this._changeToRow = oldFreeze.startRow;
         }
-        this._sceneOnPointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const activeViewport = this._getActiveViewport(moveEvt);
 
             const { startX, startY, row, column } = getCoordByOffset(
@@ -512,7 +512,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         });
 
         // eslint-disable-next-line max-lines-per-function, complexity
-        this._upObserver = scene.onPointerUpObserver.add(() => {
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
             scene.resetCursor();
             scene.enableEvent();
             this._clearObserverEvent();
@@ -1452,12 +1452,13 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         if (sheetObject == null) {
             return;
         }
-        const { scene } = sheetObject;
+        // const { scene } = sheetObject;
         // scene.onPointerMove$.remove(this._moveObserver);
-        this._sceneOnPointerMoveSub?.unsubscribe();
-        scene.onPointerUpObserver.remove(this._upObserver);
-        this._sceneOnPointerMoveSub = null;
-        this._upObserver = null;
+        // scene.onPointerUp$.remove(this._scenePointerUpSub);
+        this._scenePointerMoveSub?.unsubscribe();
+        this._scenePointerUpSub?.unsubscribe();
+        this._scenePointerMoveSub = null;
+        this._scenePointerUpSub = null;
     }
 
     private _clearFreeze() {
@@ -1477,14 +1478,14 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         const { scene } = sheetObject;
         [...this._freezeMoveObservers, ...this._freezeLeaveObservers].forEach((obs) => {
             // scene.onPointerMove$.remove(obs);
-            this._sceneOnPointerMoveSub?.unsubscribe();
+            this._scenePointerMoveSub?.unsubscribe();
             scene.onPointerLeaveObserver.remove(obs);
         });
 
         // TODO @lumixraku scene.onPointerEnterObserver bind ponterMove?
         // scene.onPointerEnterObserver.remove(this._sceneOnPointerMoveSub);
         // scene.onPointerMove$.remove(this._upObserver);
-        this._sceneOnPointerMoveSub?.unsubscribe();
+        this._scenePointerMoveSub?.unsubscribe();
     }
 
     private _getPositionByIndex(row: number, column: number) {

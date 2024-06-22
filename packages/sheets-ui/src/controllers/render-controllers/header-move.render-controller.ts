@@ -82,7 +82,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
     private _scenePointerMoveSub: Nullable<Subscription>;
 
-    private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerUpSub: Nullable<Subscription>;
 
     private _scrollTimer: Nullable<ScrollTimer>;
 
@@ -122,8 +122,9 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         this._downSubscriptions = null;
 
         // scene.onPointerMove$.remove(this._scenePointerMoveSub);
+        // scene.onPointerUp$.remove(this._scenePointerUpSub);
         this._scenePointerMoveSub?.unsubscribe();
-        scene.onPointerUpObserver.remove(this._upObserver);
+        this._scenePointerUpSub?.unsubscribe();
 
         this._scrollTimer?.dispose();
     }
@@ -307,7 +308,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
                     });
                 });
 
-                this._upObserver = scene.onPointerUpObserver.add(() => {
+                this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
                     this._disposeBackgroundAndLine();
                     scene.resetCursor();
                     scene.enableEvent();
@@ -529,12 +530,13 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
     }
 
     private _clearObserverEvent() {
-        const scene = this._context.scene;
+        // const scene = this._context.scene;
         // scene.onPointerMove$.remove(this._scenePointerMoveSub);
+        // scene.onPointerUp$.remove(this._scenePointerUpSub);
         this._scenePointerMoveSub?.unsubscribe();
-        scene.onPointerUpObserver.remove(this._upObserver);
+        this._scenePointerUpSub?.unsubscribe();
         this._scenePointerMoveSub = null;
-        this._upObserver = null;
+        this._scenePointerUpSub = null;
     }
 
     private _newBackgroundAndLine() {

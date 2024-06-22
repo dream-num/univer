@@ -76,7 +76,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
     private _scenePointerMoveSub: Nullable<Subscription>;
 
-    private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerUpSub: Nullable<Subscription>;
 
     private _resizeHelperShape: Nullable<Rect>;
 
@@ -464,7 +464,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                         }
                     });
 
-                    this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+                    this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent((upEvt: IPointerEvent | IMouseEvent) => {
                         const scene = this._context.scene;
 
                         this._clearObserverEvent();
@@ -522,12 +522,13 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
     }
 
     private _clearObserverEvent() {
-        const scene = this._context.scene;
+        // const scene = this._context.scene;
 
         // scene.onPointerMove$.remove(this._scenePointerMoveSub);
+        // scene.onPointerUp$.remove(this._scenePointerUpSub);
         this._scenePointerMoveSub?.unsubscribe();
-        scene.onPointerUpObserver.remove(this._upObserver);
+        this._scenePointerUpSub?.unsubscribe();
         this._scenePointerMoveSub = null;
-        this._upObserver = null;
+        this._scenePointerUpSub = null;
     }
 }

@@ -730,7 +730,7 @@ export const ITransformNonInlineDrawingCommand: ICommand = {
 
         const { drawings: oldDrawings = {} } = documentDataModel.getSnapshot();
         const oldDocTransform = oldDrawings[drawingId].docTransform;
-        const { positionH: oldPositionH, positionV: oldPositionV } = oldDocTransform;
+        const { positionH: oldPositionH, positionV: oldPositionV, size: oldSize, angle: oldAngle } = oldDocTransform;
 
         if (!Tools.diffValue(oldPositionH, docTransform.positionH)) {
             const updateAction = jsonX.replaceOp(['drawings', drawingId, 'docTransform', 'positionH'], oldPositionH, docTransform.positionH);
@@ -740,6 +740,18 @@ export const ITransformNonInlineDrawingCommand: ICommand = {
 
         if (!Tools.diffValue(oldPositionV, docTransform.positionV)) {
             const updateAction = jsonX.replaceOp(['drawings', drawingId, 'docTransform', 'positionV'], oldPositionV, docTransform.positionV);
+
+            rawActions.push(updateAction!);
+        }
+
+        if (!Tools.diffValue(oldSize, docTransform.size)) {
+            const updateAction = jsonX.replaceOp(['drawings', drawingId, 'docTransform', 'size'], oldSize, docTransform.size);
+
+            rawActions.push(updateAction!);
+        }
+
+        if (!Tools.diffValue(oldAngle, docTransform.angle)) {
+            const updateAction = jsonX.replaceOp(['drawings', drawingId, 'docTransform', 'angle'], oldAngle, docTransform.angle);
 
             rawActions.push(updateAction!);
         }

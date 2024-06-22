@@ -26,7 +26,7 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
+import { SelectionManagerService } from '../../services/selection-manager.service';
 import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams } from '../mutations/set-col-visible.mutation';
 import {
     SetColHiddenMutation,
@@ -68,7 +68,7 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
         const setSelectionOperationParams: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: ranges.map((r) => ({ range: r, primary: getPrimaryForRange(r, worksheet), style: null })),
         };
 
@@ -76,7 +76,7 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
         const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: getSelectionsAfterHiding(ranges).map((range) => ({
                 range,
                 primary: getPrimaryForRange(range, worksheet),
@@ -165,7 +165,7 @@ export const SetColHiddenCommand: ICommand = {
 
         const redoMutationParams: ISetColHiddenMutationParams = { unitId, subUnitId, ranges };
         const setSelectionOperationParams: ISetSelectionsOperationParams = {
-            unitId, subUnitId, pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            unitId, subUnitId,
             selections: getSelectionsAfterHiding(ranges).map((range) => ({
                 range,
                 primary: getPrimaryForRange(range, worksheet),
@@ -175,7 +175,7 @@ export const SetColHiddenCommand: ICommand = {
 
         const undoMutationParams = SetColHiddenUndoMutationFactory(accessor, redoMutationParams);
         const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
-            unitId, subUnitId, pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            unitId, subUnitId,
             selections: ranges.map((range) => ({
                 range,
                 primary: getPrimaryForRange(range, worksheet),

@@ -27,7 +27,6 @@ import {
 } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
-    NORMAL_SELECTION_PLUGIN_NAME,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
     SetRangeValuesMutation,
@@ -302,7 +301,7 @@ describe('Test auto fill rules in controller', () => {
         autoFillController = get(AutoFillController);
         selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             unitId: 'test',
             sheetId: 'sheet1',
         });

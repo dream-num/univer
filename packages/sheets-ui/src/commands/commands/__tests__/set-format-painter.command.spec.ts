@@ -29,7 +29,6 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     AddWorksheetMergeMutation,
-    NORMAL_SELECTION_PLUGIN_NAME,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
     SetRangeValuesCommand,
@@ -241,7 +240,7 @@ describe('Test format painter rules in controller', () => {
 
         const selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             unitId: 'workbook-01',
             sheetId: 'sheet-0011',
         });
@@ -255,7 +254,7 @@ describe('Test format painter rules in controller', () => {
                 await commandService.executeCommand(SetSelectionsOperation.id, {
                     unitId: 'workbook-01',
                     subUnitId: 'sheet-0011',
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     selections: [
                         {
                             range: {
@@ -310,7 +309,7 @@ describe('Test format painter rules in controller', () => {
                 await commandService.executeCommand(SetSelectionsOperation.id, {
                     unitId: 'workbook-01',
                     subUnitId: 'sheet-0011',
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     selections: [
                         {
                             range: {

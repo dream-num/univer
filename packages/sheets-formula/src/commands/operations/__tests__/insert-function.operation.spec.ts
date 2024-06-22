@@ -17,7 +17,6 @@
 import type { Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
-    NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetRangeValuesCommand,
     SetRangeValuesMutation,
@@ -63,7 +62,7 @@ describe('Test insert function operation', () => {
             it('insert function, match the data range above, directly set values', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -104,7 +103,7 @@ describe('Test insert function operation', () => {
             it('insert function, match the data range left, directly set values', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });

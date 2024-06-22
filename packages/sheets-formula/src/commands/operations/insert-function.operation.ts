@@ -29,7 +29,6 @@ import { serializeRange } from '@univerjs/engine-formula';
 import {
     getCellAtRowCol,
     getSheetCommandTarget,
-    NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
@@ -147,7 +146,7 @@ export const InsertFunctionOperation: ICommand = {
             const setSelectionParams = {
                 unitId,
                 subUnitId,
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 selections: [resultRange],
             };
             await commandService.executeCommand(SetSelectionsOperation.id, setSelectionParams);

@@ -20,10 +20,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { ISelectionStyle, ISelectionWithStyle } from '../basics/selection';
 
-export const NORMAL_SELECTION_PLUGIN_NAME = 'normalSelectionPluginName';
-
 export interface ISelectionManagerSearchParam {
-    pluginName: string;
     unitId: string;
     sheetId: string;
 }
@@ -32,8 +29,8 @@ export interface ISelectionManagerInsertParam extends ISelectionManagerSearchPar
     selectionDatas: ISelectionWithStyle[];
 }
 
-//{ [pluginName: string]: { [unitId: string]: { [sheetId: string]: ISelectionWithCoord[] } } }
-export type ISelectionInfo = Map<string, Map<string, Map<string, ISelectionWithStyle[]>>>;
+//{ { [unitId: string]: { [sheetId: string]: ISelectionWithCoord[] } }
+export type ISelectionInfo = Map<string, Map<string, ISelectionWithStyle[]>>;
 
 export enum SelectionMoveType {
     MOVE_START,
@@ -41,23 +38,6 @@ export enum SelectionMoveType {
     MOVE_END,
 }
 
-/**
- * This service is responsible for managing the selection data.
- *
- * You can generally modify its data through SetSelectionsOperation.
- *
- * In the same app and sub-table, there will be different functional selection areas,
- * such as charts, formulas, conditional formats, etc.,
- * which are distinguished by the pluginName.
- *
- * The selection data drawn by the user through the SelectionRenderService will be saved to this service.
- *
- * Data changes within the service will also notify the SelectionController to redraw the selection area.
- *
- * Not only will switching sub-tables trigger a redraw, but also changing row and column widths,
- * hiding rows and columns, automatic row height, dragging rows and columns, deleting rows and columns,
- * and so on, will cause the size of the selection area to change.
- */
 export class SelectionManagerService implements IDisposable {
     private readonly _selectionInfo: ISelectionInfo = new Map();
 
@@ -83,65 +63,17 @@ export class SelectionManagerService implements IDisposable {
         return this._currentSelection;
     }
 
-    getLastByPlugin(pluginName: string) {
-        if (this._currentSelection == null) {
-            return;
-        }
-        return this._getLastByParam({ ...this._currentSelection, pluginName });
-    }
-
-    changePlugin(pluginName: string) {
-        if (this._currentSelection == null) {
-            return;
-        }
-        this._currentSelection = {
-            pluginName,
-            unitId: this._currentSelection?.unitId,
-            sheetId: this._currentSelection?.sheetId,
-        };
-
-        this._refresh(this._currentSelection);
-    }
-
-    changePluginNoRefresh(pluginName: string) {
-        if (this._currentSelection == null || this._currentSelection.pluginName === pluginName) {
-            return;
-        }
-
-        // Fetch the old selections.
-        const selections = this.getSelectionDatasByParam(this._currentSelection);
-
-        this._currentSelection = {
-            pluginName,
-            unitId: this._currentSelection?.unitId,
-            sheetId: this._currentSelection?.sheetId,
-        };
-
-        if (selections != null) {
-            this.add([]);
-        }
-    }
-
     reset() {
         if (this._currentSelection == null) {
             return;
         }
         this._currentSelection = {
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             unitId: this._currentSelection?.unitId,
             sheetId: this._currentSelection?.sheetId,
         };
         this._selectionInfo.clear();
 
-        this._refresh(this._currentSelection);
-    }
-
-    resetPlugin() {
-        if (this._currentSelection == null) {
-            return;
-        }
-
-        this._currentSelection.pluginName = NORMAL_SELECTION_PLUGIN_NAME;
         this._refresh(this._currentSelection);
     }
 
@@ -335,8 +267,8 @@ export class SelectionManagerService implements IDisposable {
         if (param == null) {
             return;
         }
-        const { pluginName, unitId, sheetId } = param;
-        return this._selectionInfo.get(pluginName)?.get(unitId)?.get(sheetId);
+        const { unitId, sheetId } = param;
+        return this._selectionInfo.get(unitId)?.get(sheetId);
     }
 
     private _refresh(param?: ISelectionManagerSearchParam): void {
@@ -364,14 +296,9 @@ export class SelectionManagerService implements IDisposable {
     }
 
     private _addByParam(insertParam: ISelectionManagerInsertParam, isRefresh = true): void {
-        const { pluginName, unitId, sheetId, selectionDatas } = insertParam;
+        const { unitId, sheetId, selectionDatas } = insertParam;
 
-        if (!this._selectionInfo.has(pluginName)) {
-            this._selectionInfo.set(pluginName, new Map());
-        }
-
-        const unitSelectionData = this._selectionInfo.get(pluginName)!;
-
+        const unitSelectionData = this._selectionInfo;
         if (!unitSelectionData.has(unitId)) {
             unitSelectionData.set(unitId, new Map());
         }
@@ -390,19 +317,14 @@ export class SelectionManagerService implements IDisposable {
         }
 
         if (isRefresh) {
-            this._refresh({ pluginName, unitId, sheetId });
+            this._refresh({ unitId, sheetId });
         }
     }
 
     private _replaceByParam(insertParam: ISelectionManagerInsertParam) {
-        const { pluginName, unitId, sheetId, selectionDatas } = insertParam;
+        const { unitId, sheetId, selectionDatas } = insertParam;
 
-        if (!this._selectionInfo.has(pluginName)) {
-            this._selectionInfo.set(pluginName, new Map());
-        }
-
-        const unitSelectionData = this._selectionInfo.get(pluginName)!;
-
+        const unitSelectionData = this._selectionInfo;
         if (!unitSelectionData.has(unitId)) {
             unitSelectionData.set(unitId, new Map());
         }
@@ -419,8 +341,6 @@ export class SelectionManagerService implements IDisposable {
             }
             oldSelectionDatas.splice(0, oldSelectionDatas.length, ...selectionDatas);
         }
-
-        // this.refresh({ pluginName, unitId, sheetId });
     }
 
     private _clearByParam(param: ISelectionManagerSearchParam): void {
@@ -438,8 +358,4 @@ export class SelectionManagerService implements IDisposable {
 
         this._refresh(param);
     }
-
-    // private refreshCurrentSelection(): void {
-    //     this._currentSelection$.next(this._currentSelection);
-    // }
 }

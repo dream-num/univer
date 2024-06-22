@@ -19,7 +19,6 @@ import { CommandType, ICommandService, IUniverInstanceService, RANGE_TYPE, Recta
 import {
     getCellAtRowCol,
     getSheetCommandTarget,
-    NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
@@ -100,7 +99,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [
                 {
                     range: Rectangle.clone(destRange),
@@ -262,7 +261,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId: sheetId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [resultRange],
         });
     },
@@ -314,7 +313,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [
                 {
                     range: destRange,
@@ -407,7 +406,7 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [
                 {
                     range: destRange,

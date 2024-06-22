@@ -29,7 +29,6 @@ import {
     getAddMergeMutationRangeByType,
     MoveRangeCommand,
     MoveRangeMutation,
-    NORMAL_SELECTION_PLUGIN_NAME,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
@@ -250,7 +249,7 @@ export function getMoveRangeMutations(
                     params: {
                         unitId,
                         subUnitId: toSubUnitId,
-                        pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                         selections: [{ range: toRange }],
                     } as ISetSelectionsOperationParams,
                 },
@@ -264,7 +263,7 @@ export function getMoveRangeMutations(
                     params: {
                         unitId,
                         sheetId: fromSubUnitId,
-                        pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                         selections: [{ range: fromRange }],
                     },
                 },

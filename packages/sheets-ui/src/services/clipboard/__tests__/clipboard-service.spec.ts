@@ -19,7 +19,6 @@ import { ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, RedoCom
 import {
     AddWorksheetMergeMutation,
     MoveRangeMutation,
-    NORMAL_SELECTION_PLUGIN_NAME,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
     SetRangeValuesMutation,
@@ -137,7 +136,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -183,7 +182,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -223,7 +222,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -265,7 +264,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -320,7 +319,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -416,7 +415,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -458,7 +457,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -485,7 +484,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -512,7 +511,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -539,7 +538,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -577,7 +576,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -613,7 +612,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -639,7 +638,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -691,7 +690,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -749,7 +748,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });
@@ -826,7 +825,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });

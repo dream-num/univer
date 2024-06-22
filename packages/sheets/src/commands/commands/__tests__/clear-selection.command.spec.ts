@@ -28,7 +28,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
+import { SelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
@@ -71,7 +71,7 @@ describe('Test clear selection content commands', () => {
             it('will clear selection content when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -120,7 +120,7 @@ describe('Test clear selection content commands', () => {
             it('will clear selection format when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -184,7 +184,7 @@ describe('Test clear selection content commands', () => {
             it('clear formats with merged cells', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -280,7 +280,7 @@ describe('Test clear selection content commands', () => {
             it('will clear selection all when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -336,7 +336,7 @@ describe('Test clear selection content commands', () => {
             it('clear all with merged cells', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });

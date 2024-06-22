@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DependentOn, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -27,7 +27,6 @@ import { FormulaClipboardController } from './controllers/formula-clipboard.cont
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
 import type { IUniverSheetsFormulaConfig } from './controllers/formula-ui.controller';
 import { DefaultSheetFormulaConfig, FormulaUIController } from './controllers/formula-ui.controller';
-import { PromptController } from './controllers/prompt.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 
@@ -54,8 +53,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
 
     constructor(
         private readonly _config: Partial<IUniverSheetsFormulaConfig> = {},
-        @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(Injector) override readonly _injector: Injector
     ) {
         super();
 
@@ -89,7 +87,6 @@ export class UniverSheetsFormulaPlugin extends Plugin {
                     useFactory: () => this._injector.createInstance(FormulaUIController, this._config),
                 },
             ],
-            [PromptController],
             [FormulaAutoFillController],
             [FormulaClipboardController],
             [ArrayFormulaDisplayController],

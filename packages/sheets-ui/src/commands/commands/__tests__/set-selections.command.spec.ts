@@ -17,7 +17,6 @@
 import type { IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import { Direction, ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import {
-    NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetColHiddenCommand,
     SetColHiddenMutation,
@@ -79,7 +78,7 @@ describe('Test commands used for change selections', () => {
         isMergedMainCell: boolean
     ) {
         selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             unitId: 'test',
             sheetId: 'sheet1',
         });
@@ -187,7 +186,7 @@ describe('Test commands used for change selections', () => {
         commandService = get(ICommandService);
         selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             unitId: 'test',
             sheetId: 'sheet1',
         });

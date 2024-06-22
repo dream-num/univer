@@ -30,7 +30,7 @@ import {
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
+import { SelectionManagerService } from '../../../services/selection-manager.service';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import { SetRangeValuesCommand } from '../set-range-values.command';
@@ -122,7 +122,7 @@ describe('Test set range values commands', () => {
 
         selectionManager = get(SelectionManagerService);
         selectionManager.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             unitId: 'test',
             sheetId: 'sheet1',
         });

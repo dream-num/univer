@@ -31,7 +31,7 @@ import {
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
+import { SelectionManagerService } from '../../../services/selection-manager.service';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import type { ISetStyleCommandParams } from '../set-style.command';
 import {
@@ -131,7 +131,7 @@ describe("Test commands used for updating cells' styles", () => {
             it('will toggle bold style when there is a selected range', async () => {
                 const selectionManagerService = get(SelectionManagerService);
                 selectionManagerService.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -186,7 +186,7 @@ describe("Test commands used for updating cells' styles", () => {
             it('will toggle italic style when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -241,7 +241,7 @@ describe("Test commands used for updating cells' styles", () => {
             it('will toggle underline style when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -298,7 +298,7 @@ describe("Test commands used for updating cells' styles", () => {
             it('will toggle strike-through style when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -355,7 +355,7 @@ describe("Test commands used for updating cells' styles", () => {
             it('will change font size when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -401,7 +401,7 @@ describe("Test commands used for updating cells' styles", () => {
             it('will change font family when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -447,7 +447,7 @@ describe("Test commands used for updating cells' styles", () => {
             it('will change font color when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -549,7 +549,7 @@ describe("Test commands used for updating cells' styles", () => {
             it('will change background color when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -597,7 +597,7 @@ describe("Test commands used for updating cells' styles", () => {
             it('will change vertical text align when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -645,7 +645,7 @@ describe("Test commands used for updating cells' styles", () => {
             it('will change horizontal text align when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -695,7 +695,7 @@ describe("Test commands used for updating cells' styles", () => {
             it('will change text wrap when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -745,7 +745,7 @@ describe("Test commands used for updating cells' styles", () => {
             it('will change text rotation when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });

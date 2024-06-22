@@ -32,7 +32,6 @@ import {
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import {
     getPrimaryForRange,
-    NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
@@ -714,7 +713,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const setSelectionsParam: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [{ range: {
                 startRow,
                 endRow,

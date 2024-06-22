@@ -29,7 +29,7 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
+import { SelectionManagerService } from '../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
 import {
@@ -132,13 +132,13 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         const setSelectionsParam: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [{ range: destSelection, primary: getPrimaryForRange(destSelection, worksheet), style: null }],
         };
         const undoSetSelectionsParam: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [{ range: rangeToMove, primary: beforePrimary, style: null }],
         };
 
@@ -262,13 +262,13 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const setSelectionsParam: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [{ range: destSelection, primary: getPrimaryForRange(destSelection, worksheet), style: null }],
         };
         const undoSetSelectionsParam: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [{ range: rangeToMove, primary: beforePrimary, style: null }],
         };
 

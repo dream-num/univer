@@ -25,7 +25,6 @@ import {
 } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
-    NORMAL_SELECTION_PLUGIN_NAME,
     RangeProtectionRenderModel,
     RangeProtectionRuleModel,
     RangeProtectionService,
@@ -118,7 +117,7 @@ describe('Test auto fill with formula', () => {
         it('one cell with formula', async () => {
             const selectionManager = get(SelectionManagerService);
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });

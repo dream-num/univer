@@ -21,7 +21,6 @@ import {
     RANGE_TYPE,
 } from '@univerjs/core';
 import {
-    NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetBoldCommand,
     SetRangeValuesMutation,
@@ -62,7 +61,7 @@ describe('test menu items', () => {
     function select(range: IRange) {
         const selectionManager = get(SelectionManagerService);
         selectionManager.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             unitId: 'test',
             sheetId: 'sheet1',
         });

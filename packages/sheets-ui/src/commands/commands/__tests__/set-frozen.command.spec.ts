@@ -16,7 +16,7 @@
 
 import type { IFreeze, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
+import { SelectionManagerService } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -52,7 +52,7 @@ describe('Test commands used for change selections', () => {
         isMergedMainCell: boolean
     ) {
         selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             ...currentInfo,
         });
 
@@ -104,7 +104,7 @@ describe('Test commands used for change selections', () => {
         commandService = get(ICommandService);
         selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             ...currentInfo,
         });
         scrollManagerService = get(ScrollManagerService);

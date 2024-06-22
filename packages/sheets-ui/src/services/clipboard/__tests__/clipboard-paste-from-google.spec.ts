@@ -19,7 +19,6 @@ import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from 
 import {
     AddWorksheetMergeMutation,
     MoveRangeMutation,
-    NORMAL_SELECTION_PLUGIN_NAME,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
     SetRangeValuesMutation,
@@ -128,7 +127,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });

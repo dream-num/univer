@@ -26,7 +26,7 @@ import { Disposable, ICommandService,
     UniverInstanceType,
 } from '@univerjs/core';
 
-import { getPrimaryForRange, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
+import { getPrimaryForRange, SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import type { ISheetRangeLocation } from '@univerjs/sheets-ui';
 import { expandToContinuousRange } from '@univerjs/sheets-ui';
@@ -151,7 +151,7 @@ export class SheetsSortUIService extends Disposable {
         const setSelectionsOperationParams = {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [{ range, primary: getPrimaryForRange(range, worksheet), style: null }],
 
         };

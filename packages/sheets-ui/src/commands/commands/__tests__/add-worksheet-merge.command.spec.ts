@@ -38,7 +38,6 @@ import {
     MoveColsCommand,
     MoveColsMutation,
     MoveRangeMutation,
-    NORMAL_SELECTION_PLUGIN_NAME,
     RefRangeService,
     RemoveColCommand,
     RemoveColMutation,
@@ -134,7 +133,7 @@ describe('Test add worksheet merge commands', () => {
 
         selectionManager = get(SelectionManagerService);
         selectionManager.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             unitId: 'test',
             sheetId: 'sheet1',
         });
@@ -149,7 +148,7 @@ describe('Test add worksheet merge commands', () => {
             it('will merge all cells of the selected range when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -200,7 +199,7 @@ describe('Test add worksheet merge commands', () => {
             it('will merge all vertical cells of the selected range when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -249,7 +248,7 @@ describe('Test add worksheet merge commands', () => {
             it('will merge all horizontal cells of the selected range when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });
@@ -293,7 +292,7 @@ describe('Test add worksheet merge commands', () => {
             it('will cancel the merge of the selected range when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     unitId: 'test',
                     sheetId: 'sheet1',
                 });

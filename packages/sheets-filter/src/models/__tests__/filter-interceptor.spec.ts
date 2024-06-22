@@ -116,7 +116,7 @@ describe('Test "Filter Interceptor"', () => {
             }, toRange: { startColumn: 3, endColumn: 3, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN }, direction: Direction.RIGHT } as IMoveColsCommandParams;
             const selectionManagerService = get(SelectionManagerService);
             selectionManagerService.setCurrentSelection({ unitId: 'workbookId', sheetId: 'worksheetId', pluginName: NORMAL_SELECTION_PLUGIN_NAME });
-            await commandService.executeCommand(SetSelectionsOperation.id, { unitId: 'workbookId', subUnitId: 'worksheetId', pluginName: NORMAL_SELECTION_PLUGIN_NAME, selections: [{ style: null, range: { startColumn: 1, endColumn: 1, startRow: 0, endRow: 4, rangeType: RANGE_TYPE.COLUMN }, primary: {} }] } as ISetSelectionsOperationParams);
+            await commandService.executeCommand(SetSelectionsOperation.id, { unitId: 'workbookId', subUnitId: 'worksheetId', selections: [{ style: null, range: { startColumn: 1, endColumn: 1, startRow: 0, endRow: 4, rangeType: RANGE_TYPE.COLUMN }, primary: {} }] } as ISetSelectionsOperationParams);
             await commandService.executeCommand(MoveColsCommand.id, moveColCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 1, startRow: 1, endRow: 2 });
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getAllFilterColumns().map((x) => x[0])).toStrictEqual([1]);
@@ -126,7 +126,7 @@ describe('Test "Filter Interceptor"', () => {
             }, toRange: { startColumn: 4, endColumn: 4, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN }, direction: Direction.RIGHT } as IMoveColsCommandParams;
             const selectionManagerService = get(SelectionManagerService);
             selectionManagerService.setCurrentSelection({ unitId: 'workbookId', sheetId: 'worksheetId', pluginName: NORMAL_SELECTION_PLUGIN_NAME });
-            await commandService.executeCommand(SetSelectionsOperation.id, { unitId: 'workbookId', subUnitId: 'worksheetId', pluginName: NORMAL_SELECTION_PLUGIN_NAME, selections: [{ style: null, range: { startColumn: 2, endColumn: 2, startRow: 0, endRow: 4, rangeType: RANGE_TYPE.COLUMN }, primary: {} }] } as ISetSelectionsOperationParams);
+            await commandService.executeCommand(SetSelectionsOperation.id, { unitId: 'workbookId', subUnitId: 'worksheetId', selections: [{ style: null, range: { startColumn: 2, endColumn: 2, startRow: 0, endRow: 4, rangeType: RANGE_TYPE.COLUMN }, primary: {} }] } as ISetSelectionsOperationParams);
             await commandService.executeCommand(MoveColsCommand.id, moveColCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 3, startRow: 1, endRow: 2 });
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getAllFilterColumns().map((x) => x[0])).toStrictEqual([3]);
@@ -137,7 +137,7 @@ describe('Test "Filter Interceptor"', () => {
             }, toRange: { startColumn: 0, endColumn: 3, startRow: 4, endRow: 4, type: RANGE_TYPE.ROW }, direction: Direction.RIGHT } as IMoveRowsCommandParams;
             const selectionManagerService = get(SelectionManagerService);
             selectionManagerService.setCurrentSelection({ unitId: 'workbookId', sheetId: 'worksheetId', pluginName: NORMAL_SELECTION_PLUGIN_NAME });
-            await commandService.executeCommand(SetSelectionsOperation.id, { unitId: 'workbookId', subUnitId: 'worksheetId', pluginName: NORMAL_SELECTION_PLUGIN_NAME, selections: [{ style: null, range: { startColumn: 0, endColumn: 3, startRow: 2, endRow: 2, rangeType: RANGE_TYPE.ROW }, primary: {} }] } as ISetSelectionsOperationParams);
+            await commandService.executeCommand(SetSelectionsOperation.id, { unitId: 'workbookId', subUnitId: 'worksheetId', selections: [{ style: null, range: { startColumn: 0, endColumn: 3, startRow: 2, endRow: 2, rangeType: RANGE_TYPE.ROW }, primary: {} }] } as ISetSelectionsOperationParams);
             await commandService.executeCommand(MoveRowsCommand.id, moveRowCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 2, startRow: 1, endRow: 3 });
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getAllFilterColumns().map((x) => x[0])).toStrictEqual([2]);

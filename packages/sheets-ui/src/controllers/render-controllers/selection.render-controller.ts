@@ -93,7 +93,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         const unitId = workbook.getUnitId();
         const sheetId = worksheet.getSheetId();
         this._selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             unitId,
             sheetId,
         });

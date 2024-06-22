@@ -30,7 +30,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
+import { SelectionManagerService } from '../../../services/selection-manager.service';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
 import type { IRemoveRowColCommandParams } from '../remove-row-col.command';
 import { RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
@@ -64,7 +64,7 @@ describe('Test remove rows cols', () => {
         get(MergeCellController);
         const selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             unitId: 'test',
             sheetId: 'sheet1',
         });

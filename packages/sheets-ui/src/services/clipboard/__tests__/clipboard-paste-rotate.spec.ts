@@ -18,7 +18,6 @@ import type { ICellData, IStyleData, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
-    NORMAL_SELECTION_PLUGIN_NAME,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
     SetRangeValuesMutation,
@@ -121,7 +120,7 @@ describe('Test clipboard', () => {
             const selectionManager = get(SelectionManagerService);
 
             selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                 unitId: 'test',
                 sheetId: 'sheet1',
             });

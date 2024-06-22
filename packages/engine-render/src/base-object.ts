@@ -52,8 +52,8 @@ export abstract class BaseObject extends Disposable {
     pointerDown$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerMove$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerUp$ = new EventSubject<IPointerEvent | IMouseEvent>();
-    onDblclickObserver = new Observable<IPointerEvent | IMouseEvent>();
-    onTripleClickObserver = new Observable<IPointerEvent | IMouseEvent>();
+    onDblclick$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onMouseWheelObserver = new Observable<IWheelEvent>();
 
     onPointerOutObserver = new Observable<IPointerEvent | IMouseEvent>();
@@ -651,7 +651,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerDblclick(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onDblclickObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onDblclick$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerDblclick(evt);
 
             return false;
@@ -661,7 +661,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerTripleClick(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onTripleClickObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onTripleClick$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerTripleClick(evt);
 
             return false;
@@ -767,8 +767,8 @@ export abstract class BaseObject extends Disposable {
         this.onDragOverObserver.clear();
         this.onDragEnterObserver.clear();
         this.onDropObserver.clear();
-        this.onDblclickObserver.clear();
-        this.onTripleClickObserver.clear();
+        this.onDblclick$.complete();
+        this.onTripleClick$.complete();
         this.onIsAddedToParentObserver.clear();
 
         this.parent?.removeObject(this);

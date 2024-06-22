@@ -285,7 +285,7 @@ export class ImageUpdateController extends Disposable {
     private _addDialogForImage(o: Image) {
         this.disposeWithMe(
             toDisposable(
-                o.onDblclickObserver.add(() => {
+                o.onDblclick$.subscribeEvent(() => {
                     const dialogId = `${o.oKey}-viewer-dialog`;
 
                     const nativeSize = o.getNativeSize();

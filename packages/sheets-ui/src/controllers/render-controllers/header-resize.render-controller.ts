@@ -501,7 +501,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
         this.disposeWithMe(
             toDisposable(
-                eventBindingObject.onDblclickObserver.add(() => {
+                eventBindingObject.onDblclick$.subscribeEvent(() => {
                     if (initialType === HEADER_RESIZE_TYPE.ROW) {
                         const scene = this._context.scene;
 

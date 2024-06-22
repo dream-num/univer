@@ -226,7 +226,7 @@ export class AutoFillController extends Disposable {
                     // fill results will be as same as drag operation
                 disposableCollection.add(
                     toDisposable(
-                        controlSelection.fillControl.onDblclickObserver.add(() => {
+                        controlSelection.fillControl.onDblclick$.subscribeEvent(() => {
                             const source = {
                                 startColumn: controlSelection.model.startColumn,
                                 endColumn: controlSelection.model.endColumn,

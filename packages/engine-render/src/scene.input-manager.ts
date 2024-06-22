@@ -474,17 +474,13 @@ export class InputManager extends Disposable {
         if (this._tripleClickState) {
             this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerTripleClick(evt);
 
-            if (this._scene.onTripleClickObserver.hasObservers()) {
-                this._scene.onTripleClickObserver.notifyObservers(evt);
-            }
+            this._scene.onTripleClick$.emitEvent(evt);
         }
 
         if (this._doubleClickOccurred === 2) {
             this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerDblclick(evt);
 
-            if (this._scene.onDblclickObserver.hasObservers()) {
-                this._scene.onDblclickObserver.notifyObservers(evt);
-            }
+            this._scene.onDblclick$.emitEvent(evt);
             this._resetDoubleClickParam();
             this._tripleClickState = true;
 

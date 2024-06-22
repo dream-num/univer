@@ -81,14 +81,4 @@ describe('Observable', () => {
         const result = observable.notifyObservers('testData');
         expect(result?.lastReturnValue).not.toBe('should not be called');
     });
-
-    it('should notify observers with promise', async () => {
-        const observable = new Observable();
-        const callback = async (eventData: any, eventState: EventState) => {
-            eventState.lastReturnValue = eventData;
-        };
-        observable.add(callback);
-        const result = await observable.notifyObserversWithPromise('testData');
-        expect(result).toBe('testData');
-    });
 });

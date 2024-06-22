@@ -15,7 +15,10 @@
  */
 
 import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, throttle, toDisposable } from '@univerjs/core';
+import {
+    Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectRelativeFromH, ObjectRelativeFromV,
+    OnLifecycle, PositionedObjectLayoutType, throttle, toDisposable,
+} from '@univerjs/core';
 import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Documents, IDocumentSkeletonGlyph } from '@univerjs/engine-render';
@@ -124,8 +127,7 @@ export class DocDrawingTransformerController extends Disposable {
         );
 
         const throttleMultipleDrawingUpdate = throttle(this._updateMultipleDrawingDocTransform.bind(this), 50);
-        const throttleDrawingSizeAndAngleUpdate = throttle(this._updateDrawingSize.bind(this), 50);
-        const throttleNonInlineMoveUpdate = throttle(this._moveNonInlineDrawing.bind(this), 50);
+        const throttleNonInlineMoveUpdate = throttle(this._nonInlineDrawingTransform.bind(this), 50);
 
         this.disposeWithMe(
             toDisposable(
@@ -150,17 +152,14 @@ export class DocDrawingTransformerController extends Disposable {
                         }
 
                         if (drawingCache && drawingCache.drawing.layoutType !== PositionedObjectLayoutType.INLINE) {
-                            if (width !== drawingCache.width || height !== drawingCache.height || angle !== drawingCache.angle) {
-                                throttleDrawingSizeAndAngleUpdate(drawingCache, object);
-                            } else {
-                                throttleNonInlineMoveUpdate(drawingCache.drawing, object);
-                            }
+                            throttleNonInlineMoveUpdate(drawingCache.drawing, object);
                         }
                     }
                 })
             )
         );
 
+        // Handle transformer mouseup.
         this.disposeWithMe(
             toDisposable(
                 transformer.onChangeEndObservable.add((state) => {
@@ -192,11 +191,7 @@ export class DocDrawingTransformerController extends Disposable {
                             }
                         } else if (drawingCache) {
                             // Handle non-inline drawing.
-                            if (width !== drawingCache.width || height !== drawingCache.height || angle !== drawingCache.angle) {
-                                this._updateDrawingSize(drawingCache, object);
-                            } else {
-                                this._moveNonInlineDrawing(drawingCache.drawing, object);
-                            }
+                            this._nonInlineDrawingTransform(drawingCache.drawing, object);
                         }
                     }
 
@@ -323,12 +318,17 @@ export class DocDrawingTransformerController extends Disposable {
 
         this._liquid.reset();
         const { pages } = skeletonData;
-        const { left, top } = object;
+        const { left, top, width, height, angle } = object;
         const { positionV, positionH } = drawing.docTransform;
 
         let glyphAnchor: Nullable<IDocumentSkeletonGlyph> = null;
         const docTransform = {
             ...drawing.docTransform,
+            size: {
+                width,
+                height,
+            },
+            angle,
         };
 
         for (const page of pages) {
@@ -479,6 +479,8 @@ export class DocDrawingTransformerController extends Disposable {
         const { unitId, subUnitId } = drawing;
         const { width, height, angle } = object;
 
+        // console.log('width', width, 'height', height);
+
         if (width !== oldWidth || height !== oldHeight) {
             drawings.push({
                 drawingId: drawing.drawingId,
@@ -523,7 +525,7 @@ export class DocDrawingTransformerController extends Disposable {
         });
     }
 
-    private _moveNonInlineDrawing(drawing: IDocDrawingBase, object: BaseObject) {
+    private _nonInlineDrawingTransform(drawing: IDocDrawingBase, object: BaseObject) {
         const anchor = this._getDrawingAnchor(drawing, object, false);
         const { offset, docTransform } = anchor ?? {};
         if (offset == null || docTransform == null) {

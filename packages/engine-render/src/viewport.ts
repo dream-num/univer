@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IPosition, IRange, Nullable } from '@univerjs/core';
-import { Observable, Tools } from '@univerjs/core';
+import { EventSubject, Observable, Tools } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from './basics/const';
@@ -114,7 +114,7 @@ export class Viewport {
     private _physicalSceneWidth: number = 0;
     private _physicalSceneHeight: number = 0;
 
-    onMouseWheelObserver = new Observable<IWheelEvent>();
+    onMouseWheel$ = new EventSubject<IWheelEvent>();
 
     onScrollAfterObserver = new Observable<IScrollObserverParam>();
 
@@ -1081,7 +1081,7 @@ export class Viewport {
     }
 
     dispose() {
-        this.onMouseWheelObserver.clear();
+        this.onMouseWheel$.complete();
         this.onScrollAfterObserver.clear();
         this.onScrollBeforeObserver.clear();
         this.onScrollStopObserver.clear();

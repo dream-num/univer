@@ -722,7 +722,7 @@ export class Scene extends ThinScene {
         this.onPointerLeaveObserver.clear();
         this.onDblclick$.complete();
         this.onTripleClick$.complete();
-        this.onMouseWheelObserver.clear();
+        this.onMouseWheel$.complete();
         this.onKeyDownObservable.clear();
         this.onKeyUpObservable.clear();
         this._addObject$.complete();
@@ -822,7 +822,7 @@ export class Scene extends ThinScene {
 
     override triggerMouseWheel(evt: IWheelEvent) {
         if (
-            !this.onMouseWheelObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onMouseWheel$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerMouseWheel(evt);

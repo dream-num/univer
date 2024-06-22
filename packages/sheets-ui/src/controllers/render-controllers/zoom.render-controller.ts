@@ -53,7 +53,7 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
         }
 
         this.disposeWithMe(
-            scene.onMouseWheelObserver.add((e: IWheelEvent) => {
+            scene.onMouseWheel$.subscribeEvent((e: IWheelEvent) => {
                 if (!e.ctrlKey) {
                     return;
                 }

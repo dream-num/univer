@@ -257,15 +257,15 @@ export class InputManager extends Disposable {
             const isStop = currentObject?.triggerMouseWheel(evt);
 
             this._scene.getViewports().forEach((vp: Viewport) => {
-                if (vp.onMouseWheelObserver.hasObservers()) {
-                    vp.onMouseWheelObserver.notifyObservers(evt);
-                }
+                vp.onMouseWheel$.emitEvent(evt);
+                // if (vp.onMouseWheel$.hasObservers()) {
+                // }
             });
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
-                if (this._scene.onMouseWheelObserver.hasObservers()) {
-                    this._scene.onMouseWheelObserver.notifyObservers(evt);
-                }
+                this._scene.onMouseWheel$.emitEvent(evt);
+                // if (this._scene.onMouseWheel$.hasObservers()) {
+                // }
             }
         };
 

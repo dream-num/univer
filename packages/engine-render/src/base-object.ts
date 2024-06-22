@@ -54,7 +54,7 @@ export abstract class BaseObject extends Disposable {
     onPointerUp$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onDblclick$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
-    onMouseWheelObserver = new Observable<IWheelEvent>();
+    onMouseWheel$ = new EventSubject<IWheelEvent>();
 
     onPointerOutObserver = new Observable<IPointerEvent | IMouseEvent>();
     onPointerLeaveObserver = new Observable<IPointerEvent | IMouseEvent>();
@@ -671,7 +671,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerMouseWheel(evt: IWheelEvent) {
-        if (!this.onMouseWheelObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onMouseWheel$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerMouseWheel(evt);
             return false;
         }
@@ -758,7 +758,7 @@ export abstract class BaseObject extends Disposable {
         this.pointerDown$.complete();
         this.onPointerMove$.complete();
         this.onPointerUp$.complete();
-        this.onMouseWheelObserver.clear();
+        this.onMouseWheel$.complete();
         this.onPointerOutObserver.clear();
         this.onPointerLeaveObserver.clear();
         this.onPointerOverObserver.clear();

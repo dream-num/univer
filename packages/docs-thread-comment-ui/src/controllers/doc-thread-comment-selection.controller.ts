@@ -22,6 +22,7 @@ import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/
 import { Inject } from '@wendellhu/redi';
 import { BackScrollController } from '@univerjs/docs-ui';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../common/const';
+import { DocThreadCommentService } from '../services/doc-thread-comment.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DocThreadCommentSelectionController)
 export class DocThreadCommentSelectionController extends Disposable {
@@ -29,7 +30,8 @@ export class DocThreadCommentSelectionController extends Disposable {
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(BackScrollController) private readonly _backScrollController: BackScrollController
+        @Inject(BackScrollController) private readonly _backScrollController: BackScrollController,
+        @Inject(DocThreadCommentService) private readonly _docThreadCommentService: DocThreadCommentService
     ) {
         super();
 
@@ -85,6 +87,10 @@ export class DocThreadCommentSelectionController extends Disposable {
                         });
                     }
                 }
+            }
+
+            if (!activeComment || activeComment.commentId !== this._docThreadCommentService.addingComment?.id) {
+                this._docThreadCommentService.endAdd();
             }
         }));
     }

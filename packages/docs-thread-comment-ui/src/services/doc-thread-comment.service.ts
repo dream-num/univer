@@ -25,6 +25,10 @@ export class DocThreadCommentService {
     private _addingComment$ = new BehaviorSubject<Nullable<IThreadComment & ITextRange>>(undefined);
     readonly addingComment$ = this._addingComment$.asObservable();
 
+    get addingComment() {
+        return this._addingComment$.getValue();
+    }
+
     constructor(
         @ISidebarService private readonly _sidebarService: ISidebarService,
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService

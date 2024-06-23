@@ -20,8 +20,9 @@ import { Button, Mention, Mentions } from '@univerjs/design';
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IDocumentBody } from '@univerjs/core';
-import { LocaleService } from '@univerjs/core';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { IThreadCommentMentionDataService } from '../../services/thread-comment-mention-data.service';
+import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import styles from './index.module.less';
 import { parseMentions, transformDocument2TextNodes, transformMention, transformTextNode2Text, transformTextNodes2Document } from './util';
 
@@ -52,6 +53,7 @@ const defaultRenderSuggestion: MentionProps['renderSuggestion'] = (mention, sear
 export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThreadCommentEditorProps>((props, ref) => {
     const { comment, onSave, id, onCancel, autoFocus } = props;
     const mentionDataService = useDependency(IThreadCommentMentionDataService);
+    const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const [localComment, setLocalComment] = useState({ ...comment });
     const [editing, setEditing] = useState(false);
@@ -105,6 +107,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                                 onCancel?.();
                                 setEditing(false);
                                 setLocalComment({ text: undefined });
+                                commandService.executeCommand(SetActiveCommentOperation.id);
                             }}
                         >
                             {localeService.t('threadCommentUI.editor.cancel')}

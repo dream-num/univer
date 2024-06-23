@@ -18,8 +18,9 @@ import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
-import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
+import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { Inject } from '@wendellhu/redi';
+import { BackScrollController } from '@univerjs/docs-ui';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../common/const';
 
 @OnLifecycle(LifecycleStages.Rendered, DocThreadCommentSelectionController)
@@ -27,11 +28,13 @@ export class DocThreadCommentSelectionController extends Disposable {
     constructor(
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(BackScrollController) private readonly _backScrollController: BackScrollController
     ) {
         super();
 
         this._initSelectionChange();
+        this._initActiveCommandChange();
     }
 
     private _initSelectionChange() {
@@ -53,18 +56,36 @@ export class DocThreadCommentSelectionController extends Disposable {
                         }
 
                         if (customRange) {
-                            this._threadCommentPanelService.setActiveComment({
+                            this._commandService.executeCommand(SetActiveCommentOperation.id, {
                                 unitId,
                                 subUnitId: DEFAULT_DOC_SUBUNIT_ID,
-                                commentId: customRange?.rangeId,
+                                commentId: customRange.rangeId,
                             });
                             return;
                         }
                     }
 
-                    this._threadCommentPanelService.setActiveComment(null);
+                    this._commandService.executeCommand(SetActiveCommentOperation.id);
                 }
             })
         );
+    }
+
+    private _initActiveCommandChange() {
+        this.disposeWithMe(this._threadCommentPanelService.activeCommentId$.subscribe((activeComment) => {
+            if (activeComment) {
+                const doc = this._univerInstanceService.getUnit<DocumentDataModel>(activeComment.unitId);
+                if (doc) {
+                    const customRange = doc.getCustomRanges()?.find((range) => range.rangeId === activeComment.commentId);
+                    if (customRange) {
+                        this._backScrollController.scrollToRange(activeComment.unitId, {
+                            startOffset: customRange.startIndex,
+                            endOffset: customRange.endIndex,
+                            collapsed: false,
+                        });
+                    }
+                }
+            }
+        }));
     }
 }

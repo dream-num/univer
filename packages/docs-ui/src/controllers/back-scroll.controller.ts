@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import type { ITextRange, Nullable } from '@univerjs/core';
 import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { DocSkeletonManagerService, getDocObject, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
+import type { INodePosition } from '@univerjs/engine-render';
 import { getAnchorBounding, IRenderManagerService, NodePositionConvertToCursor } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
@@ -51,19 +53,22 @@ export class BackScrollController extends RxDisposable {
         });
     }
 
-    // Let the selection show on the current screen.
-    private _scrollToSelection(unitId: string) {
-        const activeTextRange = this._textSelectionManagerService.getActiveRange();
-        const docObject = this._getDocObject();
-        const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
-
-        if (activeTextRange == null || docObject == null || skeleton == null) {
+    scrollToRange(unitId: string, range: ITextRange) {
+        const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
+        if (!skeleton) {
             return;
         }
+        const { startOffset } = range;
+        const anchorNodePosition = skeleton.findNodePositionByCharIndex(startOffset);
+        // const focusNodePosition = startOffset !== endOffset ? skeleton.findNodePositionByCharIndex(endOffset) : null;
+        this.scrollToNode(unitId, anchorNodePosition);
+    }
 
-        const { collapsed, startNodePosition } = activeTextRange;
+    scrollToNode(unitId: string, startNodePosition: Nullable<INodePosition>) {
+        const docObject = this._getDocObject();
+        const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
 
-        if (!collapsed) {
+        if (docObject == null || skeleton == null) {
             return;
         }
 
@@ -114,6 +119,22 @@ export class BackScrollController extends RxDisposable {
 
         const config = viewportMain.transViewportScroll2ScrollValue(offsetX, offsetY);
         viewportMain.scrollBy(config);
+    }
+
+    // Let the selection show on the current screen.
+    private _scrollToSelection(unitId: string) {
+        const activeTextRange = this._textSelectionManagerService.getActiveRange();
+        if (activeTextRange == null) {
+            return;
+        }
+
+        const { collapsed, startNodePosition } = activeTextRange;
+
+        if (!collapsed) {
+            return;
+        }
+
+        this.scrollToNode(unitId, startNodePosition);
     }
 
     private _getDocObject() {

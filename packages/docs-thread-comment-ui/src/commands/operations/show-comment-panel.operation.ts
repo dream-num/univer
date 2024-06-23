@@ -55,7 +55,6 @@ export const StartAddCommentOperation: ICommand = {
     type: CommandType.OPERATION,
     handler(accessor) {
         const panelService = accessor.get(ThreadCommentPanelService);
-        const sidebarService = accessor.get(ISidebarService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
@@ -63,13 +62,17 @@ export const StartAddCommentOperation: ICommand = {
         const docCommentService = accessor.get(DocThreadCommentService);
         const commandService = accessor.get(ICommandService);
 
-        const textRange = textSelectionManagerService.getSelections()?.[0];
+        const textRange = textSelectionManagerService.getActiveRange();
         if (!doc || !textRange) {
             return false;
         }
 
         if (!panelService.panelVisible) {
             commandService.executeCommand(ShowCommentPanelOperation.id);
+        }
+
+        if (textRange.collapsed) {
+            return true;
         }
 
         const unitId = doc.getUnitId();
@@ -98,17 +101,6 @@ export const StartAddCommentOperation: ICommand = {
             subUnitId,
             commentId,
         });
-
-        sidebarService.open({
-            header: { title: 'comment' },
-            children: { label: DocThreadCommentPanel.componentKey },
-            width: 312,
-            onClose: () => {
-                panelService.setPanelVisible(false);
-                panelService.setActiveComment(undefined);
-            },
-        });
-        panelService.setPanelVisible(true);
 
         return true;
     },

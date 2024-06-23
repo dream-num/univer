@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { BackScrollController } from './controllers/back-scroll.controller';
 export * from './basics';
 export * from './docs-ui-plugin';
 export { DocCanvasView } from './views/doc-canvas-view';

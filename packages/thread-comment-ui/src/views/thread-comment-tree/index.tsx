@@ -272,9 +272,11 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             <div className={styles.threadCommentTitle}>
                 <div className={styles.threadCommentTitlePosition}>
                     <div className={styles.threadCommentTitleHighlight} />
-                    {refStr || comments?.root.ref}
-                    {subUnitName ? ' · ' : ''}
-                    {subUnitName}
+                    <div className={styles.threadCommentTitlePositionText}>
+                        {refStr || comments?.root.ref}
+                        {subUnitName ? ' · ' : ''}
+                        {subUnitName}
+                    </div>
                 </div>
                 {comments
                     ? (

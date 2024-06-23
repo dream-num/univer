@@ -45,6 +45,7 @@ export interface IThreadCommentPanelProps {
     tempComment?: Nullable<IThreadComment>;
     onAddComment?: IThreadCommentTreeProps['onAddComment'];
     onDeleteComment?: IThreadCommentTreeProps['onDeleteComment'];
+    showComments?: string[];
 }
 
 export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
@@ -63,6 +64,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         tempComment,
         onAddComment,
         onDeleteComment,
+        showComments,
     } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
@@ -80,7 +82,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const currentUser = useObservable(userService.currentUser$);
 
     const comments = useMemo(() => {
-        const res = (() => {
+        const allComments = (() => {
             if (unit === 'all') {
                 const filteredComments = unitComments.map((i) => i[1]).flat().filter((i) => !i.parentId);
                 return sortComments ? sortComments(filteredComments) : filteredComments;
@@ -89,8 +91,16 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
             }
         })();
 
-        return tempComment ? [...res, tempComment] : res;
-    }, [unit, unitComments, subUnitId, sortComments, tempComment]);
+        const res = tempComment ? [...allComments, tempComment] : allComments;
+
+        if (showComments) {
+            const showCommentsSet = new Set(showComments);
+            showCommentsSet.add('');
+            return (res).filter((comment) => showCommentsSet.has(comment.id));
+        } else {
+            return res;
+        }
+    }, [tempComment, showComments, unit, unitComments, sortComments, subUnitId]);
 
     const statuedComments = useMemo(() => {
         if (status === 'resolved') {

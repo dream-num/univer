@@ -18,9 +18,9 @@ import type { DocumentDataModel } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ThreadCommentPanel } from '@univerjs/thread-comment-ui';
 import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
-import { TextSelectionManagerService } from '@univerjs/docs';
+import { RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { StartAddCommentOperation } from '../../commands/operations/show-comment-panel.operation';
 import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
@@ -30,13 +30,30 @@ import { DeleteDocCommentComment, type IDeleteDocCommentComment } from '../../co
 
 export const DocThreadCommentPanel = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const doc$ = useMemo(() => univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC), [univerInstanceService]);
+    const doc = useObservable(doc$);
     const subUnitId$ = useMemo(() => new Observable<string>((sub) => sub.next(DEFAULT_DOC_SUBUNIT_ID)), []);
     const textSelectionManagerService = useDependency(TextSelectionManagerService);
     const textRange = useObservable(textSelectionManagerService.textSelection$)?.textRanges[0];
     const commandService = useDependency(ICommandService);
     const docCommentService = useDependency(DocThreadCommentService);
     const tempComment = useObservable(docCommentService.addingComment$);
+    const [commentIds, setCommentIds] = useState<string[]>([]);
+
+    useEffect(() => {
+        const customRanges = doc?.getCustomRanges();
+        setCommentIds(customRanges?.map((r) => r.rangeId) ?? []);
+
+        const dispose = commandService.onCommandExecuted((command) => {
+            if (command.id === RichTextEditingMutation.id) {
+                const customRanges = doc?.getCustomRanges();
+                setCommentIds(customRanges?.map((r) => r.rangeId) ?? []);
+            }
+        });
+        return () => {
+            dispose.dispose();
+        };
+    }, [commandService, doc]);
 
     if (!doc) {
         return null;
@@ -82,6 +99,7 @@ export const DocThreadCommentPanel = () => {
                 }
                 return true;
             }}
+            showComments={commentIds}
         />
     );
 };

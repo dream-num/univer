@@ -251,6 +251,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     };
 
     const subUnitName = getSubUnitName(comments?.root.subUnitId ?? subUnitId);
+    const editorVisible = showEdit && !editingId && !resolved;
 
     return (
         <div
@@ -322,13 +323,15 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                 if (!user) {
                                     return;
                                 }
-                                editorRef.current?.reply(transformTextNodes2Document([{
-                                    type: 'mention',
-                                    content: {
-                                        id: user.userID,
-                                        label: user.name,
-                                    },
-                                }]));
+                                requestAnimationFrame(() => {
+                                    editorRef.current?.reply(transformTextNodes2Document([{
+                                        type: 'mention',
+                                        content: {
+                                            id: user.userID,
+                                            label: user.name,
+                                        },
+                                    }]));
+                                });
                             }}
                             onAddComment={onAddComment}
                             onDeleteComment={onDeleteComment}
@@ -336,7 +339,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                     )
                 )}
             </div>
-            {showEdit && !editingId && !resolved
+            {editorVisible
                 ? (
                     <div>
                         <ThreadCommentEditor

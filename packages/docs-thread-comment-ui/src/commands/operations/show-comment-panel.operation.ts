@@ -94,7 +94,6 @@ export const StartAddCommentOperation: ICommand = {
             endOffset: textRange.endOffset!,
             collapsed: true,
         };
-
         docCommentService.startAdd(comment);
         panelService.setActiveComment({
             unitId,

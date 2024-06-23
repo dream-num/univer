@@ -206,6 +206,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     id={comment.id}
                     unitId={comment.unitId}
                     subUnitId={comment.subUnitId}
+                    refStr={comment.ref}
                     type={type}
                     showEdit={activeCommentId?.commentId === comment.id}
                     showHighlight={activeCommentId?.commentId === comment.id}

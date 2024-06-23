@@ -206,6 +206,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     const resolved = comments?.root.resolved;
     const currentUser = useObservable(userManagerService.currentUser$);
     const editorRef = useRef<IThreadCommentEditorInstance>(null);
+
     const renderComments = [
         ...comments ?
             [comments.root] :

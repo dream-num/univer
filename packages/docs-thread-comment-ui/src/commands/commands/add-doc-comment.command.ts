@@ -19,6 +19,7 @@ import { CommandType, CustomRangeType, ICommandService, sequenceExecuteAsync } f
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { AddCommentMutation, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
+import { SetActiveCommentOperation } from '@univerjs/thread-comment-ui';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 
 export interface IAddDocCommentComment {
@@ -56,7 +57,16 @@ export const AddDocCommentComment: ICommand<IAddDocCommentComment> = {
                 },
             };
 
-            return (await sequenceExecuteAsync([commentMutation, doMutation], commandService)).result;
+            const activeOperation = {
+                id: SetActiveCommentOperation.id,
+                params: {
+                    unitId,
+                    subUnitId: DEFAULT_DOC_SUBUNIT_ID,
+                    commentId: comment.id,
+                },
+            };
+
+            return (await sequenceExecuteAsync([commentMutation, doMutation, activeOperation], commandService)).result;
         }
 
         return false;

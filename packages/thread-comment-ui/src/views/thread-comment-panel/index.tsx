@@ -82,23 +82,22 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const currentUser = useObservable(userService.currentUser$);
 
     const comments = useMemo(() => {
-        const allComments = (() => {
-            if (unit === 'all') {
-                const filteredComments = unitComments.map((i) => i[1]).flat().filter((i) => !i.parentId);
-                return sortComments ? sortComments(filteredComments) : filteredComments;
-            } else {
-                return unitComments.find((i) => i[0] === subUnitId)?.[1] ?? [];
-            }
-        })();
+        const allComments =
+            (unit === 'all' ? unitComments.map((i) => i[1]).flat() : unitComments.find((i) => i[0] === subUnitId)?.[1] ?? [])
+                .filter((i) => !i.parentId);
 
+        const sort = sortComments ?? ((a) => a);
         const res = tempComment ? [...allComments, tempComment] : allComments;
 
         if (showComments) {
-            const showCommentsSet = new Set(showComments);
-            showCommentsSet.add('');
-            return (res).filter((comment) => showCommentsSet.has(comment.id));
+            const map = new Map<string, IThreadComment>();
+            res.forEach((comment) => {
+                map.set(comment.id, comment);
+            });
+
+            return [...showComments, ''].map((id) => map.get(id)).filter(Boolean) as IThreadComment[];
         } else {
-            return res;
+            return sort(res);
         }
     }, [tempComment, showComments, unit, unitComments, sortComments, subUnitId]);
 

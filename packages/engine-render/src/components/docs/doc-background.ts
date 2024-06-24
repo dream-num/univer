@@ -74,7 +74,7 @@ export class DocBackground extends DocComponent {
             }
 
             // Draw background and margin identifier.
-            const { width, pageWidth, height, pageHeight, marginTop, marginBottom, marginLeft, marginRight } = page;
+            const { width, pageWidth, height, pageHeight, originMarginTop, originMarginBottom, marginLeft, marginRight } = page;
 
             ctx.save();
             ctx.translate(pageLeft - 0.5, pageTop - 0.5);
@@ -91,40 +91,40 @@ export class DocBackground extends DocComponent {
             const marginIdentification: IPathProps = {
                 dataArray: [{
                     command: 'M',
-                    points: [marginLeft - IDENTIFIER_WIDTH, marginTop],
+                    points: [marginLeft - IDENTIFIER_WIDTH, originMarginTop],
                 }, {
                     command: 'L',
-                    points: [marginLeft, marginTop],
+                    points: [marginLeft, originMarginTop],
                 }, {
                     command: 'L',
-                    points: [marginLeft, marginTop - IDENTIFIER_WIDTH],
+                    points: [marginLeft, originMarginTop - IDENTIFIER_WIDTH],
                 }, {
                     command: 'M',
-                    points: [pageWidth - marginRight + IDENTIFIER_WIDTH, marginTop],
+                    points: [pageWidth - marginRight + IDENTIFIER_WIDTH, originMarginTop],
                 }, {
                     command: 'L',
-                    points: [pageWidth - marginRight, marginTop],
+                    points: [pageWidth - marginRight, originMarginTop],
                 }, {
                     command: 'L',
-                    points: [pageWidth - marginRight, marginTop - IDENTIFIER_WIDTH],
+                    points: [pageWidth - marginRight, originMarginTop - IDENTIFIER_WIDTH],
                 }, {
                     command: 'M',
-                    points: [marginLeft - IDENTIFIER_WIDTH, pageHeight - marginBottom],
+                    points: [marginLeft - IDENTIFIER_WIDTH, pageHeight - originMarginBottom],
                 }, {
                     command: 'L',
-                    points: [marginLeft, pageHeight - marginBottom],
+                    points: [marginLeft, pageHeight - originMarginBottom],
                 }, {
                     command: 'L',
-                    points: [marginLeft, pageHeight - marginBottom + IDENTIFIER_WIDTH],
+                    points: [marginLeft, pageHeight - originMarginBottom + IDENTIFIER_WIDTH],
                 }, {
                     command: 'M',
-                    points: [pageWidth - marginRight + IDENTIFIER_WIDTH, pageHeight - marginBottom],
+                    points: [pageWidth - marginRight + IDENTIFIER_WIDTH, pageHeight - originMarginBottom],
                 }, {
                     command: 'L',
-                    points: [pageWidth - marginRight, pageHeight - marginBottom],
+                    points: [pageWidth - marginRight, pageHeight - originMarginBottom],
                 }, {
                     command: 'L',
-                    points: [pageWidth - marginRight, pageHeight - marginBottom + IDENTIFIER_WIDTH],
+                    points: [pageWidth - marginRight, pageHeight - originMarginBottom + IDENTIFIER_WIDTH],
                 }] as unknown as IPathProps['dataArray'],
                 strokeWidth: 1.5,
                 stroke: MARGIN_STROKE_COLOR,

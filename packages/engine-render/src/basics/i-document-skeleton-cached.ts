@@ -68,7 +68,9 @@ export interface IDocumentSkeletonPage {
     pageOrient: PageOrientType; // Paper orientation, whether it's portrait (vertical) or landscape (horizontal)
     marginLeft: number; // The current page's padding, used to accommodate column title space, follows the snapshot configuration, jointly determined by documentStyle and sectionBreak. It represents the static limit for each page, which may vary per page.
     marginRight: number;
+    originMarginTop: number; // The margin top in document style config, used to draw margin identifier.
     marginTop: number;
+    originMarginBottom: number; // The margin bottom in document style config, used to draw margin identifier.
     marginBottom: number;
 
     pageNumber: number; // page页数

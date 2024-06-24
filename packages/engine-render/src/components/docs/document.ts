@@ -432,6 +432,28 @@ export class Documents extends DocComponent {
 
             this._resetRotation(ctx, finalAngle);
 
+            const footerSkeletonPage = skeFooters.get(footerId)?.get(pageWidth);
+
+            if (footerSkeletonPage) {
+                const footerAlignOffsetNoAngle = Vector2.create(
+                    horizontalOffsetNoAngle,
+                    page.pageHeight - footerSkeletonPage?.height - footerSkeletonPage.marginBottom
+                );
+
+                this._drawHeaderFooter(
+                    footerSkeletonPage,
+                    ctx,
+                    extensions,
+                    backgroundExtension,
+                    glyphExtensionsExcludeBackground,
+                    footerAlignOffsetNoAngle,
+                    centerAngle,
+                    vertexAngle,
+                    renderConfig,
+                    parentScale
+                );
+            }
+
             const { x, y } = this._drawLiquid.translatePage(
                 page,
                 this.pageLayoutType,

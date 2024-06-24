@@ -116,13 +116,16 @@ export function createSkeletonPage(
                 ctx,
                 footerTreeMap.get(footerId)!,
                 sectionBreakConfig,
-                skeletonResourceReference
+                skeletonResourceReference,
+                false
             );
             skeFooters.set(footerId, new Map([[pageWidth, footer]]));
         }
         page.footerId = footerId;
     }
 
+    page.originMarginTop = marginTop;
+    page.originMarginBottom = marginBottom;
     page.marginTop = _getVerticalMargin(marginTop, marginHeader, header);
     page.marginBottom = _getVerticalMargin(marginBottom, marginFooter, footer);
 
@@ -167,7 +170,9 @@ function _getNullPage() {
         height: 0,
         marginLeft: 0,
         marginRight: 0,
+        originMarginTop: 0,
         marginTop: 0,
+        originMarginBottom: 0,
         marginBottom: 0,
         breakType: BreakType.SECTION,
         st: 0,
@@ -236,7 +241,7 @@ function _getVerticalMargin(
         return marginTB;
     }
 
-    return Math.max(marginTB, marginHF, headerOrFooter?.height || 0);
+    return Math.max(marginTB, (marginHF + headerOrFooter?.height || 0));
 }
 
 function __getHeaderMarginTop(marginTop: number, marginHeader: number, height: number) {

@@ -20,16 +20,16 @@ import { ptToPixel } from '@univerjs/engine-render';
 
 function getDefaultHeaderFooterBody(type: 'header' | 'footer') {
     return {
-        dataStream: type === 'header' ? '荷塘月色\r作者：朱自清 👨‍👩‍👧‍👦 Today 我是页眉页眉\r\n' : '荷塘𠮷\r作者：朱自清 👨‍👩‍👧‍👦 Today 我是页脚页脚\r\n',
+        dataStream: type === 'header' ? '荷塘月色\r作者：朱自清\rToday Office\r我是页眉页眉\r\n' : '荷塘月色\r作者：朱自清\rToday Office\r我是页脚页脚\r\n',
         textRuns: [
             {
                 st: 0,
                 ed: 4,
                 ts: {
-                    fs: 12,
+                    fs: 10,
                     ff: 'Microsoft YaHei',
                     cl: {
-                        rgb: 'rgb(0, 0, 0)',
+                        rgb: 'rgb(155, 155, 0)',
                     },
                     bl: BooleanNumber.TRUE,
                     ul: {
@@ -39,9 +39,9 @@ function getDefaultHeaderFooterBody(type: 'header' | 'footer') {
             },
             {
                 st: 5,
-                ed: 36,
+                ed: 31,
                 ts: {
-                    fs: 12,
+                    fs: 10,
                     ff: 'Times New Roman',
                     cl: {
                         rgb: 'rgb(30, 30, 30)',
@@ -55,12 +55,18 @@ function getDefaultHeaderFooterBody(type: 'header' | 'footer') {
                 startIndex: 4,
             },
             {
-                startIndex: 36,
+                startIndex: 11,
+            },
+            {
+                startIndex: 24,
+            },
+            {
+                startIndex: 31,
             },
         ],
         sectionBreaks: [
             {
-                startIndex: 37,
+                startIndex: 32,
             },
         ],
     };
@@ -844,6 +850,6 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         defaultHeaderId: 'defaultHeaderId',
         defaultFooterId: 'defaultFooterId',
         marginHeader: 30,
-        marginFooter: 20,
+        marginFooter: 30,
     },
 };

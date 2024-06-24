@@ -211,7 +211,7 @@ export default {
         },
     },
     NOW: {
-        description: '返回当前日期和时间的序列号',
+        description: '返回当前日期和时间的序列号。',
         abstract: '返回当前日期和时间的序列号',
         links: [
             {
@@ -220,8 +220,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     SECOND: {

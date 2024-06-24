@@ -212,7 +212,7 @@ export default {
     },
     NOW: {
         description: '現在の日付と時刻に対応するシリアル値を返します。',
-        abstract: '現在の日付と時刻に対応するシリアル値を返します。',
+        abstract: '現在の日付と時刻に対応するシリアル値を返します',
         links: [
             {
                 title: '指導',
@@ -220,8 +220,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     SECOND: {

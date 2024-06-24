@@ -19,6 +19,7 @@ import { Day } from './day';
 import { Edate } from './edate';
 import { FUNCTION_NAMES_DATE } from './function-names';
 import { Month } from './month';
+import { Now } from './now';
 import { Today } from './today';
 import { Year } from './year';
 
@@ -27,6 +28,7 @@ export const functionDate = [
     [Day, FUNCTION_NAMES_DATE.DAY],
     [Edate, FUNCTION_NAMES_DATE.EDATE],
     [Month, FUNCTION_NAMES_DATE.MONTH],
+    [Now, FUNCTION_NAMES_DATE.NOW],
     [Today, FUNCTION_NAMES_DATE.TODAY],
     [Year, FUNCTION_NAMES_DATE.YEAR],
 ];

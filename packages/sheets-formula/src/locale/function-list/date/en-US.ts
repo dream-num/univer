@@ -211,7 +211,7 @@ export default {
         },
     },
     NOW: {
-        description: 'Returns the serial number of the current date and time',
+        description: 'Returns the serial number of the current date and time.',
         abstract: 'Returns the serial number of the current date and time',
         links: [
             {
@@ -220,8 +220,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     SECOND: {

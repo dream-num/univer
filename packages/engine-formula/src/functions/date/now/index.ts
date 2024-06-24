@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-import { DEFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
+import { DEFAULT_NOW_FORMAT, excelDateTimeSerial } from '../../../basics/date';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Today extends BaseFunction {
+export class Now extends BaseFunction {
     override minParams = 0;
 
     override maxParams = 0;
 
     override calculate() {
-        const currentSerial = excelDateSerial(new Date());
+        const now = new Date();
+        const utcNow = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds()));
+        const currentSerial = excelDateTimeSerial(utcNow);
         const valueObject = NumberValueObject.create(currentSerial);
-        valueObject.setPattern(DEFAULT_DATE_FORMAT);
+        valueObject.setPattern(DEFAULT_NOW_FORMAT);
         return valueObject;
     }
 }

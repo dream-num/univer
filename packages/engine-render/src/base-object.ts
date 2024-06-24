@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { EventState, IKeyValue, ITransformState, Nullable, Observer } from '@univerjs/core';
-import { Disposable, EventSubject, Observable } from '@univerjs/core';
+import type { EventState, IKeyValue, ITransformState, Nullable, Observable, Observer } from '@univerjs/core';
+import { Disposable, EventSubject } from '@univerjs/core';
 
 import type { EVENT_TYPE } from './basics/const';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
@@ -48,29 +48,27 @@ export abstract class BaseObject extends Disposable {
     groupKey?: string;
     isInGroup: boolean = false;
 
-    onTransformChangeObservable = new Observable<ITransformChangeState>();
+    onTransformChange$ = new EventSubject<ITransformChangeState>();
+
     pointerDown$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerMove$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerUp$ = new EventSubject<IPointerEvent | IMouseEvent>();
-    onDblclick$ = new EventSubject<IPointerEvent | IMouseEvent>();
-    onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
-    onMouseWheel$ = new EventSubject<IWheelEvent>();
-
     onPointerOut$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerOver$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerLeave$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerEnter$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
+    onDblclick$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onTripleClick$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onMouseWheel$ = new EventSubject<IWheelEvent>();
+
     onDragLeave$ = new EventSubject<IDragEvent | IMouseEvent>();
-
     onDragOver$ = new EventSubject<IDragEvent | IMouseEvent>();
-
     onDragEnter$ = new EventSubject<IDragEvent | IMouseEvent>();
-
     onDrop$ = new EventSubject<IDragEvent | IMouseEvent>();
 
-    onIsAddedToParentObserver = new Observable<any>();
-    onDisposeObserver = new Observable<BaseObject>();
+    onIsAddedToParent$ = new EventSubject<any>();
+    onDispose$ = new EventSubject<BaseObject>();
 
     protected _oKey: string;
 
@@ -434,7 +432,7 @@ export abstract class BaseObject extends Disposable {
 
         this._setTransForm();
 
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.translate,
             value: { top: this._top, left: this._left },
             preValue: { top: preTop, left: preLeft },
@@ -455,7 +453,7 @@ export abstract class BaseObject extends Disposable {
 
         this._setTransForm();
 
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize,
             value: { width: this._width, height: this._height },
             preValue: { width: preWidth, height: preHeight },
@@ -477,7 +475,7 @@ export abstract class BaseObject extends Disposable {
 
         this._setTransForm();
 
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
             value: { scaleX: this._scaleX, scaleY: this._scaleY },
             preValue: { scaleX: preScaleX, scaleY: preScaleY },
@@ -499,7 +497,7 @@ export abstract class BaseObject extends Disposable {
 
         this._setTransForm();
 
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.skew,
             value: { skewX: this._skewX, skewY: this._skewY },
             preValue: { skewX: preSkewX, skewY: preSkewY },
@@ -520,7 +518,7 @@ export abstract class BaseObject extends Disposable {
 
         this._setTransForm();
 
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.flip,
             value: { flipX: this._flipX, flipY: this._flipY },
             preValue: { flipX: preFlipX, flipY: preFlipY },
@@ -546,7 +544,7 @@ export abstract class BaseObject extends Disposable {
 
         this._setTransForm();
 
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.all,
             value: option,
             preValue: preKeys,
@@ -754,7 +752,7 @@ export abstract class BaseObject extends Disposable {
 
     override dispose() {
         super.dispose();
-        this.onTransformChangeObservable.clear();
+        this.onTransformChange$.complete();
         this.pointerDown$.complete();
         this.onPointerMove$.complete();
         this.onPointerUp$.complete();
@@ -769,15 +767,15 @@ export abstract class BaseObject extends Disposable {
         this.onDrop$.complete();
         this.onDblclick$.complete();
         this.onTripleClick$.complete();
-        this.onIsAddedToParentObserver.clear();
+        this.onIsAddedToParent$.complete();
 
         this.parent?.removeObject(this);
 
-        this.onDisposeObserver.notifyObservers(this);
+        this.onDispose$.emitEvent(this);
 
         this._makeDirtyMix();
 
-        this.onDisposeObserver.clear();
+        this.onDispose$.complete();
 
         this._parent = null;
         this._layer = null;

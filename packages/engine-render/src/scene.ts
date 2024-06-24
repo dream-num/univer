@@ -83,7 +83,7 @@ export class Scene extends ThinScene {
 
         this.disposeWithMe(
             toDisposable(
-                this._parent?.onTransformChangeObservable.add((change: ITransformChangeState) => {
+                this._parent?.onTransformChange$.subscribeEvent((_change: ITransformChangeState) => {
                     this._setTransForm();
                 })
             )
@@ -218,7 +218,7 @@ export class Scene extends ThinScene {
         }
 
         this._setTransForm();
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize,
             value: {
                 width: this.width,
@@ -256,7 +256,7 @@ export class Scene extends ThinScene {
         }
 
         this._setTransForm();
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
             value: {
                 scaleX: this.scaleX,
@@ -284,7 +284,7 @@ export class Scene extends ThinScene {
         this.scaleY = precisionTo(this.scaleY, 1);
 
         this._setTransForm();
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
             value: {
                 scaleX: this.scaleX,
@@ -300,7 +300,6 @@ export class Scene extends ThinScene {
      * scene._setTransForm --> viewport@resetCanvasSizeAndUpdateScrollBar ---> scrollTo ---> limitedScroll ---> onScrollBeforeObserver ---> setScrollInfo
      * scrollInfo needs accurate scene width & height, limitedScroll depends on scene & engine's width & height
      * @param state
-     * @returns
      */
     transformByState(state: ISceneTransformState) {
         const optionKeys = Object.keys(state);
@@ -318,7 +317,7 @@ export class Scene extends ThinScene {
 
         this._setTransForm();
 
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.all,
             value: state,
             preValue: preKeys,
@@ -385,7 +384,7 @@ export class Scene extends ThinScene {
         // this.onTransformChangeObservable.add((state: ITransformChangeState) => {
         //     o.scaleCacheCanvas();
         // });
-        o.onIsAddedToParentObserver.notifyObservers(this);
+        o.onIsAddedToParent$.emitEvent(this);
     }
 
     override addObjects(objects: BaseObject[], zIndex: number = 1) {
@@ -710,7 +709,7 @@ export class Scene extends ThinScene {
         this.clearLayer();
         this.clearViewports();
         this.detachControl();
-        this.onTransformChangeObservable?.clear();
+        this.onTransformChange$?.complete();
         this._inputManager?.dispose();
         this._inputManager = null;
         this._transformer?.dispose();

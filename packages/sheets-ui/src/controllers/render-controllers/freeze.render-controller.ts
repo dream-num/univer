@@ -1445,7 +1445,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         }
         const { scene } = sheetObject;
 
-        scene.onTransformChangeObservable.add((state) => {
+        scene.onTransformChange$.subscribeEvent((state) => {
             if (state.type !== TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale) {
                 return;
             }

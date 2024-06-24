@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, type Nullable, type Observer, toDisposable } from '@univerjs/core';
+import { Disposable, type Nullable, toDisposable } from '@univerjs/core';
 
+import type { Subscription } from 'rxjs';
 import type { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import type { IDragEvent, IEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
@@ -45,7 +46,7 @@ export class InputManager extends Disposable {
     // private _alreadyAttachedTo: HTMLElement;
 
     // WorkBookObserver
-    private _onInputObserver: Nullable<Observer<IEvent>>;
+    private _onInput$: Nullable<Subscription>;
 
     // Pointers
     private _onPointerMove!: (evt: IMouseEvent) => void;
@@ -312,7 +313,7 @@ export class InputManager extends Disposable {
         };
 
         // eslint-disable-next-line complexity
-        this._onInputObserver = engine.onInputChangedObservable.add((eventData: IEvent) => {
+        this._onInput$ = engine.onInputChanged$.subscribeEvent((eventData: IEvent) => {
             const evt: IEvent = eventData;
             // Keyboard Events
             if (eventData.deviceType === DeviceType.Keyboard) {
@@ -391,7 +392,7 @@ export class InputManager extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                this._onInputObserver
+                this._onInput$
             )
         );
 
@@ -411,7 +412,8 @@ export class InputManager extends Disposable {
         if (!engine) {
             return;
         }
-        engine.onInputChangedObservable.remove(this._onInputObserver);
+        // engine.onInputChanged$.remove(this._onInput$);
+        this._onInput$?.unsubscribe();
 
         this._alreadyAttached = false;
     }

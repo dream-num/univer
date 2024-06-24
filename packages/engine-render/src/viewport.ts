@@ -254,7 +254,7 @@ export class Viewport {
         this.resetCanvasSizeAndUpdateScrollBar();
         this.getBounding();
 
-        this.scene.getEngine()?.onTransformChangeObservable.add(() => {
+        this.scene.getEngine()?.onTransformChange$.subscribeEvent(() => {
             this._mainCanvasResizeHandler();
         });
         this._mainCanvasResizeHandler();
@@ -1551,7 +1551,7 @@ export class Viewport {
 
     /**
      * main canvas element resize
-     * called by this.scene.getEngine()?.onTransformChangeObservable.add
+     * called by this.scene.getEngine()?.onTransformChange$.add
      */
     private _mainCanvasResizeHandler() {
         this.markForceDirty(true);

@@ -155,13 +155,13 @@ export class CanvasView extends RxDisposable {
 
         const { scene, engine } = currentRender;
 
-        const observer = engine.onTransformChangeObservable.add(() => {
+        const observer = engine.onTransformChange$.subscribeEvent(() => {
             this._scrollToCenter();
             // add once
-            observer?.dispose();
+            observer?.unsubscribe();
         });
 
-        engine.onTransformChangeObservable.add(() => {
+        engine.onTransformChange$.subscribeEvent(() => {
             setTimeout(() => {
                 this.createThumbs();
             }, 300);
@@ -209,7 +209,7 @@ export class CanvasView extends RxDisposable {
             }
         });
 
-        scene.onFileLoadedObservable.add(() => {
+        scene.onFileLoaded$.subscribeEvent(() => {
             this._refreshThumb();
         });
 

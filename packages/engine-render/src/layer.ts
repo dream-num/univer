@@ -229,7 +229,7 @@ export class Layer extends Disposable {
     private _layerBehavior(o: BaseObject) {
         this.disposeWithMe(
             toDisposable(
-                o.onTransformChangeObservable.add(() => {
+                o.onTransformChange$.subscribeEvent(() => {
                     this.makeDirty(true);
                 })
             )
@@ -242,7 +242,7 @@ export class Layer extends Disposable {
         this._cacheCanvas = new Canvas();
         this.disposeWithMe(
             toDisposable(
-                this._scene.getEngine()?.onTransformChangeObservable.add(() => {
+                this._scene.getEngine()?.onTransformChange$.subscribeEvent(() => {
                     this._resizeCacheCanvas();
                 })
             )

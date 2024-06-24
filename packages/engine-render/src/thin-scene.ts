@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
-import { Disposable, EventSubject, Observable } from '@univerjs/core';
+import type { EventState, IKeyValue, Nullable, Observable, Observer } from '@univerjs/core';
+import { Disposable, EventSubject } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import type { CURSOR_TYPE, EVENT_TYPE } from './basics/const';
@@ -25,11 +25,12 @@ import type { ITransformChangeState } from './basics/interfaces';
 import { Transform } from './basics/transform';
 import type { Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
+import type { Engine } from './engine';
 
 export abstract class ThinScene extends Disposable {
-    onTransformChangeObservable = new Observable<ITransformChangeState>();
+    onTransformChange$ = new EventSubject<ITransformChangeState>();
 
-    onFileLoadedObservable = new Observable<string>();
+    onFileLoaded$ = new EventSubject<string>();
 
     pointerDown$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
@@ -203,8 +204,8 @@ export abstract class ThinScene extends Disposable {
     abstract getParent(): any;
 
     override dispose(): void {
-        this.onTransformChangeObservable.clear();
-        this.onFileLoadedObservable.clear();
+        this.onTransformChange$.complete();
+        this.onFileLoaded$.complete();
         this.pointerDown$.complete();
         this.onPointerMove$.complete();
         this.onPointerUp$.complete();
@@ -229,7 +230,7 @@ export abstract class ThinScene extends Disposable {
 
     abstract addObjects(objects: BaseObject[], zIndex?: number): void;
 
-    abstract getEngine(): any;
+    abstract getEngine(): Engine;
 
     abstract setObjectBehavior(o: BaseObject): void;
 

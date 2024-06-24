@@ -72,7 +72,7 @@ export {
 export { MarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { IMarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { ISelectionRenderService } from './services/selection/selection-render.service';
-export { SelectionRenderService } from './services/selection/selection-render.service';
+export { SelectionRenderService, NormalSelectionRenderService } from './services/selection/selection-render.service';
 export { SelectionShape } from './services/selection/selection-shape';
 export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manager.service';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';

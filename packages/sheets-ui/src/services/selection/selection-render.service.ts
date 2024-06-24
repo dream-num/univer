@@ -189,44 +189,23 @@ export class SelectionRenderService extends Disposable implements ISelectionRend
     public interceptor = new InterceptorManager({ RANGE_MOVE_PERMISSION_CHECK, RANGE_FILL_PERMISSION_CHECK });
 
     constructor(
-        private readonly _context: IRenderContext<Workbook>,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @IShortcutService private readonly _shortcutService: IShortcutService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(Injector) private readonly _injector: Injector,
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
+        protected readonly _injector: Injector,
+        protected readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        protected readonly _themeService: ThemeService,
+        // WTF: why shortcutService is injected here?
+        protected readonly _shortcutService: IShortcutService,
+        protected readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
-        this._init();
-    }
-
-    override dispose(): void {
-        super.dispose();
-    }
-
-    private _init() {
-        const sheetObject = this._getSheetObject();
-
-        this._initViewMainListener(sheetObject);
-        this._initHeaders(sheetObject);
-        this._initLeftTop(sheetObject);
-        this._initSelectionChangeListener();
-        this._initThemeChangeListener();
-        this._initSkeletonChangeListener();
-        this._initUserActionSyncListener();
-        this._initDefinedNameListener();
     }
 
     private _setStyle(style: ISelectionStyle) {
         this._selectionStyle = style;
     }
 
-    private _resetStyle() {
+    protected _resetStyle() {
         this._setStyle(getNormalSelectionStyle(this._themeService));
     }
 
@@ -239,7 +218,7 @@ export class SelectionRenderService extends Disposable implements ISelectionRend
      * @param selectionRange
      * @param curCellRange
      */
-    addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle) {
+    protected _addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle) {
         const currentControls = this.getCurrentControls();
 
         if (!currentControls) {
@@ -419,7 +398,7 @@ export class SelectionRenderService extends Disposable implements ISelectionRend
      * @param zIndex Stacking order of the selection object
      * @param rangeType Determines whether the selection is made normally according to the range or by rows and columns
      */
-    private _eventTrigger(
+    protected _eventTrigger(
         evt: IPointerEvent | IMouseEvent,
         zIndex = 0,
         rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL,
@@ -1113,8 +1092,40 @@ export class SelectionRenderService extends Disposable implements ISelectionRend
             rangeWithCoord,
         };
     }
+}
 
-    // #region legacy SelectionRenderController
+export class NormalSelectionRenderService extends SelectionRenderService implements IRenderModule {
+    constructor(
+        private readonly _context: IRenderContext<Workbook>,
+        @Inject(Injector) _injector: Injector,
+        @Inject(SheetSkeletonManagerService) _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @Inject(ThemeService) _themeService: ThemeService,
+        @IShortcutService _shortcutService: IShortcutService,
+        @IRenderManagerService _renderManagerService: IRenderManagerService,
+        // WTF: this should not be here, but in defined names service controller, next: move defined name this out of this shit
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @ICommandService private readonly _commandService: ICommandService,
+
+        // TODO@wzhudev: it should only listen to the current sheet's selection
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
+    ) {
+        super(_injector, _sheetSkeletonManagerService, _themeService, _shortcutService, _renderManagerService);
+
+        this._init();
+    }
+
+    private _init() {
+        const sheetObject = this._getSheetObject();
+
+        this._initViewMainListener(sheetObject);
+        this._initHeaders(sheetObject);
+        this._initLeftTop(sheetObject);
+        this._initSelectionChangeListener();
+        this._initThemeChangeListener();
+        this._initSkeletonChangeListener();
+        this._initUserActionSyncListener();
+        this._initDefinedNameListener();
+    }
 
     private _initDefinedNameListener() {
         this.disposeWithMe(
@@ -1315,7 +1326,7 @@ export class SelectionRenderService extends Disposable implements ISelectionRend
                 const selectionWithStyle = this._getAllRange(skeleton);
 
                 const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
-                this.addControlToCurrentByRangeData(selectionData);
+                this._addControlToCurrentByRangeData(selectionData);
 
                 this.refreshSelectionMoveStart();
 
@@ -1340,7 +1351,7 @@ export class SelectionRenderService extends Disposable implements ISelectionRend
                         }
                         const selectionData =
                             this.attachSelectionWithCoord(selectionWithStyle);
-                        this.addControlToCurrentByRangeData(selectionData);
+                        this._addControlToCurrentByRangeData(selectionData);
                     }
 
                     this._syncDefinedNameRange(params);
@@ -1493,8 +1504,6 @@ export class SelectionRenderService extends Disposable implements ISelectionRend
             }
         );
     }
-
-    // #endregion
 }
 
 /**

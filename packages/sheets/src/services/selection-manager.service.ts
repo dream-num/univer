@@ -32,6 +32,8 @@ export enum SelectionMoveType {
     MOVE_END,
 }
 
+export interface ISelectionManager {}
+
 export class SelectionManagerService extends RxDisposable {
     private get _currentSelectionPos(): ISelectionManagerSearchParam {
         const workbook = this._instanceSrv.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;

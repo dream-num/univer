@@ -182,7 +182,7 @@ export const AddWorksheetMergeAllCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getCurrentSelections().map((s) => s.range);
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) {
             return false;
         }

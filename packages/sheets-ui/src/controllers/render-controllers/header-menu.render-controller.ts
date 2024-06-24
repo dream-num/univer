@@ -95,7 +95,6 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
         // });
         this._headerPointerSubs?.unsubscribe();
         this._headerPointerSubs = null;
-        // this._colHeaderPointerSubs = [];
     }
 
     private _initialize() {

@@ -702,7 +702,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         const { viewMain, viewRowBottom, viewColumnRight, viewMainLeft, viewMainTop } = viewports;
 
         this.disposeWithMe(
-            viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
+            viewMain.onScrollAfter$.subscribeEvent((param: IScrollObserverParam) => {
                 const { scrollX, scrollY, viewportScrollX, viewportScrollY } = param;
 
                 if (viewRowBottom.isActive) {

@@ -875,7 +875,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const scrollBefore = viewport.onScrollBeforeObserver.add((param: IScrollObserverParam) => {
+        const scrollBefore = viewport.onScrollBefore$.subscribeEvent((param: IScrollObserverParam) => {
             const viewport = param.viewport;
             if (!viewport) {
                 return;
@@ -886,7 +886,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             activeRangeInstance?.activeStatic();
         });
 
-        const scrollStop = viewport.onScrollStopObserver.add((param: IScrollObserverParam) => {
+        const scrollStop = viewport.onScrollStop$.subscribeEvent((param: IScrollObserverParam) => {
             const viewport = param.viewport;
             if (!viewport) {
                 return;

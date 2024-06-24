@@ -28,7 +28,6 @@ import { Vector2 } from './basics/vector2';
 import { subtractViewportRange } from './basics/viewport-subtract';
 import { Canvas as UniverCanvas } from './canvas';
 import type { UniverRenderingContext } from './context';
-import type { Scene } from './scene';
 import type { BaseScrollBar } from './shape/base-scroll-bar';
 import type { ThinScene } from './thin-scene';
 
@@ -116,13 +115,13 @@ export class Viewport {
 
     onMouseWheel$ = new EventSubject<IWheelEvent>();
 
-    onScrollAfterObserver = new Observable<IScrollObserverParam>();
+    onScrollAfter$ = new EventSubject<IScrollObserverParam>();
 
-    onScrollBeforeObserver = new Observable<IScrollObserverParam>();
+    onScrollBefore$ = new EventSubject<IScrollObserverParam>();
 
-    onScrollStopObserver = new Observable<IScrollObserverParam>();
+    onScrollStop$ = new EventSubject<IScrollObserverParam>();
 
-    onScrollByBarObserver = new Observable<IScrollObserverParam>();
+    onScrollByBar$ = new EventSubject<IScrollObserverParam>();
 
     private _viewportKey: string = '';
 
@@ -547,7 +546,7 @@ export class Viewport {
     scrollByBar(pos: IScrollBarPosition, isTrigger = true) {
         this._scrollToScrollbarPos(SCROLL_TYPE.scrollBy, pos, isTrigger);
         const { x, y } = pos;
-        this.onScrollByBarObserver.notifyObservers({
+        this.onScrollByBar$.emitEvent({
             viewport: this,
             scrollX: this.scrollX,
             scrollY: this.scrollY,
@@ -646,7 +645,7 @@ export class Viewport {
             }
         }
 
-        const { scaleX, scaleY } = (this._scene as Scene).getPrecisionScale();
+        const { scaleX, scaleY } = this._scene.getPrecisionScale();
 
         return {
             x: fixLineWidthByScale(x + this._paddingStartX, scaleX),
@@ -1082,9 +1081,9 @@ export class Viewport {
 
     dispose() {
         this.onMouseWheel$.complete();
-        this.onScrollAfterObserver.clear();
-        this.onScrollBeforeObserver.clear();
-        this.onScrollStopObserver.clear();
+        this.onScrollAfter$.complete();
+        this.onScrollBefore$.complete();
+        this.onScrollStop$.complete();
         this._scrollBar?.dispose();
         this._cacheCanvas?.dispose();
         this._scene.removeViewport(this._viewportKey);
@@ -1269,7 +1268,7 @@ export class Viewport {
     ) {
         clearTimeout(this._scrollStopNum);
         this._scrollStopNum = setTimeout(() => {
-            this.onScrollStopObserver.notifyObservers({
+            this.onScrollStop$.emitEvent({
                 viewport: this,
                 scrollX: this.scrollX,
                 scrollY: this.scrollY,
@@ -1325,7 +1324,7 @@ export class Viewport {
         }
 
         const limited = this.limitedScroll(); // 限制滚动范围
-        this.onScrollBeforeObserver.notifyObservers({
+        this.onScrollBefore$.emitEvent({
             viewport: this,
             scrollX: this.scrollX,
             scrollY: this.scrollY,
@@ -1347,7 +1346,7 @@ export class Viewport {
         // calc startRow & offset by viewportScrollXY, then update scrollInfo
         // other viewports, rowHeader & colHeader depend on this notify
         // scroll.render-controller@onScrollAfterObserver ---> setScrollInfo but no notify
-        this.onScrollAfterObserver.notifyObservers({
+        this.onScrollAfter$.emitEvent({
             isTrigger,
             viewport: this,
             x,

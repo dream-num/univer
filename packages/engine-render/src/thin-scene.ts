@@ -25,7 +25,8 @@ import type { ITransformChangeState } from './basics/interfaces';
 import { Transform } from './basics/transform';
 import type { Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
-import type { Engine } from './engine';
+import type { ThinEngine } from './thin-engine';
+import type { Scene } from './scene';
 
 export abstract class ThinScene extends Disposable {
     onTransformChange$ = new EventSubject<ITransformChangeState>();
@@ -230,7 +231,7 @@ export abstract class ThinScene extends Disposable {
 
     abstract addObjects(objects: BaseObject[], zIndex?: number): void;
 
-    abstract getEngine(): Engine;
+    abstract getEngine(): Nullable<ThinEngine<Scene>>;
 
     abstract setObjectBehavior(o: BaseObject): void;
 

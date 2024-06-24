@@ -166,7 +166,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         this.disposeWithMe(
             toDisposable(
                 // set scrollInfo, the event is triggered in viewport@_scrollToScrollbarPos
-                viewportMain?.onScrollAfterObserver.add((param: IScrollObserverParam) => {
+                viewportMain?.onScrollAfter$.subscribeEvent((param: IScrollObserverParam) => {
                     const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                     if (skeleton == null || param.isTrigger === false) {
                         return;
@@ -202,7 +202,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         );
         this.disposeWithMe(
             toDisposable(
-                viewportMain?.onScrollByBarObserver.add((param) => {
+                viewportMain?.onScrollByBar$.subscribeEvent((param) => {
                     const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                     if (skeleton == null || param.isTrigger === false) {
                         return;

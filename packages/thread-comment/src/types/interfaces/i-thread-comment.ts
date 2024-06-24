@@ -22,18 +22,22 @@ export interface IThreadCommentMention {
     icon?: string;
 }
 
-export interface IThreadComment {
+export interface IBaseComment {
     id: string;
-    ref: string;
     dT: string;
     updateT?: string;
     personId: string;
-    parentId?: string;
     text: IDocumentBody;
     attachments?: string[];
-    resolved?: boolean;
     updated?: boolean;
+    mentions?: string[];
+}
+
+export interface IThreadComment extends IBaseComment {
     unitId: string;
     subUnitId: string;
-    mentions?: string[];
+    ref: string;
+    parentId?: string;
+    resolved?: boolean;
+    children?: IBaseComment[];
 }

@@ -19,11 +19,13 @@ import type { IThreadComment } from '../types/interfaces/i-thread-comment';
 
 export type ThreadCommentJSON = { id: string } & Partial<Omit<IThreadComment, 'id'>>;
 
+type GoNext = boolean;
+
 export interface IThreadCommentDataSourceService {
     addComment: (comment: IThreadComment) => Promise<IThreadComment>;
-    updateComment: (comment: IThreadComment) => Promise<boolean>;
-    deleteComment: (commentId: string) => Promise<boolean>;
-    deleteCommentBatch: (commentIds: string[]) => Promise<boolean>;
+    updateComment: (comment: IThreadComment) => Promise<GoNext>;
+    deleteComment: (commentId: string) => Promise<GoNext>;
+    deleteCommentBatch: (commentIds: string[]) => Promise<GoNext>;
     loadFormSnapshot: (unitComments: Record<string, ThreadCommentJSON[]>) => Promise<Record<string, IThreadComment[]>>;
     saveToSnapshot: (unitComments: Record<string, IThreadComment[]>) => Record<string, ThreadCommentJSON[]>;
 }

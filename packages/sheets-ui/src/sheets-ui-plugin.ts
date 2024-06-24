@@ -35,7 +35,6 @@ import { HeaderMoveRenderController } from './controllers/render-controllers/hea
 import { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
-import { SelectionRenderController } from './controllers/render-controllers/selection.render-controller';
 import { SheetsRenderService } from './services/sheets-render.service';
 import type { IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
 import { DefaultSheetUiConfig, SheetUIController } from './controllers/sheet-ui.controller';
@@ -174,6 +173,7 @@ export class UniverSheetsUIPlugin extends Plugin {
         ([
             [SheetSkeletonManagerService],
             [SheetRenderController],
+
             [ISelectionRenderService, { useClass: SelectionRenderService }],
         ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
@@ -184,20 +184,16 @@ export class UniverSheetsUIPlugin extends Plugin {
     // a correct skeleton when they get loaded.
     private _registerRenderModules(): void {
         ([
-            // https://github.com/dream-num/univer-pro/issues/669
-            // HeaderMoveRenderController(HMRC) must be initialized before SelectionRenderController(SRC).
-            // Before HMRC expected selections remain unchanged when user clicks on the header. If we don't initialize HMRC before SRC,
-            // the selections will be changed by SRC first. Maybe we should merge row/col header related render controllers to one class.
             [HeaderMoveRenderController],
-            [SelectionRenderController],
-
             [HeaderFreezeRenderController],
             [HeaderUnhideRenderController],
             [HeaderResizeRenderController],
+
             // Caution: ScrollRenderController should placed before ZoomRenderController
             // because ZoomRenderController ---> viewport.resize --> setScrollInfo, but ScrollRenderController needs scrollInfo
             [SheetsScrollRenderController],
             [SheetsZoomRenderController],
+
             [FormatPainterRenderController],
             [HeaderMenuRenderController],
             [CellAlertRenderController],

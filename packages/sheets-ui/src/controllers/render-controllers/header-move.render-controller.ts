@@ -40,7 +40,6 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
-import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset } from '../utils/component-tools';
 import { checkInHeaderRanges } from '../utils/selections-tools';
@@ -115,7 +114,6 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
@@ -125,7 +123,6 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
     private _initialize() {
         this._initialRowOrColumn(RANGE_TYPE.ROW);
-
         this._initialRowOrColumn(RANGE_TYPE.COLUMN);
     }
 
@@ -137,32 +134,32 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         const eventBindingObject =
             initialType === RANGE_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
 
-        this._rowOrColumnMoveObservers.push(
-            eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+        // this._rowOrColumnMoveObservers.push(
+        //     eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        //         const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
 
-                const selectionRange = this._selectionManagerService.getCurrentLastSelection()?.range;
-                if (!selectionRange) return;
+        //         const selectionRange = this._selectionManagerService.getCurrentLastSelection()?.range;
+        //         if (!selectionRange) return;
 
-                const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_MOVE_PERMISSION_CHECK)(false, selectionRange);
-                if (!permissionCheck) return;
+        //         const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_MOVE_PERMISSION_CHECK)(false, selectionRange);
+        //         if (!permissionCheck) return;
 
-                const { row, column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
+        //         const { row, column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
 
-                const matchSelectionData = checkInHeaderRanges(
-                    this._selectionManagerService,
-                    initialType === RANGE_TYPE.ROW ? row : column,
-                    initialType
-                );
+        //         const matchSelectionData = checkInHeaderRanges(
+        //             this._selectionManagerService,
+        //             initialType === RANGE_TYPE.ROW ? row : column,
+        //             initialType
+        //         );
 
-                if (matchSelectionData === false) {
-                    scene.resetCursor();
-                    return;
-                }
+        //         if (matchSelectionData === false) {
+        //             scene.resetCursor();
+        //             return;
+        //         }
 
-                scene.setCursor(CURSOR_TYPE.GRAB);
-            })
-        );
+        //         scene.setCursor(CURSOR_TYPE.GRAB);
+        //     })
+        // );
 
         this._rowOrColumnLeaveObservers.push(
             eventBindingObject?.onPointerLeaveObserver.add(() => {
@@ -174,7 +171,9 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
         this._rowOrColumnDownObservers.push(
             // eslint-disable-next-line max-lines-per-function
-            eventBindingObject?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            eventBindingObject?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                if (state.isStopPropagation) return;
+
                 const selectionRange = this._selectionManagerService.getCurrentLastSelection()?.range;
                 if (!selectionRange) return;
 

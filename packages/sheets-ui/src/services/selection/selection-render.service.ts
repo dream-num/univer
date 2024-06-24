@@ -28,17 +28,21 @@ import type {
     Observer,
     Workbook,
 } from '@univerjs/core';
-import { createInterceptorKey, InterceptorManager, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { createInterceptorKey, Disposable, ICommandService, InterceptorManager, makeCellToSelection, RANGE_TYPE, ThemeService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
-import { getNormalSelectionStyle } from '@univerjs/sheets';
+import { convertSelectionDataToRange, getNormalSelectionStyle, getPrimaryForRange, ScrollToCellOperation, SelectionManagerService, SelectionMoveType, SetSelectionsOperation, SetWorksheetActivateCommand, transformCellDataToSelectionData } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
+import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
+import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
+import { checkInHeaderRanges } from '../../controllers/utils/selections-tools';
 import { SelectionShape } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
 
@@ -52,44 +56,23 @@ export interface ISelectionRenderService {
     readonly controlFillConfig$: Observable<IControlFillConfig | null>;
     readonly selectionMoving$: Observable<ISelectionWithCoordAndStyle[]>;
     readonly selectionMoveStart$: Observable<ISelectionWithCoordAndStyle[]>;
-    readonly usable$: Observable<boolean>;
 
     interceptor: InterceptorManager<{
         RANGE_MOVE_PERMISSION_CHECK: IInterceptor<boolean, null>;
         RANGE_FILL_PERMISSION_CHECK: IInterceptor<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>;
     }>;
 
-    // #region SelectionRenderController only
-    // Methods and properties only used in the SelectionRenderController. The more methods in this region,
-    // the greater the necessity is to merge these two modules.
-
-    updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]): void;
-    addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle): void;
-    changeRuntime(skeleton: Nullable<SpreadsheetSkeleton>, scene: Nullable<Scene>, viewport?: Viewport): void;
-    eventTrigger(
-        evt: IPointerEvent | IMouseEvent,
-        zIndex: number,
-        rangeType: RANGE_TYPE,
-        viewport?: Viewport,
-        scrollTimerType?: ScrollTimerType
-    ): void;
-    refreshSelectionMoveStart(): void;
-    reset(): void;
-    resetStyle(): void;
-
-    // #endregion
-
     // #region PromptController
     // Methods and properties only used in PromptController. The more methods in this region,
     // the greater the necessity is to create a `PromptSelectionService`.
 
-    enableSingleSelection(): void;
-    disableSingleSelection(): void;
-    getActiveRange(): Nullable<IRange>;
-    enableSkipRemainLast(): void;
-    enableRemainLast(): void;
-    disableRemainLast(): void;
-    disableSkipRemainLast(): void;
+    // enableSingleSelection(): void;
+    // disableSingleSelection(): void;
+    // getActiveRange(): Nullable<IRange>;
+    // enableSkipRemainLast(): void;
+    // enableRemainLast(): void;
+    // disableRemainLast(): void;
+    // disableSkipRemainLast(): void;
 
     // #endregion
 
@@ -124,7 +107,7 @@ export interface ISelectionRenderService {
 export const RANGE_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('rangeMovePermissionCheck');
 export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>('rangeFillPermissionCheck');
 
-export class SelectionRenderService implements ISelectionRenderService, IRenderModule {
+export class SelectionRenderService extends Disposable implements ISelectionRenderService, IRenderModule {
     private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
@@ -203,60 +186,48 @@ export class SelectionRenderService implements ISelectionRenderService, IRenderM
 
     private _activeViewport: Nullable<Viewport>;
 
-    /**
-     * This service relies on the scene and skeleton to work
-     * Use usable$ to check if this service works
-     */
-    private readonly _usable$ = new BehaviorSubject<boolean>(false);
-
-    readonly usable$ = this._usable$.asObservable();
     public interceptor = new InterceptorManager({ RANGE_MOVE_PERMISSION_CHECK, RANGE_FILL_PERMISSION_CHECK });
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(Injector) private readonly _injector: Injector
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(Injector) private readonly _injector: Injector,
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
     ) {
+        super();
+
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
+        this._init();
     }
 
-    dispose(): void {
-        // TODO: there should be something to garbage collect
+    override dispose(): void {
+        super.dispose();
     }
 
-    setStyle(style: ISelectionStyle) {
+    private _init() {
+        const sheetObject = this._getSheetObject();
+
+        this._initViewMainListener(sheetObject);
+        this._initHeaders(sheetObject);
+        this._initLeftTop(sheetObject);
+        this._initSelectionChangeListener();
+        this._initThemeChangeListener();
+        this._initSkeletonChangeListener();
+        this._initUserActionSyncListener();
+        this._initDefinedNameListener();
+    }
+
+    private _setStyle(style: ISelectionStyle) {
         this._selectionStyle = style;
     }
 
-    resetStyle() {
-        this.setStyle(getNormalSelectionStyle(this._themeService));
-    }
-
-    enableRemainLast() {
-        this._isRemainLastEnable = true;
-    }
-
-    disableRemainLast() {
-        this._isRemainLastEnable = false;
-    }
-
-    enableSkipRemainLast() {
-        this._isSkipRemainLastEnable = true;
-    }
-
-    disableSkipRemainLast() {
-        this._isSkipRemainLastEnable = false;
-    }
-
-    enableSingleSelection() {
-        this._isSingleSelection = true;
-    }
-
-    disableSingleSelection() {
-        this._isSingleSelection = false;
+    private _resetStyle() {
+        this._setStyle(getNormalSelectionStyle(this._themeService));
     }
 
     getViewPort() {
@@ -334,7 +305,6 @@ export class SelectionRenderService implements ISelectionRenderService, IRenderM
         this._skeleton = skeleton;
         this._scene = scene;
         this._activeViewport = viewport || scene?.getViewports()[0];
-        this._usable$.next(Boolean(skeleton && scene));
     }
 
     getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[] {
@@ -345,18 +315,6 @@ export class SelectionRenderService implements ISelectionRenderService, IRenderM
     getCurrentControls() {
         return this._selectionControls;
     }
-
-    // private _getCurrentControl() {
-    //     const controls = this.getCurrentControls();
-    //     if (controls && controls.length > 0) {
-    //         for (const control of controls) {
-    //             const currentCell = control.model.currentCell;
-    //             if (currentCell) {
-    //                 return control;
-    //             }
-    //         }
-    //     }
-    // }
 
     private _clearSelectionControls() {
         const curControls = this.getCurrentControls();
@@ -461,7 +419,7 @@ export class SelectionRenderService implements ISelectionRenderService, IRenderM
      * @param zIndex Stacking order of the selection object
      * @param rangeType Determines whether the selection is made normally according to the range or by rows and columns
      */
-    eventTrigger(
+    private _eventTrigger(
         evt: IPointerEvent | IMouseEvent,
         zIndex = 0,
         rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL,
@@ -1155,6 +1113,388 @@ export class SelectionRenderService implements ISelectionRenderService, IRenderM
             rangeWithCoord,
         };
     }
+
+    // #region legacy SelectionRenderController
+
+    private _initDefinedNameListener() {
+        this.disposeWithMe(
+            this._definedNamesService.focusRange$.subscribe(async (item) => {
+                if (item == null) {
+                    return;
+                }
+
+                const { unitId } = item;
+                let { formulaOrRefString } = item;
+
+                const workbook = this._context.unit;
+
+                if (unitId !== workbook.getUnitId()) {
+                    return;
+                }
+
+                if (formulaOrRefString.substring(0, 1) === operatorToken.EQUALS) {
+                    formulaOrRefString = formulaOrRefString.substring(1);
+                }
+
+                const result = isReferenceStrings(formulaOrRefString);
+
+                if (!result) {
+                    return;
+                }
+
+                const selections = await this._getSelections(workbook, unitId, formulaOrRefString);
+
+                this._selectionManagerService.setSelections(selections);
+
+                this._commandService.executeCommand(ScrollToCellOperation.id, selections[0].range);
+            })
+        );
+    }
+
+    private async _getSelections(workbook: Workbook, unitId: string, formulaOrRefString: string) {
+        const valueArray = formulaOrRefString.split(',');
+
+        let worksheet = workbook.getActiveSheet();
+
+        if (!worksheet) {
+            return [];
+        }
+
+        const selections = [];
+
+        for (let i = 0; i < valueArray.length; i++) {
+            const refString = valueArray[i].trim();
+
+            const unitRange = deserializeRangeWithSheet(refString.trim());
+
+            if (i === 0) {
+                const worksheetCache = workbook.getSheetBySheetName(unitRange.sheetName);
+                if (worksheetCache && worksheet.getSheetId() !== worksheetCache.getSheetId()) {
+                    worksheet = worksheetCache;
+                    await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                        subUnitId: worksheet.getSheetId(),
+                        unitId,
+                    });
+                }
+            }
+
+            if (worksheet.getName() !== unitRange.sheetName) {
+                continue;
+            }
+
+            let primary = null;
+            if (i === valueArray.length - 1) {
+                const range = unitRange.range;
+                const { startRow, startColumn, endRow, endColumn } = range;
+                primary = getPrimaryForRange({
+                    startRow,
+                    startColumn,
+                    endRow,
+                    endColumn,
+
+                }, worksheet);
+            }
+
+            selections.push({
+                range: unitRange.range,
+                style: getNormalSelectionStyle(this._themeService),
+                primary,
+            });
+        }
+
+        return selections;
+    }
+
+    private _getActiveViewport(evt: IPointerEvent | IMouseEvent) {
+        const sheetObject = this._getSheetObject();
+
+        return sheetObject?.scene.getActiveViewportByCoord(Vector2.FromArray([evt.offsetX, evt.offsetY]));
+    }
+
+    private _initViewMainListener(sheetObject: ISheetObjectParam) {
+        const { spreadsheet } = sheetObject;
+
+        this.disposeWithMe(
+            spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                this._eventTrigger(evt, spreadsheet.zIndex + 1, RANGE_TYPE.NORMAL, this._getActiveViewport(evt));
+
+                if (evt.button !== 2) {
+                    state.stopPropagation();
+                }
+            })
+        );
+    }
+
+    private _initThemeChangeListener() {
+        this.disposeWithMe(
+            toDisposable(
+                this._themeService.currentTheme$.subscribe(() => {
+                    this._resetStyle();
+                    const param = this._selectionManagerService.getCurrentSelections();
+                    if (param == null) {
+                        return;
+                    }
+
+                    this._refreshSelection(param);
+                })
+            )
+        );
+    }
+
+    private _refreshSelection(params: readonly ISelectionWithStyle[]) {
+        const selections = params.map((selectionWithStyle) => {
+            const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
+            selectionData.style = getNormalSelectionStyle(this._themeService);
+            return selectionData;
+        });
+
+        this.updateControlForCurrentByRangeData(selections);
+    }
+
+    private _initHeaders(sheetObject: ISheetObjectParam) {
+        const { spreadsheetRowHeader, spreadsheetColumnHeader, spreadsheet } = sheetObject;
+        const { scene } = this._context;
+
+        this.disposeWithMe(
+            spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                // If the pointer down is in the selected range, we shu
+                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+                const { row } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
+
+                const matchSelectionData = checkInHeaderRanges(this._selectionManagerService, row, RANGE_TYPE.ROW);
+                if (matchSelectionData) return;
+
+                this._eventTrigger(
+                    evt,
+                    (spreadsheet?.zIndex || 1) + 1,
+                    RANGE_TYPE.ROW,
+                    this._getActiveViewport(evt),
+                    ScrollTimerType.Y
+                );
+
+                if (evt.button !== 2) {
+                    state.stopPropagation();
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
+                const { column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
+
+                const matchSelectionData = checkInHeaderRanges(this._selectionManagerService, column, RANGE_TYPE.COLUMN);
+                if (matchSelectionData) return;
+
+                this._eventTrigger(
+                    evt,
+                    (spreadsheet?.zIndex || 1) + 1,
+                    RANGE_TYPE.COLUMN,
+                    this._getActiveViewport(evt),
+                    ScrollTimerType.X
+                );
+
+                if (evt.button !== 2) {
+                    state.stopPropagation();
+                }
+            })
+        );
+    }
+
+    private _initLeftTop(sheetObject: ISheetObjectParam) {
+        const { spreadsheetLeftTopPlaceholder } = sheetObject;
+        this.disposeWithMe(
+            spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                if (skeleton == null) {
+                    return;
+                }
+
+                this.reset();
+
+                const selectionWithStyle = this._getAllRange(skeleton);
+
+                const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
+                this.addControlToCurrentByRangeData(selectionData);
+
+                this.refreshSelectionMoveStart();
+
+                // this._selectionManagerService.replace([selectionWithStyle]);
+
+                if (evt.button !== 2) {
+                    state.stopPropagation();
+                }
+            })
+        );
+    }
+
+    private _initSelectionChangeListener() {
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
+                    this.reset();
+
+                    for (const selectionWithStyle of params) {
+                        if (selectionWithStyle == null) {
+                            continue;
+                        }
+                        const selectionData =
+                            this.attachSelectionWithCoord(selectionWithStyle);
+                        this.addControlToCurrentByRangeData(selectionData);
+                    }
+
+                    this._syncDefinedNameRange(params);
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionManagerService.selectionMoving$.subscribe((params) => {
+                    if (params == null) {
+                        return;
+                    }
+
+                    this._syncDefinedNameRange(params);
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionManagerService.selectionMoveStart$.subscribe((params) => {
+                    if (params == null) {
+                        return;
+                    }
+
+                    this._syncDefinedNameRange(params);
+                })
+            )
+        );
+    }
+
+    private _syncDefinedNameRange(params: ISelectionWithStyle[]) {
+        if (params.length === 0) {
+            return;
+        }
+        const lastSelection = params[params.length - 1];
+
+        const workbook = this._context.unit;
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return;
+        }
+
+        this._definedNamesService.setCurrentRange({
+            range: lastSelection.range,
+            unitId: workbook.getUnitId(),
+            sheetId: worksheet.getSheetId(),
+        });
+    }
+
+    private _initUserActionSyncListener() {
+        this.disposeWithMe(this.selectionMoveStart$.subscribe((params) => {
+            this._move(params, SelectionMoveType.MOVE_START);
+        }));
+
+        this.disposeWithMe(this.selectionMoving$.subscribe((params) => {
+            this._move(params, SelectionMoveType.MOVING);
+        }));
+
+        this.disposeWithMe(this.selectionMoveEnd$.subscribe((params) => {
+            this._move(params, SelectionMoveType.MOVE_END);
+        }));
+    }
+
+    private _move(selectionDataWithStyleList: ISelectionWithCoordAndStyle[], type: SelectionMoveType) {
+        const workbook = this._context.unit;
+        if (!workbook) return;
+
+        const unitId = workbook.getUnitId();
+        const sheetId = workbook.getActiveSheet()?.getSheetId();
+        if (!sheetId) return;
+
+        if (selectionDataWithStyleList == null || selectionDataWithStyleList.length === 0) {
+            return;
+        }
+
+        this._commandService.executeCommand(SetSelectionsOperation.id, {
+            unitId,
+            subUnitId: sheetId,
+            type,
+            selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>
+                convertSelectionDataToRange(selectionDataWithStyle)
+            ),
+        });
+    }
+
+    private _getSheetObject() {
+        return getSheetObject(this._context.unit, this._context)!;
+    }
+
+    private _initSkeletonChangeListener() {
+        this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+            if (param == null) {
+                this.changeRuntime(null, null);
+                return;
+            }
+
+            const unitId = this._context.unitId;
+            const { sheetId, skeleton } = param;
+            const { scene } = this._context;
+
+            const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+
+            this.changeRuntime(skeleton, scene, viewportMain);
+
+            // If there is no initial selection, add one by default in the top left corner.
+            const last = this._selectionManagerService.getCurrentLastSelection();
+            if (last == null) {
+                this._selectionManagerService.addSelections(unitId, sheetId, [this._getZeroRange(skeleton)]);
+            }
+        }));
+    }
+
+    private _getAllRange(skeleton: SpreadsheetSkeleton): ISelectionWithStyle {
+        return {
+            range: {
+                startRow: 0,
+                startColumn: 0,
+                endRow: skeleton.getRowCount() - 1,
+                endColumn: skeleton.getColumnCount() - 1,
+                rangeType: RANGE_TYPE.ALL,
+            },
+            primary: this._getZeroRange(skeleton).primary,
+            style: null,
+        };
+    }
+
+    private _getZeroRange(skeleton: SpreadsheetSkeleton) {
+        const mergeData = skeleton.mergeData;
+        return (
+            transformCellDataToSelectionData(0, 0, mergeData) || {
+                range: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 0,
+                    endColumn: 0,
+                },
+                primary: {
+                    actualRow: 0,
+                    actualColumn: 0,
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 0,
+                    endColumn: 0,
+                    isMerged: false,
+                    isMergedMainCell: false,
+                },
+                style: null,
+            }
+        );
+    }
+
+    // #endregion
 }
 
 /**

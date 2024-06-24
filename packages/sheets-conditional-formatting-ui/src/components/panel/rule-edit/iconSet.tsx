@@ -84,11 +84,11 @@ const createDefaultConfigItem = (iconType: IIconType, index: number, list: unkno
     iconId: String(index),
 });
 
-type IconGroupListProps = {
-    onClick: (iconType: IIconType) => void,
-    iconType?: IIconType
-}
-const IconGroupList = forwardRef<HTMLDivElement|null, IconGroupListProps>((props, ref) => {
+interface IconGroupListProps {
+    onClick: (iconType: IIconType) => void;
+    iconType?: IIconType;
+};
+const IconGroupList = forwardRef<HTMLDivElement | null, IconGroupListProps>((props, ref) => {
     const localeService = useDependency(LocaleService);
 
     const handleClick = (iconType: IIconType) => {
@@ -421,15 +421,15 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         configListSet([...configList]);
     };
     const layoutService = useDependency(ILayoutService);
-    const [iconGroupListEl, setIconGroupListEl] = useState<HTMLDivElement>()
+    const [iconGroupListEl, setIconGroupListEl] = useState<HTMLDivElement>();
 
-    useScrollYOverContainer(iconGroupListEl, layoutService.rootContainerElement)
+    useScrollYOverContainer(iconGroupListEl, layoutService.rootContainerElement);
 
     return (
-        <div  className={styles.iconSet}>
+        <div className={styles.iconSet}>
             <div className={stylesBase.title}>{localeService.t('sheet.cf.panel.styleRule')}</div>
             <div className={`${stylesBase.mTSm}`}>
-                <Dropdown placement='bottomLeft' overlay={<IconGroupList ref={el => !iconGroupListEl && el && setIconGroupListEl(el)} iconType={currentIconType} onClick={handleClickIconList} />}>
+                <Dropdown placement="bottomLeft" overlay={<IconGroupList ref={(el) => !iconGroupListEl && el && setIconGroupListEl(el)} iconType={currentIconType} onClick={handleClickIconList} />}>
                     <div className={styles.dropdownIcon} style={{ width: 'unset' }}>
                         {previewIcon}
                         <MoreDownSingle />

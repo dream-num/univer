@@ -186,6 +186,10 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
                 const { unitId, subUnitId } = option;
                 switch (option.type) {
                     case 'add': {
+                        if (option.payload.parentId) {
+                            return;
+                        }
+
                         const comment = {
                             ...option.payload,
                             row: option.row,

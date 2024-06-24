@@ -26,6 +26,7 @@ export type CommentUpdate = {
 } & ({
     type: 'add';
     payload: IThreadComment;
+    isRoot: boolean;
 } | {
     type: 'update';
     payload: IUpdateCommentPayload;
@@ -49,13 +50,12 @@ export type CommentUpdate = {
 
 export class ThreadCommentModel {
     private _commentsMap: Record<string, Record<string, Record<string, IThreadComment>>> = {};
-    private _commentsTreeMap: Map<string, Map<string, Map<string, string[]>>> = new Map();
+    private _commentsTreeMap: Map<string, Map<string, Map<string, IThreadComment>>> = new Map();
+
     private _commentUpdate$ = new Subject<CommentUpdate>();
-    private _commentsTreeMap$ = new BehaviorSubject<Record<string, Record<string, Record<string, string[]>>>>({});
     private _commentsMap$ = new BehaviorSubject<Record<string, Record<string, Record<string, IThreadComment>>>>({});
 
     commentUpdate$ = this._commentUpdate$.asObservable();
-    commentTreeMap$ = this._commentsTreeMap$.asObservable();
     commentMap$ = this._commentsMap$.asObservable();
 
     private _ensureCommentMap(unitId: string, subUnitId: string) {
@@ -98,22 +98,6 @@ export class ThreadCommentModel {
         });
     }
 
-    private _refreshCommentsTreeMap$() {
-        const map: Record<string, Record<string, Record<string, string[]>>> = {};
-        this._commentsTreeMap.forEach((unit, unitId) => {
-            map[unitId] = {};
-            const unitRecord = map[unitId];
-            unit.forEach((subUnit, subUnitId) => {
-                unitRecord[subUnitId] = {};
-                const subUnitRecord = unitRecord[subUnitId];
-                subUnit.forEach((children, key) => {
-                    subUnitRecord[key] = children;
-                });
-            });
-        });
-        this._commentsTreeMap$.next(map);
-    }
-
     ensureMap(unitId: string, subUnitId: string) {
         const commentMap = this._ensureCommentMap(unitId, subUnitId);
         const commentChildrenMap = this._ensureCommentChildrenMap(unitId, subUnitId);
@@ -127,25 +111,15 @@ export class ThreadCommentModel {
     addComment(unitId: string, subUnitId: string, comment: IThreadComment) {
         const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
 
-        let parentId = comment.parentId;
+        const parentId = comment.parentId;
         if (parentId) {
-            let parent = commentMap[parentId];
-            // find the top root
-            while (parent?.parentId) {
-                parent = commentMap[parent.parentId];
-                parentId = parent.parentId!;
-            }
-
-            if (parent) {
-                let children = commentChildrenMap.get(parentId);
-                if (!children) {
-                    children = [];
-                }
-                children.push(comment.id);
-                commentChildrenMap.set(parentId, children);
-            }
+            const parent = commentMap[parentId];
+            parent.children = [
+                ...parent.children ?? [],
+                comment,
+            ];
         } else {
-            commentChildrenMap.set(comment.id, []);
+            commentChildrenMap.set(comment.id, comment);
         }
 
         commentMap[comment.id] = comment;
@@ -154,9 +128,9 @@ export class ThreadCommentModel {
             subUnitId,
             type: 'add',
             payload: comment,
+            isRoot: !comment.parentId,
         });
         this._refreshCommentsMap$();
-        this._refreshCommentsTreeMap$();
         return true;
     }
 
@@ -179,7 +153,6 @@ export class ThreadCommentModel {
             silent,
         });
         this._refreshCommentsMap$();
-        this._refreshCommentsTreeMap$();
         return true;
     }
 
@@ -200,7 +173,6 @@ export class ThreadCommentModel {
             silent,
         });
         this._refreshCommentsMap$();
-        this._refreshCommentsTreeMap$();
         return true;
     }
 
@@ -222,7 +194,6 @@ export class ThreadCommentModel {
             },
         });
         this._refreshCommentsMap$();
-        this._refreshCommentsTreeMap$();
         return true;
     }
 
@@ -243,10 +214,13 @@ export class ThreadCommentModel {
         }
 
         const relativeUsers = new Set<string>();
-        const children = commentChildrenMap.get(commentId) ?? [];
-        const childrenComments = children?.map((childId) => commentMap[childId]!);
+        const root = commentChildrenMap.get(commentId);
 
-        [current, ...childrenComments].forEach((comment) => {
+        if (!root) {
+            return undefined;
+        }
+
+        [root, ...root.children ?? []].forEach((comment) => {
             relativeUsers.add(comment.personId);
             comment.text.customRanges?.forEach((range) => {
                 if (range.rangeType === CustomRangeType.MENTION) {
@@ -257,7 +231,7 @@ export class ThreadCommentModel {
 
         return {
             root: current,
-            children: childrenComments,
+            children: root.children ?? [],
             relativeUsers,
         };
     }
@@ -270,10 +244,10 @@ export class ThreadCommentModel {
         }
 
         if (current.parentId) {
-            const children = commentChildrenMap.get(current.parentId);
-            if (children) {
-                const index = children.indexOf(commentId);
-                children.splice(index, 1);
+            const root = commentChildrenMap.get(current.parentId);
+            if (root && root.children) {
+                const index = root.children.findIndex((comment) => comment.id = commentId);
+                root.children.splice(index, 1);
             }
             delete commentMap[commentId];
         } else {
@@ -292,7 +266,6 @@ export class ThreadCommentModel {
             },
         });
         this._refreshCommentsMap$();
-        this._refreshCommentsTreeMap$();
         return true;
     }
 
@@ -321,12 +294,6 @@ export class ThreadCommentModel {
     getRootCommentIds(unitId: string, subUnitId: string) {
         const commentChildrenMap = this._ensureCommentChildrenMap(unitId, subUnitId);
         return Array.from(commentChildrenMap.keys());
-    }
-
-    getRootCommentIds$(unitId: string, subUnitId: string) {
-        return this._commentsTreeMap$.pipe(map(
-            (tree) => Object.keys(tree[unitId]?.[subUnitId])
-        ));
     }
 
     getAll() {

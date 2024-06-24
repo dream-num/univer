@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Average extends BaseFunction {
+export class Averagea extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 255;
@@ -38,13 +39,36 @@ export class Average extends BaseFunction {
             }
 
             if (variant.isArray()) {
-                accumulatorSum = accumulatorSum.plus(variant.sum());
+                // accumulatorSum = accumulatorSum.plus(variant.sum());
+
+                (variant as ArrayValueObject).iterator((valueObject) => {
+                    if (valueObject == null || valueObject.isNull()) {
+                        return true; // continue
+                    }
+
+                    if (valueObject.isString()) {
+                        valueObject = valueObject.convertToNumberObjectValue();
+                        if (valueObject.isError()) {
+                            valueObject = NumberValueObject.create(0);
+                        }
+                    }
+
+                    if (valueObject.isBoolean()) {
+                        valueObject = valueObject.convertToNumberObjectValue();
+                    }
+
+                    if (valueObject.isError()) {
+                        accumulatorSum = valueObject;
+                        return false; // break
+                    }
+
+                    accumulatorSum = accumulatorSum.plus(valueObject);
+                    accumulatorCount = accumulatorCount.plus(NumberValueObject.create(1));
+                });
 
                 if (accumulatorSum.isError()) {
                     return accumulatorSum;
                 }
-
-                accumulatorCount = accumulatorCount.plus(variant.count());
             } else if (!variant.isNull()) {
                 accumulatorSum = accumulatorSum.plus(variant);
                 accumulatorCount = accumulatorCount.plus(NumberValueObject.create(1));

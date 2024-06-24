@@ -32,6 +32,7 @@ import { Maxifs } from './maxifs';
 
 export const functionStatistical = [
     [Average, FUNCTION_NAMES_STATISTICAL.AVERAGE],
+    [Average, FUNCTION_NAMES_STATISTICAL.AVERAGEA],
     [Count, FUNCTION_NAMES_STATISTICAL.COUNT],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Min, FUNCTION_NAMES_STATISTICAL.MIN],

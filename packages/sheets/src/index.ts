@@ -38,6 +38,7 @@ export {
     type ISelectionWidgetConfig,
     type ISelectionWithCoordAndStyle,
     type ISelectionWithStyle,
+    type ISheetRangeLocation,
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
     transformCellDataToSelectionData,

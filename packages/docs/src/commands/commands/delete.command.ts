@@ -26,39 +26,37 @@ import {
 } from '@univerjs/core';
 import { getParagraphByGlyph, hasListGlyph, type IActiveTextRange, isFirstGlyph, isIndentByGlyph, type ITextRangeWithStyle, type TextRange } from '@univerjs/engine-render';
 
-import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import type { ITextActiveRange } from '../../services/text-selection-manager.service';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import { getCommandSkeleton } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, DeleteDirection, UpdateCommand } from './core-editing.command';
 
 // Handle BACKSPACE key.
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
-
     type: CommandType.COMMAND,
-
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const docSkeletonManagerService = accessor.get(DocSkeletonManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const activeRange = textSelectionManagerService.getActiveRange();
-        const ranges = textSelectionManagerService.getCurrentSelections();
-        const skeleton = docSkeletonManagerService.getCurrent()?.skeleton;
-
         let result = true;
-
-        if (activeRange == null || skeleton == null || ranges == null) {
-            return false;
-        }
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
         if (!docDataModel) {
+            return false;
+        }
+
+        const unitId = docDataModel.getUnitId();
+        const docSkeletonManagerService = getCommandSkeleton(accessor, unitId);
+        const activeRange = textSelectionManagerService.getActiveRange();
+        const ranges = textSelectionManagerService.getCurrentSelections();
+        const skeleton = docSkeletonManagerService?.getSkeleton();
+        if (activeRange == null || skeleton == null || ranges == null) {
             return false;
         }
 
@@ -190,28 +188,22 @@ export const DeleteLeftCommand: ICommand = {
 // handle Delete key
 export const DeleteRightCommand: ICommand = {
     id: 'doc.command.delete-right',
-
     type: CommandType.COMMAND,
-
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const docSkeletonManagerService = accessor.get(DocSkeletonManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!docDataModel) {
+            return false;
+        }
+
+        const docSkeletonManagerService = getCommandSkeleton(accessor, docDataModel.getUnitId());
         const commandService = accessor.get(ICommandService);
 
         const activeRange = textSelectionManagerService.getActiveRange();
         const ranges = textSelectionManagerService.getCurrentSelections();
-
-        const skeleton = docSkeletonManagerService.getCurrent()?.skeleton;
-
-        let result;
-
+        const skeleton = docSkeletonManagerService?.getSkeleton();
         if (activeRange == null || skeleton == null || ranges == null) {
-            return false;
-        }
-
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!docDataModel) {
             return false;
         }
 
@@ -222,6 +214,7 @@ export const DeleteRightCommand: ICommand = {
             return true;
         }
 
+        let result: boolean = false;
         if (collapsed === true) {
             const needDeleteSpan = skeleton.findNodeByCharIndex(startOffset)!;
 

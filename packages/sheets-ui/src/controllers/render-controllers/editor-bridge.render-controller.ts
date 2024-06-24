@@ -111,10 +111,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             });
         });
 
-        spreadsheet.onPointerDownObserver.add(this._keepVisibleHideEditor.bind(this));
-        spreadsheetColumnHeader.onPointerDownObserver.add(this._keepVisibleHideEditor.bind(this));
-        spreadsheetLeftTopPlaceholder.onPointerDownObserver.add(this._keepVisibleHideEditor.bind(this));
-        spreadsheetRowHeader.onPointerDownObserver.add(this._keepVisibleHideEditor.bind(this));
+        spreadsheet.onPointerDownObserver.add(this._onCanvasPointerDown.bind(this));
+        spreadsheetColumnHeader.onPointerDownObserver.add(this._onCanvasPointerDown.bind(this));
+        spreadsheetLeftTopPlaceholder.onPointerDownObserver.add(this._onCanvasPointerDown.bind(this));
+        spreadsheetRowHeader.onPointerDownObserver.add(this._onCanvasPointerDown.bind(this));
     }
 
     // Move to another controller
@@ -142,11 +142,9 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     //     );
     // }
 
-    /**
-     * In the activated state of formula editing,
-     * prohibit closing the editor according to the state to facilitate generating selection reference text.
-     */
-    private _keepVisibleHideEditor() {
+    private _onCanvasPointerDown() {
+        // In the activated state of formula editing,
+        // prohibit closing the editor according to the state to facilitate generating selection reference text.
         if (this._editorBridgeService.isForceKeepVisible()) {
             return;
         }
@@ -232,7 +230,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                 }
 
                 if (command.id === SetWorksheetActiveOperation.id) {
-                    this._keepVisibleHideEditor();
+                    this._onCanvasPointerDown();
                 } else if (updateCommandList.includes(command.id)) {
                     this._hideEditor();
                 }

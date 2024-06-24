@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { UniverInstanceService } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { ICommandService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable } from '@univerjs/core';
 
 import { Inject, Injector } from '@wendellhu/redi';
 import type { MenuConfig, UIPartsService } from '@univerjs/ui';
@@ -24,7 +23,8 @@ import { takeUntil } from 'rxjs';
 import { serializeRange } from '@univerjs/engine-formula';
 import { AscendingSingle, CustomSortSingle, DescendingSingle, ExpandAscendingSingle, ExpandDescendingSingle } from '@univerjs/icons';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
-import { SheetsUIPart } from '@univerjs/sheets-ui';
+import { SheetsRenderService, SheetsUIPart } from '@univerjs/sheets-ui';
+import { SortRangeCommand } from '@univerjs/sheets-sort';
 import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/sheets-sort.command';
 import { CustomSortPanel } from '../views/CustomSortPanel';
 import type { ISheetSortLocation } from '../services/sheets-sort-ui.service';
@@ -47,11 +47,11 @@ export class SheetsSortUIController extends RxDisposable {
     constructor(
         private readonly _config: Partial<IUniverSheetsSortUIConfig>,
         @ICommandService private readonly _commandService: ICommandService,
-        @IUniverInstanceService private readonly _instanceService: UniverInstanceService,
         @IMenuService private readonly _menuService: IMenuService,
         @IDialogService private readonly _dialogService: IDialogService,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IUIPartsService private readonly _uiPartsService: UIPartsService,
+        @Inject(SheetsRenderService) private _sheetRenderService: SheetsRenderService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(SheetsSortUIService) private readonly _sheetsSortUIService: SheetsSortUIService,
         @Inject(Injector) private _injector: Injector,
@@ -101,6 +101,8 @@ export class SheetsSortUIController extends RxDisposable {
             SortRangeCustomInCtxMenuCommand,
 
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+
+        this.disposeWithMe(this._sheetRenderService.registerSkeletonChangingMutations(SortRangeCommand.id));
     }
 
     private _initUI(): void {

@@ -15,10 +15,11 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, isICellData, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { ErrorType } from '@univerjs/engine-formula';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
+import type { IRenderContext } from '@univerjs/engine-render';
 import { extractFormulaError } from './utils/utils';
 
 const ALERT_KEY = 'SHEET_FORMULA_ALERT';
@@ -38,12 +39,12 @@ const ErrorTypeToMessageMap = {
     [ErrorType.NULL]: 'null',
 };
 
-@OnLifecycle(LifecycleStages.Rendered, FormulaAlertController)
-export class FormulaAlertController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, FormulaAlertRenderController)
+export class FormulaAlertRenderController extends Disposable {
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
@@ -57,13 +58,15 @@ export class FormulaAlertController extends Disposable {
     private _initCellAlertPopup() {
         this.disposeWithMe(this._hoverManagerService.currentCell$.subscribe((cellPos) => {
             if (cellPos) {
-                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const workbook = this._context.unit;
                 const worksheet = workbook.getActiveSheet();
+
                 if (!worksheet) return;
 
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 
-                if (cellData) {
+                // Preventing blank object
+                if (isICellData(cellData)) {
                     const errorType = extractFormulaError(cellData);
 
                     if (!errorType) {

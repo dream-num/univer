@@ -19,6 +19,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaDisplayController } from './controllers/array-formula-display.controller';
@@ -40,7 +41,7 @@ import { IRegisterFunctionService, RegisterFunctionService } from './services/re
 import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
 import { RegisterOtherFormulaService } from './services/register-other-formula.service';
-import { FormulaAlertController } from './controllers/formula-alert.controller';
+import { FormulaAlertRenderController } from './controllers/formula-alert-render.controller';
 import { FormulaRenderManagerController } from './controllers/formula-render.controller';
 
 /**
@@ -53,7 +54,8 @@ export class UniverSheetsFormulaPlugin extends Plugin {
 
     constructor(
         private readonly _config: Partial<IUniverSheetsFormulaConfig> = {},
-        @Inject(Injector) override readonly _injector: Injector
+        @Inject(Injector) override readonly _injector: Injector,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -62,6 +64,19 @@ export class UniverSheetsFormulaPlugin extends Plugin {
 
     override onStarting(): void {
         this._init();
+    }
+
+    override onRendered(): void {
+        this._registerRenderControllers();
+    }
+
+    private _registerRenderControllers(): void {
+        ([
+
+            FormulaAlertRenderController,
+        ]).forEach((controller) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller));
+        });
     }
 
     _init(): void {
@@ -96,7 +111,6 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [ActiveDirtyController],
             [DefinedNameController],
             [FormulaRenderManagerController],
-            [FormulaAlertController],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

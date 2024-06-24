@@ -62,9 +62,9 @@ export const CellLinkPopup = () => {
                 <div className={styles.cellLinkType}>
                     {iconsMap[linkObj.type]}
                 </div>
-                <div className={styles.cellLinkUrl}>
-                    {linkObj.name}
-                </div>
+                <Tooltip showIfEllipsis title={linkObj.name}>
+                    <span className={styles.cellLinkUrl}>{linkObj.name}</span>
+                </Tooltip>
             </div>
             <div className={styles.cellLinkOperations}>
                 {currentPopup.copyPermission && (

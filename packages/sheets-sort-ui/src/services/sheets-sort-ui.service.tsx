@@ -27,8 +27,8 @@ import { Disposable, ICommandService,
 } from '@univerjs/core';
 
 import { getPrimaryForRange, SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
+import type { ISheetRangeLocation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-import type { ISheetRangeLocation } from '@univerjs/sheets-ui';
 import { expandToContinuousRange } from '@univerjs/sheets-ui';
 
 import type { ISortOption } from '@univerjs/sheets-sort';
@@ -235,7 +235,7 @@ export class SheetsSortUIService extends Disposable {
         const worksheet = workbook.getActiveSheet() as Worksheet;
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        const selection = this._selectionManagerService.getLast();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
         if (!selection) {
             return null;
         }
@@ -257,7 +257,7 @@ export class SheetsSortUIService extends Disposable {
                 this.setSelection(unitId, subUnitId, range);
             }
         }
-        const primary = this._selectionManagerService.getLast()?.primary;
+        const primary = this._selectionManagerService.getCurrentLastSelection()?.primary;
         if (!primary) {
             return null;
         }

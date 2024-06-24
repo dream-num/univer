@@ -45,7 +45,6 @@ export class MoveCursorController extends Disposable {
     private _onInputSubscription: Nullable<Subscription>;
 
     constructor(
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
@@ -99,8 +98,8 @@ export class MoveCursorController extends Disposable {
             return;
         }
 
-        const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
-
+        const skeleton = this._renderManagerService.getRenderById(docDataModel.getUnitId())
+            ?.with(DocSkeletonManagerService).getSkeleton();
         const docObject = this._getDocObject();
 
         if (activeRange == null || skeleton == null || docObject == null) {
@@ -203,8 +202,8 @@ export class MoveCursorController extends Disposable {
             return false;
         }
 
-        const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
-
+        const skeleton = this._renderManagerService.getRenderById(docDataModel.getUnitId())
+            ?.with(DocSkeletonManagerService).getSkeleton();
         const docObject = this._getDocObject();
 
         if (activeRange == null || skeleton == null || docObject == null || allRanges == null) {

@@ -24,46 +24,46 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test vara function', () => {
-    const textFunction = new Vara(FUNCTION_NAMES_STATISTICAL.VARA);
+    const testFunction = new Vara(FUNCTION_NAMES_STATISTICAL.VARA);
 
     describe('Vara', () => {
         it('Var1 is number, var2 is number', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = NumberValueObject.create(2);
-            const result = textFunction.calculate(var1, var2);
+            const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(0.5);
         });
         it('Var1 is number, var2 is string', () => {
             const var1 = NumberValueObject.create(1);
             let var2 = StringValueObject.create('test');
-            let result = textFunction.calculate(var1, var2);
+            let result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(ErrorType.VALUE);
 
             var2 = StringValueObject.create('2');
-            result = textFunction.calculate(var1, var2);
+            result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(0.5);
         });
         it('Var1 is number, var2 is boolean', () => {
             const var1 = NumberValueObject.create(2);
 
             let var2 = BooleanValueObject.create(true);
-            let result = textFunction.calculate(var1, var2);
+            let result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(0.5);
 
             var2 = BooleanValueObject.create(false);
-            result = textFunction.calculate(var1, var2);
+            result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(2);
         });
         it('Var1 is number, var2 is null', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = NullValueObject.create();
-            const result = textFunction.calculate(var1, var2);
+            const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(0.5);
         });
         it('Var1 is number, var2 is error', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = ErrorValueObject.create(ErrorType.NA);
-            const result = textFunction.calculate(var1, var2);
+            const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(ErrorType.NA);
         });
 
@@ -81,7 +81,7 @@ describe('Test vara function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(var1, var2);
+            const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(ErrorType.VALUE);
         });
 
@@ -99,7 +99,7 @@ describe('Test vara function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(var1, var2);
+            const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(902.7908054545456);
         });
     });

@@ -144,7 +144,7 @@ describe('Test index', () => {
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
     let interpreter: Interpreter;
-    let calculate: (formula: string) => Promise<(string | number | boolean | null)[][] | string | number | boolean>;
+    let calculate: (formula: string) => (string | number | boolean | null)[][] | string | number | boolean;
 
     beforeEach(() => {
         const testBed = createFunctionTestBed(getTestWorkbookData());
@@ -191,12 +191,12 @@ describe('Test index', () => {
             new Index(FUNCTION_NAMES_LOOKUP.INDEX)
         );
 
-        calculate = async (formula: string) => {
+        calculate = (formula: string) => {
             const lexerNode = lexer.treeBuilder(formula);
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+            const result = interpreter.execute(astNode as BaseAstNode);
 
             return getObjectValue(result);
         };

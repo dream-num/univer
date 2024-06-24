@@ -16,6 +16,7 @@
 
 import type { ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
 
 import type { ISelectionWithStyle } from '../basics/selection';
@@ -25,13 +26,6 @@ export interface ISelectionManagerSearchParam {
     sheetId: string;
 }
 
-export interface ISelectionManagerInsertParam extends ISelectionManagerSearchParam {
-    selectionDatas: ISelectionWithStyle[];
-}
-
-//{ { [unitId: string]: { [sheetId: string]: ISelectionWithCoord[] } }
-export type ISelectionInfo = Map<string, Map<string, ISelectionWithStyle[]>>;
-
 export enum SelectionMoveType {
     MOVE_START,
     MOVING,
@@ -39,16 +33,16 @@ export enum SelectionMoveType {
 }
 
 export class SelectionManagerService extends RxDisposable {
-    private get _currentWorksheet(): ISelectionManagerSearchParam {
+    private get _currentSelectionPos(): ISelectionManagerSearchParam {
         const workbook = this._instanceSrv.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet()!;
 
         return { unitId: workbook.getUnitId(), sheetId: worksheet.getSheetId() };
     }
 
-    readonly selectionMoveStart$;
-    readonly selectionMoving$;
-    readonly selectionMoveEnd$;
+    readonly selectionMoveStart$: Observable<Nullable<ISelectionWithStyle[]>>;
+    readonly selectionMoving$: Observable<Nullable<ISelectionWithStyle[]>>;
+    readonly selectionMoveEnd$: Observable<ISelectionWithStyle[]>;
 
     constructor(
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService
@@ -82,7 +76,7 @@ export class SelectionManagerService extends RxDisposable {
             return;
         }
 
-        const { unitId, sheetId } = this._currentWorksheet;
+        const { unitId, sheetId } = this._currentSelectionPos;
         this._ensureWorkbookSelection(unitId).addSelection(sheetId, unitIdOrSelections);
     }
 
@@ -99,7 +93,7 @@ export class SelectionManagerService extends RxDisposable {
             return;
         }
 
-        const { unitId, sheetId } = this._currentWorksheet;
+        const { unitId, sheetId } = this._currentSelectionPos;
         this._ensureWorkbookSelection(unitId).setSelection(sheetId, unitIdOrSelections, worksheetIdOrType as SelectionMoveType ?? SelectionMoveType.MOVE_END);
     }
 
@@ -135,7 +129,7 @@ export class SelectionManagerService extends RxDisposable {
     }
 
     private _getCurrentSelections() {
-        const { unitId, sheetId } = this._currentWorksheet;
+        const { unitId, sheetId } = this._currentSelectionPos;
         return this._ensureWorkbookSelection(unitId).getSelectionOfWorksheet(sheetId);
     }
 

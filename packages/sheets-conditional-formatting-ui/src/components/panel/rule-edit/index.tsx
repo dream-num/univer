@@ -182,7 +182,6 @@ export const RuleEdit = (props: IRuleEditProps) => {
     };
 
     const handleSubmit = () => {
-        const beforeSubmitResult = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().beforeSubmit)(true, null);
         const getRanges = () => {
             const worksheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
             if (!worksheet) {
@@ -192,11 +191,11 @@ export const RuleEdit = (props: IRuleEditProps) => {
             const result = ranges.filter((range) => !(Number.isNaN(range.startRow) || Number.isNaN(range.startColumn)));
             return result;
         };
-
+        const ranges = getRanges();
+        const beforeSubmitResult = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().beforeSubmit)(true, null);
         if (beforeSubmitResult) {
             const result = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().submit)(null, null);
-            const ranges = getRanges();
-            if (result && ranges.length) {
+            if (result) {
                 // When you switch the child table, you need to fetch it again here, instead of using the
                 const unitId = getUnitId(univerInstanceService);
                 const subUnitId = getSubUnitId(univerInstanceService);

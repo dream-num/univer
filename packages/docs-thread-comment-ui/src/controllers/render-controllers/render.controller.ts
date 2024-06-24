@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { DOC_INTERCEPTOR_POINT, DocInterceptorService } from '@univerjs/docs';
 import { DocRenderController } from '@univerjs/docs-ui';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { Inject } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Starting, DocThreadCommentRenderController)
-export class DocThreadCommentRenderController extends Disposable {
+export class DocThreadCommentRenderController extends Disposable implements IRenderModule {
     constructor(
+        private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(DocInterceptorService) private readonly _docInterceptorService: DocInterceptorService,
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService,
         @Inject(DocRenderController) private readonly _docRenderController: DocRenderController,

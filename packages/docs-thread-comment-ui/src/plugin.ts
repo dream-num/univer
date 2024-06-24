@@ -18,6 +18,7 @@ import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { PLUGIN_NAME } from './common/const';
 import type { IDocThreadCommentUIConfig } from './controllers/doc-thread-comment-ui.controller';
 import { DocThreadCommentUIController } from './controllers/doc-thread-comment-ui.controller';
@@ -32,7 +33,8 @@ export class UniverDocsCommentUIPlugin extends Plugin {
 
     constructor(
         private _config: IDocThreadCommentUIConfig = { menu: {} },
-        @Inject(Injector) protected _injector: Injector
+        @Inject(Injector) protected _injector: Injector,
+        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService
     ) {
         super();
     }
@@ -46,11 +48,20 @@ export class UniverDocsCommentUIPlugin extends Plugin {
                 },
             ],
             [DocThreadCommentSelectionController],
-            [DocThreadCommentRenderController],
 
             [DocThreadCommentService],
         ] as Dependency[]).forEach((dep) => {
             injector.add(dep);
+        });
+    }
+
+    override onRendered(): void {
+        this._initRenderModule();
+    }
+
+    private _initRenderModule() {
+        [DocThreadCommentRenderController].forEach((dep) => {
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, dep);
         });
     }
 }

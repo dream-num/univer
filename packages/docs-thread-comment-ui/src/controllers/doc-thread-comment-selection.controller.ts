@@ -21,6 +21,7 @@ import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { Inject } from '@wendellhu/redi';
 import { DocBackScrollRenderController } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../common/const';
 import { DocThreadCommentService } from '../services/doc-thread-comment.service';
 
@@ -30,8 +31,8 @@ export class DocThreadCommentSelectionController extends Disposable {
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DocBackScrollRenderController) private readonly _backScrollController: DocBackScrollRenderController,
-        @Inject(DocThreadCommentService) private readonly _docThreadCommentService: DocThreadCommentService
+        @Inject(DocThreadCommentService) private readonly _docThreadCommentService: DocThreadCommentService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -78,9 +79,10 @@ export class DocThreadCommentSelectionController extends Disposable {
             if (activeComment) {
                 const doc = this._univerInstanceService.getUnit<DocumentDataModel>(activeComment.unitId);
                 if (doc) {
+                    const backScrollController = this._renderManagerService.getRenderById(activeComment.unitId)?.with(DocBackScrollRenderController);
                     const customRange = doc.getCustomRanges()?.find((range) => range.rangeId === activeComment.commentId);
-                    if (customRange) {
-                        this._backScrollController.scrollToRange(activeComment.unitId, {
+                    if (customRange && backScrollController) {
+                        backScrollController.scrollToRange(activeComment.unitId, {
                             startOffset: customRange.startIndex,
                             endOffset: customRange.endIndex,
                             collapsed: false,

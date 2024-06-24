@@ -115,14 +115,14 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
 
         onValid,
 
-        placeholder = '',
-
         isValueValid = true,
     } = props;
 
     const editorService = useDependency(IEditorService);
 
     const localeService = useDependency(LocaleService);
+
+    const [placeholder, placeholderSet] = useState('');
 
     const [validationContent, setValidationContent] = useState<string>('');
 
@@ -170,6 +170,9 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             openForSheetSubUnitId,
         },
         editor);
+
+        editorService.setValueNoRefresh(props.value || '', id);
+        placeholderSet(props.placeholder || '');
 
         const activeChange = debounce((state: boolean) => {
             setActive(state);

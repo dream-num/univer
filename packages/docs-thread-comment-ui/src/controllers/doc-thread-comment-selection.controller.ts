@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';

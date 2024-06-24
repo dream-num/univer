@@ -21,7 +21,7 @@ import { getDT, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
 import { TextSelectionManagerService } from '@univerjs/docs';
 import { DocThreadCommentPanel } from '../../views/doc-thread-comment-panel';
-import { DEFAULT_DOC_SUBUNIT_ID, DEFAULT_TEMP_COMMENT_ID } from '../../common/const';
+import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
 
 export interface IShowCommentPanelOperationParams {

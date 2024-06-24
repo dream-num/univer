@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentBody, IMutationInfo, IParagraph, ITextRun, Nullable } from '@univerjs/core';
+import type { ICommand, IDocumentBody, IMutationInfo, IParagraph, ITextRun } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,

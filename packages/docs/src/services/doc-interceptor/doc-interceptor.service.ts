@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICustomRangeForInterceptor, IInterceptor, Nullable } from '@univerjs/core';
-import { composeInterceptors, Disposable, DisposableCollection, LifecycleStages, OnLifecycle, remove, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { composeInterceptors, Disposable, DisposableCollection, LifecycleStages, OnLifecycle, remove, toDisposable } from '@univerjs/core';
 import type { DocumentViewModel, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { DocSkeletonManagerService } from '../doc-skeleton-manager.service';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullable, Observer, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
 import {
     ColorKit,
     createInterceptorKey,
@@ -66,7 +66,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import type { Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../common/keys';
@@ -110,11 +110,11 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
     private _columnFreezeMainRect: Nullable<Rect>;
 
-    private _freezeDownSubs: Array<Subscription> = [];
+    private _freezeDownSubs: Nullable<Subscription>;
 
-    private _freezeMainPointerMoveSubs: Array<Subscription> = [];
+    private _freezeMainPointerMoveSubs: Nullable<Subscription>;
 
-    private _freezeHeaderPointerLeaveSubs: Array<Subscription> = [];
+    private _freezeHeaderPointerLeaveSubs: Nullable<Subscription>;
 
     private _scenePointerMoveSub: Nullable<Subscription>;
 
@@ -285,6 +285,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         this._eventBinding(freezeDirectionType);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _eventBinding(freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW) {
         let freezeObjectHeaderRect = this._rowFreezeHeaderRect;
         let freezeObjectMainRect = this._rowFreezeMainRect;
@@ -300,6 +301,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         const { scene } = sheetObject;
 
+        this._freezeMainPointerMoveSubs = new Subscription();
+        this._freezeHeaderPointerLeaveSubs = new Subscription();
+        this._freezeDownSubs = new Subscription();
+
         if (freezeObjectMainRect) {
             const _freezeObjHeaderPointerEnterSub = freezeObjectMainRect.onPointerEnter$.subscribeEvent(() => {
                 const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
@@ -312,7 +317,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 });
                 scene.setCursor(CURSOR_TYPE.GRAB);
             });
-            this._freezeMainPointerMoveSubs.push(_freezeObjHeaderPointerEnterSub);
+            this._freezeMainPointerMoveSubs.add(_freezeObjHeaderPointerEnterSub);
         }
 
         if (freezeObjectHeaderRect) {
@@ -323,9 +328,22 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                 });
                 scene.resetCursor();
             });
-            this._freezeHeaderPointerLeaveSubs.push(_freezeObjHeaderPointerLeaveSub);
+            this._freezeHeaderPointerLeaveSubs.add(_freezeObjHeaderPointerLeaveSub);
         }
 
+        const s1 = freezeObjectHeaderRect?.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
+            this._freezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
+        });
+        if (s1) {
+            this._freezeDownSubs.add(s1);
+        }
+
+        const s2 = freezeObjectMainRect?.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
+            this._freezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
+        });
+        if (s2) {
+            this._freezeDownSubs.add(s2);
+        }
         // this._freezeMoveObservers.push(
         //     freezeObjectMainRect?.onPointerEnter$.subscribeEvent(() => {
         //         const permissionCheck = this.interceptor.fetchThroughInterceptors(FREEZE_PERMISSION_CHECK)(null, null);
@@ -348,20 +366,6 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         //         scene.resetCursor();
         //     })
         // );
-
-        const s1 = freezeObjectHeaderRect?.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
-            this._freezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
-        });
-        if (s1) {
-            this._freezeDownSubs.push(s1);
-        }
-
-        const s2 = freezeObjectMainRect?.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
-            this._freezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
-        });
-        if (s2) {
-            this._freezeDownSubs.push(s2);
-        }
     }
 
     private _getCurrentLastVisibleRow() {
@@ -1475,20 +1479,20 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             return;
         }
 
-        this._freezeDownSubs.forEach((s) => s.unsubscribe());
-        this._freezeDownSubs = [];
-
-        [...this._freezeMainPointerMoveSubs, ...this._freezeHeaderPointerLeaveSubs].forEach((s) => {
-            s.unsubscribe();
+        [this._freezeDownSubs, this._freezeMainPointerMoveSubs, this._freezeHeaderPointerLeaveSubs].forEach((s) => {
+            s?.unsubscribe();
         });
-        this._freezeMainPointerMoveSubs = [];
-        this._freezeHeaderPointerLeaveSubs = [];
+        this._freezeDownSubs = null;
+        this._freezeMainPointerMoveSubs = null;
+        this._freezeHeaderPointerLeaveSubs = null;
 
-        // const { scene } = sheetObject;
-        // TODO @lumixraku scene.onPointerEnter$ bind ponterMove?
-        // scene.onPointerEnter$.remove(this._sceneOnPointerMoveSub);
-        // scene.onPointerMove$.remove(this._upObserver);
+        // TODO @lumixraku
+        // in prev version, scene.onPointerEnterObserver.remove(this._moveObserver);
+        // but did not find when to add
         this._scenePointerMoveSub?.unsubscribe();
+        this._scenePointerUpSub?.unsubscribe();
+        this._scenePointerMoveSub = null;
+        this._scenePointerUpSub = null;
     }
 
     private _getPositionByIndex(row: number, column: number) {

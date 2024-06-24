@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable, Observer, Workbook } from '@univerjs/core';
+import type { IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     createInterceptorKey,
     Disposable,
@@ -72,13 +72,18 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
     private _moveHelperLineShape: Nullable<Rect>;
 
-    private _downSubscriptions: Nullable<Subscription>;
-    /** @deprecated */
-    private _rowOrColumnDownObservers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
+    private _headerPointerDownSubs: Nullable<Subscription>;
 
-    private _rowOrColumnMoveObservers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
+    private _headerPointerMoveSubs: Nullable<Subscription>;
 
-    private _rowOrColumnLeaveObservers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
+    private _headerPointerLeaveSubs: Nullable<Subscription>;
+
+    // /** @deprecated */
+    // private _rowOrColumnDownObservers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
+
+    // private _rowOrColumnMoveObservers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
+
+    // private _rowOrColumnLeaveObservers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
 
     private _scenePointerMoveSub: Nullable<Subscription>;
 
@@ -95,16 +100,16 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
     private _changeToRow = -1;
 
     public interceptor = new InterceptorManager({ HEADER_MOVE_PERMISSION_CHECK });
-    private _colHeaderPointerMoveSub: Nullable<Subscription>;
-    private _rowHeaderPointerMoveSub: Nullable<Subscription>;
+    // private _colHeaderPointerMoveSub: Nullable<Subscription>;
+    // private _rowHeaderPointerMoveSub: Nullable<Subscription>;
 
     override dispose(): void {
         this._moveHelperBackgroundShape?.dispose();
         this._moveHelperLineShape?.dispose();
 
-        const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
-        const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
-        const scene = this._context.scene;
+        // const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+        // const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
+        // const scene = this._context.scene;
 
         // this._rowOrColumnMoveObservers.forEach((obs) => {
         //     spreadsheetRowHeader.onPointerMoveObserver.remove(obs);
@@ -116,18 +121,19 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
             //     spreadsheetColumnHeader.onPointerLeave$.remove(obs);
             // });
 
-        this._rowHeaderPointerMoveSub?.unsubscribe();
-        this._colHeaderPointerMoveSub?.unsubscribe();
-        // this._rowHeaderPointerLeaveSub?.unsubscribe();
-        // this._colHeaderPointerLeaveSub?.unsubscribe();
-        this._downSubscriptions?.unsubscribe();
-        this._downSubscriptions = null;
+        this._headerPointerMoveSubs?.unsubscribe();
+        this._headerPointerLeaveSubs?.unsubscribe();
+        this._headerPointerDownSubs?.unsubscribe();
+        this._headerPointerMoveSubs = null;
+        this._headerPointerLeaveSubs = null;
+        this._headerPointerDownSubs = null;
 
         // scene.onPointerMove$.remove(this._scenePointerMoveSub);
         // scene.onPointerUp$.remove(this._scenePointerUpSub);
         this._scenePointerMoveSub?.unsubscribe();
         this._scenePointerUpSub?.unsubscribe();
-
+        this._scenePointerMoveSub = null;
+        this._scenePointerUpSub = null;
         this._scrollTimer?.dispose();
     }
 
@@ -189,108 +195,108 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
             this._selectionRenderService.disableSelection();
         };
-        if (initialType === HEADER_MOVE_TYPE.ROW) {
-            this._rowHeaderPointerMoveSub = spreadsheetRowHeader.onPointerMove$.subscribeEvent(pointerMoveHandler);
-        } else {
-            this._colHeaderPointerMoveSub = spreadsheetColumnHeader.onPointerMove$.subscribeEvent(pointerMoveHandler);
-        }
 
-        this._rowOrColumnLeaveObservers.push(
-            eventBindingObject?.onPointerLeave$.subscribeEvent(() => {
-                this._moveHelperBackgroundShape?.hide();
-                this._moveHelperLineShape?.hide();
-                scene.resetCursor();
-                this._selectionRenderService.enableSelection();
-            })
-        );
+        const pointerLeaveHandler = () => {
+            this._moveHelperBackgroundShape?.hide();
+            this._moveHelperLineShape?.hide();
+            scene.resetCursor();
+            this._selectionRenderService.enableSelection();
+        };
 
-        this._downSubscriptions = new Subscription();
-        this._downSubscriptions.add(
-            // eslint-disable-next-line max-lines-per-function
-            eventBindingObject?.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                if (skeleton == null) {
+        // eslint-disable-next-line max-lines-per-function
+        const pointerDownHandler = (evt: IPointerEvent | IMouseEvent) => {
+            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            if (skeleton == null) {
+                return;
+            }
+
+            const selectionRange = this._selectionManagerService.getLast()?.range;
+            if (!selectionRange) return;
+
+            const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_MOVE_PERMISSION_CHECK)(false, selectionRange);
+
+            if (!permissionCheck) {
+                return;
+            }
+
+            const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+
+            const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+
+            const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
+
+            this._startOffsetX = newEvtOffsetX;
+
+            this._startOffsetY = newEvtOffsetY;
+
+            const { row, column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
+
+            let scrollType: ScrollTimerType;
+
+            if (initialType === HEADER_MOVE_TYPE.ROW) {
+                this._changeFromRow = row;
+                scrollType = ScrollTimerType.Y;
+            } else {
+                this._changeFromColumn = column;
+                scrollType = ScrollTimerType.X;
+            }
+
+            const matchSelectionData = this._checkInHeaderRange(
+                initialType === HEADER_MOVE_TYPE.ROW ? row : column,
+                initialType
+            );
+
+            if (matchSelectionData === false) {
+                return;
+            }
+
+            const startScrollXY = scene.getScrollXYByRelativeCoords(
+                Vector2.FromArray([this._startOffsetX, this._startOffsetY])
+            );
+
+            this._newBackgroundAndLine();
+
+            scene.setCursor(CURSOR_TYPE.GRABBING);
+
+            scene.disableEvent();
+
+            let scrollTimerInitd = false;
+            let scrollTimer: ScrollTimer;
+
+            const initScrollTimer = () => {
+                if (scrollTimerInitd) {
                     return;
                 }
 
-                const selectionRange = this._selectionManagerService.getLast()?.range;
-                if (!selectionRange) return;
+                scrollTimer = ScrollTimer.create(scene, scrollType);
 
-                const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_MOVE_PERMISSION_CHECK)(false, selectionRange);
+                const mainViewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
-                if (!permissionCheck) {
-                    return;
-                }
+                scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, mainViewport);
 
-                const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+                this._scrollTimer = scrollTimer;
+                scrollTimerInitd = true;
+            };
 
-                const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+            this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+                initScrollTimer();
+                const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-                const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
+                const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
+                    Vector2.FromArray([moveOffsetX, moveOffsetY])
+                );
 
-                this._startOffsetX = newEvtOffsetX;
+                // scene.setCursor(CURSOR_TYPE.GRABBING);
 
-                this._startOffsetY = newEvtOffsetY;
-
-                const { row, column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
-
-                let scrollType: ScrollTimerType;
-
-                if (initialType === HEADER_MOVE_TYPE.ROW) {
-                    this._changeFromRow = row;
-                    scrollType = ScrollTimerType.Y;
-                } else {
-                    this._changeFromColumn = column;
-                    scrollType = ScrollTimerType.X;
-                }
-
-                const matchSelectionData = this._checkInHeaderRange(
-                    initialType === HEADER_MOVE_TYPE.ROW ? row : column,
+                this._rowColumnMoving(
+                    newMoveOffsetX,
+                    newMoveOffsetY,
+                    matchSelectionData,
+                    startScrollXY,
                     initialType
                 );
 
-                if (matchSelectionData === false) {
-                    return;
-                }
-
-                const startScrollXY = scene.getScrollXYByRelativeCoords(
-                    Vector2.FromArray([this._startOffsetX, this._startOffsetY])
-                );
-
-                this._newBackgroundAndLine();
-
-                scene.setCursor(CURSOR_TYPE.GRABBING);
-
-                scene.disableEvent();
-
-                let scrollTimerInitd = false;
-                let scrollTimer: ScrollTimer;
-
-                const initScrollTimer = () => {
-                    if (scrollTimerInitd) {
-                        return;
-                    }
-
-                    scrollTimer = ScrollTimer.create(scene, scrollType);
-
-                    const mainViewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-
-                    scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, mainViewport);
-
-                    this._scrollTimer = scrollTimer;
-                    scrollTimerInitd = true;
-                };
-
-                this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
-                    initScrollTimer();
-                    const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-
-                    const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
-                        Vector2.FromArray([moveOffsetX, moveOffsetY])
-                    );
-
-                    // scene.setCursor(CURSOR_TYPE.GRABBING);
-
+                scrollTimer.scrolling(newMoveOffsetX, newMoveOffsetY, () => {
                     this._rowColumnMoving(
                         newMoveOffsetX,
                         newMoveOffsetY,
@@ -298,82 +304,87 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
                         startScrollXY,
                         initialType
                     );
-
-                    scrollTimer.scrolling(newMoveOffsetX, newMoveOffsetY, () => {
-                        this._rowColumnMoving(
-                            newMoveOffsetX,
-                            newMoveOffsetY,
-                            matchSelectionData,
-                            startScrollXY,
-                            initialType
-                        );
-                    });
                 });
+            });
 
-                this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
-                    this._disposeBackgroundAndLine();
-                    scene.resetCursor();
-                    scene.enableEvent();
-                    this._clearObserverEvent();
-                    this._scrollTimer?.dispose();
+            this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
+                this._disposeBackgroundAndLine();
+                scene.resetCursor();
+                scene.enableEvent();
+                this._clearObserverEvent();
+                this._scrollTimer?.dispose();
 
-                    // when multi ranges are selected, we should only move the range that contains
-                    // `changeFromRow`
-                    const selections = this._selectionManagerService.getSelections();
+                // when multi ranges are selected, we should only move the range that contains
+                // `changeFromRow`
+                const selections = this._selectionManagerService.getSelections();
 
-                    if (initialType === HEADER_MOVE_TYPE.ROW) {
-                        if (this._changeFromRow !== this._changeToRow && this._changeToRow !== -1) {
-                            const filteredSelections =
-                                selections?.filter(
-                                    (selection) =>
-                                        selection.range.rangeType === RANGE_TYPE.ROW &&
-                                        selection.range.startRow <= this._changeFromRow &&
-                                        this._changeFromRow <= selection.range.endRow
-                                ) || [];
-                            const range = filteredSelections[0]?.range;
-                            if (range) {
-                                this._commandService.executeCommand<IMoveRowsCommandParams>(MoveRowsCommand.id, {
-                                    fromRange: range,
-                                    toRange: {
-                                        ...range,
-                                        startRow: this._changeToRow,
-                                        endRow: this._changeToRow + range.endRow - range.startRow,
-                                    },
-                                });
-                            }
+                if (initialType === HEADER_MOVE_TYPE.ROW) {
+                    if (this._changeFromRow !== this._changeToRow && this._changeToRow !== -1) {
+                        const filteredSelections =
+                            selections?.filter(
+                                (selection) =>
+                                    selection.range.rangeType === RANGE_TYPE.ROW &&
+                                    selection.range.startRow <= this._changeFromRow &&
+                                    this._changeFromRow <= selection.range.endRow
+                            ) || [];
+                        const range = filteredSelections[0]?.range;
+                        if (range) {
+                            this._commandService.executeCommand<IMoveRowsCommandParams>(MoveRowsCommand.id, {
+                                fromRange: range,
+                                toRange: {
+                                    ...range,
+                                    startRow: this._changeToRow,
+                                    endRow: this._changeToRow + range.endRow - range.startRow,
+                                },
+                            });
                         }
-
-                        // reset dragging status
-                        this._changeToRow = this._changeFromRow = -1;
-                    } else {
-                        if (this._changeFromColumn !== this._changeToColumn && this._changeToColumn !== -1) {
-                            const filteredSelections =
-                                selections?.filter(
-                                    (selection) =>
-                                        selection.range.rangeType === RANGE_TYPE.COLUMN &&
-                                        selection.range.startColumn <= this._changeFromColumn &&
-                                        this._changeFromColumn <= selection.range.endColumn
-                                ) || [];
-                            const range = filteredSelections[0]?.range;
-                            if (range) {
-                                this._commandService.executeCommand<IMoveColsCommandParams>(MoveColsCommand.id, {
-                                    fromRange: range,
-                                    toRange: {
-                                        ...range,
-                                        startColumn: this._changeToColumn,
-                                        endColumn: this._changeToColumn + range.endColumn - range.startColumn,
-                                    },
-                                });
-                            }
-                        }
-
-                        this._changeToColumn = this._changeFromColumn = -1;
                     }
-                });
-            })
-        );
+
+                    // reset dragging status
+                    this._changeToRow = this._changeFromRow = -1;
+                } else {
+                    if (this._changeFromColumn !== this._changeToColumn && this._changeToColumn !== -1) {
+                        const filteredSelections =
+                            selections?.filter(
+                                (selection) =>
+                                    selection.range.rangeType === RANGE_TYPE.COLUMN &&
+                                    selection.range.startColumn <= this._changeFromColumn &&
+                                    this._changeFromColumn <= selection.range.endColumn
+                            ) || [];
+                        const range = filteredSelections[0]?.range;
+                        if (range) {
+                            this._commandService.executeCommand<IMoveColsCommandParams>(MoveColsCommand.id, {
+                                fromRange: range,
+                                toRange: {
+                                    ...range,
+                                    startColumn: this._changeToColumn,
+                                    endColumn: this._changeToColumn + range.endColumn - range.startColumn,
+                                },
+                            });
+                        }
+                    }
+
+                    this._changeToColumn = this._changeFromColumn = -1;
+                }
+            });
+        };
+        // if (initialType === HEADER_MOVE_TYPE.ROW) {
+        //     this._rowHeaderPointerMoveSub = spreadsheetRowHeader.onPointerMove$.subscribeEvent(pointerMoveHandler);
+        // } else {
+        //     this._colHeaderPointerMoveSub = spreadsheetColumnHeader.onPointerMove$.subscribeEvent(pointerMoveHandler);
+        // }
+
+        this._headerPointerMoveSubs = new Subscription();
+        this._headerPointerMoveSubs.add(eventBindingObject.onPointerMove$.subscribeEvent(pointerMoveHandler));
+
+        this._headerPointerLeaveSubs = new Subscription();
+        this._headerPointerLeaveSubs.add(eventBindingObject?.onPointerLeave$.subscribeEvent(pointerLeaveHandler));
+
+        this._headerPointerDownSubs = new Subscription();
+        this._headerPointerDownSubs.add(eventBindingObject?.pointerDown$.subscribeEvent(pointerDownHandler));
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _rowColumnMoving(
         moveOffsetX: number,
         moveOffsetY: number,

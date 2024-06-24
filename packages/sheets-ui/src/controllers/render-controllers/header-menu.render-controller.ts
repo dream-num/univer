@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable, Observer, Workbook } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -27,7 +27,7 @@ import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService, SetSelectionsOpe
 import { IContextMenuService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
-import type { Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { HEADER_MENU_SHAPE_TYPE, HeaderMenuShape } from '../../views/header-menu-shape';
@@ -56,15 +56,14 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
 
     private _currentColumn: number = Number.POSITIVE_INFINITY;
 
-    private _observers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
-    private _rowHeaderPointerMoveSub: Nullable<Subscription>;
-    private _colHeaderPointerMoveSub: Nullable<Subscription>;
-    private _rowHeaderPointerLeaveSub: Subscription;
-    private _colHeaderPointerLeaveSub: Subscription;
-    private _rowHeaderPointerEnterSub: Subscription;
-    private _colHeaderPointerEnterSub: Subscription;
-    private _rowHeaderPointerSubs: Array<Subscription> = [];
-    private _colHeaderPointerSubs: Array<Subscription> = [];
+    // private _rowHeaderPointerMoveSub: Subscription;
+    // private _colHeaderPointerMoveSub: Subscription;
+    // private _rowHeaderPointerLeaveSub: Subscription;
+    // private _colHeaderPointerLeaveSub: Subscription;
+    // private _rowHeaderPointerEnterSub: Subscription;
+    // private _colHeaderPointerEnterSub: Subscription;
+    private _headerPointerSubs: Nullable<Subscription>;
+    private _colHeaderPointerSubs: Nullable<Subscription>;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -85,15 +84,18 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
         // const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
         // const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
 
-        [...this._rowHeaderPointerSubs, ...this._colHeaderPointerSubs].forEach((s) => {
-            s.unsubscribe();
+        // [...this._headerPointerSubs, ...this._colHeaderPointerSubs].forEach((s) => {
+            // s.unsubscribe();
             // spreadsheetRowHeader.onPointerEnterObserver.remove(observer);
             // spreadsheetRowHeader.onPointerMoveObserver.remove(observer);
             // spreadsheetRowHeader.onPointerLeaveObserver.remove(observer);
             // spreadsheetColumnHeader.onPointerEnterObserver.remove(observer);
             // spreadsheetColumnHeader.onPointerMoveObserver.remove(observer);
             // spreadsheetColumnHeader.onPointerLeaveObserver.remove(observer);
-        });
+        // });
+        this._headerPointerSubs?.unsubscribe();
+        this._headerPointerSubs = null;
+        // this._colHeaderPointerSubs = [];
     }
 
     private _initialize() {
@@ -120,8 +122,8 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
         const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
 
-        // const eventBindingObject =
-        //     initialType === HEADER_HOVER_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
+        const eventBindingObject =
+            initialType === HEADER_HOVER_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
 
         const pointerMoveHandler = (evt: IPointerEvent | IMouseEvent) => {
             const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
@@ -186,24 +188,23 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
             this._hoverMenu?.hide();
         };
 
-        if (initialType === HEADER_HOVER_TYPE.ROW) {
-            this._rowHeaderPointerMoveSub = spreadsheetRowHeader.onPointerMove$.subscribeEvent(pointerMoveHandler);
-            this._rowHeaderPointerEnterSub = spreadsheetColumnHeader.onPointerEnter$.subscribeEvent(pointerEnterHandler);
-            this._rowHeaderPointerLeaveSub = spreadsheetRowHeader.onPointerLeave$.subscribeEvent(pointerLeaveHandler);
-            this._rowHeaderPointerSubs.push(this._rowHeaderPointerMoveSub, this._rowHeaderPointerEnterSub, this._rowHeaderPointerLeaveSub);
-        } else {
-            this._colHeaderPointerMoveSub = spreadsheetColumnHeader.onPointerMove$.subscribeEvent(pointerMoveHandler);
-            this._colHeaderPointerEnterSub = spreadsheetColumnHeader.onPointerEnter$.subscribeEvent(pointerEnterHandler);
-            this._colHeaderPointerLeaveSub = spreadsheetColumnHeader.onPointerLeave$.subscribeEvent(pointerLeaveHandler);
-            this._colHeaderPointerSubs.push(this._colHeaderPointerMoveSub, this._colHeaderPointerEnterSub, this._colHeaderPointerLeaveSub);
-        }
+        this._headerPointerSubs = new Subscription();
+        const headerPointerMoveSub = eventBindingObject.onPointerMove$.subscribeEvent(pointerMoveHandler);
+        const headerPointerEnterSub = eventBindingObject.onPointerEnter$.subscribeEvent(pointerEnterHandler);
+        const headerPointerLeaveSub = eventBindingObject.onPointerLeave$.subscribeEvent(pointerLeaveHandler);
+        this._headerPointerSubs?.add(headerPointerMoveSub);
+        this._headerPointerSubs?.add(headerPointerEnterSub);
+        this._headerPointerSubs?.add(headerPointerLeaveSub);
         // this._observers.push(
         //     eventBindingObject?.onPointerEnter$.subscribeEvent(() => {
-        //         this._hoverRect?.show();
         //     })
         // );
         // this._observers.push(
-            // eventBindingObject?.onPointerLeave$.subscribeEvent(})
+        // eventBindingObject?.onPointerMoveObserver.add(
+        // );
+
+        // this._observers.push(
+        // eventBindingObject?.onPointerLeave$.subscribeEvent(})
         // );
     }
 

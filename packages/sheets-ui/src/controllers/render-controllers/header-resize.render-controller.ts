@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { EventState, Nullable, Observer, Workbook } from '@univerjs/core';
+import type { EventState, Nullable, Workbook } from '@univerjs/core';
 import {
     createInterceptorKey,
     Disposable,
@@ -34,7 +34,7 @@ import type {
 import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import type { Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
@@ -72,7 +72,8 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
     private _columnResizeRect: Nullable<HeaderMenuResizeShape>;
 
-    private _observers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
+    private _headerPointerSubs: Nullable<Subscription>;
+    // private _colHeaderPointerSubs: Array<Subscription>;
 
     private _scenePointerMoveSub: Nullable<Subscription>;
 
@@ -85,12 +86,6 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
     private _startOffsetY: number = Number.POSITIVE_INFINITY;
 
     public interceptor = new InterceptorManager({ HEADER_RESIZE_PERMISSION_CHECK });
-    private _pointerMoveSub: Nullable<Subscription>;
-
-    private _rowHeaderPointerMoveSub: Nullable<Subscription>;
-    private _columnHeaderPointerMoveSub: Nullable<Subscription>;
-    private _rowHeaderPointerLeaveSub: Subscription;
-    private _columnHeaderPointerLeaveSub: Subscription;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -109,20 +104,8 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
         this._columnResizeRect?.dispose();
         this._columnResizeRect = null;
 
-        // const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
-        // const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
-        // this._observers.forEach((observer) => {
-            // spreadsheetRowHeader.onPointerMove$.remove(observer);
-            // spreadsheetRowHeader.onPointerLeave$.remove(observer);
-            // spreadsheetColumnHeader.onPointerMove$.remove(observer);
-            // spreadsheetColumnHeader.onPointerLeave$.remove(observer);
-        // });
-        this._rowHeaderPointerMoveSub?.unsubscribe();
-        this._columnHeaderPointerMoveSub?.unsubscribe();
-        this._rowHeaderPointerLeaveSub?.unsubscribe();
-        this._columnHeaderPointerLeaveSub?.unsubscribe();
-
-        this._observers = [];
+        this._headerPointerSubs?.unsubscribe();
+        this._headerPointerSubs = null;
     }
 
     private _init() {
@@ -156,10 +139,11 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
         const scene = this._context.scene;
 
-        // const eventBindingObject =
-        //     initialType === HEADER_RESIZE_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
+        const eventBindingObject =
+            initialType === HEADER_RESIZE_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
 
         // this._observers.push(
+        //     eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent |
         //     eventBindingObject?.onPointerLeave$.subscribeEvent()
         // );
         const pointerLeaveEvent = (_evt: IPointerEvent | IMouseEvent, _state: EventState) => {
@@ -271,13 +255,10 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                 this._columnResizeRect.show();
             }
         };
-        if (initialType === HEADER_RESIZE_TYPE.ROW) {
-            this._rowHeaderPointerMoveSub = spreadsheetRowHeader?.onPointerMove$.subscribeEvent(pointerMoveEvent);
-            this._rowHeaderPointerLeaveSub = spreadsheetRowHeader?.onPointerLeave$.subscribeEvent(pointerLeaveEvent);
-        } else {
-            this._columnHeaderPointerMoveSub = spreadsheetColumnHeader?.onPointerMove$.subscribeEvent(pointerMoveEvent);
-            this._columnHeaderPointerLeaveSub = spreadsheetColumnHeader?.onPointerLeave$.subscribeEvent(pointerLeaveEvent);
-        }
+
+        this._headerPointerSubs = new Subscription();
+        this._headerPointerSubs.add(eventBindingObject?.onPointerMove$.subscribeEvent(pointerMoveEvent));
+        this._headerPointerSubs.add(eventBindingObject?.onPointerLeave$.subscribeEvent(pointerLeaveEvent));
     }
 
     private _initialHoverResize(initialType: HEADER_RESIZE_TYPE = HEADER_RESIZE_TYPE.ROW) {
@@ -322,7 +303,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
         this.disposeWithMe(
             toDisposable(
-                eventBindingObject.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+                eventBindingObject.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
                     const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                     if (skeleton == null) return;
 

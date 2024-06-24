@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
-import type { ICustomRangeForInterceptor, IInterceptor, Nullable } from '@univerjs/core';
-import { composeInterceptors, Disposable, DisposableCollection, LifecycleStages, OnLifecycle, remove, toDisposable } from '@univerjs/core';
-import type { DocumentViewModel } from '@univerjs/engine-render';
+import type { DocumentDataModel, ICustomRangeForInterceptor, IInterceptor, Nullable } from '@univerjs/core';
+import { composeInterceptors, Disposable, DisposableCollection, LifecycleStages, OnLifecycle, remove, toDisposable, UniverInstanceType } from '@univerjs/core';
+import type { DocumentViewModel, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
-import { DocViewModelManagerService } from '../doc-view-model-manager.service';
+import { DocSkeletonManagerService } from '../doc-skeleton-manager.service';
 import { DOC_INTERCEPTOR_POINT } from './interceptor-const';
 
 @OnLifecycle(LifecycleStages.Starting, DocInterceptorService)
-export class DocInterceptorService extends Disposable {
+export class DocInterceptorService extends Disposable implements IRenderModule {
     private _interceptorsByName: Map<string, Array<IInterceptor<unknown, unknown>>> = new Map();
 
     constructor(
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
+        private readonly _context: IRenderContext<DocumentDataModel>,
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
     ) {
         super();
-        this.disposeWithMe(this._docViewModelManagerService.docViewModelAdd$.subscribe((viewModel) => {
-            this.interceptDocumentViewModel(viewModel);
+
+        this.disposeWithMe(this._docSkeletonManagerService.currentViewModel$.subscribe((viewModel) => {
+            if (viewModel) {
+                this.interceptDocumentViewModel(viewModel);
+            }
         }));
 
         this.disposeWithMe(this.intercept(DOC_INTERCEPTOR_POINT.CUSTOM_RANGE, {
@@ -65,7 +69,7 @@ export class DocInterceptorService extends Disposable {
 
     interceptDocumentViewModel(viewModel: DocumentViewModel) {
         const disposableCollection = new DisposableCollection();
-        disposableCollection.add(viewModel.registerCellContentInterceptor({
+        disposableCollection.add(viewModel.registerCustomRangeInterceptor({
             getCustomRange: (index: number): Nullable<ICustomRangeForInterceptor> => {
                 return this.fetchThroughInterceptors(DOC_INTERCEPTOR_POINT.CUSTOM_RANGE)(
                     viewModel.getCustomRangeRaw(index),

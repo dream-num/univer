@@ -55,7 +55,7 @@ export class DocumentViewModel implements IDisposable {
         this._buildHeaderFooterViewModel();
     }
 
-    registerCellContentInterceptor(interceptor: ICustomRangeInterceptor): IDisposable {
+    registerCustomRangeInterceptor(interceptor: ICustomRangeInterceptor): IDisposable {
         if (this._customRangeInterceptor) {
             throw new Error('[DocViewModel]: Interceptor already registered.');
         }

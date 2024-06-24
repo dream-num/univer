@@ -67,7 +67,6 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
                 const activeCustomRange = customRanges.find((i) => i.rangeId === activeComment.commentId);
                 const isActiveIndex = activeCustomRange && index >= activeCustomRange.startIndex && index <= activeCustomRange.endIndex;
                 const isActive = activeComment.unitId === unitId && data.rangeId === activeComment.commentId;
-
                 return next({
                     ...data,
                     active: isActive || isActiveIndex,

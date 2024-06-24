@@ -27,7 +27,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { IEditorService, IShortcutService } from '@univerjs/ui';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DocSkeletonManagerService } from '@univerjs/docs';
+import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
 import {
     MoveCursorDownShortcut,
     MoveCursorLeftShortcut,
@@ -140,6 +140,7 @@ export class UniverDocsUIPlugin extends Plugin {
     private _initRenderBasics(): void {
         ([
             DocSkeletonManagerService,
+            DocInterceptorService,
             DocRenderController,
             DocZoomRenderController,
         ]).forEach((m) => {

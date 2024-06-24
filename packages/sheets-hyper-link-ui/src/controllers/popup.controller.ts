@@ -46,7 +46,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
 
                 const skeleton = this._renderManagerService.getRenderById(currentCell.location.unitId)
                     ?.with(SheetSkeletonManagerService)
-                    .getUnitSkeleton(currentCell.location.unitId, currentCell.location.subUnitId)
+                    .getWorksheetSkeleton(currentCell.location.subUnitId)
                     ?.skeleton;
 
                 const currentCol = currentCell.location.col;

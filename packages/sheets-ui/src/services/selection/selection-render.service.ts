@@ -21,15 +21,15 @@ import type {
     IInterceptor,
     IRange,
     IRangeWithCoord,
-    ISelection,
     ISelectionCell,
     ISelectionCellWithCoord,
     ISelectionWithCoord,
     Nullable,
     Observer,
+    Workbook,
 } from '@univerjs/core';
-import { createInterceptorKey, InterceptorManager, IUniverInstanceService, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
+import { createInterceptorKey, InterceptorManager, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import { getNormalSelectionStyle } from '@univerjs/sheets';
@@ -39,7 +39,6 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import type { SelectionRenderModel } from './selection-render-model';
 import { SelectionShape } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
 
@@ -60,33 +59,13 @@ export interface ISelectionRenderService {
         RANGE_FILL_PERMISSION_CHECK: IInterceptor<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>;
     }>;
 
-    enableHeaderHighlight(): void;
-    disableHeaderHighlight(): void;
+    // #region SelectionRenderController only
+    // Methods and properties only used in the SelectionRenderController. The more methods in this region,
+    // the greater the necessity is to merge these two modules.
 
-    setStyle(style: ISelectionStyle): void;
-    resetStyle(): void;
-    enableShowPrevious(): void;
-    disableShowPrevious(): void;
-    enableRemainLast(): void;
-    disableRemainLast(): void;
-    enableSkipRemainLast(): void;
-    disableSkipRemainLast(): void;
-
-    addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle): void;
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]): void;
+    addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle): void;
     changeRuntime(skeleton: Nullable<SpreadsheetSkeleton>, scene: Nullable<Scene>, viewport?: Viewport): void;
-
-    /** @deprecated This should not be provided by the selection render service. */
-    getViewPort(): Viewport;
-    getCurrentControls(): SelectionShape[];
-    getActiveSelections(): Nullable<ISelection[]>;
-    getActiveRange(): Nullable<IRange>;
-    getActiveSelection(): Nullable<SelectionShape>;
-    getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[];
-    attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
-    attachRangeWithCoord(range: IRange): Nullable<IRangeWithCoord>;
-    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
-    getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithCoord>;
     eventTrigger(
         evt: IPointerEvent | IMouseEvent,
         zIndex: number,
@@ -94,14 +73,38 @@ export interface ISelectionRenderService {
         viewport?: Viewport,
         scrollTimerType?: ScrollTimerType
     ): void;
-    // getMoveCellInfo(direction: Direction, selectionData: Nullable<ISelectionWithCoord>): Nullable<ISelectionWithCoord>;
-    // transformCellDataToSelectionData(row: number, column: number): Nullable<ISelectionWithCoord>;
-    reset(): void;
-
     refreshSelectionMoveStart(): void;
+    reset(): void;
+    resetStyle(): void;
+
+    // #endregion
+
+    // #region PromptController
+    // Methods and properties only used in PromptController. The more methods in this region,
+    // the greater the necessity is to create a `PromptSelectionService`.
 
     enableSingleSelection(): void;
     disableSingleSelection(): void;
+    getActiveRange(): Nullable<IRange>;
+    enableSkipRemainLast(): void;
+    enableRemainLast(): void;
+    disableRemainLast(): void;
+    disableSkipRemainLast(): void;
+
+    // #endregion
+
+    /** @deprecated This should not be provided by the selection render service. */
+    getViewPort(): Viewport; // AutoFill
+    getCurrentControls(): SelectionShape[]; // AutoFill
+
+    // The following methods are used to get range locations in a worksheet. Though `attachRangeWithCoord` should not happens here.
+    // And `attachPrimaryWithCoord` is redundant.
+
+    attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
+
+    /** @deprecated Use `attachSelectionWithCoord instead`. */
+    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
+    getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithCoord>; // drawing
 }
 
 /**
@@ -121,7 +124,7 @@ export interface ISelectionRenderService {
 export const RANGE_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, null>('rangeMovePermissionCheck');
 export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: number; y: number; skeleton: SpreadsheetSkeleton; scene: Scene }>('rangeFillPermissionCheck');
 
-export class SelectionRenderService implements ISelectionRenderService {
+export class SelectionRenderService implements ISelectionRenderService, IRenderModule {
     private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
@@ -172,9 +175,6 @@ export class SelectionRenderService implements ISelectionRenderService {
     // Whether to enable the selection area. If set to false, the user cannot draw a selection area in the content area by clicking with the mouse.
     private _isSelectionEnabled: boolean = true;
 
-    // Used in the format painter feature, similar to ctrl, it can retain the previous selection.
-    private _isShowPreviousEnable: boolean | number = 0;
-
     //Used in the formula selection feature, a new selection string is added by drawing a box with the mouse.
     private _isRemainLastEnable: boolean = true;
 
@@ -213,21 +213,18 @@ export class SelectionRenderService implements ISelectionRenderService {
     public interceptor = new InterceptorManager({ RANGE_MOVE_PERMISSION_CHECK, RANGE_FILL_PERMISSION_CHECK });
 
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
     }
 
-    enableHeaderHighlight() {
-        this._isHeaderHighlight = true;
-    }
-
-    disableHeaderHighlight() {
-        this._isHeaderHighlight = false;
+    dispose(): void {
+        // TODO: there should be something to garbage collect
     }
 
     setStyle(style: ISelectionStyle) {
@@ -236,14 +233,6 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     resetStyle() {
         this.setStyle(getNormalSelectionStyle(this._themeService));
-    }
-
-    enableShowPrevious() {
-        this._isShowPreviousEnable = true;
-    }
-
-    disableShowPrevious() {
-        this._isShowPreviousEnable = false;
     }
 
     enableRemainLast() {
@@ -311,11 +300,6 @@ export class SelectionRenderService implements ISelectionRenderService {
         // update control
         control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
 
-        if (this._isHeaderHighlight) {
-            control.enableHeaderHighlight();
-        } else {
-            control.disableHeaderHighlight();
-        }
         currentControls.push(control);
     }
 
@@ -415,45 +399,6 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         if (row > freeze.startRow && column <= freeze.startColumn) {
             return this._scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT);
-        }
-    }
-
-    /**
-     * Returns the list of active ranges in the active sheet or null if there are no active ranges.
-     * If there is a single range selected, this behaves as a getActiveRange() call.
-     *
-     * @returns
-     */
-    getActiveSelections(): Nullable<ISelection[]> {
-        const controls = this.getCurrentControls();
-        if (controls && controls.length > 0) {
-            const selections = controls?.map((control: SelectionShape) => {
-                const model: SelectionRenderModel = control.model;
-                const currentCell = model.currentCell;
-                let primary: Nullable<ISelectionCell> = null;
-                if (currentCell) {
-                    primary = {
-                        actualRow: currentCell.actualRow,
-                        actualColumn: currentCell.actualColumn,
-                        isMerged: currentCell.isMerged,
-                        isMergedMainCell: currentCell.isMergedMainCell,
-                        startRow: currentCell.mergeInfo.startRow,
-                        startColumn: currentCell.mergeInfo.startColumn,
-                        endRow: currentCell.mergeInfo.endRow,
-                        endColumn: currentCell.mergeInfo.endColumn,
-                    };
-                }
-                return {
-                    range: {
-                        startRow: model.startRow,
-                        startColumn: model.startColumn,
-                        endRow: model.endRow,
-                        endColumn: model.endColumn,
-                    },
-                    primary,
-                };
-            });
-            return selections;
         }
     }
 
@@ -615,7 +560,6 @@ export class SelectionRenderService implements ISelectionRenderService {
             (curControls.length > 0 &&
                 !evt.ctrlKey &&
                 !evt.shiftKey &&
-                !this._isShowPreviousEnable &&
                 !this._isRemainLastEnable) || (curControls.length > 0 && this._isSingleSelection && !evt.shiftKey)
         ) {
             for (const control of curControls) {
@@ -906,7 +850,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle {
         const { range, primary, style } = selectionWithStyle;
-        let rangeWithCoord = this.attachRangeWithCoord(range);
+        let rangeWithCoord = this._sheetSkeletonManagerService.attachRangeWithCoord(range);
         if (rangeWithCoord == null) {
             rangeWithCoord = {
                 startRow: -1,
@@ -920,34 +864,11 @@ export class SelectionRenderService implements ISelectionRenderService {
                 rangeType: RANGE_TYPE.NORMAL,
             };
         }
+
         return {
             rangeWithCoord,
             primaryWithCoord: this.attachPrimaryWithCoord(primary),
             style,
-        };
-    }
-
-    attachRangeWithCoord(range: IRange): Nullable<IRangeWithCoord> {
-        const { startRow, startColumn, endRow, endColumn, rangeType } = range;
-        const scene = this._scene;
-        const skeleton = this._skeleton;
-        if (scene == null || skeleton == null) {
-            return;
-        }
-        const { scaleX, scaleY } = scene.getAncestorScale();
-        const startCell = skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
-        const endCell = skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
-
-        return {
-            startRow,
-            startColumn,
-            endRow,
-            endColumn,
-            rangeType,
-            startY: startCell?.startY || 0,
-            endY: endCell?.endY || 0,
-            startX: startCell?.startX || 0,
-            endX: endCell?.endX || 0,
         };
     }
 
@@ -1178,10 +1099,10 @@ export class SelectionRenderService implements ISelectionRenderService {
                 scaleY,
                 scrollXY
             );
+
+            if (!primaryWithCoord) return;
+
             const rangeWithCoord = makeCellToSelection(primaryWithCoord);
-            if (rangeWithCoord == null) {
-                return;
-            }
             return {
                 primaryWithCoord,
                 rangeWithCoord,

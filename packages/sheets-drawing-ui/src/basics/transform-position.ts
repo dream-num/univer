@@ -17,14 +17,14 @@
 import type { ITransformState, Nullable } from '@univerjs/core';
 import { precisionTo } from '@univerjs/engine-render';
 import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
-import type { ISelectionRenderService } from '@univerjs/sheets-ui';
+import type { ISelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
-export function drawingPositionToTransform(position: ISheetDrawingPosition, selectionRenderService: ISelectionRenderService): Nullable<ITransformState> {
+export function drawingPositionToTransform(position: ISheetDrawingPosition, skeletonManagerService: SheetSkeletonManagerService): Nullable<ITransformState> {
     const { from, to } = position;
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
     const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
 
-    const startSelectionCell = selectionRenderService.attachRangeWithCoord({
+    const startSelectionCell = skeletonManagerService.attachRangeWithCoord({
         startColumn: fromColumn,
         endColumn: fromColumn,
         startRow: fromRow,
@@ -35,7 +35,7 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, sele
         return;
     }
 
-    const endSelectionCell = selectionRenderService.attachRangeWithCoord({
+    const endSelectionCell = skeletonManagerService.attachRangeWithCoord({
         startColumn: toColumn,
         endColumn: toColumn,
         startRow: toRow,

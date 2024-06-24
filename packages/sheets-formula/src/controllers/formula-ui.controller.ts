@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 import { BuiltInUIPart, ComponentManager, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import type { Ctor } from '@wendellhu/redi';
@@ -44,7 +44,6 @@ import {
     promptSelectionShortcutItemShift,
     singleEditorPromptSelectionShortcutItem,
 } from './shortcuts/prompt.shortcut';
-import { FormulaEditorShowController } from './formula-editor-show.controller';
 
 export interface IUniverSheetsFormulaConfig {
     menu: MenuConfig;
@@ -76,7 +75,6 @@ export class FormulaUIController extends Disposable {
         this._registerMenus();
         this._registerShortcuts();
         this._registerComponents();
-        this._registerRenderModules();
     }
 
     private _registerMenus(): void {
@@ -122,9 +120,5 @@ export class FormulaUIController extends Disposable {
         );
 
         this._componentManager.register(MORE_FUNCTIONS_COMPONENT, MoreFunctions);
-    }
-
-    private _registerRenderModules(): void {
-        this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, FormulaEditorShowController));
     }
 }

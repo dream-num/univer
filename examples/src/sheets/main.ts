@@ -33,7 +33,6 @@ import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
-import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { FUniver } from '@univerjs/facade';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
@@ -99,7 +98,7 @@ univer.registerPlugin(UniverSheetsSortUIPlugin);
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // drawing
-univer.registerPlugin(UniverSheetsDrawingUIPlugin);
+// univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {

@@ -223,7 +223,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     const { unitId, subUnitId, drawingId } = param;
                     const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
                     const floatDomParam = this._drawingManagerService.getDrawingByParam(param) as IFloatDomData;
-                    const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId);
+                    const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
                     if (floatDomParam == null || target == null || skeleton == null) {
                         return;
                     }
@@ -322,7 +322,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 const map = this._ensureMap(unitId, subUnitId);
                 const ids = Array.from(map.keys());
                 const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
-                const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId);
+                const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
                 if (!renderObject || !target || !skeleton) {
                     return;
                 }

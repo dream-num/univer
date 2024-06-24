@@ -50,7 +50,6 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
     constructor(
         @IUniverInstanceService private readonly _currentService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
@@ -91,15 +90,15 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
 
             const { style } = selection;
             const renderUnit = this._renderManagerService.getRenderById(unitId);
-            const scene = renderUnit?.scene;
-            const { rangeWithCoord, primaryWithCoord } =
-                this._selectionRenderService.attachSelectionWithCoord(selection);
+            if (!renderUnit) return;
 
             const skeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentSkeleton();
-            if (!scene || !skeleton) return;
+            if (!skeleton) return;
 
+            const { scene } = renderUnit;
             const { rowHeaderWidth, columnHeaderHeight } = skeleton;
             const control = new SelectionShape(scene, zIndex, false, this._themeService);
+            const { rangeWithCoord, primaryWithCoord } = renderUnit.with(ISelectionRenderService).attachSelectionWithCoord(selection);
             control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
             shape.control = control;
         });

@@ -240,14 +240,6 @@ export class SelectionShape extends Disposable {
         this.bottomControl.evented = state;
     }
 
-    enableHeaderHighlight() {
-        this._isHelperSelection = true;
-    }
-
-    disableHeaderHighlight() {
-        this._isHeaderHighlight = false;
-    }
-
     refreshSelectionFilled(val: IRangeWithCoord) {
         this._selectionFilled$.next(val);
     }

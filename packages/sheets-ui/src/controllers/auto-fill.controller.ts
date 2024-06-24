@@ -30,7 +30,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DeviceInputEventType } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import type {
     IAddWorksheetMergeMutationParams,
     IRemoveSheetMutationParams,
@@ -51,7 +51,6 @@ import {
     RemoveRowMutation,
     RemoveSheetMutation,
     RemoveWorksheetMergeMutation,
-    SelectionManagerService,
     SetRangeValuesCommand,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
@@ -92,11 +91,10 @@ export class AutoFillController extends Disposable {
     private _defaultHook: ISheetAutoFillHook;
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @ICommandService private readonly _commandService: ICommandService,
         @IAutoFillService private readonly _autoFillService: IAutoFillService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetsRenderService) private _sheetsRenderService: SheetsRenderService
     ) {
@@ -180,7 +178,9 @@ export class AutoFillController extends Disposable {
             // Each range change requires re-listening
             disposableCollection.dispose();
 
-            const selectionControls = this._selectionRenderService.getCurrentControls();
+            const selectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)!.with(ISelectionRenderService);
+
+            const selectionControls = selectionRenderService.getCurrentControls();
             selectionControls.forEach((controlSelection) => {
                 disposableCollection.add(
                     toDisposable(

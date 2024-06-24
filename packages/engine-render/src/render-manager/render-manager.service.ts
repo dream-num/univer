@@ -16,7 +16,7 @@
 
 import type { Nullable, UnitModel, UnitType, UniverInstanceType } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, toDisposable } from '@univerjs/core';
-import type { DependencyIdentifier, IDisposable } from '@wendellhu/redi';
+import type { Dependency, DependencyIdentifier, IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -27,7 +27,7 @@ import type { SheetComponent } from '../components/sheets/sheet-component';
 import type { Slide } from '../components/slides/slide';
 import { Engine } from '../engine';
 import { Scene } from '../scene';
-import { type IRender, type IRenderModuleCtor, RenderUnit } from './render-unit';
+import { type IRender, RenderUnit } from './render-unit';
 
 export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;
 
@@ -39,6 +39,7 @@ export interface IRenderManagerService extends IDisposable {
     removeRender(unitId: string): void;
     setCurrent(unitId: string): void;
     getRenderById(unitId: string): Nullable<IRender>;
+    getCurrentTypeOfRenderer(type: UniverInstanceType): Nullable<RenderUnit>;
     getRenderAll(): Map<string, IRender>;
     defaultEngine: Engine;
 
@@ -59,7 +60,7 @@ export interface IRenderManagerService extends IDisposable {
 
     has(unitId: string): boolean;
     withCurrentTypeOfUnit<T>(type: UniverInstanceType, id: DependencyIdentifier<T>): Nullable<T>;
-    registerRenderModule<T extends UnitModel>(type: UnitType, ctor: IRenderModuleCtor<T>): IDisposable;
+    registerRenderModule<T extends UnitModel>(type: UnitType, dep: Dependency<T>): IDisposable;
 }
 
 const DEFAULT_SCENE_SIZE = { width: 1500, height: 1000 };
@@ -87,7 +88,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return this._defaultEngine;
     }
 
-    private readonly _renderControllers = new Map<UnitType, Set<IRenderModuleCtor>>();
+    private readonly _renderDependencies = new Map<UnitType, Set<Dependency>>();
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -100,31 +101,31 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         super.dispose();
 
         this._renderMap.forEach((item) => this._disposeItem(item));
-        this._renderControllers.clear();
+        this._renderDependencies.clear();
         this._renderMap.clear();
         this._currentRender$.complete();
     }
 
-    registerRenderModule(type: UnitType, ctor: IRenderModuleCtor): IDisposable {
-        if (!this._renderControllers.has(type)) {
-            this._renderControllers.set(type, new Set());
+    registerRenderModule(type: UnitType, ctor: Dependency): IDisposable {
+        if (!this._renderDependencies.has(type)) {
+            this._renderDependencies.set(type, new Set());
         }
 
-        const set = this._renderControllers.get(type)!;
+        const set = this._renderDependencies.get(type)!;
         set.add(ctor);
 
         for (const [renderUnitId, render] of this._renderMap) {
             const renderType = this._univerInstanceService.getUnitType(renderUnitId);
             if (renderType === type) {
-                (render as RenderUnit).addRenderControllers([ctor]);
+                (render as RenderUnit).addRenderDependencies([ctor]);
             }
         }
 
         return toDisposable(() => set.delete(ctor));
     }
 
-    private _getRenderControllersForType(type: UnitType): Array<IRenderModuleCtor> {
-        return Array.from(this._renderControllers.get(type) ?? []);
+    private _getRenderControllersForType(type: UnitType): Array<Dependency> {
+        return Array.from(this._renderDependencies.get(type) ?? []);
     }
 
     create(unitId: string) {
@@ -133,6 +134,13 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
 
     createRender(unitId: string): IRender {
         return this._createRender(unitId, new Engine());
+    }
+
+    getCurrentTypeOfRenderer(type: UniverInstanceType): Nullable<RenderUnit> {
+        const current = this._univerInstanceService.getCurrentUnitForType(type);
+        if (!current) return null;
+
+        return this.getRenderById(current.getUnitId()) as RenderUnit;
     }
 
     withCurrentTypeOfUnit<T>(type: UniverInstanceType, id: DependencyIdentifier<T>): Nullable<T> {
@@ -175,7 +183,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
                 isMainScene,
             });
 
-            (renderUnit as RenderUnit).addRenderControllers(ctors);
+            (renderUnit as RenderUnit).addRenderDependencies(ctors);
         } else {
             // For slide pages
             renderUnit = {

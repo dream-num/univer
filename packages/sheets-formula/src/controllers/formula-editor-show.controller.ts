@@ -27,7 +27,6 @@ import {
 import {
     ErrorType,
     FormulaDataModel,
-    LexerTreeBuilder,
     SetArrayFormulaDataMutation,
     SetFormulaCalculationResultMutation,
 } from '@univerjs/engine-formula';
@@ -49,10 +48,8 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         private readonly _context: IRenderContext<Workbook>,
         @Inject(IEditorBridgeService) private _editorBridgeService: IEditorBridgeService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
@@ -216,8 +213,11 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
             hasColumnHeader: false,
         };
 
-        const { scene } = this._renderManagerService.getRenderById(unitId) || {};
-        const { rangeWithCoord, primaryWithCoord } = this._selectionRenderService.attachSelectionWithCoord({
+        const renderUnit = this._renderManagerService.getRenderById(unitId);
+        if (!renderUnit) return;
+
+        const { scene } = renderUnit;
+        const { rangeWithCoord, primaryWithCoord } = renderUnit.with(ISelectionRenderService).attachSelectionWithCoord({
             range: arrayRange,
             primary: null,
             style,

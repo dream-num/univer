@@ -106,7 +106,7 @@ export class FRange {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const skeleton = this._renderManagerService.getRenderById(unitId)!
-            .with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId)!.skeleton;
+            .with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)!.skeleton;
         return skeleton.getCellByIndex(this._range.startRow, this._range.startColumn);
     }
 

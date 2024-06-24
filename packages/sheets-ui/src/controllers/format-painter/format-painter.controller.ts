@@ -32,6 +32,7 @@ import {
 import { Inject, Injector } from '@wendellhu/redi';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation, getAddMergeMutationRangeByType, RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     ApplyFormatPainterCommand,
     SetOnceFormatPainterCommand,
@@ -41,13 +42,13 @@ import { FormatPainterStatus, IFormatPainterService } from '../../services/forma
 import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
 
-@OnLifecycle(LifecycleStages.Rendered, FormatPainterController)
+@OnLifecycle(LifecycleStages.Steady, FormatPainterController)
 export class FormatPainterController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IFormatPainterService private readonly _formatPainterService: IFormatPainterService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(Injector) private readonly _injector: Injector
@@ -63,9 +64,11 @@ export class FormatPainterController extends Disposable {
     }
 
     private _commandExecutedListener() {
+        const selectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)!.with(ISelectionRenderService);
+
         this.disposeWithMe(
             toDisposable(
-                this._selectionRenderService.selectionMoveEnd$.subscribe((selections) => {
+                selectionRenderService.selectionMoveEnd$.subscribe((selections) => {
                     if (this._formatPainterService.getStatus() !== FormatPainterStatus.OFF) {
                         const { rangeWithCoord } = selections[selections.length - 1];
                         this._commandService.executeCommand(ApplyFormatPainterCommand.id, {

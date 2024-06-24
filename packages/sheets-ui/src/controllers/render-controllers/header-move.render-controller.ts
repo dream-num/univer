@@ -374,7 +374,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
         const { startX: cellStartX, startY: cellStartY, endX: cellEndX, endY: cellEndY } = startCell;
 
-        const selectionWithCoord = this._selectionRenderService.attachRangeWithCoord(matchSelectionData.range);
+        const selectionWithCoord = this._sheetSkeletonManagerService.attachRangeWithCoord(matchSelectionData.range);
 
         if (selectionWithCoord == null) {
             return;

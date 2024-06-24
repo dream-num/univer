@@ -127,7 +127,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IEditorService private readonly _editorService: IEditorService
@@ -182,30 +181,27 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             return;
         }
 
-        const skeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentSkeleton();
-        if (skeleton == null) {
-            return;
-        }
+        const ru = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
+        if (!ru) return;
+
+        const skeleton = ru.with(SheetSkeletonManagerService).getCurrentSkeleton();
+        const selectionRenderService = ru.with(ISelectionRenderService);
 
         const { primary, unitId, sheetId, scene, engine } = currentEditCell;
         const { startRow, startColumn } = primary;
-        const primaryWithCoord = this._selectionRenderService.attachPrimaryWithCoord(primary);
+        const primaryWithCoord = selectionRenderService.attachPrimaryWithCoord(primary);
         if (primaryWithCoord == null) {
             return;
         }
 
         const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
-        if (actualRangeWithCoord == null) {
-            return;
-        }
-
         const canvasOffset = getCanvasOffsetByEngine(engine);
 
         let { startX, startY, endX, endY } = actualRangeWithCoord;
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
+        const scrollXY = scene.getScrollXY(selectionRenderService.getViewPort());
         startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
         startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
         endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);

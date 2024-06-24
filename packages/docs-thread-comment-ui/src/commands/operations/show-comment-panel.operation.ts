@@ -37,7 +37,7 @@ export const ShowCommentPanelOperation: ICommand<IShowCommentPanelOperationParam
 
         if (!panelService.panelVisible) {
             sidebarService.open({
-                header: { title: 'comment' },
+                header: { title: 'threadCommentUI.panel.title' },
                 children: { label: DocThreadCommentPanel.componentKey },
                 width: 312,
                 onClose: () => panelService.setPanelVisible(false),

@@ -26,8 +26,8 @@ export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'CommentSingle',
-        title: 'Set bold',
-        tooltip: 'comment',
+        title: 'threadCommentUI.panel.addComment',
+        tooltip: 'threadCommentUI.panel.addComment',
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };

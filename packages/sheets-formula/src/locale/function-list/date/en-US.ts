@@ -45,7 +45,7 @@ export default {
         },
     },
     DATEVALUE: {
-        description: 'Converts a date in the form of text to a serial number',
+        description: 'Converts a date in the form of text to a serial number.',
         abstract: 'Converts a date in the form of text to a serial number',
         links: [
             {
@@ -54,8 +54,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dateText: { name: 'date_text', detail: 'Text that represents a date in an Excel date format, or a reference to a cell that contains text that represents a date in an Excel date format. For example, "1/30/2008" or "30-Jan-2008" are text strings within quotation marks that represent dates.\nUsing the default date system in Microsoft Excel for Windows, the date_text argument must represent a date between January 1, 1900 and December 31, 9999. The DATEVALUE function returns the #VALUE! error value if the value of the date_text argument falls outside of this range.\nIf the year portion of the date_text argument is omitted, the DATEVALUE function uses the current year from your computer\'s built-in clock. Time information in the date_text argument is ignored.' },
         },
     },
     DAY: {

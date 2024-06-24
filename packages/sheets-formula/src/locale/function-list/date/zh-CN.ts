@@ -45,7 +45,7 @@ export default {
         },
     },
     DATEVALUE: {
-        description: '将文本格式的日期转换为序列号',
+        description: '将文本格式的日期转换为序列号。',
         abstract: '将文本格式的日期转换为序列号',
         links: [
             {
@@ -54,8 +54,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dateText: { name: '日期文本', detail: '表示 Excel 日期格式的日期的文本，或对包含表示 Excel 日期格式的日期的文本的单元格的引用。 例如，“1/30/2008”或“30-Jan-2008”是表示日期的引号内的文本字符串。\n使用 Microsoft Excel for Windows 中的默认日期系统， date_text 参数必须表示 1900 年 1 月 1 日至 9999 年 12 月 31 日的日期。 DATEVALUE 函数返回 #VALUE！ 如果 date_text 参数的值超出此范围，则为 error 值。\n如果省略参数 date_text 中的年份部分，则 DATEVALUE 函数会使用计算机内置时钟的当前年份。 参数 date_text 中的时间信息将被忽略。' },
         },
     },
     DAY: {

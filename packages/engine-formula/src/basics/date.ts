@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// @ts-ignore
+import numfmt from 'numfmt';
+
 export const DEFAULT_DATE_FORMAT = 'yyyy/mm/dd;@';
 export const DEFAULT_NOW_FORMAT = 'yyyy/mm/dd hh:mm';
 export const DEFAULT_TIME_FORMAT = 'h:mm A/P';
@@ -130,4 +133,8 @@ export function isValidDateStr(dateStr: string): boolean {
     const dateStrPad = dateStr.replace(/\//g, '-').split('-').map((v) => v.padStart(2, '0')).join('-');
 
     return dateStrPad === reconstructedDateStr;
+}
+
+export function parseDate(value: string) {
+    return numfmt.parseDate(value);
 }

@@ -15,6 +15,7 @@
  */
 
 import { DateFunction } from './date';
+import { Datevalue } from './datevalue';
 import { Day } from './day';
 import { Edate } from './edate';
 import { FUNCTION_NAMES_DATE } from './function-names';
@@ -26,6 +27,7 @@ import { Year } from './year';
 
 export const functionDate = [
     [DateFunction, FUNCTION_NAMES_DATE.DATE],
+    [Datevalue, FUNCTION_NAMES_DATE.DATEVALUE],
     [Day, FUNCTION_NAMES_DATE.DAY],
     [Edate, FUNCTION_NAMES_DATE.EDATE],
     [Month, FUNCTION_NAMES_DATE.MONTH],

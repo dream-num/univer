@@ -75,16 +75,9 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.DATEVALUE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.DATEVALUE.functionParameter.number1.name',
-                detail: 'formula.functionList.DATEVALUE.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.DATEVALUE.functionParameter.number2.name',
-                detail: 'formula.functionList.DATEVALUE.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.DATEVALUE.functionParameter.dateText.name',
+                detail: 'formula.functionList.DATEVALUE.functionParameter.dateText.detail',
+                example: '"2024-8-8"',
                 require: 1,
                 repeat: 0,
             },

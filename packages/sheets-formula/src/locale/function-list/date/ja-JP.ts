@@ -46,7 +46,7 @@ export default {
     },
     DATEVALUE: {
         description: '日付を表す文字列をシリアル値に変換します。',
-        abstract: '日付を表す文字列をシリアル値に変換します。',
+        abstract: '日付を表す文字列をシリアル値に変換します',
         links: [
             {
                 title: '指導',
@@ -54,8 +54,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dateText: { name: '日付文字列', detail: 'Excel の日付形式で日付を表すテキスト、または Excel の日付形式で日付を表すテキストを含むセルへの参照。 たとえば、"1/30/2008" や "30-Jan-2008" は、日付を表す引用符内のテキスト文字列です。\nWindows 版 Excel の標準の日付システムを使用する場合、日付文字列の引数には、1900 年 1 月 1 日～ 9999 年 12 月 31 日までの間の日付を指定する必要があります。 DATEVALUE 関数は、#VALUE を返します。 が返されます。\n日付文字列 引数の年の部分を省略すると、DATEVALUE 関数はコンピューターのシステム時計による現在の年を使用します。 日付文字列引数に時刻の情報が含まれていても無視されます。' },
         },
     },
     DAY: {

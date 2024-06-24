@@ -26,7 +26,7 @@ import { getCoordByCell, ISelectionRenderService, SelectionShape, SheetSkeletonM
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { combineLatest, filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
+import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
 import type { ISheetsFilterButtonShapeProps } from '../views/widgets/filter-button.shape';
 import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../views/widgets/filter-button.shape';
 
@@ -73,50 +73,44 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
 
     private _initRenderer(): void {
         // Subscribe to skeleton change and filter model change.
-        combineLatest([
-            this._selectionRenderService.usable$,
-            this._sheetSkeletonManagerService.currentSkeleton$,
-        ])
-            .pipe(
-                filter(([usable]) => usable),
-                switchMap(([_, skeletonParams]) => {
-                    if (!skeletonParams) return of(null);
+        this._sheetSkeletonManagerService.currentSkeleton$.pipe(
+            switchMap((skeletonParams) => {
+                if (!skeletonParams) return of(null);
 
-                    const { unit: workbook, unitId } = this._context;
-                    const worksheetId = workbook.getActiveSheet()?.getSheetId() || '';
-                    const filterModel = this._sheetsFilterService.getFilterModel(unitId, worksheetId) ?? undefined;
-                    const getParams = (): ISheetsFilterRenderParams => ({
-                        unitId,
-                        worksheetId,
-                        filterModel,
-                        range: filterModel?.getRange(),
-                        skeleton: skeletonParams.skeleton,
-                    });
+                const { unit: workbook, unitId } = this._context;
+                const worksheetId = workbook.getActiveSheet()?.getSheetId() || '';
+                const filterModel = this._sheetsFilterService.getFilterModel(unitId, worksheetId) ?? undefined;
+                const getParams = (): ISheetsFilterRenderParams => ({
+                    unitId,
+                    worksheetId,
+                    filterModel,
+                    range: filterModel?.getRange(),
+                    skeleton: skeletonParams.skeleton,
+                });
 
-                    return fromCallback(this._commandService.onCommandExecuted).pipe(
-                        filter(([command]) =>
-                            command.type === CommandType.MUTATION
+                return fromCallback(this._commandService.onCommandExecuted).pipe(
+                    filter(([command]) =>
+                        command.type === CommandType.MUTATION
                             && (command.params as ISheetCommandSharedParams).unitId === workbook.getUnitId()
                             && FILTER_MUTATIONS.has(command.id)
-                        ),
-                        throttleTime(20, undefined, { leading: false, trailing: true }),
-                        map(getParams),
-                        startWith(getParams()) // must trigger once
-                    );
-                }),
-                takeUntil(this.dispose$)
-            )
-            .subscribe((renderParams) => {
-                this._disposeRendering();
+                    ),
+                    throttleTime(20, undefined, { leading: false, trailing: true }),
+                    map(getParams),
+                    startWith(getParams()) // must trigger once
+                );
+            }),
+            takeUntil(this.dispose$)
+        ).subscribe((renderParams) => {
+            this._disposeRendering();
 
                 // If there's no filter range, we don't need to render anything.
-                if (!renderParams || !renderParams.range) {
-                    return;
-                }
+            if (!renderParams || !renderParams.range) {
+                return;
+            }
 
-                this._renderRange(renderParams.unitId, renderParams.range, renderParams.skeleton);
-                this._renderButtons(renderParams as Required<ISheetsFilterRenderParams>);
-            });
+            this._renderRange(renderParams.unitId, renderParams.range, renderParams.skeleton);
+            this._renderButtons(renderParams as Required<ISheetsFilterRenderParams>);
+        });
     }
 
     private _renderRange(unitId: string, range: IRange, skeleton: SpreadsheetSkeleton): void {

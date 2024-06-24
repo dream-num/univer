@@ -74,7 +74,6 @@ import {
     convertSelectionDataToRange,
     getNormalSelectionStyle,
     getPrimaryForRange,
-    SelectionManagerService,
     setEndForRange,
 } from '@univerjs/sheets';
 import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
@@ -82,7 +81,6 @@ import {
     ExpandSelectionCommand,
     getEditorObject,
     IEditorBridgeService,
-    ISelectionRenderService,
     JumpOver,
     MoveSelectionCommand,
     SheetSkeletonManagerService,
@@ -95,7 +93,7 @@ import { SelectEditorFormulaOperation } from '../commands/operations/editor-form
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { META_KEY_CTRL_AND_SHIFT } from '../common/prompt';
-import { FORMULA_REF_SELECTION_PLUGIN_NAME, getFormulaRefSelectionStyle } from '../common/selection';
+import { getFormulaRefSelectionStyle } from '../common/selection';
 import { IDescriptionService } from '../services/description.service';
 import { IFormulaPromptService } from '../services/prompt.service';
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
@@ -165,7 +163,7 @@ export class PromptController extends Disposable {
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(PromptSelectionsRenderService) private readonly _promptSelectionRenderService: PromptSelectionsRenderService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(ISelectionRenderService) private readonly _selectionRenderService: ISelectionRenderService,
+        // @Inject(ISelectionRenderService) private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
@@ -296,7 +294,7 @@ export class PromptController extends Disposable {
                 this._previousSequenceNodes = null;
                 this._previousInsertRefStringIndex = null;
 
-                this._selectionRenderService.enableSkipRemainLast();
+                // this._selectionRenderService.enableSkipRemainLast();
 
                 const e = param?.event as KeyboardEvent;
 
@@ -367,33 +365,14 @@ export class PromptController extends Disposable {
     }
 
     private _closeRangePrompt(editorId: Nullable<string>) {
-        /**
-         * Switching the selection of PluginName causes a refresh.
-         * Here, a delay is added to prevent the loss of content when pressing enter.
-         */
-        const current = this._selectionManagerService.getCurrent();
-
         this._insertSelections = [];
-
-        if (current?.pluginName === NORMAL_SELECTION_PLUGIN_NAME) {
-            this._disableForceKeepVisible();
-            return;
-        }
-
-        this._selectionManagerService.clear();
-
         if (editorId && this._editorService.isSheetEditor(editorId)) {
             this._updateEditorModel('\r\n', []);
         }
 
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
-
         this._disableForceKeepVisible();
-
-        this._selectionRenderService.resetStyle();
-
         this._resetTemp();
-
         this._hideFunctionPanel();
     }
 
@@ -406,8 +385,6 @@ export class PromptController extends Disposable {
                     // Each range change requires re-listening
                     disposableCollection.dispose();
 
-                    const current = this._selectionManagerService.getCurrent();
-
                     this._formulaPromptService.disableSelectionMoving();
 
                     this._updateRefSelectionStyle(this._isSelectionMovingRefSelections);
@@ -416,37 +393,21 @@ export class PromptController extends Disposable {
                     selectionControls.forEach((controlSelection) => {
                         controlSelection.disableHelperSelection();
 
-                        disposableCollection.add(
-                            toDisposable(
-                                controlSelection.selectionMoving$.subscribe((toRange) => {
-                                    this._changeControlSelection(toRange, controlSelection);
-                                })
-                            )
-                        );
+                        disposableCollection.add(controlSelection.selectionMoving$.subscribe((toRange) => {
+                            this._changeControlSelection(toRange, controlSelection);
+                        }));
 
-                        disposableCollection.add(
-                            toDisposable(
-                                controlSelection.selectionScaling$.subscribe((toRange) => {
-                                    this._changeControlSelection(toRange, controlSelection);
-                                })
-                            )
-                        );
+                        disposableCollection.add(controlSelection.selectionScaling$.subscribe((toRange) => {
+                            this._changeControlSelection(toRange, controlSelection);
+                        }));
 
-                        disposableCollection.add(
-                            toDisposable(
-                                controlSelection.selectionMoved$.subscribe(() => {
-                                    this._formulaPromptService.disableLockedSelectionChange();
-                                })
-                            )
-                        );
+                        disposableCollection.add(controlSelection.selectionMoved$.subscribe(() => {
+                            this._formulaPromptService.disableLockedSelectionChange();
+                        }));
 
-                        disposableCollection.add(
-                            toDisposable(
-                                controlSelection.selectionScaled$.subscribe(() => {
-                                    this._formulaPromptService.disableLockedSelectionChange();
-                                })
-                            )
-                        );
+                        disposableCollection.add(controlSelection.selectionScaled$.subscribe(() => {
+                            this._formulaPromptService.disableLockedSelectionChange();
+                        }));
                     });
                 })
             )
@@ -692,7 +653,7 @@ export class PromptController extends Disposable {
 
             this._formulaPromptService.enableLockedSelectionInsert();
 
-            this._selectionRenderService.enableRemainLast();
+            // this._selectionRenderService.enableRemainLast();
 
             if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
                 this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
@@ -744,11 +705,6 @@ export class PromptController extends Disposable {
             this._arrowMoveActionState = ArrowMoveAction.exitInput;
         }
     }
-
-    // private _getCurrentBody() {
-    //     const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
-    //     return documentModel?.snapshot?.body;
-    // }
 
     private _getCurrentBodyDataStreamAndOffset() {
         const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
@@ -1828,8 +1784,7 @@ export class PromptController extends Disposable {
                     const previousRanges = this._selectionManagerService.getCurrentSelections()?.map((s) => s.range) || [];
 
                     if (previousRanges.length === 0) {
-                        const selectionData =
-                            this._selectionManagerService.getLastByPlugin(NORMAL_SELECTION_PLUGIN_NAME);
+                        const selectionData = this._selectionManagerService.getLastByPlugin(NORMAL_SELECTION_PLUGIN_NAME);
                         if (selectionData != null) {
                             const selectionDataNew = Tools.deepClone(selectionData);
                             this._selectionManagerService.add([selectionDataNew]);
@@ -1913,9 +1868,9 @@ export class PromptController extends Disposable {
         this.disposeWithMe(
             this._editorService.singleSelection$.subscribe((state) => {
                 if (state === true) {
-                    this._selectionRenderService.enableSingleSelection();
+                    // this._selectionRenderService.enableSingleSelection();
                 } else {
-                    this._selectionRenderService.disableSingleSelection();
+                    // this._selectionRenderService.disableSingleSelection();
                 }
             })
         );

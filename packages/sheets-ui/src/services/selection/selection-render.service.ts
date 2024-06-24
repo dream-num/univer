@@ -32,13 +32,13 @@ import { createInterceptorKey, Disposable, ICommandService, InterceptorManager, 
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
-import { convertSelectionDataToRange, getNormalSelectionStyle, getPrimaryForRange, ScrollToCellOperation, SelectionManagerService, SelectionMoveType, SetSelectionsOperation, SetWorksheetActivateCommand, transformCellDataToSelectionData } from '@univerjs/sheets';
+import { convertSelectionDataToRange, getNormalSelectionStyle, getPrimaryForRange, SelectionManagerService, SelectionMoveType, SetSelectionsOperation, SetWorksheetActivateCommand, transformCellDataToSelectionData } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
@@ -1102,11 +1102,7 @@ export class NormalSelectionRenderService extends SelectionRenderService impleme
         @Inject(ThemeService) _themeService: ThemeService,
         @IShortcutService _shortcutService: IShortcutService,
         @IRenderManagerService _renderManagerService: IRenderManagerService,
-        // WTF: this should not be here, but in defined names service controller, next: move defined name this out of this shit
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @ICommandService private readonly _commandService: ICommandService,
-
-        // TODO@wzhudev: it should only listen to the current sheet's selection
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super(_injector, _sheetSkeletonManagerService, _themeService, _shortcutService, _renderManagerService);
@@ -1128,38 +1124,7 @@ export class NormalSelectionRenderService extends SelectionRenderService impleme
     }
 
     private _initDefinedNameListener() {
-        this.disposeWithMe(
-            this._definedNamesService.focusRange$.subscribe(async (item) => {
-                if (item == null) {
-                    return;
-                }
 
-                const { unitId } = item;
-                let { formulaOrRefString } = item;
-
-                const workbook = this._context.unit;
-
-                if (unitId !== workbook.getUnitId()) {
-                    return;
-                }
-
-                if (formulaOrRefString.substring(0, 1) === operatorToken.EQUALS) {
-                    formulaOrRefString = formulaOrRefString.substring(1);
-                }
-
-                const result = isReferenceStrings(formulaOrRefString);
-
-                if (!result) {
-                    return;
-                }
-
-                const selections = await this._getSelections(workbook, unitId, formulaOrRefString);
-
-                this._selectionManagerService.setSelections(selections);
-
-                this._commandService.executeCommand(ScrollToCellOperation.id, selections[0].range);
-            })
-        );
     }
 
     private async _getSelections(workbook: Workbook, unitId: string, formulaOrRefString: string) {
@@ -1341,66 +1306,18 @@ export class NormalSelectionRenderService extends SelectionRenderService impleme
 
     private _initSelectionChangeListener() {
         this.disposeWithMe(
-            toDisposable(
-                this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
-                    this.reset();
+            this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
+                this.reset();
 
-                    for (const selectionWithStyle of params) {
-                        if (selectionWithStyle == null) {
-                            continue;
-                        }
-                        const selectionData =
-                            this.attachSelectionWithCoord(selectionWithStyle);
-                        this._addControlToCurrentByRangeData(selectionData);
+                for (const selectionWithStyle of params) {
+                    if (selectionWithStyle == null) {
+                        continue;
                     }
-
-                    this._syncDefinedNameRange(params);
-                })
-            )
+                    const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
+                    this._addControlToCurrentByRangeData(selectionData);
+                }
+            })
         );
-
-        this.disposeWithMe(
-            toDisposable(
-                this._selectionManagerService.selectionMoving$.subscribe((params) => {
-                    if (params == null) {
-                        return;
-                    }
-
-                    this._syncDefinedNameRange(params);
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            toDisposable(
-                this._selectionManagerService.selectionMoveStart$.subscribe((params) => {
-                    if (params == null) {
-                        return;
-                    }
-
-                    this._syncDefinedNameRange(params);
-                })
-            )
-        );
-    }
-
-    private _syncDefinedNameRange(params: ISelectionWithStyle[]) {
-        if (params.length === 0) {
-            return;
-        }
-        const lastSelection = params[params.length - 1];
-
-        const workbook = this._context.unit;
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            return;
-        }
-
-        this._definedNamesService.setCurrentRange({
-            range: lastSelection.range,
-            unitId: workbook.getUnitId(),
-            sheetId: worksheet.getSheetId(),
-        });
     }
 
     private _initUserActionSyncListener() {

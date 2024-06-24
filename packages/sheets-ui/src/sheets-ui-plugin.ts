@@ -50,7 +50,7 @@ import { EditorBridgeService, IEditorBridgeService } from './services/editor-bri
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
-import { ISelectionRenderService, NormalSelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
+import { ISelectionRenderService, NormalSelectionRenderService } from './services/selection/selection-render.service';
 import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
@@ -82,6 +82,7 @@ import { SheetPermissionPanelModel } from './services/permission/sheet-permissio
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 import { WorksheetProtectionRenderService } from './services/permission/worksheet-permission-render.service';
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
+import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
 
 @DependentOn(UniverSheetsPlugin, UniverUIPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
@@ -138,6 +139,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [StatusBarController],
             [AutoFillController],
             [FormatPainterController],
+            [SheetsDefinedNameController],
 
             // permission
             [SheetPermissionPanelModel],

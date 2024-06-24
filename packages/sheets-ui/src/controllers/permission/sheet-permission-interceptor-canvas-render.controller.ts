@@ -176,7 +176,7 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
 
                     const resizeType = rangeParams.row !== undefined ? RANGE_TYPE.ROW : RANGE_TYPE.COLUMN;
                     const selectionRowColRanges: IRange[] = [];
-                    const selectionRanges = this._selectionManagerService.getSelections();
+                    const selectionRanges = this._selectionManagerService.getCurrentSelections();
                     let isResizeTargetInSelectionRanges = false;
                     if (resizeType === RANGE_TYPE.ROW) {
                         selectionRanges?.forEach((selection) => {

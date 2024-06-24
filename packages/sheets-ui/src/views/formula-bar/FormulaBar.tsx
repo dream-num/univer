@@ -24,8 +24,7 @@ import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 
 import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import type { Subscription } from 'rxjs';
-import { merge } from 'rxjs';
+import { EMPTY, merge, switchMap } from 'rxjs';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { DefinedName } from '../defined-name/DefinedName';
@@ -52,43 +51,48 @@ export function FormulaBar() {
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
     const permissionService = useDependency(IPermissionService);
 
+    function getPermissionIds(unitId: string, subUnitId: string): string[] {
+        return [
+            new WorkbookEditablePermission(unitId).id,
+            new WorksheetSetCellValuePermission(unitId, subUnitId).id,
+            new WorksheetEditPermission(unitId, subUnitId).id,
+        ];
+    }
+
     useLayoutEffect(() => {
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        let innerSubscription: Subscription | null = null;
         const subscription = merge(
             worksheetProtectionRuleModel.ruleChange$,
             rangeProtectionRuleModel.ruleChange$,
             selectionManager.selectionMoveEnd$,
             workbook.activeSheet$
-        ).subscribe(() => {
-            innerSubscription?.unsubscribe();
-            const unitId = workbook.getUnitId();
-            const worksheet = workbook.getActiveSheet();
-            if (!worksheet) return;
-            const subUnitId = worksheet.getSheetId();
-            const range = selectionManager.getCurrentLastSelection()?.range;
-            if (!range) return;
-            const permissionIds: string[] = [];
-            permissionIds.push(new WorkbookEditablePermission(unitId).id);
-            permissionIds.push(new WorksheetSetCellValuePermission(unitId, subUnitId).id);
-            permissionIds.push(new WorksheetEditPermission(unitId, subUnitId).id);
+        ).pipe(
+            switchMap(() => {
+                const unitId = workbook.getUnitId();
+                const worksheet = workbook.getActiveSheet();
+                if (!worksheet) return EMPTY;
 
-            const selectionRanges = selectionManager.getCurrentSelections()?.map((selection) => selection.range);
-            const permissionList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
-                return rule.ranges.some((r) => {
-                    return selectionRanges?.some((selectionRange) => {
-                        return Rectangle.intersects(r, selectionRange);
-                    });
+                const subUnitId = worksheet.getSheetId();
+                const range = selectionManager.getCurrentLastSelection()?.range;
+                if (!range) return EMPTY;
+
+                const permissionIds = getPermissionIds(unitId, subUnitId);
+
+                const selectionRanges = selectionManager.getCurrentSelections()?.map((selection) => selection.range);
+                const permissionList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
+                    return rule.ranges.some((r) => selectionRanges?.some((selectionRange) => Rectangle.intersects(r, selectionRange)));
                 });
-            });
 
-            permissionList.forEach((p) => {
-                permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, p.permissionId).id);
-            });
+                permissionList.forEach((p) => {
+                    permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, p.permissionId).id);
+                });
 
-            innerSubscription = permissionService.composePermission$(permissionIds).subscribe((permissions) => {
+                return permissionService.composePermission$(permissionIds);
+            })
+        ).subscribe((permissions) => {
+            if (permissions) {
                 setDisable(!permissions.every((p) => p.value));
-            });
+            }
         });
 
         return () => {

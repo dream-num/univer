@@ -24,6 +24,7 @@ export interface IThreadCommentMention {
 
 export interface IBaseComment {
     id: string;
+    threadId: string;
     dT: string;
     updateT?: string;
     personId: string;

@@ -18,9 +18,13 @@ import { createIdentifier } from '@wendellhu/redi';
 import type { IThreadComment } from '../types/interfaces/i-thread-comment';
 import { Disposable, Nullable } from '@univerjs/core';
 
-export type ThreadCommentJSON = { id: string } & Partial<Omit<IThreadComment, 'id'>>;
+export type ThreadCommentJSON = {
+    id: string;
+    threadId: string;
+    ref: string
+} & Partial<Omit<IThreadComment, 'id' | 'threadId' | 'ref'>>;
 
-type GoNext = boolean;
+type Success = boolean;
 
 
 export interface IThreadCommentDataSource {
@@ -31,19 +35,19 @@ export interface IThreadCommentDataSource {
     /**
      * handler for update-comment, throw error means fail and stop the process.
      */
-    updateComment: (comment: IThreadComment) => Promise<GoNext>;
+    updateComment: (comment: IThreadComment) => Promise<Success>;
     /**
      * handler for delete-comment, throw error means fail and stop the process.
      */
-    deleteComment: (commentId: string, unitId: string, subUnitId: string) => Promise<GoNext>;
+    deleteComment: (commentId: string, threadId: string, unitId: string, subUnitId: string) => Promise<Success>;
     /**
      * handler for batch-delete-comment, throw error means fail and stop the process.
      */
-    deleteCommentBatch: (commentIds: string[], unitId: string, subUnitId: string) => Promise<GoNext>;
+    deleteCommentBatch: (commentIds: string[], threadId: string, unitId: string, subUnitId: string) => Promise<Success>;
     /**
      * handler for batch-fetch-comment, throw error means fail and stop the process.
      */
-    listComments: (commentIds: string[], unitId: string, subUnitId: string) => Record<string, IThreadComment>;
+    listComments: (commentIds: ThreadCommentJSON[], unitId: string, subUnitId: string) => Promise<IThreadComment[]>;
     saveCommentToSnapshot: (comment: IThreadComment) => ThreadCommentJSON;
 }
 
@@ -55,18 +59,18 @@ export interface IThreadCommentDataSourceService {
      * handler for add-comment, throw error means fail and stop the process.
      */
     addComment: (comment: IThreadComment) => Promise<IThreadComment>;
-     /**
-     * handler for update-comment, throw error means fail and stop the process.
-     */
-    updateComment: (comment: IThreadComment) => Promise<GoNext>;
-     /**
-     * handler for delete-comment, throw error means fail and stop the process.
-     */
-    deleteComment: (commentId: string, unitId: string, subUnitId: string) => Promise<GoNext>;
-     /**
-     * handler for batch-delete-comment, throw error means fail and stop the process.
-     */
-    deleteCommentBatch: (commentIds: string[], unitId: string, subUnitId: string) => Promise<GoNext>;
+    /**
+    * handler for update-comment, throw error means fail and stop the process.
+    */
+    updateComment: (comment: IThreadComment) => Promise<Success>;
+    /**
+    * handler for delete-comment, throw error means fail and stop the process.
+    */
+    deleteComment: (commentId: string, threadId: string, unitId: string, subUnitId: string) => Promise<Success>;
+    /**
+    * handler for batch-delete-comment, throw error means fail and stop the process.
+    */
+    deleteCommentBatch: (commentIds: string[], threadId: string, unitId: string, subUnitId: string) => Promise<Success>;
     loadFormSnapshot: (unitComments: Record<string, ThreadCommentJSON[]>, unitId: string) => Promise<Record<string, IThreadComment[]>>;
     saveToSnapshot: (unitComments: Record<string, IThreadComment[]>, unitId: string) => Record<string, ThreadCommentJSON[]>;
 }
@@ -99,16 +103,16 @@ export class ThreadCommentDataSourceService extends Disposable implements IThrea
         return true;
     }
 
-    async deleteComment(commentId: string, unitId: string, subUnitId: string) {
+    async deleteComment(commentId: string, threadId: string, unitId: string, subUnitId: string) {
         if (this._dataSource) {
-            return this._dataSource.deleteComment(commentId, unitId, subUnitId);
+            return this._dataSource.deleteComment(commentId, threadId, unitId, subUnitId);
         }
         return true;
     }
 
-    async deleteCommentBatch(commentIds: string[], unitId: string, subUnitId: string) {
+    async deleteCommentBatch(commentIds: string[], threadId: string, unitId: string, subUnitId: string) {
         if (this._dataSource) {
-            return this._dataSource.deleteCommentBatch(commentIds, unitId, subUnitId);
+            return this._dataSource.deleteCommentBatch(commentIds, threadId, unitId, subUnitId);
         }
         return true;
     }
@@ -119,8 +123,8 @@ export class ThreadCommentDataSourceService extends Disposable implements IThrea
                 Object.keys(unitComments)
                     .map(subUnitId => [subUnitId, unitComments[subUnitId]] as const)
                     .map(async ([subUnitId, comments]) => {
-                        const res = await this._dataSource!.listComments(comments.map(i => i.id), unitId, subUnitId);
-                        return [subUnitId, Object.values(res)] as const;
+                        const res = await this._dataSource!.listComments(comments, unitId, subUnitId);
+                        return [subUnitId, res] as const;
                     })
             )
             const map: Record<string, IThreadComment[]> = {};
@@ -139,7 +143,7 @@ export class ThreadCommentDataSourceService extends Disposable implements IThrea
             const map: Record<string, ThreadCommentJSON[]> = {};
             Object.keys(unitComments).forEach(subUnitId => {
                 const comments = unitComments[subUnitId];
-                map[subUnitId] = comments.map(comment => ({ id: comment.id }));
+                map[subUnitId] = comments.map(this.dataSource!.saveCommentToSnapshot);
             });
             return map;
         }

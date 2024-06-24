@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { forwardRef, useEffect, useMemo, useState } from 'react';
 import set from 'lodash.set';
 import get from 'lodash.get';
 import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
@@ -24,7 +24,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 
 import type { Workbook } from '@univerjs/core';
 import { createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
-import { TextEditor } from '@univerjs/ui';
+import { ILayoutService, TextEditor, useScrollYOverContainer } from '@univerjs/ui';
 import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formatting';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType, compareWithNumber, createDefaultValue, EMPTY_ICON_TYPE, getOppositeOperator, iconGroup, iconMap, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import stylesBase from '../index.module.less';
@@ -84,17 +84,18 @@ const createDefaultConfigItem = (iconType: IIconType, index: number, list: unkno
     iconId: String(index),
 });
 
-const IconGroupList = (props: {
-    onClick: (iconType: IIconType) => void;
-    iconType?: IIconType;
-}) => {
+type IconGroupListProps = {
+    onClick: (iconType: IIconType) => void,
+    iconType?: IIconType
+}
+const IconGroupList = forwardRef<HTMLDivElement|null, IconGroupListProps>((props, ref) => {
     const localeService = useDependency(LocaleService);
 
     const handleClick = (iconType: IIconType) => {
         props.onClick(iconType);
     };
     return (
-        <div className={styles.iconGroupList}>
+        <div ref={ref} className={styles.iconGroupList}>
             {iconGroup.map((group, index) => {
                 return (
                     <div key={index} className={styles.group}>
@@ -116,7 +117,7 @@ const IconGroupList = (props: {
             })}
         </div>
     );
-};
+});
 
 const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) => void;iconType?: IIconType; iconId: string }) => {
     const list = useMemo(() => {
@@ -419,11 +420,16 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         });
         configListSet([...configList]);
     };
+    const layoutService = useDependency(ILayoutService);
+    const [iconGroupListEl, setIconGroupListEl] = useState<HTMLDivElement>()
+
+    useScrollYOverContainer(iconGroupListEl, layoutService.rootContainerElement)
+
     return (
-        <div className={styles.iconSet}>
+        <div  className={styles.iconSet}>
             <div className={stylesBase.title}>{localeService.t('sheet.cf.panel.styleRule')}</div>
             <div className={`${stylesBase.mTSm}`}>
-                <Dropdown overlay={<IconGroupList iconType={currentIconType} onClick={handleClickIconList} />}>
+                <Dropdown placement='bottomLeft' overlay={<IconGroupList ref={el => !iconGroupListEl && el && setIconGroupListEl(el)} iconType={currentIconType} onClick={handleClickIconList} />}>
                     <div className={styles.dropdownIcon} style={{ width: 'unset' }}>
                         {previewIcon}
                         <MoreDownSingle />

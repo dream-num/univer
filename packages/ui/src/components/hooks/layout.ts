@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { useEffect, useRef } from 'react';
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
+import { useEffect } from 'react';
 
-import type { Nullable } from '@univerjs/core';
+import { type Nullable } from '@univerjs/core';
 import { resizeObserverCtor } from '@univerjs/design';
 import { useEvent } from './event';
 /**
@@ -33,10 +33,6 @@ import { useEvent } from './event';
  * @param container
  */
 export function useScrollYOverContainer(element: Nullable<HTMLElement>, container: Nullable<HTMLElement>) {
-    const initialRectRef = useRef({
-        width: 0,
-        height: 0,
-    });
     const updater = useEvent(() => {
         if (!element || !container) {
             return;
@@ -44,28 +40,22 @@ export function useScrollYOverContainer(element: Nullable<HTMLElement>, containe
 
         const elStyle = element.style;
         const elRect = element.getBoundingClientRect();
+        const { y } = elRect;
         const containerRect = container.getBoundingClientRect();
-        if (elRect.y < 0 && elRect.y + elRect.height <= 0) {
-            /* The element is hidden in viewport */
-            return;
-        }
-        if (Math.abs(elRect.y) < Math.abs(containerRect.y)) {
-            /* The position of element is higher than container  */
+
+        const scrolled = element.scrollHeight > elRect.height;
+
+        const isOverViewport = y < 0 || (y + elRect.height > containerRect.height)
+
+        if (!isOverViewport && !scrolled) {
             elStyle.overflowY = '';
             elStyle.maxHeight = '';
             return;
         }
 
-        const relativeY = elRect.y - containerRect.y;
-
-        const initialHeight = initialRectRef.current?.height || 0;
-
-        if (containerRect.height >= relativeY + initialHeight) {
-            elStyle.overflowY = '';
-            elStyle.maxHeight = '';
-        } else {
+        if (isOverViewport) {
             elStyle.overflowY = 'scroll';
-            elStyle.maxHeight = `${containerRect.height - relativeY}px`;
+            elStyle.maxHeight = y < 0 ? `${element.scrollHeight + y}px` : `${containerRect.height - y}px`;
         }
     });
 
@@ -73,20 +63,12 @@ export function useScrollYOverContainer(element: Nullable<HTMLElement>, containe
         if (!canUseDom() || !element || !container) {
             return;
         }
-        const rect = element.getBoundingClientRect();
-        initialRectRef.current = {
-            width: rect.width,
-            height: rect.height,
-        };
-
-        updater();
+        updater()
 
         const resizeObserver = resizeObserverCtor(updater);
         resizeObserver.observe(element);
-        window.addEventListener('resize', updater);
         return () => {
             resizeObserver.unobserve(element);
-            window.removeEventListener('resize', updater);
         };
     }, [element, container]);
 }

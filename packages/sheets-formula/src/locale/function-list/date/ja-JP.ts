@@ -252,7 +252,7 @@ export default {
     },
     TIMEVALUE: {
         description: '時刻を表す文字列をシリアル値に変換します。',
-        abstract: '時刻を表す文字列をシリアル値に変換します。',
+        abstract: '時刻を表す文字列をシリアル値に変換します',
         links: [
             {
                 title: '指導',
@@ -260,8 +260,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            timeText: { name: '時刻文字列', detail: 'Microsoft Excel のいずれかの時刻形式で時刻を表すテキスト文字列。たとえば、"6:45 PM" と "18:45" のテキスト文字列は、時間を表す引用符で囲みます。' },
         },
     },
     TODAY: {

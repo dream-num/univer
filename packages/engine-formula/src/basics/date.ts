@@ -135,6 +135,18 @@ export function isValidDateStr(dateStr: string): boolean {
     return dateStrPad === reconstructedDateStr;
 }
 
-export function parseDate(value: string) {
+export function parseFormattedDate(value: string) {
     return numfmt.parseDate(value);
+}
+
+export function parseFormattedValue(value: string) {
+    return numfmt.parseValue(value);
+}
+
+export function parseFormattedTime(value: string) {
+    return numfmt.parseTime(value);
+}
+
+export function isDate(format: string) {
+    return numfmt.isDate(format);
 }

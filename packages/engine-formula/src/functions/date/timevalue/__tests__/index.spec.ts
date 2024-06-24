@@ -17,53 +17,49 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_DATE } from '../../function-names';
-import { Datevalue } from '../index';
+import { Timevalue } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 
-describe('Test datevalue function', () => {
-    const testFunction = new Datevalue(FUNCTION_NAMES_DATE.DATEVALUE);
+describe('Test timevalue function', () => {
+    const testFunction = new Timevalue(FUNCTION_NAMES_DATE.TIMEVALUE);
 
-    describe('Datevalue', () => {
-        it('Date text string', () => {
-            const dateText = StringValueObject.create('2020-01-02');
-            const result = testFunction.calculate(dateText);
-            expect(result.getValue()).toStrictEqual(43832);
+    describe('Timevalue', () => {
+        it('Time text string', () => {
+            const timetText = StringValueObject.create('2020-01-02');
+            const result = testFunction.calculate(timetText);
+            expect(result.getValue()).toStrictEqual(0);
 
-            const dateText2 = StringValueObject.create('5-Jul');
-            const result2 = testFunction.calculate(dateText2);
-            expect(result2.getValue()).toStrictEqual(45478);
+            const timetText2 = StringValueObject.create('2020-01-02 13:14:15');
+            const result2 = testFunction.calculate(timetText2);
+            expect(result2.getValue()).toStrictEqual(0.5515624999970896);
 
-            const dateText3 = StringValueObject.create('2020-01-02 13:14:15');
-            const result3 = testFunction.calculate(dateText3);
-            expect(result3.getValue()).toStrictEqual(43832);
-
-            const dateText4 = StringValueObject.create('10:11:12');
-            const result4 = testFunction.calculate(dateText4);
-            expect(result4.getValue()).toStrictEqual(0);
+            const timetText3 = StringValueObject.create('10:11:12');
+            const result3 = testFunction.calculate(timetText3);
+            expect(result3.getValue()).toStrictEqual(0.42444444444444446);
         });
 
-        it('Date text number', () => {
-            const dateText = NumberValueObject.create(43832);
-            const result = testFunction.calculate(dateText);
+        it('Time text number', () => {
+            const timetText = NumberValueObject.create(43832);
+            const result = testFunction.calculate(timetText);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
         });
-        it('Date text boolean', () => {
-            const dateText = BooleanValueObject.create(true);
-            const result = testFunction.calculate(dateText);
+        it('Time text boolean', () => {
+            const timetText = BooleanValueObject.create(true);
+            const result = testFunction.calculate(timetText);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
-        it('Date text blank', () => {
-            const dateText = NullValueObject.create();
-            const result = testFunction.calculate(dateText);
+        it('Time text blank', () => {
+            const timetText = NullValueObject.create();
+            const result = testFunction.calculate(timetText);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
         });
-        it('Date text error', () => {
-            const dateText = ErrorValueObject.create(ErrorType.NAME);
-            const result = testFunction.calculate(dateText);
+        it('Time text error', () => {
+            const timetText = ErrorValueObject.create(ErrorType.NAME);
+            const result = testFunction.calculate(timetText);
             expect(result.getValue()).toStrictEqual(ErrorType.NAME);
         });
 

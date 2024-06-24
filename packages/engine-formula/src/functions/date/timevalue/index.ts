@@ -16,36 +16,38 @@
 
 import { isDate, parseFormattedValue } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
+import { getFractionalPart } from '../../../engine/utils/math-kit';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Datevalue extends BaseFunction {
+export class Timevalue extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
 
-    override calculate(dateText: BaseValueObject) {
-        if (dateText.isError()) {
-            return dateText;
+    override calculate(timeText: BaseValueObject) {
+        if (timeText.isError()) {
+            return timeText;
         }
 
-        if (dateText.isArray()) {
-            return dateText.map((dateTextObject) => this._handleSingleObject(dateTextObject));
+        if (timeText.isArray()) {
+            return timeText.map((timeTextObject) => this._handleSingleObject(timeTextObject));
         }
 
-        return this._handleSingleObject(dateText);
+        return this._handleSingleObject(timeText);
     }
 
-    private _handleSingleObject(dateTextObject: BaseValueObject) {
-        if (dateTextObject.isString()) {
-            const value = `${dateTextObject.getValue()}`;
-            const parsedDate = parseFormattedValue(value);
-            if (parsedDate) {
-                const { v, z } = parsedDate;
+    private _handleSingleObject(timeTextObject: BaseValueObject) {
+        if (timeTextObject.isString()) {
+            const value = `${timeTextObject.getValue()}`;
+            const parsedTime = parseFormattedValue(value);
+            if (parsedTime) {
+                const { v, z } = parsedTime;
+
                 if (isDate(z)) {
-                    return NumberValueObject.create(Math.trunc(v));
+                    return NumberValueObject.create(getFractionalPart(v));
                 }
             }
         }

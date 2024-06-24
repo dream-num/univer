@@ -251,7 +251,7 @@ export default {
         },
     },
     TIMEVALUE: {
-        description: 'Converts a time in the form of text to a serial number',
+        description: 'Converts a time in the form of text to a serial number.',
         abstract: 'Converts a time in the form of text to a serial number',
         links: [
             {
@@ -260,8 +260,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            timeText: { name: 'time_text', detail: 'A text string that represents a time in any one of the Microsoft Excel time formats; for example, "6:45 PM" and "18:45" text strings within quotation marks that represent time.' },
         },
     },
     TODAY: {

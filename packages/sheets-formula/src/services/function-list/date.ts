@@ -377,16 +377,9 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.TIMEVALUE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.TIMEVALUE.functionParameter.number1.name',
-                detail: 'formula.functionList.TIMEVALUE.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.TIMEVALUE.functionParameter.number2.name',
-                detail: 'formula.functionList.TIMEVALUE.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.TIMEVALUE.functionParameter.timeText.name',
+                detail: 'formula.functionList.TIMEVALUE.functionParameter.timeText.detail',
+                example: '"15:20:59"',
                 require: 1,
                 repeat: 0,
             },

@@ -251,7 +251,7 @@ export default {
         },
     },
     TIMEVALUE: {
-        description: '将文本格式的时间转换为序列号',
+        description: '将文本格式的时间转换为序列号。',
         abstract: '将文本格式的时间转换为序列号',
         links: [
             {
@@ -260,8 +260,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            timeText: { name: 'time_text', detail: '一个文本字符串，代表以任一 Microsoft Excel 时间格式表示的时间（例如，代表时间的具有引号的文本字符串 "6:45 PM" 和 "18:45"）。' },
         },
     },
     TODAY: {

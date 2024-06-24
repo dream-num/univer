@@ -15,13 +15,17 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
-import { PageLayoutType, Vector2 } from '@univerjs/engine-render';
+import { Disposable, ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import type { Documents, IMouseEvent, IPageRenderConfig, IPathProps, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService, PageLayoutType, Path, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
 import { IEditorService } from '@univerjs/ui';
 import { DocSkeletonManagerService, neoGetDocObject } from '@univerjs/docs';
+import { TextBubbleShape } from '../views/header-footer/text-bubble';
+
+const HEADER_FOOTER_STROKE_COLOR = 'rgb(0, 0, 255)';
+const HEADER_FOOTER_FILL_COLOR = 'rgb(219, 231, 244)';
 
 export class DocHeaderFooterController extends Disposable implements IRenderModule {
     private _loadedMap = new WeakSet<RenderComponentType>();
@@ -31,7 +35,9 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorService private readonly _editorService: IEditorService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
 
@@ -40,6 +46,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
     private _initialize() {
         this._init();
+        this._drawHeaderFooterLabel();
     }
 
     private _init() {
@@ -107,6 +114,91 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         const originCoord = activeViewport.getRelativeVector(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         return documentTransform.clone().invert().applyPoint(originCoord);
+    }
+
+    // eslint-disable-next-line max-lines-per-function
+    private _drawHeaderFooterLabel() {
+        const localeService = this._localeService;
+        this._renderManagerService.currentRender$.subscribe((unitId) => {
+            if (unitId == null) {
+                return;
+            }
+
+            const currentRender = this._renderManagerService.getRenderById(unitId);
+            if (this._editorService.isEditor(unitId) || this._instanceSrv.getUniverDocInstance(unitId) == null) {
+                return;
+            }
+
+            if (currentRender == null) {
+                return;
+            }
+
+            const { mainComponent } = currentRender;
+
+            const docsComponent = mainComponent as Documents;
+
+            const pageSize = docsComponent.getSkeleton()?.getPageSize();
+
+            this.disposeWithMe(
+                toDisposable(
+                    docsComponent.onPageRenderObservable.add((config: IPageRenderConfig) => {
+                        const viewModel = this._docSkeletonManagerService.getViewModel();
+                        const isEditBody = viewModel.getEditArea() === DocumentEditArea.BODY;
+                        if (this._editorService.isEditor(unitId) || isEditBody) {
+                            return;
+                        }
+
+                        // Draw page borders
+                        const { page, pageLeft, pageTop, ctx } = config;
+
+                        const { pageWidth, pageHeight, marginTop, marginBottom } = page;
+
+                        ctx.save();
+
+                        ctx.translate(pageLeft - 0.5, pageTop - 0.5);
+
+                        const headerPathConfigIPathProps = {
+                            dataArray: [{
+                                command: 'M',
+                                points: [0, marginTop],
+                            }, {
+                                command: 'L',
+                                points: [pageWidth, marginTop],
+                            }] as unknown as IPathProps['dataArray'],
+                            strokeWidth: 1,
+                            stroke: HEADER_FOOTER_STROKE_COLOR,
+                        };
+
+                        const footerPathConfigIPathProps = {
+                            dataArray: [{
+                                command: 'M',
+                                points: [0, pageHeight - marginBottom],
+                            }, {
+                                command: 'L',
+                                points: [pageWidth, pageHeight - marginBottom],
+                            }] as unknown as IPathProps['dataArray'],
+                            strokeWidth: 1,
+                            stroke: HEADER_FOOTER_STROKE_COLOR,
+                        };
+
+                        Path.drawWith(ctx, headerPathConfigIPathProps);
+                        Path.drawWith(ctx, footerPathConfigIPathProps);
+
+                        ctx.translate(0, marginTop + 1);
+                        TextBubbleShape.drawWith(ctx, {
+                            text: localeService.t('headerFooter.header'),
+                            color: HEADER_FOOTER_FILL_COLOR,
+                        });
+                        ctx.translate(0, pageHeight - marginTop - marginBottom);
+                        TextBubbleShape.drawWith(ctx, {
+                            text: localeService.t('headerFooter.footer'),
+                            color: HEADER_FOOTER_FILL_COLOR,
+                        });
+                        ctx.restore();
+                    })
+                )
+            );
+        });
     }
 
     private _isEditorReadOnly(unitId: string) {

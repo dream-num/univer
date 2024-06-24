@@ -42,6 +42,10 @@ const locale = {
         alignRight: '右对齐',
         alignJustify: '两端对齐',
     },
+    headerFooter: {
+        header: '页眉',
+        footer: '页脚',
+    },
 };
 
 export default locale;

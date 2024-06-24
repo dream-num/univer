@@ -44,6 +44,10 @@ const locale: typeof zhCN = {
         alignRight: 'Выровнять по правому краю',
         alignJustify: 'Выровнять по ширине',
     },
+    headerFooter: {
+        header: 'Header',
+        footer: 'Footer',
+    },
 };
 
 export default locale;

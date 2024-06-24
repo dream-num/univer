@@ -238,7 +238,7 @@ export class Documents extends DocComponent {
 
             this._startRotation(ctx, finalAngle);
 
-            if (isEditBody) {
+            if (!isEditBody) {
                 ctx.save();
                 ctx.globalAlpha = 0.5;
             }
@@ -438,7 +438,7 @@ export class Documents extends DocComponent {
                 }
             }
 
-            if (isEditBody) {
+            if (!isEditBody) {
                 ctx.restore();
             }
 
@@ -494,7 +494,7 @@ export class Documents extends DocComponent {
         }
         const isEditHeaderFooter = this.getSkeleton()?.getViewModel().getEditArea() === DocumentEditArea.HEADER_FOOTER;
 
-        if (isEditHeaderFooter) {
+        if (!isEditHeaderFooter) {
             ctx.save();
             ctx.globalAlpha = 0.5;
         }
@@ -642,7 +642,7 @@ export class Documents extends DocComponent {
             this._drawLiquid.translateRestore();
         }
 
-        if (isEditHeaderFooter) {
+        if (!isEditHeaderFooter) {
             ctx.restore();
         }
     }

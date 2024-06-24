@@ -28,7 +28,7 @@ export class Sumifs extends BaseFunction {
 
     override calculate(sumRange: BaseValueObject, ...variants: BaseValueObject[]) {
         if (sumRange.isError()) {
-            return ErrorValueObject.create(ErrorType.NA);
+            return sumRange;
         }
 
         if (!sumRange.isArray()) {

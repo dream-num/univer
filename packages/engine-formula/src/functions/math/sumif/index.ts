@@ -26,8 +26,16 @@ export class Sumif extends BaseFunction {
     override maxParams = 3;
 
     override calculate(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
-        if (range.isError() || criteria.isError() || sumRange?.isError()) {
-            return ErrorValueObject.create(ErrorType.NA);
+        if (range.isError()) {
+            return range;
+        }
+
+        if (criteria.isError()) {
+            return criteria;
+        }
+
+        if (sumRange?.isError()) {
+            return sumRange;
         }
 
         if (!range.isArray() || (sumRange && !sumRange.isArray())) {

@@ -237,7 +237,7 @@ export default {
         },
     },
     TIME: {
-        description: '返回特定时间的序列号',
+        description: '返回特定时间的序列号。',
         abstract: '返回特定时间的序列号',
         links: [
             {
@@ -246,8 +246,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            hour: { name: '小时', detail: '0（零）到 32767 之间的数字，代表小时。 任何大于 23 的值都会除以 24，余数将作为小时值。 例如，TIME(27,0,0) = TIME(3,0,0) = .125 或 3:00 AM。' },
+            minute: { name: '分钟', detail: ' 0 到 32767 之间的数字，代表分钟。 任何大于 59 的值将转换为小时和分钟。 例如，TIME(0,750,0) = TIME(12,30,0) = .520833 或 12:30 PM。' },
+            second: { name: '秒', detail: '0 到 32767 之间的数字，代表秒。 任何大于 59 的值将转换为小时、分钟和秒。 例如，TIME(0,0,2000) = TIME(0,33,22) = .023148 或 12:33:20 AM。' },
         },
     },
     TIMEVALUE: {

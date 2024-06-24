@@ -16,6 +16,7 @@
 
 export const DEFAULT_DATE_FORMAT = 'yyyy/mm/dd;@';
 export const DEFAULT_NOW_FORMAT = 'yyyy/mm/dd hh:mm';
+export const DEFAULT_TIME_FORMAT = 'h:mm A/P';
 
 /**
  * Excel stores dates as sequential serial numbers so they can be used in calculations. By default, January 1, 1900 is serial number 1, and January 1, 2008 is serial number 39448 because it is 39,447 days after January 1, 1900.

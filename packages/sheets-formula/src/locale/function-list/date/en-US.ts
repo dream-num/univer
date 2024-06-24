@@ -237,7 +237,7 @@ export default {
         },
     },
     TIME: {
-        description: 'Returns the serial number of a particular time',
+        description: 'Returns the serial number of a particular time.',
         abstract: 'Returns the serial number of a particular time',
         links: [
             {
@@ -246,8 +246,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            hour: { name: 'hour', detail: 'A number from 0 (zero) to 32767 representing the hour. Any value greater than 23 will be divided by 24 and the remainder will be treated as the hour value. For example, TIME(27,0,0) = TIME(3,0,0) = .125 or 3:00 AM.' },
+            minute: { name: 'minute', detail: 'A number from 0 to 32767 representing the minute. Any value greater than 59 will be converted to hours and minutes. For example, TIME(0,750,0) = TIME(12,30,0) = .520833 or 12:30 PM.' },
+            second: { name: 'second', detail: 'A number from 0 to 32767 representing the second. Any value greater than 59 will be converted to hours, minutes, and seconds. For example, TIME(0,0,2000) = TIME(0,33,22) = .023148 or 12:33:20 AM.' },
         },
     },
     TIMEVALUE: {

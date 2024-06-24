@@ -238,7 +238,7 @@ export default {
     },
     TIME: {
         description: '指定した時刻に対応するシリアル値を返します。',
-        abstract: '指定した時刻に対応するシリアル値を返します。',
+        abstract: '指定した時刻に対応するシリアル値を返します',
         links: [
             {
                 title: '指導',
@@ -246,8 +246,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            hour: { name: '時', detail: '時間を表す 0 (ゼロ) から 32767 までの数値。 23 より大きい値は 24 で割られ、残りは時間値として扱われます。 たとえば、TIME(27,0,0) = TIME(3,0,0) = .125 または 3:00 AM。' },
+            minute: { name: '分', detail: '分を表す 0 から 32767 までの数値。 59 より大きい値は、時間と分に変換されます。 たとえば、TIME(0,750,0) = TIME(12,30,0) = .520833 または 12:30 PM。' },
+            second: { name: '秒', detail: '2 番目を表す 0 から 32767 までの数値。 59 を超える値は、時間、分、秒に変換されます。 たとえば、TIME(0,0,2000) = TIME(0,33,22) = .023148 または 12:33:20 AM。' },
         },
     },
     TIMEVALUE: {

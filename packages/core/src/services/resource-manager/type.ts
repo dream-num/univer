@@ -37,8 +37,8 @@ export interface IResourceManagerService {
     disposePluginResource: (pluginName: IResourceName) => void;
     getAllResourceHooks: () => IResourceHook[];
     getResources: (unitId: string) => IWorkbookData['resources'];
+    getResourcesByType: (unitId: string, type: UniverInstanceType) => IWorkbookData['resources'];
     loadResources: (unitId: string, resources: IWorkbookData['resources']) => void;
-
     unloadResources(unitId: string): void;
 }
 

@@ -20,140 +20,184 @@ import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
     id: 'd',
+    documentStyle: {
+        pageSize: {
+            width: 793.3333333333334,
+            height: 1122.6666666666667,
+        },
+        marginTop: 66.66666666666667,
+        marginBottom: 66.66666666666667,
+        marginRight: 66.66666666666667,
+        marginLeft: 66.66666666666667,
+        renderConfig: {
+            vertexAngle: 0,
+            centerAngle: 0,
+        },
+    },
     drawings: {
         shapeTest1: {
             unitId: 'd',
             subUnitId: 'd',
-            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            drawingType: 1,
             drawingId: 'shapeTest1',
             title: 'test shape',
             description: 'test shape',
             docTransform: {
                 size: {
-                    width: 1484 * 0.12,
-                    height: 864 * 0.15,
+                    width: 178.07999999999998,
+                    height: 129.6,
                 },
                 positionH: {
-                    relativeFrom: ObjectRelativeFromH.MARGIN,
+                    relativeFrom: 3,
                     posOffset: 100,
                 },
                 positionV: {
-                    relativeFrom: ObjectRelativeFromV.PAGE,
+                    relativeFrom: 0,
                     posOffset: 230,
                 },
                 angle: 0,
             },
-            layoutType: PositionedObjectLayoutType.WRAP_NONE,
-            behindDoc: BooleanNumber.TRUE,
-            wrapText: WrapTextType.BOTH_SIDES,
+            layoutType: 1,
+            behindDoc: 1,
+            wrapText: 0,
             distT: 0,
             distB: 0,
             distL: 0,
             distR: 0,
+            transform: {
+                left: 100,
+                top: 230,
+                width: 178.07999999999998,
+                height: 129.6,
+            },
         },
         shapeTest2: {
             unitId: 'd',
             subUnitId: 'd',
-            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            drawingType: 1,
             drawingId: 'shapeTest2',
             title: 'test shape',
             description: 'test shape',
             docTransform: {
                 size: {
-                    width: 1484 * 0.3,
-                    height: 864 * 0.3,
+                    width: 445.2,
+                    height: 259.2,
                 },
                 positionH: {
-                    relativeFrom: ObjectRelativeFromH.PAGE,
+                    relativeFrom: 0,
                     posOffset: 100,
                 },
                 positionV: {
-                    relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                    relativeFrom: 1,
                     posOffset: 20,
                 },
                 angle: 0,
             },
-            layoutType: PositionedObjectLayoutType.WRAP_NONE,
-            behindDoc: BooleanNumber.FALSE,
-            wrapText: WrapTextType.BOTH_SIDES,
+            layoutType: 1,
+            behindDoc: 0,
+            wrapText: 0,
+            transform: {
+                left: 100,
+                top: 20,
+                width: 445.2,
+                height: 259.2,
+            },
         },
         shapeTest3: {
             unitId: 'd',
             subUnitId: 'd',
-            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            drawingType: 1,
             drawingId: 'shapeTest3',
             title: 'test shape',
             description: 'test shape',
             docTransform: {
                 size: {
-                    width: 1484 * 0.3,
-                    height: 864 * 0.3,
+                    width: 445.2,
+                    height: 259.2,
                 },
                 positionH: {
-                    relativeFrom: ObjectRelativeFromH.PAGE,
+                    relativeFrom: 0,
                     posOffset: 100,
                 },
                 positionV: {
-                    relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                    relativeFrom: 1,
                     posOffset: 200,
                 },
                 angle: 0,
             },
-            layoutType: PositionedObjectLayoutType.INLINE,
-            behindDoc: BooleanNumber.FALSE,
-            wrapText: WrapTextType.BOTH_SIDES,
+            layoutType: 0,
+            behindDoc: 0,
+            wrapText: 0,
+            transform: {
+                left: 100,
+                top: 200,
+                width: 445.2,
+                height: 259.2,
+            },
         },
         shapeTest4: {
             unitId: 'd',
             subUnitId: 'd',
-            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            drawingType: 1,
             drawingId: 'shapeTest4',
             title: 'test shape',
             description: 'test shape',
             docTransform: {
                 size: {
-                    width: 1484 * 0.3,
-                    height: 864 * 0.3,
+                    width: 445.2,
+                    height: 259.2,
                 },
                 positionH: {
-                    relativeFrom: ObjectRelativeFromH.PAGE,
+                    relativeFrom: 0,
                     posOffset: 100,
                 },
                 positionV: {
-                    relativeFrom: ObjectRelativeFromV.LINE,
+                    relativeFrom: 2,
                     posOffset: 200,
                 },
                 angle: 0,
             },
-            layoutType: PositionedObjectLayoutType.INLINE,
-            behindDoc: BooleanNumber.FALSE,
-            wrapText: WrapTextType.BOTH_SIDES,
+            layoutType: 0,
+            behindDoc: 0,
+            wrapText: 0,
+            transform: {
+                left: 100,
+                top: 200,
+                width: 445.2,
+                height: 259.2,
+            },
         },
         shapeTest5: {
             unitId: 'd',
             subUnitId: 'd',
-            drawingType: DrawingTypeEnum.DRAWING_SHAPE,
+            drawingType: 1,
             drawingId: 'shapeTest5',
             title: 'test shape',
             description: 'test shape',
             docTransform: {
                 size: {
-                    width: 1484 * 0.3,
-                    height: 864 * 0.3,
+                    width: 445.2,
+                    height: 259.2,
                 },
                 positionH: {
-                    relativeFrom: ObjectRelativeFromH.PAGE,
+                    relativeFrom: 0,
                     posOffset: 100,
                 },
                 positionV: {
-                    relativeFrom: ObjectRelativeFromV.PAGE,
+                    relativeFrom: 0,
                     posOffset: 200,
                 },
                 angle: 0,
             },
-            layoutType: PositionedObjectLayoutType.INLINE,
-            behindDoc: BooleanNumber.FALSE,
-            wrapText: WrapTextType.BOTH_SIDES,
+            layoutType: 0,
+            behindDoc: 0,
+            wrapText: 0,
+            transform: {
+                left: 100,
+                top: 200,
+                width: 445.2,
+                height: 259.2,
+            },
         },
     },
     drawingsOrder: [
@@ -164,8 +208,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         'shapeTest5',
     ],
     body: {
-        dataStream:
-            '荷塘月色\r\r作者：朱自清\r\r这几天心里颇不宁静。今晚在院子里坐着乘凉，忽然想起日日走过的荷塘，在这满月的光里，总该另有一番样子吧。月亮渐渐地升高了，墙外马路上孩子们的欢笑，已经听不见了；妻在屋里拍着闰儿，迷迷糊糊地哼着眠歌。我悄悄地披了大衫，带上门出去。\r\r沿着荷塘，是一条曲折的小煤屑路。这是一条幽僻的路；白天也少人走，夜晚更加寂寞。荷塘四面，长着许多树，蓊蓊郁郁的。路图片一\b是些杨柳，和一些不知道名字的树。没有月光的晚上，这路上阴森森的，有些怕人。今晚却很好，虽然月光也还是淡淡的。\r\r路上只我一个人，背着手踱着。这一片天地好像是我的；我也像超出了平常的自己，到了另一个世界里。我爱热闹，也爱冷静；爱群居，也爱独处。像今晚上，一个人在这苍茫的月下，什么都可以想，什么都可以不想，便觉是个自由的人。白天里一定要做的事，一定要说的话\b现在都可不理。这是独处的妙处，我且受用这无边的荷香月色好了。\r\r曲曲折折的荷塘上面，弥望的是田田的叶子。叶子出水很高，像亭亭的舞女的裙。层层的叶子中间，零星地点缀着些白花，有袅娜地开着的，有羞涩地打着朵儿的；正如一粒粒的明珠，又如碧天里的星星\b又如刚出浴的美人。微风过处，送来缕缕清香，仿佛远处高楼上渺茫的歌声似的。这时候叶子与花也有一丝的颤动，像闪电般，霎时传过荷塘的那边去了。叶子本是肩并肩密密地挨着，这便宛然有了一道凝碧的波痕。叶子底下是脉脉的流水，遮住了，不能见一些颜色；而叶子却更见风致了。\r\r月光如流水一般，静静地泻在这一片叶子和花上。薄薄的青雾浮起在荷塘里。叶子和花仿佛在牛乳中洗过一样\b又像笼着轻纱的梦。虽然是满月，天上却有一层淡淡的云，所以不能朗照；但我以为这恰是到了好处——酣眠固不可少，小睡也别有风味的。月光是隔了树照过来的，高处丛生的灌木，落下参差的斑驳的黑影，峭楞楞如鬼一般；弯弯的杨柳的稀疏的倩影，却又像是画在荷叶上。塘中的月色并不均匀；但光与影有着和谐的旋律，如梵婀玲上奏着的名曲。\r\r荷塘的四面，远远近近，高高低低都是树，而杨柳最多。这些树将一片荷塘重重围住；只在小路一旁，漏着几段空隙，像是特为月光留下的。树色一例是阴阴的，乍看像一团烟雾；但杨柳的丰姿，便在烟雾里也辨得出。树梢上隐隐约约的是一带远山，只有些大意罢了。树缝里也漏着一两点路灯光，没精打采的\b是渴睡人的眼。这时候最热闹的，要数树上的蝉声与水里的蛙声；但热闹是它们的，我什么也没有。\r\r忽然想起采莲的事情来了。采莲是江南的旧俗，似乎很早就有，而六朝时为盛；从诗歌里可以约略知道。采莲的是少年的女子，她们是荡着小船，唱着艳歌去的。采莲人不用说很多，还有看采莲的人。那是一个热闹的季节，也是一个风流的季节。梁元帝《采莲赋》里说得好：\r\r于是妖童女，荡舟心许；鷁首徐回，兼传羽杯；櫂将移而藻挂，船欲动而萍开。尔其纤腰束素，迁延顾步；夏始春余，叶嫩花初，恐沾裳而浅笑，畏倾船而敛裾。\r\r可见当时嬉游的光景了。这真是有趣的事，可惜我们现在早已无福消受了。\r\r于是又记起，《西洲曲》里的句子：\r\r采莲南塘秋，莲花过人头；低头弄莲子，莲子清如水。\r\r今晚若有采莲人，这儿的莲花也算得“过人头”了；只不见一些流水的影子，是不行的。这令我到底惦着江南了。——这样想着，猛一抬头，不觉已是自己的门前；轻轻地推门进去，什么声息也没有，妻已睡熟好久了。\r\r一九二七年七月，北京清华园。\r\r\r\r《荷塘月色》语言朴素典雅，准确生动，贮满诗意，满溢着朱自清的散文语言一贯有朴素的美，不用浓墨重彩，画的是淡墨水彩。\r\r朱自清先生一笔写景一笔说情，看起来松散不知所云，可仔细体会下，就能感受到先生在字里行间表述出的苦闷，而随之读者也被先生的文字所感染，被带进了他当时那苦闷而无法明喻的心情。这就是优异散文的必须品质之一。\r\r扩展资料：\r一首长诗《毁灭》奠定了朱自清在文坛新诗人的地位，而《桨声灯影里的秦淮河》则被公认为白话美文的典范。朱自清用白话美文向复古派宣战，有力地回击了复古派“白话不能作美文”之说，他是“五四”新文学运动的开拓者之一。\r\r朱自清的美文影响了一代又一代人。作家贾平凹说：来到扬州，第一个想到的人是朱自清，他是知识分子中最最了不起的人物。\r\r实际上，朱自清的写作路程是非常曲折的，他早期的时候大多数作品都是诗歌，但是他的诗歌和我国古代诗人的诗有很大区别，他的诗是用白话文写的，这其实也是他写作的惯用风格。\r\r后来，朱自清开始写一些关于社会的文章，因为那个时候社会比较混乱，这时候的作品大多抨击社会的黑暗面，文体风格大多硬朗，基调伉俪。到了后期，大多是写关于山水的文章，这类文章的写作格调大多以清丽雅致为主。\r\r朱自清的写作风格虽然在不同的时期随着他的人生阅历和社会形态的不同而发生着变化，但是他文章的主基调是没有变的，他这一生，所写的所有文章风格上都有一个非常显著的特点，那就是简约平淡，他不是类似古代花间词派的诗人们，不管是他的诗词还是他的文章从来都不用过于华丽的辞藻，他崇尚的是平淡。\r\r英国友人戴立克试过英译朱自清几篇散文，译完一读显得单薄，远远不如原文流利。他不服气，改用稍微古奥的英文重译，好多了：“那是说，朱先生外圆内方，文字尽管浅白，心思却很深沉，译笔只好朝深处经营。”朱自清的很多文章，譬如《背影》《祭亡妇》，读来自有一番只可意会不可言传的东西。\r\r平淡就是朱自清的写作风格。他不是豪放派的作家，他在创作的时候钟情于清新的风格，给人耳目一新的感觉。在他的文章中包含了他对生活的向往，由此可见他的写作风格和他待人处事的态度也是有几分相似的。他的文章非常优美，但又不会让人觉得狭隘，给人一种豁达渊博的感觉，这就是朱自清的写作风格，更是朱自清的为人品质。\r\r写有《荷塘月色》《背影》等名篇的著名散文家朱自清先生，不仅自己一生风骨正气，还用无形的家风涵养子孙。良好的家风家规意蕴深远，催人向善，是凝聚情感、涵养德行、砥砺成才的人生信条。“北有朱自清，南有朱物华，一文一武，一南一北，双星闪耀”，这是中国知识界、教育界对朱家两兄弟的赞誉。\r\r朱自清性格温和，为人和善，对待年轻人平易近人，是个平和的人。他取字“佩弦”，意思要像弓弦那样将自己绷紧，给人的感觉是自我要求高，偶尔有呆气。朱自清教学负责，对学生要求严格，修他的课的学生都受益不少。\r\r1948 年 6 月，患胃病多年的朱自清，在《抗议美国扶日政策并拒绝领取美援面粉宣言》上，一丝不苟地签下了自己的名字。随后，朱自清还将面粉配购证以及面粉票退了回去。1948 年 8 月 12 日，朱自清因不堪胃病折磨，离开人世。在新的时代即将到来时，朱自清却匆匆地离人们远去。他为人们留下了无数经典的诗歌和文字，还有永不屈服的精神。\r\r朱自清没有豪言壮语，他只是用坚定的行动、朴实的语言，向世人展示了中国知识分子在祖国危难之际坚定的革命性，体现了中国人的骨气，表现了无比高贵的民族气节，呈现了人生最有价值的一面，谱就了生命中最华丽的乐章。\r\r他以“自清”为名，自勉在困境中不丧志；他身患重病，至死拒领美援面粉，其气节令世人感佩；他的《背影》《荷塘月色》《匆匆》脍炙人口；他的文字追求“真”，没有半点矫饰，却蕴藏着动人心弦的力量。\r\r朱自清不但在文学创作方面有很高的造诣，也是一名革命民主主义战士，在反饥饿、反内战的斗争中，他始终保持着一个正直的爱国知识分子的气节和情操。毛泽东对朱自清宁肯饿死不领美国“救济粉”的精神给予称赞，赞扬他“表现了我们民族的英雄气概”。\r\n',
+        dataStream: '荷塘月色\r\r作者：朱自清\r\r这几天心里颇不宁静\u001F。今晚在院子里坐着乘凉，忽然想起日日走过的荷塘，在这满月的光里，总该另有一番样子吧。月亮渐渐地升高了，墙外马路上孩子们的欢笑，已经听不见了；妻在屋里拍着闰儿，迷迷糊糊地哼着\u001E眠歌。我悄悄地披了大衫，带上门出去。\r\r沿着荷塘，是一条曲折的小煤屑路。这是一条幽僻的路；白天也少人走，夜晚更加寂寞。荷塘四面，长着许多树，蓊蓊郁郁的。路图片一\b是些杨柳，和一些不知道名字的树。没有月光的晚上，这路上阴森森的，有些怕人。今晚却很好，虽然月光也还是淡淡的。\r\r路上只我一个人，背着手踱着。这一片天地好像是我的；我也像超出了平常的自己，到了另一个世界里。我爱热闹，也爱冷静；爱群居，也爱独处。像今晚上，一个人在这苍茫的月下，什么都可以想，什么都可以不想，便觉是个自由的人。白天里一定要做的事，一定要说的话\b现在都可不理。这是独处的妙处，我且受用这无边的荷香月色好了。\r\r曲曲折折的荷塘上面，弥望的是田田的叶子。叶子出水很高，像亭亭的舞女的裙。层层的叶子中间，零星地点缀着些白花，有袅娜地开着的，有羞涩地打着朵儿的；正如一粒粒的明珠，又如碧天里的星星\b又如刚出浴的美人。微风过处，送来缕缕清香，仿佛远处高楼上渺茫的歌声似的。这时候叶子与花也有一丝的颤动，像闪电般，霎时传过荷塘的那边去了。叶子本是肩并肩密密地挨着，这便宛然有了一道凝碧的波痕。叶子底下是脉脉的流水，遮住了，不能见一些颜色；而叶子却更见风致了。\r\r月光如流水一般，静静地泻在这一片叶子和花上。薄薄的青雾浮起在荷塘里。叶子和花仿佛在牛乳中洗过一样\b又像笼着轻纱的梦。虽然是满月，天上却有一层淡淡的云，所以不能朗照；但我以为这恰是到了好处——酣眠固不可少，小睡也别有风味的。月光是隔了树照过来的，高处丛生的灌木，落下参差的斑驳的黑影，峭楞楞如鬼一般；弯弯的杨柳的稀疏的倩影，却又像是画在荷叶上。塘中的月色并不均匀；但光与影有着和谐的旋律，如梵婀玲上奏着的名曲。\r\r荷塘的四面，远远近近，高高低低都是树，而杨柳最多。这些树将一片荷塘重重围住；只在小路一旁，漏着几段空隙，像是特为月光留下的。树色一例是阴阴的，乍看像一团烟雾；但杨柳的丰姿，便在烟雾里也辨得出。树梢上隐隐约约的是一带远山，只有些大意罢了。树缝里也漏着一两点路灯光，没精打采的\b是渴睡人的眼。这时候最热闹的，要数树上的蝉声与水里的蛙声；但热闹是它们的，我什么也没有。\r\r忽然想起采莲的事情来了。采莲是江南的旧俗，似乎很早就有，而六朝时为盛；从诗歌里可以约略知道。采莲的是少年的女子，她们是荡着小船，唱着艳歌去的。采莲人不用说很多，还有看采莲的人。那是一个热闹的季节，也是一个风流的季节。梁元帝《采莲赋》里说得好：\r\r于是妖童女，荡舟心许；鷁首徐回，兼传羽杯；櫂将移而藻挂，船欲动而萍开。尔其纤腰束素，迁延顾步；夏始春余，叶嫩花初，恐沾裳而浅笑，畏倾船而敛裾。\r\r可见当时嬉游的光景了。这真是有趣的事，可惜我们现在早已无福消受了。\r\r于是又记起，《西洲曲》里的句子：\r\r采莲南塘秋，莲花过人头；低头弄莲子，莲子清如水。\r\r今晚若有采莲人，这儿的莲花也算得“过人头”了；只不见一些流水的影子，是不行的。这令我到底惦着江南了。——这样想着，猛一抬头，不觉已是自己的门前；轻轻地推门进去，什么声息也没有，妻已睡熟好久了。\r\r一九二七年七月，北京清华园。\r\r\r\r《荷塘月色》语言朴素典雅，准确生动，贮满诗意，满溢着朱自清的散文语言一贯有朴素的美，不用浓墨重彩，画的是淡墨水彩。\r\r朱自清先生一笔写景一笔说情，看起来松散不知所云，可仔细体会下，就能感受到先生在字里行间表述出的苦闷，而随之读者也被先生的文字所感染，被带进了他当时那苦闷而无法明喻的心情。这就是优异散文的必须品质之一。\r\r扩展资料：\r一首长诗《毁灭》奠定了朱自清在文坛新诗人的地位，而《桨声灯影里的秦淮河》则被公认为白话美文的典范。朱自清用白话美文向复古派宣战，有力地回击了复古派“白话不能作美文”之说，他是“五四”新文学运动的开拓者之一。\r\r朱自清的美文影响了一代又一代人。作家贾平凹说：来到扬州，第一个想到的人是朱自清，他是知识分子中最最了不起的人物。\r\r实际上，朱自清的写作路程是非常曲折的，他早期的时候大多数作品都是诗歌，但是他的诗歌和我国古代诗人的诗有很大区别，他的诗是用白话文写的，这其实也是他写作的惯用风格。\r\r后来，朱自清开始写一些关于社会的文章，因为那个时候社会比较混乱，这时候的作品大多抨击社会的黑暗面，文体风格大多硬朗，基调伉俪。到了后期，大多是写关于山水的文章，这类文章的写作格调大多以清丽雅致为主。\r\r朱自清的写作风格虽然在不同的时期随着他的人生阅历和社会形态的不同而发生着变化，但是他文章的主基调是没有变的，他这一生，所写的所有文章风格上都有一个非常显著的特点，那就是简约平淡，他不是类似古代花间词派的诗人们，不管是他的诗词还是他的文章从来都不用过于华丽的辞藻，他崇尚的是平淡。\r\r英国友人戴立克试过英译朱自清几篇散文，译完一读显得单薄，远远不如原文流利。他不服气，改用稍微古奥的英文重译，好多了：“那是说，朱先生外圆内方，文字尽管浅白，心思却很深沉，译笔只好朝深处经营。”朱自清的很多文章，譬如《背影》《祭亡妇》，读来自有一番只可意会不可言传的东西。\r\r平淡就是朱自清的写作风格。他不是豪放派的作家，他在创作的时候钟情于清新的风格，给人耳目一新的感觉。在他的文章中包含了他对生活的向往，由此可见他的写作风格和他待人处事的态度也是有几分相似的。他的文章非常优美，但又不会让人觉得狭隘，给人一种豁达渊博的感觉，这就是朱自清的写作风格，更是朱自清的为人品质。\r\r写有《荷塘月色》《背影》等名篇的著名散文家朱自清先生，不仅自己一生风骨正气，还用无形的家风涵养子孙。良好的家风家规意蕴深远，催人向善，是凝聚情感、涵养德行、砥砺成才的人生信条。“北有朱自清，南有朱物华，一文一武，一南一北，双星闪耀”，这是中国知识界、教育界对朱家两兄弟的赞誉。\r\r朱自清性格温和，为人和善，对待年轻人平易近人，是个平和的人。他取字“佩弦”，意思要像弓弦那样将自己绷紧，给人的感觉是自我要求高，偶尔有呆气。朱自清教学负责，对学生要求严格，修他的课的学生都受益不少。\r\r1948 年 6 月，患胃病多年的朱自清，在《抗议美国扶日政策并拒绝领取美援面粉宣言》上，一丝不苟地签下了自己的名字。随后，朱自清还将面粉配购证以及面粉票退了回去。1948 年 8 月 12 日，朱自清因不堪胃病折磨，离开人世。在新的时代即将到来时，朱自清却匆匆地离人们远去。他为人们留下了无数经典的诗歌和文字，还有永不屈服的精神。\r\r朱自清没有豪言壮语，他只是用坚定的行动、朴实的语言，向世人展示了中国知识分子在祖国危难之际坚定的革命性，体现了中国人的骨气，表现了无比高贵的民族气节，呈现了人生最有价值的一面，谱就了生命中最华丽的乐章。\r\r他以“自清”为名，自勉在困境中不丧志；他身患重病，至死拒领美援面粉，其气节令世人感佩；他的《背影》《荷塘月色》《匆匆》脍炙人口；他的文字追求“真”，没有半点矫饰，却蕴藏着动人心弦的力量。\r\r朱自清不但在文学创作方面有很高的造诣，也是一名革命民主主义战士，在反饥饿、反内战的斗争中，他始终保持着一个正直的爱国知识分子的气节和情操。毛泽东对朱自清宁肯饿死不领美国“救济粉”的精神给予称赞，赞扬他“表现了我们民族的英雄气概”。\r\n',
         textRuns: [
             {
                 st: 0,
@@ -176,11 +219,11 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     cl: {
                         rgb: 'rgb(255, 255, 255)',
                     },
-                    bl: BooleanNumber.TRUE,
+                    bl: 1,
                     bg: {
                         rgb: '#FF6670',
                     },
-                    it: BooleanNumber.TRUE,
+                    it: 1,
                 },
             },
             {
@@ -192,7 +235,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     cl: {
                         rgb: 'rgb(30, 30, 30)',
                     },
-                    bl: BooleanNumber.FALSE,
+                    bl: 0,
                 },
             },
             {
@@ -204,19 +247,19 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     cl: {
                         rgb: 'rgb(30, 30, 30)',
                     },
-                    bl: BooleanNumber.TRUE,
+                    bl: 1,
                 },
             },
             {
                 st: 14,
-                ed: 3064,
+                ed: 3066,
                 ts: {
                     fs: 12,
                     ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(30, 30, 30)',
                     },
-                    bl: BooleanNumber.FALSE,
+                    bl: 0,
                 },
             },
         ],
@@ -254,19 +297,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 127,
-                paragraphStyle: {
-                    spaceAbove: 10,
-                    lineSpacing: 2,
-                    spaceBelow: 0,
-                    // hanging: 20,
-                    // indentStart: 50,
-                    // indentEnd: 50,
-                    // indentFirstLine: 50,
-                },
-            },
-            {
-                startIndex: 128,
+                startIndex: 129,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -274,7 +305,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 244,
+                startIndex: 130,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -282,7 +313,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 245,
+                startIndex: 246,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -290,7 +321,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 398,
+                startIndex: 247,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -298,7 +329,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 399,
+                startIndex: 400,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -306,7 +337,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 618,
+                startIndex: 401,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -314,7 +345,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 619,
+                startIndex: 620,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -322,7 +353,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 824,
+                startIndex: 621,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -330,7 +361,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 825,
+                startIndex: 826,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -338,7 +369,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1007,
+                startIndex: 827,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -346,7 +377,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1008,
+                startIndex: 1009,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -354,7 +385,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1130,
+                startIndex: 1010,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -362,7 +393,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1131,
+                startIndex: 1132,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -370,7 +401,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1203,
+                startIndex: 1133,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -378,7 +409,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1204,
+                startIndex: 1205,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -386,7 +417,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1238,
+                startIndex: 1206,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -394,7 +425,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1239,
+                startIndex: 1240,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -402,7 +433,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1256,
+                startIndex: 1241,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -410,7 +441,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1257,
+                startIndex: 1258,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -418,7 +449,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1282,
+                startIndex: 1259,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -426,7 +457,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1283,
+                startIndex: 1284,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -434,7 +465,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1380,
+                startIndex: 1285,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -442,7 +473,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1381,
+                startIndex: 1382,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -450,15 +481,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1396,
-                paragraphStyle: {
-                    spaceAbove: 10,
-                    lineSpacing: 2,
-                    spaceBelow: 0,
-                },
-            },
-            {
-                startIndex: 1397,
+                startIndex: 1383,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -482,7 +505,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1457,
+                startIndex: 1400,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -490,7 +513,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1458,
+                startIndex: 1401,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -498,7 +521,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1559,
+                startIndex: 1459,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -506,7 +529,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1560,
+                startIndex: 1460,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -514,7 +537,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1566,
+                startIndex: 1561,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -522,7 +545,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1670,
+                startIndex: 1562,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -530,7 +553,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1671,
+                startIndex: 1568,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -538,7 +561,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1728,
+                startIndex: 1672,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -546,7 +569,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1729,
+                startIndex: 1673,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -554,7 +577,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1811,
+                startIndex: 1730,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -562,7 +585,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1812,
+                startIndex: 1731,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -570,7 +593,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1912,
+                startIndex: 1813,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -578,7 +601,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 1913,
+                startIndex: 1814,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -586,7 +609,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2053,
+                startIndex: 1914,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -594,7 +617,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2054,
+                startIndex: 1915,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -602,7 +625,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2190,
+                startIndex: 2055,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -610,7 +633,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2191,
+                startIndex: 2056,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -618,7 +641,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2341,
+                startIndex: 2192,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -626,7 +649,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2342,
+                startIndex: 2193,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -634,7 +657,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2481,
+                startIndex: 2343,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -642,7 +665,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2482,
+                startIndex: 2344,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -650,7 +673,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2582,
+                startIndex: 2483,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -658,7 +681,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2583,
+                startIndex: 2484,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -666,7 +689,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2750,
+                startIndex: 2584,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -674,7 +697,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2751,
+                startIndex: 2585,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -682,7 +705,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2853,
+                startIndex: 2752,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -690,7 +713,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2854,
+                startIndex: 2753,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -698,7 +721,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2948,
+                startIndex: 2855,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -706,7 +729,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2949,
+                startIndex: 2856,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -714,7 +737,23 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 3065,
+                startIndex: 2950,
+                paragraphStyle: {
+                    spaceAbove: 10,
+                    lineSpacing: 2,
+                    spaceBelow: 0,
+                },
+            },
+            {
+                startIndex: 2951,
+                paragraphStyle: {
+                    spaceAbove: 10,
+                    lineSpacing: 2,
+                    spaceBelow: 0,
+                },
+            },
+            {
+                startIndex: 3067,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -724,54 +763,27 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         ],
         sectionBreaks: [
             {
-                startIndex: 3066,
-                // columnProperties: [
-                //     {
-                //         width: ptToPixel(240),
-                //         paddingEnd: ptToPixel(15),
-                //     },
-                // ],
-                // columnSeparatorType: ColumnSeparatorType.NONE,
-                // sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
-                // textDirection: textDirectionDocument,
-                // contentDirection: textDirection!,
+                startIndex: 3068,
             },
         ],
-        customBlocks: [
-            // {
-            //     startIndex: 189,
-            //     blockId: 'shapeTest1',
-            // },
-            // {
-            //     startIndex: 367,
-            //     blockId: 'shapeTest2',
-            // },
-            // {
-            //     startIndex: 489,
-            //     blockId: 'shapeTest3',
-            // },
-            // {
-            //     startIndex: 668,
-            //     blockId: 'shapeTest4',
-            // },
-            // {
-            //     startIndex: 962,
-            //     blockId: 'shapeTest5',
-            // },
+        customBlocks: [],
+        customRanges: [
+            {
+                rangeId: '3tnTNMRA1jYWkcoxSEoCk',
+                rangeType: 4,
+                startIndex: 23,
+                endIndex: 110,
+            },
         ],
     },
-    documentStyle: {
-        pageSize: {
-            width: ptToPixel(595),
-            height: ptToPixel(842),
+    resources: [
+        {
+            name: 'SHEET_THREAD_COMMENT_PLUGIN',
+            data: '{"default_doc":[{"text":{"textRuns":[],"paragraphs":[{"startIndex":1,"paragraphStyle":{}}],"sectionBreaks":[{"startIndex":2}],"dataStream":"1\\n\\r","customRanges":[]},"dT":"2024/06/24 15:13","id":"3tnTNMRA1jYWkcoxSEoCk","ref":"。今晚在院子里坐着乘凉，忽然想起日日走过的荷塘，在这满月的光里，总该另有一番样子吧。月亮渐渐地升高了，墙外马路上孩子们的欢笑，已经听不见了；妻在屋里拍着闰儿，迷迷糊糊地哼着","personId":"Owner_qxVnhPbQ","unitId":"d","subUnitId":"default_doc"}]}',
         },
-        marginTop: ptToPixel(50),
-        marginBottom: ptToPixel(50),
-        marginRight: ptToPixel(50),
-        marginLeft: ptToPixel(50),
-        renderConfig: {
-            vertexAngle: 0,
-            centerAngle: 0,
+        {
+            name: 'DOC_DRAWING_PLUGIN',
+            data: '{"d":{"unitId":"d","subUnitId":"d","data":{"shapeTest1":{"unitId":"d","subUnitId":"d","drawingType":1,"drawingId":"shapeTest1","title":"test shape","description":"test shape","docTransform":{"size":{"width":178.07999999999998,"height":129.6},"positionH":{"relativeFrom":3,"posOffset":100},"positionV":{"relativeFrom":0,"posOffset":230},"angle":0},"layoutType":1,"behindDoc":1,"wrapText":0,"distT":0,"distB":0,"distL":0,"distR":0,"transform":{"left":100,"top":230,"width":178.07999999999998,"height":129.6}},"shapeTest2":{"unitId":"d","subUnitId":"d","drawingType":1,"drawingId":"shapeTest2","title":"test shape","description":"test shape","docTransform":{"size":{"width":445.2,"height":259.2},"positionH":{"relativeFrom":0,"posOffset":100},"positionV":{"relativeFrom":1,"posOffset":20},"angle":0},"layoutType":1,"behindDoc":0,"wrapText":0,"transform":{"left":100,"top":20,"width":445.2,"height":259.2}},"shapeTest3":{"unitId":"d","subUnitId":"d","drawingType":1,"drawingId":"shapeTest3","title":"test shape","description":"test shape","docTransform":{"size":{"width":445.2,"height":259.2},"positionH":{"relativeFrom":0,"posOffset":100},"positionV":{"relativeFrom":1,"posOffset":200},"angle":0},"layoutType":0,"behindDoc":0,"wrapText":0,"transform":{"left":100,"top":200,"width":445.2,"height":259.2}},"shapeTest4":{"unitId":"d","subUnitId":"d","drawingType":1,"drawingId":"shapeTest4","title":"test shape","description":"test shape","docTransform":{"size":{"width":445.2,"height":259.2},"positionH":{"relativeFrom":0,"posOffset":100},"positionV":{"relativeFrom":2,"posOffset":200},"angle":0},"layoutType":0,"behindDoc":0,"wrapText":0,"transform":{"left":100,"top":200,"width":445.2,"height":259.2}},"shapeTest5":{"unitId":"d","subUnitId":"d","drawingType":1,"drawingId":"shapeTest5","title":"test shape","description":"test shape","docTransform":{"size":{"width":445.2,"height":259.2},"positionH":{"relativeFrom":0,"posOffset":100},"positionV":{"relativeFrom":0,"posOffset":200},"angle":0},"layoutType":0,"behindDoc":0,"wrapText":0,"transform":{"left":100,"top":200,"width":445.2,"height":259.2}}},"order":["shapeTest1","shapeTest2","shapeTest3","shapeTest4","shapeTest5"]}}',
         },
-    },
+    ],
 };

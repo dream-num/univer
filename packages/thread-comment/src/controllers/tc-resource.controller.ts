@@ -62,7 +62,7 @@ export class ThreadCommentResourceController extends Disposable {
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource({
                 pluginName: `SHEET_${TC_PLUGIN_NAME}`,
-                businesses: [UniverType.UNIVER_SHEET],
+                businesses: [UniverType.UNIVER_SHEET, UniverType.UNIVER_DOC],
                 toJson: (unitID) => toJson(unitID),
                 parseJson: (json) => parseJson(json),
                 onUnLoad: (unitID) => {

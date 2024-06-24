@@ -183,14 +183,14 @@ function _getNullPage() {
 
 function _createSkeletonHeaderFooter(
     ctx: ILayoutContext,
-    headerOrFooter: DocumentViewModel,
+    headerOrFooterViewModel: DocumentViewModel,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
     isHeader = true
 ): IDocumentSkeletonHeaderFooter {
     const {
         lists, footerTreeMap, headerTreeMap, localeService, pageSize, drawings,
-        marginLeft = 0, marginRight = 0, marginTop = 0, marginBottom = 0,
+        marginLeft = 0, marginRight = 0,
         marginHeader = 0, marginFooter = 0,
     } = sectionBreakConfig;
     const pageWidth = pageSize?.width || Number.POSITIVE_INFINITY;
@@ -209,8 +209,8 @@ function _createSkeletonHeaderFooter(
     const areaPage = createSkeletonPage(ctx, headerFooterConfig, skeletonResourceReference);
     const page = dealWithSection(
         ctx,
-        headerOrFooter,
-        headerOrFooter.children[0],
+        headerOrFooterViewModel,
+        headerOrFooterViewModel.children[0],
         areaPage,
         headerFooterConfig
     ).pages[0];

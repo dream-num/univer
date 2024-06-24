@@ -232,6 +232,18 @@ export class DocumentViewModel implements IDisposable {
         this._customBlockCurrentIndex = 0;
         this._tableBlockCurrentIndex = 0;
         this._customRangeCurrentIndex = 0;
+
+        if (this.headerTreeMap.size > 0) {
+            for (const header of this.headerTreeMap.values()) {
+                header.resetCache();
+            }
+        }
+
+        if (this.footerTreeMap.size > 0) {
+            for (const footer of this.footerTreeMap.values()) {
+                footer.resetCache();
+            }
+        }
     }
 
     getSectionBreak(index: number) {
@@ -323,7 +335,7 @@ export class DocumentViewModel implements IDisposable {
      * textRun matches according to the selection. If the text length is 10, then the range of textRun is from 0 to 11.
      */
     getTextRun(index: number) {
-        const textRuns = this.getBody()!.textRuns;
+        const textRuns = this.getBody()?.textRuns;
         if (textRuns == null) {
             return;
         }

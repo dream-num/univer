@@ -20,7 +20,7 @@ import { ptToPixel } from '@univerjs/engine-render';
 
 function getDefaultHeaderFooterBody(type: 'header' | 'footer') {
     return {
-        dataStream: type === 'header' ? '荷塘月色\r作者：朱自清\rToday Office\r我是页眉页眉\r\n' : '荷塘月色\r作者：朱自清\rToday Office\r我是页脚页脚\r\n',
+        dataStream: type === 'header' ? '苍茫夜色\r作者：朱自清\rToday Office\r我是页眉页眉\r\n' : '苍茫月色\r作者：朱自清\rToday Office\r我是页脚页脚\r\n',
         textRuns: [
             {
                 st: 0,

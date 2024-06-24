@@ -98,7 +98,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         const numfmtService = this._numfmtService;
         const localeService = this._localeService;
 
-        const selections = selectionManagerService.getSelectionRanges() || [];
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range) || [];
         const range = selections[0];
 
         if (!range) {
@@ -131,7 +131,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     this._previewPattern = config.value;
                     this._forceUpdate();
                 } else if (config.type === 'confirm') {
-                    const selections = selectionManagerService.getSelectionRanges() || [];
+                    const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range) || [];
                     const params: ISetNumfmtCommandParams = { values: [] };
                     const patternType = getPatternType(config.value);
                     selections.forEach((rangeInfo) => {

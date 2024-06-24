@@ -151,7 +151,7 @@ export class MergeCellController extends Disposable {
 
                         const subUnitId = worksheet.getSheetId();
                         const mergeData = worksheet.getConfig().mergeData;
-                        const selections = self._selectionManagerService.getSelectionRanges();
+                        const selections = self._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
                         if (selections && selections.length > 0) {
                             const isHasMerge = selections.some((range) =>
                                 mergeData.some((item) => Rectangle.intersects(item, range))

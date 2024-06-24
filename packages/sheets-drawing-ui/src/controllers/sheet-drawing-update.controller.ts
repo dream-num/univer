@@ -208,7 +208,7 @@ export class SheetDrawingUpdateController extends Disposable {
     }
 
     private _getImagePosition(imageWidth: number, imageHeight: number, sceneWidth: number, sceneHeight: number): Nullable<ISheetDrawingPosition> {
-        const selections = this._selectionManagerService.getSelections();
+        const selections = this._selectionManagerService.getCurrentSelections();
         let range: IRange = {
             startRow: 0,
             endRow: 0,

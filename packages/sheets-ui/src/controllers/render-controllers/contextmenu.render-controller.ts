@@ -50,7 +50,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         const spreadsheetPointerDownObserver = (this._context?.mainComponent as Spreadsheet)?.onPointerDownObserver;
         const spreadsheetObserver = spreadsheetPointerDownObserver.add((event) => {
             if (event.button === 2) {
-                const selections = this._selectionManagerService.getSelections();
+                const selections = this._selectionManagerService.getCurrentSelections();
                 const currentSelection = selections?.[0];
                 if (!currentSelection) {
                     return;

@@ -95,7 +95,7 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
             return () => disposable.dispose();
         })
     ).pipe(debounceTime(16)).subscribe(() => {
-        const ranges = selectionManagerService.getSelections()?.map((selection) => selection.range) || [];
+        const ranges = selectionManagerService.getCurrentSelections()?.map((selection) => selection.range) || [];
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return;
         const worksheet = workbook.getActiveSheet();

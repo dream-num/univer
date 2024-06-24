@@ -123,7 +123,7 @@ export const DefinedNameContainer = () => {
             return '';
         }
 
-        const selections = selectionManagerService.getSelections();
+        const selections = selectionManagerService.getCurrentSelections();
         if (selections == null) {
             return '';
         }

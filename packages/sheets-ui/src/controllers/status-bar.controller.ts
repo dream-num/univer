@@ -40,7 +40,6 @@ import type {
 } from '@univerjs/sheets';
 import {
     INumfmtService,
-    NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetRangeValuesMutation,
 } from '@univerjs/sheets';
@@ -87,9 +86,6 @@ export class StatusBarController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._selectionManagerService.selectionMoving$.subscribe((selections) => {
-                    if (this._selectionManagerService.getCurrent()?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                        return;
-                    }
                     if (selections) {
                         _statisticsHandler(selections);
                     }
@@ -100,9 +96,6 @@ export class StatusBarController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
-                    if (this._selectionManagerService.getCurrent()?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                        return;
-                    }
                     if (selections) {
                         _statisticsHandler(selections);
                     }
@@ -113,7 +106,7 @@ export class StatusBarController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetRangeValuesMutation.id) {
-                    const selections = this._selectionManagerService.getSelections();
+                    const selections = this._selectionManagerService.getCurrentSelections();
                     if (selections) {
                         _statisticsHandler(selections as ISelectionWithStyle[]);
                     }

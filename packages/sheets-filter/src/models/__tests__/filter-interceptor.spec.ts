@@ -21,7 +21,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, NORMAL_SELECTION_PLUGIN_NAME, RefRangeService, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SelectionManagerService, SetSelectionsOperation, SheetInterceptorService } from '@univerjs/sheets';
+import { InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SelectionManagerService, SetSelectionsOperation, SheetInterceptorService } from '@univerjs/sheets';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
 import { SheetsFilterController } from '../../controllers/sheets-filter.controller';
 
@@ -115,7 +115,7 @@ describe('Test "Filter Interceptor"', () => {
             const moveColCommandParams = { unitId: 'workbookId', subUnitId: 'worksheetId', fromRange: { startColumn: 1, endColumn: 1, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN,
             }, toRange: { startColumn: 3, endColumn: 3, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN }, direction: Direction.RIGHT } as IMoveColsCommandParams;
             const selectionManagerService = get(SelectionManagerService);
-            selectionManagerService.setCurrentSelection({ unitId: 'workbookId', sheetId: 'worksheetId', pluginName: NORMAL_SELECTION_PLUGIN_NAME });
+            selectionManagerService.setCurrentSelection({ unitId: 'workbookId', sheetId: 'worksheetId' });
             await commandService.executeCommand(SetSelectionsOperation.id, { unitId: 'workbookId', subUnitId: 'worksheetId', selections: [{ style: null, range: { startColumn: 1, endColumn: 1, startRow: 0, endRow: 4, rangeType: RANGE_TYPE.COLUMN }, primary: {} }] } as ISetSelectionsOperationParams);
             await commandService.executeCommand(MoveColsCommand.id, moveColCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 1, startRow: 1, endRow: 2 });
@@ -125,7 +125,7 @@ describe('Test "Filter Interceptor"', () => {
             const moveColCommandParams = { unitId: 'workbookId', subUnitId: 'worksheetId', fromRange: { startColumn: 2, endColumn: 2, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN,
             }, toRange: { startColumn: 4, endColumn: 4, startRow: 0, endRow: 4, type: RANGE_TYPE.COLUMN }, direction: Direction.RIGHT } as IMoveColsCommandParams;
             const selectionManagerService = get(SelectionManagerService);
-            selectionManagerService.setCurrentSelection({ unitId: 'workbookId', sheetId: 'worksheetId', pluginName: NORMAL_SELECTION_PLUGIN_NAME });
+            selectionManagerService.setCurrentSelection({ unitId: 'workbookId', sheetId: 'worksheetId' });
             await commandService.executeCommand(SetSelectionsOperation.id, { unitId: 'workbookId', subUnitId: 'worksheetId', selections: [{ style: null, range: { startColumn: 2, endColumn: 2, startRow: 0, endRow: 4, rangeType: RANGE_TYPE.COLUMN }, primary: {} }] } as ISetSelectionsOperationParams);
             await commandService.executeCommand(MoveColsCommand.id, moveColCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 3, startRow: 1, endRow: 2 });
@@ -136,7 +136,7 @@ describe('Test "Filter Interceptor"', () => {
             const moveRowCommandParams = { unitId: 'workbookId', subUnitId: 'worksheetId', fromRange: { startColumn: 0, endColumn: 3, startRow: 2, endRow: 2, type: RANGE_TYPE.ROW,
             }, toRange: { startColumn: 0, endColumn: 3, startRow: 4, endRow: 4, type: RANGE_TYPE.ROW }, direction: Direction.RIGHT } as IMoveRowsCommandParams;
             const selectionManagerService = get(SelectionManagerService);
-            selectionManagerService.setCurrentSelection({ unitId: 'workbookId', sheetId: 'worksheetId', pluginName: NORMAL_SELECTION_PLUGIN_NAME });
+            selectionManagerService.setCurrentSelection({ unitId: 'workbookId', sheetId: 'worksheetId' });
             await commandService.executeCommand(SetSelectionsOperation.id, { unitId: 'workbookId', subUnitId: 'worksheetId', selections: [{ style: null, range: { startColumn: 0, endColumn: 3, startRow: 2, endRow: 2, rangeType: RANGE_TYPE.ROW }, primary: {} }] } as ISetSelectionsOperationParams);
             await commandService.executeCommand(MoveRowsCommand.id, moveRowCommandParams);
             expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')!.getRange()).toStrictEqual({ startColumn: 1, endColumn: 2, startRow: 1, endRow: 3 });

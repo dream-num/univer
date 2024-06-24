@@ -46,7 +46,7 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IDeltaColumnWidthCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections();
+        const selections = selectionManagerService.getCurrentSelections();
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         if (!selections?.length) {
@@ -159,7 +159,7 @@ export const SetColWidthCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const selections = selectionManagerService.getSelectionRanges();
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));

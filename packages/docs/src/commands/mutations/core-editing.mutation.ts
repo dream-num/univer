@@ -68,7 +68,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         const documentViewModel = docViewModelManagerService.getViewModel(unitId);
 
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const selections = textSelectionManagerService.getSelections() ?? [];
+        const selections = textSelectionManagerService.getCurrentSelections() ?? [];
 
         const serializedSelections = selections.map(serializeTextRange);
 

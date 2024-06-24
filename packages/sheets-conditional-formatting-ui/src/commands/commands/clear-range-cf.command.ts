@@ -53,7 +53,7 @@ export const ClearRangeCfCommand: ICommand<IClearRangeCfParams> = {
         if (!target) return false;
 
         const { unitId, subUnitId } = target;
-        const ranges = selectionManagerService.getSelections()?.map((selection) => selection.range) || [];
+        const ranges = selectionManagerService.getCurrentSelections()?.map((selection) => selection.range) || [];
         const allRuleList = conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
         if (!allRuleList?.length || !ranges.length) {
             return false;

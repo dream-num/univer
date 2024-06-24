@@ -24,7 +24,6 @@ import { SelectionManagerService } from '../../services/selection-manager.servic
 export interface ISetSelectionsOperationParams {
     unitId: string;
     subUnitId: string;
-    pluginName: string;
     selections: ISelectionWithStyle[];
     type?: SelectionMoveType;
 }

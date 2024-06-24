@@ -44,7 +44,7 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
         const { unitId, subUnitId } = target;
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections();
+        const selections = selectionManagerService.getCurrentSelections();
         if (!selections) {
             return false;
         }

@@ -73,7 +73,7 @@ export function FormulaBar() {
                 return;
             }
 
-            const selectionRanges = selectionManager.getSelections()?.map((selection) => selection.range);
+            const selectionRanges = selectionManager.getCurrentSelections()?.map((selection) => selection.range);
             const permissionList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
                 return rule.ranges.some((r) => {
                     return selectionRanges?.some((selectionRange) => {

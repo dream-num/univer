@@ -49,7 +49,7 @@ export const OpenConditionalFormattingOperator: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
 
-        const ranges = selectionManagerService.getSelectionRanges() || [];
+        const ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range) || [];
 
         const type = params.value;
         switch (type) {

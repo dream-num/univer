@@ -48,7 +48,7 @@ export const DeleteLeftCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
 
         const activeRange = textSelectionManagerService.getActiveRange();
-        const ranges = textSelectionManagerService.getSelections();
+        const ranges = textSelectionManagerService.getCurrentSelections();
         const skeleton = docSkeletonManagerService.getCurrent()?.skeleton;
 
         let result = true;
@@ -200,7 +200,7 @@ export const DeleteRightCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
 
         const activeRange = textSelectionManagerService.getActiveRange();
-        const ranges = textSelectionManagerService.getSelections();
+        const ranges = textSelectionManagerService.getCurrentSelections();
 
         const skeleton = docSkeletonManagerService.getCurrent()?.skeleton;
 
@@ -282,7 +282,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         const { direction, range } = params;
 
         const activeRange = textSelectionManagerService.getActiveRange();
-        const ranges = textSelectionManagerService.getSelections();
+        const ranges = textSelectionManagerService.getCurrentSelections();
 
         if (activeRange == null || ranges == null) {
             return false;

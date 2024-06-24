@@ -421,7 +421,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         if (!subUnitId) {
             subUnitId = worksheet.getSheetId();
         }
-        const ranges = selectionRanges ?? this._selectionManagerService.getSelections()?.map((selection) => {
+        const ranges = selectionRanges ?? this._selectionManagerService.getCurrentSelections()?.map((selection) => {
             return selection.range;
         });
 

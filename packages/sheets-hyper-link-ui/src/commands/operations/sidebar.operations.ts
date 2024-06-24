@@ -78,10 +78,11 @@ export const InsertHyperLinkOperation: ICommand = {
         }
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selection = selectionManagerService.getFirst();
-        if (!selection?.primary) {
+        const selection = selectionManagerService.getLast();
+        if (!selection) {
             return false;
         }
+
         const row = selection.primary.startRow;
         const column = selection.primary.startColumn;
         return commandService.executeCommand(OpenHyperLinkSidebarOperation.id, {

@@ -118,7 +118,7 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
                 return () => disposable.dispose();
             })
         ).subscribe(() => {
-            const selections = selectionManagerService.getSelections();
+            const selections = selectionManagerService.getCurrentSelections();
             if (selections && selections[0]) {
                 const range = selections[0].range;
                 const row = range.startRow;

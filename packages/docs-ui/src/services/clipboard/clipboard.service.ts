@@ -121,7 +121,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             endOffset: activeEndOffset,
             style,
         } = this._textSelectionManagerService.getActiveRange() ?? {};
-        const ranges = this._textSelectionManagerService.getSelections();
+        const ranges = this._textSelectionManagerService.getCurrentSelections();
 
         if (segmentId == null) {
             this._logService.error('[DocClipboardController] segmentId is not existed');
@@ -165,7 +165,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     private async _paste(body: IDocumentBody): Promise<boolean> {
         const { segmentId, endOffset: activeEndOffset, style } = this._textSelectionManagerService.getActiveRange() ?? {};
-        const ranges = this._textSelectionManagerService.getSelections();
+        const ranges = this._textSelectionManagerService.getCurrentSelections();
 
         if (segmentId == null) {
             this._logService.error('[DocClipboardController] segmentId does not exist!');
@@ -235,7 +235,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     }
 
     private _getDocumentBodyInRanges(): IDocumentBody[] {
-        const ranges = this._textSelectionManagerService.getSelections();
+        const ranges = this._textSelectionManagerService.getCurrentSelections();
         const doc = this._univerInstanceService.getCurrentUniverDocInstance();
         const results: IDocumentBody[] = [];
 

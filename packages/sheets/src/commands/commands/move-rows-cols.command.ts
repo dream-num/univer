@@ -57,7 +57,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IMoveRowsCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections();
+        const selections = selectionManagerService.getCurrentSelections();
         const {
             fromRange: { startRow: fromRow },
             toRange: { startRow: toRow },
@@ -187,7 +187,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IMoveColsCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections();
+        const selections = selectionManagerService.getCurrentSelections();
         const {
             fromRange: { startColumn: fromCol },
             toRange: { startColumn: toCol },

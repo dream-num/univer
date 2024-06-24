@@ -1141,7 +1141,7 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'rightClick.showHideRow',
         hidden$: deriveStateFromActiveSheet$(univerInstanceService, true, ({ worksheet }) => new Observable((subscriber) => {
             function hasHiddenRowsInSelections(): boolean {
-                const rowRanges = selectionManagerService.getSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
+                const rowRanges = selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
                 return !!rowRanges?.some((range) => {
                     for (let r = range.startRow; r <= range.endRow; r++) {
                         if (!worksheet.getRowRawVisible(r)) return true; // should not take filtered out rows into account
@@ -1177,7 +1177,7 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'rightClick.showHideColumn',
         hidden$: deriveStateFromActiveSheet$(univerInstanceService, true, ({ worksheet }) => new Observable((subscriber) => {
             function hasHiddenColsInSelections(): boolean {
-                const colRanges = selectionManagerService.getSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
+                const colRanges = selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
                 if (!colRanges || colRanges.length === 0) return false;
 
                 return !!colRanges.some((range) => {

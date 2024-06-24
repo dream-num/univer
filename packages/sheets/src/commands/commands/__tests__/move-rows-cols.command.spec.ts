@@ -162,7 +162,7 @@ describe('Test move rows cols', () => {
 
     function getCurrentSelection(): IRange {
         const selectionManagerService = get(SelectionManagerService);
-        const currentSelection = selectionManagerService.getSelections();
+        const currentSelection = selectionManagerService.getCurrentSelections();
         if (!currentSelection) {
             throw new Error('No current selection');
         }

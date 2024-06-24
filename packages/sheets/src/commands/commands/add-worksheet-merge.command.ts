@@ -182,7 +182,7 @@ export const AddWorksheetMergeAllCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelectionRanges();
+        const selections = selectionManagerService.getCurrentSelections().map((s) => s.range);
         if (!selections?.length) {
             return false;
         }
@@ -211,7 +211,7 @@ export const AddWorksheetMergeVerticalCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelectionRanges();
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) {
             return false;
         }
@@ -241,7 +241,7 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelectionRanges();
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) {
             return false;
         }

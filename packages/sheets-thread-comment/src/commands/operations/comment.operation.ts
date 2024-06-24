@@ -31,7 +31,7 @@ export const ShowAddSheetCommentModalOperation: ICommand = {
 
         const sheetsThreadCommentPopupService = accessor.get(SheetsThreadCommentPopupService);
         const threadCommentPanelService = accessor.get(ThreadCommentPanelService);
-        const activeCell = selectionManagerService.getFirst()?.primary;
+        const activeCell = selectionManagerService.getLast()?.primary;
         const current = selectionManagerService.getCurrent();
         const model = accessor.get(SheetsThreadCommentModel);
 

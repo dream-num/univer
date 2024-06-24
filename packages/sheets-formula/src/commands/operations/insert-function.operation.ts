@@ -51,7 +51,7 @@ export const InsertFunctionOperation: ICommand = {
     handler: async (accessor: IAccessor, params: IInsertFunctionOperationParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const editorService = accessor.get(IEditorService);
-        const currentSelections = selectionManagerService.getSelections();
+        const currentSelections = selectionManagerService.getCurrentSelections();
         if (!currentSelections || !currentSelections.length) {
             return false;
         }

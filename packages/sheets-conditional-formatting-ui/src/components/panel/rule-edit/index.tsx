@@ -64,7 +64,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const rangeString = useMemo(() => {
         let ranges = props.rule?.ranges;
         if (!ranges?.length) {
-            ranges = selectionManagerService.getSelectionRanges() ?? [];
+            ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range) ?? [];
         }
         rangeResult.current = ranges;
         if (!ranges?.length) {

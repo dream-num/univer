@@ -1181,7 +1181,7 @@ export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: 
         case EffectRefRangId.DeleteRangeMoveUpCommandId:
         case EffectRefRangId.InsertRangeMoveDownCommandId: {
             const params = command;
-            const range = params.params?.range || selectionManagerService.getSelectionRanges()?.[0];
+            const range = params.params?.range || selectionManagerService.getCurrentSelections()?.map((s) => s.range)?.[0];
             if (!range) {
                 return [];
             }
@@ -1190,7 +1190,7 @@ export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: 
         case EffectRefRangId.DeleteRangeMoveLeftCommandId:
         case EffectRefRangId.InsertRangeMoveRightCommandId: {
             const params = command;
-            const range = params.params?.range || selectionManagerService.getSelectionRanges()?.[0];
+            const range = params.params?.range || selectionManagerService.getCurrentSelections()?.map((s) => s.range)?.[0];
             if (!range) {
                 return [];
             }

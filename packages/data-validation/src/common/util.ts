@@ -45,7 +45,7 @@ export function getRuleOptions(rule: IDataValidationRuleOptions): IDataValidatio
 
 export function createDefaultNewRule(accessor: IAccessor) {
     const selectionManagerService = accessor.get(SelectionManagerService);
-    const currentRanges = selectionManagerService.getSelectionRanges();
+    const currentRanges = selectionManagerService.getCurrentSelections().map((s) => s.range);
     const uid = Tools.generateRandomId(6);
     const rule = {
         uid,

@@ -115,7 +115,7 @@ export class DataValidationController extends RxDisposable {
                     }
 
                     const subUnitId = worksheet.getSheetId();
-                    const selections = this._selectionManagerService.getSelectionRanges();
+                    const selections = this._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
 
                     const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
 

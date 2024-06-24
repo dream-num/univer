@@ -24,7 +24,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { IMoveRangeCommandParams } from '@univerjs/sheets';
-import { MoveRangeCommand, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
+import { MoveRangeCommand, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { ISelectionRenderService } from '../services/selection/selection-render.service';
@@ -48,16 +48,6 @@ export class MoveRangeController extends Disposable {
                 this._selectionManagerService.selectionMoveEnd$.subscribe(() => {
                     // Each range change requires re-listening
                     disposableCollection.dispose();
-
-                    const current = this._selectionManagerService.getCurrent();
-
-                    /**
-                     * Moving the selection only responds to regular selections;
-                     * it does not apply to selections for features like formulas or charts.
-                     */
-                    if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                        return;
-                    }
 
                     const selectionControls = this._selectionRenderService.getCurrentControls();
                     selectionControls.forEach((controlSelection) => {

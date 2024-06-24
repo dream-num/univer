@@ -25,6 +25,7 @@ import {
     IUniverInstanceService,
     LocaleService,
     ObjectMatrix,
+    ThemeService,
     toDisposable,
     Tools,
     UniverInstanceType,
@@ -46,6 +47,7 @@ import { IMarkSelectionService } from '../mark-selection/mark-selection.service'
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import { rangeToDiscreteRange, virtualizeDiscreteRanges } from '../../controllers/utils/range-tools';
+import { createCopyPasteSelectionStyle } from '../utils/selection-util';
 import { CopyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 
@@ -123,6 +125,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @INotificationService private readonly _notificationService: INotificationService,
         @IPlatformService private readonly _platformService: IPlatformService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(ErrorService) private readonly _errorService: ErrorService,
         @Inject(Injector) private readonly _injector: Injector
@@ -185,7 +188,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // 5. mark the copy range
         this._markSelectionService.removeAllShapes();
 
-        const style = this._selectionManagerService.createCopyPasteSelection();
+        const style = createCopyPasteSelectionStyle(this._themeService);
         this._copyMarkId = this._markSelectionService.addShape({ ...selection, style });
 
         return true;
@@ -713,7 +716,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const setSelectionsParam: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
-
             selections: [{ range: {
                 startRow,
                 endRow,

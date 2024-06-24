@@ -29,7 +29,6 @@ import {
     convertSelectionDataToRange,
     getNormalSelectionStyle,
     getPrimaryForRange,
-    NORMAL_SELECTION_PLUGIN_NAME,
     ScrollToCellOperation,
     SelectionManagerService,
     SelectionMoveType,
@@ -69,7 +68,6 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
         this._selectionRenderService.changeRuntime(null, null);
         this._selectionRenderService.reset();
-        this._selectionManagerService.reset();
     }
 
     private _init() {
@@ -220,10 +218,8 @@ export class SelectionRenderController extends Disposable implements IRenderModu
             toDisposable(
                 this._themeService.currentTheme$.subscribe(() => {
                     this._selectionRenderService.resetStyle();
-                    const param = this._selectionManagerService.getSelections();
-                    const current = this._selectionManagerService.getCurrent();
-
-                    if (param == null || current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                    const param = this._selectionManagerService.getCurrentSelections();
+                    if (param == null) {
                         return;
                     }
 
@@ -409,8 +405,6 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         const sheetId = workbook.getActiveSheet()?.getSheetId();
         if (!sheetId) return;
 
-        const current = this._selectionManagerService.getCurrent();
-
         if (selectionDataWithStyleList == null || selectionDataWithStyleList.length === 0) {
             return;
         }
@@ -419,7 +413,6 @@ export class SelectionRenderController extends Disposable implements IRenderModu
             unitId,
             subUnitId: sheetId,
             type,
-            pluginName: current?.pluginName || NORMAL_SELECTION_PLUGIN_NAME,
             selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>
                 convertSelectionDataToRange(selectionDataWithStyle)
             ),
@@ -466,31 +459,27 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
             /**
              * Features like formulas can select ranges across sub-tables.
-             *  If the current pluginName is not in a normal state,
+             * If the current pluginName is not in a normal state,
              * the current selection will not be refreshed.
              */
-            const current = this._selectionManagerService.getCurrent();
-            const pluginName = current?.pluginName || NORMAL_SELECTION_PLUGIN_NAME;
+            const current = this._selectionManagerService.getCurrentWorksheet();
 
             if (current?.unitId === unitId && current.sheetId === sheetId) {
-                const currentSelections = this._selectionManagerService.getSelections();
+                const currentSelections = this._selectionManagerService.getCurrentSelections();
                 if (currentSelections != null) {
                     this._refreshSelection(currentSelections);
                 }
             } else {
                 this._selectionManagerService.setCurrentSelection({
-                    pluginName,
                     unitId,
                     sheetId,
                 });
             }
 
-            if (pluginName === NORMAL_SELECTION_PLUGIN_NAME) {
-                // If there is no initial selection, add one by default in the top left corner.
-                const last = this._selectionManagerService.getLast();
-                if (last == null) {
-                    this._selectionManagerService.add([this._getZeroRange(skeleton)]);
-                }
+            // If there is no initial selection, add one by default in the top left corner.
+            const last = this._selectionManagerService.getLast();
+            if (last == null) {
+                this._selectionManagerService.add([this._getZeroRange(skeleton)]);
             }
         }));
     }

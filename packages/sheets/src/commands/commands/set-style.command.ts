@@ -81,7 +81,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const ranges = range ? [range] : selectionManagerService.getSelectionRanges();
+        const ranges = range ? [range] : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!ranges?.length) {
             return false;
         }

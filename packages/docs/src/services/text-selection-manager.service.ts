@@ -118,7 +118,7 @@ export class TextSelectionManagerService extends RxDisposable {
         this._currentSelection = param;
     }
 
-    getSelections(): Readonly<Nullable<TextRange[]>> {
+    getCurrentSelections(): Readonly<Nullable<TextRange[]>> {
         return this._getTextRanges(this._currentSelection)?.textRanges;
     }
 

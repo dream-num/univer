@@ -21,7 +21,6 @@ import { DeviceInputEventType } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
-    NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetWorksheetActiveOperation,
 } from '@univerjs/sheets';
@@ -87,10 +86,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     }
 
     private _handleSelectionChange(params: Nullable<ISelectionWithStyle[]>) {
-        const current = this._selectionManagerService.getCurrent();
-
         // The editor only responds to regular selections.
-        if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) return;
         if (this._editorBridgeService.isVisible().visible) return;
 
         const primary = params?.[params.length - 1]?.primary;
@@ -109,12 +105,6 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                 return;
             }
 
-            const current = this._selectionManagerService.getCurrent();
-            if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                return;
-            }
-
-            // this._editorBridgeService.show(DeviceInputEventType.Dblclick);
             this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: true,
                 eventType: DeviceInputEventType.Dblclick,
@@ -201,7 +191,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
          */
         this.disposeWithMe(
             this._rangeSelectorService.openSelector$.subscribe(() => {
-                const selectionWithStyle = this._selectionManagerService.getSelections();
+                const selectionWithStyle = this._selectionManagerService.getCurrentSelections();
                 const { unitId, sheetId, sheetName } = this._getCurrentUnitIdAndSheetId();
 
                 if (!sheetId || !sheetName) return;

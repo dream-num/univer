@@ -145,14 +145,14 @@ export class EndEditController extends Disposable {
 
                 this._cursorChange = CursorChange.InitialState;
 
-                const selections = this._selectionManagerService.getSelections();
-                const currentSelection = this._selectionManagerService.getCurrent();
+                const selections = this._selectionManagerService.getCurrentSelections();
+                const currentSelection = this._selectionManagerService.getCurrentWorksheet();
 
                 if (currentSelection == null) {
                     return;
                 }
 
-                const { unitId: workbookId, sheetId: worksheetId, pluginName } = currentSelection;
+                const { unitId: workbookId, sheetId: worksheetId } = currentSelection;
 
                 this._exitInput(param);
 
@@ -162,7 +162,6 @@ export class EndEditController extends Disposable {
                         this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
                             unitId: workbookId,
                             subUnitId: worksheetId,
-                            pluginName,
                             selections,
                         });
                     }

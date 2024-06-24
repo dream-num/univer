@@ -852,7 +852,7 @@
 //     private _switchSelectionPlugin() {
 //         if (this._getContextState() === true) {
 //             this._selectionManagerService.changePluginNoRefresh(FORMULA_REF_SELECTION_PLUGIN_NAME);
-//             // const selections = this._selectionManagerService.getSelections();
+//             // const selections = this._selectionManagerService.getCurrentSelections();
 //             // if (selections == null || selections.length === 0) {
 //             //     const selectionData = this._selectionManagerService.getLastByPlugin(NORMAL_SELECTION_PLUGIN_NAME);
 //             //     if (selectionData != null) {
@@ -1846,7 +1846,7 @@
 //                         this._arrowMoveActionState = ArrowMoveAction.movingRef;
 //                     }
 
-//                     const previousRanges = this._selectionManagerService.getSelectionRanges() || [];
+//                     const previousRanges = this._selectionManagerService.getCurrentSelections()?.map(s => s.range) || [];
 
 //                     if (previousRanges.length === 0) {
 //                         const selectionData =
@@ -1859,7 +1859,7 @@
 
 //                     this._pressArrowKey(params);
 
-//                     const selectionWithStyles = this._selectionManagerService.getSelections() || [];
+//                     const selectionWithStyles = this._selectionManagerService.getCurrentSelections() || [];
 
 //                     const currentSelection = selectionWithStyles[selectionWithStyles.length - 1];
 

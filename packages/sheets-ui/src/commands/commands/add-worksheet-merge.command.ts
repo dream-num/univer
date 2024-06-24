@@ -144,7 +144,7 @@ export const AddWorksheetMergeAllCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelectionRanges();
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         const mergeableSelections = getMergeableSelectionsByType(MergeType.MergeAll, selections);
         if (!mergeableSelections?.length) {
             return false;
@@ -175,7 +175,7 @@ export const AddWorksheetMergeVerticalCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelectionRanges();
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         const mergeableSelections = getMergeableSelectionsByType(MergeType.MergeVertical, selections);
         if (!mergeableSelections?.length) {
             return false;
@@ -207,7 +207,7 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelectionRanges();
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         const mergeableSelections = getMergeableSelectionsByType(MergeType.MergeHorizontal, selections);
         if (!mergeableSelections?.length) {
             return false;

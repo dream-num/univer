@@ -43,7 +43,7 @@ export const RemoveWorksheetMergeCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selections = selectionManagerService.getSelectionRanges();
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) return false;
 
         const target = getSheetCommandTarget(univerInstanceService);
@@ -67,7 +67,7 @@ export const RemoveWorksheetMergeCommand: ICommand = {
             removeMergeMutationParams
         );
 
-        const nowSelections = selectionManagerService.getSelections();
+        const nowSelections = selectionManagerService.getCurrentSelections();
         if (!nowSelections?.length) return false;
 
         const undoSelections = Tools.deepClone(nowSelections);

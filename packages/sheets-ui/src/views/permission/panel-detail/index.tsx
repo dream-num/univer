@@ -158,7 +158,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
                 },
             ]);
         }
-        const ranges = selectionManagerService.getSelectionRanges() ?? [];
+        const ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range) ?? [];
         const rangeErrorString = checkRangeValid(ranges);
         sheetPermissionPanelModel.setRangeErrorMsg(rangeErrorString);
         const rangeStr = ranges?.length

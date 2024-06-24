@@ -126,7 +126,7 @@ export const SetSelectedRowsVisibleCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const ranges = selectionManagerService.getSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
+        const ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
         if (!ranges?.length) return false;
 
         const target = getSheetCommandTarget(univerInstanceService);
@@ -153,7 +153,7 @@ export const SetRowHiddenCommand: ICommand = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         // Ranges should be divided by already hidden rows.
-        let ranges = selectionManagerService.getSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
+        let ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
         if (!ranges?.length) return false;
 
         const target = getSheetCommandTarget(univerInstanceService);

@@ -240,7 +240,6 @@ describe('Test format painter rules in controller', () => {
 
         const selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({
-
             unitId: 'workbook-01',
             sheetId: 'sheet-0011',
         });

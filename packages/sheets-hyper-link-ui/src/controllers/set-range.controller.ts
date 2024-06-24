@@ -220,7 +220,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                 ) {
                     const redos: IMutationInfo[] = [];
                     const undos: IMutationInfo[] = [];
-                    const selection = this._selectionManagerService.getFirst();
+                    const selection = this._selectionManagerService.getLast();
                     const target = getSheetCommandTarget(this._univerInstanceService);
                     if (selection && target) {
                         const { unitId, subUnitId } = target;

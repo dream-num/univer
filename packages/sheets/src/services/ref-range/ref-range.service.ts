@@ -427,7 +427,7 @@ function getSubUnitId(univerInstanceService: IUniverInstanceService) {
 }
 
 function getSelectionRanges(selectionManagerService: SelectionManagerService) {
-    return selectionManagerService.getSelectionRanges() || [];
+    return selectionManagerService.getCurrentSelections()?.map((s) => s.range) || [];
 }
 
 function getRefRangId(unitId: string, subUnitId: string) {

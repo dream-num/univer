@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { type IRange, type ISelectionCell, type Nullable, ThemeService } from '@univerjs/core';
-import { type IDisposable, Inject } from '@wendellhu/redi';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Disposable, type ISelectionCell, IUniverInstanceService, type Nullable, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { BehaviorSubject, of, share, Subject, switchMap, takeUntil } from 'rxjs';
 
-import type { ISelectionStyle, ISelectionWithStyle } from '../basics/selection';
+import type { ISelectionWithStyle } from '../basics/selection';
 
 export interface ISelectionManagerSearchParam {
     unitId: string;
@@ -38,212 +37,106 @@ export enum SelectionMoveType {
     MOVE_END,
 }
 
-export class SelectionManagerService implements IDisposable {
-    private readonly _selectionInfo: ISelectionInfo = new Map();
+export class SelectionManagerService extends RxDisposable {
+    private _currentWorksheet: Nullable<ISelectionManagerSearchParam> = null;
 
-    private _currentSelection: Nullable<ISelectionManagerSearchParam> = null;
-
-    private readonly _selectionMoveStart$ = new Subject<Nullable<ISelectionWithStyle[]>>();
-    readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
-
-    private readonly _selectionMoving$ = new Subject<Nullable<ISelectionWithStyle[]>>();
-    readonly selectionMoving$ = this._selectionMoving$.asObservable();
-
-    private readonly _selectionMoveEnd$ = new BehaviorSubject<Nullable<ISelectionWithStyle[]>>(null);
-    readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
+    readonly selectionMoveStart$;
+    readonly selectionMoving$;
+    readonly selectionMoveEnd$;
 
     private _dirty: boolean = true;
 
-    // FIMXE: this dependency is not correct!
-    constructor(@Inject(ThemeService) private readonly _themeService: ThemeService) {
-        // empty
+    constructor(
+        @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService
+    ) {
+        super();
+
+        const c$ = this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).pipe(share(), takeUntil(this.dispose$));
+        this.selectionMoveStart$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveStart$));
+        this.selectionMoving$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoving$));
+        this.selectionMoveEnd$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveEnd$));
+
+        this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
+            this._wbSelections.delete(workbook.getUnitId());
+        });
     }
 
-    getCurrent() {
-        return this._currentSelection;
+    /**
+     * Get which Workbook and worksheet the current selection belongs to.
+     * @deprecated Bad design.
+     */
+    getCurrentWorksheet() {
+        return this._currentWorksheet;
     }
 
-    reset() {
-        if (this._currentSelection == null) {
-            return;
-        }
-        this._currentSelection = {
-
-            unitId: this._currentSelection?.unitId,
-            sheetId: this._currentSelection?.sheetId,
-        };
-        this._selectionInfo.clear();
-
-        this._refresh(this._currentSelection);
-    }
-
-    dispose(): void {
-        this._selectionMoveEnd$.complete();
-        this._selectionMoveStart$.complete();
-        this._selectionMoving$.complete();
-    }
-
+    /** @deprecated */
     makeDirty(dirty: boolean = true) {
         this._dirty = dirty;
     }
 
+    /** @deprecated */
     refreshSelection() {
-        if (this._currentSelection == null) {
-            return;
-        }
-
-        this._refresh(this._currentSelection);
     }
 
+    /** @deprecated should be merged to addSelection */
     setCurrentSelection(param: ISelectionManagerSearchParam) {
         if (this._dirty === false) {
             return;
         }
 
-        this._currentSelection = param;
-        this._refresh(param);
+        this._currentWorksheet = param;
     }
 
-    setCurrentSelectionNotRefresh(param: ISelectionManagerSearchParam) {
-        this._currentSelection = param;
-    }
-
-    getSelectionInfo(): Readonly<ISelectionInfo> {
-        return this._selectionInfo;
-    }
-
-    getSelectionDatasByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionWithStyle[]>> {
-        return this._getSelectionDatas(param);
-    }
-
-    getSelections(): Readonly<Nullable<ISelectionWithStyle[]>> {
-        return this._getSelectionDatas(this._currentSelection);
-    }
-
-    getSelectionRanges(): Nullable<IRange[]> {
-        const selectionDataList = this.getSelections();
-        if (selectionDataList == null) {
-            return;
-        }
-
-        return selectionDataList.map((selectionData: ISelectionWithStyle) => selectionData.range);
-    }
-
-    getFirst(): Readonly<Nullable<ISelectionWithStyle>> {
-        return this._getFirstByParam(this._currentSelection);
+    // TODO@wzhudev: rename to get current selections
+    getCurrentSelections(): Readonly<Nullable<ISelectionWithStyle[]>> {
+        return this._getSelections(this._currentWorksheet);
     }
 
     getLast(): Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>> {
         // The last selection position must have a primary.
-        return this._getLastByParam(this._currentSelection) as Readonly<
-            Nullable<ISelectionWithStyle & { primary: ISelectionCell }>
-        >;
+        return this._getLastByParam(this._currentWorksheet) as Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>>;
     }
 
-    addNoRefresh(selectionDatas: ISelectionWithStyle[]) {
-        if (this._currentSelection == null) {
-            return;
-        }
-        this._addByParam(
-            {
-                ...this._currentSelection,
-                selectionDatas,
-            },
-            false
-        );
-    }
-
+    /** @deprecated Bad design. */
     add(selectionDatas: ISelectionWithStyle[]) {
-        if (this._currentSelection == null) {
+        if (!this._currentWorksheet) {
             return;
         }
 
-        this._addByParam({
-            ...this._currentSelection,
-            selectionDatas,
-        });
+        this.addSelections(this._currentWorksheet.unitId, this._currentWorksheet.sheetId, selectionDatas);
+    }
+
+    addSelections(unitId: string, worksheetId: string, selectionDatas: ISelectionWithStyle[]) {
+        this._ensureWorkbookSelection(unitId).addSelection(worksheetId, selectionDatas);
+    }
+
+    setSelections(unitId: string, worksheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType = SelectionMoveType.MOVE_END) {
+        this._ensureWorkbookSelection(unitId).setSelection(worksheetId, selectionDatas, type);
     }
 
     replace(selectionDatas: ISelectionWithStyle[], type: SelectionMoveType = SelectionMoveType.MOVE_END) {
-        if (this._currentSelection == null) {
+        if (!this._currentWorksheet) {
             return;
         }
 
-        this._replaceByParam({
-            ...this._currentSelection,
-            selectionDatas,
-        });
-
-        if (type === SelectionMoveType.MOVE_START) {
-            this._refreshStart(this._currentSelection);
-        } else if (type === SelectionMoveType.MOVING) {
-            this._refreshMoving(this._currentSelection);
-        } else {
-            this._refresh(this._currentSelection);
-        }
-    }
-
-    replaceWithNoRefresh(selectionDatas: ISelectionWithStyle[]) {
-        if (this._currentSelection == null) {
-            return;
-        }
-        this._replaceByParam({
-            ...this._currentSelection,
-            selectionDatas,
-        });
+        this.setSelections(this._currentWorksheet.unitId, this._currentWorksheet.sheetId, selectionDatas, type);
     }
 
     clear(): void {
-        if (this._currentSelection == null) {
-            return;
-        }
-        this._clearByParam(this._currentSelection);
-    }
-
-    remove(index: number): void {
-        if (this._currentSelection == null) {
+        if (this._currentWorksheet == null) {
             return;
         }
 
-        this._removeByParam(index, this._currentSelection);
-    }
-
-    createDefaultAutoFillSelection(): ISelectionStyle {
-        return {
-            strokeWidth: 2,
-            stroke: '#FFF000',
-            fill: 'rgba(0, 0, 0, 0.2)',
-            widgets: {},
-            hasAutoFill: true,
-        };
-    }
-
-    createCopyPasteSelection(): ISelectionStyle {
-        return {
-            strokeWidth: 1.5,
-            stroke: this._themeService.getCurrentTheme().primaryColor,
-            fill: 'rgba(178, 178, 178, 0.10)',
-            widgets: {},
-            hasAutoFill: false,
-            strokeDash: 8,
-        };
-    }
-
-    createDefaultSelection(): ISelectionStyle {
-        return {
-            strokeWidth: 2,
-            stroke: '#FFF000',
-            fill: 'rgba(0, 0, 0, 0.2)',
-            widgets: { tr: true, tl: true, br: true, bl: true },
-            hasAutoFill: false,
-        };
+        this._clearByParam(this._currentWorksheet);
     }
 
     /**
      * Determine whether multiple current selections overlap
+     *
+     * @deprecated this should be extracted to an pure function
      */
     isOverlapping(): boolean {
-        const selectionDataList = this.getSelections();
+        const selectionDataList = this.getCurrentSelections();
         if (selectionDataList == null) {
             return false;
         }
@@ -263,99 +156,100 @@ export class SelectionManagerService implements IDisposable {
         );
     }
 
-    private _getSelectionDatas(param: Nullable<ISelectionManagerSearchParam>) {
-        if (param == null) {
-            return;
+    private _getSelections(param: Nullable<ISelectionManagerSearchParam>) {
+        if (!param) {
+            return [];
         }
+
         const { unitId, sheetId } = param;
-        return this._selectionInfo.get(unitId)?.get(sheetId);
-    }
-
-    private _refresh(param?: ISelectionManagerSearchParam): void {
-        this._selectionMoveEnd$.next(this._getSelectionDatas(param));
-    }
-
-    private _refreshStart(param?: ISelectionManagerSearchParam): void {
-        this._selectionMoveStart$.next(this._getSelectionDatas(param));
-    }
-
-    private _refreshMoving(param?: ISelectionManagerSearchParam): void {
-        this._selectionMoving$.next(this._getSelectionDatas(param));
-    }
-
-    private _getFirstByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionWithStyle>> {
-        const selectionData = this._getSelectionDatas(param);
-
-        return selectionData?.[0];
+        return this._ensureWorkbookSelection(unitId).getSelectionOfWorksheet(sheetId);
     }
 
     private _getLastByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionWithStyle>> {
-        const selectionData = this._getSelectionDatas(param);
+        const selectionData = this._getSelections(param);
 
         return selectionData?.[selectionData.length - 1];
     }
 
-    private _addByParam(insertParam: ISelectionManagerInsertParam, isRefresh = true): void {
-        const { unitId, sheetId, selectionDatas } = insertParam;
-
-        const unitSelectionData = this._selectionInfo;
-        if (!unitSelectionData.has(unitId)) {
-            unitSelectionData.set(unitId, new Map());
-        }
-
-        const sheetSelectionData = unitSelectionData.get(unitId)!;
-
-        if (!sheetSelectionData.has(sheetId)) {
-            sheetSelectionData.set(sheetId, [...selectionDatas]);
-        } else {
-            let oldSelectionDatas = sheetSelectionData.get(sheetId);
-            if (oldSelectionDatas == null) {
-                oldSelectionDatas = [];
-                sheetSelectionData.set(sheetId, oldSelectionDatas);
-            }
-            oldSelectionDatas.push(...selectionDatas);
-        }
-
-        if (isRefresh) {
-            this._refresh({ unitId, sheetId });
-        }
-    }
-
-    private _replaceByParam(insertParam: ISelectionManagerInsertParam) {
-        const { unitId, sheetId, selectionDatas } = insertParam;
-
-        const unitSelectionData = this._selectionInfo;
-        if (!unitSelectionData.has(unitId)) {
-            unitSelectionData.set(unitId, new Map());
-        }
-
-        const sheetSelectionData = unitSelectionData.get(unitId)!;
-
-        if (!sheetSelectionData.has(sheetId)) {
-            sheetSelectionData.set(sheetId, selectionDatas);
-        } else {
-            let oldSelectionDatas = sheetSelectionData.get(sheetId);
-            if (oldSelectionDatas == null) {
-                oldSelectionDatas = [];
-                sheetSelectionData.set(sheetId, oldSelectionDatas);
-            }
-            oldSelectionDatas.splice(0, oldSelectionDatas.length, ...selectionDatas);
-        }
-    }
-
     private _clearByParam(param: ISelectionManagerSearchParam): void {
-        const selectionData = this._getSelectionDatas(param);
-
+        const selectionData = this._getSelections(param);
         selectionData?.splice(0);
-
-        this._refresh(param);
     }
 
-    private _removeByParam(index: number, param: ISelectionManagerSearchParam): void {
-        const selectionData = this._getSelectionDatas(param);
+    getWorkbookSelections(unitId: string): WorkbookSelections {
+        return this._ensureWorkbookSelection(unitId);
+    }
 
-        selectionData?.splice(index, 1);
+    private _wbSelections = new Map<string, WorkbookSelections>();
+    private _ensureWorkbookSelection(unitId: string): WorkbookSelections {
+        let wbSelection = this._wbSelections.get(unitId);
+        if (!wbSelection) {
+            wbSelection = new WorkbookSelections();
+            this._wbSelections.set(unitId, wbSelection);
+        }
 
-        this._refresh(param);
+        return wbSelection;
+    }
+}
+
+/**
+ * This class manages selections in a single workbook.
+ */
+export class WorkbookSelections extends Disposable {
+    private readonly _selectionMoveStart$ = new Subject<Nullable<ISelectionWithStyle[]>>();
+    readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
+
+    private readonly _selectionMoving$ = new Subject<Nullable<ISelectionWithStyle[]>>();
+    readonly selectionMoving$ = this._selectionMoving$.asObservable();
+
+    private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
+    readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
+
+    constructor() {
+        super();
+    }
+
+    override dispose(): void {
+        super.dispose();
+
+        this._selectionMoveEnd$.complete();
+        this._selectionMoving$.complete();
+        this._selectionMoveStart$.complete();
+    }
+
+    addSelection(sheetId: string, selectionDatas: ISelectionWithStyle[]) {
+        this._ensureSheetSelection(sheetId).push(...selectionDatas);
+    }
+
+    setSelection(sheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType = SelectionMoveType.MOVE_END) {
+        this._ensureSheetSelection(sheetId).splice(0, selectionDatas.length, ...selectionDatas);
+
+        // WTF: why we would not refresh in add but in replace?
+        if (type === SelectionMoveType.MOVE_START) {
+            this._selectionMoveStart$.next(selectionDatas);
+        } else if (type === SelectionMoveType.MOVING) {
+            this._selectionMoving$.next(selectionDatas);
+        } else {
+            this._selectionMoveEnd$.next(selectionDatas);
+        }
+    }
+
+    getSelectionOfWorksheet(sheetId: string): ISelectionWithStyle[] {
+        if (!this._wsSelections.has(sheetId)) {
+            return [];
+        }
+
+        return this._wsSelections.get(sheetId)!;
+    }
+
+    private _wsSelections = new Map<string, ISelectionWithStyle[]>();
+    private _ensureSheetSelection(sheetId: string): ISelectionWithStyle[] {
+        let wsSelection = this._wsSelections.get(sheetId);
+        if (!wsSelection) {
+            wsSelection = [];
+            this._wsSelections.set(sheetId, wsSelection);
+        }
+
+        return wsSelection;
     }
 }

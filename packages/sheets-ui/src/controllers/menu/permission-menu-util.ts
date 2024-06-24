@@ -48,7 +48,7 @@ export function getAddPermissionHidden$(accessor: IAccessor) {
                             const unitId = workbook.getUnitId();
                             const subUnitId = worksheet.getSheetId();
                             const subUnitRuleList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
-                            const selections = selectionManagerService.getSelections();
+                            const selections = selectionManagerService.getCurrentSelections();
                             const selectionsRanges = selections?.map((selection) => selection.range);
                             const ruleRanges = subUnitRuleList.map((rule) => rule.ranges).flat();
                             if (!selectionsRanges) {
@@ -102,7 +102,7 @@ export function getEditPermissionHidden$(accessor: IAccessor) {
                             const unitId = workbook.getUnitId();
                             const subUnitId = worksheet.getSheetId();
                             const subUnitRuleList = rangeRuleModel.getSubunitRuleList(unitId, subUnitId);
-                            const selectionRanges = selectionManagerService.getSelections()?.map((selection) => selection.range);
+                            const selectionRanges = selectionManagerService.getCurrentSelections()?.map((selection) => selection.range);
 
                             const ruleRanges = subUnitRuleList.map((rule) => rule.ranges).flat();
                             if (!selectionRanges?.length) {
@@ -164,7 +164,7 @@ export function getPermissionDisableBase$(accessor: IAccessor) {
                             if (!permission) {
                                 return true;
                             }
-                            const selections = selectionManagerService.getSelections();
+                            const selections = selectionManagerService.getCurrentSelections();
                             const selectionRanges = selections?.map((selection) => selection.range);
                             if (!selectionRanges?.length) {
                                 return false;
@@ -218,7 +218,7 @@ export function getAddPermissionDisableBase$(accessor: IAccessor) {
                             if (!permission || focus) {
                                 return true;
                             }
-                            const selections = selectionManagerService.getSelections();
+                            const selections = selectionManagerService.getCurrentSelections();
                             const selectionRanges = selections?.map((selection) => selection.range);
                             if (!selectionRanges?.length) {
                                 return true;
@@ -398,7 +398,7 @@ export function getRemovePermissionDisable$(accessor: IAccessor) {
                             if (!permission) {
                                 return true;
                             }
-                            const selections = accessor.get(SelectionManagerService).getSelections();
+                            const selections = accessor.get(SelectionManagerService).getCurrentSelections();
                             const selectionRanges = selections?.map((selection) => selection.range);
                             if (!selectionRanges?.length || selectionRanges.length > 1) {
                                 return true;

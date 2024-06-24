@@ -15,13 +15,14 @@
  */
 
 import type { IMutationInfo, IRange, IStyleData } from '@univerjs/core';
-import { Disposable, ICommandService, ILogService, IUndoRedoService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService, IUndoRedoService, ObjectMatrix, ThemeService } from '@univerjs/core';
 import { SelectionManagerService, SetRangeValuesMutation } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
+import { createCopyPasteSelectionStyle } from '../utils/selection-util';
 
 export interface IFormatPainterService {
     status$: Observable<FormatPainterStatus>;
@@ -71,7 +72,7 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
 
     constructor(
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -159,7 +160,7 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         if (status !== FormatPainterStatus.OFF) {
             const selection = this._selectionManagerService.getLast();
             if (selection) {
-                const style = this._selectionManagerService.createCopyPasteSelection();
+                const style = createCopyPasteSelectionStyle(this._themeService);
                 if (status === FormatPainterStatus.INFINITE) {
                     this._markId = this._markSelectionService.addShape({ ...selection, style });
                 } else {

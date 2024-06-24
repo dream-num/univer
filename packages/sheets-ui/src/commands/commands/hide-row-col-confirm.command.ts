@@ -28,7 +28,7 @@ export const HideRowConfirmCommand: ICommand = {
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const ranges = selectionManagerService.getSelections()?.map((s) => s.range);
+        const ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!ranges?.length) return false;
 
         const commandService = accessor.get(ICommandService);
@@ -68,7 +68,7 @@ export const HideColConfirmCommand: ICommand = {
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const ranges = selectionManagerService.getSelections()?.map((s) => s.range);
+        const ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!ranges?.length) {
             return false;
         }

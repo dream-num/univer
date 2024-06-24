@@ -126,7 +126,7 @@ export const SetSelectedColsVisibleCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
 
-        const ranges = selectionManagerService.getSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
+        const ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
         if (!ranges?.length) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
@@ -153,7 +153,7 @@ export const SetColHiddenCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        let ranges = selectionManagerService.getSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
+        let ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
         if (!ranges?.length) return false;
 
         const target = getSheetCommandTarget(univerInstanceService);

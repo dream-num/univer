@@ -24,7 +24,7 @@ import { SetSelectionsOperation } from '../operations/selection.operation';
 
 export const AddMergeRedoSelectionsOperationFactory = (accessor: IAccessor, params: IAddMergeCommandParams, ranges: IRange[]) => {
     const selectionManagerService = accessor.get(SelectionManagerService);
-    const selectionsBeforeMutation = selectionManagerService.getSelections();
+    const selectionsBeforeMutation = selectionManagerService.getCurrentSelections();
     const { value, selections, unitId, subUnitId } = params;
     if (selectionsBeforeMutation) {
         const lastSelectionBeforeMutation = selectionsBeforeMutation[selectionsBeforeMutation?.length - 1];
@@ -82,7 +82,7 @@ export const AddMergeRedoSelectionsOperationFactory = (accessor: IAccessor, para
 
 export const AddMergeUndoSelectionsOperationFactory = (accessor: IAccessor, params: IAddMergeCommandParams) => {
     const selectionManagerService = accessor.get(SelectionManagerService);
-    const selectionsBeforeMutation = selectionManagerService.getSelections();
+    const selectionsBeforeMutation = selectionManagerService.getCurrentSelections();
     const { unitId, subUnitId } = params;
     if (selectionsBeforeMutation) {
         const lastSelectionBeforeMutation = selectionsBeforeMutation[selectionsBeforeMutation?.length - 1];

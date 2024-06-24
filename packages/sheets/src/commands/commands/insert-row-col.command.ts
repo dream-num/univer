@@ -149,7 +149,7 @@ export const InsertRowBeforeCommand: ICommand = {
     id: 'sheet.command.insert-row-before',
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections()?.map((s) => s.range);
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         let range: IRange;
 
         if (selections?.length === 1) {
@@ -207,7 +207,7 @@ export const InsertRowAfterCommand: ICommand = {
     id: 'sheet.command.insert-row-after',
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections()?.map((s) => s.range);
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         let range: IRange;
 
         if (selections?.length === 1) {
@@ -336,7 +336,7 @@ export const InsertColBeforeCommand: ICommand = {
     id: 'sheet.command.insert-col-before',
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections();
+        const selections = selectionManagerService.getCurrentSelections();
         let range: IRange;
 
         if (selections?.length === 1) {
@@ -393,7 +393,7 @@ export const InsertColAfterCommand: ICommand = {
     id: 'sheet.command.insert-col-after',
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections();
+        const selections = selectionManagerService.getCurrentSelections();
         let range: IRange;
 
         if (selections?.length === 1) {

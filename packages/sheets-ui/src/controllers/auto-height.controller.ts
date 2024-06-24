@@ -146,7 +146,7 @@ export class AutoHeightController extends Disposable {
                     };
                 }
 
-                const selections = selectionManagerService.getSelectionRanges();
+                const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
 
                 if (!selections?.length) {
                     return {

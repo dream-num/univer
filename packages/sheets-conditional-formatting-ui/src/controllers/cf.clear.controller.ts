@@ -43,7 +43,7 @@ export class ConditionalFormattingClearController extends Disposable {
                 const undos: IMutationInfo[] = [];
                 const defaultV = { redos, undos };
                 if ([ClearSelectionFormatCommand.id, ClearSelectionAllCommand.id].includes(commandInfo.id)) {
-                    const ranges = this._selectionManagerService.getSelectionRanges();
+                    const ranges = this._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
                     if (!ranges) {
                         return defaultV;
                     }

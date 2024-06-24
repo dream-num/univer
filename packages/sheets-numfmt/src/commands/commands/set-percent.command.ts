@@ -29,7 +29,7 @@ export const SetPercentCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const selections = selectionManagerService.getSelections();
+        const selections = selectionManagerService.getCurrentSelections();
         if (!selections || !selections.length) {
             return false;
         }

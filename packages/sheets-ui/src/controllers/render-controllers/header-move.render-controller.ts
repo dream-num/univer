@@ -283,7 +283,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
                     // when multi ranges are selected, we should only move the range that contains
                     // `changeFromRow`
-                    const selections = this._selectionManagerService.getSelections();
+                    const selections = this._selectionManagerService.getCurrentSelections();
 
                     if (initialType === RANGE_TYPE.ROW) {
                         if (this._changeFromRow !== this._changeToRow && this._changeToRow !== -1) {

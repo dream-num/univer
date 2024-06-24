@@ -50,7 +50,7 @@ export class FWorksheet {
     }
 
     getSelection(): FSelection | null {
-        const selections = this._selectionManagerService.getSelections();
+        const selections = this._selectionManagerService.getCurrentSelections();
         if (!selections) {
             return null;
         }

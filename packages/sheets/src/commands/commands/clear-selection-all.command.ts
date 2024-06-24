@@ -52,7 +52,7 @@ export const ClearSelectionAllCommand: ICommand = {
         if (!worksheet) return false;
 
         const subUnitId = worksheet.getSheetId();
-        const selections = selectionManagerService.getSelectionRanges();
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) {
             return false;
         }

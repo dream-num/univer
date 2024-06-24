@@ -32,7 +32,7 @@ export const AddDecimalCommand: ICommand = {
         const numfmtService = accessor.get(INumfmtService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selections = selectionManagerService.getSelections();
+        const selections = selectionManagerService.getCurrentSelections();
         if (!selections || !selections.length) {
             return false;
         }

@@ -215,7 +215,7 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
 
         this._hoverMenu.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
             const currentColumn = this._currentColumn;
-            const currentSelectionDatas = this._selectionManagerService.getSelectionRanges();
+            const currentSelectionDatas = this._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
             const menuInSelections: boolean = !!currentSelectionDatas
                 ?.filter((range) => range.rangeType === RANGE_TYPE.COLUMN)
                 .find((data) => {

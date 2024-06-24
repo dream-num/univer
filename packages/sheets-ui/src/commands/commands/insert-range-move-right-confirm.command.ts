@@ -29,7 +29,7 @@ export const InsertRangeMoveRightConfirmCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selection = selectionManagerService.getSelections();
+        const selection = selectionManagerService.getCurrentSelections();
         if (!selection) {
             return false;
         }

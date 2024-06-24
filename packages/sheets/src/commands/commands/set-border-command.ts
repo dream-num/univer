@@ -146,7 +146,7 @@ export const SetBorderCommand: ICommand = {
         if (!target) return false;
 
         const { worksheet, unitId, subUnitId } = target;
-        const selections = selectionManagerService.getSelectionRanges();
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         const mergeData = worksheet.getConfig().mergeData;
         if (!selections?.length) {
             return false;

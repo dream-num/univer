@@ -52,7 +52,7 @@ export const DeltaRowHeightCommand: ICommand = {
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IDeltaRowHeightCommand) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections();
+        const selections = selectionManagerService.getCurrentSelections();
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         if (!selections?.length) {
@@ -203,7 +203,7 @@ export const SetRowHeightCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const selections = selectionManagerService.getSelectionRanges();
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) {
             return false;
         }
@@ -317,7 +317,7 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
                         endColumn: worksheet.getMaxColumns() - 1,
                     },
                 ]
-                : selectionManagerService.getSelectionRanges();
+                : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
 
         if (!ranges?.length) {
             return false;

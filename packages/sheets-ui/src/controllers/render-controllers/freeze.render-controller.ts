@@ -1187,7 +1187,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                     }
 
                     if (command.id === MoveColsCommand.id) {
-                        const selections = this._selectionManagerService.getSelections();
+                        const selections = this._selectionManagerService.getCurrentSelections();
                         const {
                             fromRange: { startColumn: fromCol },
                             toRange: { startColumn: toCol },
@@ -1251,7 +1251,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
                     }
 
                     if (command.id === MoveRowsCommand.id) {
-                        const selections = this._selectionManagerService.getSelections();
+                        const selections = this._selectionManagerService.getCurrentSelections();
                         const {
                             fromRange: { startRow: fromRow },
                             toRange: { startRow: toRow },

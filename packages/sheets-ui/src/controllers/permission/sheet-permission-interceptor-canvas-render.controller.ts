@@ -189,7 +189,7 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                         return false;
                     }
 
-                    const ranges = this._selectionManagerService.getSelections()?.map((selection) => {
+                    const ranges = this._selectionManagerService.getCurrentSelections()?.map((selection) => {
                         return selection.range;
                     });
 
@@ -236,7 +236,7 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                         return false;
                     }
 
-                    const ranges = this._selectionManagerService.getSelections()?.map((selection) => {
+                    const ranges = this._selectionManagerService.getCurrentSelections()?.map((selection) => {
                         return selection.range;
                     });
 

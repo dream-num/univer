@@ -72,7 +72,7 @@ export const SetRangeValuesCommand: ICommand = {
         const { subUnitId, unitId } = target;
 
         const { value, range } = params;
-        const currentSelections = range ? [range] : selectionManagerService.getSelectionRanges();
+        const currentSelections = range ? [range] : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
 
         if (!currentSelections || !currentSelections.length) {
             return false;

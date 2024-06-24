@@ -24,6 +24,7 @@ import { DocBackScrollRenderController } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../common/const';
 import { DocThreadCommentService } from '../services/doc-thread-comment.service';
+import { ShowCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
 
 @OnLifecycle(LifecycleStages.Rendered, DocThreadCommentSelectionController)
 export class DocThreadCommentSelectionController extends Disposable {
@@ -59,10 +60,12 @@ export class DocThreadCommentSelectionController extends Disposable {
                         }
 
                         if (customRange) {
-                            this._commandService.executeCommand(SetActiveCommentOperation.id, {
-                                unitId,
-                                subUnitId: DEFAULT_DOC_SUBUNIT_ID,
-                                commentId: customRange.rangeId,
+                            this._commandService.executeCommand(ShowCommentPanelOperation.id, {
+                                activeComment: {
+                                    unitId,
+                                    subUnitId: DEFAULT_DOC_SUBUNIT_ID,
+                                    commentId: customRange.rangeId,
+                                },
                             });
                             return;
                         }

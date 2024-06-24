@@ -35,13 +35,15 @@ export const ShowCommentPanelOperation: ICommand<IShowCommentPanelOperationParam
         const panelService = accessor.get(ThreadCommentPanelService);
         const sidebarService = accessor.get(ISidebarService);
 
-        sidebarService.open({
-            header: { title: 'comment' },
-            children: { label: DocThreadCommentPanel.componentKey },
-            width: 312,
-            onClose: () => panelService.setPanelVisible(false),
-        });
-        panelService.setPanelVisible(true);
+        if (!panelService.panelVisible) {
+            sidebarService.open({
+                header: { title: 'comment' },
+                children: { label: DocThreadCommentPanel.componentKey },
+                width: 312,
+                onClose: () => panelService.setPanelVisible(false),
+            });
+            panelService.setPanelVisible(true);
+        }
         if (params) {
             panelService.setActiveComment(params?.activeComment);
         }

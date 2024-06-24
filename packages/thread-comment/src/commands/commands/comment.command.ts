@@ -29,7 +29,7 @@ export interface IAddCommentCommandParams {
 export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
     id: 'thread-comment.command.add-comment',
     type: CommandType.COMMAND,
-    async  handler(accessor, params) {
+    async handler(accessor, params) {
         if (!params) {
             return false;
         }
@@ -196,7 +196,7 @@ export interface IResolveCommentCommandParams {
 export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
     id: 'thread-comment.command.resolve-comment',
     type: CommandType.COMMAND,
-    async  handler(accessor, params) {
+    async handler(accessor, params) {
         if (!params) {
             return false;
         }
@@ -250,7 +250,7 @@ export const DeleteCommentCommand: ICommand<IDeleteCommentCommandParams> = {
             return false;
         }
 
-        if (!(await dataSourceService.deleteComment(commentId))) {
+        if (!(await dataSourceService.deleteComment(commentId, unitId, subUnitId))) {
             return false;
         }
 
@@ -299,8 +299,9 @@ export const DeleteCommentTreeCommand: ICommand<IDeleteCommentCommandParams> = {
             return false;
         }
         const comments = [commentWithChildren.root, ...commentWithChildren.children];
+        const commentIds = comments.map((comment) => comment.id);
 
-        if (!(await dataSourceService.deleteCommentBatch(comments.map((comment) => comment.id)))) {
+        if (!(await dataSourceService.deleteCommentBatch(commentIds, unitId, subUnitId))) {
             return false;
         }
 

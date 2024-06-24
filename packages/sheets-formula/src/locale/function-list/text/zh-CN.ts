@@ -101,7 +101,7 @@ export default {
     },
     CONCAT: {
         description: '将多个区域和/或字符串的文本组合起来，但不提供分隔符或 IgnoreEmpty 参数。',
-        abstract: '将多个区域和/或字符串的文本组合起来，但不提供分隔符或 IgnoreEmpty 参数。',
+        abstract: '将多个区域和/或字符串的文本组合起来，但不提供分隔符或 IgnoreEmpty 参数',
         links: [
             {
                 title: '教学',
@@ -109,8 +109,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text1: { name: '文本 1', detail: '要联接的文本项。 字符串或字符串数组，如单元格区域。' },
+            text2: { name: '文本 2', detail: '要联接的其他文本项。 文本项最多可以有 253 个文本参数。 每个参数可以是一个字符串或字符串数组，如单元格区域。' },
         },
     },
     CONCATENATE: {

@@ -39,8 +39,6 @@ export class Averagea extends BaseFunction {
             }
 
             if (variant.isArray()) {
-                // accumulatorSum = accumulatorSum.plus(variant.sum());
-
                 (variant as ArrayValueObject).iterator((valueObject) => {
                     if (valueObject == null || valueObject.isNull()) {
                         return true; // continue

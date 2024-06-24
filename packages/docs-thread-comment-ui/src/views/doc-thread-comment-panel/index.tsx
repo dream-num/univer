@@ -70,7 +70,6 @@ export const DocThreadCommentPanel = () => {
                 commandService.executeCommand(StartAddCommentOperation.id);
             }}
             getSubUnitName={() => ''}
-            showFilter={false}
             disableAdd={isInValidSelection}
             tempComment={tempComment}
             onAddComment={(comment) => {

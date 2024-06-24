@@ -18,8 +18,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
-import type { Nullable, UniverInstanceType } from '@univerjs/core';
-import { ICommandService, LocaleService, UserManagerService } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { ICommandService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import { Button, Select } from '@univerjs/design';
 import { IncreaseSingle } from '@univerjs/icons';
@@ -40,7 +40,6 @@ export interface IThreadCommentPanelProps {
     sortComments?: (comments: IThreadComment[]) => IThreadComment[];
     onItemLeave?: (comment: IThreadComment) => void;
     onItemEnter?: (comment: IThreadComment) => void;
-    showFilter?: boolean;
     disableAdd?: boolean;
     tempComment?: Nullable<IThreadComment>;
     onAddComment?: IThreadCommentTreeProps['onAddComment'];
@@ -59,7 +58,6 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         sortComments,
         onItemLeave,
         onItemEnter,
-        showFilter = true,
         disableAdd,
         tempComment,
         onAddComment,
@@ -155,9 +153,9 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
 
     return (
         <div className={styles.threadCommentPanel}>
-            {showFilter
-                ? (
-                    <div className={styles.threadCommentPanelForms}>
+            <div className={styles.threadCommentPanelForms}>
+                {type === UniverInstanceType.UNIVER_SHEET
+                    ? (
                         <Select
                             borderless
                             value={unit}
@@ -172,31 +170,31 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                                 },
                             ]}
                         />
-                        <Select
-                            borderless
-                            value={status}
-                            onChange={(e) => setStatus(e)}
-                            options={[
-                                {
-                                    value: 'all',
-                                    label: localeService.t('threadCommentUI.filter.status.all'),
-                                }, {
-                                    value: 'resolved',
-                                    label: localeService.t('threadCommentUI.filter.status.resolved'),
-                                },
-                                {
-                                    value: 'unsolved',
-                                    label: localeService.t('threadCommentUI.filter.status.unsolved'),
-                                },
-                                {
-                                    value: 'concern_me',
-                                    label: localeService.t('threadCommentUI.filter.status.concernMe'),
-                                },
-                            ]}
-                        />
-                    </div>
-                )
-                : null}
+                    )
+                    : null}
+                <Select
+                    borderless
+                    value={status}
+                    onChange={(e) => setStatus(e)}
+                    options={[
+                        {
+                            value: 'all',
+                            label: localeService.t('threadCommentUI.filter.status.all'),
+                        }, {
+                            value: 'resolved',
+                            label: localeService.t('threadCommentUI.filter.status.resolved'),
+                        },
+                        {
+                            value: 'unsolved',
+                            label: localeService.t('threadCommentUI.filter.status.unsolved'),
+                        },
+                        {
+                            value: 'concern_me',
+                            label: localeService.t('threadCommentUI.filter.status.concernMe'),
+                        },
+                    ]}
+                />
+            </div>
             {statuedComments?.map((comment) => (
                 <ThreadCommentTree
                     prefix={prefix}

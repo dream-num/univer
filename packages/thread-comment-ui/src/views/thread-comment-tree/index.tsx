@@ -130,6 +130,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                         comment={item}
                         onCancel={() => onEditingChange?.(false)}
                         autoFocus
+                        unitId={unitId}
+                        subUnitId={subUnitId}
                         onSave={({ text, attachments }) => {
                             onEditingChange?.(false);
                             commandService.executeCommand(
@@ -320,6 +322,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                         <ThreadCommentEditor
                             key={`${autoFocus}`}
                             ref={editorRef}
+                            unitId={unitId}
+                            subUnitId={subUnitId}
                             onSave={({ text, attachments }) => {
                                 commandService.executeCommand(
                                     AddCommentCommand.id,

@@ -83,7 +83,7 @@ export const CopySheetCommand: ICommand = {
 };
 
 // If Sheet1(Copy) already exists and you copy Sheet1, you should get Sheet1(Copy2)
-function getCopyUniqueSheetName(workbook: Workbook, localeService: LocaleService, name: string): string {
+export function getCopyUniqueSheetName(workbook: Workbook, localeService: LocaleService, name: string): string {
     let output = name + localeService.t('sheets.tabs.sheetCopy', '');
     let count = 2;
 

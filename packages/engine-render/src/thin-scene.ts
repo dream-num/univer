@@ -41,13 +41,13 @@ export abstract class ThinScene extends Disposable {
 
     onPointerLeave$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
-    onDragEnterObserver = new Observable<IDragEvent>();
+    onDragEnter$ = new EventSubject<IDragEvent>();
 
-    onDragOverObserver = new Observable<IDragEvent>();
+    onDragOver$ = new EventSubject<IDragEvent>();
 
-    onDragLeaveObserver = new Observable<IDragEvent>();
+    onDragLeave$ = new EventSubject<IDragEvent>();
 
-    onDropObserver = new Observable<IDragEvent>();
+    onDrop$ = new EventSubject<IDragEvent>();
 
     onDblclick$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
@@ -210,10 +210,10 @@ export abstract class ThinScene extends Disposable {
         this.onPointerUp$.complete();
         this.onPointerEnter$.complete();
         this.onPointerLeave$.complete();
-        this.onDragEnterObserver.clear();
-        this.onDragOverObserver.clear();
-        this.onDragLeaveObserver.clear();
-        this.onDropObserver.clear();
+        this.onDragEnter$.complete();
+        this.onDragOver$.complete();
+        this.onDragLeave$.complete();
+        this.onDrop$.complete();
         this.onDblclick$.complete();
         this.onTripleClick$.complete();
         this.onMouseWheel$.complete();

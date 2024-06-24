@@ -920,7 +920,7 @@ export class Scene extends ThinScene {
 
     override triggerDragLeave(evt: IDragEvent) {
         if (
-            !this.onDragLeaveObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onDragLeave$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerDragLeave(evt);
@@ -931,7 +931,7 @@ export class Scene extends ThinScene {
 
     override triggerDragOver(evt: IDragEvent) {
         if (
-            !this.onDragOverObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onDragOver$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerDragOver(evt);
@@ -942,7 +942,7 @@ export class Scene extends ThinScene {
 
     override triggerDragEnter(evt: IDragEvent) {
         if (
-            !this.onDragEnterObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onDragEnter$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerDragEnter(evt);
@@ -953,7 +953,7 @@ export class Scene extends ThinScene {
 
     override triggerDrop(evt: IDragEvent) {
         if (
-            !this.onDropObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onDrop$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerDrop(evt);

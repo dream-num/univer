@@ -301,10 +301,8 @@ export class InputManager extends Disposable {
             this.dragLeaveEnterHandler(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
-                if (this._scene.onDragOverObserver.hasObservers()) {
-                    this._scene.onDragOverObserver.notifyObservers(evt);
-                    this._scene.getEngine()?.setRemainCapture();
-                }
+                this._scene.onDragOver$.emitEvent(evt);
+                this._scene.getEngine()?.setRemainCapture();
             }
         };
 
@@ -313,9 +311,7 @@ export class InputManager extends Disposable {
             const isStop = currentObject?.triggerDrop(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
-                if (this._scene.onDropObserver.hasObservers()) {
-                    this._scene.onDropObserver.notifyObservers(evt);
-                }
+                this._scene.onDrop$.emitEvent(evt);
             }
         };
 

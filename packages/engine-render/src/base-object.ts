@@ -61,13 +61,13 @@ export abstract class BaseObject extends Disposable {
     onPointerLeave$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerEnter$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
-    onDragLeaveObserver = new Observable<IDragEvent | IMouseEvent>();
+    onDragLeave$ = new EventSubject<IDragEvent | IMouseEvent>();
 
-    onDragOverObserver = new Observable<IDragEvent | IMouseEvent>();
+    onDragOver$ = new EventSubject<IDragEvent | IMouseEvent>();
 
-    onDragEnterObserver = new Observable<IDragEvent | IMouseEvent>();
+    onDragEnter$ = new EventSubject<IDragEvent | IMouseEvent>();
 
-    onDropObserver = new Observable<IDragEvent | IMouseEvent>();
+    onDrop$ = new EventSubject<IDragEvent | IMouseEvent>();
 
     onIsAddedToParentObserver = new Observable<any>();
     onDisposeObserver = new Observable<BaseObject>();
@@ -721,7 +721,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerDragLeave(evt: IDragEvent | IMouseEvent) {
-        if (!this.onDragLeaveObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onDragLeave$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerDragLeave(evt);
             return false;
         }
@@ -729,7 +729,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerDragOver(evt: IDragEvent | IMouseEvent) {
-        if (!this.onDragOverObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onDragOver$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerDragOver(evt);
             return false;
         }
@@ -737,7 +737,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerDragEnter(evt: IDragEvent | IMouseEvent) {
-        if (!this.onDragEnterObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onDragEnter$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerDragEnter(evt);
             return false;
         }
@@ -745,7 +745,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerDrop(evt: IDragEvent | IMouseEvent) {
-        if (!this.onDropObserver.notifyObservers(evt)?.stopPropagation) {
+        if (!this.onDrop$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerDrop(evt);
             return false;
         }
@@ -763,10 +763,10 @@ export abstract class BaseObject extends Disposable {
         this.onPointerLeave$.complete();
         this.onPointerOver$.complete();
         this.onPointerEnter$.complete();
-        this.onDragLeaveObserver.clear();
-        this.onDragOverObserver.clear();
-        this.onDragEnterObserver.clear();
-        this.onDropObserver.clear();
+        this.onDragLeave$.complete();
+        this.onDragOver$.complete();
+        this.onDragEnter$.complete();
+        this.onDrop$.complete();
         this.onDblclick$.complete();
         this.onTripleClick$.complete();
         this.onIsAddedToParentObserver.clear();

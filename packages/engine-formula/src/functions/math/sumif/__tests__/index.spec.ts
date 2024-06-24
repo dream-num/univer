@@ -22,7 +22,7 @@ import { Sumif } from '../index';
 import { StringValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test sumif function', () => {
-    const textFunction = new Sumif(FUNCTION_NAMES_MATH.SUMIF);
+    const testFunction = new Sumif(FUNCTION_NAMES_MATH.SUMIF);
 
     describe('Sumif', () => {
         it('Range and criteria', async () => {
@@ -35,7 +35,7 @@ describe('Test sumif function', () => {
 
             const criteria = StringValueObject.create('>40');
 
-            const resultObject = textFunction.calculate(range, criteria);
+            const resultObject = testFunction.calculate(range, criteria);
             expect(resultObject.getValue()).toBe(488);
         });
 
@@ -56,7 +56,7 @@ describe('Test sumif function', () => {
                 1
             }`);
 
-            const resultObject = textFunction.calculate(range, criteria, sumRange);
+            const resultObject = testFunction.calculate(range, criteria, sumRange);
             expect(resultObject.getValue()).toBe(2);
         });
 
@@ -75,7 +75,7 @@ describe('Test sumif function', () => {
                 444
             }`);
 
-            const resultObject = textFunction.calculate(range, criteria);
+            const resultObject = testFunction.calculate(range, criteria);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[4], [4], [44], [444]]);
         });
     });

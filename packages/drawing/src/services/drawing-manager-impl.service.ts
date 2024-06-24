@@ -99,6 +99,9 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     private readonly _featurePluginUngroupUpdate$ = new Subject<IDrawingGroupUpdateParam[]>();
     readonly featurePluginUngroupUpdate$: Observable<IDrawingGroupUpdateParam[]> = this._featurePluginUngroupUpdate$.asObservable();
 
+    private _visible: boolean = true;
+    private _editable: boolean = true;
+
     dispose(): void {
         this._remove$.complete();
         this._add$.complete();
@@ -742,6 +745,22 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
 
     private _getDrawingOrder(unitId: string, subUnitId: string) {
         return this.drawingManagerData[unitId]?.[subUnitId]?.order || [];
+    }
+
+    getDrawingVisible() {
+        return this._visible;
+    }
+
+    getDrawingEditable() {
+        return this._editable;
+    }
+
+    setDrawingVisible(visible: boolean) {
+        this._visible = visible;
+    }
+
+    setDrawingEditable(editable: boolean) {
+        this._editable = editable;
     }
 }
 

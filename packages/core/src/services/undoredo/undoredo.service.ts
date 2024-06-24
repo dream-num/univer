@@ -49,7 +49,7 @@ export interface IUndoRedoService {
     popUndoToRedo(): void;
     popRedoToUndo(): void;
 
-    clearUndoRedo(unitID: string): void;
+    clearUndoRedo(unitId: string): void;
 
     /**
      * Batch undo redo elements into a single `IUndoRedoItem` util the returned `IDisposable` is called.

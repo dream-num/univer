@@ -26,6 +26,9 @@ export class SelectionRenderModel implements IRangeWithCoord {
 
     private _endRow: number = -1;
 
+    /**
+     * value from { startY, endY, startX, endX } = getCellPositionByIndex in basics/tools
+     */
     private _startX: number = 0;
 
     private _startY: number = 0;
@@ -54,18 +57,30 @@ export class SelectionRenderModel implements IRangeWithCoord {
         return this._endRow;
     }
 
+    /**
+     * value from { startY, endY, startX, endX } = getCellPositionByIndex in basics/tools
+     */
     get startX() {
         return this._startX;
     }
 
+    /**
+     * value from { startY, endY, startX, endX } = getCellPositionByIndex in basics/tools
+     */
     get startY() {
         return this._startY;
     }
 
+    /**
+     * value from { startY, endY, startX, endX } = getCellPositionByIndex in basics/tools
+     */
     get endX() {
         return this._endX;
     }
 
+    /**
+     * value from { startY, endY, startX, endX } = getCellPositionByIndex in basics/tools
+     */
     get endY() {
         return this._endY;
     }

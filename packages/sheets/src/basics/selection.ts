@@ -145,6 +145,12 @@ export interface ISelectionWithStyle extends ISelection {
     style: Nullable<ISelectionStyle>;
 }
 
+export interface ISheetRangeLocation {
+    range: IRange;
+    subUnitId: string;
+    unitId: string;
+}
+
 // The default configuration of the selection.
 export function getNormalSelectionStyle(themeService: ThemeService): ISelectionStyle {
     const styleSheet = themeService.getCurrentTheme();

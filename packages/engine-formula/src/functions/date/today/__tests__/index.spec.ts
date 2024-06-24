@@ -35,11 +35,11 @@ global.Date = vi.fn((...params) => {
 global.Date.UTC = _Date.UTC;
 
 describe('Test today function', () => {
-    const textFunction = new Today(FUNCTION_NAMES_DATE.TODAY);
+    const testFunction = new Today(FUNCTION_NAMES_DATE.TODAY);
 
     describe('Today', () => {
         it('Normal', () => {
-            const result = textFunction.calculate();
+            const result = testFunction.calculate();
             expect(result.getValue()).toBe(43831);
         });
     });

@@ -87,7 +87,7 @@ describe('test "FilterConditionItems"', () => {
 
             it('should map to filter column with space string', () => {
                 expect(FilterConditionItems.NOT_EMPTY.mapToFilterColumn({ operator1: ExtendCustomFilterOperator.NOT_EMPTY }))
-                    .toEqual({ customFilters: { customFilters: [{ operator: CustomFilterOperator.NOT_EQUALS, val: ' ' }] } });
+                    .toEqual({ customFilters: { customFilters: [{ operator: CustomFilterOperator.NOT_EQUALS, val: '' }] } });
             });
         });
 

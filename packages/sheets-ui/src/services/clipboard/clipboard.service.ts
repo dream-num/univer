@@ -69,6 +69,7 @@ export const PREDEFINED_HOOK_NAME = {
     SPECIAL_PASTE_FORMAT: 'special-paste-format',
     SPECIAL_PASTE_COL_WIDTH: 'special-paste-col-width',
     SPECIAL_PASTE_BESIDES_BORDER: 'special-paste-besides-border',
+    SPECIAL_PASTE_FORMULA: 'special-paste-formula',
 };
 
 interface ICopyContent {
@@ -932,6 +933,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const { startColumn, endColumn, startRow, endRow } = cellMatrix.getDataRange();
         const rowCount = endRow - startRow + 1;
         const colCount = endColumn - startColumn + 1;
+
+        if (rowCount <= 0 || colCount <= 0) return null;
 
         const pasteSelectionRangeRowLen = discreteRange.rows.length;
         const pasteSelectionRangeColLen = discreteRange.cols.length;

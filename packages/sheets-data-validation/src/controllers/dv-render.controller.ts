@@ -213,7 +213,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
                     priority: 200,
-                    // eslint-disable-next-line max-lines-per-function
+                    // eslint-disable-next-line max-lines-per-function, complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
                         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
@@ -340,6 +340,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                                 };
                                 return validator?.canvasRender?.calcCellAutoHeight?.(info);
                             },
+                            coverable: (cell?.coverable ?? true) && !(rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE),
                         });
                     },
                 }

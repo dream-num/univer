@@ -34,8 +34,15 @@ import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/she
 import type { Dependency, IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Quantity } from '@wendellhu/redi';
 
-import type { RenderComponentType, SheetComponent, SheetExtension } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import type {
+    IColumnsHeaderCfgParam,
+    IRowsHeaderCfgParam,
+    RenderComponentType,
+    SheetComponent,
+    SheetExtension, SpreadsheetColumnHeader,
+    SpreadsheetRowHeader } from '@univerjs/engine-render';
+import {
+    IRenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FDocument } from './docs/f-document';
@@ -354,6 +361,34 @@ export class FUniver {
         }
 
         return renderComponent;
+    }
+
+    /**
+     * customizeColumnHeader
+     * @param cfg
+     * cfg example
+     ({ headerStyle:{backgroundColor: 'pink', fontSize: 9}, columnsCfg: ['MokaII', undefined, null, {text: 'Size', textAlign: 'left'}]})
+     */
+    customizeColumnHeader(cfg: IColumnsHeaderCfgParam) {
+        const wb = this.getActiveWorkbook();
+        if (!wb) {
+            console.error('WorkBook not exist');
+            return;
+        }
+        const unitId = wb?.getId();
+        const sheetColumn = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+        sheetColumn.setCustomHeader(cfg);
+    }
+
+    customizeRowHeader(cfg: IRowsHeaderCfgParam) {
+        const wb = this.getActiveWorkbook();
+        if (!wb) {
+            console.error('WorkBook not exist');
+            return;
+        }
+        const unitId = wb?.getId();
+        const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
+        sheetRow.setCustomHeader(cfg);
     }
 
     private _initialize(): void {

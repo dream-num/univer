@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange } from '../types/interfaces/i-range';
+import type { IRange, IRectLTRB } from '../types/interfaces/i-range';
 import { AbsoluteRefType, RANGE_TYPE } from '../types/interfaces/i-range';
 import type { Nullable } from './types';
 
@@ -314,20 +314,7 @@ export class Rectangle {
         return result;
     }
 
-    static hasIntersectionBetweenTwoBounds(
-        rect1: {
-            left: number;
-            top: number;
-            right: number;
-            bottom: number;
-        },
-        rect2: {
-            left: number;
-            top: number;
-            right: number;
-            bottom: number;
-        }
-    ) {
+    static hasIntersectionBetweenTwoRect(rect1: IRectLTRB, rect2: IRectLTRB) {
         if (
             rect1.left > rect2.right || // rect1 在 rect2 右侧
             rect1.right < rect2.left || // rect1 在 rect2 左侧
@@ -338,5 +325,28 @@ export class Rectangle {
         }
 
         return true;
+    }
+
+    static getIntersectionBetweenTwoRect(rect1: IRectLTRB, rect2: IRectLTRB) {
+        // 计算两个矩形的交集部分的坐标
+        const left = Math.max(rect1.left, rect2.left);
+        const right = Math.min(rect1.right, rect2.right);
+        const top = Math.max(rect1.top, rect2.top);
+        const bottom = Math.min(rect1.bottom, rect2.bottom);
+
+        // 如果交集部分的宽度或高度小于等于 0，说明两个矩形不相交
+        if (right <= left || bottom <= top) {
+            return null;
+        }
+
+        // 返回交集部分的矩形
+        return {
+            left,
+            right,
+            top,
+            bottom,
+            width: right - left,
+            height: bottom - top,
+        } as Required<IRectLTRB>;
     }
 }

@@ -20,7 +20,6 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import type { IUniverDebuggerConfig } from './controllers/debugger.controller';
 import { DebuggerController, DefaultDebuggerConfig } from './controllers/debugger.controller';
-import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
 import { E2EMemoryController } from './controllers/e2e/e2e-memory.controller';
 
 export class UniverDebuggerPlugin extends Plugin {
@@ -39,7 +38,7 @@ export class UniverDebuggerPlugin extends Plugin {
 
     override onStarting(injector: Injector): void {
         ([
-            [PerformanceMonitorController],
+            // [PerformanceMonitorController],
             [E2EMemoryController],
         ] as Dependency[]).forEach((d) => injector.add(d));
     }

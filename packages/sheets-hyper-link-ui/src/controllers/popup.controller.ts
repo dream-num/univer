@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
-import { HoverManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { Disposable, IPermissionService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
+import { HoverManagerService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { debounceTime } from 'rxjs';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookViewPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetsHyperLinkPopupController)
@@ -26,7 +27,9 @@ export class SheetsHyperLinkPopupController extends Disposable {
     constructor(
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(SheetsHyperLinkPopupService) private readonly _sheetsHyperLinkPopupService: SheetsHyperLinkPopupService,
-        @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService
+        @Inject(IRenderManagerService) private readonly _renderManagerService: IRenderManagerService,
+        @Inject(IPermissionService) private readonly _permissionService: IPermissionService,
+        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController
     ) {
         super();
 
@@ -60,10 +63,33 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     });
                 }
 
+                const viewPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+                    workbookTypes: [WorkbookViewPermission],
+                    worksheetTypes: [WorksheetViewPermission],
+                    rangeTypes: [RangeProtectionPermissionViewPoint],
+                }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);
+                if (!viewPermission) {
+                    this._sheetsHyperLinkPopupService.hideCurrentPopup();
+                    return;
+                }
+
+                const editPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
+                    workbookTypes: [WorkbookEditablePermission],
+                    worksheetTypes: [WorksheetEditPermission, WorksheetInsertHyperlinkPermission],
+                    rangeTypes: [RangeProtectionPermissionEditPoint],
+                }, [{ startRow: currentRow, startColumn: currentCol, endRow: currentRow, endColumn: currentCol }]);
+
+                const unitId = currentCell.location.unitId;
+                const subUnitId = currentCell.location.subUnitId;
+
+                const copyPermission = this._permissionService.composePermission([new WorkbookCopyPermission(unitId).id, new WorksheetCopyPermission(unitId, subUnitId).id]).every((permission) => permission.value);
+
                 this._sheetsHyperLinkPopupService.showPopup({
                     ...currentCell.location,
                     row: targetRow,
                     col: targetCol,
+                    editPermission,
+                    copyPermission,
                 });
             })
         );

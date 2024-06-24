@@ -16,9 +16,7 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService } from '@univerjs/core';
-import { SheetPasteCommand } from '@univerjs/sheets-ui';
-
-export const SPECIAL_PASTE_FORMULA = 'special-paste-formula';
+import { PREDEFINED_HOOK_NAME, SheetPasteCommand } from '@univerjs/sheets-ui';
 
 export const SheetOnlyPasteFormulaCommand: ICommand = {
     id: 'sheet.command.paste-formula',
@@ -26,7 +24,7 @@ export const SheetOnlyPasteFormulaCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         return commandService.executeCommand(SheetPasteCommand.id, {
-            value: SPECIAL_PASTE_FORMULA,
+            value: PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA,
         });
     },
 };

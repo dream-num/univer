@@ -17,8 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import { PageOrientType } from '@univerjs/core';
 import type {
-    IDocumentSkeletonFooter,
-    IDocumentSkeletonHeader,
+    IDocumentSkeletonHeaderFooter,
     IDocumentSkeletonPage,
     ISkeletonResourceReference,
 } from '../../../../basics/i-document-skeleton-cached';
@@ -32,7 +31,6 @@ import { createSkeletonSection } from './section';
 
 // 新增数据结构框架
 // 判断奇数和偶数页码
-
 export function createSkeletonPage(
     ctx: ILayoutContext,
     sectionBreakConfig: ISectionBreakConfig,
@@ -93,18 +91,18 @@ export function createSkeletonPage(
         footerId = evenPageFooterId ?? '';
     }
 
-    let header: Nullable<IDocumentSkeletonHeader>;
-    let footer: Nullable<IDocumentSkeletonFooter>;
+    let header: Nullable<IDocumentSkeletonHeaderFooter>;
+    let footer: Nullable<IDocumentSkeletonHeaderFooter>;
     if (headerId) {
         if (skeHeaders.get(headerId)?.has(pageWidth)) {
             header = skeHeaders.get(headerId)?.get(pageWidth);
         } else if (headerTreeMap && headerTreeMap.has(headerId)) {
-            header = _createSkeletonHeader(
+            header = _createSkeletonHeaderFooter(
                 ctx,
                 headerTreeMap.get(headerId)!,
                 sectionBreakConfig,
                 skeletonResourceReference
-            ) as IDocumentSkeletonHeader;
+            );
             skeHeaders.set(headerId, new Map([[pageWidth, header]]));
         }
         page.headerId = headerId;
@@ -114,13 +112,13 @@ export function createSkeletonPage(
         if (skeFooters.get(footerId)?.has(pageWidth)) {
             footer = skeFooters.get(footerId)?.get(pageWidth);
         } else if (footerTreeMap && footerTreeMap.has(footerId)) {
-            footer = _createSkeletonHeader(
+            footer = _createSkeletonHeaderFooter(
                 ctx,
                 footerTreeMap.get(footerId)!,
                 sectionBreakConfig,
                 skeletonResourceReference
-            ) as IDocumentSkeletonFooter;
-            skeFooters.set(headerId, new Map([[pageWidth, footer]]));
+            );
+            skeFooters.set(footerId, new Map([[pageWidth, footer]]));
         }
         page.footerId = footerId;
     }
@@ -178,29 +176,20 @@ function _getNullPage() {
     };
 }
 
-function _createSkeletonHeader(
+function _createSkeletonHeaderFooter(
     ctx: ILayoutContext,
     headerOrFooter: DocumentViewModel,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
     isHeader = true
-): IDocumentSkeletonHeader | IDocumentSkeletonFooter {
+): IDocumentSkeletonHeaderFooter {
     const {
-        lists,
-        footerTreeMap,
-        headerTreeMap,
-        localeService,
-        pageSize,
-        marginLeft = 0,
-        marginRight = 0,
-        drawings,
-        marginTop = 0,
-        marginBottom = 0,
-        marginHeader = 0,
-        marginFooter = 0,
+        lists, footerTreeMap, headerTreeMap, localeService, pageSize, drawings,
+        marginLeft = 0, marginRight = 0, marginTop = 0, marginBottom = 0,
+        marginHeader = 0, marginFooter = 0,
     } = sectionBreakConfig;
     const pageWidth = pageSize?.width || Number.POSITIVE_INFINITY;
-    const headerConfig: ISectionBreakConfig = {
+    const headerFooterConfig: ISectionBreakConfig = {
         lists,
         footerTreeMap,
         headerTreeMap,
@@ -212,50 +201,41 @@ function _createSkeletonHeader(
         drawings,
     };
 
-    const areaPage = createSkeletonPage(ctx, headerConfig, skeletonResourceReference);
+    const areaPage = createSkeletonPage(ctx, headerFooterConfig, skeletonResourceReference);
     const page = dealWithSection(
         ctx,
         headerOrFooter,
         headerOrFooter.children[0],
         areaPage,
-        headerConfig
+        headerFooterConfig
     ).pages[0];
 
     updateBlockIndex([page]);
-    const column = page.sections[0].columns[0];
-    const height = column.height || 0;
-    const { skeDrawings, st, ed } = page;
-
-    const headerOrFooterSke = {
-        lines: column.lines,
-        skeDrawings,
-        height,
-        st,
-        ed,
-        marginLeft,
-        marginRight,
-    };
 
     if (isHeader) {
         return {
-            ...headerOrFooterSke,
-            marginTop: __getHeaderMarginTop(marginTop, marginHeader, height),
+            ...page,
+            marginTop: marginHeader,
+            marginBottom: 0,
         };
     }
+
     return {
-        ...headerOrFooterSke,
-        marginBottom: __getHeaderMarginBottom(marginBottom, marginFooter, height),
+        ...page,
+        marginBottom: marginFooter,
+        marginTop: 0,
     };
 }
 
 function _getVerticalMargin(
     marginTB: number,
     marginHF: number,
-    headerOrFooter: Nullable<IDocumentSkeletonHeader> | Nullable<IDocumentSkeletonFooter>
+    headerOrFooter: Nullable<IDocumentSkeletonHeaderFooter>
 ) {
-    if (!headerOrFooter || headerOrFooter.lines.length === 0) {
+    if (!headerOrFooter || headerOrFooter.sections[0].columns[0].lines.length === 0) {
         return marginTB;
     }
+
     return Math.max(marginTB, marginHF, headerOrFooter?.height || 0);
 }
 

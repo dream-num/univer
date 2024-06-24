@@ -36,8 +36,8 @@ export interface IDocumentSkeletonCached extends ISkeletonResourceReference {
 }
 
 export interface ISkeletonResourceReference {
-    skeHeaders: Map<string, Map<number, IDocumentSkeletonHeader>>; // id:{ width: IDocumentSkeletonFooter }
-    skeFooters: Map<string, Map<number, IDocumentSkeletonFooter>>;
+    skeHeaders: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>; // id:{ width: IDocumentSkeletonHeaderFooter }
+    skeFooters: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
     /* Global cache, does not participate in rendering, only helps skeleton generation */
     skeListLevel?: Map<string, IDocumentSkeletonBullet[]>; // 有序列表缓存，id：{ level: max(width)的bullet }
     drawingAnchor?: Map<number, IDocumentSkeletonDrawingAnchor>; // Anchor point to assist floating element positioning
@@ -49,22 +49,14 @@ export interface IDocumentSkeletonDrawingAnchor {
     top: number; // relative height for previous block
 }
 
-export interface IDocumentSkeletonHeaderFooterBase {
-    lines: IDocumentSkeletonLine[];
-    skeDrawings: Map<string, IDocumentSkeletonDrawing>;
-    height: number; // footer或header的总长度
-    st: number; // startIndex 文本开始索引
-    ed: number; // endIndex 文本结束索引
-    marginLeft: number;
-}
-
-export interface IDocumentSkeletonHeader extends IDocumentSkeletonHeaderFooterBase {
-    marginTop: number;
-}
-
-export interface IDocumentSkeletonFooter extends IDocumentSkeletonHeaderFooterBase {
-    marginBottom: number;
-}
+// export interface IDocumentSkeletonHeaderFooterBase {
+//     lines: IDocumentSkeletonLine[];
+//     skeDrawings: Map<string, IDocumentSkeletonDrawing>;
+//     height: number; // footer或header的总长度
+//     st: number; // startIndex 文本开始索引
+//     ed: number; // endIndex 文本结束索引
+//     marginLeft: number;
+// }
 
 export interface IDocumentSkeletonPage {
     sections: IDocumentSkeletonSection[];
@@ -93,6 +85,8 @@ export interface IDocumentSkeletonPage {
     renderConfig?: IDocumentRenderConfig;
     parent?: IDocumentSkeletonCached;
 }
+
+export interface IDocumentSkeletonHeaderFooter extends IDocumentSkeletonPage {}
 
 export interface IDocumentSkeletonSection {
     columns: IDocumentSkeletonColumn[];

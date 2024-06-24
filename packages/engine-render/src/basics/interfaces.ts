@@ -36,9 +36,8 @@ import type {
     IDocumentSkeletonDrawing,
     IDocumentSkeletonDrawingAnchor,
     IDocumentSkeletonFontStyle,
-    IDocumentSkeletonFooter,
     IDocumentSkeletonGlyph,
-    IDocumentSkeletonHeader,
+    IDocumentSkeletonHeaderFooter,
 } from './i-document-skeleton-cached';
 import type { Vector2 } from './vector2';
 import type { ITransformerConfig } from './transformer-config';
@@ -115,8 +114,8 @@ export interface IParagraphConfig {
     // pageContentWidth: number;
     // pageContentHeight: number;
     paragraphStyle?: IParagraphStyle;
-    skeHeaders: Map<string, Map<number, IDocumentSkeletonHeader>>;
-    skeFooters: Map<string, Map<number, IDocumentSkeletonFooter>>;
+    skeHeaders: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
+    skeFooters: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
     drawingAnchor?: Map<number, IDocumentSkeletonDrawingAnchor>;
     // sectionBreakConfig: ISectionBreakConfig;
 }

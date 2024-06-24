@@ -16,7 +16,8 @@
 
 import type { IViewportInfo } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
-import { Rect } from '../../shape';
+import type { IPathProps } from '../../shape';
+import { Path, Rect } from '../../shape';
 import { Liquid } from './liquid';
 import type { IDocumentsConfig } from './doc-component';
 import { DocComponent } from './doc-component';
@@ -24,6 +25,7 @@ import type { DocumentSkeleton } from './layout/doc-skeleton';
 
 const PAGE_STROKE_COLOR = 'rgba(198, 198, 198, 1)';
 const PAGE_FILL_COLOR = 'rgba(255, 255, 255, 1)';
+const MARGIN_STROKE_COLOR = 'rgba(158, 158, 158, 1)';
 
 export class DocBackground extends DocComponent {
     private _drawLiquid: Liquid;
@@ -67,15 +69,16 @@ export class DocBackground extends DocComponent {
                 );
                 pageLeft += x;
                 pageTop += y;
+
                 continue;
             }
 
-            // Draw background.
-            const { width, pageWidth, height, pageHeight } = page;
+            // Draw background and margin identifier.
+            const { width, pageWidth, height, pageHeight, marginTop, marginBottom, marginLeft, marginRight } = page;
 
             ctx.save();
             ctx.translate(pageLeft - 0.5, pageTop - 0.5);
-            const options = {
+            const backgroundOptions = {
                 width: pageWidth ?? width,
                 height: pageHeight ?? height,
                 strokeWidth: 1,
@@ -83,7 +86,52 @@ export class DocBackground extends DocComponent {
                 fill: PAGE_FILL_COLOR,
                 zIndex: 3,
             };
-            Rect.drawWith(ctx, options);
+
+            const IDENTIFIER_WIDTH = 15;
+            const marginIdentification: IPathProps = {
+                dataArray: [{
+                    command: 'M',
+                    points: [marginLeft - IDENTIFIER_WIDTH, marginTop],
+                }, {
+                    command: 'L',
+                    points: [marginLeft, marginTop],
+                }, {
+                    command: 'L',
+                    points: [marginLeft, marginTop - IDENTIFIER_WIDTH],
+                }, {
+                    command: 'M',
+                    points: [pageWidth - marginRight + IDENTIFIER_WIDTH, marginTop],
+                }, {
+                    command: 'L',
+                    points: [pageWidth - marginRight, marginTop],
+                }, {
+                    command: 'L',
+                    points: [pageWidth - marginRight, marginTop - IDENTIFIER_WIDTH],
+                }, {
+                    command: 'M',
+                    points: [marginLeft - IDENTIFIER_WIDTH, pageHeight - marginBottom],
+                }, {
+                    command: 'L',
+                    points: [marginLeft, pageHeight - marginBottom],
+                }, {
+                    command: 'L',
+                    points: [marginLeft, pageHeight - marginBottom + IDENTIFIER_WIDTH],
+                }, {
+                    command: 'M',
+                    points: [pageWidth - marginRight + IDENTIFIER_WIDTH, pageHeight - marginBottom],
+                }, {
+                    command: 'L',
+                    points: [pageWidth - marginRight, pageHeight - marginBottom],
+                }, {
+                    command: 'L',
+                    points: [pageWidth - marginRight, pageHeight - marginBottom + IDENTIFIER_WIDTH],
+                }] as unknown as IPathProps['dataArray'],
+                strokeWidth: 1.5,
+                stroke: MARGIN_STROKE_COLOR,
+            };
+
+            Rect.drawWith(ctx, backgroundOptions);
+            Path.drawWith(ctx, marginIdentification);
             ctx.restore();
 
             const { x, y } = this._drawLiquid.translatePage(
@@ -92,6 +140,7 @@ export class DocBackground extends DocComponent {
                 this.pageMarginLeft,
                 this.pageMarginTop
             );
+
             pageLeft += x;
             pageTop += y;
         }

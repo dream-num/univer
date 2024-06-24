@@ -16,22 +16,23 @@
 
 import './extensions';
 
-import type { Nullable } from '@univerjs/core';
 import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import type { IDocumentRenderConfig, Nullable } from '@univerjs/core';
 
 import { Subject } from 'rxjs';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
-import type { IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
 import { LineType } from '../../basics/i-document-skeleton-cached';
 import { degToRad } from '../../basics/tools';
 import type { Transform } from '../../basics/transform';
-import type { IViewportInfo } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import { Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { Scene } from '../../scene';
-import type { IExtensionConfig } from '../extension';
+import type { ComponentExtension, IExtensionConfig } from '../extension';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
+import type { IScale } from '../../../../core/lib/types';
 import { Liquid } from './liquid';
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import { DocComponent } from './doc-component';
@@ -104,6 +105,16 @@ export class Documents extends DocComponent {
         return (this.getScene() as Scene).getEngine();
     }
 
+    changeSkeleton(newSkeleton: DocumentSkeleton) {
+        this.setSkeleton(newSkeleton);
+
+        return this;
+    }
+
+    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
+        this.draw(ctx, bounds);
+    }
+
     override draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         const skeletonData = this.getSkeleton()?.getSkeletonData();
 
@@ -113,7 +124,7 @@ export class Documents extends DocComponent {
 
         this._drawLiquid.reset();
 
-        const { pages } = skeletonData;
+        const { pages, skeHeaders, skeFooters } = skeletonData;
         const parentScale = this.getParentScale();
         // const scale = getScale(parentScale);
         const extensions = this.getExtensionsByOrder();
@@ -123,7 +134,8 @@ export class Documents extends DocComponent {
         }
 
         const backgroundExtension = extensions.find((e) => e.uKey === 'DefaultDocsBackgroundExtension');
-        const glyphExtensionsExcludeBackground = extensions.filter((e) => e.type === DOCS_EXTENSION_TYPE.SPAN && e.uKey !== 'DefaultDocsBackgroundExtension');
+        const glyphExtensionsExcludeBackground = extensions
+            .filter((e) => e.type === DOCS_EXTENSION_TYPE.SPAN && e.uKey !== 'DefaultDocsBackgroundExtension');
 
         // broadcasting the pageTop and pageLeft for each page in the document with multiple pages.
         let pageTop = 0;
@@ -139,6 +151,9 @@ export class Documents extends DocComponent {
                 marginRight: pagePaddingRight = 0,
                 width: actualWidth,
                 height: actualHeight,
+                pageWidth,
+                headerId,
+                footerId,
                 renderConfig = {},
             } = page;
             const {
@@ -185,7 +200,30 @@ export class Documents extends DocComponent {
                 );
                 pageLeft += x;
                 pageTop += y;
+
                 continue;
+            }
+
+            const headerSkeletonPage = skeHeaders.get(headerId)?.get(pageWidth);
+
+            const headerAlignOffsetNoAngle = Vector2.create(
+                horizontalOffsetNoAngle,
+                headerSkeletonPage?.marginTop ?? 0
+            );
+
+            if (headerSkeletonPage) {
+                this._drawHeaderFooter(
+                    headerSkeletonPage,
+                    ctx,
+                    extensions,
+                    backgroundExtension,
+                    glyphExtensionsExcludeBackground,
+                    headerAlignOffsetNoAngle,
+                    centerAngle,
+                    vertexAngle,
+                    renderConfig,
+                    parentScale
+                );
             }
 
             this._pageRender$.next({
@@ -405,14 +443,164 @@ export class Documents extends DocComponent {
         }
     }
 
-    changeSkeleton(newSkeleton: DocumentSkeleton) {
-        this.setSkeleton(newSkeleton);
+    private _drawHeaderFooter(
+        page: IDocumentSkeletonPage,
+        ctx: UniverRenderingContext,
+        extensions: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        backgroundExtension: Nullable<ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>>,
+        glyphExtensionsExcludeBackground: ComponentExtension<IDocumentSkeletonGlyph | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE, IBoundRectNoAngle[]>[],
+        alignOffsetNoAngle: Vector2,
+        centerAngle: number,
+        vertexAngle: number,
+        renderConfig: IDocumentRenderConfig,
+        parentScale: IScale
+    ) {
+        if (this._drawLiquid == null) {
+            return;
+        }
+        const { sections } = page;
 
-        return this;
-    }
+        for (const section of sections) {
+            const { columns } = section;
 
-    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
-        this.draw(ctx, bounds);
+            this._drawLiquid.translateSave();
+            this._drawLiquid.translateSection(section);
+
+            for (const column of columns) {
+                const { lines } = column;
+
+                this._drawLiquid.translateSave();
+                this._drawLiquid.translateColumn(column);
+
+                const linesCount = lines.length;
+
+                const alignOffset = alignOffsetNoAngle;
+
+                for (let i = 0; i < linesCount; i++) {
+                    const line = lines[i];
+                    const { divides, asc = 0, type, lineHeight = 0 } = line;
+
+                    const maxLineAsc = asc;
+
+                    const maxLineAscSin = maxLineAsc * Math.sin(centerAngle);
+                    const maxLineAscCos = maxLineAsc * Math.cos(centerAngle);
+
+                    if (type === LineType.BLOCK) {
+                        for (const extension of extensions) {
+                            if (extension.type === DOCS_EXTENSION_TYPE.LINE) {
+                                extension.extensionOffset = {
+                                    alignOffset,
+                                    renderConfig,
+                                };
+                                extension.draw(ctx, parentScale, line);
+                            }
+                        }
+                    } else {
+                        this._drawLiquid.translateSave();
+
+                        this._drawLiquid.translateLine(line, true);
+
+                        const divideLength = divides.length;
+
+                        for (let i = 0; i < divideLength; i++) {
+                            const divide = divides[i];
+                            const { glyphGroup } = divide;
+
+                            this._drawLiquid.translateSave();
+                            this._drawLiquid.translateDivide(divide);
+
+                            // Draw text background.
+                            for (const glyph of glyphGroup) {
+                                if (!glyph.content || glyph.content.length === 0) {
+                                    continue;
+                                }
+
+                                const { width: spanWidth, left: spanLeft } = glyph;
+
+                                const { x: translateX, y: translateY } = this._drawLiquid;
+
+                                const originTranslate = Vector2.create(translateX, translateY);
+
+                                const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
+
+                                const spanStartPoint = calculateRectRotate(
+                                    originTranslate.addByPoint(spanLeft, 0),
+                                    centerPoint,
+                                    centerAngle,
+                                    vertexAngle,
+                                    alignOffset
+                                );
+
+                                const extensionOffset: IExtensionConfig = {
+                                    spanStartPoint,
+                                };
+
+                                if (backgroundExtension) {
+                                    backgroundExtension.extensionOffset = extensionOffset;
+                                    backgroundExtension.draw(ctx, parentScale, glyph);
+                                }
+                            }
+
+                            // Draw text\border\lines etc.
+                            for (const glyph of glyphGroup) {
+                                if (!glyph.content || glyph.content.length === 0) {
+                                    continue;
+                                }
+
+                                const { width: spanWidth, left: spanLeft, xOffset } = glyph;
+
+                                const { x: translateX, y: translateY } = this._drawLiquid;
+
+                                const originTranslate = Vector2.create(translateX, translateY);
+
+                                const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
+
+                                const spanStartPoint = calculateRectRotate(
+                                    originTranslate.addByPoint(spanLeft + xOffset, 0),
+                                    centerPoint,
+                                    centerAngle,
+                                    vertexAngle,
+                                    alignOffset
+                                );
+
+                                const spanPointWithFont = calculateRectRotate(
+                                    originTranslate.addByPoint(
+                                        spanLeft + maxLineAscSin + xOffset,
+                                        maxLineAscCos
+                                    ),
+                                    centerPoint,
+                                    centerAngle,
+                                    vertexAngle,
+                                    alignOffset
+                                );
+
+                                const extensionOffset: IExtensionConfig = {
+                                    originTranslate,
+                                    spanStartPoint,
+                                    spanPointWithFont,
+                                    centerPoint,
+                                    alignOffset,
+                                    renderConfig,
+                                };
+
+                                for (const extension of glyphExtensionsExcludeBackground) {
+                                    extension.extensionOffset = extensionOffset;
+                                    extension.draw(ctx, parentScale, glyph);
+                                }
+                            }
+
+                            this._drawLiquid.translateRestore();
+                        }
+
+                        this._drawLiquid.translateRestore();
+                    }
+                }
+
+                this._drawLiquid.translateRestore();
+            }
+
+            this._drawLiquid.translateRestore();
+        }
     }
 
     private _horizontalHandler(

@@ -99,12 +99,7 @@ describe('Test remove row col confirm commands', () => {
     describe('Remove row', () => {
         it('Will apply when select some rows', async () => {
             const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 1, startColumn: Number.NaN, endRow: 1, endColumn: Number.NaN, rangeType: RANGE_TYPE.ROW },
                     primary: null,
@@ -126,12 +121,7 @@ describe('Test remove row col confirm commands', () => {
 
         it('Will not apply when select all rows', async () => {
             const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 0, startColumn: Number.NaN, endRow: 999, endColumn: Number.NaN, rangeType: RANGE_TYPE.ROW },
                     primary: null,
@@ -155,12 +145,7 @@ describe('Test remove row col confirm commands', () => {
     describe('Remove col', () => {
         it('Will apply when select some cols', async () => {
             const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: Number.NaN, startColumn: 1, endRow: Number.NaN, endColumn: 1, rangeType: RANGE_TYPE.COLUMN },
                     primary: null,
@@ -182,12 +167,7 @@ describe('Test remove row col confirm commands', () => {
 
         it('Will not apply when select all cols', async () => {
             const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: Number.NaN, startColumn: 0, endRow: Number.NaN, endColumn: 19, rangeType: RANGE_TYPE.COLUMN },
                     primary: null,

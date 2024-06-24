@@ -289,7 +289,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
             selections: [
                 {
-                    primary: { ...(this._selectionManagerService.getLast()?.primary ?? selection) },
+                    primary: { ...(this._selectionManagerService.getCurrentLastSelection()?.primary ?? selection) },
                     range: {
                         ...selection,
                         rangeType: RANGE_TYPE.NORMAL,

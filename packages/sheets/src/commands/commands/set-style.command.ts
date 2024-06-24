@@ -156,7 +156,7 @@ export const SetBoldCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-bold',
     handler: async (accessor) => {
-        const selection = accessor.get(SelectionManagerService).getLast();
+        const selection = accessor.get(SelectionManagerService).getCurrentLastSelection();
         if (!selection) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
@@ -185,7 +185,7 @@ export const SetItalicCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-italic',
     handler: async (accessor) => {
-        const selection = accessor.get(SelectionManagerService).getLast();
+        const selection = accessor.get(SelectionManagerService).getCurrentLastSelection();
         if (!selection) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
@@ -218,7 +218,7 @@ export const SetUnderlineCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-underline',
     handler: async (accessor) => {
-        const selection = accessor.get(SelectionManagerService).getLast();
+        const selection = accessor.get(SelectionManagerService).getCurrentLastSelection();
         if (!selection) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
@@ -253,7 +253,7 @@ export const SetStrikeThroughCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-stroke',
     handler: async (accessor) => {
-        const selection = accessor.get(SelectionManagerService).getLast();
+        const selection = accessor.get(SelectionManagerService).getCurrentLastSelection();
         if (!selection) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
@@ -286,7 +286,7 @@ export const SetOverlineCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-overline',
     handler: async (accessor) => {
-        const selection = accessor.get(SelectionManagerService).getLast();
+        const selection = accessor.get(SelectionManagerService).getCurrentLastSelection();
         if (!selection) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));

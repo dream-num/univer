@@ -66,12 +66,7 @@ describe('Test style commands', () => {
         describe('correct situations', () => {
             it('will set border style when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
-
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
-                selectionManager.add([
+                selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,

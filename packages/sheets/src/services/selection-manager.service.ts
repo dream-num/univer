@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, type ISelectionCell, IUniverInstanceService, type Nullable, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { BehaviorSubject, of, share, Subject, switchMap, takeUntil } from 'rxjs';
 
 import type { ISelectionWithStyle } from '../basics/selection';
@@ -38,13 +39,16 @@ export enum SelectionMoveType {
 }
 
 export class SelectionManagerService extends RxDisposable {
-    private _currentWorksheet: Nullable<ISelectionManagerSearchParam> = null;
+    private get _currentWorksheet(): ISelectionManagerSearchParam {
+        const workbook = this._instanceSrv.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const worksheet = workbook.getActiveSheet()!;
+
+        return { unitId: workbook.getUnitId(), sheetId: worksheet.getSheetId() };
+    }
 
     readonly selectionMoveStart$;
     readonly selectionMoving$;
     readonly selectionMoveEnd$;
-
-    private _dirty: boolean = true;
 
     constructor(
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService
@@ -61,73 +65,47 @@ export class SelectionManagerService extends RxDisposable {
         });
     }
 
-    /**
-     * Get which Workbook and worksheet the current selection belongs to.
-     * @deprecated Bad design.
-     */
-    getCurrentWorksheet() {
-        return this._currentWorksheet;
-    }
-
-    /** @deprecated */
-    makeDirty(dirty: boolean = true) {
-        this._dirty = dirty;
-    }
-
-    /** @deprecated */
-    refreshSelection() {
-    }
-
-    /** @deprecated should be merged to addSelection */
-    setCurrentSelection(param: ISelectionManagerSearchParam) {
-        if (this._dirty === false) {
-            return;
-        }
-
-        this._currentWorksheet = param;
-    }
-
-    // TODO@wzhudev: rename to get current selections
     getCurrentSelections(): Readonly<Nullable<ISelectionWithStyle[]>> {
-        return this._getSelections(this._currentWorksheet);
+        return this._getCurrentSelections();
     }
 
-    getLast(): Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>> {
-        // The last selection position must have a primary.
-        return this._getLastByParam(this._currentWorksheet) as Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>>;
+    getCurrentLastSelection(): Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>> {
+        const selectionData = this._getCurrentSelections();
+        return selectionData?.[selectionData.length - 1] as Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>>;
     }
 
-    /** @deprecated Bad design. */
-    add(selectionDatas: ISelectionWithStyle[]) {
-        if (!this._currentWorksheet) {
+    addSelections(selectionsData: ISelectionWithStyle[]): void;
+    addSelections(unitId: string, worksheetId: string, selectionDatas: ISelectionWithStyle[]): void;
+    addSelections(unitIdOrSelections: string | ISelectionWithStyle[], worksheetId?: string, selectionDatas?: ISelectionWithStyle[]): void {
+        if (typeof unitIdOrSelections === 'string') {
+            this._ensureWorkbookSelection(unitIdOrSelections).addSelection(worksheetId!, selectionDatas!);
             return;
         }
 
-        this.addSelections(this._currentWorksheet.unitId, this._currentWorksheet.sheetId, selectionDatas);
+        const { unitId, sheetId } = this._currentWorksheet;
+        this._ensureWorkbookSelection(unitId).addSelection(sheetId, unitIdOrSelections);
     }
 
-    addSelections(unitId: string, worksheetId: string, selectionDatas: ISelectionWithStyle[]) {
-        this._ensureWorkbookSelection(unitId).addSelection(worksheetId, selectionDatas);
-    }
-
-    setSelections(unitId: string, worksheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType = SelectionMoveType.MOVE_END) {
-        this._ensureWorkbookSelection(unitId).setSelection(worksheetId, selectionDatas, type);
-    }
-
-    replace(selectionDatas: ISelectionWithStyle[], type: SelectionMoveType = SelectionMoveType.MOVE_END) {
-        if (!this._currentWorksheet) {
+    setSelections(selectionDatas: ISelectionWithStyle[], type?: SelectionMoveType): void;
+    setSelections(unitId: string, worksheetId: string, selectionDatas: ISelectionWithStyle[], type?: SelectionMoveType): void;
+    setSelections(
+        unitIdOrSelections: string | ISelectionWithStyle[],
+        worksheetIdOrType: string | SelectionMoveType | undefined,
+        selectionDatas?: ISelectionWithStyle[],
+        type?: SelectionMoveType
+    ): void {
+        if (typeof unitIdOrSelections === 'string') {
+            this._ensureWorkbookSelection(unitIdOrSelections).setSelection(worksheetIdOrType as string, selectionDatas!, type ?? SelectionMoveType.MOVE_END);
             return;
         }
 
-        this.setSelections(this._currentWorksheet.unitId, this._currentWorksheet.sheetId, selectionDatas, type);
+        const { unitId, sheetId } = this._currentWorksheet;
+        this._ensureWorkbookSelection(unitId).setSelection(sheetId, unitIdOrSelections, worksheetIdOrType as SelectionMoveType ?? SelectionMoveType.MOVE_END);
     }
 
-    clear(): void {
-        if (this._currentWorksheet == null) {
-            return;
-        }
-
-        this._clearByParam(this._currentWorksheet);
+    clearCurrentSelections(): void {
+        const selectionData = this._getCurrentSelections();
+        selectionData.splice(0);
     }
 
     /**
@@ -156,24 +134,9 @@ export class SelectionManagerService extends RxDisposable {
         );
     }
 
-    private _getSelections(param: Nullable<ISelectionManagerSearchParam>) {
-        if (!param) {
-            return [];
-        }
-
-        const { unitId, sheetId } = param;
+    private _getCurrentSelections() {
+        const { unitId, sheetId } = this._currentWorksheet;
         return this._ensureWorkbookSelection(unitId).getSelectionOfWorksheet(sheetId);
-    }
-
-    private _getLastByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionWithStyle>> {
-        const selectionData = this._getSelections(param);
-
-        return selectionData?.[selectionData.length - 1];
-    }
-
-    private _clearByParam(param: ISelectionManagerSearchParam): void {
-        const selectionData = this._getSelections(param);
-        selectionData?.splice(0);
     }
 
     getWorkbookSelections(unitId: string): WorkbookSelections {

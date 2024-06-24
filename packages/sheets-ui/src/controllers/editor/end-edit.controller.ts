@@ -146,31 +146,10 @@ export class EndEditController extends Disposable {
                 this._cursorChange = CursorChange.InitialState;
 
                 const selections = this._selectionManagerService.getCurrentSelections();
-                const currentSelection = this._selectionManagerService.getCurrentWorksheet();
-
-                if (currentSelection == null) {
-                    return;
-                }
-
-                const { unitId: workbookId, sheetId: worksheetId } = currentSelection;
 
                 this._exitInput(param);
 
-                if (keycode === KeyCode.ESC) {
-                    // Reselect the current selections, when exist cell editor by press ESC.
-                    if (selections) {
-                        this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                            unitId: workbookId,
-                            subUnitId: worksheetId,
-                            selections,
-                        });
-                    }
-
-                    return;
-                }
-
                 const editCellState = this._editorBridgeService.getEditCellState();
-
                 if (editCellState == null) {
                     return;
                 }
@@ -187,10 +166,24 @@ export class EndEditController extends Disposable {
                 }
 
                 const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-
                 const worksheet = workbook?.getSheetBySheetId(sheetId);
+                const workbookId = workbook?.getUnitId();
+                const worksheetId = worksheet?.getSheetId();
 
-                if (worksheet == null) {
+                if (!worksheet) {
+                    return;
+                }
+
+                if (keycode === KeyCode.ESC) {
+                    // Reselect the current selections, when exist cell editor by press ESC.
+                    if (selections) {
+                        this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                            unitId: workbookId,
+                            subUnitId: worksheetId,
+                            selections,
+                        });
+                    }
+
                     return;
                 }
 

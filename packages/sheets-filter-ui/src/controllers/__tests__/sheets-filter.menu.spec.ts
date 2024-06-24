@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, IWorkbookData } from '@univerjs/core';
-import { AuthzIoLocalService, DisposableCollection, IAuthzIoService, ICommandService, LocaleType, Plugin, RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
+import type { IWorkbookData } from '@univerjs/core';
+import { AuthzIoLocalService, DisposableCollection, IAuthzIoService, ICommandService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionRuleModel, RefRangeService, SelectionManagerService, SetWorksheetActiveOperation, SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
@@ -121,33 +121,6 @@ describe('test sheet filter menu items', () => {
 
         disposableCollection.dispose();
     });
-
-    function select(range: IRange) {
-        const selectionManager = get(SelectionManagerService);
-        selectionManager.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
-
-        const { startColumn, startRow, endColumn, endRow } = range;
-        selectionManager.add([
-            {
-                range: { startRow, startColumn, endColumn, endRow, rangeType: RANGE_TYPE.NORMAL },
-                primary: {
-                    startRow,
-                    startColumn,
-                    endColumn,
-                    endRow,
-                    actualRow: startRow,
-                    actualColumn: startColumn,
-                    isMerged: false,
-                    isMergedMainCell: false,
-                },
-                style: null,
-            },
-        ]);
-    }
 
     it('should "SmartToggleSheetsFilterMenu" change status correctly', () => {
         let activated = false;

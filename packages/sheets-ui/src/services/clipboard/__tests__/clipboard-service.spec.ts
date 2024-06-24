@@ -135,19 +135,13 @@ describe('Test clipboard', () => {
         it('The current selection is a single cell in 1 row and 1 column', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to A1
             const startRow = 0;
             const startColumn = 0;
             const endRow = 0;
             const endColumn = 0;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -181,19 +175,13 @@ describe('Test clipboard', () => {
         it('The current selection is a single cell in 1 row and 2 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to A2:B2
             const startRow = 1;
             const startColumn = 0;
             const endRow = 1;
             const endColumn = 1;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -221,19 +209,13 @@ describe('Test clipboard', () => {
         it('The current selection is a single cell in 1 row and 3 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to A3:C3
             const startRow = 2;
             const startColumn = 0;
             const endRow = 2;
             const endColumn = 2;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -263,19 +245,13 @@ describe('Test clipboard', () => {
         it('The current selection is a single cell in 2 rows and 2 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to A4:B5
             const startRow = 3;
             const startColumn = 0;
             const endRow = 4;
             const endColumn = 1;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -318,19 +294,13 @@ describe('Test clipboard', () => {
         it('The current selection is a single cell in 4 rows and 4 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to A6:D9
             const startRow = 5;
             const startColumn = 0;
             const endRow = 8;
             const endColumn = 3;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -414,19 +384,13 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 1 row and 2 columns.', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to F1:G2
             const startRow = 0;
             const startColumn = 5;
             const endRow = 0;
             const endColumn = 6;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -456,19 +420,13 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 1 row and 3 columns.', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to F3:H3
             const startRow = 2;
             const startColumn = 5;
             const endRow = 2;
             const endColumn = 7;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -483,19 +441,13 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 1 row and 4 columns.', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to F5:I5
             const startRow = 4;
             const startColumn = 5;
             const endRow = 4;
             const endColumn = 8;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -510,19 +462,13 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 2 rows and 2 columns.', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to F7:G8
             const startRow = 6;
             const startColumn = 5;
             const endRow = 7;
             const endColumn = 6;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -537,19 +483,13 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 1 row and 2 columns, with 1 ordinary cell', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to F10:H10
             const startRow = 9;
             const startColumn = 5;
             const endRow = 9;
             const endColumn = 7;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -575,19 +515,13 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 2 rows and 2 columns, with a merged cell of 2 rows and 1 column', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to F12:H13
             const startRow = 11;
             const startColumn = 5;
             const endRow = 12;
             const endColumn = 7;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -611,19 +545,13 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 1 row and 3 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to K4:M4
             const startRow = 3;
             const startColumn = 10;
             const endRow = 3;
             const endColumn = 12;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -637,19 +565,13 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 1 row and 2 columns, with a merged cell of 2 rows and 2 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to K7:M10
             const startRow = 6;
             const startColumn = 10;
             const endRow = 9;
             const endColumn = 12;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -689,19 +611,13 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 1 row and 3 columns, with a merged cell of 2 rows and 2 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to K12:M15
             const startRow = 11;
             const startColumn = 10;
             const endRow = 14;
             const endColumn = 12;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -747,19 +663,13 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 2 rows and 2 columns, with a merged cell of 1 row and 2 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // set selection to K22:M24
             const startRow = 21;
             const startColumn = 10;
             const endRow = 23;
             const endColumn = 12;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -824,13 +734,7 @@ describe('Test clipboard', () => {
 
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { ...toRange, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,

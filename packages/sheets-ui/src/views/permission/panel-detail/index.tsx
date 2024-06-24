@@ -143,8 +143,8 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             return;
         }
         if (fromSheetBar) {
-            selectionManagerService.clear();
-            selectionManagerService.add([
+            selectionManagerService.clearCurrentSelections();
+            selectionManagerService.addSelections([
                 {
                     primary: null,
                     style: null,

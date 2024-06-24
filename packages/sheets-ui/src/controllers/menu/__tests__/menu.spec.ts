@@ -60,14 +60,9 @@ describe('test menu items', () => {
 
     function select(range: IRange) {
         const selectionManager = get(SelectionManagerService);
-        selectionManager.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
 
         const { startColumn, startRow, endColumn, endRow } = range;
-        selectionManager.add([
+        selectionManager.addSelections([
             {
                 range: { startRow, startColumn, endColumn, endRow, rangeType: RANGE_TYPE.NORMAL },
                 primary: {

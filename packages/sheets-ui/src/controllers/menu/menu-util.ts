@@ -133,7 +133,7 @@ export function getBaseRangeMenuHidden$(accessor: IAccessor) {
 
     return selectionManagerService.selectionMoveEnd$.pipe(
         map(() => {
-            const range = selectionManagerService.getLast()?.range;
+            const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
@@ -173,7 +173,7 @@ export function getInsertAfterMenuHidden$(accessor: IAccessor, type: 'row' | 'co
 
     return selectionManagerService.selectionMoveEnd$.pipe(
         map(() => {
-            const range = selectionManagerService.getLast()?.range;
+            const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
@@ -219,7 +219,7 @@ export function getInsertBeforeMenuHidden$(accessor: IAccessor, type: 'row' | 'c
 
     return selectionManagerService.selectionMoveEnd$.pipe(
         map(() => {
-            const range = selectionManagerService.getLast()?.range;
+            const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
@@ -265,7 +265,7 @@ export function getDeleteMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
 
     return selectionManagerService.selectionMoveEnd$.pipe(
         map(() => {
-            const range = selectionManagerService.getLast()?.range;
+            const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
@@ -314,7 +314,7 @@ export function getCellMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
 
     return selectionManagerService.selectionMoveEnd$.pipe(
         map(() => {
-            const range = selectionManagerService.getLast()?.range;
+            const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
             const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;

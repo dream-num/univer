@@ -62,7 +62,7 @@ export function FormulaBar() {
             const worksheet = workbook.getActiveSheet();
             if (!worksheet) return;
             const subUnitId = worksheet.getSheetId();
-            const range = selectionManager.getLast()?.range;
+            const range = selectionManager.getCurrentLastSelection()?.range;
             if (!range) return;
             const workbookEditPermission = permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value;
             const worksheetSetCellValuePermission = permissionService.getPermissionPoint(new WorksheetSetCellValuePermission(unitId, subUnitId).id)?.value;

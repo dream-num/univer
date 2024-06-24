@@ -61,13 +61,9 @@ describe('Test insert function operation', () => {
         describe('correct situations', () => {
             it('insert function, match the data range above, directly set values', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
 
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
                 // B3:B4
-                selectionManager.add([
+                selectionManager.addSelections([
                     {
                         range: { startRow: 2, startColumn: 1, endRow: 3, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -102,13 +98,9 @@ describe('Test insert function operation', () => {
 
             it('insert function, match the data range left, directly set values', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
 
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
                 // C2:D2
-                selectionManager.add([
+                selectionManager.addSelections([
                     {
                         range: { startRow: 1, startColumn: 2, endRow: 1, endColumn: 3, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,

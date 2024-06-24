@@ -116,12 +116,8 @@ describe('Test auto fill with formula', () => {
     describe('correct situations', () => {
         it('one cell with formula', async () => {
             const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
 
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 0, startColumn: 1, endRow: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,

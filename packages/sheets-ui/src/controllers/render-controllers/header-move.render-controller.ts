@@ -141,7 +141,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
             eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
 
-                const selectionRange = this._selectionManagerService.getLast()?.range;
+                const selectionRange = this._selectionManagerService.getCurrentLastSelection()?.range;
                 if (!selectionRange) return;
 
                 const permissionCheck = this.interceptor.fetchThroughInterceptors(HEADER_MOVE_PERMISSION_CHECK)(false, selectionRange);
@@ -175,7 +175,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         this._rowOrColumnDownObservers.push(
             // eslint-disable-next-line max-lines-per-function
             eventBindingObject?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-                const selectionRange = this._selectionManagerService.getLast()?.range;
+                const selectionRange = this._selectionManagerService.getCurrentLastSelection()?.range;
                 if (!selectionRange) return;
 
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;

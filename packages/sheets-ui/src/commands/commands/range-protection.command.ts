@@ -240,7 +240,7 @@ export const DeleteRangeProtectionFromContextMenuCommand: ICommand = {
         if (worksheetRule?.permissionId && worksheetRule?.name) {
             return commandService.executeCommand(DeleteWorksheetProtectionCommand.id, { unitId, subUnitId, rule: worksheetRule });
         } else {
-            const selectRange = selectionManagerService.getLast()?.range;
+            const selectRange = selectionManagerService.getCurrentLastSelection()?.range;
             if (!selectRange) {
                 return false;
             }
@@ -300,7 +300,7 @@ export const SetRangeProtectionFromContextMenuCommand: ICommand = {
             await commandService.executeCommand(SheetPermissionOpenPanelOperation.id, { showDetail: true });
             return true;
         } else {
-            const selectRange = selectionManagerService.getLast()?.range;
+            const selectRange = selectionManagerService.getCurrentLastSelection()?.range;
             if (!selectRange) {
                 return false;
             }

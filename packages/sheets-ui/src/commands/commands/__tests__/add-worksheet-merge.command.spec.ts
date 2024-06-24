@@ -132,11 +132,6 @@ describe('Test add worksheet merge commands', () => {
         get(MergeCellController);
 
         selectionManager = get(SelectionManagerService);
-        selectionManager.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
     });
 
     afterEach(() => {
@@ -147,12 +142,7 @@ describe('Test add worksheet merge commands', () => {
         describe('correct situations', () => {
             it('will merge all cells of the selected range when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
-
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
-                selectionManager.add([
+                selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -198,12 +188,7 @@ describe('Test add worksheet merge commands', () => {
         describe('correct situations', () => {
             it('will merge all vertical cells of the selected range when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
-
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
-                selectionManager.add([
+                selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -247,12 +232,7 @@ describe('Test add worksheet merge commands', () => {
         describe('correct situations', () => {
             it('will merge all horizontal cells of the selected range when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
-
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
-                selectionManager.add([
+                selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -291,12 +271,7 @@ describe('Test add worksheet merge commands', () => {
         describe('correct situations', () => {
             it('will cancel the merge of the selected range when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
-
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
-                selectionManager.add([
+                selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -334,8 +309,8 @@ describe('Test add worksheet merge commands', () => {
 
     describe('with insert or remove col', () => {
         it('will adjust the merge data when insert col and remove col', async () => {
-            selectionManager.clear();
-            selectionManager.add([
+            selectionManager.clearCurrentSelections();
+            selectionManager.addSelections([
                 {
                     range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -356,8 +331,8 @@ describe('Test add worksheet merge commands', () => {
             expect(mergeData.length).toBe(0);
             expect(await commandService.executeCommand(AddWorksheetMergeAllCommand.id)).toBeTruthy();
             expect(mergeData.length).toBe(2);
-            selectionManager.clear();
-            selectionManager.add([
+            selectionManager.clearCurrentSelections();
+            selectionManager.addSelections([
                 {
                     range: {
                         startRow: 0,
@@ -373,8 +348,8 @@ describe('Test add worksheet merge commands', () => {
             expect(await commandService.executeCommand(InsertColAfterCommand.id)).toBeTruthy();
             expect(worksheet.getMergeData().length).toBe(2);
             expect(worksheet.getMergeData()[1]).toStrictEqual({ startRow: 10, startColumn: 11, endColumn: 16, endRow: 15, rangeType: 0 });
-            selectionManager.clear();
-            selectionManager.add([
+            selectionManager.clearCurrentSelections();
+            selectionManager.addSelections([
                 {
                     range: {
                         startRow: 0,
@@ -391,8 +366,8 @@ describe('Test add worksheet merge commands', () => {
             expect(worksheet.getMergeData().length).toBe(2);
             expect(worksheet.getMergeData()[1]).toStrictEqual({ startRow: 10, startColumn: 11, endColumn: 18, endRow: 15, rangeType: 0 });
 
-            selectionManager.clear();
-            selectionManager.add([
+            selectionManager.clearCurrentSelections();
+            selectionManager.addSelections([
                 {
                     range: {
                         startRow: 0,
@@ -408,8 +383,8 @@ describe('Test add worksheet merge commands', () => {
             expect(await commandService.executeCommand(RemoveColCommand.id)).toBeTruthy();
             expect(worksheet.getMergeData().length).toBe(2);
             expect(worksheet.getMergeData()[1]).toStrictEqual({ startRow: 10, startColumn: 10, endColumn: 17, endRow: 15, rangeType: 0 });
-            selectionManager.clear();
-            selectionManager.add([
+            selectionManager.clearCurrentSelections();
+            selectionManager.addSelections([
                 {
                     range: {
                         startRow: 0,
@@ -430,8 +405,8 @@ describe('Test add worksheet merge commands', () => {
 
     describe('with move col', () => {
         it('will adjust the merge data when move col', async () => {
-            selectionManager.clear();
-            selectionManager.add([
+            selectionManager.clearCurrentSelections();
+            selectionManager.addSelections([
                 {
                     range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,
@@ -452,8 +427,8 @@ describe('Test add worksheet merge commands', () => {
             expect(mergeData.length).toBe(0);
             expect(await commandService.executeCommand(AddWorksheetMergeAllCommand.id)).toBeTruthy();
             expect(mergeData.length).toBe(2);
-            selectionManager.clear();
-            selectionManager.add([{
+            selectionManager.clearCurrentSelections();
+            selectionManager.addSelections([{
                 primary: null,
                 style: null,
                 range: {
@@ -483,8 +458,8 @@ describe('Test add worksheet merge commands', () => {
             expect(worksheet.getMergeData().length).toBe(2);
             expect(worksheet.getMergeData()[1]).toStrictEqual({ startRow: 10, startColumn: 11, endColumn: 16, endRow: 15, rangeType: 0 });
 
-            selectionManager.clear();
-            selectionManager.add([{
+            selectionManager.clearCurrentSelections();
+            selectionManager.addSelections([{
                 primary: null,
                 style: null,
                 range: {

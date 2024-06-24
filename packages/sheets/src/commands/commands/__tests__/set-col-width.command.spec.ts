@@ -48,12 +48,7 @@ describe('Test set col width commands', () => {
         const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         const maxRow = worksheet.getMaxRows() - 1;
         const selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: { startRow: 0, startColumn: 1, endColumn: 2, endRow: maxRow, rangeType: RANGE_TYPE.COLUMN },
                 primary: {
@@ -69,7 +64,7 @@ describe('Test set col width commands', () => {
                 style: null,
             },
         ]);
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: { startRow: 0, startColumn: 5, endColumn: 5, endRow: maxRow, rangeType: RANGE_TYPE.COLUMN },
                 primary: null,

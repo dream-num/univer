@@ -126,17 +126,12 @@ describe('Test clipboard', () => {
         beforeEach(() => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
-
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
             const startRow = 1;
             const startColumn = 1;
             const endRow = 1;
             const endColumn = 1;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,

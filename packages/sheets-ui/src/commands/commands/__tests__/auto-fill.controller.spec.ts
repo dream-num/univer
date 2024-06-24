@@ -300,11 +300,6 @@ describe('Test auto fill rules in controller', () => {
         themeService.setTheme(theme);
         autoFillController = get(AutoFillController);
         selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
@@ -547,7 +542,7 @@ describe('Test auto fill rules in controller', () => {
                 if (!workbook) throw new Error('This is an error');
 
                 const selectionManagerService = get(SelectionManagerService);
-                selectionManagerService.add([{
+                selectionManagerService.addSelections([{
                     style: null,
                     range: {
                         startRow: 0,
@@ -582,7 +577,7 @@ describe('Test auto fill rules in controller', () => {
                     }
                 );
                 expect(workbook.getActiveSheet()?.getMergeData().length).toBe(2);
-                expect(selectionManagerService.getLast()?.primary).toEqual(expect.objectContaining({
+                expect(selectionManagerService.getCurrentLastSelection()?.primary).toEqual(expect.objectContaining({
                     startRow: 0,
                     startColumn: 5,
                     endRow: 2,
@@ -597,7 +592,7 @@ describe('Test auto fill rules in controller', () => {
                 if (!workbook) throw new Error('This is an error');
 
                 const selectionManagerService = get(SelectionManagerService);
-                selectionManagerService.add([{
+                selectionManagerService.addSelections([{
                     style: null,
                     range: {
                         startRow: 0,
@@ -633,7 +628,7 @@ describe('Test auto fill rules in controller', () => {
                     }
                 );
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(4, 0)?.v).toBeFalsy();
-                expect(selectionManagerService.getLast()?.primary).toEqual(expect.objectContaining({
+                expect(selectionManagerService.getCurrentLastSelection()?.primary).toEqual(expect.objectContaining({
                     startRow: 0,
                     startColumn: 0,
                     endRow: 0,

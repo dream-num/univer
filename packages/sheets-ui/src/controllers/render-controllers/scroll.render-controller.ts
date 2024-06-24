@@ -100,7 +100,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
     private _scrollToSelectionForExpand(param: IExpandSelectionCommandParams) {
         setTimeout(() => {
-            const selection = this._selectionManagerService.getLast();
+            const selection = this._selectionManagerService.getCurrentLastSelection();
             if (selection == null) {
                 return;
             }
@@ -367,7 +367,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     private _scrollToSelection(targetIsActualRowAndColumn = true) {
-        const selection = this._selectionManagerService.getLast();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
         if (selection == null) {
             return;
         }

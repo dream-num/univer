@@ -207,11 +207,6 @@ describe('Test insert range commands', () => {
         commandService.registerCommand(MoveRangeMutation);
 
         selectionManager = get(SelectionManagerService);
-        selectionManager.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
 
         getValueByPosition = (
             startRow: number,
@@ -284,7 +279,7 @@ describe('Test insert range commands', () => {
     describe('Insert range move right', () => {
         describe('correct situations', () => {
             it('will insert range when there is a selected range, no merged cells', async () => {
-                selectionManager.replace([
+                selectionManager.setSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -317,7 +312,7 @@ describe('Test insert range commands', () => {
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             });
             it('will insert range when there is a selected range, with merged cells of 2 rows and 1 column, break merged cells on the right', async () => {
-                selectionManager.replace([
+                selectionManager.setSelections([
                     {
                         range: { startRow: 0, startColumn: 2, endRow: 1, endColumn: 2, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -344,7 +339,7 @@ describe('Test insert range commands', () => {
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             });
             it('will insert range when there is a selected range, with merged cells of 3 rows and 1 column, will not break merged cells on the right', async () => {
-                selectionManager.replace([
+                selectionManager.setSelections([
                     {
                         range: { startRow: 4, startColumn: 2, endRow: 6, endColumn: 2, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -389,7 +384,7 @@ describe('Test insert range commands', () => {
 
         describe('fault situations', () => {
             it('will not apply when there is no selected ranges', async () => {
-                selectionManager.clear();
+                selectionManager.clearCurrentSelections();
                 const result = await commandService.executeCommand(InsertRangeMoveRightCommand.id);
                 expect(result).toBeFalsy();
             });
@@ -398,7 +393,7 @@ describe('Test insert range commands', () => {
     describe('Insert range move down', () => {
         describe('correct situations', () => {
             it('will insert range when there is a selected range, no merged cells', async () => {
-                selectionManager.replace([
+                selectionManager.setSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -433,7 +428,7 @@ describe('Test insert range commands', () => {
             });
 
             it('will insert range when there is a selected range, with merged cells of 1 row and 2 columns, break merged cells on the bottom', async () => {
-                selectionManager.replace([
+                selectionManager.setSelections([
                     {
                         range: { startRow: 1, startColumn: 6, endRow: 1, endColumn: 7, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -465,7 +460,7 @@ describe('Test insert range commands', () => {
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             });
             it('will insert range when there is a selected range, with merged cells of 1 row and 3 columns, will not break merged cells on the bottom', async () => {
-                selectionManager.replace([
+                selectionManager.setSelections([
                     {
                         range: { startRow: 1, startColumn: 9, endRow: 1, endColumn: 11, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -509,7 +504,7 @@ describe('Test insert range commands', () => {
 
         describe('fault situations', () => {
             it('will not apply when there is no selected ranges', async () => {
-                selectionManager.clear();
+                selectionManager.clearCurrentSelections();
                 const result = await commandService.executeCommand(InsertRangeMoveDownCommand.id);
                 expect(result).toBeFalsy();
             });

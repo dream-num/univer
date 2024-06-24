@@ -83,12 +83,6 @@ describe('Test insert and remove rows cols commands', () => {
             MoveRangeMutation,
             SetRangeValuesMutation,
         ].forEach((c) => commandService.registerCommand(c));
-        const selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
     });
 
     afterEach(() => univer.dispose());
@@ -96,7 +90,7 @@ describe('Test insert and remove rows cols commands', () => {
     function selectRow(rowStart: number, rowEnd: number): void {
         const selectionManagerService = get(SelectionManagerService);
         const endColumn = getColCount() - 1;
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: { startRow: rowStart, startColumn: 0, endColumn, endRow: rowEnd, rangeType: RANGE_TYPE.ROW },
                 primary: {
@@ -117,7 +111,7 @@ describe('Test insert and remove rows cols commands', () => {
     function selectColumn(columnStart: number, columnEnd: number): void {
         const selectionManagerService = get(SelectionManagerService);
         const endRow = getRowCount() - 1;
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: {
                     startRow: 0,

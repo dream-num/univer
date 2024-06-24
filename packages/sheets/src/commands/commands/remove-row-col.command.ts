@@ -61,7 +61,7 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         let totalRange = params?.range;
-        if (!totalRange) totalRange = selectionManagerService.getLast()?.range;
+        if (!totalRange) totalRange = selectionManagerService.getCurrentLastSelection()?.range;
         if (!totalRange) return false;
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -176,7 +176,7 @@ export const RemoveColCommand: ICommand = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         let range = params?.range;
-        if (!range) range = selectionManagerService.getLast()?.range;
+        if (!range) range = selectionManagerService.getCurrentLastSelection()?.range;
         if (!range) return false;
 
         const univerInstanceService = accessor.get(IUniverInstanceService);

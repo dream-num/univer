@@ -24,7 +24,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import {
-    SelectionManagerService,
     SetColHiddenCommand,
     SetColHiddenMutation,
     SetColVisibleMutation,
@@ -74,13 +73,6 @@ describe('Test row col menu items', () => {
         });
 
         disposableCollection = new DisposableCollection();
-
-        const selectionManager = get(SelectionManagerService);
-        selectionManager.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
     });
 
     afterEach(() => univer.dispose());

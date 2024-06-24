@@ -30,7 +30,6 @@ import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     AddWorksheetMergeMutation,
     RemoveWorksheetMergeMutation,
-    SelectionManagerService,
     SetRangeValuesCommand,
     SetRangeValuesMutation,
     SetSelectionsOperation,
@@ -237,12 +236,6 @@ describe('Test format painter rules in controller', () => {
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(AddWorksheetMergeMutation);
-
-        const selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
-            unitId: 'workbook-01',
-            sheetId: 'sheet-0011',
-        });
     });
 
     describe('format painter', () => {

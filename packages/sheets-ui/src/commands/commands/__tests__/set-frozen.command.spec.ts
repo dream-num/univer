@@ -51,12 +51,7 @@ describe('Test commands used for change selections', () => {
         isMerged: boolean,
         isMergedMainCell: boolean
     ) {
-        selectionManagerService.setCurrentSelection({
-
-            ...currentInfo,
-        });
-
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                 primary: {
@@ -103,10 +98,6 @@ describe('Test commands used for change selections', () => {
 
         commandService = get(ICommandService);
         selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
-
-            ...currentInfo,
-        });
         scrollManagerService = get(ScrollManagerService);
         scrollManagerService.setSearchParamAndRefresh({
             ...currentInfo,

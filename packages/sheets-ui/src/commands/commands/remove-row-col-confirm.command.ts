@@ -31,7 +31,7 @@ export const RemoveRowConfirmCommand: ICommand = {
 
         let range = params?.range;
         if (!range) {
-            range = selectionManagerService.getLast()?.range;
+            range = selectionManagerService.getCurrentLastSelection()?.range;
         }
         if (!range) {
             return false;
@@ -76,7 +76,7 @@ export const RemoveColConfirmCommand: ICommand = {
 
         let range = params?.range;
         if (!range) {
-            range = selectionManagerService.getLast()?.range;
+            range = selectionManagerService.getCurrentLastSelection()?.range;
         }
         if (!range) {
             return false;

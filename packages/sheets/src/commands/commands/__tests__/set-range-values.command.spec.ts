@@ -121,12 +121,7 @@ describe('Test set range values commands', () => {
         commandService.registerCommand(SetRangeValuesMutation);
 
         selectionManager = get(SelectionManagerService);
-        selectionManager.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
-        selectionManager.add([
+        selectionManager.addSelections([
             {
                 range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
                 primary: null,
@@ -706,7 +701,7 @@ describe('Test set range values commands', () => {
 
         describe('fault situations', () => {
             it('will not apply when there is no selected ranges', async () => {
-                selectionManager.clear();
+                selectionManager.clearCurrentSelections();
                 const params: ISetRangeValuesCommandParams = {
                     value: {
                         v: 'a1',

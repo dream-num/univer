@@ -365,13 +365,9 @@ describe('Test insert function operation', () => {
 
         it('Move rows, update reference', async () => {
             const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
 
             // A1
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 1, startColumn: 0, endRow: 1, endColumn: 0, rangeType: RANGE_TYPE.ROW },
                     primary: null,
@@ -411,13 +407,8 @@ describe('Test insert function operation', () => {
 
         it('Move rows, update reference and position', async () => {
             const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
             // A1
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 1, startColumn: 0, endRow: 1, endColumn: 0, rangeType: RANGE_TYPE.ROW },
                     primary: null,
@@ -463,13 +454,9 @@ describe('Test insert function operation', () => {
 
         it('Move columns, update reference', async () => {
             const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
 
             // A1
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN },
                     primary: null,
@@ -509,10 +496,6 @@ describe('Test insert function operation', () => {
 
         it('Move columns, update reference and position', async () => {
             const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
 
             // A1
             selectionManager.add([

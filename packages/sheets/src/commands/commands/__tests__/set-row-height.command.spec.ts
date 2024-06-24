@@ -76,14 +76,8 @@ describe('Test set row height commands', () => {
         const maxColumn = worksheet.getMaxColumns() - 1;
         const selectionManager = get(SelectionManagerService);
 
-        selectionManager.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
-
         // select row 2, 3
-        selectionManager.add([
+        selectionManager.addSelections([
             {
                 range: { startRow: 1, startColumn: 0, endRow: 2, endColumn: maxColumn, rangeType: RANGE_TYPE.ROW },
                 primary: {
@@ -101,7 +95,7 @@ describe('Test set row height commands', () => {
         ]);
 
         // and continue select row 5
-        selectionManager.add([
+        selectionManager.addSelections([
             {
                 range: { startRow: 5, startColumn: 0, endColumn: maxColumn, endRow: 5, rangeType: RANGE_TYPE.ROW },
                 primary: null,

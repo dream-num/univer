@@ -109,7 +109,7 @@ export class FormatPainterController extends Disposable {
     }
 
     private _collectSelectionRangeFormat() {
-        const selection = this._selectionManagerService.getLast();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
         const range = selection?.range;
         if (!range) return null;
         const { startRow, endRow, startColumn, endColumn } = range;

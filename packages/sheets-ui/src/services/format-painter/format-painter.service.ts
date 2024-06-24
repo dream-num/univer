@@ -158,7 +158,7 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         this._markSelectionService.removeAllShapes();
 
         if (status !== FormatPainterStatus.OFF) {
-            const selection = this._selectionManagerService.getLast();
+            const selection = this._selectionManagerService.getCurrentLastSelection();
             if (selection) {
                 const style = createCopyPasteSelectionStyle(this._themeService);
                 if (status === FormatPainterStatus.INFINITE) {

@@ -201,11 +201,6 @@ describe('Test delete range commands', () => {
         commandService.registerCommand(SetRangeValuesMutation);
 
         selectionManager = get(SelectionManagerService);
-        selectionManager.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
 
         getValueByPosition = (
             startRow: number,
@@ -263,7 +258,7 @@ describe('Test delete range commands', () => {
     describe('Delete range move left', () => {
         describe('correct situations', () => {
             it('will insert range when there is a selected range, no merged cells', async () => {
-                selectionManager.replace([
+                selectionManager.setSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -295,7 +290,7 @@ describe('Test delete range commands', () => {
 
         describe('fault situations', () => {
             it('will not apply when there is no selected ranges', async () => {
-                selectionManager.clear();
+                selectionManager.clearCurrentSelections();
                 const result = await commandService.executeCommand(DeleteRangeMoveLeftCommand.id);
                 expect(result).toBeFalsy();
             });
@@ -304,7 +299,7 @@ describe('Test delete range commands', () => {
     describe('Delete range move up', () => {
         describe('correct situations', () => {
             it('will insert range when there is a selected range, no merged cells', async () => {
-                selectionManager.replace([
+                selectionManager.setSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -337,7 +332,7 @@ describe('Test delete range commands', () => {
 
         describe('fault situations', () => {
             it('will not apply when there is no selected ranges', async () => {
-                selectionManager.clear();
+                selectionManager.clearCurrentSelections();
                 const result = await commandService.executeCommand(DeleteRangeMoveUpCommand.id);
                 expect(result).toBeFalsy();
             });

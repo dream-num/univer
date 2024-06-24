@@ -70,12 +70,7 @@ describe('Test clear selection content commands', () => {
         describe('correct situations', () => {
             it('will clear selection content when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
-
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
-                selectionManager.add([
+                selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -119,12 +114,8 @@ describe('Test clear selection content commands', () => {
         describe('correct situations', () => {
             it('will clear selection format when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
 
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
-                selectionManager.add([
+                selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -183,12 +174,7 @@ describe('Test clear selection content commands', () => {
             });
             it('clear formats with merged cells', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
-
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
-                selectionManager.add([
+                selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 1, endRow: 1, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -279,12 +265,7 @@ describe('Test clear selection content commands', () => {
         describe('correct situations', () => {
             it('will clear selection all when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
-
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
-                selectionManager.add([
+                selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -335,12 +316,7 @@ describe('Test clear selection content commands', () => {
             });
             it('clear all with merged cells', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
-
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
-                selectionManager.add([
+                selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 1, endRow: 1, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,

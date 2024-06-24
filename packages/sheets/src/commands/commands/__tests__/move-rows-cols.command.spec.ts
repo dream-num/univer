@@ -62,18 +62,12 @@ describe('Test move rows cols', () => {
             SetSelectionsOperation,
         ].forEach((c) => commandService.registerCommand(c));
         get(MergeCellController);
-        const selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
     });
 
     function selectRow(rowStart: number, rowEnd: number): void {
         const selectionManagerService = get(SelectionManagerService);
         const endColumn = getColCount() - 1;
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: { startRow: rowStart, startColumn: 0, endColumn, endRow: rowEnd, rangeType: RANGE_TYPE.ROW },
                 primary: {
@@ -94,7 +88,7 @@ describe('Test move rows cols', () => {
     function selectColumn(columnStart: number, columnEnd: number): void {
         const selectionManagerService = get(SelectionManagerService);
         const endRow = getRowCount() - 1;
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: {
                     startRow: 0,

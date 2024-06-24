@@ -47,7 +47,7 @@ export class SheetPermissionInterceptorClipboardController extends Disposable {
                 id: SHEET_PERMISSION_PASTE_PLUGIN,
                 onBeforePaste: (pasteTo) => {
                     const [ranges] = virtualizeDiscreteRanges([pasteTo.range]).ranges;
-                    const startRange = this._selectionManagerService.getLast()?.range;
+                    const startRange = this._selectionManagerService.getCurrentLastSelection()?.range;
                     if (!startRange) {
                         return false;
                     }

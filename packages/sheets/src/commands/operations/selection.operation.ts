@@ -37,8 +37,8 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
             return false;
         }
 
-        const { selections, type } = params;
-        selectionManagerService.replace(selections, type);
+        const { selections, type, unitId, subUnitId } = params;
+        selectionManagerService.setSelections(unitId, subUnitId, selections, type);
 
         return true;
     },

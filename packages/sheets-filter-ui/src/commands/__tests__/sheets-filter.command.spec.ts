@@ -148,14 +148,8 @@ describe('test sheets filter commands', () => {
     });
 
     function select(range: IRange) {
-        selectionManagerService.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
-
         const { startColumn, startRow, endColumn, endRow } = range;
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: { startRow, startColumn, endColumn, endRow, rangeType: RANGE_TYPE.NORMAL },
                 primary: {

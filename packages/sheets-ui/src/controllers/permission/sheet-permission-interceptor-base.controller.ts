@@ -316,7 +316,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
             return false;
         }
         const { worksheet, unitId, subUnitId } = target;
-        const selectionRange = this._selectionManagerService.getLast()?.range;
+        const selectionRange = this._selectionManagerService.getCurrentLastSelection()?.range;
         if (!selectionRange) {
             return false;
         };
@@ -361,7 +361,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
             return false;
         }
         const { worksheet, unitId, subUnitId } = target;
-        const selection = this._selectionManagerService.getLast();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
         if (!selection) {
             return true;
         }

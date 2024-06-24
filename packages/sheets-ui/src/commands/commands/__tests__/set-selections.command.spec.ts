@@ -49,7 +49,7 @@ describe('Test commands used for change selections', () => {
     let selectionManagerService: SelectionManagerService;
 
     function select00() {
-        selectionManagerService.replace([
+        selectionManagerService.setSelections([
             {
                 range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
                 primary: {
@@ -77,13 +77,7 @@ describe('Test commands used for change selections', () => {
         isMerged: boolean,
         isMergedMainCell: boolean
     ) {
-        selectionManagerService.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
-
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                 primary: {
@@ -102,7 +96,7 @@ describe('Test commands used for change selections', () => {
     }
 
     function expectSelectionToBe(startRow: number, startColumn: number, endRow: number, endColumn: number) {
-        expect(selectionManagerService.getLast()!.range).toEqual({
+        expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
             startRow,
             startColumn,
             endRow,
@@ -128,7 +122,7 @@ describe('Test commands used for change selections', () => {
     function selectRow(rowStart: number, rowEnd: number): void {
         const selectionManagerService = get(SelectionManagerService);
         const endColumn = getColCount() - 1;
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: { startRow: rowStart, startColumn: 0, endColumn, endRow: rowEnd, rangeType: RANGE_TYPE.ROW },
                 primary: {
@@ -149,7 +143,7 @@ describe('Test commands used for change selections', () => {
     function selectColumn(columnStart: number, columnEnd: number): void {
         const selectionManagerService = get(SelectionManagerService);
         const endRow = getRowCount() - 1;
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: {
                     startRow: 0,
@@ -185,11 +179,6 @@ describe('Test commands used for change selections', () => {
 
         commandService = get(ICommandService);
         selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
-
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
     }
 
     afterEach(disposeTestBed);
@@ -538,40 +527,40 @@ describe('Test commands used for change selections', () => {
                 loop: true,
                 expandToGapFirst: true,
             });
-            expect(selectionManagerService.getLast()!.range).toEqual({
+            expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
                 startRow: 0,
                 startColumn: 0,
                 endRow: 1,
                 endColumn: 1,
                 rangeType: RANGE_TYPE.NORMAL,
             });
-            expect(selectionManagerService.getLast()!.primary).toEqual(unchangedPrimaryInfo);
+            expect(selectionManagerService.getCurrentLastSelection()!.primary).toEqual(unchangedPrimaryInfo);
 
             await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
                 loop: true,
                 expandToGapFirst: true,
             });
-            expect(selectionManagerService.getLast()!.range).toEqual({
+            expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
                 startRow: 0,
                 startColumn: 0,
                 endRow: 19,
                 endColumn: 19,
                 rangeType: RANGE_TYPE.ALL,
             });
-            expect(selectionManagerService.getLast()!.primary).toEqual(unchangedPrimaryInfo);
+            expect(selectionManagerService.getCurrentLastSelection()!.primary).toEqual(unchangedPrimaryInfo);
 
             await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
                 loop: true,
                 expandToGapFirst: true,
             });
-            expect(selectionManagerService.getLast()!.range).toEqual({
+            expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
                 startRow: 0,
                 startColumn: 0,
                 endRow: 0,
                 endColumn: 0,
                 rangeType: RANGE_TYPE.NORMAL,
             });
-            expect(selectionManagerService.getLast()!.primary).toEqual(unchangedPrimaryInfo);
+            expect(selectionManagerService.getCurrentLastSelection()!.primary).toEqual(unchangedPrimaryInfo);
         });
 
         it('Should directly select all if `expandToGapFirst` is false', async () => {
@@ -581,7 +570,7 @@ describe('Test commands used for change selections', () => {
                 loop: true,
                 expandToGapFirst: false,
             });
-            expect(selectionManagerService.getLast()!.range).toEqual({
+            expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
                 startRow: 0,
                 startColumn: 0,
                 endRow: 19,
@@ -593,7 +582,7 @@ describe('Test commands used for change selections', () => {
                 loop: true,
                 expandToGapFirst: false,
             });
-            expect(selectionManagerService.getLast()!.range).toEqual({
+            expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
                 startRow: 0,
                 startColumn: 0,
                 endRow: 0,
@@ -609,7 +598,7 @@ describe('Test commands used for change selections', () => {
                 loop: false,
                 expandToGapFirst: false,
             });
-            expect(selectionManagerService.getLast()!.range).toEqual({
+            expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
                 startRow: 0,
                 startColumn: 0,
                 endRow: 19,
@@ -621,7 +610,7 @@ describe('Test commands used for change selections', () => {
                 loop: false,
                 expandToGapFirst: false,
             });
-            expect(selectionManagerService.getLast()!.range).toEqual({
+            expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
                 startRow: 0,
                 startColumn: 0,
                 endRow: 19,
@@ -638,7 +627,7 @@ describe('Test commands used for change selections', () => {
                     loop: true,
                     expandToGapFirst: true,
                 });
-                expect(selectionManagerService.getLast()!.range).toEqual({
+                expect(selectionManagerService.getCurrentLastSelection()!.range).toEqual({
                     startRow: 0,
                     startColumn: 0,
                     endRow: 1,

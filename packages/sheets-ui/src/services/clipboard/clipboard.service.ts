@@ -154,7 +154,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     async copy(copyType = COPY_TYPE.COPY): Promise<boolean> {
-        const selection = this._selectionManagerService.getLast();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
         if (!selection) {
             return false; // maybe we should notify user that there is no selection
         }
@@ -732,7 +732,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     private _getPastingTarget() {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
-        const selection = this._selectionManagerService.getLast();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
         return {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet?.getSheetId(),

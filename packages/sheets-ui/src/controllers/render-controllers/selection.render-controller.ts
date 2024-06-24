@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -39,8 +39,6 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
-import type { ISetZoomRatioOperationParams } from '../../commands/operations/set-zoom-ratio.operation';
-import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import type { ISheetObjectParam } from '../utils/component-tools';
@@ -84,17 +82,8 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         this._initSelectionChangeListener();
         this._initThemeChangeListener();
         this._initSkeletonChangeListener();
-        this._initCommandListener();
         this._initUserActionSyncListener();
         this._initDefinedNameListener();
-
-        const unitId = workbook.getUnitId();
-        const sheetId = worksheet.getSheetId();
-        this._selectionManagerService.setCurrentSelection({
-
-            unitId,
-            sheetId,
-        });
     }
 
     private _initDefinedNameListener() {
@@ -125,7 +114,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
                 const selections = await this._getSelections(workbook, unitId, formulaOrRefString);
 
-                this._selectionManagerService.replace(selections);
+                this._selectionManagerService.setSelections(selections);
 
                 this._commandService.executeCommand(ScrollToCellOperation.id, selections[0].range);
             })
@@ -423,25 +412,6 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         return getSheetObject(this._context.unit, this._context)!;
     }
 
-    private _initCommandListener() {
-        const updateCommandList = [SetZoomRatioOperation.id];
-
-        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (updateCommandList.includes(command.id)) {
-                const workbook = this._context.unit;
-                const worksheet = workbook.getActiveSheet();
-
-                const params = command.params as ISetZoomRatioOperationParams;
-                const { unitId, subUnitId } = params;
-                if (!(unitId === workbook.getUnitId() && subUnitId === worksheet?.getSheetId())) {
-                    return;
-                }
-
-                this._selectionManagerService.refreshSelection();
-            }
-        }));
-    }
-
     private _initSkeletonChangeListener() {
         this.disposeWithMe(this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (param == null) {
@@ -457,29 +427,10 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
             this._selectionRenderService.changeRuntime(skeleton, scene, viewportMain);
 
-            /**
-             * Features like formulas can select ranges across sub-tables.
-             * If the current pluginName is not in a normal state,
-             * the current selection will not be refreshed.
-             */
-            const current = this._selectionManagerService.getCurrentWorksheet();
-
-            if (current?.unitId === unitId && current.sheetId === sheetId) {
-                const currentSelections = this._selectionManagerService.getCurrentSelections();
-                if (currentSelections != null) {
-                    this._refreshSelection(currentSelections);
-                }
-            } else {
-                this._selectionManagerService.setCurrentSelection({
-                    unitId,
-                    sheetId,
-                });
-            }
-
             // If there is no initial selection, add one by default in the top left corner.
-            const last = this._selectionManagerService.getLast();
+            const last = this._selectionManagerService.getCurrentLastSelection();
             if (last == null) {
-                this._selectionManagerService.add([this._getZeroRange(skeleton)]);
+                this._selectionManagerService.addSelections(unitId, sheetId, [this._getZeroRange(skeleton)]);
             }
         }));
     }

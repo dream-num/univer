@@ -23,12 +23,12 @@ import { Isnontext } from '../index';
 import { StringValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test isnontext function', () => {
-    const textFunction = new Isnontext(FUNCTION_NAMES_INFORMATION.ISNONTEXT);
+    const testFunction = new Isnontext(FUNCTION_NAMES_INFORMATION.ISNONTEXT);
 
     describe('Isnontext', () => {
         it('value text', () => {
             const value = StringValueObject.create('test');
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(result.getValue()).toBe(false);
         });
 
@@ -45,7 +45,7 @@ describe('Test isnontext function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [true, false, true, true, true, true, true, true, true, true],
                 [true, true, true, false, true, true, true, true, true, true],

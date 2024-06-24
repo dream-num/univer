@@ -22,18 +22,18 @@ import { NumberValueObject, StringValueObject } from '../../../../engine/value-o
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
 describe('Test acos function', () => {
-    const textFunction = new Acos(FUNCTION_NAMES_MATH.ACOS);
+    const testFunction = new Acos(FUNCTION_NAMES_MATH.ACOS);
 
     describe('Acos', () => {
         it('Value is normal', () => {
             const value = NumberValueObject.create(1);
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(result.getValue()).toBe(0);
         });
 
         it('Value is string number', () => {
             const value = new StringValueObject('1');
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(result.getValue()).toBe(0);
         });
 
@@ -50,7 +50,7 @@ describe('Test acos function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(valueArray);
+            const result = testFunction.calculate(valueArray);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[0, '#VALUE!', '#NUM!', 0, 1.5707963267948966],
                 [1.5707963267948966, '#NUM!', '#NUM!', '#VALUE!', '#NUM!']]);
         });

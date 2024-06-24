@@ -37,6 +37,7 @@ export class Index extends BaseFunction {
 
     override needsReferenceObject = true;
 
+    // eslint-disable-next-line max-lines-per-function, complexity
     override calculate(reference: FunctionVariantType, rowNum?: FunctionVariantType, columnNum?: FunctionVariantType, areaNum?: FunctionVariantType) {
         if (reference.isError()) {
             return reference;

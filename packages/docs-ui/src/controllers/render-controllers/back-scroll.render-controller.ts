@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ITextRange, Nullable } from '@univerjs/core';
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import type { DocumentDataModel, ITextRange, Nullable } from '@univerjs/core';
+import { IUniverInstanceService, RxDisposable } from '@univerjs/core';
 import { DocSkeletonManagerService, getDocObject, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
-import type { INodePosition } from '@univerjs/engine-render';
+import type { INodePosition, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { getAnchorBounding, IRenderManagerService, NodePositionConvertToCursor } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
@@ -25,13 +25,12 @@ import { takeUntil } from 'rxjs';
 
 const ANCHOR_WIDTH = 1.5;
 
-@OnLifecycle(LifecycleStages.Rendered, BackScrollController)
-export class BackScrollController extends RxDisposable {
+export class DocBackScrollRenderController extends RxDisposable implements IRenderModule {
     constructor(
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @IEditorService private readonly _editorService: IEditorService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
@@ -54,7 +53,8 @@ export class BackScrollController extends RxDisposable {
     }
 
     scrollToRange(unitId: string, range: ITextRange) {
-        const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
+        const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+        const skeleton = docSkeletonManagerService?.getSkeleton();
         if (!skeleton) {
             return;
         }
@@ -66,7 +66,8 @@ export class BackScrollController extends RxDisposable {
 
     scrollToNode(unitId: string, startNodePosition: Nullable<INodePosition>) {
         const docObject = this._getDocObject();
-        const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
+        const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+        const skeleton = docSkeletonManagerService?.getSkeleton();
 
         if (docObject == null || skeleton == null) {
             return;

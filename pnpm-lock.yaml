@@ -1015,6 +1015,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
@@ -1855,9 +1858,6 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
       '@wendellhu/redi':
         specifier: ^0.15.4
         version: 0.15.4
@@ -2488,6 +2488,12 @@ importers:
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../sheets-numfmt
+      '@univerjs/sheets-sort':
+        specifier: workspace:*
+        version: link:../sheets-sort
+      '@univerjs/sheets-sort-ui':
+        specifier: workspace:*
+        version: link:../sheets-sort-ui
       '@univerjs/sheets-thread-comment':
         specifier: workspace:*
         version: link:../sheets-thread-comment

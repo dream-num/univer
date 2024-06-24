@@ -15,7 +15,7 @@
  */
 
 export { UniverSheetsDrawingPlugin } from './plugin';
-export { DrawingApplyType, SetDrawingApplyMutation } from './commands/mutations/set-drawing-apply.mutation';
+export { DrawingApplyType, SetDrawingApplyMutation, type ISetDrawingApplyMutationParams } from './commands/mutations/set-drawing-apply.mutation';
 export { ISheetDrawingService, SheetDrawingAnchorType } from './services/sheet-drawing.service';
 export type { IFloatDomData, ISheetDrawing, ISheetDrawingPosition, ISheetFloatDom } from './services/sheet-drawing.service';
 

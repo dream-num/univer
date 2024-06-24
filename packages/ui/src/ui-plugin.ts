@@ -144,6 +144,6 @@ export class UniverUIPlugin extends Plugin {
 
     private _initUI(): void {
         // We need to run this async to let other modules do their `onReady` jobs first.
-        Promise.resolve().then(() => this._injector.get(IUIController).bootstrapWorkbench(this._config));
+        setTimeout(() => this._injector.get(IUIController).bootstrapWorkbench(this._config), 16);
     }
 }

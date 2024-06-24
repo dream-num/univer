@@ -65,12 +65,6 @@ export interface ICopyPastePayload {
     pasteType: string;
 }
 
-export interface ISheetRangeLocation {
-    range: IRange;
-    subUnitId: string;
-    unitId: string;
-}
-
 export interface ISheetDiscreteRangeLocation {
     range: IDiscreteRange;
     subUnitId: string;

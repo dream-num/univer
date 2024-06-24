@@ -597,6 +597,10 @@ export function initSheetFormulaData(
                 const y = r - formulaInfo.r;
 
                 sheetFormulaDataMatrix.setValue(r, c, { f, si: formulaId, x, y });
+            } else {
+                // If the formula ID is not found in the formula ID map, delete the formula ID.
+                // Prevent IDs without corresponding formulas from appearing
+                sheetFormulaDataMatrix.realDeleteValue(r, c);
             }
         }
     });

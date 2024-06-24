@@ -14,32 +14,29 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import {
     BooleanNumber,
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
     Disposable,
     ICommandService,
-    LifecycleStages,
-    OnLifecycle,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation, SetDocZoomRatioOperation } from '@univerjs/docs';
-import type { Documents, DocumentSkeleton, IRender } from '@univerjs/engine-render';
-import { IRenderManagerService, Liquid } from '@univerjs/engine-render';
+import type { Documents, DocumentSkeleton, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { Liquid } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
-@OnLifecycle(LifecycleStages.Steady, DocFloatingObjectController)
-export class DocFloatingObjectController extends Disposable {
+export class DocFloatingObjectRenderController extends Disposable implements IRenderModule {
     private _liquid = new Liquid();
 
     private _pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
 
     constructor(
+        private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorService private readonly _editorService: IEditorService
     ) {
@@ -51,81 +48,12 @@ export class DocFloatingObjectController extends Disposable {
     }
 
     private _initialize() {
-        this._initialRenderRefresh();
-
-        this._updateOnPluginChange();
-    }
-
-    private _updateOnPluginChange() {
-        // this._drawingManagerService.pluginUpdate$.subscribe((params) => {
-        //     const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
-
-        //     if (docsSkeletonObject == null) {
-        //         return;
-        //     }
-
-        //     const { unitId, skeleton } = docsSkeletonObject;
-
-        //     const currentRender = this._renderManagerService.getRenderById(unitId);
-
-        //     if (currentRender == null) {
-        //         return;
-        //     }
-
-        //     const { mainComponent, components, scene } = currentRender;
-
-        //     const docsComponent = mainComponent as Documents;
-
-        //     const { left: docsLeft, top: docsTop } = docsComponent;
-
-        //     params.forEach((param) => {
-        //         const { unitId, subUnitId, drawingId, drawing } = param;
-
-        //         const { left = 0, top = 0, width = 0, height = 0, angle, flipX, flipY, skewX, skewY } = drawing;
-
-        //         const cache = this._pageMarginCache.get(drawingId);
-
-        //         const marginLeft = cache?.marginLeft || 0;
-        //         const marginTop = cache?.marginTop || 0;
-
-        //         skeleton
-        //             ?.getViewModel()
-        //             .getDataModel()
-        //             .updateDrawing(drawingId, {
-        //                 left: left - docsLeft - marginLeft,
-        //                 top: top - docsTop - marginTop,
-        //                 height,
-        //                 width,
-        //             });
-        //     });
-
-        //     skeleton?.calculate();
-        //     mainComponent?.makeDirty();
-        // });
-    }
-
-    private _initialRenderRefresh() {
-        this._docSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-            if (param == null) {
+        this._docSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
+            if (skeleton == null) {
                 return;
             }
 
-            const { skeleton: documentSkeleton, unitId } = param;
-
-            const currentRender = this._renderManagerService.getRenderById(unitId);
-
-            if (currentRender == null) {
-                return;
-            }
-
-            const { mainComponent } = currentRender;
-
-            const docsComponent = mainComponent as Documents;
-
-            // TODO: Why NEED change skeleton here?
-            docsComponent.changeSkeleton(documentSkeleton);
-
-            this._refreshDrawing(unitId, documentSkeleton, currentRender);
+            this._refreshDrawing(skeleton);
         });
     }
 
@@ -136,43 +64,28 @@ export class DocFloatingObjectController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
                     const params = command.params as IRichTextEditingMutationParams;
-                    const { unitId: commandUnitId } = params;
+                    const { unitId } = params;
 
-                    const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
-
-                    if (docsSkeletonObject == null) {
-                        return;
-                    }
-
-                    const { unitId, skeleton } = docsSkeletonObject;
-
-                    if (commandUnitId !== unitId) {
-                        return;
-                    }
-
-                    const currentRender = this._renderManagerService.getRenderById(unitId);
-
-                    if (currentRender == null) {
+                    const skeleton = this._docSkeletonManagerService.getSkeleton();
+                    if (!skeleton) {
                         return;
                     }
 
                     if (this._editorService.isEditor(unitId)) {
-                        currentRender.mainComponent?.makeDirty();
+                        this._context.mainComponent?.makeDirty();
                         return;
                     }
 
-                    this._refreshDrawing(unitId, skeleton, currentRender);
-
-                    // this.calculatePagePosition(currentRender);
+                    this._refreshDrawing(skeleton);
                 }
             })
         );
     }
 
-    private _refreshDrawing(unitId: string, skeleton: DocumentSkeleton, currentRender: IRender) {
+    private _refreshDrawing(skeleton: DocumentSkeleton) {
         const skeletonData = skeleton?.getSkeletonData();
 
-        const { mainComponent, scene } = currentRender;
+        const { mainComponent, scene, unitId } = this._context;
 
         const documentComponent = mainComponent as Documents;
 

@@ -15,7 +15,7 @@
  */
 
 export type { IDocObjectParam } from './basics/component-tools';
-export { getDocObject, getDocObjectById } from './basics/component-tools';
+export { getDocObject, neoGetDocObject, getDocObjectById } from './basics/component-tools';
 export * from './basics/docs-view-key';
 export { BreakLineCommand } from './commands/commands/break-line.command';
 export {
@@ -63,8 +63,7 @@ export {
     SetTextSelectionsOperation,
 } from './commands/operations/text-selection.operation';
 export { type IUniverDocsConfig, UniverDocsPlugin } from './doc-plugin';
-export { DocSkeletonManagerService, type IDocSkeletonManagerParam } from './services/doc-skeleton-manager.service';
-export { DocViewModelManagerService } from './services/doc-view-model-manager.service';
+export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export { TextSelectionManagerService, serializeTextRange } from './services/text-selection-manager.service';
 export { DocStateChangeManagerService, type IDocStateChangeParams } from './services/doc-state-change-manager.service';
 export { IMEInputManagerService } from './services/ime-input-manager.service';

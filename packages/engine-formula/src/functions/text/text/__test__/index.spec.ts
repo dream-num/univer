@@ -22,13 +22,13 @@ import { NumberValueObject, StringValueObject } from '../../../../engine/value-o
 import { transformToValue } from '../../../../engine/value-object/array-value-object';
 
 describe('Test text function', () => {
-    const textFunction = new Text(FUNCTION_NAMES_TEXT.TEXT);
+    const testFunction = new Text(FUNCTION_NAMES_TEXT.TEXT);
 
     describe('Text', () => {
         it('Text is single cell, format text is single cell', () => {
             const text1 = NumberValueObject.create(111);
             const formatText = StringValueObject.create('$#,##0.00');
-            const result = textFunction.calculate(text1, formatText);
+            const result = testFunction.calculate(text1, formatText);
             const resultArray = result.getArrayValue();
             expect(transformToValue(resultArray)).toStrictEqual([['$111.00']]);
         });

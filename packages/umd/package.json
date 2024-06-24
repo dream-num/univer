@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/umd",
-    "version": "0.1.15",
+    "version": "0.1.16",
     "private": false,
     "description": "UMD bundle for Univer",
     "author": "DreamNum <developer@univer.ai>",
@@ -68,6 +68,8 @@
         "@univerjs/sheets-hyper-link": "workspace:*",
         "@univerjs/sheets-hyper-link-ui": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
+        "@univerjs/sheets-sort": "workspace:*",
+        "@univerjs/sheets-sort-ui": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",
         "@univerjs/sheets-thread-comment-base": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

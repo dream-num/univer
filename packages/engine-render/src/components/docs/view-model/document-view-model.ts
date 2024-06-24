@@ -25,25 +25,24 @@ export interface ICustomRangeInterceptor {
     getCustomDecoration: (index: number) => Nullable<ICustomDecorationForInterceptor>;
 }
 
+export enum DocumentEditArea {
+    BODY = 'BODY',
+    HEADER_FOOTER = 'HEADER_FOOTER',
+}
+
 export class DocumentViewModel implements IDisposable {
     private _interceptor: Nullable<ICustomRangeInterceptor> = null;
 
     children: DataStreamTreeNode[] = [];
-
     private _sectionBreakCurrentIndex = 0;
-
     private _paragraphCurrentIndex = 0;
-
     private _textRunCurrentIndex = 0;
-
     private _customBlockCurrentIndex = 0;
-
     private _tableBlockCurrentIndex = 0;
-
     private _customRangeCurrentIndex = 0;
+    private _editArea: DocumentEditArea = DocumentEditArea.BODY;
 
     headerTreeMap: Map<string, DocumentViewModel> = new Map();
-
     footerTreeMap: Map<string, DocumentViewModel> = new Map();
 
     constructor(private _documentDataModel: DocumentDataModel) {
@@ -69,6 +68,14 @@ export class DocumentViewModel implements IDisposable {
 
     selfPlus(len: number, index: number) {
         // empty
+    }
+
+    getEditArea() {
+        return this._editArea;
+    }
+
+    setEditArea(editArea: DocumentEditArea) {
+        this._editArea = editArea;
     }
 
     getPositionInParent() {

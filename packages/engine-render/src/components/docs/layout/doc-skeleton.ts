@@ -28,6 +28,7 @@ import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
 import { Skeleton } from '../../skeleton';
 import { Liquid } from '../liquid';
 import type { DocumentViewModel } from '../view-model/document-view-model';
+import { DocumentEditArea } from '../view-model/document-view-model';
 import type { ILayoutContext } from './tools';
 import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, setPageParent, updateBlockIndex } from './tools';
 import { createSkeletonSection } from './model/section';
@@ -255,6 +256,59 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         return glyphGroup[glyph];
+    }
+
+    findEditAreaByCoord(
+        coord: Vector2,
+        pageLayoutType: PageLayoutType,
+        pageMarginLeft: number,
+        pageMarginTop: number
+    ): DocumentEditArea {
+        const { x, y } = coord;
+        let editArea = DocumentEditArea.BODY;
+        const skeletonData = this.getSkeletonData();
+
+        if (skeletonData == null) {
+            return editArea;
+        }
+
+        this._findLiquid.reset();
+
+        const pages = skeletonData.pages;
+
+        for (let i = 0, len = pages.length; i < len; i++) {
+            const page = pages[i];
+
+            const { marginTop, marginBottom, pageWidth, pageHeight } = page;
+
+            if (
+                x > this._findLiquid.x && x < this._findLiquid.x + pageWidth &&
+                y > this._findLiquid.y && y < this._findLiquid.y + marginTop
+            ) {
+                editArea = DocumentEditArea.HEADER_FOOTER;
+                break;
+            }
+
+            if (
+                x > this._findLiquid.x && x < this._findLiquid.x + pageWidth &&
+                y > this._findLiquid.y + marginTop && y < this._findLiquid.y + pageHeight - marginBottom
+            ) {
+                editArea = DocumentEditArea.BODY;
+                break;
+            }
+
+            if (
+                x > this._findLiquid.x && x < this._findLiquid.x + pageWidth &&
+                y > this._findLiquid.y + pageHeight - marginBottom && y < this._findLiquid.y + pageHeight
+            ) {
+                editArea = DocumentEditArea.HEADER_FOOTER;
+                break;
+            }
+
+            this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+        }
+
+        return editArea;
     }
 
     findNodeByCoord(

@@ -24,6 +24,7 @@ import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 
 import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import type { Subscription } from 'rxjs';
 import { merge } from 'rxjs';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -53,25 +54,24 @@ export function FormulaBar() {
 
     useLayoutEffect(() => {
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        merge(
+        let innerSubscription: Subscription | null = null;
+        const subscription = merge(
             worksheetProtectionRuleModel.ruleChange$,
             rangeProtectionRuleModel.ruleChange$,
-            selectionManager.selectionMoveEnd$
+            selectionManager.selectionMoveEnd$,
+            workbook.activeSheet$
         ).subscribe(() => {
+            innerSubscription?.unsubscribe();
             const unitId = workbook.getUnitId();
             const worksheet = workbook.getActiveSheet();
             if (!worksheet) return;
             const subUnitId = worksheet.getSheetId();
             const range = selectionManager.getCurrentLastSelection()?.range;
             if (!range) return;
-            const workbookEditPermission = permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value;
-            const worksheetSetCellValuePermission = permissionService.getPermissionPoint(new WorksheetSetCellValuePermission(unitId, subUnitId).id)?.value;
-            const worksheetEditPermission = permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value;
-
-            if (!workbookEditPermission || !worksheetSetCellValuePermission || !worksheetEditPermission) {
-                setDisable(true);
-                return;
-            }
+            const permissionIds: string[] = [];
+            permissionIds.push(new WorkbookEditablePermission(unitId).id);
+            permissionIds.push(new WorksheetSetCellValuePermission(unitId, subUnitId).id);
+            permissionIds.push(new WorksheetEditPermission(unitId, subUnitId).id);
 
             const selectionRanges = selectionManager.getCurrentSelections()?.map((selection) => selection.range);
             const permissionList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
@@ -82,21 +82,18 @@ export function FormulaBar() {
                 });
             });
 
-            const permissionEditIds: string[] = [];
             permissionList.forEach((p) => {
-                permissionEditIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, p.permissionId).id);
+                permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, p.permissionId).id);
             });
 
-            const rangeEditPermission = permissionService.composePermission(permissionEditIds).every((p) => p.value);
+            innerSubscription = permissionService.composePermission$(permissionIds).subscribe((permissions) => {
+                setDisable(!permissions.every((p) => p.value));
+            });
+        });
 
-            if (rangeEditPermission) {
-                setDisable(false);
-            } else {
-                setDisable(true);
-            }
-        }
-        );
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        return () => {
+            subscription.unsubscribe();
+        };
     }, []);
 
     const INITIAL_SNAPSHOT = {

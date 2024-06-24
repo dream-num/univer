@@ -130,7 +130,7 @@ export class SheetPermissionInitController extends Disposable {
                         this._worksheetProtectionPointRuleModel.deleteRule(info.unitId, info.subUnitId);
                         [...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
                             const instance = new F(info.unitId, info.subUnitId);
-                            this._permissionService.addPermissionPoint(instance);
+                            this._permissionService.updatePermissionPoint(instance.id, true);
                         });
                     }
                 }

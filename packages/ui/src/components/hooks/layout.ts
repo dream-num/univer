@@ -17,7 +17,7 @@
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
 import { useEffect } from 'react';
 
-import { type Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import { resizeObserverCtor } from '@univerjs/design';
 import { useEvent } from './event';
 /**
@@ -45,7 +45,7 @@ export function useScrollYOverContainer(element: Nullable<HTMLElement>, containe
 
         const scrolled = element.scrollHeight > elRect.height;
 
-        const isOverViewport = y < 0 || (y + elRect.height > containerRect.height)
+        const isOverViewport = y < 0 || (y + elRect.height > containerRect.height);
 
         if (!isOverViewport && !scrolled) {
             elStyle.overflowY = '';
@@ -63,7 +63,7 @@ export function useScrollYOverContainer(element: Nullable<HTMLElement>, containe
         if (!canUseDom() || !element || !container) {
             return;
         }
-        updater()
+        updater();
 
         const resizeObserver = resizeObserverCtor(updater);
         resizeObserver.observe(element);

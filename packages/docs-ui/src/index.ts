@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-export { BackScrollController } from './controllers/back-scroll.controller';
+export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 export * from './basics';
 export * from './docs-ui-plugin';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 export * from './services';
 export { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
-export { DocRenderController } from './controllers/doc-render.controller';

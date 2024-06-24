@@ -20,7 +20,7 @@ import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { Inject } from '@wendellhu/redi';
-import { BackScrollController } from '@univerjs/docs-ui';
+import { DocBackScrollRenderController } from '@univerjs/docs-ui';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../common/const';
 import { DocThreadCommentService } from '../services/doc-thread-comment.service';
 
@@ -30,7 +30,7 @@ export class DocThreadCommentSelectionController extends Disposable {
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(BackScrollController) private readonly _backScrollController: BackScrollController,
+        @Inject(DocBackScrollRenderController) private readonly _backScrollController: DocBackScrollRenderController,
         @Inject(DocThreadCommentService) private readonly _docThreadCommentService: DocThreadCommentService
     ) {
         super();

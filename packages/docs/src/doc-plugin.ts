@@ -57,6 +57,7 @@ import { TextSelectionManagerService } from './services/text-selection-manager.s
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
 import { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
+import { DocViewModelManagerService } from './services/doc-view-model-manager.service';
 
 export interface IUniverDocsConfig {
     hasScroll?: boolean;
@@ -138,11 +139,13 @@ export class UniverDocsPlugin extends Plugin {
                     },
                 ],
                 [TextSelectionManagerService],
+                [DocViewModelManagerService],
                 [DocInterceptorService],
                 // controllers
                 [NormalInputController],
                 [IMEInputController],
                 [MoveCursorController],
+
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
     }

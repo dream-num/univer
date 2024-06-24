@@ -109,6 +109,8 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocClipboardController],
             [DocEditorBridgeController],
             [DocsRenderService],
+            [DocBackScrollRenderController],
+            [DocRenderController],
             [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
             [IDocClipboardService, { useClass: DocClipboardService }],
             [DocCanvasPopManagerService],

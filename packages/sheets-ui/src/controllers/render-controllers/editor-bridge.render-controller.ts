@@ -56,7 +56,6 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     private _initialize() {
         this._initSelectionChangeListener();
         this._initEventListener();
-        // this._initialChangeEditorListener();
         this._initialRangeSelector();
     }
 
@@ -116,31 +115,6 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         spreadsheetLeftTopPlaceholder.onPointerDownObserver.add(this._onCanvasPointerDown.bind(this));
         spreadsheetRowHeader.onPointerDownObserver.add(this._onCanvasPointerDown.bind(this));
     }
-
-    // Move to another controller
-    // private _initialChangeEditorListener() {
-    //     this.disposeWithMe(
-    //         this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC).subscribe((documentDataModel) => {
-    //             if (documentDataModel == null) {
-    //                 return;
-    //             }
-
-    //             const editorId = documentDataModel.getUnitId();
-    //             if (!this._editorService.isEditor(editorId)) {
-    //                 return;
-    //             }
-
-    //             if (this._editorService.isSheetEditor(editorId)) {
-    //                 this._contextService.setContextValue(FOCUSING_DOC, false);
-    //                 this._contextService.setContextValue(FOCUSING_SHEET, true);
-    //             } else {
-    //                 this._contextService.setContextValue(FOCUSING_SHEET, false);
-    //                 this._contextService.setContextValue(FOCUSING_DOC, true);
-    //                 this._hideEditor();
-    //             }
-    //         })
-    //     );
-    // }
 
     private _onCanvasPointerDown() {
         // In the activated state of formula editing,

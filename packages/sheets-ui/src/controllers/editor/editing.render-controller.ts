@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable max-lines-per-function */
+
 import type { ICellData, ICommandInfo, IDocumentBody, IPosition, Nullable, Workbook } from '@univerjs/core';
 import {
     CellValueType,
@@ -358,7 +360,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
      * determine whether a scrollbar appears,
      * and calculate the editor's boundaries relative to the browser.
      */
-    // eslint-disable-next-line max-lines-per-function
+
     private _editAreaProcessing(
         editorWidth: number,
         editorHeight: number,
@@ -490,7 +492,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     // You can double-click on the cell or input content by keyboard to put the cell into the edit state.
-    // eslint-disable-next-line max-lines-per-function
+
     private _handleEditorVisible(param: IEditorBridgeServiceVisibleParam) {
         const { eventType, keycode } = param;
 
@@ -759,33 +761,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         this._cursorChange = CursorChange.InitialState;
 
-        const selections = this._selectionManagerService.getSelections();
-        const currentSelection = this._selectionManagerService.getCurrent();
-
-        if (currentSelection == null) {
-            return;
-        }
-
-        const { unitId: workbookId, sheetId: worksheetId, pluginName } = currentSelection;
-
         this._exitInput(param);
 
-        if (keycode === KeyCode.ESC) {
-            // Reselect the current selections, when exist cell editor by press ESC.
-            if (selections) {
-                this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                    unitId: workbookId,
-                    subUnitId: worksheetId,
-                    pluginName,
-                    selections,
-                });
-            }
-
-            return;
-        }
-
         const editCellState = this._editorBridgeService.getEditCellState();
-
         if (editCellState == null) {
             return;
         }
@@ -802,10 +780,25 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-
         const worksheet = workbook?.getSheetBySheetId(sheetId);
 
         if (worksheet == null) {
+            return;
+        }
+
+        const workbookId = workbook!.getUnitId();
+        const worksheetId = worksheet.getSheetId();
+        if (keycode === KeyCode.ESC) {
+            const selections = this._selectionManagerService.getCurrentSelections();
+            // Reselect the current selections, when exist cell editor by press ESC.
+            if (selections) {
+                this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                    unitId: workbookId,
+                    subUnitId: worksheetId,
+                    selections,
+                });
+            }
+
             return;
         }
 
@@ -840,11 +833,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 unitId,
             });
         }
-        /**
-         * When switching tabs while the editor is open,
-         * the operation to refresh the selection will be blocked and needs to be triggered manually.
-         */
-        this._selectionManagerService.refreshSelection();
 
         const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
             this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT

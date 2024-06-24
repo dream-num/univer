@@ -16,7 +16,7 @@
 
 import type { ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { BehaviorSubject, of, share, Subject, switchMap, takeUntil } from 'rxjs';
+import { BehaviorSubject, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
 
 import type { ISelectionWithStyle } from '../basics/selection';
 
@@ -55,7 +55,7 @@ export class SelectionManagerService extends RxDisposable {
     ) {
         super();
 
-        const c$ = this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).pipe(share(), takeUntil(this.dispose$));
+        const c$ = this._instanceSrv.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).pipe(shareReplay(1), takeUntil(this.dispose$));
         this.selectionMoveStart$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveStart$));
         this.selectionMoving$ = c$.pipe(switchMap((workbook) => !workbook ? of() : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoving$));
         this.selectionMoveEnd$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveEnd$));
@@ -167,10 +167,6 @@ export class WorkbookSelections extends Disposable {
 
     private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
-
-    constructor() {
-        super();
-    }
 
     override dispose(): void {
         super.dispose();

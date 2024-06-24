@@ -723,8 +723,8 @@ export class Scene extends ThinScene {
         this.onDblclick$.complete();
         this.onTripleClick$.complete();
         this.onMouseWheel$.complete();
-        this.onKeyDownObservable.clear();
-        this.onKeyUpObservable.clear();
+        this.onKeyDown$.complete();
+        this.onKeyUp$.complete();
         this._addObject$.complete();
         super.dispose();
     }
@@ -796,14 +796,14 @@ export class Scene extends ThinScene {
     }
 
     override triggerKeyDown(evt: IKeyboardEvent) {
-        this.onKeyDownObservable.notifyObservers(evt);
+        this.onKeyDown$.emitEvent(evt);
         // if (this._parent instanceof SceneViewer) {
         //     this._parent?.triggerKeyDown(evt);
         // }
     }
 
     override triggerKeyUp(evt: IKeyboardEvent) {
-        this.onKeyUpObservable.notifyObservers(evt);
+        this.onKeyUp$.emitEvent(evt);
         // if (this._parent instanceof SceneViewer) {
         //     this._parent?.triggerKeyUp(evt);
         // }

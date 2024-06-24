@@ -270,15 +270,11 @@ export class InputManager extends Disposable {
         };
 
         this._onKeyDown = (evt: IKeyboardEvent) => {
-            if (this._scene.onKeyDownObservable.hasObservers()) {
-                this._scene.onKeyDownObservable.notifyObservers(evt);
-            }
+            this._scene.onKeyDown$.emitEvent(evt);
         };
 
         this._onKeyUp = (evt: IKeyboardEvent) => {
-            if (this._scene.onKeyUpObservable.hasObservers()) {
-                this._scene.onKeyUpObservable.notifyObservers(evt);
-            }
+            this._scene.onKeyUp$.emitEvent(evt);
         };
 
         this._onDragEnter = (evt: IDragEvent) => {

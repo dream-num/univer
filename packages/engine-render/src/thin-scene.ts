@@ -55,9 +55,9 @@ export abstract class ThinScene extends Disposable {
 
     onMouseWheel$ = new EventSubject<IWheelEvent>();
 
-    onKeyDownObservable = new Observable<IKeyboardEvent>();
+    onKeyDown$ = new EventSubject<IKeyboardEvent>();
 
-    onKeyUpObservable = new Observable<IKeyboardEvent>();
+    onKeyUp$ = new EventSubject<IKeyboardEvent>();
 
     debounceParentTimeout: number = -1;
 
@@ -157,14 +157,14 @@ export abstract class ThinScene extends Disposable {
     }
 
     triggerKeyDown(evt: IKeyboardEvent) {
-        this.onKeyDownObservable.notifyObservers(evt);
+        this.onKeyDown$.emitEvent(evt);
         // if (this._parent instanceof SceneViewer) {
         //     this._parent?.triggerKeyDown(evt);
         // }
     }
 
     triggerKeyUp(evt: IKeyboardEvent) {
-        this.onKeyUpObservable.notifyObservers(evt);
+        this.onKeyUp$.emitEvent(evt);
         // if (this._parent instanceof SceneViewer) {
         //     this._parent?.triggerKeyUp(evt);
         // }
@@ -217,8 +217,8 @@ export abstract class ThinScene extends Disposable {
         this.onDblclick$.complete();
         this.onTripleClick$.complete();
         this.onMouseWheel$.complete();
-        this.onKeyDownObservable.clear();
-        this.onKeyUpObservable.clear();
+        this.onKeyDown$.complete();
+        this.onKeyUp$.complete();
 
         super.dispose();
     }

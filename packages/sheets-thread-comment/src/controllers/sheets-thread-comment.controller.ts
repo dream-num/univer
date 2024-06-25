@@ -168,7 +168,7 @@ export class SheetsThreadCommentController extends Disposable {
                     return;
                 }
 
-                const GAP = 5;
+                const GAP = 1;
                 await this._commandService.executeCommand(ScrollToRangeOperation.id, {
                     range: {
                         startRow: Math.max(location.row - GAP, 0),

@@ -21,10 +21,10 @@ import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { Menu } from '../../../components/menu/Menu';
+import { Menu } from '../../../components/menu/desktop/Menu';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 
-export function ContextMenu() {
+export function DesktopContextMenu() {
     const [visible, setVisible] = useState(false);
     const [menuType, setMenuType] = useState('');
     const [offset, setOffset] = useState<[number, number]>([0, 0]);
@@ -46,7 +46,7 @@ export function ContextMenu() {
             document.removeEventListener('wheel', handleClose);
             disposables.dispose();
         };
-    }, []);
+    }, [contextMenuService]);
 
     function handleContextMenu(event: IMouseEvent, menuType: string) {
         setMenuType(menuType);

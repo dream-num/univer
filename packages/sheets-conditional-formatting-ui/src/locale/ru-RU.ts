@@ -167,6 +167,11 @@ const locale: typeof zhCN = {
                 formula: 'Формула',
                 none: 'Нет',
             },
+            errorMessage: {
+                notBlank: 'Условие не может быть пустым',
+                formulaError: 'Ошибка формулы',
+
+            },
         },
     },
 };

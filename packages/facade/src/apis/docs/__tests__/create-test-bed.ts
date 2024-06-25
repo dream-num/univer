@@ -30,8 +30,8 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DocSkeletonManagerService, DocStateChangeManagerService, IMEInputManagerService, TextSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService, ITextSelectionRenderManager, RenderManagerService, TextSelectionRenderManager } from '@univerjs/engine-render';
+import { DocsRenderService } from '@univerjs/docs-ui';
 
-import { DocsRenderService } from '@univerjs/docs-ui/services/docs-render.service.js';
 import { FUniver } from '../../facade';
 
 function getTestDocumentDataDemo(): IDocumentData {

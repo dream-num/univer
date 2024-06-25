@@ -59,7 +59,7 @@ export {
     PREDEFINED_HOOK_NAME,
     SheetClipboardService,
 } from './services/clipboard/clipboard.service';
-export type { ICellDataWithSpanInfo, ISheetClipboardHook, ISheetRangeLocation, ISheetDiscreteRangeLocation, ICopyPastePayload } from './services/clipboard/type';
+export type { ICellDataWithSpanInfo, ISheetClipboardHook, ISheetDiscreteRangeLocation, ICopyPastePayload } from './services/clipboard/type';
 export { COPY_TYPE } from './services/clipboard/type';
 export { getRepeatRange } from './services/clipboard/utils';
 export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
@@ -77,7 +77,7 @@ export { SelectionShape } from './services/selection/selection-shape';
 export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manager.service';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 export { UniverSheetsUIPlugin } from './sheets-ui-plugin';
-export { SheetRenderController } from './controllers/render-controllers/sheet-render.controller';
+export { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export { HoverManagerService } from './services/hover-manager.service';
 export { DragManagerService } from './services/drag-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';

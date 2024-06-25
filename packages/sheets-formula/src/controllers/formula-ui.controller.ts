@@ -76,7 +76,7 @@ export class FormulaUIController extends Disposable {
         this._registerMenus();
         this._registerShortcuts();
         this._registerComponents();
-        this._registerRenderControllers();
+        this._registerRenderModules();
     }
 
     private _registerMenus(): void {
@@ -124,7 +124,7 @@ export class FormulaUIController extends Disposable {
         this._componentManager.register(MORE_FUNCTIONS_COMPONENT, MoreFunctions);
     }
 
-    private _registerRenderControllers(): void {
-        this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, FormulaEditorShowController));
+    private _registerRenderModules(): void {
+        this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, FormulaEditorShowController));
     }
 }

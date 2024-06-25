@@ -24,7 +24,7 @@ import {
     SetWorksheetHideCommand,
     SetWorksheetHideMutation,
     SetWorksheetShowCommand,
-    WorkbookCopySheetPermission,
+    WorkbookCreateSheetPermission,
     WorkbookDeleteSheetPermission,
     WorkbookEditablePermission,
     WorkbookHideSheetPermission,
@@ -33,6 +33,7 @@ import {
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
+import type { Subscriber } from 'rxjs';
 import { combineLatest, combineLatestWith, map, Observable } from 'rxjs';
 
 import { RemoveSheetConfirmCommand } from '../../commands/commands/remove-sheet-confirm.command';
@@ -53,16 +54,13 @@ export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
                 id === InsertSheetMutation.id ||
                 id === SetWorksheetHideMutation.id
             ) {
-                const worksheets = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getWorksheets();
-                // loop through all worksheets Map to see if there is more than one visible sheet
-                const visibleSheets = Array.from(worksheets.values()).filter(
-                    (sheet) => sheet.getConfig().hidden === BooleanNumber.FALSE
-                );
-
-                subscriber.next(visibleSheets.length === 1);
+                disableFunction(univerInstanceService, subscriber);
             }
         });
-        subscriber.next(false);
+
+        // When there is only one sheet initialized, it is also necessary to disable
+        disableFunction(univerInstanceService, subscriber);
+
         return disposable.dispose;
     });
     const permissionDisable$ = getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookDeleteSheetPermission]);
@@ -86,7 +84,7 @@ export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.copy',
-        disabled$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookCopySheetPermission]),
+        disabled$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookCreateSheetPermission]),
     };
 }
 
@@ -135,16 +133,13 @@ export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                     id === InsertSheetMutation.id ||
                     id === SetWorksheetHideMutation.id
                 ) {
-                    const worksheets = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getWorksheets();
-                    // loop through all worksheets Map to see if there is more than one visible sheet
-                    const visibleSheets = Array.from(worksheets.values()).filter(
-                        (sheet) => sheet.getConfig().hidden === BooleanNumber.FALSE
-                    );
-
-                    subscriber.next(visibleSheets.length === 1);
+                    disableFunction(univerInstanceService, subscriber);
                 }
             });
-            subscriber.next(false);
+
+            // When there is only one sheet initialized, it is also necessary to disable
+            disableFunction(univerInstanceService, subscriber);
+
             return disposable.dispose;
         }).pipe(
             combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookHideSheetPermission])),
@@ -211,6 +206,13 @@ export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',
         disabled$: new Observable<boolean>((subscriber) => {
+            function disableFunction() {
+                const worksheets = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getWorksheets();
+                    // loop through all worksheets Map to see if there is more than one sheet
+                const visibleSheets = Array.from(worksheets.values());
+
+                subscriber.next(visibleSheets.length === 1);
+            }
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (
@@ -218,17 +220,24 @@ export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                     id === InsertSheetMutation.id ||
                     id === SetWorksheetHideMutation.id
                 ) {
-                    const worksheets = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getWorksheets();
-                    // loop through all worksheets Map to see if there is more than one sheet
-                    const visibleSheets = Array.from(worksheets.values());
-
-                    subscriber.next(visibleSheets.length === 1);
+                    disableFunction();
                 }
             });
-            subscriber.next(false);
+
+            disableFunction();
+
             return disposable.dispose;
         }).pipe(
             combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookHideSheetPermission])),
             map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled)),
     };
+}
+
+function disableFunction(univerInstanceService: IUniverInstanceService, subscriber: Subscriber<boolean>) {
+    const worksheets = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getWorksheets();
+        // loop through all worksheets Map to see if there is more than one visible sheet
+    const visibleSheets = Array.from(worksheets.values()).filter(
+        (sheet) => sheet.getConfig().hidden === BooleanNumber.FALSE
+    );
+    subscriber.next(visibleSheets.length === 1);
 }

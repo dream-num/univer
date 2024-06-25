@@ -55,6 +55,12 @@ export interface IConfirmProps {
      * Callback when the Confirm is confirmed.
      */
     onConfirm?: () => void;
+
+    /**
+     * The width of the Confirm.
+     */
+    width?: number | string;
+
 }
 
 function Footer(props: { locale: ILocale['design']; cancelText?: string; confirmText?: string; onClose: (() => void) | undefined; onConfirm: (() => void) | undefined }) {
@@ -71,7 +77,7 @@ function Footer(props: { locale: ILocale['design']; cancelText?: string; confirm
 }
 
 export function Confirm(props: IConfirmProps) {
-    const { children, visible = false, title, cancelText, confirmText, onClose, onConfirm } = props;
+    const { children, visible = false, title, cancelText, confirmText, width, onClose, onConfirm } = props;
 
     const { locale } = useContext(ConfigContext);
 
@@ -89,6 +95,7 @@ export function Confirm(props: IConfirmProps) {
                 />
             )}
             onClose={onClose}
+            width={width}
         >
             {children}
         </Dialog>

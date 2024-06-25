@@ -41,7 +41,7 @@ export interface IUniverInstanceService {
     /** Subscribe to curtain type of units' creation. */
     getTypeOfUnitAdded$<T extends UnitModel>(type: UnitType): Observable<T>;
 
-    /** @interal */
+    /** @ignore */
     __addUnit(unit: UnitModel): void;
 
     /** Omits value when a UnitModel is disposed. */

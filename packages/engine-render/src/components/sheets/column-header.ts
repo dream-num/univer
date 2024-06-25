@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import { SheetColumnHeaderExtensionRegistry } from '../extension';
-import type { ColumnHeaderLayout } from './extensions/column-header-layout';
+import type { ColumnHeaderLayout, IColumnsHeaderCfgParam } from './extensions/column-header-layout';
 import { SpreadsheetHeader } from './sheet-component';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
 
@@ -97,5 +97,10 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
         this._columnHeaderLayoutExtension = this.getExtensionByKey(
             'DefaultColumnHeaderLayoutExtension'
         ) as ColumnHeaderLayout;
+    }
+
+    setCustomHeader(cfg: IColumnsHeaderCfgParam) {
+        this.makeDirty(true);
+        this._columnHeaderLayoutExtension.configHeaderColumn(cfg);
     }
 }

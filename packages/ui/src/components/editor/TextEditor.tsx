@@ -115,14 +115,14 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
 
         onValid,
 
-        placeholder = '',
-
         isValueValid = true,
     } = props;
 
     const editorService = useDependency(IEditorService);
 
     const localeService = useDependency(LocaleService);
+
+    const [placeholder, placeholderSet] = useState('');
 
     const [validationContent, setValidationContent] = useState<string>('');
 
@@ -171,6 +171,9 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         },
         editor);
 
+        editorService.setValueNoRefresh(props.value || '', id);
+        placeholderSet(props.placeholder || '');
+
         const activeChange = debounce((state: boolean) => {
             setActive(state);
             onActive && onActive(state);
@@ -192,7 +195,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
                 const rect = editor.getBoundingClientRect();
                 setValidationOffset([rect.left, rect.top - 16]);
                 if (rect.left + rect.top > 0) {
-                    setValidationVisible(!isLegality);
+                    setValidationVisible(isLegality);
                 }
 
                 if (editor.onlyInputFormula()) {
@@ -280,7 +283,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
     if (props.className == null) {
         if (isReadonly) {
             borderStyle = ` ${styles.textEditorContainerDisabled}`;
-        } else if (validationVisible) {
+        } else if (!validationVisible) {
             borderStyle = ` ${styles.textEditorContainerError}`;
         } else if (active) {
             borderStyle = ` ${styles.textEditorContainerActive}`;
@@ -292,7 +295,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             <div {...propsNew} className={className + borderStyle} ref={editorRef}>
                 <div style={{ display: hasValue() ? 'none' : 'unset' }} className={styles.textEditorContainerPlaceholder}>{placeholder}</div>
             </div>
-            <Popup visible={validationVisible} offset={validationOffset}>
+            <Popup visible={!validationVisible} offset={validationOffset}>
                 <div className={styles.textEditorValidationError}>{validationContent}</div>
             </Popup>
         </>

@@ -235,6 +235,7 @@ export class Engine extends ThinEngine<Scene> {
 
     override dispose() {
         super.dispose();
+
         const eventPrefix = getPointerPrefix();
         const canvasEle = this.getCanvasElement();
         canvasEle.removeEventListener(`${eventPrefix}leave`, this._pointerLeaveEvent);

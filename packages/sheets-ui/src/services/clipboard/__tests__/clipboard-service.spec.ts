@@ -30,7 +30,7 @@ import {
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ISheetClipboardService } from '../clipboard.service';
+import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../clipboard.service';
 import { COPY_TYPE } from '../type';
 import { discreteRangeToRange } from '../../../controllers/utils/range-tools';
 import { clipboardTestBed } from './clipboard-test-bed';
@@ -839,7 +839,7 @@ describe('Test clipboard', () => {
                 },
             ]);
 
-            (sheetClipboardService as any)._pasteInternal(copyId, 'default-paste');
+            (sheetClipboardService as any)._pasteInternal(copyId, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
 
             expect(getValues(24, 0, 24, 0)![0][0]).toBe(null);
             expect(getValues(24, 1, 24, 1)![0][0]!.v).toBe('A25');

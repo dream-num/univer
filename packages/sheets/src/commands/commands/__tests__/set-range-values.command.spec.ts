@@ -565,6 +565,143 @@ describe('Test set range values commands', () => {
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getValues(1, 1, 1, 4)).toStrictEqual([[{ s: 's2' }, null, null, { s: 's3' }]]);
             });
+
+            it('paste value when origin cell has rich text', async () => {
+                function getParams() {
+                    const richTextDemo: IDocumentData = {
+                        id: 'd',
+                        body: {
+                            dataStream: 'Instructions: ①Project division - Fill in the specific division of labor after the project is disassembled: ②Responsible Person - Enter the responsible person\'s name here: ③Date-The specific execution time of the project (detailed to the date of a certain month), and the gray color block marks the planned real-time time of the division of labor of the project (for example, the specific execution time of [regional scene model arrangement and construction] is the 2 days marked in gray. \r\n',
+                            textRuns: [
+                                {
+                                    st: 0,
+                                    ed: 488,
+                                    ts: {
+                                        cl: {
+                                            rgb: 'rgb(92,92,92)',
+                                        },
+                                    },
+                                },
+                            ],
+                            paragraphs: [
+                                {
+                                    startIndex: 489,
+                                    paragraphStyle: {
+                                        spaceAbove: 10,
+                                        lineSpacing: 1.2,
+                                    },
+                                },
+                            ],
+                        },
+                        documentStyle: {
+                            pageSize: {
+                                width: Number.POSITIVE_INFINITY,
+                                height: Number.POSITIVE_INFINITY,
+                            },
+                            marginTop: 0,
+                            marginBottom: 0,
+                            marginRight: 2,
+                            marginLeft: 2,
+                        },
+                    };
+
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            p: richTextDemo,
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                        },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+                expect(getValue()).toStrictEqual(getParams().value);
+                expect(await commandService.executeCommand(SetRangeValuesMutation.id, {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    cellValue: {
+                        0: {
+                            0: {
+                                v: 'hello',
+                                s: null,
+                            },
+                        },
+                    },
+                })).toBeTruthy();
+                expect(getValue()?.p).toBeFalsy();
+            });
+
+            it('set styles when origin cell has rich text', async () => {
+                function getParams() {
+                    const richTextDemo: IDocumentData = {
+                        id: 'd',
+                        body: {
+                            dataStream: 'Instructions: ①Project division - Fill in the specific division of labor after the project is disassembled: ②Responsible Person - Enter the responsible person\'s name here: ③Date-The specific execution time of the project (detailed to the date of a certain month), and the gray color block marks the planned real-time time of the division of labor of the project (for example, the specific execution time of [regional scene model arrangement and construction] is the 2 days marked in gray. \r\n',
+                            textRuns: [
+                                {
+                                    st: 0,
+                                    ed: 488,
+                                    ts: {
+                                        cl: {
+                                            rgb: 'rgb(92,92,92)',
+                                        },
+                                    },
+                                },
+                            ],
+                            paragraphs: [
+                                {
+                                    startIndex: 489,
+                                    paragraphStyle: {
+                                        spaceAbove: 10,
+                                        lineSpacing: 1.2,
+                                    },
+                                },
+                            ],
+                        },
+                        documentStyle: {
+                            pageSize: {
+                                width: Number.POSITIVE_INFINITY,
+                                height: Number.POSITIVE_INFINITY,
+                            },
+                            marginTop: 0,
+                            marginBottom: 0,
+                            marginRight: 2,
+                            marginLeft: 2,
+                        },
+                    };
+
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            p: richTextDemo,
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                        },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+                expect(getValue()).toStrictEqual(getParams().value);
+                expect(await commandService.executeCommand(SetRangeValuesMutation.id, {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    cellValue: {
+                        0: {
+                            0: {
+                                s: {
+                                    bg: {
+                                        rgb: '#232323',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                })).toBeTruthy();
+                expect(getValue()?.p).toBeTruthy();
+            });
         });
 
         describe('fault situations', () => {

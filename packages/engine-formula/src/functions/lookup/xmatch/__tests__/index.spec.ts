@@ -59,11 +59,11 @@ const arrayValueObject4 = ArrayValueObject.create(/*ts*/ `{
 }`);
 
 describe('Test xmatch', () => {
-    const textFunction = new Xmatch(FUNCTION_NAMES_LOOKUP.XLOOKUP);
+    const testFunction = new Xmatch(FUNCTION_NAMES_LOOKUP.XLOOKUP);
 
     describe('The value of the lookup', () => {
         it('Search single string', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 StringValueObject.create('Second'),
                 arrayValueObject1.slice(undefined, [1, 2])!
             );
@@ -71,7 +71,7 @@ describe('Test xmatch', () => {
         });
 
         it('Search single string horizon', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 StringValueObject.create('Second'),
                 arrayValueObject1.transpose().slice([1, 2])!
             );
@@ -79,7 +79,7 @@ describe('Test xmatch', () => {
         });
 
         it('Search single number ', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(5),
                 arrayValueObject1.slice(undefined, [0, 1])!
             );
@@ -87,7 +87,7 @@ describe('Test xmatch', () => {
         });
 
         it('Search array', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 arrayValueObject2.slice(undefined, [1, 2])!,
                 arrayValueObject1.slice(undefined, [1, 2])!
             );
@@ -97,7 +97,7 @@ describe('Test xmatch', () => {
 
     describe('Approximate match test', () => {
         it('Approximate match1', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 StringValueObject.create('s*'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
                 NumberValueObject.create(2)
@@ -106,7 +106,7 @@ describe('Test xmatch', () => {
         });
 
         it('Approximate asc', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 StringValueObject.create('???th'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
                 NumberValueObject.create(2)
@@ -115,7 +115,7 @@ describe('Test xmatch', () => {
         });
 
         it('Approximate desc', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 StringValueObject.create('???th'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
                 NumberValueObject.create(2),
@@ -125,7 +125,7 @@ describe('Test xmatch', () => {
         });
 
         it('match_mode is -1', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(110),
                 arrayValueObject3.slice(undefined, [0, 1])!,
                 NumberValueObject.create(-1)
@@ -134,7 +134,7 @@ describe('Test xmatch', () => {
         });
 
         it('match_mode 1', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(110),
                 arrayValueObject3.slice(undefined, [0, 1])!,
                 NumberValueObject.create(1)
@@ -143,7 +143,7 @@ describe('Test xmatch', () => {
         });
 
         it('match_mode binary asc', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(660),
                 arrayValueObject4.slice(undefined, [0, 1])!,
                 NumberValueObject.create(0),
@@ -154,7 +154,7 @@ describe('Test xmatch', () => {
         });
 
         it('match_mode binary desc', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(660),
                 arrayValueObject4.slice(undefined, [0, 1])!,
                 NumberValueObject.create(0),

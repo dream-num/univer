@@ -333,7 +333,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         const m = this.transform.getMatrix();
         mainCtx.save();
         mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        this._draw(mainCtx);
+        this._draw(mainCtx, bounds);
         mainCtx.restore();
         this.makeDirty(false);
         return this;
@@ -374,7 +374,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         };
     }
 
-    protected _draw(ctx: UniverRenderingContext) {
+    protected _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         /** abstract */
     }
 

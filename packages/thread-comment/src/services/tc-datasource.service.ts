@@ -56,6 +56,11 @@ export interface IThreadCommentDataSourceService {
     dataSource: Nullable<IThreadCommentDataSource>;
 
     /**
+     * should sync updates to ot-server
+     */
+    syncUpdates: boolean
+
+    /**
      * handler for add-comment, throw error means fail and stop the process.
      */
     addComment: (comment: IThreadComment) => Promise<IThreadComment>;
@@ -80,6 +85,7 @@ export interface IThreadCommentDataSourceService {
  */
 export class ThreadCommentDataSourceService extends Disposable implements IThreadCommentDataSourceService {
     private _dataSource: Nullable<IThreadCommentDataSource> = null;
+    syncUpdates = true;
 
     set dataSource(dataSource: Nullable<IThreadCommentDataSource>) {
         this._dataSource = dataSource;

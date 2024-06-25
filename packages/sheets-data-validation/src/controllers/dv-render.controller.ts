@@ -49,9 +49,6 @@ const INVALID_MARK = {
     },
 };
 
-/**
- * @todo RenderUnit
- */
 @OnLifecycle(LifecycleStages.Rendered, SheetsDataValidationRenderController)
 export class SheetsDataValidationRenderController extends RxDisposable {
     constructor(
@@ -362,45 +359,24 @@ export class SheetsDataValidationRenderController extends RxDisposable {
     }
 }
 
-/**
- * @todo RenderUnit
- */
+// The mobile version does not provide the ability to change data validation model.
 @OnLifecycle(LifecycleStages.Rendered, SheetsDataValidationMobileRenderController)
 export class SheetsDataValidationMobileRenderController extends RxDisposable {
     constructor(
         private readonly _config: Partial<IUniverSheetsDataValidation>,
         @ICommandService private readonly _commandService: ICommandService,
-        @IMenuService private _menuService: IMenuService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(AutoHeightController) private readonly _autoHeightController: AutoHeightController,
-        @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @Inject(DataValidationDropdownManagerService) private readonly _dropdownManagerService: DataValidationDropdownManagerService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
     ) {
         super();
 
-        this._initMenu();
         this._initSkeletonChange();
         this._initViewModelIntercept();
         this._initAutoHeight();
-    }
-
-    private _initMenu() {
-        const { menu = {} } = this._config;
-
-        [
-            dataValidationMenuFactory,
-            openDataValidationMenuFactory,
-            addDataValidationMenuFactory,
-        ].forEach((factory) => {
-            this.disposeWithMe(
-                this._menuService.addMenuItem(factory(this._injector), menu)
-            );
-        });
     }
 
     private _initSkeletonChange() {
@@ -409,7 +385,9 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
             if (!workbook) return;
 
             const unitId = workbook.getUnitId();
-            const subUnitId = workbook.getActiveSheet().getSheetId();
+            const subUnitId = workbook.getActiveSheet()?.getSheetId();
+            if (!subUnitId) return;
+
             const skeleton = this._renderManagerService.getRenderById(unitId)
                 ?.with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId)
                 ?.skeleton;
@@ -436,7 +414,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                     priority: 200,
                     // eslint-disable-next-line max-lines-per-function
                     handler: (cell, pos, next) => {
-                        const { row, col, unitId, subUnitId } = pos;
+                        const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
                         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
                         if (!manager) {
                             return next(cell);
@@ -556,6 +534,8 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                                     subUnitId,
                                     row,
                                     col,
+                                    worksheet,
+                                    workbook,
                                 };
                                 return validator?.canvasRender?.calcCellAutoHeight?.(info);
                             },

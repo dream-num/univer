@@ -32,8 +32,8 @@ import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsFormulaMobilePlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsDataValidationMobilePlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsConditionalFormattingMobileUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
-import { enUS } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
+import { enUS } from '../locales';
 
 // univer
 const univer = new Univer({
@@ -58,17 +58,13 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 } as IUniverRPCMainThreadConfig);
 
 univer.registerPlugin(UniverDocsUIPlugin);
-
 univer.registerPlugin(UniverSheetsPlugin);
 
 univer.registerPlugin(UniverSheetsMobileUIPlugin);
-
-// sheet feature plugins
 univer.registerPlugin(UniverSheetsFilterPlugin);
 univer.registerPlugin(UniverSheetsFilterMobileUIPlugin);
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverSheetsFormulaMobilePlugin);
-
 univer.registerPlugin(UniverSheetsConditionalFormattingMobileUIPlugin);
 univer.registerPlugin(UniverSheetsDataValidationMobilePlugin);
 
@@ -82,7 +78,7 @@ const mockUser = {
 
 const injector = univer.__getInjector();
 const userManagerService = injector.get(UserManagerService);
-userManagerService.currentUser = mockUser;
+userManagerService.setCurrentUser(mockUser);
 
 declare global {
     // eslint-disable-next-line ts/naming-convention
@@ -91,12 +87,5 @@ declare global {
         univerAPI?: ReturnType<typeof FUniver.newAPI>;
     }
 }
-
-// setTimeout(() => {
-//     import('./lazy').then((lazy) => {
-//         const plugins = lazy.default();
-//         plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
-//     });
-// }, LOAD_LAZY_PLUGINS_TIMEOUT);
 
 univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);

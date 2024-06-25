@@ -44,7 +44,7 @@ export class ThreadCommentResourceController extends Disposable {
                     resultMap[key] = v;
                 });
 
-                return JSON.stringify(this._threadCommentDataSourceService.saveToSnapshot(resultMap));
+                return JSON.stringify(this._threadCommentDataSourceService.saveToSnapshot(resultMap, unitID));
             }
             return '';
         };
@@ -69,7 +69,7 @@ export class ThreadCommentResourceController extends Disposable {
                     this._threadCommentModel.deleteUnit(unitID);
                 },
                 onLoad: async (unitID, value) => {
-                    const unitComments = await this._threadCommentDataSourceService.loadFormSnapshot(value);
+                    const unitComments = await this._threadCommentDataSourceService.loadFormSnapshot(value, unitID);
                     Object.keys(unitComments).forEach((subunitId) => {
                         const commentList = value[subunitId];
                         commentList.forEach((comment) => {

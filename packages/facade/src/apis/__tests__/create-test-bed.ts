@@ -49,7 +49,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISelectionRenderService, SelectionRenderService, SheetRenderController, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
-import { SheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
+import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
 
 import { FUniver } from '../facade';
 
@@ -159,7 +159,12 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService);
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, SheetRenderController);
 
-            SheetsConditionalFormattingPlugin.dependencyList.forEach((d) => {
+            ([
+                [ConditionalFormattingService],
+                [ConditionalFormattingFormulaService],
+                [ConditionalFormattingRuleModel],
+                [ConditionalFormattingViewModel],
+            ] as Dependency[]).forEach((d) => {
                 injector.add(d);
             });
 

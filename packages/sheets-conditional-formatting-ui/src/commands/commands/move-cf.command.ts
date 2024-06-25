@@ -31,7 +31,7 @@ export interface IMoveCfCommand {
     start: IAnchor;
     end: IAnchor;
 };
-export const moveCfCommand: ICommand<IMoveCfCommand> = {
+export const MoveCfCommand: ICommand<IMoveCfCommand> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.move-conditional-rule',
     handler(accessor, params) {

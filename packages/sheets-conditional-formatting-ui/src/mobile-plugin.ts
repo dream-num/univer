@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, ICommandService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, SheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
@@ -31,7 +31,7 @@ import { ClearWorksheetCfCommand } from './commands/commands/clear-worksheet-cf.
 import { OpenConditionalFormattingOperator } from './commands/operations/open-conditional-formatting-panel';
 import { DeleteCfCommand } from './commands/commands/delete-cf.command';
 import { SetCfCommand } from './commands/commands/set-cf.command';
-import { moveCfCommand } from './commands/commands/move-cf.command';
+import { MoveCfCommand } from './commands/commands/move-cf.command';
 import { AddCfCommand } from './commands/commands/add-cf.command';
 
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
@@ -41,30 +41,11 @@ import { DefaultSheetConditionalFormattingUiConfig } from './controllers/cf.menu
 import { ConditionalFormattingI18nController } from './controllers/cf.i18n.controller';
 import { SheetsCfRefRangeController } from './controllers/cf.ref-range.controller';
 import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
-import { UniverSheetsConditionalFormattingUIPlugin } from './plugin';
 
+@DependentOn(SheetsConditionalFormattingPlugin)
 export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
     static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;
-
-    static commandList = [
-        AddAverageCfCommand,
-        AddColorScaleConditionalRuleCommand,
-        AddDataBarConditionalRuleCommand,
-        AddDuplicateValuesCfCommand,
-        AddNumberCfCommand,
-        AddRankCfCommand,
-        AddTextCfCommand,
-        AddTimePeriodCfCommand,
-        AddUniqueValuesCfCommand,
-        OpenConditionalFormattingOperator,
-        DeleteCfCommand,
-        SetCfCommand,
-        moveCfCommand,
-        AddCfCommand,
-        ClearRangeCfCommand,
-        ClearWorksheetCfCommand,
-    ];
 
     constructor(
         private readonly _config: Partial<IUniverSheetsConditionalFormattingUIConfig> = {},
@@ -75,9 +56,7 @@ export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
         this._config = Tools.deepMerge({}, DefaultSheetConditionalFormattingUiConfig, this._config);
 
         this._initCommand();
-        SheetsConditionalFormattingPlugin.dependencyList.forEach((dependency) => {
-            this._injector.add(dependency);
-        });
+
         this._injector.add([SheetsCfRenderController]);
         this._injector.add([SheetsCfRefRangeController]);
         this._injector.add([ConditionalFormattingCopyPasteController]);
@@ -87,8 +66,22 @@ export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
 
     private _initCommand() {
         [
-            ...SheetsConditionalFormattingPlugin.mutationList,
-            ...UniverSheetsConditionalFormattingUIPlugin.commandList,
+            AddAverageCfCommand,
+            AddColorScaleConditionalRuleCommand,
+            AddDataBarConditionalRuleCommand,
+            AddDuplicateValuesCfCommand,
+            AddNumberCfCommand,
+            AddRankCfCommand,
+            AddTextCfCommand,
+            AddTimePeriodCfCommand,
+            AddUniqueValuesCfCommand,
+            OpenConditionalFormattingOperator,
+            DeleteCfCommand,
+            SetCfCommand,
+            MoveCfCommand,
+            AddCfCommand,
+            ClearRangeCfCommand,
+            ClearWorksheetCfCommand,
         ].forEach((m) => {
             this._commandService.registerCommand(m);
         });

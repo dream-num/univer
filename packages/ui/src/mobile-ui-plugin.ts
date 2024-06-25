@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DependentOn, IContextService, ILocalStorageService, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
+import { DependentOn, ILocalStorageService, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
@@ -66,7 +66,6 @@ export class UniverMobileUIPlugin extends Plugin {
 
     constructor(
         private _config: IUniverUIConfig,
-        @IContextService private readonly _contextService: IContextService,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();
@@ -105,7 +104,8 @@ export class UniverMobileUIPlugin extends Plugin {
             [
                 IUIController, {
                     useFactory: (injector: Injector) => injector.createInstance(MobileUIController, this._config),
-                    deps: [Injector] },
+                    deps: [Injector],
+                },
             ],
             [
                 SharedController,
@@ -114,7 +114,7 @@ export class UniverMobileUIPlugin extends Plugin {
                 },
             ],
             [ErrorController],
-        ]);
+        ], this._config.override);
 
         dependencies.forEach((dependency) => injector.add(dependency));
     }

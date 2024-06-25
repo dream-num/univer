@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IDocumentBody, IMutationInfo, IParagraph, IRange, Nullable } from '@univerjs/core';
-import { cellToRange, IUniverInstanceService, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
+import { cellToRange, DEFAULT_STYLES, IUniverInstanceService, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
     IMoveRangeMutationParams,
@@ -350,7 +350,10 @@ export function getSetCellStyleMutations(
 
     matrix.forValue((row, col, value) => {
         const newValue: ICellData = {
-            s: value.s,
+            s: Object.assign({}, {
+                ...DEFAULT_STYLES,
+                bg: null,
+            }, value.s),
         };
         if (withRichFormat && value.p?.body) {
             newValue.p = value.p;

@@ -58,6 +58,23 @@ describe('Test concat function', () => {
             expect(result.getValue()).toBe('a123234345');
         });
 
+        it('Text1 is array with blank cell', () => {
+            const text1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [null],
+                    [null],
+                ]),
+                rowCount: 2,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(text1);
+            expect(result.getValue()).toBe('');
+        });
+
         it('Text1 is array, text2 is single cell', () => {
             const text1 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

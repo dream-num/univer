@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -55,10 +53,6 @@ export class Concat extends BaseFunction {
                 // Direct concatenation if it's a single value
                 concatenatedString += textValue.getValue();
             }
-        }
-
-        if (concatenatedString === '') {
-            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         return StringValueObject.create(concatenatedString);

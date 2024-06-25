@@ -156,7 +156,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
     }
 
     override onRendered(): void {
-        this._registerRenderControllers();
+        this._registerRenderModules();
     }
 
     private _registerRenderBasics(): void {
@@ -170,7 +170,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
 
     // We have to let render basics get bootstrapped before. Because some render controllers relies on
     // a correct skeleton when they get loaded.
-    private _registerRenderControllers(): void {
+    private _registerRenderModules(): void {
         ([
             // https://github.com/dream-num/univer-pro/issues/669
             // HeaderMoveRenderController(HMRC) must be initialized before SelectionRenderController(SRC).

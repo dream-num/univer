@@ -28,7 +28,7 @@ export class SheetsFilterMobileUIController extends RxDisposable {
     }
 
     private _initRenderControllers(): void {
-        this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, SheetsFilterRenderController));
+        this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, SheetsFilterRenderController));
     }
 }
 

@@ -69,10 +69,10 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     }
 
     override onRendered(): void {
-        this._registerRenderControllers();
+        this._registerRenderModules();
     }
 
-    private _registerRenderControllers(): void {
+    private _registerRenderModules(): void {
         ([
 
             FormulaAlertRenderController,

@@ -118,7 +118,12 @@ export class ThreadCommentModel {
         const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
         let comment = origin;
         if (sync) {
-            const res = await this._dataSourceService.getThreadComment(unitId, subUnitId, comment.threadId, comment.id);
+            const res = await this._dataSourceService.getThreadComment(unitId, subUnitId, {
+                threadId: comment.threadId,
+                ref: comment.ref,
+                id: comment.id
+            });
+
             if (res) {
                 comment = res;
             }

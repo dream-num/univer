@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Inject, createIdentifier } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
 import type { IThreadComment } from '../types/interfaces/i-thread-comment';
 import { Disposable, Nullable } from '@univerjs/core';
 
@@ -47,7 +47,7 @@ export interface IThreadCommentDataSource {
     /**
      * handler for batch-fetch-comment, throw error means fail and stop the process.
      */
-    listComments: (commentIds: { id: string; threadId: string }[], unitId: string, subUnitId: string) => Promise<IThreadComment[]>;
+    listComments: (commentIds: ThreadCommentJSON[], unitId: string, subUnitId: string) => Promise<IThreadComment[]>;
     saveCommentToSnapshot: (comment: IThreadComment) => ThreadCommentJSON;
 }
 
@@ -78,7 +78,7 @@ export interface IThreadCommentDataSourceService {
     deleteCommentBatch: (commentIds: string[], threadId: string, unitId: string, subUnitId: string) => Promise<Success>;
     loadFormSnapshot: (unitComments: Record<string, ThreadCommentJSON[]>, unitId: string) => Promise<Record<string, IThreadComment[]>>;
     saveToSnapshot: (unitComments: Record<string, IThreadComment[]>, unitId: string) => Record<string, ThreadCommentJSON[]>;
-    getThreadComment: (unitId: string, subUnitId: string, threadId: string, commentId: string) => Promise<Nullable<IThreadComment>>;
+    getThreadComment: (unitId: string, subUnitId: string, info: IThreadComment) => Promise<Nullable<IThreadComment>>;
 }
 
 /**
@@ -100,9 +100,9 @@ export class ThreadCommentDataSourceService extends Disposable implements IThrea
         super()
     }
 
-    async getThreadComment(unitId: string, subUnitId: string, threadId: string, commentId: string): Promise<Nullable<IThreadComment>> {
+    async getThreadComment(unitId: string, subUnitId: string, info: ThreadCommentJSON): Promise<Nullable<IThreadComment>> {
         if (this._dataSource) {
-            const comments = await this._dataSource.listComments([{ threadId, id: commentId, }], unitId, subUnitId);
+            const comments = await this._dataSource.listComments([info], unitId, subUnitId);
             return comments[0];
         }
 

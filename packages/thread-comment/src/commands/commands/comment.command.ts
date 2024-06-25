@@ -39,7 +39,7 @@ export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
         const dataSourceService = accessor.get(IThreadCommentDataSourceService);
         const { unitId, subUnitId, comment: originComment } = params;
         const comment = await dataSourceService.addComment(originComment);
-        const syncUpdates = dataSourceService.syncUpdates;
+        const syncUpdateMutationToColla = dataSourceService.syncUpdateMutationToColla;
         const isRoot = !originComment.parentId;
 
         const redo = {
@@ -69,7 +69,7 @@ export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
             return res;
         }
 
-        if (!syncUpdates) {
+        if (!syncUpdateMutationToColla) {
             commandService.executeCommand(CommentUpdateOperation.id, {
                 unitId,
                 subUnitId,
@@ -102,7 +102,7 @@ export const UpdateCommentCommand: ICommand<IUpdateCommentCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const threadCommentModel = accessor.get(ThreadCommentModel);
         const dataSourceService = accessor.get(IThreadCommentDataSourceService);
-        const syncUpdates = dataSourceService.syncUpdates;
+        const syncUpdateMutationToColla = dataSourceService.syncUpdateMutationToColla;
         const current = threadCommentModel.getComment(
             unitId,
             subUnitId,
@@ -123,7 +123,7 @@ export const UpdateCommentCommand: ICommand<IUpdateCommentCommandParams> = {
             return false;
         }
 
-        if (!syncUpdates) {
+        if (!syncUpdateMutationToColla) {
             commandService.executeCommand(CommentUpdateOperation.id, {
                 unitId,
                 subUnitId,
@@ -163,7 +163,7 @@ export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
         const dataSourceService = accessor.get(IThreadCommentDataSourceService);
         const threadCommentModel = accessor.get(ThreadCommentModel);
         const currentComment = threadCommentModel.getComment(unitId, subUnitId, commentId);
-        const syncUpdates = dataSourceService.syncUpdates;
+        const syncUpdateMutationToColla = dataSourceService.syncUpdateMutationToColla;
         if (!currentComment) {
             return false;
         }
@@ -182,7 +182,7 @@ export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
         return commandService.executeCommand(
             ResolveCommentMutation.id,
             params,
-            { onlyLocal: !syncUpdates }
+            { onlyLocal: !syncUpdateMutationToColla }
         );
     },
 };
@@ -207,7 +207,7 @@ export const DeleteCommentCommand: ICommand<IDeleteCommentCommandParams> = {
         const dataSourceService = accessor.get(IThreadCommentDataSourceService);
         const commandService = accessor.get(ICommandService);
         const { unitId, subUnitId, commentId } = params;
-        const syncUpdates = dataSourceService.syncUpdates;
+        const syncUpdateMutationToColla = dataSourceService.syncUpdateMutationToColla;
 
         const comment = threadCommentModel.getComment(unitId, subUnitId, commentId);
         if (!comment) {
@@ -223,7 +223,7 @@ export const DeleteCommentCommand: ICommand<IDeleteCommentCommandParams> = {
             params,
         };
 
-        if (!syncUpdates) {
+        if (!syncUpdateMutationToColla) {
             commandService.executeCommand(CommentUpdateOperation.id, {
                 unitId,
                 subUnitId,

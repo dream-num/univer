@@ -78,7 +78,7 @@ export interface IThreadCommentDataSourceService {
     deleteCommentBatch: (commentIds: string[], threadId: string, unitId: string, subUnitId: string) => Promise<Success>;
     loadFormSnapshot: (unitComments: Record<string, ThreadCommentJSON[]>, unitId: string) => Promise<Record<string, IThreadComment[]>>;
     saveToSnapshot: (unitComments: Record<string, IThreadComment[]>, unitId: string) => Record<string, ThreadCommentJSON[]>;
-    getThreadComment: (unitId: string, subUnitId: string, info: IThreadComment) => Promise<Nullable<IThreadComment>>;
+    getThreadComment: (unitId: string, subUnitId: string, info: ThreadCommentJSON) => Promise<Nullable<IThreadComment>>;
 }
 
 /**

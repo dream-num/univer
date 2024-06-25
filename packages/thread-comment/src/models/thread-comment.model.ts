@@ -15,11 +15,12 @@
  */
 
 import { BehaviorSubject, map, Subject } from 'rxjs';
-import { CustomRangeType } from '@univerjs/core';
+import { CustomRangeType, ICommandService } from '@univerjs/core';
 import type { IThreadComment } from '../types/interfaces/i-thread-comment';
 import type { IUpdateCommentPayload, IUpdateCommentRefPayload } from '../commands/mutations/comment.mutation';
 import { Inject } from '@wendellhu/redi';
-import { ThreadCommentDataSourceService } from '../services/tc-datasource.service';
+import { IThreadCommentDataSourceService, ThreadCommentJSON } from '../services/tc-datasource.service';
+import { CommentUpdateOperation, ICommentUpdateOperationProps } from '../commands/operations/comment.operation';
 
 export type CommentUpdate = {
     unitId: string;
@@ -61,8 +62,30 @@ export class ThreadCommentModel {
     commentMap$ = this._commentsMap$.asObservable();
 
     constructor(
-        @Inject(ThreadCommentDataSourceService) private readonly _dataSourceService: ThreadCommentDataSourceService
-    ) { }
+        @Inject(IThreadCommentDataSourceService) private readonly _dataSourceService: IThreadCommentDataSourceService,
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
+        this._initSync();
+    }
+
+
+    private _initSync() {
+        this._commandService.onCommandExecuted(command => {
+            if (command.id === CommentUpdateOperation.id) {
+                const params = command.params as ICommentUpdateOperationProps
+                const { unitId, subUnitId, commentId, threadId, rootId } = params;
+                const rootComment = this.getComment(unitId, subUnitId, rootId);
+                if (rootComment) {
+                    this.syncComment(unitId, subUnitId, {
+                        id: rootId,
+                        threadId,
+                        ref: rootComment.ref
+                    })
+                }
+
+            }
+        })
+    }
 
     private _ensureCommentMap(unitId: string, subUnitId: string) {
         let unitMap = this._commentsMap[unitId];
@@ -114,20 +137,9 @@ export class ThreadCommentModel {
         };
     }
 
-    async addComment(unitId: string, subUnitId: string, origin: IThreadComment, sync = false) {
+    addComment(unitId: string, subUnitId: string, origin: IThreadComment, sync = false) {
         const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
         let comment = origin;
-        if (sync) {
-            const res = await this._dataSourceService.getThreadComment(unitId, subUnitId, {
-                threadId: comment.threadId,
-                ref: comment.ref,
-                id: comment.id
-            });
-
-            if (res) {
-                comment = res;
-            }
-        }
 
         const parentId = comment.parentId;
         if (parentId) {
@@ -141,19 +153,39 @@ export class ThreadCommentModel {
         }
 
         const addCommentItem = (item: IThreadComment) => {
-            commentMap[item.id] = comment;
+            commentMap[item.id] = item;
             this._commentUpdate$.next({
                 unitId,
                 subUnitId,
                 type: 'add',
-                payload: comment,
-                isRoot: !comment.parentId,
+                payload: item,
+                isRoot: !item.parentId,
             });
         }
 
         addCommentItem(comment);
+        comment.children?.forEach(addCommentItem);
         this._refreshCommentsMap$();
+        if (sync) {
+            this.syncComment(unitId, subUnitId, {
+                ref: comment.ref,
+                threadId: comment.threadId,
+                id: comment.id
+            })
+        }
         return true;
+    }
+
+    async syncComment(unitId: string, subUnitId: string, info: ThreadCommentJSON) {
+        const comment = await this._dataSourceService.getThreadComment(unitId, subUnitId, info);
+        const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
+        if (comment) {
+            commentMap[comment.id] = comment;
+            comment.children?.forEach(child => {
+                commentMap[child.id] = child;
+            });
+            commentChildrenMap.set(comment.id, comment);
+        }
     }
 
     updateComment(unitId: string, subUnitId: string, payload: IUpdateCommentPayload, silent?: boolean) {

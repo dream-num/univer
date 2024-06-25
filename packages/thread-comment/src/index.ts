@@ -54,3 +54,4 @@ export {
     type IThreadCommentDataSource,
     type ThreadCommentJSON
 } from './services/tc-datasource.service';
+export { CommentUpdateOperation, type ICommentUpdateOperationProps } from './commands/operations/comment.operation';

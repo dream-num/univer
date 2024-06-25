@@ -6,7 +6,7 @@ export interface ICommentUpdateOperationProps {
     unitId: string;
     subUnitId: string;
     rootId: string;
-    type: 'update' | 'delete' | 'reply'
+    type: 'update' | 'delete' | 'reply' | 'colla'
 }
 
 export const CommentUpdateOperation: ICommand<ICommentUpdateOperationProps> = {

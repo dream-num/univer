@@ -357,11 +357,16 @@ export function getSetCellStyleMutations(
         }
         const content = String(value.v);
         const numfmtValue = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
-        if (numfmtValue?.z && newValue.s && typeof newValue?.s === 'object') {
-            if (!newValue.s?.n) {
-                newValue.s.n = { pattern: numfmtValue.z };
-            } else {
-                newValue.s.n.pattern = numfmtValue.z;
+        if (numfmtValue?.z) {
+            if (!newValue.s) {
+                newValue.s = {};
+            }
+            if (typeof newValue.s === 'object') {
+                if (!newValue.s?.n) {
+                    newValue.s.n = { pattern: numfmtValue.z };
+                } else {
+                    newValue.s.n.pattern = numfmtValue.z;
+                }
             }
         }
         const { row: actualRow, col: actualCol } = mapFunc(row, col);

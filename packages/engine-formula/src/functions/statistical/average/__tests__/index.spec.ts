@@ -104,5 +104,57 @@ describe('Test average function', () => {
             const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(14.795714285714286);
         });
+
+        it('Var1 is array includes string only', () => {
+            const var1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['Hello'],
+                    ['Univer'],
+                ]),
+                rowCount: 2,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(var1);
+            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
+        });
+
+        it('Var1 is array includes blank cells only', () => {
+            const var1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [null],
+                    [null],
+                ]),
+                rowCount: 2,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(var1);
+            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
+        });
+
+        it('Var1 is array includes blank cells and string', () => {
+            const var1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [null],
+                    [null],
+                    ['Hello'],
+                ]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(var1);
+            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
+        });
     });
 });

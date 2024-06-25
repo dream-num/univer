@@ -75,7 +75,6 @@ export class TextSelectionManagerService extends RxDisposable {
     private readonly _textSelectionInfo: ITextSelectionInfo = new Map();
 
     private readonly _textSelection$ = new BehaviorSubject<Nullable<ITextSelectionManagerInsertParam>>(null);
-
     readonly textSelection$ = this._textSelection$.asObservable();
 
     constructor(
@@ -191,13 +190,15 @@ export class TextSelectionManagerService extends RxDisposable {
 
     // All textRanges should be synchronized from the render layer.
     private _syncSelectionFromRenderService() {
-        this._textSelectionRenderManager.textSelectionInner$.pipe(takeUntil(this.dispose$)).subscribe((params) => {
-            if (params == null) {
-                return;
-            }
+        this._textSelectionRenderManager.textSelectionInner$
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((params) => {
+                if (params == null) {
+                    return;
+                }
 
-            this._replaceTextRangesWithNoRefresh(params);
-        });
+                this._replaceTextRangesWithNoRefresh(params);
+            });
     }
 
     private _replaceTextRangesWithNoRefresh(textSelectionInfo: ITextSelectionInnerParam) {

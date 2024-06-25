@@ -492,7 +492,8 @@ export class Documents extends DocComponent {
         if (this._drawLiquid == null) {
             return;
         }
-        const isEditHeaderFooter = this.getSkeleton()?.getViewModel().getEditArea() === DocumentEditArea.HEADER_FOOTER;
+        const editArea = this.getSkeleton()?.getViewModel().getEditArea();
+        const isEditHeaderFooter = editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER;
 
         if (!isEditHeaderFooter) {
             ctx.save();

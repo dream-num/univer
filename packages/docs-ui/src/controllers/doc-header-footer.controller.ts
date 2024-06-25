@@ -15,17 +15,107 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
-import type { Documents, IMouseEvent, IPageRenderConfig, IPathProps, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
-import { DocumentEditArea, IRenderManagerService, PageLayoutType, Path, Vector2 } from '@univerjs/engine-render';
+import { BooleanNumber, Disposable, ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import type { Documents, DocumentViewModel, IMouseEvent, IPageRenderConfig, IPathProps, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager, PageLayoutType, Path, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
 import { IEditorService } from '@univerjs/ui';
 import { DocSkeletonManagerService, neoGetDocObject } from '@univerjs/docs';
+import type { Nullable } from 'vitest';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
 
 const HEADER_FOOTER_STROKE_COLOR = 'rgb(0, 0, 255)';
 const HEADER_FOOTER_FILL_COLOR = 'rgb(219, 231, 244)';
+
+export enum HeaderFooterType {
+    FIRST_PAGE_HEADER,
+    FIRST_PAGE_FOOTER,
+    DEFAULT_HEADER,
+    DEFAULT_FOOTER,
+    EVEN_PAGE_HEADER,
+    EVEN_PAGE_FOOTER,
+}
+
+interface IHeaderFooterCreate {
+    createType: Nullable<HeaderFooterType>;
+    headerFooterId: Nullable<string>;
+}
+
+// TODO: @JOCS also need to check sectionBreak config in the future.
+function checkCreateHeaderFooterType(viewModel: DocumentViewModel, editArea: DocumentEditArea, pageNumber: number): IHeaderFooterCreate {
+    const { documentStyle } = viewModel.getDataModel().getSnapshot();
+    const {
+        defaultHeaderId,
+        defaultFooterId,
+        evenPageHeaderId,
+        evenPageFooterId,
+        firstPageHeaderId,
+        firstPageFooterId,
+        evenAndOddHeaders,
+        useFirstPageHeaderFooter,
+    } = documentStyle;
+
+    switch (editArea) {
+        case DocumentEditArea.BODY:
+            return {
+                createType: null,
+                headerFooterId: null,
+            };
+        case DocumentEditArea.HEADER: {
+            if (useFirstPageHeaderFooter === BooleanNumber.TRUE && !firstPageHeaderId) {
+                return {
+                    createType: HeaderFooterType.FIRST_PAGE_HEADER,
+                    headerFooterId: null,
+                };
+            }
+
+            if (evenAndOddHeaders === BooleanNumber.TRUE && pageNumber % 2 === 0 && !evenPageHeaderId) {
+                return {
+                    createType: HeaderFooterType.EVEN_PAGE_HEADER,
+                    headerFooterId: null,
+                };
+            }
+
+            return defaultHeaderId
+                ? {
+                    createType: null,
+                    headerFooterId: defaultHeaderId,
+                }
+                : {
+                    createType: HeaderFooterType.DEFAULT_HEADER,
+                    headerFooterId: null,
+                };
+        }
+        case DocumentEditArea.FOOTER: {
+            if (useFirstPageHeaderFooter === BooleanNumber.TRUE && !firstPageFooterId) {
+                return {
+                    createType: HeaderFooterType.FIRST_PAGE_FOOTER,
+                    headerFooterId: null,
+                };
+            }
+
+            if (evenAndOddHeaders === BooleanNumber.TRUE && pageNumber % 2 === 0 && !evenPageFooterId) {
+                return {
+                    createType: HeaderFooterType.EVEN_PAGE_FOOTER,
+                    headerFooterId: null,
+                };
+            }
+
+            return defaultFooterId
+                ? {
+                    createType: null,
+                    headerFooterId: defaultFooterId,
+                }
+                : {
+                    createType: HeaderFooterType.DEFAULT_FOOTER,
+                    headerFooterId: null,
+                };
+        }
+        default:
+            throw new Error(`Invalid editArea: ${editArea}`);
+    }
+}
 
 export class DocHeaderFooterController extends Disposable implements IRenderModule {
     private _loadedMap = new WeakSet<RenderComponentType>();
@@ -37,6 +127,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
@@ -88,15 +179,30 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
             const viewModel = this._docSkeletonManagerService.getViewModel();
             const skeleton = this._docSkeletonManagerService.getSkeleton();
             const preEditArea = viewModel.getEditArea();
-            const editArea = skeleton.findEditAreaByCoord(
+            const { editArea, pageNumber } = skeleton.findEditAreaByCoord(
                 coord,
                 pageLayoutType,
                 pageMarginLeft,
                 pageMarginTop
             );
 
-            if (preEditArea !== editArea) {
-                viewModel.setEditArea(editArea);
+            if (preEditArea === editArea) {
+                return;
+            }
+
+            viewModel.setEditArea(editArea);
+
+            const { createType, headerFooterId } = checkCreateHeaderFooterType(viewModel, editArea, pageNumber);
+
+            if (editArea === DocumentEditArea.BODY) {
+                this._textSelectionRenderManager.setSegment('');
+            } else {
+                if (createType != null) {
+                    // TODO: create header or footer and set segment.
+                } else if (headerFooterId != null) {
+                    this._textSelectionRenderManager.setSegment(headerFooterId);
+                    // TODO: set selection to header or footer.
+                }
             }
         }));
     }
@@ -136,8 +242,6 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
             const { mainComponent } = currentRender;
 
             const docsComponent = mainComponent as Documents;
-
-            const pageSize = docsComponent.getSkeleton()?.getPageSize();
 
             this.disposeWithMe(
                 toDisposable(
@@ -208,5 +312,9 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         }
 
         return editor.isReadOnly();
+    }
+
+    private _getDocDataModel() {
+        return this._context.unit;
     }
 }

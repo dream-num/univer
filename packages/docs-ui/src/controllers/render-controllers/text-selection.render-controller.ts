@@ -123,6 +123,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }
+
             this._textSelectionRenderManager.handleTripleClick(evt);
         }));
     }

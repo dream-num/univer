@@ -154,18 +154,15 @@ export class DocumentSkeleton extends Skeleton {
         return this.getViewModel().getDataModel().documentStyle.pageSize;
     }
 
-    findPositionByGlyph(glyph: IDocumentSkeletonGlyph): Nullable<INodeSearch> {
+    findPositionByGlyph(glyph: IDocumentSkeletonGlyph, segmentPage: number): Nullable<INodeSearch> {
         const divide = glyph.parent;
-
         const line = divide?.parent;
-
         const column = line?.parent;
-
         const section = column?.parent;
-
         const page = section?.parent;
-
         const skeletonData = this.getSkeletonData();
+        const viewModel = this.getViewModel();
+        const editArea = viewModel.getEditArea();
 
         if (!divide || !column || !section || !page || !skeletonData) {
             return;
@@ -181,7 +178,9 @@ export class DocumentSkeleton extends Skeleton {
 
         const sectionIndex = page.sections.indexOf(section);
 
-        const pageIndex = skeletonData.pages.indexOf(page);
+        const pageIndex = editArea !== DocumentEditArea.BODY
+            ? 0 // Because header or footer only has one page.
+            : skeletonData.pages.indexOf(page);
 
         return {
             glyph: glyphIndex,
@@ -190,11 +189,13 @@ export class DocumentSkeleton extends Skeleton {
             column: columnIndex,
             section: sectionIndex,
             page: pageIndex,
+            segmentPage,
+            isInBody: editArea === DocumentEditArea.BODY,
         };
     }
 
-    findNodePositionByCharIndex(charIndex: number, isBack: boolean = true): Nullable<INodePosition> {
-        const nodes = this._findNodeIterator(charIndex);
+    findNodePositionByCharIndex(charIndex: number, isBack: boolean = true, segmentId = ''): Nullable<INodePosition> {
+        const nodes = this._findNodeIterator(charIndex, segmentId);
 
         if (nodes == null) {
             return;
@@ -221,8 +222,8 @@ export class DocumentSkeleton extends Skeleton {
         };
     }
 
-    findNodeByCharIndex(charIndex: number): Nullable<IDocumentSkeletonGlyph> {
-        const nodes = this._findNodeIterator(charIndex);
+    findNodeByCharIndex(charIndex: number, segmentId = ''): Nullable<IDocumentSkeletonGlyph> {
+        const nodes = this._findNodeIterator(charIndex, segmentId);
 
         return nodes?.glyph;
     }
@@ -238,7 +239,10 @@ export class DocumentSkeleton extends Skeleton {
             return;
         }
 
-        const { divide, line, column, section, page, isBack } = position;
+        const editArea = this.getViewModel().getEditArea();
+        const { pages, skeFooters, skeHeaders } = skeletonData;
+
+        const { divide, line, column, section, page, isBack, isInBody, segmentPage } = position;
 
         let { glyph } = position;
 
@@ -248,8 +252,31 @@ export class DocumentSkeleton extends Skeleton {
 
         glyph = glyph < 0 ? 0 : glyph;
 
+        let skePage = pages[page];
+
+        if (editArea !== DocumentEditArea.BODY) {
+            skePage = pages[segmentPage];
+            const { headerId, footerId, pageWidth } = skePage;
+
+            if (editArea === DocumentEditArea.HEADER) {
+                const skeHeader = skeHeaders.get(headerId)?.get(pageWidth);
+                if (skeHeader == null) {
+                    return;
+                } else {
+                    skePage = skeHeader;
+                }
+            } else if (editArea === DocumentEditArea.FOOTER) {
+                const skeFooter = skeFooters.get(footerId)?.get(pageWidth);
+                if (skeFooter == null) {
+                    return;
+                } else {
+                    skePage = skeFooter;
+                }
+            }
+        }
+
         const glyphGroup =
-            skeletonData.pages[page].sections[section].columns[column].lines[line].divides[divide].glyphGroup;
+            skePage.sections[section].columns[column].lines[line].divides[divide].glyphGroup;
 
         if (glyphGroup[glyph].glyphType === GlyphType.LIST) {
             return glyphGroup[glyph + 1];
@@ -263,13 +290,23 @@ export class DocumentSkeleton extends Skeleton {
         pageLayoutType: PageLayoutType,
         pageMarginLeft: number,
         pageMarginTop: number
-    ): DocumentEditArea {
+    ): {
+            editArea: DocumentEditArea;
+            pageNumber: number;
+            page: Nullable<IDocumentSkeletonPage>;
+        } {
         const { x, y } = coord;
         let editArea = DocumentEditArea.BODY;
+        let pageNumber = 0;
+        let pageSkeleton = null;
         const skeletonData = this.getSkeletonData();
 
         if (skeletonData == null) {
-            return editArea;
+            return {
+                editArea,
+                page: pageSkeleton,
+                pageNumber,
+            };
         }
 
         this._findLiquid.reset();
@@ -285,7 +322,9 @@ export class DocumentSkeleton extends Skeleton {
                 x > this._findLiquid.x && x < this._findLiquid.x + pageWidth &&
                 y > this._findLiquid.y && y < this._findLiquid.y + marginTop
             ) {
-                editArea = DocumentEditArea.HEADER_FOOTER;
+                editArea = DocumentEditArea.HEADER;
+                pageSkeleton = page;
+                pageNumber = i;
                 break;
             }
 
@@ -294,6 +333,8 @@ export class DocumentSkeleton extends Skeleton {
                 y > this._findLiquid.y + marginTop && y < this._findLiquid.y + pageHeight - marginBottom
             ) {
                 editArea = DocumentEditArea.BODY;
+                pageSkeleton = page;
+                pageNumber = i;
                 break;
             }
 
@@ -301,14 +342,20 @@ export class DocumentSkeleton extends Skeleton {
                 x > this._findLiquid.x && x < this._findLiquid.x + pageWidth &&
                 y > this._findLiquid.y + pageHeight - marginBottom && y < this._findLiquid.y + pageHeight
             ) {
-                editArea = DocumentEditArea.HEADER_FOOTER;
+                editArea = DocumentEditArea.HEADER;
+                pageSkeleton = page;
+                pageNumber = i;
                 break;
             }
 
             this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        return editArea;
+        return {
+            editArea,
+            page: pageSkeleton,
+            pageNumber,
+        };
     }
 
     findNodeByCoord(
@@ -322,12 +369,13 @@ export class DocumentSkeleton extends Skeleton {
         this._findLiquid.reset();
 
         const skeletonData = this.getSkeletonData();
-
         if (skeletonData == null) {
             return;
         }
 
-        const pages = skeletonData.pages;
+        const editArea = this.getViewModel().getEditArea();
+
+        const { pages, skeHeaders, skeFooters } = skeletonData;
 
         let nearestNodeList: INodeInfo[] = [];
 
@@ -335,8 +383,9 @@ export class DocumentSkeleton extends Skeleton {
 
         let nearestNodeDistanceY = Number.POSITIVE_INFINITY;
 
-        for (let i = 0, len = pages.length; i < len; i++) {
-            const page = pages[i];
+        for (let pi = 0, len = pages.length; pi < len; pi++) {
+            let page = pages[pi];
+            const { headerId, footerId, pageWidth } = page;
 
             // const { startX, startY, endX, endY } = this._getPageBoundingBox(page, pageLayoutType);
 
@@ -345,12 +394,28 @@ export class DocumentSkeleton extends Skeleton {
             //     continue;
             // }
 
-            this._findLiquid.translatePagePadding(page);
+            if (editArea === DocumentEditArea.HEADER) {
+                const headerSke = skeHeaders.get(headerId)?.get(pageWidth) as IDocumentSkeletonPage;
+
+                if (headerSke) {
+                    page = headerSke;
+                }
+            } else if (editArea === DocumentEditArea.FOOTER) {
+                const footerSke = skeFooters.get(footerId)?.get(pageWidth) as IDocumentSkeletonPage;
+
+                if (footerSke) {
+                    page = footerSke;
+                }
+            }
 
             const { sections } = page;
+            this._findLiquid.translatePagePadding({
+                ...page,
+                marginLeft: pages[pi].marginLeft, // Because header or footer margin Left is 0.
+            });
 
             for (const section of sections) {
-                const { columns, height } = section;
+                const { columns } = section;
 
                 this._findLiquid.translateSection(section);
 
@@ -361,7 +426,7 @@ export class DocumentSkeleton extends Skeleton {
                 // }
 
                 for (const column of columns) {
-                    const { lines, width: columnWidth } = column;
+                    const { lines } = column;
 
                     this._findLiquid.translateSave();
                     this._findLiquid.translateColumn(column);
@@ -400,7 +465,7 @@ export class DocumentSkeleton extends Skeleton {
                             const divideLength = divides.length;
                             for (let i = 0; i < divideLength; i++) {
                                 const divide = divides[i];
-                                const { glyphGroup, width: divideWidth } = divide;
+                                const { glyphGroup } = divide;
 
                                 this._findLiquid.translateSave();
                                 this._findLiquid.translateDivide(divide);
@@ -429,6 +494,7 @@ export class DocumentSkeleton extends Skeleton {
                                         if (x >= startX_fin && x <= endX_fin) {
                                             return {
                                                 node: glyph,
+                                                segmentPage: pi,
                                                 ratioX: x / (startX_fin + endX_fin),
                                                 ratioY: y / (startY_fin + endY_fin),
                                             };
@@ -440,6 +506,7 @@ export class DocumentSkeleton extends Skeleton {
                                         }
                                         nearestNodeList.push({
                                             node: glyph,
+                                            segmentPage: pi,
                                             ratioX: x / (startX_fin + endX_fin),
                                             ratioY: y / (startY_fin + endY_fin),
                                         });
@@ -459,6 +526,7 @@ export class DocumentSkeleton extends Skeleton {
                                     if (distanceY === nearestNodeDistanceY) {
                                         nearestNodeList.push({
                                             node: glyph,
+                                            segmentPage: pi,
                                             ratioX: x / (startX_fin + endX_fin),
                                             ratioY: y / (startY_fin + endY_fin),
                                         });
@@ -475,7 +543,7 @@ export class DocumentSkeleton extends Skeleton {
                 }
             }
             this._findLiquid.restorePagePadding(page);
-            this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+            this._translatePage(pages[pi], pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
         return this._getNearestNode(nearestNodeList, nearestNodeDistanceList);
@@ -484,6 +552,7 @@ export class DocumentSkeleton extends Skeleton {
     private _getNearestNode(nearestNodeList: INodeInfo[], nearestNodeDistanceList: number[]) {
         const miniValue = Math.min(...nearestNodeDistanceList);
         const miniValueIndex = nearestNodeDistanceList.indexOf(miniValue);
+
         return nearestNodeList[miniValueIndex];
     }
 
@@ -735,17 +804,37 @@ export class DocumentSkeleton extends Skeleton {
         sections.push(newSection);
     }
 
-    private _findNodeIterator(charIndex: number) {
+    private _findNodeIterator(charIndex: number, segmentId = '') {
         const skeletonData = this.getSkeletonData();
 
         if (!skeletonData) {
             return;
         }
 
-        const pages = skeletonData.pages;
+        const editArea = this.getViewModel().getEditArea();
+        const { pages, skeFooters, skeHeaders } = skeletonData;
 
         for (const page of pages) {
-            const { sections, st, ed } = page;
+            const { pageWidth } = page;
+            let segmentPage = page;
+
+            if (editArea === DocumentEditArea.HEADER) {
+                const headerSke = skeHeaders.get(segmentId)?.get(pageWidth);
+                if (headerSke) {
+                    segmentPage = headerSke;
+                } else {
+                    continue;
+                }
+            } else if (editArea === DocumentEditArea.FOOTER) {
+                const footerSke = skeFooters.get(segmentId)?.get(pageWidth);
+                if (footerSke) {
+                    segmentPage = footerSke;
+                } else {
+                    continue;
+                }
+            }
+
+            const { sections, st, ed } = segmentPage;
 
             if (charIndex < st || charIndex > ed) {
                 continue;

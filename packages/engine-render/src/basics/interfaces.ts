@@ -144,6 +144,7 @@ export interface INodeInfo {
     node: IDocumentSkeletonGlyph;
     ratioX: number;
     ratioY: number;
+    segmentPage: number; // The index of the page where node is located.
 }
 
 export interface INodeSearch {
@@ -153,6 +154,8 @@ export interface INodeSearch {
     column: number;
     section: number;
     page: number;
+    segmentPage: number; // The index of the page where the header and footer reside.
+    isInBody: boolean;
 }
 
 export interface INodePosition extends INodeSearch {

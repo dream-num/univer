@@ -52,12 +52,12 @@ export function cursorConvertToTextRange(
     docSkeleton: DocumentSkeleton,
     document: Documents
 ): Nullable<TextRange> {
-    const { startOffset, endOffset, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE } = range;
+    const { startOffset, endOffset, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE, segmentId = '' } = range;
 
-    const anchorNodePosition = docSkeleton.findNodePositionByCharIndex(startOffset);
-    const focusNodePosition = startOffset !== endOffset ? docSkeleton.findNodePositionByCharIndex(endOffset) : null;
+    const anchorNodePosition = docSkeleton.findNodePositionByCharIndex(startOffset, true, segmentId);
+    const focusNodePosition = startOffset !== endOffset ? docSkeleton.findNodePositionByCharIndex(endOffset, true, segmentId) : null;
 
-    const textRange = new TextRange(scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style);
+    const textRange = new TextRange(scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style, segmentId);
 
     textRange.refresh();
 
@@ -99,7 +99,8 @@ export class TextRange {
         private _docSkeleton: DocumentSkeleton,
         public anchorNodePosition?: Nullable<INodePosition>,
         public focusNodePosition?: Nullable<INodePosition>,
-        public style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE
+        public style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+        public segmentId = ''
     ) {
         this._anchorBlink();
     }

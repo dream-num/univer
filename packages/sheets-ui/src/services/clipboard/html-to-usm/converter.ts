@@ -120,7 +120,10 @@ export class HtmlToUSMService {
         // Convert stylesheets to map
         const style = this._dom.querySelector('style');
         if (style) {
-            document.head.appendChild(style);
+            const shadowHost = document.createElement('div');
+            const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+            document.body.appendChild(shadowHost);
+            shadowRoot.appendChild(style);
             for (const rule of style.sheet!.cssRules) {
                 const cssRule = rule as CSSStyleRule;
                 const selectorText = cssRule.selectorText;
@@ -128,6 +131,7 @@ export class HtmlToUSMService {
                 this._styleMap.set(selectorText, style);
             }
             style.remove();
+            shadowHost.remove();
         }
         const newDocBody: IDocumentBody = {
             dataStream: '',
@@ -251,23 +255,37 @@ export class HtmlToUSMService {
 
             // retrieve multiple sources for a node and compile them into a cohesive new style string.
             if (key === 'background') {
-                const bgColor = style.getPropertyValue('background-color') || this._getStyleBySelectorText(`.${node.className}`, 'background-color') ||
-                    this._getStyleBySelectorText(`.${node.className}`, key) ||
+                let value = '';
+                node.classList.forEach((className) => {
+                    value = this._getStyleBySelectorText(`.${className}`, 'background-color') || this._getStyleBySelectorText(`.${className}`, key);
+                });
+                const bgColor = style.getPropertyValue('background-color') || value ||
+                    this._getStyleBySelectorText(`#${node.id}`, 'background-color') || this._getStyleBySelectorText(`#${node.id}`, key) ||
                     this._getStyleBySelectorText(node.nodeName.toLowerCase(), key) || this._getStyleBySelectorText(node.nodeName, 'background-color') || recordStyle['background-color'] || '';
                 bgColor && (newStyleStr += `background:${bgColor};`);
                 continue;
             }
             if (key === 'text-decoration') {
-                const textDecoration = style.getPropertyValue('text-decoration-line') || style.getPropertyValue('text-decoration') || this._getStyleBySelectorText(`.${node.className}`, 'text-decoration-line') ||
-                    this._getStyleBySelectorText(`.${node.className}`, key) ||
+                let value = '';
+                node.classList.forEach((className) => {
+                    value = this._getStyleBySelectorText(`.${className}`, 'text-decoration-line') || this._getStyleBySelectorText(`.${className}`, key);
+                });
+                const textDecoration = style.getPropertyValue('text-decoration-line') || style.getPropertyValue('text-decoration') || value ||
+                    this._getStyleBySelectorText(`#${node.id}`, 'text-decoration-line') || this._getStyleBySelectorText(`#${node.id}`, key) ||
                     this._getStyleBySelectorText(node.nodeName.toLowerCase(), key) || this._getStyleBySelectorText(node.nodeName, 'text-decoration-line') || recordStyle['text-decoration-line'] || '';
                 textDecoration && (newStyleStr += `text-decoration:${textDecoration};`);
                 continue;
             }
 
-            const value =
+            let value = '';
+            node.classList.forEach((className) => {
+                value = this._getStyleBySelectorText(`.${className}`, key);
+            });
+
+            value =
                 style.getPropertyValue(key) ||
-                this._getStyleBySelectorText(`.${node.className}`, key) ||
+                this._getStyleBySelectorText(`#${node.id}`, key) ||
+                value ||
                 this._getStyleBySelectorText(node.nodeName.toLowerCase(), key) ||
                 recordStyle[key] ||
                 '';

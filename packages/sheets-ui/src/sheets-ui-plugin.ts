@@ -83,6 +83,7 @@ import { SheetPermissionPanelModel } from './services/permission/sheet-permissio
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
 import { WorksheetProtectionRenderService } from './services/permission/worksheet-permission-render.service';
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
+import { MoveRangeController } from './controllers/move-range.controller';
 
 @DependentOn(UniverSheetsPlugin, UniverUIPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
@@ -149,6 +150,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [SheetPermissionInterceptorClipboardController],
                 [SheetPermissionInterceptorBaseController],
                 [SheetPermissionInitController],
+                [MoveRangeController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
 

@@ -345,7 +345,7 @@ export class ScrollBar extends BaseScrollBar {
             this._hoverFunc(this.thumbHoverBackgroundColor!, this.verticalThumbRect!);
         }));
 
-        this.verticalBarRect && this._eventSub.add(this.verticalBarRect.pointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
+        this.verticalBarRect && this._eventSub.add(this.verticalBarRect.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             this._view.scrollTo({
                 y: e.offsetY - this._view.top - this.verticalThumbHeight / 2,
@@ -354,7 +354,7 @@ export class ScrollBar extends BaseScrollBar {
         }));
 
         // 垂直滚动条的拖拽事件
-        this.verticalThumbRect && this._eventSub.add(this.verticalThumbRect.pointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
+        this.verticalThumbRect && this._eventSub.add(this.verticalThumbRect.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             const srcElement = this.verticalThumbRect;
             this._isVerticalMove = true;
@@ -434,7 +434,7 @@ export class ScrollBar extends BaseScrollBar {
         }));
 
         // 水平滚动条槽的点击滚动事件
-        this.horizonBarRect && this._eventSub.add(this.horizonBarRect.pointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
+        this.horizonBarRect && this._eventSub.add(this.horizonBarRect.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             this._view.scrollTo({
                 x: e.offsetX - this._view.left - this.horizontalThumbWidth / 2,
@@ -443,7 +443,7 @@ export class ScrollBar extends BaseScrollBar {
         }));
 
         // 水平滚动条的拖拽事件
-        this.horizonThumbRect && this._eventSub.add(this.horizonThumbRect.pointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
+        this.horizonThumbRect && this._eventSub.add(this.horizonThumbRect.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             this._isHorizonMove = true;
             this._lastX = e.offsetX;

@@ -33,7 +33,7 @@ export abstract class ThinScene extends Disposable {
 
     onFileLoaded$ = new EventSubject<string>();
 
-    pointerDown$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onPointerDown$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
     onPointerMove$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
@@ -207,7 +207,7 @@ export abstract class ThinScene extends Disposable {
     override dispose(): void {
         this.onTransformChange$.complete();
         this.onFileLoaded$.complete();
-        this.pointerDown$.complete();
+        this.onPointerDown$.complete();
         this.onPointerMove$.complete();
         this.onPointerUp$.complete();
         this.onPointerEnter$.complete();

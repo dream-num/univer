@@ -50,7 +50,7 @@ export abstract class BaseObject extends Disposable {
 
     onTransformChange$ = new EventSubject<ITransformChangeState>();
 
-    pointerDown$ = new EventSubject<IPointerEvent | IMouseEvent>();
+    onPointerDown$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerMove$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerUp$ = new EventSubject<IPointerEvent | IMouseEvent>();
     onPointerOut$ = new EventSubject<IPointerEvent | IMouseEvent>();
@@ -633,7 +633,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     triggerPointerDown(evt: IPointerEvent | IMouseEvent) {
-        if (!this.pointerDown$.emitEvent(evt)?.stopPropagation) {
+        if (!this.onPointerDown$.emitEvent(evt)?.stopPropagation) {
             this._parent?.triggerPointerDown(evt);
             return false;
         }
@@ -753,7 +753,7 @@ export abstract class BaseObject extends Disposable {
     override dispose() {
         super.dispose();
         this.onTransformChange$.complete();
-        this.pointerDown$.complete();
+        this.onPointerDown$.complete();
         this.onPointerMove$.complete();
         this.onPointerUp$.complete();
         this.onMouseWheel$.complete();

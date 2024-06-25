@@ -319,7 +319,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             this.hoverLeaveFunc && applyObject.onPointerLeave$.subscribeEvent(this.hoverLeaveFunc);
         }
 
-        const observer = applyObject.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+        const observer = applyObject.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
             this._startOffsetX = evtOffsetX;
             this._startOffsetY = evtOffsetY;
@@ -874,7 +874,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _attachEventToAnchor(anchor: BaseObject, type = TransformerManagerType.RESIZE_LT, applyObject: BaseObject) {
         this.disposeWithMe(
             toDisposable(
-                anchor.pointerDown$.subscribeEvent((evt, state) => {
+                anchor.onPointerDown$.subscribeEvent((evt, state) => {
                     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
                     this._startOffsetX = evtOffsetX;
                     this._startOffsetY = evtOffsetY;
@@ -982,7 +982,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _attachEventToRotate(rotateControl: Rect, applyObject: BaseObject) {
         this.disposeWithMe(
             toDisposable(
-                rotateControl.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+                rotateControl.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                     const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
                     this._startOffsetX = evtOffsetX;
@@ -1612,7 +1612,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _addCancelObserver(scene: Scene) {
         this._cancelFocusSubscription?.unsubscribe();
-        this._cancelFocusSubscription = scene.pointerDown$.subscribeEvent(() => {
+        this._cancelFocusSubscription = scene.onPointerDown$.subscribeEvent(() => {
             this.clearSelectedObjects();
         });
     }

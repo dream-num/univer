@@ -381,7 +381,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         this._headerPointerLeaveSubs.add(eventBindingObject?.onPointerLeave$.subscribeEvent(pointerLeaveHandler));
 
         this._headerPointerDownSubs = new Subscription();
-        this._headerPointerDownSubs.add(eventBindingObject?.pointerDown$.subscribeEvent(pointerDownHandler));
+        this._headerPointerDownSubs.add(eventBindingObject?.onPointerDown$.subscribeEvent(pointerDownHandler));
     }
 
     // eslint-disable-next-line max-lines-per-function

@@ -233,7 +233,7 @@ export class InputManager extends Disposable {
             const isStop = currentObject?.triggerPointerDown(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
-                this._scene.pointerDown$.emitEvent(evt);
+                this._scene.onPointerDown$.emitEvent(evt);
             }
         };
 

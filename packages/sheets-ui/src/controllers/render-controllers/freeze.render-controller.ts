@@ -331,14 +331,14 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
             this._freezeHeaderPointerLeaveSubs.add(_freezeObjHeaderPointerLeaveSub);
         }
 
-        const s1 = freezeObjectHeaderRect?.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
+        const s1 = freezeObjectHeaderRect?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             this._freezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
         });
         if (s1) {
             this._freezeDownSubs.add(s1);
         }
 
-        const s2 = freezeObjectMainRect?.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
+        const s2 = freezeObjectMainRect?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             this._freezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
         });
         if (s2) {

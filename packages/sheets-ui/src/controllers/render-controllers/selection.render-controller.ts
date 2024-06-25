@@ -199,7 +199,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
         this.disposeWithMe(
             toDisposable(
-                spreadsheet?.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+                spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                     this._selectionRenderService.enableDetectMergedCell();
 
                     this._selectionRenderService.eventTrigger(
@@ -249,7 +249,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         const { spreadsheetRowHeader, spreadsheet } = sheetObject;
 
         this.disposeWithMe(
-            spreadsheetRowHeader?.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 this._selectionRenderService.disableDetectMergedCell();
                 this._selectionRenderService.eventTrigger(
                     evt,
@@ -272,7 +272,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         const { spreadsheetColumnHeader, spreadsheet } = sheetObject;
 
         this.disposeWithMe(
-            spreadsheetColumnHeader?.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 this._selectionRenderService.disableDetectMergedCell();
 
                 this._selectionRenderService.eventTrigger(
@@ -293,7 +293,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
     private _initLeftTop(sheetObject: ISheetObjectParam) {
         const { spreadsheetLeftTopPlaceholder } = sheetObject;
         this.disposeWithMe(
-            spreadsheetLeftTopPlaceholder?.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            spreadsheetLeftTopPlaceholder?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                 if (skeleton == null) {
                     return;

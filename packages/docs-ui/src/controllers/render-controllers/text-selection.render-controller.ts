@@ -63,19 +63,19 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
     private _initialMain(unitId: string) {
         const docObject = neoGetDocObject(this._context);
         const { document, scene } = docObject;
-        this.disposeWithMe(document.onPointerEnterObserver.add(() => {
+        this.disposeWithMe(document.onPointerEnter$.subscribeEvent(() => {
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }
             document.cursor = CURSOR_TYPE.TEXT;
         }));
 
-        this.disposeWithMe(document.onPointerLeaveObserver.add(() => {
+        this.disposeWithMe(document.onPointerLeave$.subscribeEvent(() => {
             document.cursor = CURSOR_TYPE.DEFAULT;
             scene.resetCursor();
         }));
 
-        this.disposeWithMe(document.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+        this.disposeWithMe(document.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }
@@ -111,7 +111,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
             }
         }));
 
-        this.disposeWithMe(document.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        this.disposeWithMe(document.onDblclick$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }
@@ -119,7 +119,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
             this._textSelectionRenderManager.handleDblClick(evt);
         }));
 
-        this.disposeWithMe(document.onTripleClickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        this.disposeWithMe(document.onTripleClick$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }

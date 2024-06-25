@@ -1189,7 +1189,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._mainScenePointerUpSub = mainScene.onPointerUp$.subscribeEvent(() => this._endSelection());
 
         this._pointerdownSub?.unsubscribe();
-        this._pointerdownSub = mainScene.pointerDown$.subscribeEvent(() => this._endSelection());
+        this._pointerdownSub = mainScene.onPointerDown$.subscribeEvent(() => this._endSelection());
     }
 
     private _getSelectedRangeWithMerge(

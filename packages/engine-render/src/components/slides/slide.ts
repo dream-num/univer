@@ -196,14 +196,14 @@ export class Slide extends SceneViewer {
     }
 
     private _addNavTrigger(leftArrow: Path, rightArrow: Path) {
-        leftArrow.pointerDown$.subscribeEvent(() => {
+        leftArrow.onPointerDown$.subscribeEvent(() => {
             const result = this._getSubScenesIndex(this.getActiveSubScene()?.sceneKey);
             const prevKey = result?.previousScene.sceneKey;
             this.changePage(prevKey);
             this.slideChangePageByNavigation$.emitEvent(prevKey);
         });
 
-        rightArrow.pointerDown$.subscribeEvent(() => {
+        rightArrow.onPointerDown$.subscribeEvent(() => {
             const result = this._getSubScenesIndex(this.getActiveSubScene()?.sceneKey);
             const nextKey = result?.nextScene.sceneKey;
             this.changePage(nextKey);

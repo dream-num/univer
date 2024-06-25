@@ -21,7 +21,6 @@ import {
     Documents,
     DocumentSkeleton,
     DocumentViewModel,
-    EVENT_TYPE,
     Image,
     Liquid,
     PageLayoutType,
@@ -121,7 +120,7 @@ export class DocsAdaptor extends ObjectAdaptor {
 
         scene.attachControl();
 
-        scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
+        scene.onMouseWheel$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IWheelEvent;
             if (e.ctrlKey) {
                 const deltaFactor = Math.abs(e.deltaX);

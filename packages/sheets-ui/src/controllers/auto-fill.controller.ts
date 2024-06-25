@@ -241,7 +241,7 @@ export class AutoFillController extends Disposable {
 
                 disposableCollection.add(
                     toDisposable(
-                        controlSelection.fillControl.pointerDown$.subscribeEvent(() => {
+                        controlSelection.fillControl.onPointerDown$.subscribeEvent(() => {
                             const visibleState = this._editorBridgeService.isVisible();
                             if (visibleState.visible) {
                                 this._editorBridgeService.changeVisible({

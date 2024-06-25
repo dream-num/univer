@@ -238,8 +238,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _viewPortObserverMap = new Map<
         string,
         {
-            scrollStop: Nullable<Observer<IScrollObserverParam>>;
-            scrollBefore: Nullable<Observer<IScrollObserverParam>>;
+            scrollStop: Nullable<Subscription>;
+            scrollBefore: Nullable<Subscription>;
         }
     >();
 

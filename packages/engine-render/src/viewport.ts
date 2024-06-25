@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IPosition, IRange, Nullable } from '@univerjs/core';
-import { EventSubject, Observable, Tools } from '@univerjs/core';
+import { EventSubject, Tools } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from './basics/const';

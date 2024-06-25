@@ -18,7 +18,6 @@ import type { EventState, IColorStyle, ISlidePage, Nullable, SlideDataModel } fr
 import { debounce, getColorStyle, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IWheelEvent } from '@univerjs/engine-render';
 import {
-    EVENT_TYPE,
     IRenderManagerService,
     Rect,
     Scene,
@@ -185,7 +184,7 @@ export class CanvasView extends RxDisposable {
 
         scene.attachControl();
 
-        scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
+        scene.onMouseWheel$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IWheelEvent;
             if (e.ctrlKey) {
                 const deltaFactor = Math.abs(e.deltaX);

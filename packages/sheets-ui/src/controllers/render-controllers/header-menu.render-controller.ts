@@ -238,7 +238,7 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
             this._context.scene.resetCursor();
         });
 
-        this._hoverMenu.pointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
+        this._hoverMenu.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             const currentColumn = this._currentColumn;
             const currentSelectionDatas = this._selectionManagerService.getSelectionRanges();
             const menuInSelections: boolean = !!currentSelectionDatas

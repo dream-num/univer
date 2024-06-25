@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, isInternalEditorID, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { Disposable, isInternalEditorID, LifecycleService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Optional } from '@wendellhu/redi';
@@ -35,7 +35,6 @@ const STEADY_TIMEOUT = 3000;
 export class DesktopUIController extends Disposable {
     constructor(
         private readonly _config: IUniverUIConfig,
-        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,

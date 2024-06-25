@@ -45,7 +45,6 @@ import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-ba
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
-import { SheetRenderController } from './controllers/render-controllers/sheet-render.controller';
 import { HoverRenderController } from './controllers/hover-render.controller';
 import { HoverManagerService } from './services/hover-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
@@ -71,6 +70,7 @@ import { WorksheetProtectionRenderService } from './services/permission/workshee
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
 import { SheetUIMobileController } from './controllers/mobile/mobile-sheet-ui.controller';
 import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
+import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 
 /**
  * @ignore
@@ -164,7 +164,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             SheetSkeletonManagerService,
             SheetRenderController,
         ]).forEach((controller) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller));
         });
     }
 
@@ -198,7 +198,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             SheetPermissionInterceptorFormulaRenderController,
             SheetPermissionRenderController,
         ]).forEach((controller) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
+            this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller));
         });
     }
 

@@ -51,7 +51,7 @@ function MobileSheetBarImpl(props: { workbook: Workbook }) {
     const commandService = useDependency(ICommandService);
 
     const updateSheetItems = useCallback(() => {
-        const currentSubUnitId = workbook.getActiveSheet().getSheetId();
+        const currentSubUnitId = workbook.getActiveSheet()!.getSheetId();
         const sheets = workbook.getSheets();
         const activeSheet = workbook.getActiveSheet();
         const sheetListItems = sheets

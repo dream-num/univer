@@ -25,7 +25,7 @@ import {
     ThinEngine,
 } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
-import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/ui';
+import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -179,10 +179,10 @@ describe('Test indirect', () => {
 
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
-            [IShortcutService, { useClass: DesktopShortcutService }],
+            [IShortcutService, { useClass: ShortcutService }],
             [SheetSkeletonManagerService],
             [SelectionRenderService],
-            [IPlatformService, { useClass: DesktopPlatformService }],
+            [IPlatformService, { useClass: PlatformService }],
             [IRenderManagerService, { useClass: RenderManagerService }],
         ]);
 

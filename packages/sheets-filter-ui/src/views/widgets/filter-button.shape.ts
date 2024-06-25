@@ -114,7 +114,9 @@ export class SheetsFilterButtonShape extends Shape<ISheetsFilterButtonShapeProps
 
         const { col, unitId, subUnitId } = this._filterParams!;
         const opened = this._contextService.getContextValue(FILTER_PANEL_OPENED_KEY);
-        if (opened) return;
+        if (opened || !this._commandService.hasCommand(OpenFilterPanelOperation.id)) {
+            return;
+        }
 
         setTimeout(() => {
             this._commandService.executeCommand(OpenFilterPanelOperation.id, {

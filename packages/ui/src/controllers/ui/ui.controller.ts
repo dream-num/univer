@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DependencyOverride } from '@univerjs/core';
+import { type DependencyOverride, LifecycleStages, runOnLifecycle } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import type { MenuConfig } from '../../services/menu/menu';
 
@@ -26,11 +26,9 @@ export interface IWorkbenchOptions {
     contextMenu?: boolean;
 }
 
-export interface IUIController {
-    bootstrapWorkbench(options: IWorkbenchOptions): void;
-}
-
-export const IUIController = createIdentifier<IUIController>('univer.ui-controller');
+export interface IUIController {}
+export const IUIController = createIdentifier<IUIController>('univer.ui.ui-controller');
+runOnLifecycle(LifecycleStages.Ready, IUIController);
 
 export interface IUniverUIConfig extends IWorkbenchOptions {
     /** Disable auto focus when Univer bootstraps. */

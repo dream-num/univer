@@ -107,3 +107,4 @@ export { SheetPermissionInterceptorBaseController } from './controllers/permissi
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';
 export { ScrollToRangeOperation } from './commands/operations/scroll-to-range.operation';
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';
+export { UniverSheetsMobileUIPlugin } from './mobile-sheets-ui-plugin';

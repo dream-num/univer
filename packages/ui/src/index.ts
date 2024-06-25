@@ -41,7 +41,7 @@ export {
 export { IConfirmService } from './services/confirm/confirm.service';
 export { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
 export {
-    DesktopContextMenuService,
+    ContextMenuService,
     type IContextMenuHandler,
     IContextMenuService,
 } from './services/contextmenu/contextmenu.service';
@@ -63,22 +63,24 @@ export {
     MenuPosition,
     type MenuItemDefaultValueType,
 } from './services/menu/menu';
-export { DesktopMenuService, IMenuService } from './services/menu/menu.service';
+export { MenuService, IMenuService } from './services/menu/menu.service';
 export { DesktopMessageService } from './services/message/desktop-message.service';
 export { IMessageService } from './services/message/message.service';
 export { DesktopNotificationService } from './services/notification/desktop-notification.service';
 export { type NotificationType, type INotificationOptions } from './components/notification/Notification';
 export { INotificationService } from './services/notification/notification.service';
-export { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
+export { PlatformService, IPlatformService } from './services/platform/platform.service';
 export { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
 export { IGlobalZoneService } from './services/global-zone/global-zone.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
-export { DesktopShortcutService, type IShortcutItem, IShortcutService } from './services/shortcut/shortcut.service';
+export { ShortcutService, type IShortcutItem, IShortcutService } from './services/shortcut/shortcut.service';
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 export { ISidebarService } from './services/sidebar/sidebar.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';
 export { UniverUIPlugin, DISABLE_AUTO_FOCUS_KEY } from './ui-plugin';
+export { UniverMobileUIPlugin } from './mobile-ui-plugin';
 export * from './utils';
+export { Menu } from './components/menu/desktop/Menu';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
 export { ComponentContainer, useComponentsOfPart, type IComponentContainerProps } from './views/components/ComponentContainer';
 export { IEditorService, EditorService } from './services/editor/editor.service';
@@ -98,7 +100,7 @@ export type { IProgressStep } from './services/progress/progress.service';
 
 export { GlobalZone } from './views/components/global-zone/GlobalZone';
 export { builtInGlobalComponents } from './views/parts';
-export { ContextMenu } from './views/components/context-menu/ContextMenu';
+export { DesktopContextMenu as ContextMenu } from './views/components/context-menu/ContextMenu';
 export { Sidebar } from './views/components/sidebar/Sidebar';
 export { ZenZone } from './views/components/zen-zone/ZenZone';
 export { CanvasPopup } from './views/components/popup/CanvasPopup';

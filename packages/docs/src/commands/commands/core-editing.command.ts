@@ -31,6 +31,7 @@ import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import { getInsertSelection } from '../../basics/selection';
+import { getRichTextEditPath } from '../util';
 
 export interface IInsertCommandParams {
     unitId: string;
@@ -52,12 +53,16 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
 
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
-
-        const { range, segmentId, body, unitId, textRanges: propTextRanges } = params;
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
-        const originBody = doc?.getBody();
+        const { range, segmentId, body, unitId, textRanges: propTextRanges } = params;
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+
+        if (docDataModel == null) {
+            return false;
+        }
+
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const originBody = docDataModel?.getBody();
         const activeRange = textSelectionManagerService.getActiveRange();
 
         if (!originBody) {
@@ -112,7 +117,9 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             line: 0,
             segmentId,
         });
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

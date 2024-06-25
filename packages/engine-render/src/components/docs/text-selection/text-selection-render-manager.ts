@@ -261,6 +261,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             const textSelection = cursorConvertToTextRange(scene!, {
                 style: this._selectionStyle,
                 ...range,
+                segmentId: this._currentSegmentId,
             }, docSkeleton!, this._document!);
 
             this._add(textSelection);

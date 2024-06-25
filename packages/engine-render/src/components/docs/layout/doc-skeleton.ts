@@ -208,8 +208,9 @@ export class DocumentSkeleton extends Skeleton {
         }
 
         const pages = skeletonData.pages;
+        const editArea = this.getViewModel().getEditArea();
 
-        const { glyph, divide, line, column, section, page } = nodes;
+        const { glyph, divide, line, column, section, page, segmentPageIndex } = nodes;
 
         return {
             glyph: divide.glyphGroup.indexOf(glyph),
@@ -217,7 +218,9 @@ export class DocumentSkeleton extends Skeleton {
             line: column.lines.indexOf(line),
             column: section.columns.indexOf(column),
             section: page.sections.indexOf(section),
-            page: pages.indexOf(page),
+            page: editArea === DocumentEditArea.BODY ? pages.indexOf(page) : 0,
+            isInBody: editArea === DocumentEditArea.BODY,
+            segmentPage: segmentPageIndex,
             isBack,
         };
     }
@@ -878,12 +881,13 @@ export class DocumentSkeleton extends Skeleton {
 
                                 if (delta < 0) {
                                     return {
-                                        page,
+                                        page: segmentPage,
                                         section,
                                         column,
                                         line,
                                         divide,
                                         glyph,
+                                        segmentPageIndex: pages.indexOf(page),
                                     };
                                 }
                             }

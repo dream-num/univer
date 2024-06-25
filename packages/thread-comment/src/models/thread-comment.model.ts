@@ -197,7 +197,9 @@ export class ThreadCommentModel {
     async syncComment(unitId: string, subUnitId: string, info: ThreadCommentJSON) {
         const comment = await this._dataSourceService.getThreadComment(unitId, subUnitId, info);
         const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
-        if (comment) {
+        const currentComment = commentMap[info.id];
+
+        if (comment && currentComment) {
             commentMap[comment.id] = comment;
             comment.children?.forEach(child => {
                 commentMap[child.id] = child;
@@ -210,6 +212,18 @@ export class ThreadCommentModel {
                 type: 'syncUpdate',
                 payload: comment,
             });
+
+            if (Boolean(comment.resolved) !== Boolean(currentComment.resolved)) {
+                this._commentUpdate$.next({
+                    unitId,
+                    subUnitId,
+                    type: 'resolve',
+                    payload: {
+                        commentId: info.id,
+                        resolved: Boolean(comment.resolved)
+                    },
+                });
+            }
             this._refreshCommentsMap$();
         }
     }

@@ -25,7 +25,6 @@ import { ConditionFormattingPanel } from '../components/panel';
 
 export interface IUniverSheetsConditionalFormattingUIConfig {
     menu: MenuConfig;
-    skipConditionalFormattingCore?: boolean;
 }
 
 export const DefaultSheetConditionalFormattingUiConfig = {};

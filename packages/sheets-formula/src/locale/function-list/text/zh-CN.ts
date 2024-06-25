@@ -179,8 +179,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: 'find_text', detail: 'The text to find. The item can be a text value, number, or cell reference.' },
+            withinText: { name: 'within_text', detail: 'The text in which findText has to be found.The item can be a text value, number, or cell reference.' },
+            startNumber: { name: 'start_num', detail: 'The position from which string has to be found' },
         },
     },
     FINDB: {
@@ -193,8 +194,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: 'find_text', detail: 'The text to find. The item can be a text value, number, or cell reference.' },
+            withinText: { name: 'within_text', detail: 'The text in which findText has to be found.The item can be a text value, number, or cell reference.' },
+            startNumber: { name: 'start_num', detail: 'The position from which string has to be found' },
         },
     },
     FIXED: {
@@ -221,8 +223,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text string that contains the characters to extract.' },
+            numChars: { name: 'num_chars', detail: ' Optional. Specifies the number of characters for LEFT to extract.' },
         },
     },
     LEFTB: {

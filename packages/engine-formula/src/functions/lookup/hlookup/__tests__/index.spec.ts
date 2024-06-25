@@ -39,11 +39,11 @@ const matchArrayValueObject = ArrayValueObject.create(/*ts*/ `{
 }`);
 
 describe('Test hlookup', () => {
-    const textFunction = new Hlookup(FUNCTION_NAMES_LOOKUP.HLOOKUP);
+    const testFunction = new Hlookup(FUNCTION_NAMES_LOOKUP.HLOOKUP);
 
     describe('Exact match', () => {
         it('Search two', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(2),
                 arrayValueObject1.clone(),
                 NumberValueObject.create(2),
@@ -53,7 +53,7 @@ describe('Test hlookup', () => {
         });
 
         it('Search eight', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(8),
                 arrayValueObject1.clone(),
                 NumberValueObject.create(2),
@@ -63,7 +63,7 @@ describe('Test hlookup', () => {
         });
 
         it('Exceeding columns', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(8),
                 arrayValueObject1.clone(),
                 NumberValueObject.create(3),
@@ -73,7 +73,7 @@ describe('Test hlookup', () => {
         });
 
         it('Not match', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(100),
                 arrayValueObject1.clone(),
                 NumberValueObject.create(2),
@@ -83,7 +83,7 @@ describe('Test hlookup', () => {
         });
 
         it('array', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 matchArrayValueObject.clone(),
                 arrayValueObject1.clone(),
                 NumberValueObject.create(2),
@@ -98,7 +98,7 @@ describe('Test hlookup', () => {
 
     describe('Approximate match', () => {
         it('Approximate search two', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(2),
                 arrayValueObject1.clone(),
                 NumberValueObject.create(2),
@@ -108,7 +108,7 @@ describe('Test hlookup', () => {
         });
 
         it('Approximate search eight', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(8),
                 arrayValueObject1.clone(),
                 NumberValueObject.create(2)
@@ -117,7 +117,7 @@ describe('Test hlookup', () => {
         });
 
         it('Approximate exceeding columns', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(8),
                 arrayValueObject1.clone(),
                 NumberValueObject.create(3)
@@ -126,7 +126,7 @@ describe('Test hlookup', () => {
         });
 
         it('Approximate not match', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(100),
                 arrayValueObject1.clone(),
                 NumberValueObject.create(2),
@@ -136,7 +136,7 @@ describe('Test hlookup', () => {
         });
 
         it('Approximate not order data', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(2),
                 arrayValueObject2.clone(),
                 NumberValueObject.create(2),
@@ -146,7 +146,7 @@ describe('Test hlookup', () => {
         });
 
         it('Approximate not order data match', async () => {
-            const resultObject = textFunction.calculate(
+            const resultObject = testFunction.calculate(
                 NumberValueObject.create(8),
                 arrayValueObject2.clone(),
                 NumberValueObject.create(2)
@@ -156,7 +156,7 @@ describe('Test hlookup', () => {
     });
     describe('Error', () => {
         it('TableArray is number', () => {
-            const result = textFunction.calculate(
+            const result = testFunction.calculate(
                 NumberValueObject.create(1),
                 NumberValueObject.create(1),
                 NumberValueObject.create(1)

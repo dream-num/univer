@@ -23,12 +23,12 @@ import { ArrayValueObject, transformToValue, transformToValueObject } from '../.
 import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test lenb function', () => {
-    const textFunction = new Lenb(FUNCTION_NAMES_TEXT.LENB);
+    const testFunction = new Lenb(FUNCTION_NAMES_TEXT.LENB);
 
     describe('Lenb', () => {
         it('Text is single cell', () => {
             const text = StringValueObject.create('Univer');
-            const result = textFunction.calculate(text);
+            const result = testFunction.calculate(text);
             expect(result.getValue()).toStrictEqual(6);
         });
 
@@ -45,7 +45,7 @@ describe('Test lenb function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(text);
+            const result = testFunction.calculate(text);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [1, 1, 4, 4, 5, 0, 26],
                 [1, 3, 4, 4, 2, '#VALUE!', 0],
@@ -76,7 +76,7 @@ describe('Test lenb function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(text);
+            const result = testFunction.calculate(text);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[1], [1], [1], [1], [1], [2], [2], [2], [2], [8], [2], [2], [1]]);
         });
     });

@@ -21,7 +21,7 @@ import { ArrayValueObject, transformToValue } from '../../../../engine/value-obj
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test maxifs function', () => {
-    const textFunction = new Maxifs(FUNCTION_NAMES_STATISTICAL.MAXIFS);
+    const testFunction = new Maxifs(FUNCTION_NAMES_STATISTICAL.MAXIFS);
 
     describe('Maxifs', () => {
         it('Range and criteria', async () => {
@@ -37,7 +37,7 @@ describe('Test maxifs function', () => {
             }`);
 
             const criteria = StringValueObject.create('>2');
-            const resultObject = textFunction.calculate(maxRange, range, criteria);
+            const resultObject = testFunction.calculate(maxRange, range, criteria);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[3]]);
         });
 
@@ -60,7 +60,7 @@ describe('Test maxifs function', () => {
                 >4
             }`);
 
-            const resultObject = textFunction.calculate(maxRange, range, criteria);
+            const resultObject = testFunction.calculate(maxRange, range, criteria);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[3], [3], [0]]);
         });
 
@@ -87,7 +87,7 @@ describe('Test maxifs function', () => {
 
             const criteria2 = StringValueObject.create('<5');
 
-            const resultObject = textFunction.calculate(maxRange, range1, criteria1, range2, criteria2);
+            const resultObject = testFunction.calculate(maxRange, range1, criteria1, range2, criteria2);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2]]);
         });
 
@@ -118,7 +118,7 @@ describe('Test maxifs function', () => {
 
             const criteria2 = NumberValueObject.create(5);
 
-            const resultObject = textFunction.calculate(maxRange, range1, criteria1, range2, criteria2);
+            const resultObject = testFunction.calculate(maxRange, range1, criteria1, range2, criteria2);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[3], [3], [0]]);
         });
 
@@ -154,7 +154,7 @@ describe('Test maxifs function', () => {
                 4
             }`);
 
-            const resultObject = textFunction.calculate(maxRange, range1, criteria1, range2, criteria2);
+            const resultObject = testFunction.calculate(maxRange, range1, criteria1, range2, criteria2);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2], [0], [0], [0]]);
         });
     });

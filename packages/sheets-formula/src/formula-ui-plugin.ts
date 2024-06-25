@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DependentOn, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -56,8 +56,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverSheetsFormulaConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -126,8 +125,7 @@ export class UniverSheetsFormulaMobilePlugin extends Plugin {
 
     constructor(
         private readonly _config: Partial<IUniverSheetsFormulaConfig> = {},
-        @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(Injector) override readonly _injector: Injector
     ) {
         super();
 
@@ -159,7 +157,7 @@ export class UniverSheetsFormulaMobilePlugin extends Plugin {
             [ActiveDirtyController],
             [DefinedNameController],
             [FormulaRenderManagerController],
-            [FormulaAlertController],
+            [FormulaAlertRenderController],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

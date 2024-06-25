@@ -28,6 +28,7 @@ import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { ThreadCommentEditor } from '../thread-comment-editor';
 import { transformDocument2TextNodes, transformTextNodes2Document } from '../thread-comment-editor/util';
 import styles from './index.module.less';
+import { threadId } from 'worker_threads';
 
 export interface IThreadCommentTreeProps {
     id?: string;
@@ -197,7 +198,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     const resolved = comments?.root.resolved;
     const currentUser = useObservable(userManagerService.currentUser$);
     const editorRef = useRef<IThreadCommentEditorInstance>(null);
-    const renderComments = [
+    const renderComments: IThreadComment[] = [
         ...comments ?
             [comments.root] :
             // mock empty comment
@@ -211,6 +212,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 dT: '',
                 unitId,
                 subUnitId,
+                threadId: ''
             }],
         ...comments?.children ?? [],
     ];
@@ -340,6 +342,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                             parentId: comments?.root.id,
                                             unitId,
                                             subUnitId,
+                                            threadId: comments?.root.threadId
                                         },
                                     } as IAddCommentCommandParams
                                 );

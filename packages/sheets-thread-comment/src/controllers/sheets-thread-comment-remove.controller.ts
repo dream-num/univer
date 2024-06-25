@@ -48,10 +48,10 @@ export class ThreadCommentRemoveSheetsController extends Disposable {
                         if (!subUnitId) {
                             return { redos: [], undos: [] };
                         }
-                        const { commentMap } = this._threadCommentModel.ensureMap(unitId, subUnitId);
+                        const { commentChildrenMap } = this._threadCommentModel.ensureMap(unitId, subUnitId);
 
-                        const ids = Array.from(Object.keys(commentMap));
-                        const comments = Array.from(Object.values(commentMap));
+                        const ids = Array.from(Object.keys(commentChildrenMap));
+                        const comments = Array.from(Object.values(commentChildrenMap));
                         const redos = ids.map((id) => ({
                             id: DeleteCommentMutation.id,
                             params: {

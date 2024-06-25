@@ -79,10 +79,11 @@ export class SheetsThreadCommentCopyPasteController extends Disposable {
                             column: range.startColumn,
                         };
                         if (!(targetUnitId === sourceUnitId && targetSubUnitId === sourceSubUnitId)) {
-                            const roots: { root: IThreadComment; children: IThreadComment[] }[] = [];
+                            const roots: IThreadComment[] = [];
 
                             Range.foreach(range, (row, col) => {
-                                const root = this._sheetsThreadCommentModel.getCommentWithChildren(sourceUnitId, sourceSubUnitId, row, col);
+                                const commentId = this._sheetsThreadCommentModel.getByLocation(sourceUnitId, sourceSubUnitId, row, col);
+                                const root = commentId && this._sheetsThreadCommentModel.getComment(sourceUnitId, sourceSubUnitId, commentId)
                                 if (root) {
                                     roots.push(root);
                                 }
@@ -134,10 +135,7 @@ export class SheetsThreadCommentCopyPasteController extends Disposable {
                             };
 
                             roots.forEach((root) => {
-                                handleCommentItem(root.root);
-                                root.children.forEach((child) => {
-                                    handleCommentItem(child);
-                                });
+                                handleCommentItem(root);
                             });
 
                             return {

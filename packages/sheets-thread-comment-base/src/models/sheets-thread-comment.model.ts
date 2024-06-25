@@ -118,6 +118,7 @@ export class SheetsThreadCommentModel extends Disposable {
             subUnitId,
             payload: comment,
             type: 'add',
+            isRoot: !parentId,
             ...location,
         });
     }

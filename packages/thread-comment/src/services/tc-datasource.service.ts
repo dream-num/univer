@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '@wendellhu/redi';
+import { Inject, createIdentifier } from '@wendellhu/redi';
 import type { IThreadComment } from '../types/interfaces/i-thread-comment';
 import { Disposable, Nullable } from '@univerjs/core';
 
@@ -47,7 +47,7 @@ export interface IThreadCommentDataSource {
     /**
      * handler for batch-fetch-comment, throw error means fail and stop the process.
      */
-    listComments: (commentIds: ThreadCommentJSON[], unitId: string, subUnitId: string) => Promise<IThreadComment[]>;
+    listComments: (commentIds: { id: string; threadId: string }[], unitId: string, subUnitId: string) => Promise<IThreadComment[]>;
     saveCommentToSnapshot: (comment: IThreadComment) => ThreadCommentJSON;
 }
 
@@ -78,6 +78,7 @@ export interface IThreadCommentDataSourceService {
     deleteCommentBatch: (commentIds: string[], threadId: string, unitId: string, subUnitId: string) => Promise<Success>;
     loadFormSnapshot: (unitComments: Record<string, ThreadCommentJSON[]>, unitId: string) => Promise<Record<string, IThreadComment[]>>;
     saveToSnapshot: (unitComments: Record<string, IThreadComment[]>, unitId: string) => Record<string, ThreadCommentJSON[]>;
+    getThreadComment: (unitId: string, subUnitId: string, threadId: string, commentId: string) => Promise<Nullable<IThreadComment>>;
 }
 
 /**
@@ -93,6 +94,19 @@ export class ThreadCommentDataSourceService extends Disposable implements IThrea
 
     get dataSource() {
         return this._dataSource;
+    }
+
+    constructor() {
+        super()
+    }
+
+    async getThreadComment(unitId: string, subUnitId: string, threadId: string, commentId: string): Promise<Nullable<IThreadComment>> {
+        if (this._dataSource) {
+            const comments = await this._dataSource.listComments([{ threadId, id: commentId, }], unitId, subUnitId);
+            return comments[0];
+        }
+
+        return null;
     }
 
     async addComment(comment: IThreadComment) {

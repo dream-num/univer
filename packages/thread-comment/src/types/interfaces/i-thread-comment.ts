@@ -40,5 +40,5 @@ export interface IThreadComment extends IBaseComment {
     ref: string;
     parentId?: string;
     resolved?: boolean;
-    children?: IBaseComment[];
+    children?: IThreadComment[];
 }

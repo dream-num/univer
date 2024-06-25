@@ -18,6 +18,8 @@ import { BehaviorSubject, map, Subject } from 'rxjs';
 import { CustomRangeType } from '@univerjs/core';
 import type { IThreadComment } from '../types/interfaces/i-thread-comment';
 import type { IUpdateCommentPayload, IUpdateCommentRefPayload } from '../commands/mutations/comment.mutation';
+import { Inject } from '@wendellhu/redi';
+import { ThreadCommentDataSourceService } from '../services/tc-datasource.service';
 
 export type CommentUpdate = {
     unitId: string;
@@ -57,6 +59,10 @@ export class ThreadCommentModel {
 
     commentUpdate$ = this._commentUpdate$.asObservable();
     commentMap$ = this._commentsMap$.asObservable();
+
+    constructor(
+        @Inject(ThreadCommentDataSourceService) private readonly _dataSourceService: ThreadCommentDataSourceService
+    ) { }
 
     private _ensureCommentMap(unitId: string, subUnitId: string) {
         let unitMap = this._commentsMap[unitId];
@@ -108,8 +114,15 @@ export class ThreadCommentModel {
         };
     }
 
-    addComment(unitId: string, subUnitId: string, comment: IThreadComment) {
+    async addComment(unitId: string, subUnitId: string, origin: IThreadComment, sync = false) {
         const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
+        let comment = origin;
+        if (sync) {
+            const res = await this._dataSourceService.getThreadComment(unitId, subUnitId, comment.threadId, comment.id);
+            if (res) {
+                comment = res;
+            }
+        }
 
         const parentId = comment.parentId;
         if (parentId) {
@@ -122,14 +135,18 @@ export class ThreadCommentModel {
             commentChildrenMap.set(comment.id, comment);
         }
 
-        commentMap[comment.id] = comment;
-        this._commentUpdate$.next({
-            unitId,
-            subUnitId,
-            type: 'add',
-            payload: comment,
-            isRoot: !comment.parentId,
-        });
+        const addCommentItem = (item: IThreadComment) => {
+            commentMap[item.id] = comment;
+            this._commentUpdate$.next({
+                unitId,
+                subUnitId,
+                type: 'add',
+                payload: comment,
+                isRoot: !comment.parentId,
+            });
+        }
+
+        addCommentItem(comment);
         this._refreshCommentsMap$();
         return true;
     }
@@ -252,7 +269,21 @@ export class ThreadCommentModel {
             delete commentMap[commentId];
         } else {
             delete commentMap[commentId];
+            const comment = commentChildrenMap.get(commentId);
             commentChildrenMap.delete(commentId);
+            comment?.children?.forEach(child => {
+                delete commentMap[child.id];
+                this._commentUpdate$.next({
+                    unitId,
+                    subUnitId,
+                    type: 'delete',
+                    payload: {
+                        commentId: child.id,
+                        isRoot: false,
+                        comment: child,
+                    },
+                });
+            })
         }
 
         this._commentUpdate$.next({

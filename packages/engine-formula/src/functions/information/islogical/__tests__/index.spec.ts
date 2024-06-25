@@ -23,12 +23,12 @@ import { Islogical } from '../index';
 import { BooleanValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test islogical function', () => {
-    const textFunction = new Islogical(FUNCTION_NAMES_INFORMATION.ISLOGICAL);
+    const testFunction = new Islogical(FUNCTION_NAMES_INFORMATION.ISLOGICAL);
 
     describe('Islogical', () => {
         it('value logical', () => {
             const value = BooleanValueObject.create(true);
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(result.getValue()).toBe(true);
         });
 
@@ -45,7 +45,7 @@ describe('Test islogical function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [false, false, false, true, true, false, false, false, false, false],
                 [false, false, false, false, false, false, false, false, false, false],

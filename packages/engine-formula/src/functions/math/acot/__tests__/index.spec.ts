@@ -22,18 +22,18 @@ import { NumberValueObject, StringValueObject } from '../../../../engine/value-o
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
 describe('Test acot function', () => {
-    const textFunction = new Acot(FUNCTION_NAMES_MATH.ACOT);
+    const testFunction = new Acot(FUNCTION_NAMES_MATH.ACOT);
 
     describe('Acot', () => {
         it('Value is normal', () => {
             const value = NumberValueObject.create(1);
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(result.getValue()).toBe(0.7853981633974483);
         });
 
         it('Value is string number', () => {
             const value = new StringValueObject('1');
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(result.getValue()).toBe(0.7853981633974483);
         });
 
@@ -50,7 +50,7 @@ describe('Test acot function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(valueArray);
+            const result = testFunction.calculate(valueArray);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[0.7853981633974483, '#VALUE!', 0.682622552417217, 0.7853981633974483, 1.5707963267948966],
                 [1.5707963267948966, 0.009999666686665238, 0.40385979490737667, '#VALUE!', -0.3217505543966422]]);
         });

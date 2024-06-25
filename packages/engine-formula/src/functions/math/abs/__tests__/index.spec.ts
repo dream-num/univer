@@ -22,17 +22,17 @@ import { NumberValueObject, StringValueObject } from '../../../../engine/value-o
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
 describe('Test abs function', () => {
-    const textFunction = new Abs(FUNCTION_NAMES_MATH.ABS);
+    const testFunction = new Abs(FUNCTION_NAMES_MATH.ABS);
 
     describe('Abs', () => {
         it('Value is normal', () => {
             const value = NumberValueObject.create(1);
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(result.getValue()).toBe(1);
         });
         it('Value is string number', () => {
             const value = new StringValueObject('1');
-            const result = textFunction.calculate(value);
+            const result = testFunction.calculate(value);
             expect(result.getValue()).toBe(1);
         });
 
@@ -50,7 +50,7 @@ describe('Test abs function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = textFunction.calculate(valueArray);
+            const result = testFunction.calculate(valueArray);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[1, 2],
                 [2, 3],
                 [3, 4]]);

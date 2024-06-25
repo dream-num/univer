@@ -15,9 +15,9 @@
  */
 
 import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { DocCanvasView } from '@univerjs/docs-ui';
+import { DocRenderController } from '@univerjs/docs-ui';
 import { Inject, Injector } from '@wendellhu/redi';
-import { interval, takeUntil, throttle } from 'rxjs';
+import { takeUntil } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, PerformanceMonitorController)
 export class PerformanceMonitorController extends RxDisposable {
@@ -27,7 +27,7 @@ export class PerformanceMonitorController extends RxDisposable {
     private _styleElement!: HTMLStyleElement;
 
     constructor(
-        @Inject(DocCanvasView) private _docCanvasView: DocCanvasView,
+        @Inject(DocRenderController) private _DocRenderController: DocRenderController,
         @Inject(Injector) private _injector: Injector,
         @IUniverInstanceService private _instanceService: IUniverInstanceService
     ) {
@@ -86,13 +86,6 @@ export class PerformanceMonitorController extends RxDisposable {
         this._styleElement = document.createElement('style');
         document.head.appendChild(this._styleElement).innerText = style;
 
-        if (this._documentType === UniverInstanceType.UNIVER_DOC) {
-            this._docCanvasView.fps$
-                .pipe(takeUntil(this.dispose$))
-                .pipe(throttle(() => interval(THROTTLE_TIME)))
-                .subscribe((fps) => {
-                    container.innerText = `FPS: ${fps}`;
-                });
-        }
+        // TODO@wzhudev: monitor fps from engine
     }
 }

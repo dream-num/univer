@@ -21,10 +21,11 @@ export interface IInsertImageOperationParams {
     files: Nullable<File[]>;
 };
 
+/**
+ * @deprecated Do not use command as event!
+ */
 export const InsertDocImageOperation: IOperation<IInsertImageOperationParams> = {
     id: 'doc.operation.insert-float-image',
     type: CommandType.OPERATION,
-    handler: (accessor, params) => {
-        return true;
-    },
+    handler: () => true,
 };

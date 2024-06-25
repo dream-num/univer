@@ -291,19 +291,20 @@ export function getSetCellValueMutations(
     const valueMatrix = new ObjectMatrix<ICellData>();
 
     matrix.forValue((row, col, value) => {
+        let originNumberValue;
         if (!value.p && value.v && !pasteFrom) {
             const content = String(value.v);
             const numfmtValue = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
             if (numfmtValue?.v && typeof numfmtValue.v === 'number') {
-                value.v = numfmtValue.v;
+                originNumberValue = numfmtValue.v;
             }
         }
         const { row: realRow, col: realCol } = mapFunc(row, col);
 
         if (value.p?.body) {
-            valueMatrix.setValue(realRow, realCol, Tools.deepClone({ p: value.p, v: value.v }));
+            valueMatrix.setValue(realRow, realCol, Tools.deepClone({ p: value.p, v: originNumberValue ?? value.v }));
         } else {
-            valueMatrix.setValue(realRow, realCol, Tools.deepClone({ v: value.v }));
+            valueMatrix.setValue(realRow, realCol, Tools.deepClone({ v: originNumberValue ?? value.v }));
         }
     });
     // set cell value and style
@@ -353,6 +354,15 @@ export function getSetCellStyleMutations(
         };
         if (withRichFormat && value.p?.body) {
             newValue.p = value.p;
+        }
+        const content = String(value.v);
+        const numfmtValue = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
+        if (numfmtValue?.z && newValue.s && typeof newValue?.s === 'object') {
+            if (!newValue.s?.n) {
+                newValue.s.n = { pattern: numfmtValue.z };
+            } else {
+                newValue.s.n.pattern = numfmtValue.z;
+            }
         }
         const { row: actualRow, col: actualCol } = mapFunc(row, col);
         valueMatrix.setValue(actualRow, actualCol, newValue);

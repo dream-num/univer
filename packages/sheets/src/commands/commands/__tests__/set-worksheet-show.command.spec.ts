@@ -88,5 +88,34 @@ describe('Test set worksheet show commands', () => {
                 expect(workbook.getSheetBySheetId(targetSheetId)?.getConfig().hidden).toBeTruthy();
             });
         });
+
+        describe('set sheet show after make it hidden using worksheet show function', async () => {
+            it('correct situation: ', async () => {
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                if (!workbook) throw new Error('This is an error');
+
+                const targetActiveSheet = workbook.getActiveSheet();
+                const targetSheetId = targetActiveSheet?.getSheetId();
+                expect(
+                    await commandService.executeCommand(SetWorksheetActivateCommand.id, { subUnitId: targetSheetId })
+                ).toBeTruthy();
+
+                expect(await commandService.executeCommand(InsertSheetCommand.id, {})).toBeTruthy();
+                expect(await commandService.executeCommand(InsertSheetCommand.id, {})).toBeTruthy();
+                expect(await commandService.executeCommand(InsertSheetCommand.id, {})).toBeTruthy();
+                expect(await commandService.executeCommand(InsertSheetCommand.id, {})).toBeTruthy();
+                expect(
+                    await commandService.executeCommand(SetWorksheetHideCommand.id, { subUnitId: targetSheetId })
+                ).toBeTruthy();
+
+                expect(workbook.getSheetBySheetId(targetSheetId)?.getConfig().hidden).toBeTruthy();
+
+                expect(
+                    await commandService.executeCommand(SetWorksheetShowCommand.id, { subUnitId: targetSheetId })
+                ).toBeTruthy();
+
+                expect(workbook.getSheetBySheetId(targetSheetId)?.getConfig().hidden).toBeFalsy();
+            });
+        });
     });
 });

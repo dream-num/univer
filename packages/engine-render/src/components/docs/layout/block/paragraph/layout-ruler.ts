@@ -491,6 +491,7 @@ function _lineOperator(
     );
 
     const lineHeight = marginTop + paddingTop + contentHeight + paddingBottom;
+
     let section = column.parent;
     if (!section) {
         // 做一个兜底，指向当前页最后一个section

@@ -108,7 +108,7 @@ export class MoveCursorController extends Disposable {
 
         const {
             startOffset, endOffset, style, collapsed, direction: rangeDirection,
-            segmentId, startNodePosition, endNodePosition,
+            segmentId, startNodePosition, endNodePosition, segmentPage,
         } = activeRange;
 
         if (allRanges.length > 1) {
@@ -141,8 +141,8 @@ export class MoveCursorController extends Disposable {
         const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
-            const preGlyph = skeleton.findNodeByCharIndex(focusOffset - 1, segmentId);
-            const curGlyph = skeleton.findNodeByCharIndex(focusOffset, segmentId)!;
+            const preGlyph = skeleton.findNodeByCharIndex(focusOffset - 1, segmentId, segmentPage);
+            const curGlyph = skeleton.findNodeByCharIndex(focusOffset, segmentId, segmentPage)!;
 
             focusOffset =
                 direction === Direction.RIGHT ? focusOffset + curGlyph.count : focusOffset - (preGlyph?.count ?? 0);
@@ -157,7 +157,7 @@ export class MoveCursorController extends Disposable {
                 },
             ], false);
         } else {
-            const focusGlyph = skeleton.findNodeByCharIndex(focusOffset, segmentId);
+            const focusGlyph = skeleton.findNodeByCharIndex(focusOffset, segmentId, segmentPage);
             const documentOffsetConfig = docObject.document.getOffsetConfig();
             const focusNodePosition = collapsed ? startNodePosition : rangeDirection === RANGE_DIRECTION.FORWARD ? endNodePosition : startNodePosition;
 
@@ -215,7 +215,7 @@ export class MoveCursorController extends Disposable {
             return;
         }
 
-        const { startOffset, endOffset, style, collapsed, segmentId, startNodePosition, endNodePosition } = activeRange;
+        const { startOffset, endOffset, style, collapsed, segmentId, startNodePosition, endNodePosition, segmentPage } = activeRange;
 
         const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
 
@@ -233,8 +233,8 @@ export class MoveCursorController extends Disposable {
 
                 cursor = direction === Direction.LEFT ? min : max;
             } else {
-                const preSpan = skeleton.findNodeByCharIndex(startOffset - 1, segmentId);
-                const curSpan = skeleton.findNodeByCharIndex(startOffset, segmentId)!;
+                const preSpan = skeleton.findNodeByCharIndex(startOffset - 1, segmentId, segmentPage);
+                const curSpan = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage)!;
 
                 if (direction === Direction.LEFT) {
                     cursor = Math.max(0, startOffset - (preSpan?.count ?? 0));
@@ -252,8 +252,8 @@ export class MoveCursorController extends Disposable {
                 },
             ], false);
         } else {
-            const startNode = skeleton.findNodeByCharIndex(startOffset, segmentId);
-            const endNode = skeleton.findNodeByCharIndex(endOffset, segmentId);
+            const startNode = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
+            const endNode = skeleton.findNodeByCharIndex(endOffset, segmentId, segmentPage);
 
             const documentOffsetConfig = docObject.document.getOffsetConfig();
 

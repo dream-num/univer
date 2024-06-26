@@ -221,14 +221,14 @@ function _createSkeletonHeaderFooter(
         return {
             ...page,
             marginTop: marginHeader,
-            marginBottom: 0,
+            marginBottom: 5, // Space between header and content
         };
     }
 
     return {
         ...page,
         marginBottom: marginFooter,
-        marginTop: 0,
+        marginTop: 5, // Space between footer and content
     };
 }
 
@@ -241,7 +241,7 @@ function _getVerticalMargin(
         return marginTB;
     }
 
-    return Math.max(marginTB, (marginHF + headerOrFooter?.height || 0));
+    return Math.max(marginTB, (headerOrFooter.marginTop + headerOrFooter.height + headerOrFooter.marginBottom || 0));
 }
 
 function __getHeaderMarginTop(marginTop: number, marginHeader: number, height: number) {

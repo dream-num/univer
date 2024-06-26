@@ -154,22 +154,22 @@ export function getOneTextSelectionRange(rangeList: ITextRange[]): Nullable<ITex
 
 function getOffsetInDivide(
     glyphGroup: IDocumentSkeletonGlyph[],
-    startSpanIndex: number,
-    endSpanIndex: number,
+    startGlyphIndex: number,
+    endGlyphIndex: number,
     st: number
 ) {
     let startOffset = st;
     let endOffset = st;
 
     for (let i = 0; i < glyphGroup.length; i++) {
-        const span = glyphGroup[i];
-        const contentLength = span.count;
+        const glyph = glyphGroup[i];
+        const contentLength = glyph.count;
 
-        if (i < startSpanIndex) {
+        if (i < startGlyphIndex) {
             startOffset += contentLength;
         }
 
-        if (i < endSpanIndex) {
+        if (i < endGlyphIndex) {
             endOffset += contentLength;
         }
     }
@@ -519,10 +519,23 @@ export class NodePositionConvertToCursor {
                 editArea === DocumentEditArea.BODY ? p : 0
             );
             this._liquid.translateSave();
-            this._liquid.translatePagePadding({
-                ...segmentPage,
-                marginLeft: page.marginLeft,
-            });
+
+            switch (editArea) {
+                case DocumentEditArea.HEADER:
+                    this._liquid.translatePagePadding({
+                        ...segmentPage,
+                        marginLeft: page.marginLeft, // Because header or footer margin Left is 0.
+                    });
+                    break;
+                case DocumentEditArea.FOOTER: {
+                    const footerTop = page.pageHeight - segmentPage.height - segmentPage.marginBottom;
+                    this._liquid.translate(page.marginLeft, footerTop);
+                    break;
+                }
+                default:
+                    this._liquid.translatePagePadding(page);
+                    break;
+            }
 
             for (let s = start_s; s <= end_s; s++) {
                 const section = sections[s];
@@ -582,11 +595,11 @@ export class NodePositionConvertToCursor {
                             let isFirst = false;
                             let isLast = false;
 
-                            if (p === pageIndex && s === start_s && c === start_c && l === start_l && d === start_d) {
+                            if (p === skipPageIndex && s === start_s && c === start_c && l === start_l && d === start_d) {
                                 isFirst = true;
                             }
 
-                            if (p === endPageIndex && s === end_s && c === end_c && l === end_l && d === end_d) {
+                            if (p === endIndex && s === end_s && c === end_c && l === end_l && d === end_d) {
                                 isLast = true;
                             }
 

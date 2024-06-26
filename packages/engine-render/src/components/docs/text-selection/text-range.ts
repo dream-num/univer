@@ -52,12 +52,11 @@ export function cursorConvertToTextRange(
     docSkeleton: DocumentSkeleton,
     document: Documents
 ): Nullable<TextRange> {
-    const { startOffset, endOffset, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE, segmentId = '' } = range;
+    const { startOffset, endOffset, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE, segmentId = '', segmentPage } = range;
+    const anchorNodePosition = docSkeleton.findNodePositionByCharIndex(startOffset, true, segmentId, segmentPage);
+    const focusNodePosition = startOffset !== endOffset ? docSkeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage) : null;
 
-    const anchorNodePosition = docSkeleton.findNodePositionByCharIndex(startOffset, true, segmentId);
-    const focusNodePosition = startOffset !== endOffset ? docSkeleton.findNodePositionByCharIndex(endOffset, true, segmentId) : null;
-
-    const textRange = new TextRange(scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style, segmentId);
+    const textRange = new TextRange(scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style);
 
     textRange.refresh();
 
@@ -99,8 +98,7 @@ export class TextRange {
         private _docSkeleton: DocumentSkeleton,
         public anchorNodePosition?: Nullable<INodePosition>,
         public focusNodePosition?: Nullable<INodePosition>,
-        public style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-        public segmentId = ''
+        public style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE
     ) {
         this._anchorBlink();
     }

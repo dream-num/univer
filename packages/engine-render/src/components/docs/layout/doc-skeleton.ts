@@ -194,8 +194,8 @@ export class DocumentSkeleton extends Skeleton {
         };
     }
 
-    findNodePositionByCharIndex(charIndex: number, isBack: boolean = true, segmentId = ''): Nullable<INodePosition> {
-        const nodes = this._findNodeIterator(charIndex, segmentId);
+    findNodePositionByCharIndex(charIndex: number, isBack: boolean = true, segmentId = '', segmentPIndex = -1): Nullable<INodePosition> {
+        const nodes = this._findNodeByIndex(charIndex, segmentId, segmentPIndex);
 
         if (nodes == null) {
             return;
@@ -225,8 +225,8 @@ export class DocumentSkeleton extends Skeleton {
         };
     }
 
-    findNodeByCharIndex(charIndex: number, segmentId = ''): Nullable<IDocumentSkeletonGlyph> {
-        const nodes = this._findNodeIterator(charIndex, segmentId);
+    findNodeByCharIndex(charIndex: number, segmentId = '', segmentPageIndex = -1): Nullable<IDocumentSkeletonGlyph> {
+        const nodes = this._findNodeByIndex(charIndex, segmentId, segmentPageIndex);
 
         return nodes?.glyph;
     }
@@ -300,7 +300,7 @@ export class DocumentSkeleton extends Skeleton {
         } {
         const { x, y } = coord;
         let editArea = DocumentEditArea.BODY;
-        let pageNumber = 0;
+        let pageNumber = -1;
         let pageSkeleton = null;
         const skeletonData = this.getSkeletonData();
 
@@ -314,7 +314,7 @@ export class DocumentSkeleton extends Skeleton {
 
         this._findLiquid.reset();
 
-        const pages = skeletonData.pages;
+        const { pages } = skeletonData;
 
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
@@ -345,7 +345,7 @@ export class DocumentSkeleton extends Skeleton {
                 x > this._findLiquid.x && x < this._findLiquid.x + pageWidth &&
                 y > this._findLiquid.y + pageHeight - marginBottom && y < this._findLiquid.y + pageHeight
             ) {
-                editArea = DocumentEditArea.HEADER;
+                editArea = DocumentEditArea.FOOTER;
                 pageSkeleton = page;
                 pageNumber = i;
                 break;
@@ -384,6 +384,8 @@ export class DocumentSkeleton extends Skeleton {
 
         let nearestNodeDistanceList: number[] = [];
 
+        let segmentId = '';
+
         let nearestNodeDistanceY = Number.POSITIVE_INFINITY;
 
         for (let pi = 0, len = pages.length; pi < len; pi++) {
@@ -402,20 +404,36 @@ export class DocumentSkeleton extends Skeleton {
 
                 if (headerSke) {
                     page = headerSke;
+                    segmentId = headerId;
                 }
             } else if (editArea === DocumentEditArea.FOOTER) {
                 const footerSke = skeFooters.get(footerId)?.get(pageWidth) as IDocumentSkeletonPage;
 
                 if (footerSke) {
                     page = footerSke;
+                    segmentId = footerId;
                 }
             }
 
             const { sections } = page;
-            this._findLiquid.translatePagePadding({
-                ...page,
-                marginLeft: pages[pi].marginLeft, // Because header or footer margin Left is 0.
-            });
+
+            this._findLiquid.translateSave();
+            switch (editArea) {
+                case DocumentEditArea.HEADER:
+                    this._findLiquid.translatePagePadding({
+                        ...page,
+                        marginLeft: pages[pi].marginLeft, // Because header or footer margin Left is 0.
+                    });
+                    break;
+                case DocumentEditArea.FOOTER: {
+                    const footerTop = pages[pi].pageHeight - page.height - page.marginBottom;
+                    this._findLiquid.translate(pages[pi].marginLeft, footerTop);
+                    break;
+                }
+                default:
+                    this._findLiquid.translatePagePadding(pages[pi]);
+                    break;
+            }
 
             for (const section of sections) {
                 const { columns } = section;
@@ -497,7 +515,8 @@ export class DocumentSkeleton extends Skeleton {
                                         if (x >= startX_fin && x <= endX_fin) {
                                             return {
                                                 node: glyph,
-                                                segmentPage: pi,
+                                                segmentPage: editArea === DocumentEditArea.BODY ? -1 : pi,
+                                                segmentId,
                                                 ratioX: x / (startX_fin + endX_fin),
                                                 ratioY: y / (startY_fin + endY_fin),
                                             };
@@ -509,7 +528,8 @@ export class DocumentSkeleton extends Skeleton {
                                         }
                                         nearestNodeList.push({
                                             node: glyph,
-                                            segmentPage: pi,
+                                            segmentPage: editArea === DocumentEditArea.BODY ? -1 : pi,
+                                            segmentId,
                                             ratioX: x / (startX_fin + endX_fin),
                                             ratioY: y / (startY_fin + endY_fin),
                                         });
@@ -529,7 +549,8 @@ export class DocumentSkeleton extends Skeleton {
                                     if (distanceY === nearestNodeDistanceY) {
                                         nearestNodeList.push({
                                             node: glyph,
-                                            segmentPage: pi,
+                                            segmentPage: editArea === DocumentEditArea.BODY ? -1 : pi,
+                                            segmentId,
                                             ratioX: x / (startX_fin + endX_fin),
                                             ratioY: y / (startY_fin + endY_fin),
                                         });
@@ -545,7 +566,7 @@ export class DocumentSkeleton extends Skeleton {
                     this._findLiquid.translateRestore();
                 }
             }
-            this._findLiquid.restorePagePadding(page);
+            this._findLiquid.translateRestore();
             this._translatePage(pages[pi], pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
@@ -807,10 +828,10 @@ export class DocumentSkeleton extends Skeleton {
         sections.push(newSection);
     }
 
-    private _findNodeIterator(charIndex: number, segmentId = '') {
+    private _findNodeByIndex(charIndex: number, segmentId = '', segmentPageIndex = -1) {
         const skeletonData = this.getSkeletonData();
 
-        if (!skeletonData) {
+        if (skeletonData == null) {
             return;
         }
 
@@ -818,6 +839,11 @@ export class DocumentSkeleton extends Skeleton {
         const { pages, skeFooters, skeHeaders } = skeletonData;
 
         for (const page of pages) {
+            const curPageIndex = pages.indexOf(page);
+            if (editArea !== DocumentEditArea.BODY && curPageIndex !== segmentPageIndex) {
+                continue;
+            }
+
             const { pageWidth } = page;
             let segmentPage = page;
 
@@ -887,7 +913,7 @@ export class DocumentSkeleton extends Skeleton {
                                         line,
                                         divide,
                                         glyph,
-                                        segmentPageIndex: pages.indexOf(page),
+                                        segmentPageIndex,
                                     };
                                 }
                             }

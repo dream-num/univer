@@ -39,7 +39,7 @@ export interface ISuccinctTextRangeParam {
     startOffset: number;
     endOffset: number;
     segmentId?: string; // Header of footer id.
-    pageIndex?: number; // Optional, because header and footer are in different pages, so need pageIndex to allocate selection in header or footer.
+    segmentPage?: number; // Optional, because header and footer are in different pages, so need pageIndex to allocate selection in header or footer.
     style?: ITextSelectionStyle;
 }
 

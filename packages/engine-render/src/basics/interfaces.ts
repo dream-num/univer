@@ -144,6 +144,7 @@ export interface INodeInfo {
     node: IDocumentSkeletonGlyph;
     ratioX: number;
     ratioY: number;
+    segmentId: string;
     segmentPage: number; // The index of the page where node is located.
 }
 

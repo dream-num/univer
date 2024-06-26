@@ -103,6 +103,7 @@ export interface ITextSelectionInnerParam {
     segmentId: string;
     isEditing: boolean;
     style: ITextSelectionStyle;
+    segmentPage: number;
 }
 
 export interface IActiveTextRange {
@@ -113,6 +114,7 @@ export interface IActiveTextRange {
     endNodePosition: Nullable<INodePosition>;
     direction: RANGE_DIRECTION;
     segmentId: string;
+    segmentPage: number;
     style: ITextSelectionStyle;
 }
 
@@ -134,6 +136,7 @@ export interface ITextSelectionRenderManager {
     enableSelection(): void;
     disableSelection(): void;
     setSegment(id: string): void;
+    setSegmentPage(pageIndex: number): void;
     setStyle(style: ITextSelectionStyle): void;
     resetStyle(): void;
     removeAllTextRanges(): void;
@@ -200,6 +203,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _viewportScrollY: number = 0;
     private _rangeList: TextRange[] = [];
     private _currentSegmentId: string = '';
+    private _currentSegmentPage: number = -1;
     private _selectionStyle: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE;
     private _isSelectionEnabled: boolean = true;
     private _viewPortObserverMap = new Map<
@@ -238,6 +242,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._currentSegmentId = id;
     }
 
+    setSegmentPage(pageIndex: number) {
+        this._currentSegmentPage = pageIndex;
+    }
+
     setStyle(style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE) {
         this._selectionStyle = style;
     }
@@ -262,6 +270,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
                 style: this._selectionStyle,
                 ...range,
                 segmentId: this._currentSegmentId,
+                segmentPage: this._currentSegmentPage,
             }, docSkeleton!, this._document!);
 
             this._add(textSelection);
@@ -270,6 +279,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._textSelectionInner$.next({
             textRanges: this._getAllTextRanges(),
             segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
             style: this._selectionStyle,
             isEditing,
         });
@@ -450,10 +460,19 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const position = this._getNodePosition(startNode);
 
-        if (position == null) {
+        if (position == null || startNode == null) {
             this._removeAllTextRanges();
 
             return;
+        }
+        const { segmentId, segmentPage } = startNode;
+
+        if (segmentId !== this._currentSegmentId) {
+            this.setSegment(segmentId);
+        }
+
+        if (segmentPage !== this._currentSegmentPage) {
+            this.setSegmentPage(segmentPage);
         }
 
         if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
@@ -463,7 +482,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         if (evt.shiftKey && this._getActiveRangeInstance()) {
             this._updateActiveRangeFocusPosition(position);
         } else if (evt.ctrlKey || this._isEmpty()) {
-            const newTextSelection = new TextRange(scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle, this._currentSegmentId);
+            const newTextSelection = new TextRange(scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle);
 
             this._addTextRange(newTextSelection);
         } else {
@@ -513,12 +532,15 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
             scene.enableEvent();
 
-            this._textSelectionInner$.next({
+            const selectionInfo = {
                 textRanges: this._getAllTextRanges(),
                 segmentId: this._currentSegmentId,
+                segmentPage: this._currentSegmentPage,
                 style: this._selectionStyle,
                 isEditing: false,
-            });
+            };
+
+            this._textSelectionInner$.next(selectionInfo);
 
             this._scrollTimers.forEach((timer) => {
                 timer?.dispose();
@@ -574,6 +596,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             endNodePosition,
             direction,
             segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
             style: this._selectionStyle,
         };
     }
@@ -725,7 +748,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         let lastRange = this._rangeList.pop();
 
         if (!lastRange) {
-            lastRange = new TextRange(this._scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle, this._currentSegmentId);
+            lastRange = new TextRange(this._scene, this._document!, this._docSkeleton!, position, undefined, this._selectionStyle);
         }
 
         this._removeAllTextRanges();
@@ -1004,9 +1027,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             pageMarginTop,
         } = this._document!.getOffsetConfig();
 
-        return this._docSkeleton?.findNodeByCoord(
+        const nodeInfo = this._docSkeleton?.findNodeByCoord(
             coord, pageLayoutType, pageMarginLeft, pageMarginTop
         );
+
+        return nodeInfo;
     }
 
     private _detachEvent() {

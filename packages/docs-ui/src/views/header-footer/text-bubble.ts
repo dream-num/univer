@@ -81,7 +81,7 @@ export class TextBubbleShape<
         const { text, color } = props;
         ctx.save();
         // Measure the text width
-        ctx.font = 'bold 13px Source Han Sans CN';
+        ctx.font = '13px Source Han Sans CN';
         const textWidth = ctx.measureText(text).width;
         const realInfoWidth = Math.min(
             textWidth + 2 * COLLAB_CURSOR_LABEL_TEXT_PADDING_LR,
@@ -97,7 +97,7 @@ export class TextBubbleShape<
             evented: false,
         });
 
-        ctx.fillStyle = 'rgb(0, 0, 255)';
+        ctx.fillStyle = 'rgba(58, 96, 247, 1)';
 
         // Draw the text with truncation if needed
         const offsetX = COLLAB_CURSOR_LABEL_TEXT_PADDING_LR;

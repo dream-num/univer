@@ -177,24 +177,24 @@ export const DeleteLeftCommand: ICommand = {
 
         const actualRange = getDeleteSelection(activeRange, body);
         const { startOffset, collapsed } = actualRange;
-        const { segmentId, style } = activeRange;
-        const curGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId);
+        const { segmentId, style, segmentPage } = activeRange;
+        const curGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
 
         // is in bullet list?
         const isBullet = hasListGlyph(curGlyph);
         // is in indented paragraph?
-        const isIndent = isIndentByGlyph(curGlyph, docDataModel.getBody());
+        const isIndent = isIndentByGlyph(curGlyph, docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody());
 
         let cursor = startOffset;
 
         // Get the deleted glyph. It maybe null or undefined when the curGlyph is first glyph in skeleton.
-        const preGlyph = skeleton.findNodeByCharIndex(startOffset - 1, segmentId);
+        const preGlyph = skeleton.findNodeByCharIndex(startOffset - 1, segmentId, segmentPage);
 
         const isUpdateParagraph =
             isFirstGlyph(curGlyph) && preGlyph !== curGlyph && (isBullet === true || isIndent === true);
 
         if (isUpdateParagraph && collapsed) {
-            const paragraph = getParagraphByGlyph(curGlyph, docDataModel.getBody());
+            const paragraph = getParagraphByGlyph(curGlyph, docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody());
 
             if (paragraph == null) {
                 return false;
@@ -323,18 +323,17 @@ export const DeleteRightCommand: ICommand = {
 
         const actualRange = getInsertSelection(activeRange, body);
         const { startOffset, collapsed } = actualRange;
-        const { segmentId, style } = activeRange;
+        const { segmentId, style, segmentPage } = activeRange;
         // No need to delete when the cursor is at the last position of the last paragraph.
-        if (startOffset === docDataModel.getBody()!.dataStream.length - 2 && collapsed) {
+        if (startOffset === docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.dataStream.length - 2 && collapsed) {
             return true;
         }
 
         let result: boolean = false;
         if (collapsed === true) {
-            const needDeleteSpan = skeleton.findNodeByCharIndex(startOffset, segmentId)!;
+            const needDeleteGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage)!;
 
-            // skip custom-range-split-symbol
-            if (needDeleteSpan.content === '\r') {
+            if (needDeleteGlyph.content === '\r') {
                 result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
                     direction: DeleteDirection.RIGHT,
                     range: activeRange,
@@ -358,7 +357,7 @@ export const DeleteRightCommand: ICommand = {
                     segmentId,
                     direction: DeleteDirection.RIGHT,
                     textRanges,
-                    len: needDeleteSpan.count,
+                    len: needDeleteGlyph.count,
                 });
             }
         } else {

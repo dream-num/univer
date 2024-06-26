@@ -17,7 +17,7 @@
 import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { Documents, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
-import { CURSOR_TYPE, ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { CURSOR_TYPE, DocumentEditArea, ITextSelectionRenderManager, PageLayoutType, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
 import { IEditorService } from '@univerjs/ui';
@@ -60,6 +60,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
         }
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initialMain(unitId: string) {
         const docObject = neoGetDocObject(this._context);
         const { document, scene } = docObject;
@@ -81,9 +82,34 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
             }
 
             // FIXME:@Jocs: editor status should not be coupled with the instance service.
-            const currentDocInstance = this._instanceSrv.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
-            if (currentDocInstance?.getUnitId() !== unitId) {
+            const docDataModel = this._instanceSrv.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+            if (docDataModel?.getUnitId() !== unitId) {
                 this._instanceSrv.setCurrentUnitForType(unitId);
+            }
+
+            const skeleton = this._docSkeletonManagerService.getSkeleton();
+            const { offsetX, offsetY } = evt;
+            const coord = this._getTransformCoordForDocumentOffset(offsetX, offsetY);
+
+            if (coord != null) {
+                const {
+                    pageLayoutType = PageLayoutType.VERTICAL,
+                    pageMarginLeft,
+                    pageMarginTop,
+                } = document.getOffsetConfig();
+                const { editArea } = skeleton.findEditAreaByCoord(
+                    coord,
+                    pageLayoutType,
+                    pageMarginLeft,
+                    pageMarginTop
+                );
+
+                const viewModel = this._docSkeletonManagerService.getViewModel();
+                const preEditArea = viewModel.getEditArea();
+
+                if (preEditArea !== DocumentEditArea.BODY && editArea !== preEditArea) {
+                    viewModel.setEditArea(editArea);
+                }
             }
 
             this._textSelectionRenderManager.eventTrigger(evt);
@@ -126,6 +152,21 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
 
             this._textSelectionRenderManager.handleTripleClick(evt);
         }));
+    }
+
+    private _getTransformCoordForDocumentOffset(evtOffsetX: number, evtOffsetY: number) {
+        const docObject = neoGetDocObject(this._context);
+        const { document, scene } = docObject;
+        const { documentTransform } = document.getOffsetConfig();
+        const activeViewport = scene.getViewports()[0];
+
+        if (activeViewport == null) {
+            return;
+        }
+
+        const originCoord = activeViewport.getRelativeVector(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+
+        return documentTransform.clone().invert().applyPoint(originCoord);
     }
 
     private _isEditorReadOnly(unitId: string) {

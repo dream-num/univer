@@ -44,6 +44,7 @@ export interface ITextActiveRange {
     direction: RANGE_DIRECTION;
     segmentId: string;
     style: ITextSelectionStyle;
+    segmentPage: number;
 }
 
 interface ITextSelectionManagerInsertParam extends ITextSelectionManagerSearchParam, ITextSelectionInnerParam {}
@@ -137,7 +138,7 @@ export class TextSelectionManagerService extends RxDisposable {
             return;
         }
 
-        const { textRanges, segmentId, style } = selectionInfo;
+        const { textRanges, segmentId, style, segmentPage } = selectionInfo;
         const activeTextRange = textRanges.find((textRange) => textRange.isActive());
 
         if (activeTextRange == null) {
@@ -158,6 +159,7 @@ export class TextSelectionManagerService extends RxDisposable {
             endNodePosition,
             direction,
             segmentId,
+            segmentPage,
             style,
         };
     }
@@ -172,6 +174,7 @@ export class TextSelectionManagerService extends RxDisposable {
             ...this._currentSelection,
             textRanges: textRanges as TextRange[],
             segmentId: '',
+            segmentPage: -1,
             isEditing,
             style: NORMAL_TEXT_SELECTION_PLUGIN_STYLE, // mock style.
         });
@@ -256,7 +259,7 @@ export class TextSelectionManagerService extends RxDisposable {
     }
 
     private _replaceByParam(insertParam: ITextSelectionManagerInsertParam) {
-        const { unitId, subUnitId, style, segmentId, textRanges, isEditing } = insertParam;
+        const { unitId, subUnitId, style, segmentId, textRanges, isEditing, segmentPage } = insertParam;
 
         if (!this._textSelectionInfo.has(unitId)) {
             this._textSelectionInfo.set(unitId, new Map());
@@ -264,11 +267,11 @@ export class TextSelectionManagerService extends RxDisposable {
 
         const unitTextRange = this._textSelectionInfo.get(unitId)!;
 
-        unitTextRange.set(subUnitId, { textRanges, style, segmentId, isEditing });
+        unitTextRange.set(subUnitId, { textRanges, style, segmentId, isEditing, segmentPage });
     }
 
     private _addByParam(insertParam: ITextSelectionManagerInsertParam): void {
-        const { unitId, subUnitId, textRanges, style, segmentId, isEditing } = insertParam;
+        const { unitId, subUnitId, textRanges, style, segmentId, isEditing, segmentPage } = insertParam;
 
         if (!this._textSelectionInfo.has(unitId)) {
             this._textSelectionInfo.set(unitId, new Map());
@@ -277,7 +280,7 @@ export class TextSelectionManagerService extends RxDisposable {
         const unitTextRange = this._textSelectionInfo.get(unitId)!;
 
         if (!unitTextRange.has(subUnitId)) {
-            unitTextRange.set(subUnitId, { textRanges, style, segmentId, isEditing });
+            unitTextRange.set(subUnitId, { textRanges, style, segmentId, isEditing, segmentPage });
         } else {
             const OldTextRanges = unitTextRange.get(subUnitId)!;
             OldTextRanges.textRanges.push(...textRanges);

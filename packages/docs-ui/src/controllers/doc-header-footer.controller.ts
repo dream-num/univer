@@ -25,8 +25,8 @@ import { DocSkeletonManagerService, neoGetDocObject } from '@univerjs/docs';
 import type { Nullable } from 'vitest';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
 
-const HEADER_FOOTER_STROKE_COLOR = 'rgb(0, 0, 255)';
-const HEADER_FOOTER_FILL_COLOR = 'rgb(219, 231, 244)';
+const HEADER_FOOTER_STROKE_COLOR = 'rgba(58, 96, 247, 1)';
+const HEADER_FOOTER_FILL_COLOR = 'rgba(58, 96, 247, 0.08)';
 
 export enum HeaderFooterType {
     FIRST_PAGE_HEADER,
@@ -196,6 +196,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
             if (editArea === DocumentEditArea.BODY) {
                 this._textSelectionRenderManager.setSegment('');
+                this._textSelectionRenderManager.setSegmentPage(pageNumber);
             } else {
                 if (createType != null) {
                     // TODO: create header or footer and set segment.

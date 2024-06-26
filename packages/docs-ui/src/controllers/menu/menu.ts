@@ -652,20 +652,20 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 function getParagraphStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(TextSelectionManagerService);
-    const editorDataModel = univerInstanceService.getCurrentUniverDocInstance();
+    const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
     const activeTextRange = textSelectionService.getActiveRange();
 
-    if (editorDataModel == null || activeTextRange == null) {
+    if (docDataModel == null || activeTextRange == null) {
         return;
     }
 
-    const paragraphs = editorDataModel.getBody()?.paragraphs;
+    const { startOffset, segmentId } = activeTextRange;
+
+    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
 
     if (paragraphs == null) {
         return;
     }
-
-    const { startOffset } = activeTextRange;
 
     let prevIndex = -1;
 

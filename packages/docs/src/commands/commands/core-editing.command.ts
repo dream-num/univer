@@ -48,9 +48,7 @@ export const EditorInsertTextCommandId = 'doc.command.insert-text';
  */
 export const InsertCommand: ICommand<IInsertCommandParams> = {
     id: EditorInsertTextCommandId,
-
     type: CommandType.COMMAND,
-
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

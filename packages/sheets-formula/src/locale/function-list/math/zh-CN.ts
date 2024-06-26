@@ -112,7 +112,7 @@ export default {
         },
     },
     ASIN: {
-        description: '返回数字的反正弦值',
+        description: '返回数字的反正弦值。',
         abstract: '返回数字的反正弦值',
         links: [
             {
@@ -121,8 +121,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: ' 所求角度的正弦值，必须介于 -1 到 1 之间。' },
         },
     },
     ASINH: {

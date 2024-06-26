@@ -113,7 +113,7 @@ export default {
         },
     },
     ASIN: {
-        description: 'Returns the arcsine of a number',
+        description: 'Returns the arcsine of a number.',
         abstract: 'Returns the arcsine of a number',
         links: [
             {
@@ -122,8 +122,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The sine of the angle you want and must be from -1 to 1.' },
         },
     },
     ASINH: {

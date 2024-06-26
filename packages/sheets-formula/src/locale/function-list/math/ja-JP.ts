@@ -114,7 +114,7 @@ export default {
     },
     ASIN: {
         description: '数値のアークサインを返します。',
-        abstract: '数値のアークサインを返します。',
+        abstract: '数値のアークサインを返します',
         links: [
             {
                 title: '指導',
@@ -122,8 +122,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '求める角度のサインの値を -1 ～ 1 の範囲で指定します。' },
         },
     },
     ASINH: {

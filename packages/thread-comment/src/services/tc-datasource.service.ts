@@ -36,6 +36,7 @@ export interface IThreadCommentDataSource {
      * handler for update-comment, throw error means fail and stop the process.
      */
     updateComment: (comment: IThreadComment) => Promise<Success>;
+    resolveComment: (comment: IThreadComment) => Promise<Success>;
     /**
      * handler for delete-comment, throw error means fail and stop the process.
      */
@@ -68,6 +69,10 @@ export interface IThreadCommentDataSourceService {
     * handler for update-comment, throw error means fail and stop the process.
     */
     updateComment: (comment: IThreadComment) => Promise<Success>;
+    /**
+   * handler for resolve-comment, throw error means fail and stop the process.
+   */
+    resolveComment: (comment: IThreadComment) => Promise<Success>;
     /**
     * handler for delete-comment, throw error means fail and stop the process.
     */
@@ -119,6 +124,13 @@ export class ThreadCommentDataSourceService extends Disposable implements IThrea
     async updateComment(comment: IThreadComment) {
         if (this._dataSource) {
             return this._dataSource.updateComment(comment);
+        }
+        return true;
+    }
+
+    async resolveComment(comment: IThreadComment) {
+        if (this._dataSource) {
+            return this._dataSource.resolveComment(comment);
         }
         return true;
     }

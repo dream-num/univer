@@ -168,7 +168,7 @@ export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
             return false;
         }
 
-        const success = await dataSourceService.updateComment({
+        const success = await dataSourceService.resolveComment({
             ...currentComment,
             resolved,
         });

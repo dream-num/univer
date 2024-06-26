@@ -44,7 +44,7 @@ import { ConditionalFormattingPermissionController } from './controllers/cf.perm
 
 @DependentOn(SheetsConditionalFormattingPlugin)
 export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
-    static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
+    static override pluginName = `${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_MOBILE_UI_PLUGIN`;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

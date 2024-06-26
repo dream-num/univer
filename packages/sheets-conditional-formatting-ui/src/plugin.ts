@@ -47,7 +47,7 @@ import { ConditionalFormattingPermissionController } from './controllers/cf.perm
 
 @DependentOn(SheetsConditionalFormattingPlugin)
 export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
-    static override pluginName = `${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_UI`;
+    static override pluginName = `${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_UI_PLUGIN`;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
@@ -56,6 +56,7 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
         @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();
+
         this._config = Tools.deepMerge({}, DefaultSheetConditionalFormattingUiConfig, this._config);
 
         this._initCommand();

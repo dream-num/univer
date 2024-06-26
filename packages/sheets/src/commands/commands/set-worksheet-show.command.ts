@@ -41,7 +41,7 @@ export class BranchCoverage {
 
     constructor(functionName: string, branchCount: number) {
         this.functionName = functionName;
-        this.branches = new Array<branchCount>.fill(false);
+        this.branches = new Array<boolean>(branchCount).fill(false);
     }
 
     public printCoverage(): void {
@@ -51,7 +51,7 @@ export class BranchCoverage {
         console.log(`Branches covered : ${totalCovered}`)
         console.log(`Branches total   : ${this.branches.length}`)
         console.log(`Percentage       : ${totalCovered * 100 / this.branches.length}%`)
-        this.branches.foreach((value, index) => {
+        this.branches.forEach((value, index) => {
             console.log(`Branch ${index}: ${value ? "Hit" : "Miss"}`)
         })
     }

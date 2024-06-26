@@ -23,7 +23,6 @@ import { BranchCoverage } from '../set-worksheet-show.command';
 
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
 import { SetWorksheetHideMutation } from '../../mutations/set-worksheet-hide.mutation';
-import { SetWorksheetShowMutation } from '../../mutations/set-worksheet-show.mutation';
 import { SetWorksheetActiveOperation } from '../../operations/set-worksheet-active.operation';
 import { InsertSheetCommand } from '../insert-sheet.command';
 import { SetWorksheetActivateCommand } from '../set-worksheet-activate.command';
@@ -49,7 +48,6 @@ describe('Test set worksheet show commands', () => {
         commandService.registerCommand(SetWorksheetHideCommand);
         commandService.registerCommand(SetWorksheetHideMutation);
         commandService.registerCommand(SetWorksheetShowCommand);
-        commandService.registerCommand(SetWorksheetHideMutation);
     });
 
     afterEach(() => {

@@ -199,7 +199,7 @@ export class SheetsThreadCommentModel extends Disposable {
                     locationMap.delete(commentId);
 
                     if (location.row >= 0 && location.column >= 0) {
-                        this._addCommentToMatrix(matrix, row, column, commentId);
+                        this._addCommentToMatrix(matrix, location.row, location.column, commentId);
                         locationMap.set(commentId, { row: location.row, column: location.column });
                     }
                     this._commentUpdate$.next({

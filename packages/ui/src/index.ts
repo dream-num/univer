@@ -106,6 +106,7 @@ export { ZenZone } from './views/components/zen-zone/ZenZone';
 export { CanvasPopup } from './views/components/popup/CanvasPopup';
 export { CanvasFloatDomService, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
 export { FloatDom } from './views/components/dom/FloatDom';
+export { MobileContextMenu } from './views/components/context-menu/MobileContextMenu';
 
 // #endregion
 

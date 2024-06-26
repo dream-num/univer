@@ -157,7 +157,6 @@ export class UniverSheetsFormulaMobilePlugin extends Plugin {
             [ActiveDirtyController],
             [DefinedNameController],
             [FormulaRenderManagerController],
-            [FormulaAlertRenderController],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

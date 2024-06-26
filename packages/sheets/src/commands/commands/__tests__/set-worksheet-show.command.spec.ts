@@ -146,7 +146,7 @@ describe('Test set worksheet show commands', () => {
             });
         });
 
-        describe('set sheet shown with bad get injected', async () => {
+        describe('set sheet shown with incorrect get injected', async () => {
             it('correct situation: ', async () => {
                 let badInjector = createBadInjector();
                 get = badInjector.get.bind(badInjector);
@@ -158,7 +158,7 @@ describe('Test set worksheet show commands', () => {
             });
         });
 
-        describe('', async () => {
+        describe('set sheet shown with adjusted test bed', async () => {
             it('correct situation: ', async () => {
                 TestData.testData.spoofed = true;
                 univer.dispose();

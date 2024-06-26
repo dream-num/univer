@@ -33,6 +33,7 @@ import { getCharSpaceApply, getNumberUnitValue, type IActiveTextRange } from '@u
 import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import { getRichTextEditPath } from '../util';
 
 interface IListOperationCommandParams {
     listType: PresetListType;
@@ -51,14 +52,14 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         const { listType } = params;
 
-        const dataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!dataModel) {
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!docDataModel) {
             return false;
         }
 
         const activeRange = textSelectionManagerService.getActiveRange();
         const selections = textSelectionManagerService.getSelections() ?? [];
-        const paragraphs = dataModel.getBody()?.paragraphs;
+        const paragraphs = docDataModel.getBody()?.paragraphs;
         const serializedSelections = selections.map(serializeTextRange);
 
         if (activeRange == null || paragraphs == null) {
@@ -69,7 +70,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         const { segmentId } = activeRange;
 
-        const unitId = dataModel.getUnitId();
+        const unitId = docDataModel.getUnitId();
 
         const isAlreadyList = currentParagraphs.every((paragraph) => paragraph.bullet?.listType === listType);
 
@@ -105,14 +106,14 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
-        const customLists = dataModel.getSnapshot().lists ?? {};
+        const customLists = docDataModel.getSnapshot().lists ?? {};
 
         const lists = {
             ...PRESET_LIST_TYPE,
             ...customLists,
         };
 
-        const { charSpace, defaultTabStop = 36, gridType } = dataModel.getSnapshot().documentStyle;
+        const { charSpace, defaultTabStop = 36, gridType } = docDataModel.getSnapshot().documentStyle;
 
         for (const paragraph of currentParagraphs) {
             const { startIndex, paragraphStyle = {} } = paragraph;
@@ -170,7 +171,8 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             memoryCursor.moveCursorTo(startIndex + 1);
         }
 
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

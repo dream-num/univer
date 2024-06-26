@@ -16,7 +16,6 @@
 
 import type { ICommand, IParagraph } from '@univerjs/core';
 import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, Tools } from '@univerjs/core';
-
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import { InsertCommand } from './core-editing.command';
 
@@ -66,7 +65,7 @@ export const BreakLineCommand: ICommand = {
         }
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!docDataModel) {
+        if (docDataModel == null) {
             return false;
         }
 

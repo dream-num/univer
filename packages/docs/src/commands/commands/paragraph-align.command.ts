@@ -29,6 +29,7 @@ import {
 import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import { getRichTextEditPath } from '../util';
 import { getParagraphsInRange } from './list.command';
 
 interface IAlignOperationCommandParams {
@@ -48,19 +49,19 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
 
         const { alignType } = params;
 
-        const dataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!dataModel) return false;
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!docDataModel) return false;
 
         const activeRange = textSelectionManagerService.getActiveRange();
         const selections = textSelectionManagerService.getSelections() ?? [];
-        const paragraphs = dataModel.getBody()?.paragraphs;
+        const paragraphs = docDataModel.getBody()?.paragraphs;
         const serializedSelections = selections.map(serializeTextRange);
 
         if (activeRange == null || paragraphs == null) return false;
 
         const currentParagraphs = getParagraphsInRange(activeRange, paragraphs);
         const { segmentId } = activeRange;
-        const unitId = dataModel.getUnitId();
+        const unitId = docDataModel.getUnitId();
         const isAlreadyAligned = currentParagraphs.every((paragraph) => paragraph.paragraphStyle?.horizontalAlign === alignType);
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -113,7 +114,8 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
             memoryCursor.moveCursorTo(startIndex + 1);
         }
 
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

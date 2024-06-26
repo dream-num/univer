@@ -32,6 +32,7 @@ import type { TextRange } from '@univerjs/engine-render';
 import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import { getRichTextEditPath } from '../util';
 
 function handleInlineFormat(
     preCommandId: string,
@@ -276,12 +277,12 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             return false;
         }
 
-        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!documentDataModel) {
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!docDataModel) {
             return false;
         }
 
-        const unitId = documentDataModel.getUnitId();
+        const unitId = docDataModel.getUnitId();
 
         let formatValue;
 
@@ -293,7 +294,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             case SetInlineFormatSubscriptCommand.id: // fallthrough
             case SetInlineFormatSuperscriptCommand.id: {
                 formatValue = getReverseFormatValueInSelection(
-                    documentDataModel.getBody()!.textRuns!,
+                    docDataModel.getBody()!.textRuns!,
                     preCommandId,
                     selections
                 );
@@ -379,7 +380,8 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

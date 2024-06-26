@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, ICommandInfo } from '@univerjs/core';
+import type { ICommand, ICommandInfo } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
@@ -23,6 +23,7 @@ import { IMEInputManagerService } from '../../services/ime-input-manager.service
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getInsertSelection } from '../../basics/selection';
+import { getRichTextEditPath } from '../util';
 
 export interface IIMEInputCommandParams {
     unitId: string;
@@ -43,10 +44,15 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         // console.log('===ime', params);
         const commandService = accessor.get(ICommandService);
         const imeInputManagerService = accessor.get(IMEInputManagerService);
-        const previousActiveRange = imeInputManagerService.getActiveRange();
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId);
-        const body = doc?.getBody();
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+
+        if (docDataModel == null) {
+            return false;
+        }
+
+        const previousActiveRange = imeInputManagerService.getActiveRange();
+        const body = docDataModel?.getBody();
         if (!previousActiveRange || !body) {
             return false;
         }
@@ -115,7 +121,8 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             segmentId,
         });
 
-        doMutation.params!.actions = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params!.actions = jsonX.editOp(textX.serialize(), path);
 
         doMutation.params!.noHistory = !isCompositionEnd;
 

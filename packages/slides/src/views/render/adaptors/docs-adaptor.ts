@@ -162,7 +162,7 @@ export class DocsAdaptor extends ObjectAdaptor {
 
         const pageSize = documents.getSkeleton()?.getPageSize();
 
-        documents.onPageRenderObservable.add((config: IPageRenderConfig) => {
+        documents.pageRender$.subscribe((config: IPageRenderConfig) => {
             const { page, pageLeft, pageTop, ctx } = config;
             const { width, height, marginBottom, marginLeft, marginRight, marginTop } = page;
             ctx.save();

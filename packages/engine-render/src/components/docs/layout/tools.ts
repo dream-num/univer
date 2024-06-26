@@ -762,7 +762,8 @@ export function getFontCreateConfig(
         ? { ts: {}, st: 0, ed: 0 }
         : bodyModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
     const customRange = bodyModel.getCustomRange(index + startIndex);
-    const customRangeStyle = customRange ? getCustomRangeStyle(customRange) : null;
+    const showCustomRange = customRange && (customRange.show !== false);
+    const customRangeStyle = showCustomRange ? getCustomRangeStyle(customRange) : null;
 
     const { st, ed } = textRun;
     let { ts: textStyle = {} } = textRun;
@@ -792,7 +793,7 @@ export function getFontCreateConfig(
         pageWidth,
     };
 
-    if (!customRange) {
+    if (!showCustomRange) {
         fontCreateConfigCache.setValue(st, ed, result);
     }
 

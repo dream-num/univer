@@ -19,6 +19,7 @@ import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Unive
 import { DOC_INTERCEPTOR_POINT, DocInterceptorService } from '@univerjs/docs';
 import { DocRenderController } from '@univerjs/docs-ui';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { Inject } from '@wendellhu/redi';
 
@@ -29,7 +30,8 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
         @Inject(DocInterceptorService) private readonly _docInterceptorService: DocInterceptorService,
         @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService,
         @Inject(DocRenderController) private readonly _docRenderController: DocRenderController,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(ThreadCommentModel) private readonly _threadCommentModel: ThreadCommentModel
     ) {
         super();
 
@@ -64,12 +66,18 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
                 if (!activeComment) {
                     return next(data);
                 }
-                const activeCustomRange = customRanges.find((i) => i.rangeId === activeComment.commentId);
+                const { commentId, unitId: commentUnitID, subUnitId } = activeComment;
+                const comment = this._threadCommentModel.getComment(commentUnitID, subUnitId, commentId);
+                if (!comment) {
+                    return next(data);
+                }
+                const activeCustomRange = customRanges.find((i) => i.rangeId === commentId);
                 const isActiveIndex = activeCustomRange && index >= activeCustomRange.startIndex && index <= activeCustomRange.endIndex;
-                const isActive = activeComment.unitId === unitId && data.rangeId === activeComment.commentId;
+                const isActive = commentUnitID === unitId && data.rangeId === commentId;
                 return next({
                     ...data,
                     active: isActive || isActiveIndex,
+                    show: !comment.resolved,
                 });
             },
         });

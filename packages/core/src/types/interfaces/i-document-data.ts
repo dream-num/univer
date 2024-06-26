@@ -274,6 +274,7 @@ export interface ICustomRange {
 
 export interface ICustomRangeForInterceptor extends ICustomRange {
     active?: boolean;
+    show?: boolean;
 }
 
 export enum CustomRangeType {

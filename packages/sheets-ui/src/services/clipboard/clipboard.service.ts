@@ -307,6 +307,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                     });
                 } else {
                     matrixFragment.setValue(rowIndex - startRow, c - startColumn, getEmptyCell());
+                    matrix.setValue(r, c, getEmptyCell());
                 }
             }
             rowIndex += 1;
@@ -716,12 +717,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             unitId,
             subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            selections: [{ range: {
-                startRow,
-                endRow,
-                startColumn,
-                endColumn,
-            }, primary, style: null }],
+            selections: [{
+                range: {
+                    startRow,
+                    endRow,
+                    startColumn,
+                    endColumn,
+                }, primary, style: null,
+            }],
         };
         return {
             id: SetSelectionsOperation.id,

@@ -53,15 +53,27 @@ function getDefaultHeaderFooterBody(type: 'header' | 'footer') {
         paragraphs: [
             {
                 startIndex: 4,
+                spaceAbove: 10,
+                lineSpacing: 2,
+                spaceBelow: 0,
             },
             {
                 startIndex: 11,
+                spaceAbove: 10,
+                lineSpacing: 2,
+                spaceBelow: 0,
             },
             {
                 startIndex: 24,
+                spaceAbove: 10,
+                lineSpacing: 2,
+                spaceBelow: 0,
             },
             {
                 startIndex: 31,
+                spaceAbove: 10,
+                lineSpacing: 2,
+                spaceBelow: 0,
             },
         ],
         sectionBreaks: [

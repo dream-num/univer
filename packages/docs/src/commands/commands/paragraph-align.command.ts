@@ -50,17 +50,20 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
         const { alignType } = params;
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!docDataModel) return false;
-
         const activeRange = textSelectionManagerService.getActiveRange();
+        if (docDataModel == null || activeRange == null) {
+            return false;
+        }
+        const { segmentId } = activeRange;
         const selections = textSelectionManagerService.getSelections() ?? [];
-        const paragraphs = docDataModel.getBody()?.paragraphs;
+        const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
         const serializedSelections = selections.map(serializeTextRange);
 
-        if (activeRange == null || paragraphs == null) return false;
+        if (paragraphs == null) {
+            return false;
+        }
 
         const currentParagraphs = getParagraphsInRange(activeRange, paragraphs);
-        const { segmentId } = activeRange;
         const unitId = docDataModel.getUnitId();
         const isAlreadyAligned = currentParagraphs.every((paragraph) => paragraph.paragraphStyle?.horizontalAlign === alignType);
 

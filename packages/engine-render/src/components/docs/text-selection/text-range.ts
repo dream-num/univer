@@ -380,7 +380,7 @@ export class TextRange {
             return;
         }
 
-        const OPACITY = 0.2;
+        const OPACITY = 0.3;
         const polygon = new RegularPolygon(TEXT_RANGE_KEY_PREFIX + Tools.generateRandomId(ID_LENGTH), {
             pointsGroup,
             fill: this.style?.fill || getColor(COLORS.black, OPACITY),

@@ -614,20 +614,20 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
 function getFontStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(TextSelectionManagerService);
-    const editorDataModel = univerInstanceService.getCurrentUniverDocInstance();
+    const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
     const activeTextRange = textSelectionService.getActiveRange();
 
-    if (editorDataModel == null || activeTextRange == null) {
+    if (docDataModel == null || activeTextRange == null) {
         return;
     }
 
-    const textRuns = editorDataModel.getBody()?.textRuns;
+    const { startOffset, segmentId } = activeTextRange;
+
+    const textRuns = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.textRuns;
 
     if (textRuns == null) {
         return;
     }
-
-    const { startOffset } = activeTextRange;
 
     let textRun;
 

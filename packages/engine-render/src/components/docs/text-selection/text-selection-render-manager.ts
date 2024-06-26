@@ -543,7 +543,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             strokeWidth: 1.5,
             stroke: 'rgba(0, 0, 0, 0)',
             strokeActive: 'rgba(0, 0, 0, 1)',
-            fill: `rgba(${r}, ${g}, ${b}, ${a ?? 0.2})`,
+            fill: `rgba(${r}, ${g}, ${b}, ${a ?? 0.3})`,
         };
 
         this.setStyle(style);

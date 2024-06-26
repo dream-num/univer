@@ -18,15 +18,10 @@ import type {
     ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun,
 } from '@univerjs/core';
 import {
-    BaselineOffset,
-    BooleanNumber,
-    CommandType,
-    ICommandService,
-    IUniverInstanceService,
-    JSONX,
-    MemoryCursor,
-    TextX,
-    TextXActionType,
+    BaselineOffset, BooleanNumber, CommandType,
+    ICommandService, IUniverInstanceService,
+    JSONX, MemoryCursor,
+    TextX, TextXActionType,
 } from '@univerjs/core';
 import type { TextRange } from '@univerjs/engine-render';
 import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
@@ -278,7 +273,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         }
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!docDataModel) {
+        if (docDataModel == null) {
             return false;
         }
 
@@ -294,7 +289,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             case SetInlineFormatSubscriptCommand.id: // fallthrough
             case SetInlineFormatSuperscriptCommand.id: {
                 formatValue = getReverseFormatValueInSelection(
-                    docDataModel.getBody()!.textRuns!,
+                    docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.textRuns!,
                     preCommandId,
                     selections
                 );

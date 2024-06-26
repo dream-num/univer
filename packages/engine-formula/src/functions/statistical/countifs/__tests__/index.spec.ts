@@ -45,6 +45,18 @@ describe('Test countifs function', () => {
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2], [1], [0], [2]]);
         });
 
+        it('Range and criteria, compare string', async () => {
+            const range = ArrayValueObject.create(`{
+                a;
+                b;
+                c
+            }`);
+
+            const criteria = StringValueObject.create('>2');
+            const resultObject = testFunction.calculate(range, criteria);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[0]]);
+        });
+
         it('Different ranges, error reporting', async () => {
             const range1 = ArrayValueObject.create(`{
                 1;

@@ -53,7 +53,7 @@ export class Minifs extends BaseFunction {
             return errorArray;
         }
 
-        const booleanResults = getBooleanResults(variants, maxRowLength, maxColumnLength);
+        const booleanResults = getBooleanResults(variants, maxRowLength, maxColumnLength, true);
 
         return this._aggregateResults(minRange, booleanResults);
     }

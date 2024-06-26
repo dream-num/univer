@@ -26,7 +26,7 @@ describe('Test averageifs function', () => {
 
     describe('Averageifs', () => {
         it('Range and criteria', async () => {
-            const minRange = ArrayValueObject.create(`{
+            const averageRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
@@ -38,12 +38,29 @@ describe('Test averageifs function', () => {
             }`);
 
             const criteria = StringValueObject.create('>2');
-            const resultObject = testFunction.calculate(minRange, range, criteria);
+            const resultObject = testFunction.calculate(averageRange, range, criteria);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2.5]]);
         });
 
+        it('Range and criteria, compare string', async () => {
+            const averageRange = ArrayValueObject.create(`{
+                1;
+                2;
+                3
+            }`);
+            const range = ArrayValueObject.create(`{
+                a;
+                b;
+                c
+            }`);
+
+            const criteria = StringValueObject.create('>2');
+            const resultObject = testFunction.calculate(averageRange, range, criteria);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[ErrorType.DIV_BY_ZERO]]);
+        });
+
         it('Range and array criteria', async () => {
-            const minRange = ArrayValueObject.create(`{
+            const averageRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
@@ -61,12 +78,12 @@ describe('Test averageifs function', () => {
                 >4
             }`);
 
-            const resultObject = testFunction.calculate(minRange, range, criteria);
+            const resultObject = testFunction.calculate(averageRange, range, criteria);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2.5], [3], [ErrorType.DIV_BY_ZERO]]);
         });
 
         it('2 ranges and criteria', async () => {
-            const minRange = ArrayValueObject.create(`{
+            const averageRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
@@ -88,12 +105,12 @@ describe('Test averageifs function', () => {
 
             const criteria2 = StringValueObject.create('<5');
 
-            const resultObject = testFunction.calculate(minRange, range1, criteria1, range2, criteria2);
+            const resultObject = testFunction.calculate(averageRange, range1, criteria1, range2, criteria2);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2]]);
         });
 
         it('2 ranges and criteria, 1 array criteria', async () => {
-            const minRange = ArrayValueObject.create(`{
+            const averageRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
@@ -119,12 +136,12 @@ describe('Test averageifs function', () => {
 
             const criteria2 = NumberValueObject.create(5);
 
-            const resultObject = testFunction.calculate(minRange, range1, criteria1, range2, criteria2);
+            const resultObject = testFunction.calculate(averageRange, range1, criteria1, range2, criteria2);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[3], [3], [ErrorType.DIV_BY_ZERO]]);
         });
 
         it('2 ranges and criteria, 2 array criteria', async () => {
-            const minRange = ArrayValueObject.create(`{
+            const averageRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
@@ -155,7 +172,7 @@ describe('Test averageifs function', () => {
                 4
             }`);
 
-            const resultObject = testFunction.calculate(minRange, range1, criteria1, range2, criteria2);
+            const resultObject = testFunction.calculate(averageRange, range1, criteria1, range2, criteria2);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2], [ErrorType.DIV_BY_ZERO], [ErrorType.DIV_BY_ZERO], [ErrorType.DIV_BY_ZERO]]);
         });
     });

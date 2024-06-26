@@ -45,6 +45,23 @@ describe('Test sumifs function', () => {
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2]]);
         });
 
+        it('Range and criteria, compare string', async () => {
+            const sumRange = ArrayValueObject.create(`{
+                1;
+                2;
+                3
+            }`);
+            const range = ArrayValueObject.create(`{
+                a;
+                b;
+                c
+            }`);
+
+            const criteria = StringValueObject.create('>2');
+            const resultObject = testFunction.calculate(sumRange, range, criteria);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[0]]);
+        });
+
         it('Range and array criteria', async () => {
             const sumRange = ArrayValueObject.create(/*ts*/ `{
                 1;

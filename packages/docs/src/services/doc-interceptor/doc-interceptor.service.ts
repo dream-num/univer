@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICustomRangeForInterceptor, IInterceptor, Nullable } from '@univerjs/core';
-import { composeInterceptors, Disposable, DisposableCollection, LifecycleStages, OnLifecycle, remove, toDisposable } from '@univerjs/core';
+import { composeInterceptors, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, LifecycleStages, OnLifecycle, remove, toDisposable } from '@univerjs/core';
 import type { DocumentViewModel, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { DocSkeletonManagerService } from '../doc-skeleton-manager.service';
@@ -32,7 +32,13 @@ export class DocInterceptorService extends Disposable implements IRenderModule {
         super();
 
         this.disposeWithMe(this._docSkeletonManagerService.currentViewModel$.subscribe((viewModel) => {
+
             if (viewModel) {
+                const unitId = viewModel.getDataModel().getUnitId();
+                if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY || unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+                    return;
+                }
+
                 this.interceptDocumentViewModel(viewModel);
             }
         }));

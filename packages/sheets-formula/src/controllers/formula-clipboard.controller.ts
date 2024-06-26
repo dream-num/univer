@@ -233,10 +233,12 @@ export function getSetCellFormulaMutations(
         }
 
         // If there is rich text, remove the style
-        const richText = getCellRichText(value);
-        if (richText) {
-            valueObject.p = null;
-            valueObject.v = richText;
+        if (copyInfo.pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMULA && value.p) {
+            const richText = getCellRichText(value);
+            if (richText) {
+                valueObject.p = null;
+                valueObject.v = richText;
+            }
         }
 
         valueMatrix.setValue(range.rows[row], range.cols[col], valueObject);

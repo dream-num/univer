@@ -59,6 +59,7 @@ export class SheetsThreadCommentPopupService extends Disposable {
 
     showPopup(location: IThreadCommentPopup, onHide?: () => void) {
         const { row, col, unitId, subUnitId } = location;
+        console.trace('===showPopup',location);
         if (
             this._activePopup &&
             row === this._activePopup.row &&

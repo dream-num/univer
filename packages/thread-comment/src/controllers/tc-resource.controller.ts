@@ -69,10 +69,9 @@ export class ThreadCommentResourceController extends Disposable {
                     this._threadCommentModel.deleteUnit(unitID);
                 },
                 onLoad: async (unitID, value) => {
-                    const unitComments = await this._threadCommentDataSourceService.loadFormSnapshot(value, unitID);
-                    Object.keys(unitComments).forEach((subunitId) => {
+                    Object.keys(value).forEach((subunitId) => {
                         const commentList = value[subunitId];
-                        commentList.forEach((comment) => {
+                        commentList.forEach((comment: IThreadComment) => {
                             this._threadCommentModel.addComment(unitID, subunitId, comment);
                         });
                     });

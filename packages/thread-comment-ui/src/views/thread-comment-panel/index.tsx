@@ -78,7 +78,6 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const shouldScroll = useRef(true);
     const prefix = 'panel';
     const currentUser = useObservable(userService.currentUser$);
-
     const comments = useMemo(() => {
         const allComments =
             (unit === 'all' ? unitComments.map((i) => i[1]).flat() : unitComments.find((i) => i[0] === subUnitId)?.[1] ?? [])

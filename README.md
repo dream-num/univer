@@ -22,17 +22,19 @@ Programming language: Typescript
 
 <The following is supposed to be repeated for each group member>
 
-<Group member name>
+#### Team Member: Sanjay Chacku Purakal
 
-<Function 1 name>
+##### SetWorksheetShowCommand()
 
-<Show a patch (diff) or a link to a commit made in your forked repository that shows the instrumented code to gather coverage measurements>
+[Github Commit](https://github.com/JariRoossien/univer/tree/521c2d1cff201c2bf9c4495505c0dfc7b1f9d5f5)
 
-<Provide a screenshot of the coverage results output by the instrumentation>
+![Coverage Report for SetWorksheetShowCommand showing 0% coverage before adding tests](images/setWorksheetShowCommand-Before.jpeg)
 
-<Function 2 name>
+##### setEndForRange()
 
-<Provide the same kind of information provided for Function 1>
+[Github Commit](https://github.com/JariRoossien/univer/tree/dc771281840c7e80bec107ee43dcbe9f70103f76)
+
+![Coverage Report for setEndForRange showing 0% coverage before adding tests](images/setEndForRange-Before.jpeg)
 
 ## Coverage improvement
 
@@ -40,21 +42,34 @@ Programming language: Typescript
 
 <The following is supposed to be repeated for each group member>
 
-<Group member name>
+#### Team Member: Sanjay Chacku Purakal
 
-<Test 1>
+##### SetWorksheetShowCommand()
 
-<Show a patch (diff) or a link to a commit made in your forked repository that shows the new/enhanced test>
+[Github Commit](https://github.com/JariRoossien/univer/tree/9bfd026c8a5d9e96685a9c6cb22008c086ddfdca)
 
-<Provide a screenshot of the old coverage results (the same as you already showed above)>
+###### Before
+![Coverage Report for SetWorksheetShowCommand showing 0% coverage before adding tests](images/setWorksheetShowCommand-Before.jpeg)
 
-<Provide a screenshot of the new coverage results>
+###### After
+![Coverage Report for SetWorksheetShowCommand showing 81.82% coverage after adding tests](images/setWorksheetShowCommand-After.jpeg)
 
-<State the coverage improvement with a number and elaborate on why the coverage is improved>
+The code coverage has been improved from 0% (0/11 branches) to 81.82% (9/11 branches).
+The coverage has been improved by considering many edge cases and ensuring all cases in which a program can fail are tested.
+For this some test cases had to be specifically constructed since the test case should only fail if another part of the program malfunctions or is changed. To emulate this, flawed inputs where constructed artificially and the brach coverage was achieved by the program catching those exceptions and handling them appropriately.
 
-<Test 2>
+##### setEndForRange()
 
-<Provide the same kind of information provided for Test 1>
+[Github Commit](https://github.com/JariRoossien/univer/tree/13d355d6ee7ef0388dc3159525270a4e6492a288)
+
+###### Before
+![Coverage Report for setEndForRange showing 0% coverage before adding tests](images/setEndForRange-Before.jpeg)
+
+###### After
+![Coverage Report for setEndForRange showing 100% coverage after adding tests](images/setEndForRange-After.jpeg)
+
+The code coverage has been improved from 0% (0/9 branches) to 100% (9/9 branches).
+The function is intended to replace NaN values in a range with the extremes (0 or max - 1). For this purpose the tests supply a NaN value in ecah of the possible positions. The branch coverage is then achieved by the program handling all NaN values and replacing them with the correct default values.
 
 ### Overall
 

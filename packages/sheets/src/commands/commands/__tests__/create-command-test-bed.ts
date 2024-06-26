@@ -126,3 +126,50 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
         sheet,
     };
 }
+
+export function createBadCommandTestBed() {
+    const univer = new Univer();
+    const injector = univer.__getInjector();
+
+    class TestPlugin extends Plugin {
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.UNIVER_DOC;
+
+        constructor(
+            _config: undefined,
+            @Inject(Injector) override readonly _injector: Injector
+        ) {
+            super();
+
+            this._injector = _injector;
+        }
+
+        override onStarting(injector: Injector): void {
+            injector.add([WorksheetPermissionService]);
+            injector.add([WorksheetProtectionPointModel]);
+            injector.add([WorkbookPermissionService]);
+            injector.add([WorksheetProtectionRuleModel]);
+            injector.add([SelectionManagerService]);
+            injector.add([BorderStyleManagerService]);
+            injector.add([SheetInterceptorService]);
+        }
+    }
+
+    univer.registerPlugin(TestPlugin);
+    const sheet = univer.createUniverDoc(Tools.deepClone(TEST_WORKBOOK_DATA_DEMO));
+
+    const univerInstanceService = injector.get(IUniverInstanceService);
+    univerInstanceService.focusUnit('test');
+    const logService = injector.get(ILogService);
+
+    logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
+
+    const localeService = injector.get(LocaleService);
+    localeService.load({ enUS });
+
+    return {
+        univer,
+        get: injector.get.bind(injector),
+        sheet,
+    };
+}

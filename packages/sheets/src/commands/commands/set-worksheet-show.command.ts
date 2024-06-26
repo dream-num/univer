@@ -25,7 +25,7 @@ import {
     SetWorksheetActiveOperation,
     // SetWorksheetUnActivateMutationFactory,
 } from '../operations/set-worksheet-active.operation';
-import { getSheetCommandTarget } from './utils/target-util';
+import { getSheetCommandTarget } from './__tests__/broken-test-functions';
 
 export interface ISetWorksheetShowCommandParams {
     unitId: string;

@@ -28,7 +28,8 @@ import { InsertSheetCommand } from '../insert-sheet.command';
 import { SetWorksheetActivateCommand } from '../set-worksheet-activate.command';
 import { SetWorksheetHideCommand } from '../set-worksheet-hide.command';
 import { SetWorksheetShowCommand } from '../set-worksheet-show.command';
-import { createCommandTestBed } from './create-command-test-bed';
+import { createBadCommandTestBed, createCommandTestBed } from './create-command-test-bed';
+import { TestData } from './broken-test-functions';
 
 describe('Test set worksheet show commands', () => {
     let univer: Univer;
@@ -39,6 +40,8 @@ describe('Test set worksheet show commands', () => {
         const testBed = createCommandTestBed();
         univer = testBed.univer;
         get = testBed.get;
+
+        TestData.testData = new TestData();
 
         commandService = get(ICommandService);
         commandService.registerCommand(InsertSheetCommand);
@@ -149,6 +152,24 @@ describe('Test set worksheet show commands', () => {
                 get = badInjector.get.bind(badInjector);
                 commandService = get(ICommandService);
                 commandService.registerCommand(SetWorksheetShowCommand);
+                expect(
+                    await commandService.executeCommand(SetWorksheetShowCommand.id, { subUnitId: null})
+                ).toBeFalsy();
+            });
+        });
+
+        describe('', async () => {
+            it('correct situation: ', async () => {
+                TestData.testData.spoofed = true;
+                univer.dispose();
+
+                const testBed = createBadCommandTestBed();
+                univer = testBed.univer;
+                get = testBed.get;
+
+                commandService = get(ICommandService);
+                commandService.registerCommand(SetWorksheetShowCommand);
+
                 expect(
                     await commandService.executeCommand(SetWorksheetShowCommand.id, { subUnitId: null})
                 ).toBeFalsy();

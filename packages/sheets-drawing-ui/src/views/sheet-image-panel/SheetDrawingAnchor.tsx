@@ -88,13 +88,13 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
     }
 
     useEffect(() => {
-        const onClearControlObserver = transformer.onClearControlObservable.add((changeSelf) => {
+        const onClearControlObserver = transformer.clearControl$.subscribe((changeSelf) => {
             if (changeSelf === true) {
                 setAnchorShow(false);
             }
         });
 
-        const onChangeStartObserver = transformer.onChangeStartObservable.add((state) => {
+        const onChangeStartObserver = transformer.changeStart$.subscribe((state) => {
             const { objects } = state;
             const params = getUpdateParams(objects, drawingManagerService);
 
@@ -108,8 +108,8 @@ export const SheetDrawingAnchor = (props: ISheetDrawingAnchorProps) => {
         });
 
         return () => {
-            onChangeStartObserver?.dispose();
-            onClearControlObserver?.dispose();
+            onChangeStartObserver.unsubscribe();
+            onClearControlObserver.unsubscribe();
         };
     }, []);
 

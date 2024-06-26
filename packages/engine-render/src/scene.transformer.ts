@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IAbsoluteTransform, IKeyValue, Nullable, Observer } from '@univerjs/core';
-import { Disposable, MOVE_BUFFER_VALUE, Observable, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
+import type { IAbsoluteTransform, IKeyValue, Nullable } from '@univerjs/core';
+import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
 
-import type { Subscription } from 'rxjs';
+import { Subject, type Subscription } from 'rxjs';
 import type { BaseObject } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
 import type { IMouseEvent, IPointerEvent } from './basics/i-events';
@@ -149,12 +149,20 @@ export class Transformer extends Disposable implements ITransformerConfig {
     useSingleNodeRotation: boolean = false;
     shouldOverdrawWholeArea: boolean = false;
 
-    onChangeStartObservable = new Observable<IChangeObserverConfig>();
-    onChangingObservable = new Observable<IChangeObserverConfig>();
-    onChangeEndObservable = new Observable<IChangeObserverConfig>();
+    private readonly _changeStart$ = new Subject<IChangeObserverConfig>();
+    readonly changeStart$ = this._changeStart$.asObservable();
 
-    onClearControlObservable = new Observable<boolean>();
-    onCreateControlObservable = new Observable<Group>();
+    private readonly _changing$ = new Subject<IChangeObserverConfig>();
+    readonly changing$ = this._changing$.asObservable();
+
+    private readonly _changeEnd$ = new Subject<IChangeObserverConfig>();
+    readonly changeEnd$ = this._changeEnd$.asObservable();
+
+    private readonly _clearControl$ = new Subject<boolean>();
+    readonly clearControl$ = this._clearControl$.asObservable();
+
+    private readonly _createControl$ = new Subject<Group>();
+    readonly createControl$ = this._createControl$.asObservable();
 
     private _startOffsetX: number = -1;
     private _startOffsetY: number = -1;
@@ -171,7 +179,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _transformerControlMap = new Map<string, Group>();
     private _selectedObjectMap = new Map<string, BaseObject>();
 
-    private _observerObjectMap = new Map<string, Nullable<Observer<IPointerEvent | IMouseEvent>>>();
     private _subscriptionObjectMap = new Map<string, Nullable<Subscription>>();
 
     private _copperControl: Nullable<Group>;
@@ -190,10 +197,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     changeNotification() {
-        this.onChangingObservable.notifyObservers({
+        this._changing$.next({
             objects: this._selectedObjectMap,
             type: MoveObserverType.MOVE_START,
         });
+
         return this;
     }
 
@@ -346,13 +354,13 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
             if (!isCropper) {
                 this._updateActiveObjectList(applyObject, evt);
-                this.onChangeStartObservable.notifyObservers({
+                this._changeStart$.next({
                     objects: this._selectedObjectMap,
                     type: MoveObserverType.MOVE_START,
                 });
             } else {
                 this._copperSelectedObject = applyObject;
-                this.onChangeStartObservable.notifyObservers({
+                this._changeStart$.next({
                     objects: new Map([[applyObject.oKey, applyObject]]) as Map<string, BaseObject>,
                     type: MoveObserverType.MOVE_START,
                 });
@@ -380,12 +388,12 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 scrollTimer.dispose();
 
                 if (!isCropper) {
-                    this.onChangeEndObservable.notifyObservers({
+                    this._changeEnd$.next({
                         objects: this._selectedObjectMap,
                         type: MoveObserverType.MOVE_END,
                     });
                 } else {
-                    this.onChangeEndObservable.notifyObservers({
+                    this._changeEnd$.next({
                         objects: new Map([[applyObject.oKey, applyObject]]) as Map<string, BaseObject>,
                         type: MoveObserverType.MOVE_END,
                     });
@@ -403,12 +411,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     detachFrom(applyObject: BaseObject) {
-        const observer = this._observerObjectMap.get(applyObject.oKey);
-        if (observer) {
-            observer.dispose();
-            this._observerObjectMap.delete(applyObject.oKey);
-        }
-
         const subscription = this._subscriptionObjectMap.get(applyObject.oKey);
         if (subscription) {
             subscription.unsubscribe();
@@ -419,6 +421,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     override dispose() {
+        super.dispose();
+
         this._topScenePointerMoveSub?.unsubscribe();
         this._topScenePointerUpSub?.unsubscribe();
 
@@ -429,15 +433,12 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._topScenePointerUpSub = null;
         this._cancelFocusSubscription = null;
 
-        this._transformerControlMap.forEach((control) => {
-            control.dispose();
-        });
-        this._selectedObjectMap.forEach((control) => {
-            control.dispose();
-        });
-        this.onChangeStartObservable.clear();
-        this.onChangingObservable.clear();
-        this.onChangeEndObservable.clear();
+        this._transformerControlMap.forEach((control) => control.dispose());
+        this._selectedObjectMap.forEach((control) => control.dispose());
+
+        this._changeStart$.complete();
+        this._changing$.complete();
+        this._changeEnd$.complete();
     }
 
     private _initialProps(props?: ITransformerConfig) {
@@ -519,7 +520,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             this._selectedObjectMap.forEach((moveObject) => {
                 moveObject.translate(moveLeft + moveObject.left, moveTop + moveObject.top);
             });
-            this.onChangingObservable.notifyObservers({
+            this._changing$.next({
                 objects: this._selectedObjectMap,
                 moveX: moveLeft,
                 moveY: moveTop,
@@ -534,7 +535,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             moveTop = boundary.moveTop;
 
             cropper.translate(moveLeft + cropper.left, moveTop + cropper.top);
-            this.onChangingObservable.notifyObservers({
+            this._changing$.next({
                 objects: new Map([[cropper.oKey, cropper]]) as Map<string, BaseObject>,
                 moveX: moveLeft,
                 moveY: moveTop,
@@ -577,14 +578,14 @@ export class Transformer extends Disposable implements ITransformerConfig {
             this._selectedObjectMap.forEach((moveObject) => {
                 this._moveFunc(moveObject, type, x, y, keepRatio, isCropper, isGroup);
             });
-            this.onChangingObservable.notifyObservers({
+            this._changing$.next({
                 objects: this._selectedObjectMap,
                 type: MoveObserverType.MOVING,
             });
         } else {
             // for cropper
             this._moveFunc(applyObject, type, x, y, keepRatio, isCropper, isGroup);
-            this.onChangingObservable.notifyObservers({
+            this._changing$.next({
                 objects: new Map([[applyObject.oKey, applyObject]]) as Map<string, BaseObject>,
                 type: MoveObserverType.MOVING,
             });
@@ -895,7 +896,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     const cursor = this._getRotateAnchorCursor(type);
                     if (!isCropper) {
                         this._clearControlMap();
-                        this.onChangeStartObservable.notifyObservers({
+                        this._changeStart$.next({
                             objects: this._selectedObjectMap,
                             type: MoveObserverType.MOVE_START,
                         });
@@ -905,7 +906,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         });
                     } else {
                         // for cropper
-                        this.onChangeStartObservable.notifyObservers({
+                        this._changeStart$.next({
                             objects: new Map([[applyObject.oKey, applyObject]]) as Map<string, BaseObject>,
                             type: MoveObserverType.MOVE_START,
                         });
@@ -935,13 +936,13 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         this._startStateMap.clear();
                         if (!isCropper) {
                             this._recoverySizeBoundary(Array.from(this._selectedObjectMap.values()), ancestorLeft, ancestorTop, topSceneWidth, topSceneHeight);
-                            this.onChangeEndObservable.notifyObservers({
+                            this._changeEnd$.next({
                                 objects: this._selectedObjectMap,
                                 type: MoveObserverType.MOVE_END,
                             });
                         } else {
                             this._recoverySizeBoundary([applyObject], ancestorLeft, ancestorTop, topSceneWidth, topSceneHeight);
-                            this.onChangeEndObservable.notifyObservers({
+                            this._changeEnd$.next({
                                 objects: new Map([[applyObject.oKey, applyObject]]) as Map<string, BaseObject>,
                                 type: MoveObserverType.MOVE_END,
                             });
@@ -1009,7 +1010,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     const centerY = (height / 2) + ancestorTop;
                     this._clearControlMap();
 
-                    this.onChangeStartObservable.notifyObservers({
+                    this._changeStart$.next({
                         objects: this._selectedObjectMap,
                         type: MoveObserverType.MOVE_START,
                     });
@@ -1030,7 +1031,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         topScene.resetCursor();
                         this.refreshControls();
 
-                        this.onChangeEndObservable.notifyObservers({
+                        this._changeEnd$.next({
                             objects: this._selectedObjectMap,
                             type: MoveObserverType.MOVE_END,
                         });
@@ -1072,7 +1073,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             moveObject.transformByState({ angle });
         });
 
-        this.onChangingObservable.notifyObservers({
+        this._changing$.next({
             objects: this._selectedObjectMap,
             angle,
             type: MoveObserverType.MOVING,
@@ -1480,7 +1481,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _clearControls(changeSelf = false) {
         this._clearControlMap();
 
-        this.onClearControlObservable.notifyObservers(changeSelf);
+        this._clearControl$.next(changeSelf);
     }
 
     private _clearControlMap() {
@@ -1563,7 +1564,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 this._transformerControlMap.get(oKey)!.dispose();
             }
             this._transformerControlMap.set(oKey, transformerControl);
-            this.onCreateControlObservable.notifyObservers(transformerControl);
+            this._createControl$.next(transformerControl);
         } else {
             this._copperControl = transformerControl;
         }

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { EventState, IKeyValue, ITransformState, Nullable, Observable, Observer } from '@univerjs/core';
+import type { IKeyValue, ITransformState, Nullable } from '@univerjs/core';
 import { Disposable, EventSubject } from '@univerjs/core';
 
-import type { EVENT_TYPE } from './basics/const';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
 import type { IDragEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { IObjectFullState, ITransformChangeState } from './basics/interfaces';
@@ -605,23 +604,6 @@ export abstract class BaseObject extends Disposable {
             return true;
         }
         return false;
-    }
-
-    /** @deprecated subscribe to specific event.  */
-    on(eventType: EVENT_TYPE, func: (evt: unknown, state: EventState) => void) {
-        const observable = (this as IKeyValue)[`on${eventType}Observer`] as Observable<unknown>;
-        const observer = observable.add(func.bind(this));
-        return observer;
-    }
-
-    off(eventType: EVENT_TYPE, observer: Nullable<Observer<unknown>>) {
-        const observable = (this as IKeyValue)[`on${eventType}Observer`] as Observable<unknown>;
-        observable.remove(observer);
-    }
-
-    clear(eventType: EVENT_TYPE) {
-        const observable = (this as IKeyValue)[`on${eventType}Observer`] as Observable<unknown>;
-        observable.clear();
     }
 
     triggerPointerMove(evt: IPointerEvent | IMouseEvent) {

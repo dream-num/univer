@@ -15,8 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Observable, toDisposable } from '@univerjs/core';
+import { toDisposable } from '@univerjs/core';
 
+import { Subject } from 'rxjs';
 import type { CURSOR_TYPE } from './basics/const';
 import type { IKeyboardEvent, IPointerEvent } from './basics/i-events';
 import { DeviceType, PointerInput } from './basics/i-events';
@@ -30,15 +31,10 @@ import { ThinEngine } from './thin-engine';
 export class Engine extends ThinEngine<Scene> {
     renderEvenInBackground = true;
 
-    /**
-     * Observable raised when the engine begins a new frame
-     */
-    onBeginFrameObservable = new Observable<Engine>();
-
-    /**
-     * Observable raised when the engine ends the current frame
-     */
-    onEndFrameObservable = new Observable<Engine>();
+    private readonly _beginFrame$ = new Subject<void>();
+    readonly beginFrame$ = this._beginFrame$.asObservable();
+    private readonly _endFrame$ = new Subject<void>();
+    readonly endFrame$ = this._endFrame$.asObservable();
 
     private _container: Nullable<HTMLElement>;
 
@@ -254,9 +250,10 @@ export class Engine extends ThinEngine<Scene> {
         this.getCanvas().dispose();
         // this._canvas = null; // 不应该这么做, 上面已经调用了 _canvas 的 dispose 方法
         // 并且 idleCallback --> resize 时需要 _canvas 对象
-        this.onBeginFrameObservable.clear();
-        this.onEndFrameObservable.clear();
         this.onTransformChange$.complete();
+
+        this._beginFrame$.complete();
+        this._endFrame$.complete();
     }
 
     /**
@@ -303,7 +300,7 @@ export class Engine extends ThinEngine<Scene> {
      */
     beginFrame(): void {
         this._measureFps();
-        this.onBeginFrameObservable.notifyObservers(this);
+        this._beginFrame$.next();
     }
 
     /**
@@ -311,7 +308,7 @@ export class Engine extends ThinEngine<Scene> {
      */
     endFrame(): void {
         this._frameId++;
-        this.onEndFrameObservable.notifyObservers(this);
+        this._endFrame$.next();
     }
 
     // FPS

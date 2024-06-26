@@ -438,11 +438,11 @@ export class CanvasView extends RxDisposable {
 
         const transformer = scene.getTransformer();
 
-        transformer?.onChangeEndObservable.add(() => {
+        transformer?.changeEnd$.subscribe(() => {
             this._thumbSceneRender(this._activePageId, slide);
         });
 
-        transformer?.onClearControlObservable.add(() => {
+        transformer?.clearControl$.subscribe(() => {
             this._thumbSceneRender(this._activePageId, slide);
         });
 

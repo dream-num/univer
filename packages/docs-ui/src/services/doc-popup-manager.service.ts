@@ -114,9 +114,11 @@ export class DocCanvasPopManagerService extends Disposable {
         }));
 
         const viewMain = currentRender.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-        disposable.add(viewMain?.onScrollAfter$.subscribeEvent(() => {
-            position$.next(calc());
-        }));
+        if (viewMain) {
+            disposable.add(viewMain.onScrollAfter$.subscribeEvent(() => {
+                position$.next(calc());
+            }));
+        }
 
         return {
             position,

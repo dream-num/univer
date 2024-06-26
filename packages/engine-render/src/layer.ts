@@ -240,13 +240,13 @@ export class Layer extends Disposable {
 
     private _initialCacheCanvas() {
         this._cacheCanvas = new Canvas();
-        this.disposeWithMe(
-            toDisposable(
-                this._scene.getEngine()?.onTransformChange$.subscribeEvent(() => {
-                    this._resizeCacheCanvas();
-                })
-            )
-        );
+
+        const engine = this.scene.getEngine();
+        if (engine) {
+            this.disposeWithMe(engine.onTransformChange$.subscribeEvent(() => {
+                this._resizeCacheCanvas();
+            }));
+        }
     }
 
     private _draw(mainCtx: UniverRenderingContext, isMaxLayer: boolean) {

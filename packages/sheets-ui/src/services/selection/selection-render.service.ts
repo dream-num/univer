@@ -26,7 +26,6 @@ import type {
     ISelectionCellWithCoord,
     ISelectionWithCoord,
     Nullable,
-    Observer,
 } from '@univerjs/core';
 import { createInterceptorKey, InterceptorManager, IUniverInstanceService, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
@@ -126,8 +125,6 @@ export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: nu
 
 export class SelectionRenderService implements ISelectionRenderService {
     hasSelection: boolean = false;
-
-    private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _scenePointerMoveSub: Nullable<Subscription>;
 
@@ -517,11 +514,9 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         this._scenePointerMoveSub?.unsubscribe();
         this._scenePointerUpSub?.unsubscribe();
-        this._downObserver?.dispose();
 
         this._scenePointerMoveSub = null;
         this._scenePointerUpSub = null;
-        this._downObserver = null;
     }
 
     resetAndEndSelection() {

@@ -235,7 +235,7 @@ export class DocsAdaptor extends ObjectAdaptor {
             scene.attachTransformerTo(object);
         });
 
-        scene.getTransformer()?.onChangingObservable.add((state) => {
+        scene.getTransformer()?.changing$.subscribe((state) => {
             const { objects } = state;
 
             objects.forEach((object) => {

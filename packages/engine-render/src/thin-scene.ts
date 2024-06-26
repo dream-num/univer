@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { EventState, IKeyValue, Nullable, Observable, Observer } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import { Disposable, EventSubject } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
-import type { CURSOR_TYPE, EVENT_TYPE } from './basics/const';
+import type { CURSOR_TYPE } from './basics/const';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import type { IDragEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ITransformChangeState } from './basics/interfaces';
@@ -140,22 +140,6 @@ export abstract class ThinScene extends Disposable {
 
     disableEvent() {
         this._evented = false;
-    }
-
-    on(eventType: EVENT_TYPE, func: (evt: unknown, state: EventState) => void) {
-        const observable = (this as IKeyValue)[`on${eventType}Observer`] as Observable<unknown>;
-        const observer = observable.add(func.bind(this));
-        return observer;
-    }
-
-    off(eventType: EVENT_TYPE, observer: Nullable<Observer<unknown>>) {
-        const observable = (this as IKeyValue)[`on${eventType}Observer`] as Observable<unknown>;
-        observable.remove(observer);
-    }
-
-    remove(eventType: EVENT_TYPE) {
-        const observable = (this as IKeyValue)[`on${eventType}Observer`] as Observable<unknown>;
-        observable.clear();
     }
 
     triggerKeyDown(evt: IKeyboardEvent) {

@@ -52,7 +52,7 @@ export type { TPriority } from './docs/data-model/text-x/text-x';
 export { JSONX, JSON1 } from './docs/data-model/json-x/json-x';
 export type { JSONXActions, JSONXPath } from './docs/data-model/json-x/json-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
-export * from './observer';
+export { type IEventObserver, EventState, EventSubject } from './observer/observable';
 export { Plugin } from './services/plugin/plugin';
 export { PluginService, DependentOn } from './services/plugin/plugin.service';
 export {

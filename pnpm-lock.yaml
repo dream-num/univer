@@ -951,6 +951,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula

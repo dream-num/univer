@@ -143,11 +143,7 @@ export class Observable<T> {
     add(
         callback: (eventData: T, eventState: EventState) => void,
         insertFirst = false
-    ): Nullable<Observer<T>> {
-        if (!callback) {
-            return null;
-        }
-
+    ): Observer<T> {
         const observer = new Observer(callback, this);
 
         if (insertFirst) {

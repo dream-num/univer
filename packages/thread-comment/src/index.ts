@@ -50,6 +50,7 @@ export type {
 export { UniverThreadCommentPlugin } from './plugin';
 export {
     IThreadCommentDataSourceService,
+    ThreadCommentDataSourceService,
     type IThreadCommentDataSource,
     type ThreadCommentJSON,
 } from './services/tc-datasource.service';

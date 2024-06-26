@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Univer, Workbook } from '@univerjs/core';
+import { CommandService, ContextService, DesktopLogService, IContextService, ILogService, IUndoRedoService, LocalUndoRedoService, Univer, UniverInstanceService, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
+import { Dependency, Injector } from '@wendellhu/redi';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { BranchCoverage } from '../set-worksheet-show.command';
@@ -142,5 +142,30 @@ describe('Test set worksheet show commands', () => {
                 ).toBeFalsy();
             });
         });
+
+        describe('set sheet shown with bad get injected', async () => {
+            it('correct situation: ', async () => {
+                let badInjector = createBadInjector();
+                get = badInjector.get.bind(badInjector);
+                commandService = get(ICommandService);
+                commandService.registerCommand(SetWorksheetShowCommand);
+                expect(
+                    await commandService.executeCommand(SetWorksheetShowCommand.id, { subUnitId: null})
+                ).toBeFalsy();
+            });
+        });
     });
 });
+
+function createBadInjector() {
+    const dependencies: Dependency[] = [
+        // abstract services
+        [IUniverInstanceService, { useClass: UniverInstanceService }],
+        [ICommandService, { useClass: CommandService, lazy: true }],
+        [ILogService, { useClass: DesktopLogService, lazy: true }],
+        [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
+        [IContextService, { useClass: ContextService }],
+    ];
+
+    return new Injector(dependencies);
+}

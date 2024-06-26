@@ -17,7 +17,7 @@
 import type { Nullable, ThemeService } from '@univerjs/core';
 import { RANGE_TYPE } from '@univerjs/core';
 import type { BaseObject, IRectProps, Scene } from '@univerjs/engine-render';
-import { Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { FloatRect, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import type { ISelectionStyle } from '@univerjs/sheets';
 
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
@@ -34,9 +34,14 @@ export class MobileSelectionControl extends SelectionControl {
         protected override _zIndex: number,
         protected override _isHeaderHighlight: boolean = true,
         protected override readonly _themeService: ThemeService,
-        protected rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL
+        protected _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL
     ) {
         super(_scene, _zIndex, _isHeaderHighlight, _themeService);
+        window.sp = this;
+        this.initControlPoints();
+    }
+
+    initControlPoints() {
         const defaultStyle = this.defaultStyle!;
         const expandCornerSize = defaultStyle.expandCornerSize || 0;
         const expandCornerInnerSize = (defaultStyle.expandCornerSize || 0) / 4;
@@ -44,30 +49,33 @@ export class MobileSelectionControl extends SelectionControl {
         const stroke = defaultStyle.stroke!;
         const AutofillStroke = defaultStyle.AutofillStroke!;
         const zIndex = this.zIndex;
-
+        let RectCtor = Rect;
+        if (this._rangeType === RANGE_TYPE.ROW || this._rangeType === RANGE_TYPE.COLUMN) {
+            RectCtor = FloatRect;
+        }
         // @transformControlPoint takes care of left & top
-        this._fillControlTopLeft = new Rect(SELECTION_MANAGER_KEY.fillTopLeft + zIndex, {
+        this._fillControlTopLeft = new RectCtor(SELECTION_MANAGER_KEY.fillTopLeft + zIndex, {
             zIndex: zIndex + 2,
             width: expandCornerSize,
             height: expandCornerSize,
             radius: expandCornerSize / 2,
             strokeWidth: AutofillStrokeWidth,
         });
-        this._fillControlTopLeftInner = new Rect(SELECTION_MANAGER_KEY.fillTopLeftInner + zIndex, {
+        this._fillControlTopLeftInner = new RectCtor(SELECTION_MANAGER_KEY.fillTopLeftInner + zIndex, {
             zIndex: zIndex + 1,
             width: expandCornerInnerSize,
             height: expandCornerInnerSize,
             radius: expandCornerInnerSize / 2,
             strokeWidth: AutofillStrokeWidth,
         });
-        this._fillControlBottomRight = new Rect(SELECTION_MANAGER_KEY.fillBottomRight + zIndex, {
+        this._fillControlBottomRight = new RectCtor(SELECTION_MANAGER_KEY.fillBottomRight + zIndex, {
             zIndex: zIndex + 2,
             width: expandCornerSize,
             height: expandCornerSize,
             radius: expandCornerSize / 2,
             strokeWidth: AutofillStrokeWidth,
         });
-        this._fillControlBottomRightInner = new Rect(SELECTION_MANAGER_KEY.fillBottomRightInner + zIndex, {
+        this._fillControlBottomRightInner = new RectCtor(SELECTION_MANAGER_KEY.fillBottomRightInner + zIndex, {
             zIndex: zIndex + 1,
             width: expandCornerInnerSize,
             height: expandCornerInnerSize,
@@ -87,11 +95,15 @@ export class MobileSelectionControl extends SelectionControl {
 
         // put into scene
         const objs = [this._fillControlTopLeft, this._fillControlBottomRight, this._fillControlTopLeftInner, this._fillControlBottomRightInner] as BaseObject[];
-        this._selectionShapeGroup.addObjects(...objs);
+
+        if (this._rangeType === RANGE_TYPE.COLUMN) {
+            this._columnHeaderGroup.addObjects(...objs);
+        } else {
+            this._selectionShapeGroup.addObjects(...objs);
+        }
+
         const scene = this.getScene();
         scene.addObjects(objs, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
-
-        window.sp = this;
     }
 
     get fillControlTopLeft(): Rect<IRectProps> | null {
@@ -110,6 +122,14 @@ export class MobileSelectionControl extends SelectionControl {
         this._fillControlBottomRight = value;
     }
 
+    get rangeType(): RANGE_TYPE {
+        return this._rangeType;
+    }
+
+    set rangeType(value: RANGE_TYPE) {
+        this._rangeType = value;
+    }
+
     override dispose() {
         this._fillControlBottomRight?.dispose();
         this._fillControlTopLeft?.dispose();
@@ -125,12 +145,11 @@ export class MobileSelectionControl extends SelectionControl {
             style = defaultStyle;
         }
 
-        this.currentStyle = defaultStyle;
-
         const {
             widgets = defaultStyle.widgets!,
             hasAutoFill: autoFillEnabled = defaultStyle.hasAutoFill!,
         } = style;
+        this.currentStyle = style;
 
         // this condition is derived from selection-shape
         if (autoFillEnabled === true && !super._hasWidgets(widgets)) {
@@ -138,7 +157,7 @@ export class MobileSelectionControl extends SelectionControl {
                 this.selectionModel.setRangeType(rangeType);
             }
 
-            this.transformControlPoint(style, this.selectionModel.rangeType);
+            this.transformControlPoint();
 
             this.fillControlTopLeft!.show();
             this.fillControlBottomRight!.show();
@@ -165,7 +184,9 @@ export class MobileSelectionControl extends SelectionControl {
         // }
     }
 
-    transformControlPoint(style: ISelectionStyle, rangeType: RANGE_TYPE) {
+    transformControlPoint(offsetX?: number = 0, offsetY?: number = 0) {
+        const style = this.currentStyle!;
+        const rangeType = this.selectionModel.rangeType;
         const expandCornerSizeInner = style.expandCornerSize! / 4;
         const expandCornerSize = style.expandCornerSize!;
         const { startX, startY, endX, endY } = this.selectionModel;
@@ -200,22 +221,22 @@ export class MobileSelectionControl extends SelectionControl {
 
             case RANGE_TYPE.ROW:
                 this.fillControlTopLeft!.transformByState({
-                    left: -expandCornerSize / 2 + viewportW / 2 + viewportScrollX / 2,
+                    left: -expandCornerSize / 2 + viewportW / 2 + offsetX,
                     top: -expandCornerSize / 2,
                 });
                 this.fillControlBottomRight!.transformByState({
-                    left: -expandCornerSize / 2 + viewportW / 2 + viewportScrollX / 2 + expandCornerSize,
+                    left: -expandCornerSize / 2 + viewportW / 2 + offsetX,
                     top: endY - startY - expandCornerSize / 2,
                 });
                 break;
             case RANGE_TYPE.COLUMN:
                 this.fillControlTopLeft!.transformByState({
                     left: -expandCornerSize / 2,
-                    top: -expandCornerSize / 2 + viewportH / 2 + viewportScrollY / 2,
+                    top: -expandCornerSize / 2 + viewportH / 2 + offsetY,
                 });
                 this.fillControlBottomRight!.transformByState({
                     left: endX - startX - expandCornerSize / 2,
-                    top: -expandCornerSize / 2 + viewportH / 2 + viewportScrollY / 2,
+                    top: -expandCornerSize / 2 + viewportH / 2 + offsetY,
                 });
                 break;
             default:

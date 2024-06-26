@@ -98,6 +98,12 @@ export class Layer extends Disposable {
         return this._objects;
     }
 
+    /**
+     * insert o to _objects[]
+     * if o is a group, insert all its children and group itself to _objects[]
+     * @param o
+     * @returns
+     */
     addObject(o: BaseObject) {
         if (o.classType === RENDER_CLASS_TYPE.GROUP) {
             const objects = (o as BaseObject).getObjects();
@@ -105,16 +111,16 @@ export class Layer extends Disposable {
                 if (this.scene.getObject(object.oKey)) {
                     continue;
                 }
-                if (object.oKey === '__SpreadsheetSelectionFillControlTopLeft__0') {
-                    console.log('!!!!add 0');
+                // if (object.oKey === '__SpreadsheetSelectionFillControlTopLeft__0') {
+                //     console.log('!!!!add 0');
 
-                    // debugger;
-                }
-                if (object.oKey === '__SpreadsheetSelectionFillControlTopLeft__1') {
-                    console.log('!!!!add 1');
+                //     // debugger;
+                // }
+                // if (object.oKey === '__SpreadsheetSelectionFillControlTopLeft__1') {
+                //     console.log('!!!!add 1');
 
-                    // debugger;
-                }
+                //     // debugger;
+                // }
 
                 this._objects.push(object);
                 this.scene.setObjectBehavior(object);

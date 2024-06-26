@@ -736,6 +736,11 @@ export class SelectionControl extends Disposable {
             evented: false,
         });
 
+        // TODO @lumixraku
+        this._columnHeaderBackground.onPointerDownObserver.add(() => {
+            console.log('.........');
+        });
+
         this._columnHeaderBorder = new Rect(SELECTION_MANAGER_KEY.columnHeaderBorder + zIndex, {
             zIndex: zIndex - 1,
             evented: false,

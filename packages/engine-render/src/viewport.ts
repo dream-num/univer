@@ -171,7 +171,7 @@ export class Viewport {
 
     private _scrollStopNum: NodeJS.Timeout | number = 0;
 
-    private _renderClipState = true;
+    private _clipViewport = true;
 
     private _active = true;
 
@@ -776,7 +776,7 @@ export class Viewport {
         const tm = sceneTrans.getMatrix();
         mainCtx.save();// At this time, mainCtx transform is (dpr, 0, 0, dpr, 0, 0)
 
-        if (this._renderClipState) {
+        if (this._clipViewport) {
             mainCtx.beginPath();
             // DEPT: left is set by upper views but width and height is not
             // this.left has handle scale already, no need to `this.width * scale`
@@ -1117,11 +1117,11 @@ export class Viewport {
     }
 
     openClip() {
-        this._renderClipState = true;
+        this._clipViewport = true;
     }
 
     closeClip() {
-        this._renderClipState = false;
+        this._clipViewport = false;
     }
 
     dispose() {

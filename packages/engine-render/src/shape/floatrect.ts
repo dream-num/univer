@@ -20,7 +20,12 @@ import type { UniverRenderingContext } from '../context';
 import type { IRectProps } from './rect';
 import { Rect } from './rect';
 
-export class DashedRect extends Rect {
+export class FloatRect<T extends IRectProps = IRectProps> extends Rect {
+    constructor(key?: string, props?: T) {
+        super(key, props);
+    }
+
+
     static override drawWith(ctx: UniverRenderingContext, props: IRectProps | Rect) {
         let { radius, left, top, width, height } = props;
 
@@ -31,11 +36,13 @@ export class DashedRect extends Rect {
         top = top ?? 0;
 
         ctx.beginPath();
-        ctx.setLineDash(props.strokeDashArray!);
+        if (props.strokeDashArray) {
+            ctx.setLineDash(props.strokeDashArray);
+        }
 
         if (!radius) {
             // simple rect - don't bother doing all that complicated maths stuff.
-            ctx.rect(left, top, width, height);
+            ctx.rect(0, 0, width, height);
         } else {
             let topLeft = 0;
             let topRight = 0;
@@ -58,8 +65,9 @@ export class DashedRect extends Rect {
         this._renderPaintInOrder(ctx, props);
     }
 
-    protected override _draw(ctx: UniverRenderingContext, viewportInfo?: IViewportInfo) {
-        const { radius, paintFirst, stroke, strokeWidth, fill, strokeScaleEnabled, fillRule, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, strokeDashArray } = this;
+    protected override _draw(ctx: UniverRenderingContext, viewportInfo: IViewportInfo) {
+        if (!(viewportInfo.viewportKey === 'viewMain')) return;
+        const { radius, paintFirst, stroke, strokeWidth, fill, strokeScaleEnabled, fillRule, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, strokeDashArray, width, height } = this;
         const parentTrans = this.getParent().transform;
         // group.transform contains startXY
         // selection-shape@_updateControl -->  this.selectionShape.translate(startX, startY);
@@ -68,24 +76,22 @@ export class DashedRect extends Rect {
         // const { startX, startY, endX, endY } = this._selectionModel;
         const startX = parentTrans.getMatrix()[4];
         const startY = parentTrans.getMatrix()[5];
-        const endX = startX + this.width;
-        const endY = startY + this.height;
-        const rect = { left: startX, top: startY, right: endX, bottom: endY };
-        let { left, top, right, bottom } = rect;
+        const top = viewportInfo.viewBound.top;
+        console.log('startXY', startX, startY, viewportInfo.viewBound.top, top);
+        const left = this.left;
+        // const left = startX + width / 2;
 
-        let width = right - left;
-        let height = bottom - top;
-        if (viewportInfo) {
-            const intersectRect = Rectangle.getIntersectionBetweenTwoRect(rect, viewportInfo.cacheBound);
-            if (intersectRect) {
-                left = intersectRect.left - startX;
-                top = intersectRect.top - startY;
-                right = intersectRect.right;
-                bottom = intersectRect.bottom;
-                width = intersectRect.width;
-                height = intersectRect.height;
-            }
-        }
-        DashedRect.drawWith(ctx, { ...{ radius, paintFirst, stroke, strokeWidth, fill, strokeScaleEnabled, fillRule, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, strokeDashArray }, ...{ width, height, left, top } });
+        // if (viewportInfo) {
+        //     const intersectRect = Rectangle.getIntersectionBetweenTwoRect(rect, viewportInfo.cacheBound);
+        //     if (intersectRect) {
+        //         left = intersectRect.left - startX;
+        //         top = intersectRect.top - startY;
+        //         right = intersectRect.right;
+        //         bottom = intersectRect.bottom;
+        //         width = intersectRect.width;
+        //         height = intersectRect.height;
+        //     }
+        // }
+        FloatRect.drawWith(ctx, { ...{ radius, paintFirst, stroke, strokeWidth, fill, strokeScaleEnabled, fillRule, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, strokeDashArray }, ...{ width, height, left, top } });
     }
 }

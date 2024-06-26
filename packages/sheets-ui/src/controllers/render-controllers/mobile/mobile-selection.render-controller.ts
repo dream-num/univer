@@ -42,11 +42,13 @@ import { Inject } from '@wendellhu/redi';
 import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
 import type { ISetZoomRatioOperationParams } from '../../../commands/operations/set-zoom-ratio.operation';
 import { SetZoomRatioOperation } from '../../../commands/operations/set-zoom-ratio.operation';
+import type { MobileSelectionRenderService } from '../../../services/selection/mobile-selection-render.service';
 import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import type { ISheetObjectParam } from '../../utils/component-tools';
 import { getSheetObject } from '../../utils/component-tools';
-import type { MobileSelectionRenderService } from '../../../services/selection/mobile-selection-render.service';
+import { ScrollManagerService } from '../../../services/scroll-manager.service';
+import type { MobileSelectionControl } from '../../../services/selection/mobile-selection-shape';
 
 export class MobileSelectionRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -57,7 +59,8 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @Inject(ScrollManagerService) private _scrollManagerService: ScrollManagerService
     ) {
         super();
 
@@ -88,7 +91,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         this._initCommandListener();
         this._initUserActionSyncListener();
         this._initDefinedNameListener();
-
+        this._initScrollEvent();
         const unitId = workbook.getUnitId();
         if (!worksheet) return;
         const sheetId = worksheet.getSheetId();
@@ -134,10 +137,36 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         );
     }
 
+    private _initScrollEvent() {
+        //this._scrollManagerService.scrollInfo$.subscribe((param) => {
+        const sub = this._scrollManagerService.scrollInfo$.subscribe((param) => {
+            if (param == null) {
+                return;
+            }
+            const { viewportScrollX, viewportScrollY } = param!;
+            const activeControl = this._selectionRenderService.getActiveSelectionControl() as MobileSelectionControl;
+            if (activeControl == null) {
+                return;
+            }
+            const rangeType = activeControl.rangeType;
+            if (rangeType === RANGE_TYPE.COLUMN) {
+                activeControl.transformControlPoint(0, viewportScrollY);
+            } else if (rangeType === RANGE_TYPE.ROW) {
+                activeControl.transformControlPoint(viewportScrollX, 0);
+            }
+
+            console.log('selection scroll$ evt', param);
+        });
+        this.disposeWithMe(toDisposable(sub));
+    }
+
     private async _getSelections(workbook: Workbook, unitId: string, formulaOrRefString: string) {
         const valueArray = formulaOrRefString.split(',');
 
         let worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return [];
+        }
 
         const selections = [];
 
@@ -391,7 +420,9 @@ export class MobileSelectionRenderController extends Disposable implements IRend
 
         const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
-
+        if (!worksheet) {
+            return;
+        }
         this._definedNamesService.setCurrentRange({
             range: lastSelection.range,
             unitId: workbook.getUnitId(),
@@ -418,7 +449,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         if (!workbook) return;
 
         const unitId = workbook.getUnitId();
-        const sheetId = workbook.getActiveSheet().getSheetId();
+        const sheetId = workbook.getActiveSheet()?.getSheetId();
         const current = this._selectionManagerService.getCurrent();
 
         if (selectionDataWithStyleList == null || selectionDataWithStyleList.length === 0) {
@@ -450,7 +481,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
 
                 const params = command.params as ISetZoomRatioOperationParams;
                 const { unitId, subUnitId } = params;
-                if (!(unitId === workbook.getUnitId() && subUnitId === worksheet.getSheetId())) {
+                if (!(unitId === workbook.getUnitId() && subUnitId === worksheet?.getSheetId())) {
                     return;
                 }
 

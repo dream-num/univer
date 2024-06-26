@@ -189,6 +189,9 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             isRelativeY: false,
         });
 
+        /**
+         * for column header
+         */
         const viewColumnRight = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
             left: rowHeader.width,
             top: 0,
@@ -198,6 +201,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             isRelativeX: true,
             isRelativeY: false,
         });
+        // viewColumnRight.closeClip();
 
         const viewLeftTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
             left: 0,

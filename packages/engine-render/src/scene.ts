@@ -63,7 +63,6 @@ export class Scene extends ThinScene {
         state?: ISceneTransformState
     ) {
         super(sceneKey);
-        console.log('sceneKey', sceneKey);
         if (state) {
             this.transformByState(state);
         }
@@ -390,6 +389,10 @@ export class Scene extends ThinScene {
         return this;
     }
 
+    /**
+     * make object parent to scene
+     * @param o
+     */
     override setObjectBehavior(o: BaseObject) {
         if (!o.parent) {
             o.parent = this;

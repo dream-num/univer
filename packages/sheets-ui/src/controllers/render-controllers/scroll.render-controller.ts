@@ -332,7 +332,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     if (skeleton == null || sheetObject == null) {
                         return;
                     }
-
+                    console.log('scroll scroll$ evt', param);
                     const scene = sheetObject.scene;
                     const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 

@@ -32,6 +32,8 @@ export interface IThreadCommentEditorProps {
     onSave?: (comment: Pick<IThreadComment, 'attachments' | 'text'>) => void;
     onCancel?: () => void;
     autoFocus?: boolean;
+    unitId: string;
+    subUnitId: string;
 }
 
 export interface IThreadCommentEditorInstance {
@@ -51,7 +53,7 @@ const defaultRenderSuggestion: MentionProps['renderSuggestion'] = (mention, sear
 };
 
 export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThreadCommentEditorProps>((props, ref) => {
-    const { comment, onSave, id, onCancel, autoFocus } = props;
+    const { comment, onSave, id, onCancel, autoFocus, unitId, subUnitId } = props;
     const mentionDataService = useDependency(IThreadCommentMentionDataService);
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
@@ -92,7 +94,7 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                 <Mention
                     key={mentionDataService.trigger}
                     trigger={mentionDataService.trigger}
-                    data={(query, callback) => mentionDataService.getMentions!(query)
+                    data={(query, callback) => mentionDataService.getMentions!(query, unitId, subUnitId)
                         .then((res) => res.map(transformMention)).then(callback) as any}
                     displayTransform={(id, label) => `@${label} `}
                     renderSuggestion={mentionDataService.renderSuggestion ?? defaultRenderSuggestion}

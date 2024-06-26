@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { threadId } from 'node:worker_threads';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
@@ -139,6 +140,8 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                         comment={item}
                         onCancel={() => onEditingChange?.(false)}
                         autoFocus
+                        unitId={unitId}
+                        subUnitId={subUnitId}
                         onSave={({ text, attachments }) => {
                             onEditingChange?.(false);
                             commandService.executeCommand(
@@ -206,8 +209,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     const resolved = comments?.root.resolved;
     const currentUser = useObservable(userManagerService.currentUser$);
     const editorRef = useRef<IThreadCommentEditorInstance>(null);
-
-    const renderComments = [
+    const renderComments: IThreadComment[] = [
         ...comments ?
             [comments.root] :
             // mock empty comment
@@ -221,6 +223,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 dT: '',
                 unitId,
                 subUnitId,
+                threadId: '',
             }],
         ...comments?.children ?? [],
     ];
@@ -345,6 +348,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                         <ThreadCommentEditor
                             key={`${autoFocus}`}
                             ref={editorRef}
+                            unitId={unitId}
+                            subUnitId={subUnitId}
                             onSave={({ text, attachments }) => {
                                 const comment: IThreadComment = {
                                     text,
@@ -356,6 +361,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                     parentId: comments?.root.id,
                                     unitId,
                                     subUnitId,
+                                    threadId: comments?.root.threadId!,
                                 };
 
                                 if (onAddComment?.(comment) === false) {

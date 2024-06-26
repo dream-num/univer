@@ -50,7 +50,6 @@ export class SheetsThreadCommentController extends Disposable {
         @IMenuService private readonly _menuService: IMenuService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetsThreadCommentPopupService) private readonly _sheetsThreadCommentPopupService: SheetsThreadCommentPopupService,
         @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel,
@@ -169,7 +168,7 @@ export class SheetsThreadCommentController extends Disposable {
                     return;
                 }
 
-                const GAP = 5;
+                const GAP = 1;
                 await this._commandService.executeCommand(ScrollToRangeOperation.id, {
                     range: {
                         startRow: Math.max(location.row - GAP, 0),

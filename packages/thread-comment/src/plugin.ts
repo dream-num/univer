@@ -23,6 +23,7 @@ import { TC_PLUGIN_NAME } from './types/const';
 import { AddCommentMutation, DeleteCommentMutation, ResolveCommentMutation, UpdateCommentMutation, UpdateCommentRefMutation } from './commands/mutations/comment.mutation';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from './commands/commands/comment.command';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
+import { CommentUpdateOperation } from './commands/operations/comment.operation';
 
 export interface IUniverThreadCommentConfig {
     overrides?: DependencyOverride;
@@ -44,9 +45,10 @@ export class UniverThreadCommentPlugin extends Plugin {
 
     override onStarting(injector: Injector): void {
         (mergeOverrideWithDependencies([
+            [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
             [ThreadCommentModel],
             [ThreadCommentResourceController],
-            [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
+
         ], this._config?.overrides) as Dependency[]).forEach(
             (d) => {
                 injector.add(d);
@@ -65,6 +67,8 @@ export class UniverThreadCommentPlugin extends Plugin {
             UpdateCommentRefMutation,
             DeleteCommentMutation,
             ResolveCommentMutation,
+
+            CommentUpdateOperation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

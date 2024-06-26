@@ -27,7 +27,7 @@ export type SheetCommentUpdate = CommentUpdate & {
 };
 
 export class SheetsThreadCommentModel extends Disposable {
-    private _matrixMap: Map<string, Map<string, ObjectMatrix<string>>> = new Map();
+    private _matrixMap: Map<string, Map<string, ObjectMatrix<Set<string>>>> = new Map();
     private _locationMap: Map<string, Map<string, Map<string, { row: number; column: number }>>> = new Map();
     private _commentUpdate$ = new Subject<SheetCommentUpdate>();
 
@@ -80,6 +80,24 @@ export class SheetsThreadCommentModel extends Disposable {
         return subUnitMap;
     }
 
+    private _addCommentToMatrix(matrix: ObjectMatrix<Set<string>>, row: number, column: number, commentId: string) {
+        const current = matrix.getValue(row, column) ?? new Set();
+        current.add(commentId);
+        matrix.setValue(row, column, current);
+    }
+
+    private _deleteCommentToMatrix(matrix: ObjectMatrix<Set<string>>, row: number, column: number, commentId: string) {
+        if (row >= 0 && column >= 0) {
+            const current = matrix.getValue(row, column);
+            if (current.has(commentId)) {
+                current.delete(commentId);
+                if (current.size === 0) {
+                    matrix.realDeleteValue(row, column);
+                }
+            }
+        }
+    }
+
     private _ensure(unitId: string, subUnitId: string) {
         const matrix = this._ensureCommentMatrix(unitId, subUnitId);
         const locationMap = this._ensureCommentLocationMap(unitId, subUnitId);
@@ -109,7 +127,7 @@ export class SheetsThreadCommentModel extends Disposable {
         const { matrix, locationMap } = this._ensure(unitId, subUnitId);
 
         if (!parentId && row >= 0 && column >= 0) {
-            matrix.setValue(row, column, commentId);
+            this._addCommentToMatrix(matrix, row, column, commentId);
             locationMap.set(commentId, { row, column });
         }
 
@@ -118,6 +136,7 @@ export class SheetsThreadCommentModel extends Disposable {
             subUnitId,
             payload: comment,
             type: 'add',
+            isRoot: !parentId,
             ...location,
         });
     }
@@ -146,12 +165,7 @@ export class SheetsThreadCommentModel extends Disposable {
                     const location = singleReferenceToGrid(comment.ref);
                     if (isRoot) {
                         const { row, column } = location;
-                        if (row >= 0 && column >= 0) {
-                            const current = matrix.getValue(row, column);
-                            if (current === comment.id) {
-                                matrix.realDeleteValue(row, column);
-                            }
-                        }
+                        this._deleteCommentToMatrix(matrix, row, column, comment.id);
                     }
                     this._commentUpdate$.next({
                         ...update,
@@ -180,19 +194,34 @@ export class SheetsThreadCommentModel extends Disposable {
                         return;
                     }
                     const { row, column } = currentLoc;
-                    const currentCommentId = matrix.getValue(row, column);
-                    if (currentCommentId === commentId) {
-                        matrix.realDeleteValue(row, column);
-                        locationMap.delete(commentId);
-                    }
+                    this._deleteCommentToMatrix(matrix, row, column, commentId);
+                    locationMap.delete(commentId);
+
                     if (location.row >= 0 && location.column >= 0) {
-                        matrix.setValue(location.row, location.column, commentId);
+                        this._addCommentToMatrix(matrix, row, column, commentId);
                         locationMap.set(commentId, { row: location.row, column: location.column });
                     }
                     this._commentUpdate$.next({
                         ...update,
                         ...location,
                     });
+                    break;
+                }
+                case 'resolve': {
+                    const { unitId, subUnitId, payload } = update;
+                    const { commentId, resolved } = payload;
+                    const { locationMap, matrix } = this._ensure(unitId, subUnitId);
+                    const location = locationMap.get(payload.commentId);
+                    if (location) {
+                        const { row, column } = location;
+                        if (resolved) {
+                            this._deleteCommentToMatrix(matrix, row, column, commentId);
+                            locationMap.delete(commentId);
+                        } else {
+                            this._addCommentToMatrix(matrix, row, column, commentId);
+                            locationMap.set(commentId, location);
+                        }
+                    }
                     break;
                 }
 
@@ -204,7 +233,12 @@ export class SheetsThreadCommentModel extends Disposable {
 
     getByLocation(unitId: string, subUnitId: string, row: number, column: number): string | undefined {
         const matrix = this._ensureCommentMatrix(unitId, subUnitId);
-        return matrix.getValue(row, column);
+        const current = matrix.getValue(row, column);
+
+        if (current) {
+            return Array.from(current)?.[0];
+        }
+        return undefined;
     }
 
     getComment(unitId: string, subUnitId: string, commentId: string) {
@@ -212,8 +246,7 @@ export class SheetsThreadCommentModel extends Disposable {
     }
 
     getCommentWithChildren(unitId: string, subUnitId: string, row: number, column: number) {
-        const matrix = this._ensureCommentMatrix(unitId, subUnitId);
-        const commentId = matrix.getValue(row, column);
+        const commentId = this.getByLocation(unitId, subUnitId, row, column);
         if (!commentId) {
             return undefined;
         }

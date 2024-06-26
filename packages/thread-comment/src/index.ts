@@ -46,8 +46,11 @@ export type {
     IResolveCommentCommandParams,
     IUpdateCommentCommandParams,
     IDeleteCommentTreeCommandParams,
-    IUpdateCommentRefCommandParams,
-    IUpdateCommentRefPayload,
 } from './commands/commands/comment.command';
 export { UniverThreadCommentPlugin } from './plugin';
-export { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
+export {
+    IThreadCommentDataSourceService,
+    type IThreadCommentDataSource,
+    type ThreadCommentJSON,
+} from './services/tc-datasource.service';
+export { CommentUpdateOperation, type ICommentUpdateOperationProps } from './commands/operations/comment.operation';

@@ -14,31 +14,22 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody } from '@univerjs/core';
+import type { ICommand } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 
-export interface IThreadCommentMention {
-    label: string;
-    id: string;
-    icon?: string;
-}
-
-export interface IBaseComment {
-    id: string;
+export interface ICommentUpdateOperationProps {
     threadId: string;
-    dT: string;
-    updateT?: string;
-    personId: string;
-    text: IDocumentBody;
-    attachments?: string[];
-    updated?: boolean;
-    mentions?: string[];
-}
-
-export interface IThreadComment extends IBaseComment {
+    commentId: string;
     unitId: string;
     subUnitId: string;
-    ref: string;
-    parentId?: string;
-    resolved?: boolean;
-    children?: IThreadComment[];
+    rootId: string;
+    type: 'update' | 'delete' | 'reply' | 'colla';
 }
+
+export const CommentUpdateOperation: ICommand<ICommentUpdateOperationProps> = {
+    type: CommandType.OPERATION,
+    id: 'thread-comment.operation.comment-update',
+    handler() {
+        return true;
+    },
+};

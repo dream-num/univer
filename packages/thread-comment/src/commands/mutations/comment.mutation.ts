@@ -28,13 +28,14 @@ export interface IAddCommentMutationParams {
 export const AddCommentMutation: ICommand<IAddCommentMutationParams> = {
     id: 'thread-comment.mutation.add-comment',
     type: CommandType.MUTATION,
-    handler(accessor, params) {
+    handler(accessor, params, options) {
         if (!params) {
             return false;
         }
         const threadCommentModel = accessor.get(ThreadCommentModel);
         const { unitId, subUnitId, comment } = params;
-        return threadCommentModel.addComment(unitId, subUnitId, comment);
+        const shouldSync = (options?.fromCollab || options?.onlyLocal || options?.fromChangeset) && !comment.parentId;
+        return threadCommentModel.addComment(unitId, subUnitId, comment, shouldSync);
     },
 };
 

@@ -17,14 +17,18 @@
 import type { Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+import { BranchCoverage } from '../set-worksheet-show.command';
 
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
 import { SetWorksheetHideMutation } from '../../mutations/set-worksheet-hide.mutation';
+import { SetWorksheetShowMutation } from '../../mutations/set-worksheet-show.mutation';
 import { SetWorksheetActiveOperation } from '../../operations/set-worksheet-active.operation';
 import { InsertSheetCommand } from '../insert-sheet.command';
 import { SetWorksheetActivateCommand } from '../set-worksheet-activate.command';
 import { SetWorksheetHideCommand } from '../set-worksheet-hide.command';
+import { SetWorksheetShowCommand } from '../set-worksheet-show.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test set worksheet show commands', () => {
@@ -44,10 +48,16 @@ describe('Test set worksheet show commands', () => {
         commandService.registerCommand(SetWorksheetActivateCommand);
         commandService.registerCommand(SetWorksheetHideCommand);
         commandService.registerCommand(SetWorksheetHideMutation);
+        commandService.registerCommand(SetWorksheetShowCommand);
+        commandService.registerCommand(SetWorksheetHideMutation);
     });
 
     afterEach(() => {
         univer.dispose();
+    });
+
+    afterAll(() => {
+        BranchCoverage.coverage.printCoverage();
     });
 
     describe('set sheet show', () => {

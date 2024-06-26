@@ -118,10 +118,27 @@ describe('Test set worksheet show commands', () => {
             });
         });
 
-        describe('call function without a worksheet', async () => {
+        describe('set sheet shown without a worksheet', async () => {
             it('correct situation: ', async () => {
                 expect(
                     await commandService.executeCommand(SetWorksheetShowCommand.id, { subUnitId: null})
+                ).toBeFalsy();
+            });
+        });
+
+        describe('set sheet shown when it is not hidden', async () => {
+            it('correct situation: ', async () => {
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                if (!workbook) throw new Error('This is an error');
+
+                const targetActiveSheet = workbook.getActiveSheet();
+                const targetSheetId = targetActiveSheet?.getSheetId();
+                expect(
+                    await commandService.executeCommand(SetWorksheetActivateCommand.id, { subUnitId: targetSheetId })
+                ).toBeTruthy();
+
+                expect(
+                    await commandService.executeCommand(SetWorksheetShowCommand.id, { subUnitId: targetSheetId })
                 ).toBeFalsy();
             });
         });

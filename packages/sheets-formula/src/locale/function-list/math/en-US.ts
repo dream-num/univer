@@ -139,7 +139,7 @@ export default {
         },
     },
     ATAN: {
-        description: 'Returns the arctangent of a number',
+        description: 'Returns the arctangent of a number.',
         abstract: 'Returns the arctangent of a number',
         links: [
             {
@@ -148,12 +148,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The tangent of the angle you want.' },
         },
     },
     ATAN2: {
-        description: 'Returns the arctangent from x- and y-coordinates',
+        description: 'Returns the arctangent from x- and y-coordinates.',
         abstract: 'Returns the arctangent from x- and y-coordinates',
         links: [
             {
@@ -162,12 +161,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xNum: { name: 'x_num', detail: 'The x-coordinate of the point.' },
+            yNum: { name: 'y_num', detail: 'The y-coordinate of the point.' },
         },
     },
     ATANH: {
-        description: 'Returns the inverse hyperbolic tangent of a number',
+        description: 'Returns the inverse hyperbolic tangent of a number.',
         abstract: 'Returns the inverse hyperbolic tangent of a number',
         links: [
             {
@@ -176,8 +175,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number between 1 and -1.' },
         },
     },
     BASE: {
@@ -265,7 +263,7 @@ export default {
         },
     },
     COS: {
-        description: 'Returns the cosine of a number',
+        description: 'Returns the cosine of a number.',
         abstract: 'Returns the cosine of a number',
         links: [
             {
@@ -274,8 +272,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The angle in radians for which you want the cosine.' },
         },
     },
     COSH: {
@@ -1139,7 +1136,7 @@ export default {
         },
     },
     TAN: {
-        description: 'Returns the tangent of a number',
+        description: 'Returns the tangent of a number.',
         abstract: 'Returns the tangent of a number',
         links: [
             {
@@ -1148,12 +1145,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The angle in radians for which you want the tangent.' },
         },
     },
     TANH: {
-        description: 'Returns the hyperbolic tangent of a number',
+        description: 'Returns the hyperbolic tangent of a number.',
         abstract: 'Returns the hyperbolic tangent of a number',
         links: [
             {
@@ -1162,8 +1158,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number.' },
         },
     },
     TRUNC: {

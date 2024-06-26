@@ -17,32 +17,32 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_MATH } from '../../function-names';
-import { Asinh } from '../index';
+import { Tanh } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
-describe('Test asinh function', () => {
-    const testFunction = new Asinh(FUNCTION_NAMES_MATH.ASINH);
+describe('Test tanh function', () => {
+    const testFunction = new Tanh(FUNCTION_NAMES_MATH.TANH);
 
-    describe('Asinh', () => {
+    describe('Tanh', () => {
         it('Value is normal number', () => {
             const value = NumberValueObject.create(1);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(0.881373587019543);
+            expect(result.getValue()).toBe(0.7615941559557649);
         });
 
         it('Value is number negative', () => {
             const value = NumberValueObject.create(-2);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(-1.4436354751788103);
+            expect(result.getValue()).toBe(-0.9640275800758169);
         });
 
         it('Value is number string', () => {
             const value = StringValueObject.create('0.5');
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(0.48121182505960347);
+            expect(result.getValue()).toBe(0.46211715726000974);
         });
 
         it('Value is normal string', () => {
@@ -81,7 +81,7 @@ describe('Test asinh function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(valueArray);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[0.881373587019543, ErrorType.VALUE, 1.0350378961923077, 0.881373587019543, 0, 0], [0, 5.298342365610589, 1.5861119704218916, ErrorType.VALUE, -1.8184464592320668, ErrorType.NAME]]);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[0.7615941559557649, ErrorType.VALUE, 0.8425793256589296, 0.7615941559557649, 0, 0], [0, 1, 0.9816125892654238, ErrorType.VALUE, -0.9950547536867305, ErrorType.NAME]]);
         });
     });
 });

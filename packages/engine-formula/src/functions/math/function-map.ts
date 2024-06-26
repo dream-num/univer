@@ -20,6 +20,10 @@ import { Acosh } from './acosh';
 import { Acot } from './acot';
 import { Asin } from './asin';
 import { Asinh } from './asinh';
+import { Atan } from './atan';
+import { Atan2 } from './atan2';
+import { Atanh } from './atanh';
+import { Cos } from './cos';
 import { FUNCTION_NAMES_MATH } from './function-names';
 import { Mod } from './mod';
 import { Power } from './power';
@@ -28,6 +32,8 @@ import { Subtotal } from './subtotal';
 import { Sum } from './sum';
 import { Sumif } from './sumif';
 import { Sumifs } from './sumifs';
+import { Tan } from './tan';
+import { Tanh } from './tanh';
 
 export const functionMath = [
     [Abs, FUNCTION_NAMES_MATH.ABS],
@@ -36,11 +42,17 @@ export const functionMath = [
     [Acot, FUNCTION_NAMES_MATH.ACOT],
     [Asin, FUNCTION_NAMES_MATH.ASIN],
     [Asinh, FUNCTION_NAMES_MATH.ASINH],
+    [Atan, FUNCTION_NAMES_MATH.ATAN],
+    [Atan2, FUNCTION_NAMES_MATH.ATAN2],
+    [Atanh, FUNCTION_NAMES_MATH.ATANH],
+    [Cos, FUNCTION_NAMES_MATH.COS],
     [Mod, FUNCTION_NAMES_MATH.MOD],
+    [Power, FUNCTION_NAMES_MATH.POWER],
+    [Product, FUNCTION_NAMES_MATH.PRODUCT],
     [Subtotal, FUNCTION_NAMES_MATH.SUBTOTAL],
     [Sum, FUNCTION_NAMES_MATH.SUM],
     [Sumif, FUNCTION_NAMES_MATH.SUMIF],
     [Sumifs, FUNCTION_NAMES_MATH.SUMIFS],
-    [Power, FUNCTION_NAMES_MATH.POWER],
-    [Product, FUNCTION_NAMES_MATH.PRODUCT],
+    [Tan, FUNCTION_NAMES_MATH.TAN],
+    [Tanh, FUNCTION_NAMES_MATH.TANH],
 ];

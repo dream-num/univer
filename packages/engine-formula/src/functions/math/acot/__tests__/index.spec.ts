@@ -33,7 +33,7 @@ describe('Test acot function', () => {
             expect(result.getValue()).toBe(0.7853981633974483);
         });
 
-        it('Value is number valid', () => {
+        it('Value is number negative', () => {
             const value = NumberValueObject.create(-2);
             const result = testFunction.calculate(value);
             expect(result.getValue()).toBe(2.677945045);

@@ -26,7 +26,6 @@ import type {
     ISelectionCellWithCoord,
     ISelectionWithCoord,
     Nullable,
-    Observer,
 } from '@univerjs/core';
 import { createInterceptorKey, InterceptorManager, IUniverInstanceService, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
@@ -35,7 +34,7 @@ import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle 
 import { getNormalSelectionStyle } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
-import type { Observable } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -127,11 +126,9 @@ export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: nu
 export class SelectionRenderService implements ISelectionRenderService {
     hasSelection: boolean = false;
 
-    private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerMoveSub: Nullable<Subscription>;
 
-    private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerUpSub: Nullable<Subscription>;
 
     private _controlFillConfig$: BehaviorSubject<IControlFillConfig | null> =
         new BehaviorSubject<IControlFillConfig | null>(null);
@@ -157,9 +154,8 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     private _scrollTimer!: ScrollTimer;
 
-    private _cancelDownObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _cancelUpObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _pointerdownSub: Nullable<Subscription>;
+    private _mainScenePointerUpSub: Nullable<Subscription>;
 
     private _skeleton: Nullable<SpreadsheetSkeleton>;
 
@@ -516,13 +512,11 @@ export class SelectionRenderService implements ISelectionRenderService {
     reset() {
         this._clearSelectionControls();
 
-        this._moveObserver?.dispose();
-        this._upObserver?.dispose();
-        this._downObserver?.dispose();
+        this._scenePointerMoveSub?.unsubscribe();
+        this._scenePointerUpSub?.unsubscribe();
 
-        this._moveObserver = null;
-        this._upObserver = null;
-        this._downObserver = null;
+        this._scenePointerMoveSub = null;
+        this._scenePointerUpSub = null;
     }
 
     resetAndEndSelection() {
@@ -784,7 +778,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         let lastX = newEvtOffsetX;
         let lastY = newEvtOffsetY;
 
-        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
             const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
@@ -915,7 +909,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             });
         });
 
-        this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent((_upEvt: IPointerEvent | IMouseEvent) => {
             this._endSelection();
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
 
@@ -1158,15 +1152,20 @@ export class SelectionRenderService implements ISelectionRenderService {
             return;
         }
 
-        scene.onPointerMoveObserver.remove(this._moveObserver);
-        scene.onPointerUpObserver.remove(this._upObserver);
+        // scene.onPointerMove$.remove(this._scenePointerMoveSub);
+        // scene.onPointerUp$.remove(this._scenePointerUpSub);
+        this._scenePointerMoveSub?.unsubscribe();
+        this._scenePointerUpSub?.unsubscribe();
         scene.enableEvent();
 
         this._scrollTimer?.dispose();
 
-        const mainScene = scene.getEngine()?.activeScene;
-        mainScene?.onPointerDownObserver.remove(this._cancelDownObserver);
-        mainScene?.onPointerUpObserver.remove(this._cancelUpObserver);
+        // const mainScene = scene.getEngine()?.activeScene;
+        // mainScene?.onPointerUp$.remove(this._mainScenePointerUpSub);
+        this._mainScenePointerUpSub?.unsubscribe();
+
+        this._pointerdownSub?.unsubscribe();
+        this._pointerdownSub = null;
     }
 
     private _addCancelObserver() {
@@ -1180,10 +1179,12 @@ export class SelectionRenderService implements ISelectionRenderService {
             return;
         }
 
-        mainScene.onPointerDownObserver.remove(this._cancelDownObserver);
-        mainScene.onPointerUpObserver.remove(this._cancelUpObserver);
-        this._cancelDownObserver = mainScene.onPointerDownObserver.add(() => this._endSelection());
-        this._cancelUpObserver = mainScene.onPointerUpObserver.add(() => this._endSelection());
+        // mainScene.onPointerUp$.remove(this._mainScenePointerUpSub);
+        this._mainScenePointerUpSub?.unsubscribe();
+        this._mainScenePointerUpSub = mainScene.onPointerUp$.subscribeEvent(() => this._endSelection());
+
+        this._pointerdownSub?.unsubscribe();
+        this._pointerdownSub = mainScene.onPointerDown$.subscribeEvent(() => this._endSelection());
     }
 
     private _getSelectedRangeWithMerge(

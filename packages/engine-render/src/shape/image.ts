@@ -20,6 +20,7 @@ import type { UniverRenderingContext } from '../context';
 import type { IObjectFullState, ITransformChangeState, IViewportInfo } from '../basics';
 import { RENDER_CLASS_TYPE, Vector2 } from '../basics';
 import { offsetRotationAxis } from '../basics/offset-rotation-axis';
+import type { Scene } from '../scene';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
@@ -65,7 +66,7 @@ export class Image extends Shape<IImageProps> {
             this._native.onload = () => {
                 config.success?.();
                 this.makeDirty(true);
-                this.getEngine()?.activeScene?.onFileLoadedObservable.notifyObservers(id);
+                (this.getEngine()?.activeScene as Scene)?.onFileLoaded$.emitEvent(id);
             };
             this._native.onerror = () => {
                 if (config.fail) {
@@ -294,7 +295,7 @@ export class Image extends Shape<IImageProps> {
     }
 
     private _init(): void {
-        this.onTransformChangeObservable.add((state) => {
+        this.onTransformChange$.subscribeEvent((state) => {
             this._updateSrcRectByTransform(state);
         });
     }

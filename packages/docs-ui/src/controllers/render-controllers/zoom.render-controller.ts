@@ -63,7 +63,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
                 return;
             }
 
-            this.disposeWithMe(scene.onMouseWheelObserver.add((e: IWheelEvent) => {
+            this.disposeWithMe(scene.onMouseWheel$.subscribeEvent((e: IWheelEvent) => {
                 if (!e.ctrlKey) {
                     return;
                 }

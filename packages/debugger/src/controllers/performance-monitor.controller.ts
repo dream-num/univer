@@ -15,10 +15,10 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable } from '@univerjs/core';
+import { IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
+import type { Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, take, takeUntil } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, PerformanceMonitorController)
@@ -27,7 +27,7 @@ export class PerformanceMonitorController extends RxDisposable {
     private _containerElement!: HTMLDivElement;
     private _styleElement!: HTMLStyleElement;
 
-    private _currentObserverDisposable: Nullable<IDisposable>;
+    private _currentUnitSub: Nullable<Subscription>;
 
     constructor(
     @Inject(LifecycleService) lifecycleService: LifecycleService,
@@ -54,8 +54,8 @@ export class PerformanceMonitorController extends RxDisposable {
     }
 
     private _disposeCurrentObserver(): void {
-        this._currentObserverDisposable?.dispose();
-        this._currentObserverDisposable = null;
+        this._currentUnitSub?.unsubscribe();
+        this._currentUnitSub = null;
     }
 
     private _listenDocumentTypeChange() {
@@ -73,11 +73,9 @@ export class PerformanceMonitorController extends RxDisposable {
         const renderer = this._renderManagerService.getRenderById(unitId);
         if (renderer) {
             const { engine } = renderer;
-            const observer = engine.onEndFrameObservable.add(() => {
+            this._currentUnitSub = engine.endFrame$.subscribe(() => {
                 this._containerElement.textContent = `FPS: ${Math.round(engine.getFps()).toString()}`;
             });
-
-            this._currentObserverDisposable = toDisposable(() => engine.onEndFrameObservable.remove(observer));
         }
     }
 

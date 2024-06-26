@@ -23,7 +23,7 @@ import { fromCallback } from './rxjs';
 export const afterInitApply = (commandService: ICommandService) => {
     return new Promise<void>((res) => {
         merge(
-            fromCallback(commandService.onCommandExecuted).pipe(filter(([info]) => {
+            fromCallback(commandService.onCommandExecuted.bind(commandService)).pipe(filter(([info]) => {
                 return info.type === CommandType.MUTATION;
             })),
             timer(300)

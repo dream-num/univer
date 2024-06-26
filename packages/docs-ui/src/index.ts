@@ -19,5 +19,6 @@ export * from './basics';
 export * from './docs-ui-plugin';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 export * from './services';
+export { DocsRenderService } from './services/docs-render.service';
 export { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';

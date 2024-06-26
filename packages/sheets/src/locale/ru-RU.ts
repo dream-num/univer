@@ -19,7 +19,7 @@ import type zhCN from './zh-CN';
 const locale: typeof zhCN = {
     sheets: {
         tabs: {
-            sheetCopy: '(Копия)',
+            sheetCopy: '(Копия{0})',
             sheet: 'Лист',
         },
         info: {

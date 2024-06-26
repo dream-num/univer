@@ -16,7 +16,7 @@
 
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { Disposable, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, Tools, UniverInstanceType } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService, ISidebarService } from '@univerjs/ui';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
@@ -25,7 +25,6 @@ import { ConditionFormattingPanel } from '../components/panel';
 
 export interface IUniverSheetsConditionalFormattingUIConfig {
     menu: MenuConfig;
-    skipConditionalFormattingCore?: boolean;
 }
 
 export const DefaultSheetConditionalFormattingUiConfig = {};
@@ -62,6 +61,7 @@ export class ConditionalFormattingMenuController extends Disposable {
             children: {
                 label: CF_PANEL_KEY,
                 rule,
+                key: Tools.generateRandomId(4),
             },
             onClose: () => this._sidebarDisposable = null,
         };

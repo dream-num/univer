@@ -32,7 +32,6 @@ export * from './scroll-timer';
 export * from './shape';
 export * from './viewport';
 
-// doc
 export { DocumentViewModel } from './components/docs/view-model/document-view-model';
 export { getAnchorBounding, TEXT_RANGE_LAYER_INDEX, TextRange } from './components/docs/text-selection/text-range';
 export { NodePositionConvertToCursor } from './components/docs/text-selection/convert-cursor';

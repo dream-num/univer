@@ -22,13 +22,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';
 import { BuiltInUIPart } from '../services/parts/parts.service';
-import styles from './app.module.less';
+import styles from './mobile-app.module.less';
 import { ComponentContainer, useComponentsOfPart } from './components/ComponentContainer';
-import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
 import { builtInGlobalComponents } from './parts';
-import { ContextMenu } from './components/context-menu/ContextMenu';
+import { MobileContextMenu } from './components/context-menu/MobileContextMenu';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -36,7 +35,7 @@ export interface IUniverAppProps extends IWorkbenchOptions {
     onRendered?: (container: HTMLElement) => void;
 }
 
-export function App(props: IUniverAppProps) {
+export function MobileApp(props: IUniverAppProps) {
     const {
         header = true,
         footer = true,
@@ -108,9 +107,7 @@ export function App(props: IUniverAppProps) {
             <div className={styles.appLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
                 {/* header */}
                 {header && (
-                    <header className={styles.appContainerHeader}>
-                        <Toolbar headerMenuComponents={headerMenuComponents} />
-                    </header>
+                    <header className={styles.appContainerHeader}></header>
                 )}
 
                 {/* content */}
@@ -121,7 +118,7 @@ export function App(props: IUniverAppProps) {
                         </aside>
 
                         <section className={styles.appContainerContent}>
-                            <header>
+                            <header className={styles.appHeader}>
                                 {header && <ComponentContainer key="header" components={headerComponents} />}
                             </header>
 
@@ -152,7 +149,7 @@ export function App(props: IUniverAppProps) {
             </div>
             <ComponentContainer key="global" components={globalComponents} />
             <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
-            {contextMenu && <ContextMenu />}
+            {contextMenu && <MobileContextMenu />}
         </ConfigProvider>
     );
 }

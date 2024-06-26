@@ -152,7 +152,7 @@ export class SheetsFilterService extends Disposable {
         this.disposeWithMe(
             merge(
                 // source1: executing filter related mutations
-                fromCallback(this._commandService.onCommandExecuted)
+                fromCallback(this._commandService.onCommandExecuted.bind(this._commandService))
                     .pipe(filter(([command]) => command.type === CommandType.MUTATION && FILTER_MUTATIONS.has(command.id))),
 
                 // source2: activate sheet changes

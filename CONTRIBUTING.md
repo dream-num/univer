@@ -85,6 +85,27 @@ During the refactoring process, it is recommended to remove legacy folders such 
 
 Avoid creating barrel imports (index.ts) unless it is the main root index.ts file of a plugin.
 
+#### Desktop & Mobile
+
+We added experimental support for mobile platforms since June 2024. After that, all UI plugins should split ui related code by their running platforms:
+
+```
+|- controllers/
+  |- render-controllers/
+    |- common/
+    |- desktop/
+    |- mobile/
+|- views/
+  |- components/
+    |- common/
+    |- desktop/
+    |- mobile/
+  |- parts/
+    |- common/
+    |- desktop/
+    |- mobile/
+```
+
 ### Connecting context
 
 To effectively contribute as a member of a software engineering team (and community as well!), it is crucial to establish strong contextual connections. Providing links to relevant resources can greatly assist others in understanding the context. Consider the following practices:

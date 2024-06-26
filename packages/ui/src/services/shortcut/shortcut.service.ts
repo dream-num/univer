@@ -68,7 +68,7 @@ export interface IShortcutService {
 
 export const IShortcutService = createIdentifier<IShortcutService>('univer.shortcut');
 
-export class DesktopShortcutService extends Disposable implements IShortcutService {
+export class ShortcutService extends Disposable implements IShortcutService {
     private readonly _shortCutMapping = new Map<number, Set<IShortcutItem>>();
     private readonly _commandIDMapping = new Map<string, Set<IShortcutItem>>();
 

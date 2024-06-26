@@ -33,38 +33,31 @@ export class SheetsConditionalFormattingPlugin extends Plugin {
     static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
-    static readonly dependencyList: Dependency[] = [
-        [ConditionalFormattingService],
-        [ConditionalFormattingFormulaService],
-        [ConditionalFormattingRuleModel],
-        [ConditionalFormattingViewModel],
-    ];
-
-    static readonly mutationList = [
-        AddConditionalRuleMutation,
-        DeleteConditionalRuleMutation,
-        SetConditionalRuleMutation,
-        MoveConditionalRuleMutation,
-        ConditionalFormattingFormulaMarkDirty,
-    ];
-
     constructor(
         _config: unknown,
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();
-        this._initCommand();
     }
 
     override onStarting(): void {
-        SheetsConditionalFormattingPlugin.dependencyList.forEach((dependency) => {
+        ([
+            [ConditionalFormattingService],
+            [ConditionalFormattingFormulaService],
+            [ConditionalFormattingRuleModel],
+            [ConditionalFormattingViewModel],
+        ] as Dependency[]).forEach((dependency) => {
             this._injector.add(dependency);
         });
-    }
 
-    _initCommand() {
-        SheetsConditionalFormattingPlugin.mutationList.forEach((m) => {
+        [
+            AddConditionalRuleMutation,
+            DeleteConditionalRuleMutation,
+            SetConditionalRuleMutation,
+            MoveConditionalRuleMutation,
+            ConditionalFormattingFormulaMarkDirty,
+        ].forEach((m) => {
             this._commandService.registerCommand(m);
         });
     }

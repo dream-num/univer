@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Choose } from '../index';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
@@ -66,6 +66,24 @@ describe('Test choose function', () => {
             }`);
             const resultObject = testFunction.calculate(indexNum, value1);
             expect(getObjectValue(resultObject)).toStrictEqual([[2], [3], [4]]);
+        });
+
+        it('Index num number, value1 array with blank cell', async () => {
+            const indexNum = NumberValueObject.create(1);
+
+            const value1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [null],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const resultObject = testFunction.calculate(indexNum, value1);
+            expect(getObjectValue(resultObject)).toStrictEqual([[0]]);
         });
 
         it('All params with array', async () => {

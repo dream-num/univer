@@ -19,6 +19,7 @@ import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Choose extends BaseFunction {
@@ -61,7 +62,12 @@ export class Choose extends BaseFunction {
             }
 
             const arrayValueObject = arrayValueObjectList[Number(index.getValue()) - 1];
-            return arrayValueObject?.get(row, column) || ErrorValueObject.create(ErrorType.VALUE);
+
+            let valueObject = arrayValueObject?.get(row, column) || ErrorValueObject.create(ErrorType.VALUE);
+            if (valueObject?.isNull()) {
+                valueObject = NumberValueObject.create(0);
+            }
+            return valueObject;
         });
     }
 }

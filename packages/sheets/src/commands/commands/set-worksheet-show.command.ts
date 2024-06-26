@@ -33,6 +33,28 @@ export interface ISetWorksheetShowCommandParams {
     value?: string;
 }
 
+export class BranchCoverage {
+    branches: boolean[];
+    functionName: string;
+
+    constructor(functionName: string, branchCount: number) {
+        this.functionName = functionName;
+        this.branches = new Array<branchCount>.fill(false);
+    }
+
+    public printCoverage(): void {
+        const totalCovered = this.branches.filter(Boolean).length;
+        console.log("--- COVERAGE REPORT ---")
+        console.log(`Function         : ${this.functionName}`)
+        console.log(`Branches covered : ${totalCovered}`)
+        console.log(`Branches total   : ${this.branches.length}`)
+        console.log(`Percentage       : ${totalCovered * 100 / this.branches.length}%`)
+        this.branches.foreach((value, index) => {
+            console.log(`Branch ${index}: ${value ? "Hit" : "Miss"}`)
+        })
+    }
+}
+
 export const SetWorksheetShowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-show',

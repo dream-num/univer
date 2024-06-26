@@ -21,7 +21,8 @@ import type {
     IRangeWithCoord,
     ITextRun,
     Nullable,
-    Workbook } from '@univerjs/core';
+    Workbook,
+} from '@univerjs/core';
 import {
     AbsoluteRefType,
     Direction,
@@ -834,7 +835,7 @@ export class PromptController extends Disposable {
 
         this._formulaPromptService.disableLockedSelectionInsert();
 
-            // this._lastSequenceNodes = [];
+        // this._lastSequenceNodes = [];
 
         this._formulaPromptService.clearSequenceNodes();
 
@@ -1688,15 +1689,13 @@ export class PromptController extends Disposable {
         }
 
         const { mainComponent: documentComponent } = editorObject;
-        this.disposeWithMe(
-            toDisposable(
-                documentComponent?.onPointerDown$.subscribeEvent(() => {
-                    this._arrowMoveActionState = ArrowMoveAction.moveCursor;
+        if (documentComponent) {
+            this.disposeWithMe(documentComponent.onPointerDown$.subscribeEvent(() => {
+                this._arrowMoveActionState = ArrowMoveAction.moveCursor;
 
-                    this._inputPanelState = InputPanelState.mouse;
-                })
-            )
-        );
+                this._inputPanelState = InputPanelState.mouse;
+            }));
+        }
     }
 
     private _pressEnter(params: ISelectEditorFormulaOperationParam) {
@@ -1892,13 +1891,11 @@ export class PromptController extends Disposable {
         }
 
         const { mainComponent: documentComponent } = editorObject;
-        this.disposeWithMe(
-            toDisposable(
-                documentComponent?.onPointerDown$.subscribeEvent(() => {
-                    this._userCursorMove = true;
-                })
-            )
-        );
+        if (documentComponent) {
+            this.disposeWithMe(documentComponent?.onPointerDown$.subscribeEvent(() => {
+                this._userCursorMove = true;
+            }));
+        }
     }
 
     private _inputFormulaListener() {

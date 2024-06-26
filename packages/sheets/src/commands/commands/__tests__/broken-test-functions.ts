@@ -15,11 +15,9 @@ export class TestData {
 
 export function getSheetCommandTarget(univerInstanceService: IUniverInstanceService) : Nullable<{workbook: Workbook, unitId: string}> {
   if (!TestData.testData.spoofed) {
-    console.log("not so scary");
     return realGetSheetCommandTarget(univerInstanceService);
   }
 
-    console.log("scary");
     const testBed = createCommandTestBed();
 
     univerInstanceService = testBed.get(IUniverInstanceService);

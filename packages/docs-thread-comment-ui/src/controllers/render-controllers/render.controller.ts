@@ -22,6 +22,7 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { Inject } from '@wendellhu/redi';
+import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 
 @OnLifecycle(LifecycleStages.Starting, DocThreadCommentRenderController)
 export class DocThreadCommentRenderController extends Disposable implements IRenderModule {
@@ -48,9 +49,13 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
 
             const unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId();
             if (unitId) {
-                this._docRenderController.reRender(
-                    unitId
-                );
+                this._docRenderController.reRender(unitId);
+            }
+        }));
+
+        this.disposeWithMe(this._threadCommentModel.commentUpdate$.subscribe((update) => {
+            if (update.type === 'resolve') {
+                this._docRenderController.reRender(update.unitId);
             }
         }));
     }
@@ -63,15 +68,16 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
                 }
                 const { unitId, index, customRanges } = pos;
                 const activeComment = this._threadCommentPanelService.activeCommentId;
-                if (!activeComment) {
-                    return next(data);
-                }
-                const { commentId, unitId: commentUnitID, subUnitId } = activeComment;
-                const comment = this._threadCommentModel.getComment(commentUnitID, subUnitId, commentId);
-                if (!comment) {
-                    return next(data);
-                }
+                const { commentId, unitId: commentUnitID } = activeComment || {};
                 const activeCustomRange = customRanges.find((i) => i.rangeId === commentId);
+                const comment = this._threadCommentModel.getComment(unitId, DEFAULT_DOC_SUBUNIT_ID, data.rangeId);
+                if (!comment) {
+                    return next({
+                        ...data,
+                        show: false,
+                    });
+                }
+
                 const isActiveIndex = activeCustomRange && index >= activeCustomRange.startIndex && index <= activeCustomRange.endIndex;
                 const isActive = commentUnitID === unitId && data.rangeId === commentId;
                 return next({

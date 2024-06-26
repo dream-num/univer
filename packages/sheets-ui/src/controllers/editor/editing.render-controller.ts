@@ -1048,7 +1048,7 @@ function isRichText(body: IDocumentBody) {
     const { textRuns = [], paragraphs = [] } = body;
 
     return (
-        textRuns.some((textRun) => textRun.ts && !Tools.isEmptyObject(textRun.ts) && textRun.ed - textRun.st !== body.dataStream.replace(/\r\n$/, '').length) ||
+        textRuns.some((textRun) => textRun.ts && !Tools.isEmptyObject(textRun.ts)) ||
         paragraphs.some((paragraph) => paragraph.bullet) ||
         paragraphs.length >= 2
     );

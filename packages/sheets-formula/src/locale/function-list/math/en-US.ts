@@ -126,7 +126,7 @@ export default {
         },
     },
     ASINH: {
-        description: 'Returns the inverse hyperbolic sine of a number',
+        description: 'Returns the inverse hyperbolic sine of a number.',
         abstract: 'Returns the inverse hyperbolic sine of a number',
         links: [
             {
@@ -135,8 +135,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number.' },
         },
     },
     ATAN: {

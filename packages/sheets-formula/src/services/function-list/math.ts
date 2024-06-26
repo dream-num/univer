@@ -166,16 +166,9 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         abstract: 'formula.functionList.ASINH.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ASINH.functionParameter.number1.name',
-                detail: 'formula.functionList.ASINH.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ASINH.functionParameter.number2.name',
-                detail: 'formula.functionList.ASINH.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ASINH.functionParameter.number.name',
+                detail: 'formula.functionList.ASINH.functionParameter.number.detail',
+                example: '10',
                 require: 1,
                 repeat: 0,
             },

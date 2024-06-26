@@ -127,7 +127,7 @@ export default {
     },
     ASINH: {
         description: '数値の双曲線逆正弦 (ハイパーボリック サインの逆関数) を返します。',
-        abstract: '数値の双曲線逆正弦 (ハイパーボリック サインの逆関数) を返します。',
+        abstract: '数値の双曲線逆正弦 (ハイパーボリック サインの逆関数) を返します',
         links: [
             {
                 title: '指導',
@@ -135,8 +135,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '実数を指定します。' },
         },
     },
     ATAN: {

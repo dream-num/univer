@@ -125,7 +125,7 @@ export default {
         },
     },
     ASINH: {
-        description: '返回数字的反双曲正弦值',
+        description: '返回数字的反双曲正弦值。',
         abstract: '返回数字的反双曲正弦值',
         links: [
             {
@@ -134,8 +134,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '任意实数。' },
         },
     },
     ATAN: {

@@ -18,6 +18,8 @@ import { Abs } from './abs';
 import { Acos } from './acos';
 import { Acosh } from './acosh';
 import { Acot } from './acot';
+import { Asin } from './asin';
+import { Asinh } from './asinh';
 import { FUNCTION_NAMES_MATH } from './function-names';
 import { Mod } from './mod';
 import { Power } from './power';
@@ -32,6 +34,8 @@ export const functionMath = [
     [Acos, FUNCTION_NAMES_MATH.ACOS],
     [Acosh, FUNCTION_NAMES_MATH.ACOSH],
     [Acot, FUNCTION_NAMES_MATH.ACOT],
+    [Asin, FUNCTION_NAMES_MATH.ASIN],
+    [Asinh, FUNCTION_NAMES_MATH.ASINH],
     [Mod, FUNCTION_NAMES_MATH.MOD],
     [Subtotal, FUNCTION_NAMES_MATH.SUBTOTAL],
     [Sum, FUNCTION_NAMES_MATH.SUM],

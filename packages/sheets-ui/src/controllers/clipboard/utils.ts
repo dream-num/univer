@@ -40,6 +40,7 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 
 import numfmt from '@univerjs/engine-numfmt';
+import { DEFAULT_PADDING_DATA } from '@univerjs/engine-render';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 import { COPY_TYPE } from '../../services/clipboard/type';
 import { discreteRangeToRange, type IDiscreteRange, virtualizeDiscreteRanges } from '../utils/range-tools';
@@ -352,6 +353,7 @@ export function getSetCellStyleMutations(
         const newValue: ICellData = {
             s: Object.assign({}, {
                 ...DEFAULT_STYLES,
+                pd: DEFAULT_PADDING_DATA,
                 bg: null,
             }, value.s),
         };

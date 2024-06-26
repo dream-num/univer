@@ -19,7 +19,6 @@ import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
 import { ThreadCommentModel } from '../../models/thread-comment.model';
 import { AddCommentMutation, DeleteCommentMutation, type IUpdateCommentPayload, ResolveCommentMutation, UpdateCommentMutation } from '../mutations/comment.mutation';
 import { IThreadCommentDataSourceService } from '../../services/tc-datasource.service';
-import { CommentUpdateOperation, ICommentUpdateOperationProps } from '../operations/comment.operation';
 
 export interface IAddCommentCommandParams {
     unitId: string;
@@ -70,14 +69,14 @@ export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
         }
 
         if (!syncUpdateMutationToColla) {
-            commandService.executeCommand(CommentUpdateOperation.id, {
-                unitId,
-                subUnitId,
-                commentId: comment.id,
-                threadId: comment.threadId,
-                rootId: comment.parentId || comment.id,
-                type: 'reply'
-            } as ICommentUpdateOperationProps);
+            // commandService.executeCommand(CommentUpdateOperation.id, {
+            //     unitId,
+            //     subUnitId,
+            //     commentId: comment.id,
+            //     threadId: comment.threadId,
+            //     rootId: comment.parentId || comment.id,
+            //     type: 'reply'
+            // } as ICommentUpdateOperationProps);
             return true;
         }
 
@@ -124,14 +123,14 @@ export const UpdateCommentCommand: ICommand<IUpdateCommentCommandParams> = {
         }
 
         if (!syncUpdateMutationToColla) {
-            commandService.executeCommand(CommentUpdateOperation.id, {
-                unitId,
-                subUnitId,
-                commentId: currentComment.id,
-                threadId: currentComment.threadId,
-                rootId: currentComment.parentId || currentComment.id,
-                type: 'update'
-            } as ICommentUpdateOperationProps);
+            // commandService.executeCommand(CommentUpdateOperation.id, {
+            //     unitId,
+            //     subUnitId,
+            //     commentId: currentComment.id,
+            //     threadId: currentComment.threadId,
+            //     rootId: currentComment.parentId || currentComment.id,
+            //     type: 'update'
+            // } as ICommentUpdateOperationProps);
             return true;
         }
 
@@ -224,14 +223,14 @@ export const DeleteCommentCommand: ICommand<IDeleteCommentCommandParams> = {
         };
 
         if (!syncUpdateMutationToColla) {
-            commandService.executeCommand(CommentUpdateOperation.id, {
-                unitId,
-                subUnitId,
-                commentId: comment.id,
-                threadId: comment.threadId,
-                rootId: comment.parentId || comment.id,
-                type: 'delete'
-            });
+            // commandService.executeCommand(CommentUpdateOperation.id, {
+            //     unitId,
+            //     subUnitId,
+            //     commentId: comment.id,
+            //     threadId: comment.threadId,
+            //     rootId: comment.parentId || comment.id,
+            //     type: 'delete'
+            // });
             return true
         }
 

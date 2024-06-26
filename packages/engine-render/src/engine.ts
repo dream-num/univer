@@ -369,7 +369,6 @@ export class Engine extends ThinEngine<Scene> {
         return window;
     }
 
-    /** @hidden */
     private _renderLoop(): void {
         let shouldRender = true;
         if (!this.renderEvenInBackground) {

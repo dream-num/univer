@@ -14,57 +14,83 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { DocRenderController } from '@univerjs/docs-ui';
-import { Inject, Injector } from '@wendellhu/redi';
-import { takeUntil } from 'rxjs';
+import type { Nullable } from '@univerjs/core';
+import { IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IDisposable } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
+import { distinctUntilChanged, filter, take, takeUntil } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, PerformanceMonitorController)
 export class PerformanceMonitorController extends RxDisposable {
-    private _documentType: UniverInstanceType = UniverInstanceType.UNIVER_UNKNOWN;
-    private _hasWatched = false;
-    private _container!: HTMLDivElement;
+    private _initListener = false;
+    private _containerElement!: HTMLDivElement;
     private _styleElement!: HTMLStyleElement;
 
+    private _currentObserverDisposable: Nullable<IDisposable>;
+
     constructor(
-        @Inject(DocRenderController) private _DocRenderController: DocRenderController,
-        @Inject(Injector) private _injector: Injector,
-        @IUniverInstanceService private _instanceService: IUniverInstanceService
+    @Inject(LifecycleService) lifecycleService: LifecycleService,
+        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
-        this._listenDocumentTypeChange();
+        lifecycleService.subscribeWithPrevious()
+            .pipe(
+                filter((stage) => stage === LifecycleStages.Rendered),
+                take(1)
+            )
+            .subscribe(() => this._listenDocumentTypeChange());
     }
 
     override dispose(): void {
         super.dispose();
 
-        document.body.removeChild(this._container);
+        document.body.removeChild(this._containerElement);
         document.head.removeChild(this._styleElement);
+
+        this._disposeCurrentObserver();
+    }
+
+    private _disposeCurrentObserver(): void {
+        this._currentObserverDisposable?.dispose();
+        this._currentObserverDisposable = null;
     }
 
     private _listenDocumentTypeChange() {
-        this._instanceService.focused$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
-            if (unitId != null) {
-                const univerType = this._instanceService.getUnitType(unitId);
-
-                this._documentType = univerType;
-
-                this._listenFPS();
+        this._instanceService.focused$.pipe(takeUntil(this.dispose$), distinctUntilChanged()).subscribe((unitId) => {
+            this._disposeCurrentObserver();
+            if (unitId) {
+                this._listenToRenderer(unitId);
             }
         });
     }
 
-    private _listenFPS() {
-        if (this._hasWatched) {
+    private _listenToRenderer(unitId: string) {
+        this._tryInit();
+
+        const renderer = this._renderManagerService.getRenderById(unitId);
+        if (renderer) {
+            const { engine } = renderer;
+            const observer = engine.onEndFrameObservable.add(() => {
+                this._containerElement.textContent = `FPS: ${Math.round(engine.getFps()).toString()}`;
+            });
+
+            this._currentObserverDisposable = toDisposable(() => engine.onEndFrameObservable.remove(observer));
+        }
+    }
+
+    private _tryInit(): void {
+        if (this._initListener) {
             return;
         }
 
-        this._hasWatched = true;
+        this._initListener = true;
 
-        const container = (this._container = document.createElement('div'));
+        const container = (this._containerElement = document.createElement('div'));
+        this._containerElement = container;
         container.classList.add('fps-monitor');
-        const THROTTLE_TIME = 500;
         document.body.appendChild(container);
 
         const style = `
@@ -84,8 +110,6 @@ export class PerformanceMonitorController extends RxDisposable {
         `;
 
         this._styleElement = document.createElement('style');
-        document.head.appendChild(this._styleElement).innerText = style;
-
-        // TODO@wzhudev: monitor fps from engine
+        document.head.appendChild(this._styleElement).textContent = style;
     }
 }

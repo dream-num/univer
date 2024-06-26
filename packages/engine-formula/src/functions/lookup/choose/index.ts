@@ -15,6 +15,7 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
@@ -27,9 +28,35 @@ export class Choose extends BaseFunction {
 
     override maxParams = 255;
 
-    override calculate(indexNum: BaseValueObject, ...variants: BaseValueObject[]) {
+    override needsReferenceObject = true;
+
+    override isAddress() {
+        return true;
+    }
+
+    override calculate(indexNum: FunctionVariantType, ...variants: FunctionVariantType[]) {
         if (indexNum.isError()) {
-            return ErrorValueObject.create(ErrorType.NA);
+            return indexNum;
+        }
+
+        if (indexNum.isReferenceObject()) {
+            indexNum = (indexNum as BaseReferenceObject).toArrayValueObject();
+        }
+
+        indexNum = indexNum as BaseValueObject;
+
+        if (!indexNum.isArray()) {
+            const index = indexNum.convertToNumberObjectValue();
+
+            if (index.isError()) {
+                return index;
+            }
+
+            const variant = variants[Math.trunc(+index.getValue()) - 1] || ErrorValueObject.create(ErrorType.VALUE);
+            // if (variant.isNull()) {
+            //     variant = NumberValueObject.create(0);
+            // }
+            return variant;
         }
 
         // The size of the extended range is determined by the maximum width and height of the criteria range.
@@ -48,7 +75,12 @@ export class Choose extends BaseFunction {
         });
 
         const indexNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, indexNum, ErrorValueObject.create(ErrorType.NA));
-        const arrayValueObjectList = variants.map((variant) => expandArrayValueObject(maxRowLength, maxColumnLength, variant, ErrorValueObject.create(ErrorType.NA)));
+        const arrayValueObjectList = variants.map((variant) => {
+            if (variant.isReferenceObject()) {
+                variant = (variant as BaseReferenceObject).toArrayValueObject();
+            }
+            return expandArrayValueObject(maxRowLength, maxColumnLength, variant as BaseValueObject, ErrorValueObject.create(ErrorType.NA));
+        });
 
         return indexNumArray.map((indexNumValue, row, column) => {
             if (indexNumValue.isError()) {
@@ -61,7 +93,7 @@ export class Choose extends BaseFunction {
                 return index;
             }
 
-            const arrayValueObject = arrayValueObjectList[Number(index.getValue()) - 1];
+            const arrayValueObject = arrayValueObjectList[Math.trunc(+index.getValue()) - 1];
 
             let valueObject = arrayValueObject?.get(row, column) || ErrorValueObject.create(ErrorType.VALUE);
             if (valueObject?.isNull()) {

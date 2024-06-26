@@ -22,6 +22,7 @@ import { Choose } from '../index';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test choose function', () => {
     const testFunction = new Choose(FUNCTION_NAMES_LOOKUP.CHOOSE);
@@ -33,7 +34,15 @@ describe('Test choose function', () => {
             const value2 = NumberValueObject.create(22);
 
             const resultObject = testFunction.calculate(indexNum, value1, value2);
-            expect(getObjectValue(resultObject)).toStrictEqual([[22]]);
+            expect(getObjectValue(resultObject)).toStrictEqual(22);
+        });
+
+        it('Index num error', async () => {
+            const indexNum = ErrorValueObject.create(ErrorType.NAME);
+            const value1 = NumberValueObject.create(11);
+
+            const resultObject = testFunction.calculate(indexNum, value1);
+            expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.NAME);
         });
 
         it('Index num and value, exceeding quantity', async () => {
@@ -42,7 +51,7 @@ describe('Test choose function', () => {
             const value2 = NumberValueObject.create(22);
 
             const resultObject = testFunction.calculate(indexNum, value1, value2);
-            expect(getObjectValue(resultObject)).toStrictEqual([[ErrorType.VALUE]]);
+            expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Index num array', async () => {
@@ -57,7 +66,7 @@ describe('Test choose function', () => {
         });
 
         it('Index num number, value1 array', async () => {
-            const indexNum = NumberValueObject.create(1);
+            const indexNum = NumberValueObject.create(1.9);
 
             const value1 = ArrayValueObject.create(/*ts*/ `{
                 2;
@@ -66,6 +75,18 @@ describe('Test choose function', () => {
             }`);
             const resultObject = testFunction.calculate(indexNum, value1);
             expect(getObjectValue(resultObject)).toStrictEqual([[2], [3], [4]]);
+        });
+
+        it('Index num number negative', async () => {
+            const indexNum = NumberValueObject.create(-2);
+
+            const value1 = ArrayValueObject.create(/*ts*/ `{
+                2;
+                3;
+                4
+            }`);
+            const resultObject = testFunction.calculate(indexNum, value1);
+            expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Index num number, value1 array with blank cell', async () => {

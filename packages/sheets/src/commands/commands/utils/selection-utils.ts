@@ -99,23 +99,60 @@ export function getCellAtRowCol(row: number, col: number, worksheet: Worksheet):
     return destRange;
 }
 
+export class BranchCoverage {
+    static coverage = new BranchCoverage("setEndForRange", 9)
+
+    branches: boolean[];
+    functionName: string;
+
+    constructor(functionName: string, branchCount: number) {
+        this.functionName = functionName;
+        this.branches = new Array<boolean>(branchCount).fill(false);
+    }
+
+    public printCoverage(): void {
+        const totalCovered = this.branches.filter(Boolean).length;
+        console.log("--- COVERAGE REPORT ---")
+        console.log(`Function         : ${this.functionName}`)
+        console.log(`Branches covered : ${totalCovered}`)
+        console.log(`Branches total   : ${this.branches.length}`)
+        console.log(`Percentage       : ${totalCovered * 100 / this.branches.length}%`)
+        this.branches.forEach((value, index) => {
+            console.log(`Branch ${index}: ${value ? "Hit" : "Miss"}`)
+        })
+    }
+}
+
 export function setEndForRange(range: IRange, rowCount: number, columnCount: number) {
+    BranchCoverage.coverage.branches[0] = true;
     const { startRow, startColumn, endRow, endColumn } = range;
 
     if (Number.isNaN(startRow)) {
+        BranchCoverage.coverage.branches[1] = true;
         range.startRow = 0;
+    } else {
+        BranchCoverage.coverage.branches[2] = true;
     }
 
     if (Number.isNaN(endRow)) {
+        BranchCoverage.coverage.branches[3] = true;
         range.endRow = rowCount - 1;
+    } else {
+        BranchCoverage.coverage.branches[4] = true;
     }
 
     if (Number.isNaN(startColumn)) {
+        BranchCoverage.coverage.branches[5] = true;
         range.startColumn = 0;
+    } else {
+        BranchCoverage.coverage.branches[6] = true;
     }
 
     if (Number.isNaN(endColumn)) {
+        BranchCoverage.coverage.branches[7] = true;
         range.endColumn = columnCount - 1;
+    } else {
+        BranchCoverage.coverage.branches[8] = true;
     }
 
     return range;

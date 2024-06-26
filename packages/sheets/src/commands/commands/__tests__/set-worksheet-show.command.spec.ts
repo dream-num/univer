@@ -117,5 +117,13 @@ describe('Test set worksheet show commands', () => {
                 expect(workbook.getSheetBySheetId(targetSheetId)?.getConfig().hidden).toBeFalsy();
             });
         });
+
+        describe('call function without a worksheet', async () => {
+            it('correct situation: ', async () => {
+                expect(
+                    await commandService.executeCommand(SetWorksheetShowCommand.id, { subUnitId: null})
+                ).toBeFalsy();
+            });
+        });
     });
 });

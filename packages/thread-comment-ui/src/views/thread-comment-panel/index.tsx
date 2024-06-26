@@ -85,7 +85,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                 .filter((i) => !i.parentId);
 
         const sort = sortComments ?? ((a) => a);
-        const res = tempComment ? [...allComments, tempComment] : allComments;
+        const res = allComments;
 
         if (showComments) {
             const map = new Map<string, IThreadComment>();
@@ -97,22 +97,27 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
         } else {
             return sort(res);
         }
-    }, [tempComment, showComments, unit, unitComments, sortComments, subUnitId]);
+    }, [showComments, unit, unitComments, sortComments, subUnitId]);
+
+    const commentsSorted = useMemo(() => [
+        ...comments.filter((comment) => !comment.resolved),
+        ...comments.filter((comment) => comment.resolved),
+    ], [comments]);
 
     const statuedComments = useMemo(() => {
         if (status === 'resolved') {
-            return comments.filter((comment) => comment.resolved);
+            return commentsSorted.filter((comment) => comment.resolved);
         }
 
         if (status === 'unsolved') {
-            return comments.filter((comment) => !comment.resolved);
+            return commentsSorted.filter((comment) => !comment.resolved);
         }
         if (status === 'concern_me') {
             if (!currentUser?.userID) {
-                return comments;
+                return commentsSorted;
             }
 
-            return comments.map((comment) => threadCommentModel.getCommentWithChildren(comment.unitId, comment.subUnitId, comment.id)).map((comment) => {
+            return commentsSorted.map((comment) => threadCommentModel.getCommentWithChildren(comment.unitId, comment.subUnitId, comment.id)).map((comment) => {
                 if (comment?.relativeUsers.has(currentUser.userID)) {
                     return comment.root;
                 }
@@ -120,8 +125,12 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
             }).filter(Boolean) as IThreadComment[];
         }
 
-        return comments;
-    }, [comments, currentUser?.userID, status, threadCommentModel]);
+        return commentsSorted;
+    }, [commentsSorted, currentUser?.userID, status, threadCommentModel]);
+
+    const renderComments = tempComment
+        ? [tempComment, ...statuedComments]
+        : statuedComments;
 
     const isFiltering = status !== 'all' || unit !== 'all';
 
@@ -195,7 +204,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     ]}
                 />
             </div>
-            {statuedComments?.map((comment) => (
+            {renderComments.map((comment) => (
                 <ThreadCommentTree
                     prefix={prefix}
                     getSubUnitName={getSubUnitName}
@@ -226,7 +235,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     onDeleteComment={onDeleteComment}
                 />
             ))}
-            {statuedComments.length
+            {renderComments.length
                 ? null
                 : (
                     <div className={styles.threadCommentPanelEmpty}>

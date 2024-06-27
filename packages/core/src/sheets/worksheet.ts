@@ -296,9 +296,9 @@ export class Worksheet {
                     });
                 }
 
-                if (row !== startRow || col !== startColumn) {
-                    returnCellMatrix.realDeleteValue(row, col);
-                }
+                // if (row !== startRow || col !== startColumn) {
+                //     returnCellMatrix.realDeleteValue(row, col);
+                // }
             });
         });
 

@@ -176,7 +176,7 @@ describe('Test clipboard', () => {
                     rgb: '#000',
                 },
                 ff: 'Arial',
-                fs: 11,
+                fs: 10,
                 ht: 2,
                 it: 0,
                 ol: {
@@ -255,7 +255,7 @@ describe('Test clipboard', () => {
                     rgb: '#000',
                 },
                 ff: 'Arial',
-                fs: 11,
+                fs: 10,
                 ht: 2,
                 it: 0,
                 ol: {
@@ -334,7 +334,7 @@ describe('Test clipboard', () => {
                     rgb: '#000',
                 },
                 ff: 'Arial',
-                fs: 11,
+                fs: 10,
                 ht: 2,
                 it: 0,
                 ol: {

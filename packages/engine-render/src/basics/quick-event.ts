@@ -22,11 +22,11 @@ export function attachObjectHover(
     hoverIn: (o: any, evt: IPointerEvent | IMouseEvent) => void,
     hoverOut: (o: any, evt: IPointerEvent | IMouseEvent) => void
 ) {
-    o.onPointerEnterObserver.add((evt) => {
+    o.onPointerEnter$.subscribeEvent((evt) => {
         hoverIn(o, evt);
     });
 
-    o.onPointerLeaveObserver.add((evt) => {
+    o.onPointerLeave$.subscribeEvent((evt) => {
         hoverOut(o, evt);
     });
 }

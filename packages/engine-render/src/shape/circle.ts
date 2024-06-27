@@ -36,7 +36,7 @@ export class Circle extends Shape<ICircleProps> {
 
         this._setFixBoundingBox();
 
-        this.onTransformChangeObservable.add((changeState) => {
+        this.onTransformChange$.subscribeEvent((changeState) => {
             const { type, value, preValue } = changeState;
             if (type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize || type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.all) {
                 const value = Math.min(this.width, this.height);

@@ -94,7 +94,6 @@ export function getBodySlice(
     }
 
     docBody.customRanges = getDeleteCustomRange(body, startOffset, endOffset);
-
     return docBody;
 }
 
@@ -103,6 +102,7 @@ export function getDeleteCustomRange(body: IDocumentBody, startOffset: number, e
 
     const deletedCustomRange: ICustomRange[] = [];
     customRanges.forEach((range) => {
+        // custom-range contain slice-range
         if (startOffset <= range.startIndex && endOffset > range.endIndex) {
             const copy = Tools.deepClone(range);
             deletedCustomRange.push({
@@ -118,6 +118,7 @@ export function getDeleteCustomRange(body: IDocumentBody, startOffset: number, e
                 startIndex: copy.startIndex - startOffset,
                 endIndex: copy.startIndex - startOffset,
             });
+            // slice-range contain custom-range
         } else if (endOffset > range.endIndex && range.endIndex >= startOffset) {
             const copy = Tools.deepClone(range);
             deletedCustomRange.push({

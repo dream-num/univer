@@ -174,10 +174,10 @@ export class ThreadCommentModel {
         if (!comments.length) {
             return;
         }
-        const deleteThreads = new Set<string>();
+        const deleteThreads = new Set<string>(threadIds);
         comments.forEach(comment => {
             this._replaceComment(unitId, subUnitId, comment);
-            deleteThreads.add(comment.threadId);
+            deleteThreads.delete(comment.threadId);
         })
         deleteThreads.forEach(id => {
             const thread = this.getThread(unitId, id);

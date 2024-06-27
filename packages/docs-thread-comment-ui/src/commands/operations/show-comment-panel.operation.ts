@@ -39,7 +39,7 @@ export const ShowCommentPanelOperation: ICommand<IShowCommentPanelOperationParam
             sidebarService.open({
                 header: { title: 'threadCommentUI.panel.title' },
                 children: { label: DocThreadCommentPanel.componentKey },
-                width: 312,
+                width: 320,
                 onClose: () => panelService.setPanelVisible(false),
             });
             panelService.setPanelVisible(true);

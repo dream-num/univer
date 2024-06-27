@@ -55,11 +55,11 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     ) {
         super();
 
-        this._addNewRender();
+        this._addNewRender(this._context.unit);
     }
 
-    private _addNewRender() {
-        const { scene, engine, unit: workbook } = this._context;
+    private _addNewRender(workbook: Workbook) {
+        const { scene, engine } = this._context;
 
         scene.addLayer(new Layer(scene, [], 0), new Layer(scene, [], 2));
 
@@ -189,6 +189,9 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             isRelativeY: false,
         });
 
+        /**
+         * for column header
+         */
         const viewColumnRight = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
             left: rowHeader.width,
             top: 0,
@@ -198,6 +201,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             isRelativeX: true,
             isRelativeY: false,
         });
+        // viewColumnRight.closeClip();
 
         const viewLeftTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
             left: 0,
@@ -278,26 +282,24 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
     private _initCommandListener(): void {
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            const { unit: workbook, unitId: workbookId } = this._context;
-            const { id: commandId } = command;
-
-            if (COMMAND_LISTENER_SKELETON_CHANGE.includes(commandId) || this._sheetRenderService.checkMutationShouldTriggerRerender(commandId)) {
+            const workbook = this._context.unit;
+            const unitId = workbook.getUnitId();
+            if (COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id) || this._sheetRenderService.checkMutationShouldTriggerRerender(command.id)) {
                 const worksheet = workbook.getActiveSheet();
                 if (!worksheet) return;
 
-                const workbookId = this._context.unitId;
-                const worksheetId = worksheet.getSheetId();
+                const sheetId = worksheet.getSheetId();
                 const params = command.params;
                 const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
 
-                if (unitId !== workbookId || subUnitId !== worksheetId) {
+                if ((unitId !== workbook.getUnitId() && subUnitId !== worksheet.getSheetId())) {
                     return;
                 }
 
-                if (commandId !== SetWorksheetActiveOperation.id) {
+                if (command.id !== SetWorksheetActiveOperation.id) {
                     this._sheetSkeletonManagerService.makeDirty({
-                        sheetId: worksheetId,
-                        commandId,
+                        sheetId,
+                        commandId: command.id,
                     }, true);
                 }
 
@@ -306,23 +308,22 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
                 // setCurrent ---> currentSkeletonBefore$ ---> zoom.controller.subscribe ---> scene._setTransForm --->  viewports markDirty
                 // setCurrent ---> currentSkeleton$ ---> scroll.controller.subscribe ---> scene?.transformByState ---> scene._setTransFor
                 this._sheetSkeletonManagerService.setCurrent({
-                    sheetId: worksheetId,
-                    commandId,
+                    sheetId,
+                    commandId: command.id,
                 });
-            } else if (COMMAND_LISTENER_VALUE_CHANGE.includes(commandId)) {
+            } else if (COMMAND_LISTENER_VALUE_CHANGE.includes(command.id)) {
                 this._sheetSkeletonManagerService.reCalculate();
             }
 
             if (command.type === CommandType.MUTATION) {
-                this._markUnitDirty(workbookId, command);
+                this._markUnitDirty(unitId, command);
             }
         }));
     }
 
     private _markUnitDirty(unitId: string, command: ICommandInfo) {
         const { mainComponent: spreadsheet, scene } = this._context;
-        // 现在 spreadsheet.markDirty 会调用 vport.markDirty
-        // 因为其他 controller 中存在 mainComponent?.makeDirty() 的调用, 不止是 sheet-render.controller 在标脏
+        // The current spreadsheet.markDirty will call viewport.markDirty. There is a call to mainComponent?.makeDirty() in other controllers, not just the sheet-render.controller that marks it as dirty.
         if (spreadsheet) {
             spreadsheet.makeDirty(); // refresh spreadsheet
         }
@@ -381,7 +382,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
         const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = skeleton;
 
-        // rowHeightAccumulation 已经表示的是行底部的高度
+        // rowHeightAccumulation means the bottom value of rows
         const dirtyBounds: IViewportInfos[] = [];
         for (const r of ranges) {
             const { startRow, endRow, startColumn, endColumn } = r;
@@ -413,7 +414,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     // eslint-disable-next-line max-lines-per-function
     private _initMouseWheel(scene: Scene, viewMain: Viewport) {
         this.disposeWithMe(
-            scene.onMouseWheel$.subscribeEvent((evt: IWheelEvent, state) => {
+            scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
                 if (evt.ctrlKey) {
                     return;
                 }

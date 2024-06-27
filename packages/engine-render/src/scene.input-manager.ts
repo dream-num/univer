@@ -24,6 +24,7 @@ import { DeviceType, PointerInput } from './basics/i-events';
 import { Vector2 } from './basics/vector2';
 import type { ThinScene } from './thin-scene';
 import type { Viewport } from './viewport';
+import type { Scene } from './scene';
 
 export class InputManager extends Disposable {
     /** The distance in pixel that you have to move to prevent some events */
@@ -55,6 +56,10 @@ export class InputManager extends Disposable {
 
     private _onPointerUp!: (evt: IPointerEvent) => void;
 
+    private _onPointerOut!: (evt: IPointerEvent) => void;
+
+    private _onPointerCancel!: (evt: IPointerEvent) => void;
+
     private _onPointerEnter!: (evt: IPointerEvent) => void;
 
     private _onPointerLeave!: (evt: IPointerEvent) => void;
@@ -75,7 +80,7 @@ export class InputManager extends Disposable {
 
     private _onDrop!: (evt: IDragEvent) => void;
 
-    private _scene!: ThinScene;
+    private _scene!: Scene;
 
     private _currentMouseEnterPicked: Nullable<BaseObject | ThinScene>;
 
@@ -152,6 +157,8 @@ export class InputManager extends Disposable {
         }
     }
 
+    private _pointerId = 0;
+
     // eslint-disable-next-line max-lines-per-function
     attachControl(
         hasDown: boolean = true,
@@ -204,14 +211,18 @@ export class InputManager extends Disposable {
             //     }
             // }
         };
-
+        //this._onPointerMove(
         this._onPointerMove = (evt: IMouseEvent) => {
             // preserve compatibility with Safari when pointerId is not present
             if ((evt as IPointerEvent).pointerId === undefined) {
                 (evt as IPointerEvent as any).pointerId = 0;
             }
+            // if (this.pointerId === (evt as IPointerEvent).pointerId) {
+            //     debugger;
+            // }
+            const currentObject = this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            Math.random() < 0.01 && console.log('!!!scene _onPointerMove', currentObject?.oKey);
 
-            this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
             const isStop = this._currentObject?.triggerPointerMove(evt);
 
             this.mouseLeaveEnterHandler(evt);
@@ -221,15 +232,15 @@ export class InputManager extends Disposable {
                 this._scene.getEngine()?.setRemainCapture();
             }
         };
-
         this._onPointerDown = (evt: IPointerEvent) => {
             // preserve compatibility with Safari when pointerId is not present
             if (evt.pointerId === undefined) {
                 (evt as any).pointerId = 0;
             }
-
+            this._pointerId = evt.pointerId;
             const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
 
+            console.log('!!!scene _onPointerDown', currentObject?.oKey);
             const isStop = currentObject?.triggerPointerDown(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
@@ -244,6 +255,7 @@ export class InputManager extends Disposable {
             }
 
             const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            console.log('!!!scene _onPointerUp', currentObject?.oKey);
             const isStop = currentObject?.triggerPointerUp(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
@@ -251,6 +263,14 @@ export class InputManager extends Disposable {
             }
 
             this._prePointerDoubleOrTripleClick(evt);
+        };
+
+        this._onPointerCancel = (evt: IPointerEvent) => {
+            this._scene.onPointerCancel$.emitEvent(evt);
+        };
+
+        this._onPointerOut = (evt: IPointerEvent) => {
+            this._scene.onPointerOut$.emitEvent(evt);
         };
 
         this._onMouseWheel = (evt: IWheelEvent) => {
@@ -312,7 +332,7 @@ export class InputManager extends Disposable {
             }
         };
 
-        // eslint-disable-next-line complexity
+        // eslint-disable-next-line complexity, max-lines-per-function
         this._onInput$ = engine.onInputChanged$.subscribeEvent((eventData: IEvent) => {
             const evt: IEvent = eventData;
             // Keyboard Events
@@ -386,6 +406,15 @@ export class InputManager extends Disposable {
                 } else if (hasLeave && eventData.currentState === 3) {
                     // this._onPointerUp(evt as IPointerEvent);
                     this._onPointerLeave(evt as IPointerEvent);
+                }
+
+                switch (evt.type) {
+                    case 'pointerout':
+                        this._onPointerOut(evt as IPointerEvent);
+                        break;
+                    case 'pointercancel':
+                        this._onPointerCancel(evt as IPointerEvent);
+                        break;
                 }
             }
         });

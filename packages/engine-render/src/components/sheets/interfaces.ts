@@ -17,7 +17,7 @@
 import type {
     BorderStyleTypes,
     HorizontalAlign,
-    ISelectionCellWithCoord,
+    ISelectionCellWithMergeInfo,
     ObjectMatrix,
     VerticalAlign,
     WrapStrategy,
@@ -62,7 +62,7 @@ interface fontCache {
 
 export interface IStylesCache {
     background?: backgroundCache;
-    backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>;
+    backgroundPositions?: ObjectMatrix<ISelectionCellWithMergeInfo>;
     font?: fontCache;
     border?: ObjectMatrix<BorderCache>;
 }

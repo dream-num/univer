@@ -25,3 +25,5 @@ export * from './rich-text';
 export * from './scroll-bar';
 export * from './shape';
 export * from './checkbox';
+export * from './dashedrect';
+export * from './floatrect';

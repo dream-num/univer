@@ -20,11 +20,32 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IScrollManagerParam {
+    /**
+     * offsetX from startRow, coordinate same as viewport, not scrollbar
+     */
     offsetX: number;
+    /**
+     * offsetY from startColumn, coordinate same as viewport, not scrollbar
+     */
     offsetY: number;
+    /**
+     * currrent start row in viewport visible area
+     */
     sheetViewStartRow: number;
+    /**
+     * current start column in viewport visible area
+     */
     sheetViewStartColumn: number;
+
+    /**
+     * overall offsetX from sheet cotent topleft, should be same as startRow * rowHeight + offsetY
+     * coordinate same as viewport, not scrollbar
+     */
     viewportScrollX?: number;
+    /**
+     * overall offsetY from sheet content topleft, should be same as startColumn * columnWidth + offsetX
+     * coordinate same as viewport, not scrollbar
+     */
     viewportScrollY?: number;
 }
 
@@ -97,15 +118,16 @@ export class ScrollManagerService {
     /**
      * set scrollInfo by cmd,
      * call _setScrollInfo twice after one scrolling.
-     * first time set scrollInfo bt scrollOperation, but offsetXY is derived from scroll event.
+     * first time set scrollInfo by scrollOperation, but offsetXY is derived from scroll event.
      * second time set scrollInfo by viewport.scrollTo(scrol.render-controller --> onScrollAfterObserver), this time offsetXY has been limited.
      *
-     * wheelevent --> sheetCanvasView -->  set-scroll.command('sheet.command.set-scroll-relative') --> scrollOperation --> this.setScrollInfo  --> scrollInfo$.next --> scroll.render-controller@viewportMain.scrollTo & notify -->
+     * wheelevent --> sheetCanvasView -->  set-scroll.command('sheet.command.set-scroll-relative') --> scrollOperation --> scrollManagerService.setScrollInfo  --> scrollInfo$.next --> scroll.render-controller@viewportMain.scrollTo & notify -->
      * scroll.render-controller@onScrollAfterObserver --> this.setScrollInfoToCurrSheetWithoutNotify --> this._setScrollInfo({}, false)
      * call _setScrollInfo again, a loop!, so we should call setScrollInfoToCurrSheetWithoutNotify
      * @param param
      */
     setScrollInfo(param: IScrollManagerInsertParam) {
+        console.log('sms', param);
         this._setScrollInfo(param);
     }
 
@@ -169,33 +191,33 @@ export class ScrollManagerService {
         const skeleton = this._renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)?.getCurrentSkeleton();
         const rowAcc = skeleton?.rowHeightAccumulation[sheetViewStartRow - 1] || 0;
         const colAcc = skeleton?.columnWidthAccumulation[sheetViewStartColumn - 1] || 0;
-        const viewportScrollX = colAcc + offsetX;
-        const viewportScrollY = rowAcc + offsetY;
+        const overallScrollX = colAcc + offsetX;
+        const overallScrollY = rowAcc + offsetY;
 
         return {
-            viewportScrollX,
-            viewportScrollY,
+            overallScrollX,
+            overallScrollY,
         };
     }
 
-    private _setScrollInfo(newScrollInfo: IScrollManagerInsertParam, notifyScrollInfo = true): void {
-        const { unitId, sheetId, sheetViewStartColumn, sheetViewStartRow, offsetX, offsetY } = newScrollInfo;
+    private _setScrollInfo(scrollInfo: IScrollManagerInsertParam, notifyScrollInfo = true): void {
+        const { unitId, sheetId, sheetViewStartColumn, sheetViewStartRow, offsetX, offsetY } = scrollInfo;
 
         if (!this._scrollInfo.has(unitId)) {
             this._scrollInfo.set(unitId, new Map());
         }
 
         const worksheetScrollInfoMap = this._scrollInfo.get(unitId)!;
-        const scrollLeftTopByRowColOffset = this.calcViewportScrollFromOffset(newScrollInfo);
-        const scrollInfo: IScrollManagerParam = {
+        const overallOffsetByRowColOffset = this.calcViewportScrollFromOffset(scrollInfo);
+        const newScrollInfo: IScrollManagerParam = {
             sheetViewStartRow,
             sheetViewStartColumn,
             offsetX,
             offsetY,
-            viewportScrollX: scrollLeftTopByRowColOffset.viewportScrollX,
-            viewportScrollY: scrollLeftTopByRowColOffset.viewportScrollY,
+            viewportScrollX: overallOffsetByRowColOffset.overallScrollX,
+            viewportScrollY: overallOffsetByRowColOffset.overallScrollY,
         };
-        worksheetScrollInfoMap.set(sheetId, scrollInfo);
+        worksheetScrollInfoMap.set(sheetId, newScrollInfo);
         if (notifyScrollInfo === true) {
             this._notifyCurrentScrollInfo({ unitId, sheetId });
         }

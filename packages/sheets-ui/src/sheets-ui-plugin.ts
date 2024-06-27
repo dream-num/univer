@@ -177,6 +177,7 @@ export class UniverSheetsUIPlugin extends Plugin {
     private _registerRenderBasics(): void {
         ([
             SheetSkeletonManagerService,
+            // SelectionRenderService,// still can not get renderContext
             SheetRenderController,
         ]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));

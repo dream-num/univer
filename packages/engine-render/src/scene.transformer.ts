@@ -379,7 +379,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 });
             });
 
-            // const upObserver = scene.onPointerUpObserver.add(() => {
+            // const upObserver = scene.onPointerUp$.subscribeEvent(() => {
             const scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
                 scenePointerMoveSub?.unsubscribe();
                 scenePointerUpSub?.unsubscribe();
@@ -924,7 +924,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         topScene.setCursor(cursor);
                     });
 
-                    // this._upObserver = topScene.onPointerUpObserver.add(() => {
+                    // this._upObserver = topScene.onPointerUp$.subscribeEvent(() => {
                     this._topScenePointerUpSub = topScene.onPointerUp$.subscribeEvent(() => {
                         // topScene.onPointerMove$.remove(this._moveObserver);
                         // topScene.onPointerUp$.remove(this._topScenePointerUpSub);

@@ -71,6 +71,8 @@ import { SheetPrintInterceptorService } from './services/print-interceptor.servi
 import { SheetUIMobileController } from './controllers/mobile/mobile-sheet-ui.controller';
 import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
+import { MobileSelectionRenderService } from './services/selection/mobile-selection-render.service';
+import { MobileSelectionRenderController } from './controllers/render-controllers/mobile/mobile-selection.render-controller';
 
 /**
  * @ignore
@@ -105,7 +107,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [ScrollManagerService],
                 // This would be removed from global injector and moved into RenderUnit provider.
                 // [SheetSkeletonManagerService],
-                [ISelectionRenderService, { useClass: SelectionRenderService }],
+                [ISelectionRenderService, { useClass: MobileSelectionRenderService }],
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
                 [HoverManagerService],
@@ -177,7 +179,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             // Before HMRC expected selections remain unchanged when user clicks on the header. If we don't initialize HMRC before SRC,
             // the selections will be changed by SRC first. Maybe we should merge row/col header related render controllers to one class.
             HeaderMoveRenderController,
-            SelectionRenderController,
+            MobileSelectionRenderController,
             HeaderFreezeRenderController,
             // HeaderUnhideRenderController,
             // HeaderResizeRenderController,

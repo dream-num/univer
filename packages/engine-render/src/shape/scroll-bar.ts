@@ -354,6 +354,7 @@ export class ScrollBar extends BaseScrollBar {
         }));
 
         // 垂直滚动条的拖拽事件
+        // scene.input-manager@_onPointerDown --> base-object@triggerPointerDown!
         this.verticalThumbRect && this._eventSub.add(this.verticalThumbRect.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             const srcElement = this.verticalThumbRect;
@@ -377,6 +378,7 @@ export class ScrollBar extends BaseScrollBar {
             this._view.scrollByBar({
                 y: e.offsetY - this._lastY,
             });
+
             this._lastY = e.offsetY;
             mainScene.getEngine()?.setRemainCapture();
         });

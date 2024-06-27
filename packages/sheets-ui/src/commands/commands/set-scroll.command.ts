@@ -29,6 +29,13 @@ export interface ISetScrollRelativeCommandParams {
     offsetY?: number;
 }
 
+export interface IScrollCommandParams {
+    offsetX?: number;
+    offsetY?: number;
+    sheetViewStartRow?: number;
+    sheetViewStartColumn?: number;
+}
+
 /**
  * This command is used to manage the scroll by relative offset
  * Usually triggered by wheel event.
@@ -37,7 +44,8 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
     id: 'sheet.command.set-scroll-relative',
     type: CommandType.COMMAND,
     // offsetXY derived from mouse wheel event
-    handler: async (accessor, params = { offsetX: 0, offsetY: 0 }) => {
+    // this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY });
+    handler: async (accessor, params: ISetScrollRelativeCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const scrollManagerService = accessor.get(ScrollManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -56,23 +64,18 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
             offsetY: currentOffsetY = 0,
         } = currentScroll || {};
 
+        // the receiver is scroll.operation.ts
         return commandService.executeCommand(SetScrollOperation.id, {
             unitId,
             sheetId: subUnitId,
+            // why + ySplit? receiver is scroll.operation.ts,  - ySplit
             sheetViewStartRow: sheetViewStartRow + ySplit,
             sheetViewStartColumn: sheetViewStartColumn + xSplit,
-            offsetX: currentOffsetX + offsetX, // offsetX may be negative or over max
+            offsetX: currentOffsetX + offsetX, // currentOffsetX + offsetX may be negative or over max
             offsetY: currentOffsetY + offsetY,
         });
     },
 };
-
-export interface IScrollCommandParams {
-    offsetX?: number;
-    offsetY?: number;
-    sheetViewStartRow?: number;
-    sheetViewStartColumn?: number;
-}
 
 /**
  * This command is used to manage the scroll position of the current view by specifying the cell index of the top left cell
@@ -113,6 +116,7 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
         return commandService.syncExecuteCommand(SetScrollOperation.id, {
             unitId: workbook.getUnitId(),
             sheetId: worksheet.getSheetId(),
+            // why + ySplit? receiver in scroll.operation.ts,  - ySplit
             sheetViewStartRow: sheetViewStartRow ?? (currentRow ?? 0) + ySplit,
             sheetViewStartColumn: sheetViewStartColumn ?? (currentColumn ?? 0) + xSplit,
             offsetX: offsetX ?? currentOffsetX,

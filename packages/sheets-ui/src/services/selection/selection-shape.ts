@@ -17,7 +17,7 @@
 import type { IRangeWithCoord, ISelectionCellWithMergeInfo, Nullable, ThemeService } from '@univerjs/core';
 import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
 import type { IObjectFullState, IRectProps, Scene } from '@univerjs/engine-render';
-import { cancelRequestFrame, DashedRect, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import { cancelRequestFrame, DashedRect, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     getNormalSelectionStyle,
@@ -343,7 +343,7 @@ export class SelectionControl extends Disposable {
         if (style == null) {
             style = this._selectionStyle;
         }
-        this._updateControl(style, rowHeaderWidth, columnHeaderHeight, rangeType);
+        this._updateControl(style, rowHeaderWidth, columnHeaderHeight);
     }
 
     updateCurrCell(highlight?: Nullable<ISelectionCellWithMergeInfo>) {
@@ -572,7 +572,7 @@ export class SelectionControl extends Disposable {
             });
 
             this.dashRect.setProps({
-                startX, startY, endX, endY,
+                // startX, startY, endX, endY,
                 strokeDashArray: [0, strokeDash / scale],
             });
 

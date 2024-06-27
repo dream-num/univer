@@ -29,21 +29,21 @@ import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-rend
 import { ScrollToCellOperation, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { ScrollCommand } from '../../commands/commands/set-scroll.command';
-import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
-import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
-import type { IScrollManagerParam, IScrollManagerSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
-import { ScrollManagerService } from '../../services/scroll-manager.service';
-import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
-import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
-import { getSheetObject } from '../utils/component-tools';
+import { ScrollCommand } from '../../../commands/commands/set-scroll.command';
+import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';
+import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
+import type { IScrollManagerParam, IScrollManagerSearchParam, IViewportScrollState } from '../../../services/scroll-manager.service';
+import { ScrollManagerService } from '../../../services/scroll-manager.service';
+import type { ISheetSkeletonManagerParam } from '../../../services/sheet-skeleton-manager.service';
+import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
+import { getSheetObject } from '../../utils/component-tools';
 
 const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAndTabCommand.id];
 
 /**
  * This controller handles scroll logic in sheet interaction.
  */
-export class SheetsScrollRenderController extends Disposable implements IRenderModule {
+export class MobileSheetsScrollRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
@@ -81,7 +81,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     private _init() {
         this._initCommandListener();
         this._initScrollEventListener();
-        this._scrollSubscribeBinding();
+        this._initPointerScrollEvent();
+        this._scrollInfo$Handler();
         this._initSkeletonListener();
     }
 
@@ -167,10 +168,10 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         if (!viewportMain) return;
 
         this.disposeWithMe(
-            // set scrollInfo, the event is triggered in viewport@_scrollToScrollbarPos
+            // set scrollInfo, the event is triggered in viewport@_scrollTo
             viewportMain.onScrollAfter$.subscribeEvent((scrollAfterParam: IScrollObserverParam) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                if (skeleton == null || scrollAfterParam.isTrigger === false) {
+                if (skeleton == null) {
                     return;
                 }
 
@@ -196,12 +197,19 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     offsetX: columnOffset,
                     offsetY: rowOffset,
                 };
-                console.log('lastestScrollInfo', viewportScrollY, lastestScrollInfo);
-                // this._scrollManagerService.setScrollInfoToCurrSheetWithoutNotify(lastestScrollInfo);
+                // console.log('lastestScrollInfo', viewportScrollY, lastestScrollInfo);
+                this._scrollManagerService.justSetScrollInfoToCurrSheet(lastestScrollInfo);
+                this._scrollManagerService.validScrollInfo$.next({
+                    scrollX: scrollAfterParam.scrollX || 0,
+                    scrollY: scrollAfterParam.scrollY || 0,
+                    viewportScrollX: scrollAfterParam.viewportScrollX || 0,
+                    viewportScrollY: scrollAfterParam.viewportScrollY || 0,
+                });
                 // snapshot is diff by diff people!
                 // this._scrollManagerService.setScrollInfoToSnapshot({ ...lastestScrollInfo, viewportScrollX, viewportScrollY });
             })
         );
+
         this.disposeWithMe(
             viewportMain.onScrollByBar$.subscribeEvent((param) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
@@ -232,14 +240,14 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         );
     }
 
-    private _scrollSubscribeBinding() {
+    private _scrollInfo$Handler() {
         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
         if (!skeleton) return;
         const { unitId } = this._context;
         const scene = this._renderManagerService.getRenderById(unitId)?.scene;
         if (!scene) return;
-        const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        if (!viewMain) return;
+        const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        if (!viewportMain) return;
 
         this.disposeWithMe(
             toDisposable(
@@ -247,7 +255,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 // --> onScrollAfterObserver.notify ---> scrollManagerService.setScrollInfo again!(valid scroll value)
                 this._scrollManagerService.rawScrollInfo$.subscribe((param) => {
                     if (param == null) {
-                        viewMain.scrollTo({
+                        viewportMain.scrollTo({
                             x: 0,
                             y: 0,
                         });
@@ -266,21 +274,10 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     const viewportScrollXByEvent = startX + offsetX;
                     const viewportScrollYByEvent = startY + offsetY;
 
-                    const config = viewMain.transViewportScroll2ScrollValue(viewportScrollXByEvent, viewportScrollYByEvent);
-                    viewMain.scrollTo(config);
+                    const config = viewportMain.transViewportScroll2ScrollValue(viewportScrollXByEvent, viewportScrollYByEvent);
+                    viewportMain.scrollTo(config);
                 })
             )
-        );
-
-        this.disposeWithMe(
-            toDisposable(viewMain.onScrollAfter$.subscribeEvent((param: any) => {
-                this._scrollManagerService.validScrollInfo$.next({
-                    scrollX: param.scrollX,
-                    scrollY: param.scrollY,
-                    viewportScrollX: param.viewportScrollX,
-                    viewportScrollY: param.viewportScrollY,
-                });
-            }))
         );
     }
 
@@ -304,6 +301,141 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     this._updateSceneSize(param as unknown as ISheetSkeletonManagerParam);
                 }
             })));
+    }
+
+    /**
+     * for mobile
+     */
+    // eslint-disable-next-line max-lines-per-function
+    private _initPointerScrollEvent() {
+        const sheetObject = this._getSheetObject();
+        if (!sheetObject) return;
+        const { unitId } = this._context;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const sheetId = workbook.getActiveSheet()!.getSheetId();
+
+        const scrollManagerService = this._scrollManagerService;
+        const scene = sheetObject.scene;
+        const spreadsheet = sheetObject.spreadsheet;
+        const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        const _lastPointerPos: IPoint = { x: 0, y: 0 };
+        let _pointerScrolling: boolean = false;
+
+        const velocity = { x: 0, y: 0 };
+        const deceleration = 0.95; // 衰减系数
+        let scrollInertiaAnimationID: null | number = null;
+        const pointerScrollInertia = () => {
+            if (!viewportMain) return;
+            velocity.x *= deceleration;
+            velocity.y *= deceleration;
+            _lastPointerPos.x += velocity.x;
+            _lastPointerPos.y += velocity.y;
+            // viewportMain.scrollByViewportScroll({
+            //     deltaX: velocity.x,
+            //     deltaY: velocity.y,
+            // });
+            const currentScroll: Readonly<Nullable<IScrollManagerParam>> = scrollManagerService.getCurrentScrollInfo();
+            const {
+                sheetViewStartRow = 0,
+                sheetViewStartColumn = 0,
+                offsetX: currentOffsetX = 0,
+                offsetY: currentOffsetY = 0,
+            } = currentScroll || {};
+            scrollManagerService.setScrollInfoAndEmitEvent({
+                unitId,
+                sheetId,
+                sheetViewStartRow, // + ySplit,
+                sheetViewStartColumn, // + xSplit,
+                offsetX: currentOffsetX + velocity.x, // currentOffsetX + offsetX may be negative or over max
+                offsetY: currentOffsetY + velocity.y,
+            });
+
+            if (Math.abs(velocity.x) > 1 || Math.abs(velocity.y) > 1) {
+                scrollInertiaAnimationID = requestAnimationFrame(pointerScrollInertia);
+            } else {
+                scrollInertiaAnimationID = null;
+            }
+        };
+
+        const cancelInertiaAnimation = () => {
+            cancelAnimationFrame(scrollInertiaAnimationID!);
+            scrollInertiaAnimationID = null;
+        };
+
+        spreadsheet.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            cancelInertiaAnimation();
+
+            if (!viewportMain) return;
+
+            _lastPointerPos.x = evt.offsetX;
+            _lastPointerPos.y = evt.offsetY;
+            _pointerScrolling = true;
+            state.stopPropagation();
+        });
+
+        spreadsheet.onPointerMove$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            // cancelInertiaAnimation();
+            if (!_pointerScrolling) return;
+            if (!viewportMain) return;
+            // console.log('spreadsheet into moving...........');
+            const e = evt as IPointerEvent | IMouseEvent;
+            const deltaX = -(e.offsetX - _lastPointerPos.x);
+            const deltaY = -(e.offsetY - _lastPointerPos.y);
+            velocity.x = -(e.offsetX - _lastPointerPos.x);
+            velocity.y = -(e.offsetY - _lastPointerPos.y);
+
+            if (deltaX !== 0 || deltaY !== 0) {
+                // console.log('....delta', deltaX, deltaY);
+            }
+
+            // get scrollInfo from packages/sheets-ui/src/commands/commands/set-scroll.command.ts
+            const currentScroll = scrollManagerService.getCurrentScrollInfo();
+            const {
+                sheetViewStartRow = 0,
+                sheetViewStartColumn = 0,
+                offsetX: currentOffsetX = 0,
+                offsetY: currentOffsetY = 0,
+            } = currentScroll || {};
+            // console.log('spreadsheet into moving', deltaX, deltaY, currentOffsetX, currentOffsetY);
+
+            scrollManagerService.setScrollInfoAndEmitEvent({
+                unitId,
+                sheetId,
+                sheetViewStartRow, // + ySplit,
+                sheetViewStartColumn, // + xSplit,
+                offsetX: currentOffsetX + deltaX, // currentOffsetX + offsetX may be negative or over max
+                offsetY: currentOffsetY + deltaY,
+            });
+            // console.log('before set scrollInfo', currentOffsetY, deltaY);
+            // console.log('after set scrollInfo', scrollManagerService.getCurrentScrollInfo());
+            // viewportMain.scrollByViewportScroll({
+            //     deltaX,
+            //     deltaY,
+            // });
+            _lastPointerPos.x = e.offsetX;
+            _lastPointerPos.y = e.offsetY;
+
+            state.stopPropagation();
+        });
+
+        spreadsheet.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            _pointerScrolling = false;
+            scrollInertiaAnimationID = requestAnimationFrame(pointerScrollInertia);
+        });
+
+        // trigger by scene.input-manager@_onPointerMove because currObject has changed
+        spreadsheet.onPointerLeave$.subscribeEvent(() => {
+            // this._pointerScrolling = false;
+        });
+        spreadsheet.onPointerOut$.subscribeEvent(() => {
+            _pointerScrolling = false;
+        });
+        scene.onPointerOut$.subscribeEvent(() => {
+            _pointerScrolling = false;
+        });
+        scene.onPointerCancel$.subscribeEvent(() => {
+            _pointerScrolling = false;
+        });
     }
 
     private _updateSceneSize(param: ISheetSkeletonManagerParam) {

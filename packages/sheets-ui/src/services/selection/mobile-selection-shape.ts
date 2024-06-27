@@ -17,7 +17,7 @@
 import type { Nullable, ThemeService } from '@univerjs/core';
 import { RANGE_TYPE } from '@univerjs/core';
 import type { BaseObject, IRectProps, Scene } from '@univerjs/engine-render';
-import { FloatRect, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import type { ISelectionStyle } from '@univerjs/sheets';
 
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
@@ -136,8 +136,10 @@ export class MobileSelectionControl extends SelectionControl {
         super.dispose();
     }
 
-    protected override _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number, rangeType: RANGE_TYPE) {
+    protected override _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
         super._updateControl(style, rowHeaderWidth, columnHeaderHeight);
+
+        const rangeType = this.rangeType;
         // startX startY shares same coordinate with viewport.(include row & colheader)
         // const { startX, startY, endX, endY } =  this.selectionModel;
         const defaultStyle = this.defaultStyle;
@@ -156,8 +158,8 @@ export class MobileSelectionControl extends SelectionControl {
             if (rangeType) {
                 this.selectionModel.setRangeType(rangeType);
             }
-
-            this.transformControlPoint();
+            const { offsetX, offsetY } = this.getViewportMainScrollingOffset();
+            this.transformControlPoint(offsetX, offsetY);
 
             this.fillControlTopLeft!.show();
             this.fillControlBottomRight!.show();
@@ -184,19 +186,32 @@ export class MobileSelectionControl extends SelectionControl {
         // }
     }
 
-    transformControlPoint(offsetX?: number = 0, offsetY?: number = 0) {
+    getViewportMainScrollingOffset() {
+        const viewMain = this.getScene().getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        return {
+            offsetX: viewMain?.viewportScrollX || 0,
+            offsetY: viewMain?.viewportScrollY || 0,
+            width: viewMain?.width || 0,
+            height: viewMain?.height || 0,
+        };
+    }
+
+    /**
+     *
+     * @param offsetX viewport viewportScrollX
+     * @param offsetY viewport viewportScrollY
+     */
+    transformControlPoint(offsetX: number = 0, offsetY: number = 0) {
         const style = this.currentStyle!;
         const rangeType = this.selectionModel.rangeType;
         const expandCornerSizeInner = style.expandCornerSize! / 4;
         const expandCornerSize = style.expandCornerSize!;
         const { startX, startY, endX, endY } = this.selectionModel;
 
-        const scene = this.getScene();
-        const viewport = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        const viewportW = viewport?.width || 0;
-        const viewportH = viewport?.height || 0;
-        const viewportScrollX = viewport?.viewportScrollX || 0;
-        const viewportScrollY = viewport?.viewportScrollY || 0;
+        // const scene = this.getScene();
+        const viewportSizeInfo = this.getViewportMainScrollingOffset();
+        const viewportW = viewportSizeInfo.width;
+        const viewportH = viewportSizeInfo.height;
 
         switch (rangeType) {
             case RANGE_TYPE.NORMAL:

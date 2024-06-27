@@ -545,7 +545,7 @@ export class Viewport {
      */
     scrollTo(pos: IScrollBarPosition) {
         // console.trace();
-        return this._scrollToCore(SCROLL_TYPE.scrollTo, pos);
+        return this._scrollCore(SCROLL_TYPE.scrollTo, pos);
     }
 
     /**
@@ -557,7 +557,7 @@ export class Viewport {
     scrollBy(pos: IScrollBarPosition, isTrigger = true) {
         pos.x = this.scrollX + (pos.x || 0);
         pos.y = this.scrollY + (pos.y || 0);
-        return this._scrollToCore(SCROLL_TYPE.scrollTo, pos, isTrigger);
+        return this._scrollCore(SCROLL_TYPE.scrollTo, pos, isTrigger);
     }
 
     /**
@@ -568,7 +568,7 @@ export class Viewport {
     scrollByBar(pos: IScrollBarPosition, isTrigger = true) {
         pos.x = this.scrollX + (pos.x || 0);
         pos.y = this.scrollY + (pos.y || 0);
-        this._scrollToCore(SCROLL_TYPE.scrollTo, pos, isTrigger);
+        this._scrollCore(SCROLL_TYPE.scrollTo, pos, isTrigger);
         const { x, y } = pos;
         this.onScrollByBar$.emitEvent({
             viewport: this,
@@ -592,7 +592,7 @@ export class Viewport {
         const y = deltaY + this.viewportScrollY;
         // console.log('before', y, viewportScrollY, this.viewportScrollY);
         const param = this.transViewportScroll2ScrollValue(x, y);
-        this._scrollToCore(SCROLL_TYPE.scrollTo, param, false);
+        this._scrollCore(SCROLL_TYPE.scrollTo, param, false);
         // console.log('after', y, this.viewportScrollY);
     }
 
@@ -1332,7 +1332,7 @@ export class Viewport {
 
     /**
      * Scroll Viewport
-     * Only the 'viewMain' will enter this function, other viewports will not.
+     * This function called by viewMain only, other viewports will not.
      *
      * caller: scroll.render-controller viewportMain.scrollTo({x, y}))
      * this._scrollManagerService.scrollInfo$.subscribe --> scrollTo --> _scroll
@@ -1340,7 +1340,7 @@ export class Viewport {
      * @param scrollBarPos viewMain 滚动条的位置
      * @param isTrigger
      */
-    private _scrollToCore(scrollType: SCROLL_TYPE, scrollBarPos: IScrollBarPosition, isTrigger: boolean = true) {
+    private _scrollCore(scrollType: SCROLL_TYPE, scrollBarPos: IScrollBarPosition, isTrigger: boolean = true) {
         const { x, y } = scrollBarPos;
         if (this._scrollBar == null) {
             return;
@@ -1389,7 +1389,7 @@ export class Viewport {
         const clampedViewportScroll = this.getViewportScrollByScroll();
         this.viewportScrollX = clampedViewportScroll.x;
         this.viewportScrollY = clampedViewportScroll.y;
-        console.log('scrollToCore', this.scrollY, this.viewportScrollY, limited);
+        // console.log('scrollToCore', this.scrollY, this.viewportScrollY, limited);
         // calc startRow & offset by viewportScrollXY, then update scrollInfo
         // other viewports, rowHeader & colHeader depend on this notify
         // scroll.render-controller@onScrollAfterObserver ---> setScrollInfo but no notify
@@ -1404,7 +1404,7 @@ export class Viewport {
             viewportScrollY: clampedViewportScroll.y,
             limitX: this._scrollBar?.limitX,
             limitY: this._scrollBar?.limitY,
-        });
+        } as IScrollObserverParam);
 
         this._triggerScrollStop(clampedViewportScroll, x, y);
 

@@ -54,7 +54,7 @@ import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.serv
 import { ForceStringRenderController } from './controllers/force-string-render.controller';
 import { ForceStringAlertRenderController } from './controllers/force-string-alert-render.controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
-import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
+import { MobileSheetsScrollRenderController } from './controllers/render-controllers/mobile/mobile-scroll.render-controller';
 // import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 import { DragRenderController } from './controllers/drag-render.controller';
 import { DragManagerService } from './services/drag-manager.service';
@@ -184,7 +184,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             // HeaderUnhideRenderController,
             // HeaderResizeRenderController,
             SheetsZoomRenderController,
-            SheetsScrollRenderController,
+            MobileSheetsScrollRenderController,
             FormatPainterRenderController,
             // HeaderMenuRenderController,
             CellAlertRenderController,
@@ -195,7 +195,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             ForceStringRenderController,
             CellCustomRenderController,
             SheetContextMenuMobileRenderController,
-
             SheetPermissionInterceptorCanvasRenderController,
             SheetPermissionInterceptorFormulaRenderController,
             SheetPermissionRenderController,

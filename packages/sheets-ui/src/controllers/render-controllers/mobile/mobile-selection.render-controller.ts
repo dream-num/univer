@@ -91,7 +91,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         this._initCommandListener();
         this._initUserActionSyncListener();
         this._initDefinedNameListener();
-        this._initScrollEvent();
+        this._updateControlPointWhenScrolling();
         const unitId = workbook.getUnitId();
         if (!worksheet) return;
         const sheetId = worksheet.getSheetId();
@@ -137,13 +137,14 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         );
     }
 
-    private _initScrollEvent() {
+    private _updateControlPointWhenScrolling() {
         //this._scrollManagerService.scrollInfo$.subscribe((param) => {
         const { scene } = this._context;
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        if(!viewportMain) return;
+        if (!viewportMain) return;
         // const sub = this._scrollManagerService.scrollInfo$.subscribe((param) => {
-        const sub = viewportMain.onScrollAfter$.subscribeEvent((param) => {
+        // const sub = viewportMain.onScrollAfter$.subscribeEvent((param) => {
+        const sub = this._scrollManagerService.validScrollInfo$.subscribe((param) => {
             if (param == null) {
                 return;
             }
@@ -158,8 +159,6 @@ export class MobileSelectionRenderController extends Disposable implements IRend
             } else if (rangeType === RANGE_TYPE.ROW) {
                 activeControl.transformControlPoint(viewportScrollX, 0);
             }
-
-            console.log('selection scroll$ evt', param);
         });
         this.disposeWithMe(toDisposable(sub));
     }

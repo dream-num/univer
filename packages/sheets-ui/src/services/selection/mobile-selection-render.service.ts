@@ -281,7 +281,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         if (scene == null || skeleton == null) {
             return;
         }
-        const control = this.addSelectionControl(scene);
+        const control = this.addSelectionControl(scene, RANGE_TYPE.NORMAL);
 
         // eslint-disable-next-line no-new
         new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
@@ -957,8 +957,13 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
                         x: endViewport.scrollX,
                         y: endViewport.scrollY,
                     };
-                    const shouldResetX = startXY.x !== endXY.x && isCrossingX && xCrossTime % 2 === 1;
-                    const shouldResetY = startXY.y !== endXY.y && isCrossingY && yCrossTime % 2 === 1;
+                    const checkStartViewportType = [
+                        SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP,
+                        SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP,
+                        SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT,
+                    ].includes(startViewport.viewportKey as SHEET_VIEWPORT_KEY);
+                    const shouldResetX = checkStartViewportType && startXY.x !== endXY.x && isCrossingX && xCrossTime % 2 === 1;
+                    const shouldResetY = checkStartViewportType && startXY.y !== endXY.y && isCrossingY && yCrossTime % 2 === 1;
 
                     if (shouldResetX || shouldResetY) {
                         viewportMain.scrollTo({

@@ -174,8 +174,16 @@ export class ThreadCommentModel {
         if (!comments.length) {
             return;
         }
+        const deleteThreads = new Set<string>();
         comments.forEach(comment => {
             this._replaceComment(unitId, subUnitId, comment);
+            deleteThreads.add(comment.threadId);
+        })
+        deleteThreads.forEach(id => {
+            const thread = this.getThread(unitId, id);
+            if (thread) {
+                this.deleteComment(thread.unitId, thread.subUnitId, thread.id);
+            }
         })
         this._refreshCommentsMap$();
     }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { threadId } from 'node:worker_threads';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
@@ -255,6 +254,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
 
     const subUnitName = getSubUnitName(comments?.root.subUnitId ?? subUnitId);
     const editorVisible = showEdit && !editingId && !resolved;
+    const title = `${refStr || comments?.root.ref}${subUnitName ? ' · ' : ''}${subUnitName}`;
 
     return (
         <div
@@ -277,9 +277,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 <div className={styles.threadCommentTitlePosition}>
                     <div className={styles.threadCommentTitleHighlight} />
                     <div className={styles.threadCommentTitlePositionText}>
-                        {refStr || comments?.root.ref}
-                        {subUnitName ? ' · ' : ''}
-                        {subUnitName}
+                        {title}
                     </div>
                 </div>
                 {comments

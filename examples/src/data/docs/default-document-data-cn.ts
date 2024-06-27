@@ -230,20 +230,20 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         'shapeTest5',
     ],
     headers: {
-        defaultHeaderId: {
-            headerId: 'defaultHeaderId',
-            body: getDefaultHeaderFooterBody('header'),
-        },
+        // defaultHeaderId: {
+        //     headerId: 'defaultHeaderId',
+        //     body: getDefaultHeaderFooterBody('header'),
+        // },
         // evenHeaderId: {
         // },
         // firstPageHeaderId: {
         // }
     },
     footers: {
-        defaultFooterId: {
-            footerId: 'defaultFooterId',
-            body: getDefaultHeaderFooterBody('footer'),
-        },
+        // defaultFooterId: {
+        //     footerId: 'defaultFooterId',
+        //     body: getDefaultHeaderFooterBody('footer'),
+        // },
         // evenFooterId: {
         // },
         // firstPageFooterId: {
@@ -859,8 +859,14 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             vertexAngle: 0,
             centerAngle: 0,
         },
-        defaultHeaderId: 'defaultHeaderId',
-        defaultFooterId: 'defaultFooterId',
+        defaultHeaderId: '',
+        defaultFooterId: '',
+        evenPageHeaderId: '',
+        evenPageFooterId: '',
+        firstPageHeaderId: '',
+        firstPageFooterId: '',
+        evenAndOddHeaders: BooleanNumber.FALSE,
+        useFirstPageHeaderFooter: BooleanNumber.FALSE,
         marginHeader: 30,
         marginFooter: 30,
     },

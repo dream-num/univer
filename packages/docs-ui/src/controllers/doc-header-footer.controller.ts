@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { BooleanNumber, Disposable, ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import { BooleanNumber, Disposable, ICommandService, IUniverInstanceService, LocaleService, toDisposable, Tools } from '@univerjs/core';
 import type { Documents, DocumentViewModel, IMouseEvent, IPageRenderConfig, IPathProps, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
 import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager, PageLayoutType, Path, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
@@ -24,6 +24,7 @@ import { IEditorService } from '@univerjs/ui';
 import { DocSkeletonManagerService, neoGetDocObject } from '@univerjs/docs';
 import type { Nullable } from 'vitest';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
+import { CoreHeaderFooterCommand } from '../commands/commands/header-footer.command';
 
 const HEADER_FOOTER_STROKE_COLOR = 'rgba(58, 96, 247, 1)';
 const HEADER_FOOTER_FILL_COLOR = 'rgba(58, 96, 247, 0.08)';
@@ -43,7 +44,7 @@ interface IHeaderFooterCreate {
 }
 
 // TODO: @JOCS also need to check sectionBreak config in the future.
-function checkCreateHeaderFooterType(viewModel: DocumentViewModel, editArea: DocumentEditArea, pageNumber: number): IHeaderFooterCreate {
+function checkCreateHeaderFooterType(viewModel: DocumentViewModel, editArea: DocumentEditArea, segmentPage: number): IHeaderFooterCreate {
     const { documentStyle } = viewModel.getDataModel().getSnapshot();
     const {
         defaultHeaderId,
@@ -70,7 +71,7 @@ function checkCreateHeaderFooterType(viewModel: DocumentViewModel, editArea: Doc
                 };
             }
 
-            if (evenAndOddHeaders === BooleanNumber.TRUE && pageNumber % 2 === 0 && !evenPageHeaderId) {
+            if (evenAndOddHeaders === BooleanNumber.TRUE && segmentPage % 2 === 0 && !evenPageHeaderId) {
                 return {
                     createType: HeaderFooterType.EVEN_PAGE_HEADER,
                     headerFooterId: null,
@@ -95,7 +96,7 @@ function checkCreateHeaderFooterType(viewModel: DocumentViewModel, editArea: Doc
                 };
             }
 
-            if (evenAndOddHeaders === BooleanNumber.TRUE && pageNumber % 2 === 0 && !evenPageFooterId) {
+            if (evenAndOddHeaders === BooleanNumber.TRUE && segmentPage % 2 === 0 && !evenPageFooterId) {
                 return {
                     createType: HeaderFooterType.EVEN_PAGE_FOOTER,
                     headerFooterId: null,
@@ -138,6 +139,11 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
     private _initialize() {
         this._init();
         this._drawHeaderFooterLabel();
+        this._registerCommands();
+    }
+
+    private _registerCommands() {
+        [CoreHeaderFooterCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     private _init() {
@@ -157,7 +163,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         const docObject = neoGetDocObject(this._context);
         const { document } = docObject;
 
-        this.disposeWithMe(document.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        this.disposeWithMe(document.onDblclickObserver.add(async (evt: IPointerEvent | IMouseEvent) => {
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }
@@ -196,10 +202,18 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
             if (editArea === DocumentEditArea.BODY) {
                 this._textSelectionRenderManager.setSegment('');
-                this._textSelectionRenderManager.setSegmentPage(pageNumber);
+                this._textSelectionRenderManager.setSegmentPage(-1);
             } else {
                 if (createType != null) {
                     // TODO: create header or footer and set segment.
+                    const segmentId = Tools.generateRandomId(6);
+                    this._textSelectionRenderManager.setSegment(segmentId);
+                    this._textSelectionRenderManager.setSegmentPage(pageNumber);
+                    await this._commandService.executeCommand(CoreHeaderFooterCommand.id, {
+                        unitId,
+                        createType,
+                        segmentId,
+                    });
                 } else if (headerFooterId != null) {
                     this._textSelectionRenderManager.setSegment(headerFooterId);
                     // TODO: set selection to header or footer.

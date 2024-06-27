@@ -45,6 +45,8 @@ export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 export class SheetPermissionInterceptorBaseController extends Disposable {
     disposableCollection = new DisposableCollection();
 
+    private _showPermissionDialog = true;
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -63,6 +65,10 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         this._initialize();
     }
 
+    setShowPermissionDialog(value: boolean) {
+        this._showPermissionDialog = value;
+    }
+
     public haveNotPermissionHandle(errorMsg: string) {
         const dialogProps = {
             id: UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID,
@@ -76,7 +82,9 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
             onClose: () => this._dialogService.close(UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID),
             className: 'sheet-permission-user-dialog',
         };
-        this._dialogService.open(dialogProps);
+        if (this._showPermissionDialog) {
+            this._dialogService.open(dialogProps);
+        }
         throw new Error('have not permission');
     }
 

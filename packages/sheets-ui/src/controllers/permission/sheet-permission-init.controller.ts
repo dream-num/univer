@@ -127,10 +127,11 @@ export class SheetPermissionInitController extends Disposable {
                 } else {
                     const ruleList = this._rangeProtectionRuleModel.getSubunitRuleList(info.unitId, info.subUnitId);
                     if (ruleList.length === 0) {
+                        // because this rule is attached to other protection, if other protection is deleted, this rule should be deleted.
                         this._worksheetProtectionPointRuleModel.deleteRule(info.unitId, info.subUnitId);
                         [...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
                             const instance = new F(info.unitId, info.subUnitId);
-                            this._permissionService.updatePermissionPoint(instance.id, true);
+                            this._permissionService.updatePermissionPoint(instance.id, instance.value);
                         });
                     }
                 }

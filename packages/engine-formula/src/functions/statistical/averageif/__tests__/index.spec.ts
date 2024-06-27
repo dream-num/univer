@@ -243,6 +243,12 @@ describe('Test isref function', () => {
             expect(result).toBe(ErrorType.DIV_BY_ZERO);
         });
 
+        it('Range string, average range number', async () => {
+            const result = await calculate('=AVERAGEIF("test",1,1)');
+
+            expect(result).toBe(ErrorType.NA);
+        });
+
         it('Range blank cell', async () => {
             const result = await calculate('=AVERAGEIF(A5,">1")');
 

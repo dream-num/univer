@@ -16,6 +16,7 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import { createNewArray } from '../../../engine/utils/array-object';
 import { isNumericComparison, valueObjectCompare } from '../../../engine/utils/object-compare';
 import { removeNonNumberValueObject } from '../../../engine/utils/value-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
@@ -46,21 +47,21 @@ export class Averageif extends BaseFunction {
             range = (range as BaseReferenceObject).toArrayValueObject();
         }
 
+        if (!range.isArray()) {
+            range = createNewArray([[range as BaseValueObject]], 1, 1);
+        }
+
         if (criteria.isReferenceObject()) {
             criteria = (criteria as BaseReferenceObject).toArrayValueObject();
         }
 
-        if (averageRange?.isReferenceObject()) {
-            averageRange = (averageRange as BaseReferenceObject).toArrayValueObject();
+        if (averageRange && !averageRange?.isReferenceObject()) {
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         range = range as BaseValueObject;
         criteria = criteria as BaseValueObject;
-        averageRange = averageRange as BaseValueObject;
-
-        if (!range.isArray() || (averageRange && !averageRange.isArray())) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
+        averageRange = averageRange as BaseReferenceObject;
 
         if (criteria.isArray()) {
             return (criteria as ArrayValueObject).map((criteriaItem) => this._handleSingleObject(range, criteriaItem, averageRange));
@@ -69,30 +70,70 @@ export class Averageif extends BaseFunction {
         return this._handleSingleObject(range, criteria, averageRange);
     }
 
-    private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject, averageRange?: BaseValueObject) {
+    private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject, averageRange?: BaseReferenceObject) {
         let resultArrayObject = valueObjectCompare(range, criteria);
 
         // When comparing non-numbers and numbers, it does not take the result
         const isNumeric = isNumericComparison(criteria.getValue());
         if (isNumeric) {
+            // if(resultArrayObject.isArray()){
             resultArrayObject = removeNonNumberValueObject(resultArrayObject as ArrayValueObject, range as ArrayValueObject);
+            // }else{
+            //     resultArrayObject = range.isNumber() ? resultArrayObject : BooleanValueObject.create(false);;
+            // }
         }
 
         // averageRange has the same dimensions as range
-        const averageRangeArray = averageRange
-            ? (averageRange as ArrayValueObject).slice(
-                [0, (range as ArrayValueObject).getRowCount()],
-                [0, (range as ArrayValueObject).getColumnCount()]
-            )
+        let averageRangeArray = averageRange
+            ? this._createRangeReferenceObject(averageRange, range)
             : (range as ArrayValueObject);
 
         if (!averageRangeArray) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
+        if (averageRangeArray.isError()) {
+            return averageRangeArray as ErrorValueObject;
+        }
+
+        if (averageRangeArray.isReferenceObject()) {
+            averageRangeArray = (averageRangeArray as BaseReferenceObject).toArrayValueObject();
+        }
+
+        averageRangeArray = averageRangeArray as ArrayValueObject;
+
         const picked = averageRangeArray.pick(resultArrayObject as ArrayValueObject);
         const sum = picked.sum();
         const count = picked.count();
         return sum.divided(count);
+    }
+
+    /**
+     * Create reference object, starting from the first cell in the upper left corner, the height is rowCount and the width is columnCount
+     * @param averageRange
+     * @param rowCount
+     * @param columnCount
+     * @returns
+     */
+    private _createRangeReferenceObject(averageRange: BaseReferenceObject, range: BaseValueObject) {
+        const averageRangeRow = averageRange.getRowCount();
+        const averageRangeColumn = averageRange.getColumnCount();
+
+        const rowCount = range.isArray() ? (range as ArrayValueObject).getRowCount() : 1;
+        const columnCount = range.isArray() ? (range as ArrayValueObject).getColumnCount() : 1;
+
+        if (averageRangeRow === rowCount || averageRangeColumn === columnCount) {
+            return averageRange;
+        }
+
+        const { startRow, startColumn } = averageRange.getRangeData();
+        const rangeData = {
+            startRow,
+            startColumn,
+            endRow: startRow + rowCount - 1,
+            endColumn: startColumn + columnCount - 1,
+        };
+
+        return this.createReferenceObject(averageRange, rangeData);
     }
 }

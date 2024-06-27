@@ -125,9 +125,10 @@ export class SheetsThreadCommentModel extends Disposable {
         const { row, column } = location;
         const commentId = comment.id;
         const { matrix, locationMap } = this._ensure(unitId, subUnitId);
-
         if (!parentId && row >= 0 && column >= 0) {
-            this._addCommentToMatrix(matrix, row, column, commentId);
+            if(!comment.resolved){
+                this._addCommentToMatrix(matrix, row, column, commentId);
+            }
             locationMap.set(commentId, { row, column });
         }
 
@@ -216,7 +217,6 @@ export class SheetsThreadCommentModel extends Disposable {
                         const { row, column } = location;
                         if (resolved) {
                             this._deleteCommentToMatrix(matrix, row, column, commentId);
-                            locationMap.delete(commentId);
                         } else {
                             this._addCommentToMatrix(matrix, row, column, commentId);
                             locationMap.set(commentId, location);

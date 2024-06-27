@@ -227,7 +227,7 @@ export const DeleteCommentTreeCommand: ICommand<IDeleteCommentCommandParams> = {
             return false;
         }
 
-        if (!(await dataSourceService.deleteComment(commentId, commentWithChildren.root.threadId, unitId, subUnitId))) {
+        if (!(await dataSourceService.deleteComment(unitId, subUnitId, commentWithChildren.root.threadId, commentId))) {
             return false;
         }
 

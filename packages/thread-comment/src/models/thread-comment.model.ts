@@ -180,7 +180,7 @@ export class ThreadCommentModel {
         this._refreshCommentsMap$();
     }
 
-    addComment(unitId: string, subUnitId: string, origin: IThreadComment) {
+    addComment(unitId: string, subUnitId: string, origin: IThreadComment, shouldSync?: boolean) {
         const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
         const comment = origin;
         const addCommentItem = (item: IThreadComment) => {
@@ -214,6 +214,9 @@ export class ThreadCommentModel {
         }
 
         this._refreshCommentsMap$();
+        if (shouldSync) {
+            this.syncThreadComments(unitId, subUnitId, [comment.threadId]);
+        }
         return true;
     }
 

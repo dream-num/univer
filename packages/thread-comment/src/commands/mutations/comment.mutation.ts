@@ -34,7 +34,8 @@ export const AddCommentMutation: ICommand<IAddCommentMutationParams> = {
         }
         const threadCommentModel = accessor.get(ThreadCommentModel);
         const { unitId, subUnitId, comment } = params;
-        return threadCommentModel.addComment(unitId, subUnitId, comment);
+        const shouldSync = (options?.fromChangeset) && !comment.parentId;
+        return threadCommentModel.addComment(unitId, subUnitId, comment, shouldSync);
     },
 };
 

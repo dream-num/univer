@@ -57,7 +57,7 @@ export class Line extends docExtension {
         }
 
         if (bottomBorderLine) {
-            const startY = asc + dsc + 4;
+            const startY = asc + dsc + 3;
             this._drawLine(ctx, glyph, bottomBorderLine, startY, scale, 2);
         }
 

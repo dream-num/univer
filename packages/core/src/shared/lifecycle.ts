@@ -19,14 +19,9 @@ import type { Subscription, SubscriptionLike } from 'rxjs';
 import { Subject } from 'rxjs';
 import { isSubscription } from 'rxjs/internal/Subscription';
 
-import type { Nullable } from '../common/type-util';
-import type { Observer } from '../observer/observable';
-import { isObserver } from '../observer/observable';
-
-type DisposableLike = IDisposable | Nullable<Observer<any>> | SubscriptionLike | (() => void);
+type DisposableLike = IDisposable | SubscriptionLike | (() => void);
 
 export function toDisposable(disposable: IDisposable): IDisposable;
-export function toDisposable(observer: Nullable<Observer<any>>): IDisposable;
 export function toDisposable(subscription: SubscriptionLike): IDisposable;
 export function toDisposable(callback: () => void): IDisposable;
 export function toDisposable(v: DisposableLike): IDisposable;
@@ -42,25 +37,6 @@ export function toDisposable(v: DisposableLike): IDisposable {
     if (isSubscription(v)) {
         return {
             dispose: () => v.unsubscribe(),
-        };
-    }
-
-    /**
-     * Represent an WorkBookObserver registered to a given Observable object.
-     * The current implementation of the rendering layer is still in use.
-     *
-     * @deprecated use rxjs instead
-     */
-    if (isObserver(v)) {
-        return {
-            dispose: () => {
-                if (disposed) {
-                    return;
-                }
-
-                disposed = true;
-                (v as Observer).dispose();
-            },
         };
     }
 

@@ -182,15 +182,15 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
     };
 
     useEffect(() => {
-        const onChangeStartObserver = transformer.onChangeStartObservable.add((state) => {
+        const chagneStartSub = transformer.changeStart$.subscribe((state) => {
             changeObs(state);
         });
 
-        const onChangingObserver = transformer.onChangingObservable.add((state) => {
+        const changingSub = transformer.changing$.subscribe((state) => {
             changeObs(state);
         });
 
-        const onFocusObserver = drawingManagerService.focus$.subscribe((drawings) => {
+        const focusSub = drawingManagerService.focus$.subscribe((drawings) => {
             if (drawings.length !== 1) {
                 return;
             }
@@ -237,9 +237,9 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
         });
 
         return () => {
-            onChangingObserver?.dispose();
-            onChangeStartObserver?.dispose();
-            onFocusObserver?.unsubscribe();
+            changingSub.unsubscribe();
+            chagneStartSub.unsubscribe();
+            focusSub.unsubscribe();
         };
     }, []);
 

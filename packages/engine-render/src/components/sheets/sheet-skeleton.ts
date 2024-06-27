@@ -197,7 +197,7 @@ export interface IDocumentLayoutObject {
     fill?: Nullable<string>;
 }
 
-const DEFAULT_PADDING_DATA = {
+export const DEFAULT_PADDING_DATA = {
     t: 0,
     b: 1,
     l: 2,

@@ -45,7 +45,7 @@ export default {
     },
     AVERAGEA: {
         description: '数値、文字列、および論理値を含む引数の平均値を返します。',
-        abstract: '数値、文字列、および論理値を含む引数の平均値を返します。',
+        abstract: '数値、文字列、および論理値を含む引数の平均値を返します',
         links: [
             {
                 title: '指導',
@@ -53,8 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '値 1', detail: '平均を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            value2: { name: '値 2', detail: '平均を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     AVERAGEIF: {

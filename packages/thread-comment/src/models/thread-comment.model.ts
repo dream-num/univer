@@ -334,7 +334,7 @@ export class ThreadCommentModel {
         const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
         const current = commentMap[commentId];
         if (!current) {
-            return false;
+            return true;
         }
 
         if (current.parentId) {

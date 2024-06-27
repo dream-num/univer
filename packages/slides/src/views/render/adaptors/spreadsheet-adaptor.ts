@@ -18,7 +18,6 @@ import type { EventState, ICellData, IPageElement } from '@univerjs/core';
 import { IContextService, LocaleService, ObjectMatrix, PageElementType, Styles, Worksheet } from '@univerjs/core';
 import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
 import {
-    EVENT_TYPE,
     getColor,
     Rect,
     Scene,
@@ -203,7 +202,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         });
         // viewMain.linkToViewport(viewLeft, LINK_VIEW_PORT_TYPE.Y);
         // viewMain.linkToViewport(viewTop, LINK_VIEW_PORT_TYPE.X);
-        viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
+        viewMain.onScrollAfter$.subscribeEvent((param: IScrollObserverParam) => {
             const { scrollX, scrollY, viewportScrollX, viewportScrollY } = param;
 
             viewTop
@@ -226,7 +225,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         });
 
         // 鼠标滚轮缩放
-        scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
+        scene.onMouseWheel$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IWheelEvent;
             if (e.ctrlKey) {
                 const deltaFactor = Math.abs(e.deltaX);

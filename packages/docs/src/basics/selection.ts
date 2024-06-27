@@ -88,9 +88,14 @@ export function getInsertSelection(selection: ITextRange, body: IDocumentBody): 
     let { startOffset, endOffset, collapsed } = normalizeSelection(selection);
 
     if (collapsed) {
-        while (isCustomRangeSplitSymbol(body.dataStream[endOffset])) {
+        while (body.dataStream[endOffset] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
             endOffset += 1;
             startOffset += 1;
+        }
+
+        while (body.dataStream[endOffset - 1] === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
+            endOffset -= 1;
+            startOffset -= 1;
         }
 
         return {
@@ -172,4 +177,26 @@ export function getSelectionForAddCustomRange(selection: ITextRange, body: IDocu
         endOffset,
         collapsed: false,
     };
+}
+const tags = [
+    DataStreamTreeTokenType.PARAGRAPH, // 段落
+    DataStreamTreeTokenType.SECTION_BREAK, // 章节
+    DataStreamTreeTokenType.TABLE_START, // 表格开始
+    DataStreamTreeTokenType.TABLE_ROW_START, // 表格开始
+    DataStreamTreeTokenType.TABLE_CELL_START, // 表格开始
+    DataStreamTreeTokenType.TABLE_CELL_END, // 表格开始
+    DataStreamTreeTokenType.TABLE_ROW_END, // 表格开始
+    DataStreamTreeTokenType.TABLE_END, // 表格结束
+    DataStreamTreeTokenType.CUSTOM_RANGE_START, // 自定义范围开始
+    DataStreamTreeTokenType.CUSTOM_RANGE_END, // 自定义范围结束
+    DataStreamTreeTokenType.COLUMN_BREAK, // 换列
+    DataStreamTreeTokenType.PAGE_BREAK, // 换页
+    DataStreamTreeTokenType.DOCS_END, // 文档结尾
+    DataStreamTreeTokenType.TAB, // 制表符
+    DataStreamTreeTokenType.CUSTOM_BLOCK, // 图片 mention 等不参与文档流的场景
+
+];
+export function getSelectionText(dataStream: string, start: number, end: number) {
+    const text = dataStream.slice(start, end);
+    return tags.reduce((res, curr) => res.replaceAll(curr, ''), text);
 }

@@ -86,28 +86,14 @@ export const DocDrawingAnchor = (props: IDocDrawingAnchorProps) => {
     }
 
     useEffect(() => {
-        const onClearControlObserver = transformer.onClearControlObservable.add((changeSelf) => {
+        const clearControlSub = transformer.clearControl$.subscribe((changeSelf) => {
             if (changeSelf === true) {
                 setAnchorShow(false);
             }
         });
 
-        const onChangeStartObserver = transformer.onChangeStartObservable.add((state) => {
-            const { objects } = state;
-            const params = getUpdateParams(objects, drawingManagerService);
-
-            // if (params.length === 0) {
-            //     setAnchorShow(false);
-            // } else if (params.length >= 1) {
-            //     setAnchorShow(true);
-            //     const anchorType = params[0]?.anchorType || SheetDrawingAnchorType.Position;
-            //     setValue(anchorType);
-            // }
-        });
-
         return () => {
-            onChangeStartObserver?.dispose();
-            onClearControlObserver?.dispose();
+            clearControlSub.unsubscribe();
         };
     }, []);
 
@@ -148,11 +134,11 @@ export const DocDrawingAnchor = (props: IDocDrawingAnchorProps) => {
             <div className={clsx(styles.imageCommonPanelRow)}>
                 <div className={clsx(styles.imageCommonPanelColumn)}>
                     {
-    // <RadioGroup value={value} onChange={handleChange} direction="vertical">
-    //                     <Radio value={SheetDrawingAnchorType.Both}>{localeService.t('drawing-anchor.both')}</Radio>
-    //                     <Radio value={SheetDrawingAnchorType.Position}>{localeService.t('drawing-anchor.position')}</Radio>
-    //                     <Radio value={SheetDrawingAnchorType.None}>{localeService.t('drawing-anchor.none')}</Radio>
-    //                 </RadioGroup>
+                        // <RadioGroup value={value} onChange={handleChange} direction="vertical">
+                        //                     <Radio value={SheetDrawingAnchorType.Both}>{localeService.t('drawing-anchor.both')}</Radio>
+                        //                     <Radio value={SheetDrawingAnchorType.Position}>{localeService.t('drawing-anchor.position')}</Radio>
+                        //                     <Radio value={SheetDrawingAnchorType.None}>{localeService.t('drawing-anchor.none')}</Radio>
+                        //                 </RadioGroup>
                     }
                 </div>
             </div>

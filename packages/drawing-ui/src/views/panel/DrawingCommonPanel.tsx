@@ -65,7 +65,7 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
     // const [groupShow, setGroupShow] = useState(false);
 
     useEffect(() => {
-        const onClearControlObserver = transformer.onClearControlObservable.add((changeSelf) => {
+        const clearControlSub = transformer.clearControl$.subscribe((changeSelf) => {
             if (changeSelf === true) {
                 setArrangeShow(false);
                 setTransformShow(false);
@@ -75,7 +75,7 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
             }
         });
 
-        const onChangeStartObserver = transformer.onChangeStartObservable.add((state) => {
+        const changeStartSub = transformer.changeStart$.subscribe((state) => {
             const { objects } = state;
             const params = getUpdateParams(objects, drawingManagerService);
 
@@ -100,7 +100,7 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
             }
         });
 
-        const onFocusObserver = drawingManagerService.focus$.subscribe((drawings) => {
+        const focusSub = drawingManagerService.focus$.subscribe((drawings) => {
             if (drawings.length === 0) {
                 setArrangeShow(false);
                 setTransformShow(false);
@@ -123,9 +123,9 @@ export const DrawingCommonPanel = (props: IDrawingCommonPanelProps) => {
         });
 
         return () => {
-            onChangeStartObserver?.dispose();
-            onClearControlObserver?.dispose();
-            onFocusObserver?.unsubscribe();
+            changeStartSub.unsubscribe();
+            clearControlSub.unsubscribe();
+            focusSub.unsubscribe();
         };
     }, []);
 

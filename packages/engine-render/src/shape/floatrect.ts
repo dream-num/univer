@@ -25,7 +25,6 @@ export class FloatRect<T extends IRectProps = IRectProps> extends Rect {
         super(key, props);
     }
 
-
     static override drawWith(ctx: UniverRenderingContext, props: IRectProps | Rect) {
         let { radius, left, top, width, height } = props;
 
@@ -68,16 +67,16 @@ export class FloatRect<T extends IRectProps = IRectProps> extends Rect {
     protected override _draw(ctx: UniverRenderingContext, viewportInfo: IViewportInfo) {
         if (!(viewportInfo.viewportKey === 'viewMain')) return;
         const { radius, paintFirst, stroke, strokeWidth, fill, strokeScaleEnabled, fillRule, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, strokeDashArray, width, height } = this;
-        const parentTrans = this.getParent().transform;
+        // const parentTrans = this.getParent().transform;
         // group.transform contains startXY
         // selection-shape@_updateControl -->  this.selectionShape.translate(startX, startY);
 
         // startXY comes from selecitonModel
         // const { startX, startY, endX, endY } = this._selectionModel;
-        const startX = parentTrans.getMatrix()[4];
-        const startY = parentTrans.getMatrix()[5];
+        // const startX = parentTrans.getMatrix()[4];
+        // const startY = parentTrans.getMatrix()[5];
         const top = viewportInfo.viewBound.top;
-        console.log('startXY', startX, startY, viewportInfo.viewBound.top, top);
+        // console.log('startXY', startX, startY, viewportInfo.viewBound.top, top);
         const left = this.left;
         // const left = startX + width / 2;
 

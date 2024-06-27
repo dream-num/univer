@@ -538,6 +538,9 @@ export class Viewport {
      *
      * TODO: @lumix many side effects in scrollTo, it would update scrollXY & viewportScrollXY, and notify listeners of scrollInfo$
      *
+     * TODO: @lumix Other controller should call scrollManagerService to set scrollInfo$
+     * example in scroll.operation.ts
+     *
      * Debug
      * window.scene.getViewports()[0].scrollTo({x: 14.2, y: 1.8}, true)
      */

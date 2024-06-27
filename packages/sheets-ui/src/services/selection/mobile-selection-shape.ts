@@ -49,10 +49,10 @@ export class MobileSelectionControl extends SelectionControl {
         const stroke = defaultStyle.stroke!;
         const AutofillStroke = defaultStyle.AutofillStroke!;
         const zIndex = this.zIndex;
-        let RectCtor = Rect;
-        if (this._rangeType === RANGE_TYPE.ROW || this._rangeType === RANGE_TYPE.COLUMN) {
-            RectCtor = FloatRect;
-        }
+        const RectCtor = Rect;
+        // if (this._rangeType === RANGE_TYPE.ROW || this._rangeType === RANGE_TYPE.COLUMN) {
+        //     RectCtor = FloatRect;
+        // }
         // @transformControlPoint takes care of left & top
         this._fillControlTopLeft = new RectCtor(SELECTION_MANAGER_KEY.fillTopLeft + zIndex, {
             zIndex: zIndex + 2,

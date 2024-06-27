@@ -20,11 +20,32 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IScrollManagerParam {
+    /**
+     * offsetX from startRow, coordinate same as viewport, not scrollbar
+     */
     offsetX: number;
+    /**
+     * offsetY from startColumn, coordinate same as viewport, not scrollbar
+     */
     offsetY: number;
+    /**
+     * currrent start row in viewport visible area
+     */
     sheetViewStartRow: number;
+    /**
+     * current start column in viewport visible area
+     */
     sheetViewStartColumn: number;
+
+    /**
+     * overall offsetX from sheet cotent topleft, should be same as startRow * rowHeight + offsetY
+     * coordinate same as viewport, not scrollbar
+     */
     viewportScrollX?: number;
+    /**
+     * overall offsetY from sheet content topleft, should be same as startColumn * columnWidth + offsetX
+     * coordinate same as viewport, not scrollbar
+     */
     viewportScrollY?: number;
 }
 
@@ -97,10 +118,10 @@ export class ScrollManagerService {
     /**
      * set scrollInfo by cmd,
      * call _setScrollInfo twice after one scrolling.
-     * first time set scrollInfo bt scrollOperation, but offsetXY is derived from scroll event.
+     * first time set scrollInfo by scrollOperation, but offsetXY is derived from scroll event.
      * second time set scrollInfo by viewport.scrollTo(scrol.render-controller --> onScrollAfterObserver), this time offsetXY has been limited.
      *
-     * wheelevent --> sheetCanvasView -->  set-scroll.command('sheet.command.set-scroll-relative') --> scrollOperation --> this.setScrollInfo  --> scrollInfo$.next --> scroll.render-controller@viewportMain.scrollTo & notify -->
+     * wheelevent --> sheetCanvasView -->  set-scroll.command('sheet.command.set-scroll-relative') --> scrollOperation --> scrollManagerService.setScrollInfo  --> scrollInfo$.next --> scroll.render-controller@viewportMain.scrollTo & notify -->
      * scroll.render-controller@onScrollAfterObserver --> this.setScrollInfoToCurrSheetWithoutNotify --> this._setScrollInfo({}, false)
      * call _setScrollInfo again, a loop!, so we should call setScrollInfoToCurrSheetWithoutNotify
      * @param param

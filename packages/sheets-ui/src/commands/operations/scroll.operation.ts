@@ -30,13 +30,17 @@ export const SetScrollOperation: IOperation<IScrollManagerInsertParam> = {
         }
 
         const scrollManagerService = accessor.get(ScrollManagerService);
+        // freeze has handle in set-scroll.command.ts
         const currentService = accessor.get(IUniverInstanceService);
         const workbook = currentService.getUniverSheetInstance(params!.unitId);
         const worksheet = workbook!.getSheetBySheetId(params!.sheetId);
         const { xSplit, ySplit } = worksheet!.getConfig().freeze;
 
         scrollManagerService.setScrollInfo({
-            ...params,
+            unitId: params.unitId,
+            sheetId: params.sheetId,
+            offsetX: params.offsetX, // offsetX may be negative or over max
+            offsetY: params.offsetY,
             sheetViewStartRow: params.sheetViewStartRow - ySplit,
             sheetViewStartColumn: params.sheetViewStartColumn - xSplit,
         });

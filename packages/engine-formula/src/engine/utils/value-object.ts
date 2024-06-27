@@ -218,7 +218,7 @@ export function getBooleanResults(variants: BaseValueObject[], maxRowLength: num
     return booleanResults;
 }
 
-function removeNonNumberValueObject(array: ArrayValueObject, range: ArrayValueObject) {
+export function removeNonNumberValueObject(array: ArrayValueObject, range: ArrayValueObject) {
     return array.mapValue((valueObject, r, c) => {
         if (range.get(r, c)?.isNumber()) {
             return valueObject;

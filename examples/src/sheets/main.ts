@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { CellValueType, LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -39,7 +39,6 @@ import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { enUS, ruRU, zhCN } from '../locales';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
 
@@ -103,7 +102,111 @@ univer.registerPlugin(UniverSheetsDrawingUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                cellData: {
+                    0: {
+                        0: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 2,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                    1: {
+                        0: {
+                            v: 3,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 4,
+                            t: CellValueType.NUMBER,
+                        },
+                        2: {
+                            v: 'B2',
+                            t: CellValueType.STRING,
+                        },
+                        3: {
+                            v: 'R2C2',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    2: {
+                        0: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: ' ',
+                            t: CellValueType.STRING,
+                        },
+                        2: {
+                            v: 1.23,
+                            t: CellValueType.NUMBER,
+                        },
+                        3: {
+                            v: true,
+                            t: CellValueType.BOOLEAN,
+                        },
+                        4: {
+                            v: false,
+                            t: CellValueType.BOOLEAN,
+                        },
+                    },
+                    3: {
+                        0: {
+                            v: 0,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: '100',
+                        },
+                        2: {
+                            v: '2.34',
+                        },
+                        3: {
+                            v: 'test',
+                            t: CellValueType.STRING,
+                        },
+                        4: {
+                            v: -3,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                    5: {
+                        0: {
+                            v: 'Tom',
+                            t: CellValueType.STRING,
+                        },
+                        1: {
+                            v: 'Sarah',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    6: {
+                        0: {
+                            v: 'Alex',
+                            t: CellValueType.STRING,
+                        },
+                        1: {
+                            v: 'Mickey',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                },
+            },
+        },
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: [],
+        styles: {},
+    });
 }
 
 const mockUser = {

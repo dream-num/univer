@@ -15,7 +15,9 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import { valueObjectCompare } from '../../../engine/utils/object-compare';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import { isNumericComparison, valueObjectCompare } from '../../../engine/utils/object-compare';
+import { removeNonNumberValueObject } from '../../../engine/utils/value-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -25,24 +27,56 @@ export class Averageif extends BaseFunction {
 
     override maxParams = 3;
 
-    override calculate(range: BaseValueObject, criteria: BaseValueObject, averageRange?: BaseValueObject) {
-        if (range.isError() || criteria.isError() || averageRange?.isError()) {
-            return ErrorValueObject.create(ErrorType.NA);
+    override needsReferenceObject = true;
+
+    override calculate(range: FunctionVariantType, criteria: FunctionVariantType, averageRange?: FunctionVariantType) {
+        if (range.isError()) {
+            return range;
         }
+
+        if (criteria.isError()) {
+            return criteria;
+        }
+
+        if (averageRange?.isError()) {
+            return averageRange;
+        }
+
+        if (range.isReferenceObject()) {
+            range = (range as BaseReferenceObject).toArrayValueObject();
+        }
+
+        if (criteria.isReferenceObject()) {
+            criteria = (criteria as BaseReferenceObject).toArrayValueObject();
+        }
+
+        if (averageRange?.isReferenceObject()) {
+            averageRange = (averageRange as BaseReferenceObject).toArrayValueObject();
+        }
+
+        range = range as BaseValueObject;
+        criteria = criteria as BaseValueObject;
+        averageRange = averageRange as BaseValueObject;
 
         if (!range.isArray() || (averageRange && !averageRange.isArray())) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (criteria.isArray()) {
-            return criteria.map((criteriaItem) => this._handleSingleObject(range, criteriaItem, averageRange));
+            return (criteria as ArrayValueObject).map((criteriaItem) => this._handleSingleObject(range, criteriaItem, averageRange));
         }
 
         return this._handleSingleObject(range, criteria, averageRange);
     }
 
     private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject, averageRange?: BaseValueObject) {
-        const resultArrayObject = valueObjectCompare(range, criteria);
+        let resultArrayObject = valueObjectCompare(range, criteria);
+
+        // When comparing non-numbers and numbers, it does not take the result
+        const isNumeric = isNumericComparison(criteria.getValue());
+        if (isNumeric) {
+            resultArrayObject = removeNonNumberValueObject(resultArrayObject as ArrayValueObject, range as ArrayValueObject);
+        }
 
         // averageRange has the same dimensions as range
         const averageRangeArray = averageRange

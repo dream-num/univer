@@ -178,7 +178,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         const docObject = neoGetDocObject(this._context);
         const { document } = docObject;
 
-        this.disposeWithMe(document.onDblclickObserver.add(async (evt: IPointerEvent | IMouseEvent) => {
+        this.disposeWithMe(document.onDblclick$.subscribeEvent(async (evt: IPointerEvent | IMouseEvent) => {
             if (this._isEditorReadOnly(unitId)) {
                 return;
             }
@@ -278,7 +278,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
             this.disposeWithMe(
                 toDisposable(
-                    docsComponent.onPageRenderObservable.add((config: IPageRenderConfig) => {
+                    docsComponent.pageRender$.subscribe((config: IPageRenderConfig) => {
                         const viewModel = this._docSkeletonManagerService.getViewModel();
                         const isEditBody = viewModel.getEditArea() === DocumentEditArea.BODY;
                         if (this._editorService.isEditor(unitId) || isEditBody) {

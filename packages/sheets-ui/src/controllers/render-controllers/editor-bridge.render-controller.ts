@@ -98,7 +98,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         const sheetObject = this._getSheetObject();
         const { spreadsheet, spreadsheetColumnHeader, spreadsheetLeftTopPlaceholder, spreadsheetRowHeader } = sheetObject;
 
-        spreadsheet.onDblclickObserver.add((evt) => {
+        spreadsheet.onDblclick$.subscribeEvent((evt) => {
             // No need to enter edit status when user click the right button.
             if (evt.button === 2) {
                 return;
@@ -110,10 +110,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             });
         });
 
-        spreadsheet.onPointerDownObserver.add(this._onCanvasPointerDown.bind(this));
-        spreadsheetColumnHeader.onPointerDownObserver.add(this._onCanvasPointerDown.bind(this));
-        spreadsheetLeftTopPlaceholder.onPointerDownObserver.add(this._onCanvasPointerDown.bind(this));
-        spreadsheetRowHeader.onPointerDownObserver.add(this._onCanvasPointerDown.bind(this));
+        spreadsheet.onPointerDown$.subscribeEvent(this._onCanvasPointerDown.bind(this));
+        spreadsheetColumnHeader.onPointerDown$.subscribeEvent(this._onCanvasPointerDown.bind(this));
+        spreadsheetLeftTopPlaceholder.onPointerDown$.subscribeEvent(this._onCanvasPointerDown.bind(this));
+        spreadsheetRowHeader.onPointerDown$.subscribeEvent(this._onCanvasPointerDown.bind(this));
     }
 
     private _onCanvasPointerDown() {

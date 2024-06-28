@@ -25,12 +25,12 @@ import {
     ThinEngine,
 } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
-import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/ui';
+import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
-import { BaseSelectionRenderService } from '../selection-render.service';
+import { BaseSelectionRenderService } from '../base-selection-render.service';
 import { createCommandTestBed } from './create-service-test-bed';
 
 const theme = {
@@ -177,10 +177,10 @@ describe('Test indirect', () => {
 
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
-            [IShortcutService, { useClass: DesktopShortcutService }],
+            [IShortcutService, { useClass: ShortcutService }],
             [SheetSkeletonManagerService],
             [BaseSelectionRenderService],
-            [IPlatformService, { useClass: DesktopPlatformService }],
+            [IPlatformService, { useClass: PlatformService }],
             [IRenderManagerService, { useClass: RenderManagerService }],
         ]);
 
@@ -211,7 +211,7 @@ describe('Test indirect', () => {
 
         const scene = new Scene('', new MockEngine());
 
-        selectionRenderService.changeRuntime(skeleton, scene);
+        selectionRenderService._changeRuntime(skeleton, scene);
 
         selectionRenderService.selectionMoveStart$.subscribe((param) => {
             selectionStartParam = param;
@@ -225,7 +225,7 @@ describe('Test indirect', () => {
             selectionEndParam = param;
         });
 
-        selectionRenderService._eventTrigger(mockEvent);
+        selectionRenderService._onPointerDown(mockEvent);
 
         scene.triggerPointerMove({ ...mockEvent, offsetX: 200 });
 

@@ -18,7 +18,6 @@ import type { EventState, IColorStyle, ISlidePage, Nullable, SlideDataModel } fr
 import { debounce, getColorStyle, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IWheelEvent } from '@univerjs/engine-render';
 import {
-    EVENT_TYPE,
     IRenderManagerService,
     Rect,
     Scene,
@@ -155,13 +154,13 @@ export class CanvasView extends RxDisposable {
 
         const { scene, engine } = currentRender;
 
-        const observer = engine.onTransformChangeObservable.add(() => {
+        const observer = engine.onTransformChange$.subscribeEvent(() => {
             this._scrollToCenter();
             // add once
-            observer?.dispose();
+            observer?.unsubscribe();
         });
 
-        engine.onTransformChangeObservable.add(() => {
+        engine.onTransformChange$.subscribeEvent(() => {
             setTimeout(() => {
                 this.createThumbs();
             }, 300);
@@ -185,7 +184,7 @@ export class CanvasView extends RxDisposable {
 
         scene.attachControl();
 
-        scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
+        scene.onMouseWheel$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IWheelEvent;
             if (e.ctrlKey) {
                 const deltaFactor = Math.abs(e.deltaX);
@@ -209,7 +208,7 @@ export class CanvasView extends RxDisposable {
             }
         });
 
-        scene.onFileLoadedObservable.add(() => {
+        scene.onFileLoaded$.subscribeEvent(() => {
             this._refreshThumb();
         });
 
@@ -439,11 +438,11 @@ export class CanvasView extends RxDisposable {
 
         const transformer = scene.getTransformer();
 
-        transformer?.onChangeEndObservable.add(() => {
+        transformer?.changeEnd$.subscribe(() => {
             this._thumbSceneRender(this._activePageId, slide);
         });
 
-        transformer?.onClearControlObservable.add(() => {
+        transformer?.clearControl$.subscribe(() => {
             this._thumbSceneRender(this._activePageId, slide);
         });
 

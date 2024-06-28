@@ -75,7 +75,7 @@ export class SelectionRenderService extends BaseSelectionRenderService implement
         const { spreadsheetRowHeader, spreadsheetColumnHeader, spreadsheet, spreadsheetLeftTopPlaceholder } = sheetObject;
         const { scene } = this._context;
 
-        this.disposeWithMe(spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+        this.disposeWithMe(spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             if (this._normalSelectionDisabled()) return;
             this._onPointerDown(evt, spreadsheet.zIndex + 1, RANGE_TYPE.NORMAL, this._getActiveViewport(evt));
             if (evt.button !== 2) {
@@ -84,7 +84,7 @@ export class SelectionRenderService extends BaseSelectionRenderService implement
         }));
 
         this.disposeWithMe(
-            spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 if (this._normalSelectionDisabled()) return;
 
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
@@ -99,7 +99,7 @@ export class SelectionRenderService extends BaseSelectionRenderService implement
             })
         );
 
-        this.disposeWithMe(spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+        this.disposeWithMe(spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             if (this._normalSelectionDisabled()) return;
 
             const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
@@ -114,7 +114,7 @@ export class SelectionRenderService extends BaseSelectionRenderService implement
             }
         }));
 
-        this.disposeWithMe(spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+        this.disposeWithMe(spreadsheetLeftTopPlaceholder?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
             if (this._normalSelectionDisabled()) return;
 
             this._reset(); // remove all other selections

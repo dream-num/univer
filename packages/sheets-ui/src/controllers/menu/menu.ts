@@ -118,9 +118,9 @@ import { FormatPainterStatus, IFormatPainterService } from '../../services/forma
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from './menu-util';
 
 export enum SheetMenuPosition {
-    ROW_HEADER_CONTEXT_MENU = 'rowHeaderContextMenu',
-    COL_HEADER_CONTEXT_MENU = 'colHeaderContextMenu',
-    SHEET_BAR = 'sheetBar',
+    ROW_HEADER_CONTEXT_MENU = 'ROW_HEADER_CONTEXT_MENU',
+    COL_HEADER_CONTEXT_MENU = 'COL_HEADER_CONTEXT_MENU',
+    SHEET_BAR = 'SHEET_BAR',
 }
 
 export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {

@@ -158,77 +158,73 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
     private _initScrollEventListener() {
         const scene = this._getSheetObject()?.scene;
-        if (scene == null) {
-            return;
-        }
+        if (scene == null) return;
 
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        if (!viewportMain) return;
+
         this.disposeWithMe(
-            toDisposable(
-                // set scrollInfo, the event is triggered in viewport@_scrollToScrollbarPos
-                viewportMain?.onScrollAfterObserver.add((param: IScrollObserverParam) => {
-                    const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                    if (skeleton == null || param.isTrigger === false) {
-                        return;
-                    }
+            // set scrollInfo, the event is triggered in viewport@_scrollToScrollbarPos
+            viewportMain.onScrollAfter$.subscribeEvent((param: IScrollObserverParam) => {
+                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                if (skeleton == null || param.isTrigger === false) {
+                    return;
+                }
 
-                    const sheetObject = this._getSheetObject();
-                    if (skeleton == null || sheetObject == null) {
-                        return;
-                    }
+                const sheetObject = this._getSheetObject();
+                if (skeleton == null || sheetObject == null) {
+                    return;
+                }
 
-                    const { viewportScrollX = 0, viewportScrollY = 0 } = param;
+                const { viewportScrollX = 0, viewportScrollY = 0 } = param;
 
-                    // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
-                    const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
-                        viewportScrollX,
-                        viewportScrollY
-                    );
+                // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
+                const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
+                    viewportScrollX,
+                    viewportScrollY
+                );
 
-                    // Refresh the scroll details in the scroll manager service.
-                    // The raw offsetX parameter from the scroll command might be out of bounds, being either negative or exceeding the maximum value.
-                    // Additionally, there's no need to manually update viewportScrollXY in the latest scroll info; the _scrollManagerService's _setScrollInfo(setScrollInfoToCurrSheetWithoutNotify) method takes care of this.
-                    const lastestScrollInfo: IScrollManagerParam = {
-                        sheetViewStartRow: row,
-                        sheetViewStartColumn: column,
-                        offsetX: columnOffset,
-                        offsetY: rowOffset,
-                    };
-                    this._scrollManagerService.setScrollInfoToCurrSheetWithoutNotify(lastestScrollInfo);
-                    // snapshot is diff by diff people!
-                    // this._scrollManagerService.setScrollInfoToSnapshot({ ...lastestScrollInfo, viewportScrollX, viewportScrollY });
-                })
-            )
+                // Refresh the scroll details in the scroll manager service.
+                // The raw offsetX parameter from the scroll command might be out of bounds, being either negative or exceeding the maximum value.
+                // Additionally, there's no need to manually update viewportScrollXY in the latest scroll info; the _scrollManagerService's _setScrollInfo(setScrollInfoToCurrSheetWithoutNotify) method takes care of this.
+                const lastestScrollInfo: IScrollManagerParam = {
+                    sheetViewStartRow: row,
+                    sheetViewStartColumn: column,
+                    offsetX: columnOffset,
+                    offsetY: rowOffset,
+                };
+                this._scrollManagerService.setScrollInfoToCurrSheetWithoutNotify(lastestScrollInfo);
+                // snapshot is diff by diff people!
+                // this._scrollManagerService.setScrollInfoToSnapshot({ ...lastestScrollInfo, viewportScrollX, viewportScrollY });
+            })
         );
         this.disposeWithMe(
-            toDisposable(
-                viewportMain?.onScrollByBarObserver.add((param) => {
-                    const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                    if (skeleton == null || param.isTrigger === false) {
-                        return;
-                    }
+            viewportMain.onScrollByBar$.subscribeEvent((param) => {
+                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                if (skeleton == null || param.isTrigger === false) {
+                    return;
+                }
 
-                    const sheetObject = this._getSheetObject();
-                    if (skeleton == null || sheetObject == null) {
-                        return;
-                    }
-                    const { viewportScrollX = 0, viewportScrollY = 0 } = param;
+                const sheetObject = this._getSheetObject();
+                if (skeleton == null || sheetObject == null) {
+                    return;
+                }
+                const { viewportScrollX = 0, viewportScrollY = 0 } = param;
 
-                    const freeze = this._getFreeze();
+                const freeze = this._getFreeze();
 
-                    const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
-                        viewportScrollX,
-                        viewportScrollY
-                    );
+                const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
+                    viewportScrollX,
+                    viewportScrollY
+                );
 
-                    this._commandService.executeCommand(ScrollCommand.id, {
-                        sheetViewStartRow: row + (freeze?.ySplit || 0),
-                        sheetViewStartColumn: column + (freeze?.xSplit || 0),
-                        offsetX: columnOffset,
-                        offsetY: rowOffset,
-                    });
-                })
-            )
+                this._commandService.executeCommand(ScrollCommand.id, {
+                    sheetViewStartRow: row + (freeze?.ySplit || 0),
+                    sheetViewStartColumn: column + (freeze?.xSplit || 0),
+                    offsetX: columnOffset,
+                    offsetY: rowOffset,
+                });
+            })
         );
     }
 

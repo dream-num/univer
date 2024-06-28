@@ -42,7 +42,7 @@ import {
     SelectionRenderService,
     SheetsRenderService,
 } from '@univerjs/sheets-ui';
-import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/ui';
+import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -76,8 +76,8 @@ describe('Test auto fill with formula', () => {
             [ISelectionRenderService, { useClass: SelectionRenderService }],
             [AutoFillController],
             [IAutoFillService, { useClass: AutoFillService }],
-            [IShortcutService, { useClass: DesktopShortcutService }],
-            [IPlatformService, { useClass: DesktopPlatformService }],
+            [IShortcutService, { useClass: ShortcutService }],
+            [IPlatformService, { useClass: PlatformService }],
             [FormulaAutoFillController],
             [RangeProtectionRuleModel],
             [RangeProtectionService],

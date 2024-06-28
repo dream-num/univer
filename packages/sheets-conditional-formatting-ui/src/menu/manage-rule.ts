@@ -125,6 +125,10 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
             if (!worksheet) return;
 
             const allRule = conditionalFormattingRuleModel.getSubunitRules(workbook.getUnitId(), worksheet.getSheetId()) || [];
+            if (!allRule.length) {
+                subscriber.next(false);
+                return false;
+            }
             const hasNotPermission = allRule.some((rule) => {
                 const ranges = rule.ranges;
                 return ranges.some((range) => {

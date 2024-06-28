@@ -1,0 +1,39 @@
+.mobile {
+    &-menu {
+        &-container {
+            min-width: 32px;
+            max-width: 200px;
+            display: grid;
+            grid-gap: 4px;
+            background-color: black;
+            border-radius: 4px;
+            padding: 4px 8px;
+        }
+
+        &-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            background: none;
+            color: white;
+            width: 48px;
+
+            > svg {
+                font-size: 18px;
+                height: 18px;
+                width: 18px;
+            }
+
+            > span {
+                width: 100%;
+                margin-top: 2px;
+                font-size: 13px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+    }
+}

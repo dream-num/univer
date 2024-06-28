@@ -88,11 +88,11 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                     skeleton: skeletonParams.skeleton,
                 });
 
-                return fromCallback(this._commandService.onCommandExecuted).pipe(
+                return fromCallback(this._commandService.onCommandExecuted.bind(this._commandService)).pipe(
                     filter(([command]) =>
                         command.type === CommandType.MUTATION
-                            && (command.params as ISheetCommandSharedParams).unitId === workbook.getUnitId()
-                            && FILTER_MUTATIONS.has(command.id)
+                        && (command.params as ISheetCommandSharedParams).unitId === workbook.getUnitId()
+                        && FILTER_MUTATIONS.has(command.id)
                     ),
                     throttleTime(20, undefined, { leading: false, trailing: true }),
                     map(getParams),
@@ -103,7 +103,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         ).subscribe((renderParams) => {
             this._disposeRendering();
 
-                // If there's no filter range, we don't need to render anything.
+            // If there's no filter range, we don't need to render anything.
             if (!renderParams || !renderParams.range) {
                 return;
             }

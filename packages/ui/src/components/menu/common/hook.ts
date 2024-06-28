@@ -14,5 +14,12 @@
  * limitations under the License.
  */
 
-export * from './observable';
-export * from './observable-hooks';
+import { useObservable } from '@wendellhu/redi/react-bindings';
+import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
+
+export function useMenuItemState(
+    menuItem: IDisplayMenuItem<IMenuItem>
+) {
+    const disabled = useObservable<boolean>(menuItem.disabled$, false);
+    const activated = useObservable<boolean>(menuItem.activated$, false);
+};

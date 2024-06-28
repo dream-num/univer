@@ -1,0 +1,40 @@
+.mobile-sheet-bar {
+    &-container {
+        width: 100%;
+        overflow-x: scroll;
+        height: 32px;
+        background-color: rgb(var(--bg-color));
+    }
+
+    &-slider {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        height: 32px;
+    }
+
+    &-item {
+        align-items: center;
+        box-sizing: border-box;
+        flex-grow: 1;
+        flex-shrink: 0;
+        flex-wrap: nowrap;
+        font-size: 12px;
+        height: 100%;
+        line-height: 28px;
+        min-width: 48px;
+        overflow: hidden;
+        padding: 2px 4px;
+        text-align: center;
+        white-space: nowrap;
+        border-right: 1px solid rgb(var(--border-color));
+        background-color: rgb(var(--bg-color));
+        text-overflow: ellipsis;
+        max-width: 120px;
+
+        &.mobile-sheet-bar-item-activated {
+            color: rgb(var(--primary-color));
+            background-color: rgb(var(--bg-color-secondary));
+        }
+    }
+}

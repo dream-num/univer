@@ -332,6 +332,12 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
             .map((s) => s.getConfig().id);
     }
 
+    getUnhiddenWorksheets(): string[] {
+        return this.getSheets()
+            .filter((s) => s.getConfig().hidden !== BooleanNumber.TRUE)
+            .map((s) => s.getConfig().id);
+    }
+
     load(config: IWorkbookData) {
         // TODO: new Command
         this._snapshot = config;

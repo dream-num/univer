@@ -112,7 +112,7 @@ export class RichText extends BaseObject {
 
         this._initialProps(props);
 
-        this.onTransformChangeObservable.add((changeState) => {
+        this.onTransformChange$.subscribeEvent((changeState) => {
             const { type } = changeState;
             if (type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize || type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.all) {
                 docModel.updateDocumentDataPageSize(this.width);

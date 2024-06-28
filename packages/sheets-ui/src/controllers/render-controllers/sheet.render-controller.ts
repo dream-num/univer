@@ -410,9 +410,10 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
     }
 
     // mouse scroll
+    // eslint-disable-next-line max-lines-per-function
     private _initMouseWheel(scene: Scene, viewMain: Viewport) {
         this.disposeWithMe(
-            scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
+            scene.onMouseWheel$.subscribeEvent((evt: IWheelEvent, state) => {
                 if (evt.ctrlKey) {
                     return;
                 }

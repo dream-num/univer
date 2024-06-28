@@ -93,13 +93,13 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
     }, [forceUpdate, commandService]);
 
     useEffect(() => {
-        const disposable = toDisposable(
-            sheetSkeletonManagerService?.currentSkeleton$.subscribe((skeleton) => {
+        const disposable = sheetSkeletonManagerService && toDisposable(
+            sheetSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
                 if (skeleton) {
                     forceUpdate();
                 }
             }));
-        return disposable.dispose;
+        return disposable?.dispose;
     }, [sheetSkeletonManagerService, forceUpdate]);
 
     useEffect(() => {

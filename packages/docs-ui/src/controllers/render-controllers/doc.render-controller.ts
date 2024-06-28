@@ -19,7 +19,7 @@ import { ICommandService, IConfigService, RxDisposable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSkeletonManagerService, RichTextEditingMutation, VIEWPORT_KEY } from '@univerjs/docs';
 import type { DocumentSkeleton, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
-import { DocBackground, Documents, EVENT_TYPE, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
+import { DocBackground, Documents, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
@@ -54,7 +54,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         scene.attachControl();
 
-        scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
+        scene.onMouseWheel$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IWheelEvent;
 
             if (e.ctrlKey) {
@@ -82,6 +82,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         // TODO@wzhudev: this shouldn't be a config, because we may render different units at the same time.
         const hasScroll = this._configService.getConfig('hasScroll') as Nullable<boolean>;
         if (hasScroll !== false) {
+            // eslint-disable-next-line no-new
             new ScrollBar(viewMain);
         }
 

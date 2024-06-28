@@ -36,7 +36,7 @@ const locale: typeof zhCN = {
             dateTime: 'Date and time',
             decimalLength: 'Decimal places',
             currencyType: 'Currency Symbol',
-            moreFmt: 'More Formats',
+            moreFmt: 'Formats',
             financialValue: 'Financial value',
             roundingCurrency: 'Rounding up the currency',
             timeDuration: 'Duration Time',

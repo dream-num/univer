@@ -35,13 +35,13 @@ import type {
     IMenuSelectorItem,
     IValueOption,
     MenuItemDefaultValueType,
-} from '../../services/menu/menu';
-import { MenuGroup, MenuItemType } from '../../services/menu/menu';
-import { IMenuService } from '../../services/menu/menu.service';
-import { CustomLabel } from '../custom-label/CustomLabel';
-import { useObservable } from '../hooks/observable';
-import { useScrollYOverContainer } from '../hooks/layout.ts';
-import { ILayoutService } from '../../services/layout/layout.service';
+} from '../../../services/menu/menu.ts';
+import { MenuGroup, MenuItemType } from '../../../services/menu/menu.ts';
+import { IMenuService } from '../../../services/menu/menu.service.ts';
+import { CustomLabel } from '../../custom-label/CustomLabel.tsx';
+import { useObservable } from '../../hooks/observable.ts';
+import { useScrollYOverContainer } from '../../hooks/layout.ts';
+import { ILayoutService } from '../../../services/layout/layout.service.ts';
 import styles from './index.module.less';
 
 // TODO: @jikkai disabled and hidden are not working
@@ -64,7 +64,9 @@ function MenuWrapper(props: IBaseMenuProps) {
     const { menuType, onOptionSelect } = props;
     const menuService = useDependency(IMenuService);
 
-    if (!menuType) return;
+    if (!menuType) {
+        return null;
+    };
 
     if (Array.isArray(menuType)) {
         const menuTypes = menuType.map((type) => menuService.getMenuItems(type));
@@ -190,18 +192,17 @@ export const Menu = (props: IBaseMenuProps) => {
 
 interface IMenuItemProps {
     menuItem: IDisplayMenuItem<IMenuItem>;
-    onClick: (params: Partial<IValueOption>) => void;
+    onClick: (object: Partial<IValueOption>) => void;
 }
 
 function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const menuService = useDependency(IMenuService);
 
-    const menuItems = menuItem.id ? menuService.getMenuItems(menuItem.id) : [];
-
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
     const activated = useObservable<boolean>(menuItem.activated$, false);
     const hidden = useObservable(menuItem.hidden$, false);
     const value = useObservable<MenuItemDefaultValueType>(menuItem.value$);
+
     const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
     const selectionsFromObservable = useObservable(isObservable(item.selections) ? item.selections : undefined);
     const [inputValue, setInputValue] = useState(value);
@@ -291,6 +292,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
         );
     };
 
+    const subMenuItems = menuItem.id ? menuService.getMenuItems(menuItem.id) : [];
     const renderSubItemsType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
 
@@ -306,7 +308,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 )}
                 expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
             >
-                {menuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}
+                {subMenuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}
             </DesignSubMenu>
         );
     };

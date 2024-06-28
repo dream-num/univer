@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, type Nullable, type Observer, toDisposable } from '@univerjs/core';
+import { Disposable, type Nullable, toDisposable } from '@univerjs/core';
 
+import type { Subscription } from 'rxjs';
 import type { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import type { IDragEvent, IEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
@@ -45,7 +46,7 @@ export class InputManager extends Disposable {
     // private _alreadyAttachedTo: HTMLElement;
 
     // WorkBookObserver
-    private _onInputObserver: Nullable<Observer<IEvent>>;
+    private _onInput$: Nullable<Subscription>;
 
     // Pointers
     private _onPointerMove!: (evt: IMouseEvent) => void;
@@ -216,10 +217,8 @@ export class InputManager extends Disposable {
             this.mouseLeaveEnterHandler(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
-                if (this._scene.onPointerMoveObserver.hasObservers()) {
-                    this._scene.onPointerMoveObserver.notifyObservers(evt);
-                    this._scene.getEngine()?.setRemainCapture();
-                }
+                this._scene.onPointerMove$.emitEvent(evt);
+                this._scene.getEngine()?.setRemainCapture();
             }
         };
 
@@ -234,13 +233,7 @@ export class InputManager extends Disposable {
             const isStop = currentObject?.triggerPointerDown(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
-                // if (this._scene.onPointerDown) {
-                //     this._scene.onPointerDown(evt);
-                // }
-
-                if (this._scene.onPointerDownObserver.hasObservers()) {
-                    this._scene.onPointerDownObserver.notifyObservers(evt);
-                }
+                this._scene.onPointerDown$.emitEvent(evt);
             }
         };
 
@@ -254,9 +247,7 @@ export class InputManager extends Disposable {
             const isStop = currentObject?.triggerPointerUp(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
-                if (this._scene.onPointerUpObserver.hasObservers()) {
-                    this._scene.onPointerUpObserver.notifyObservers(evt);
-                }
+                this._scene.onPointerUp$.emitEvent(evt);
             }
 
             this._prePointerDoubleOrTripleClick(evt);
@@ -267,28 +258,24 @@ export class InputManager extends Disposable {
             const isStop = currentObject?.triggerMouseWheel(evt);
 
             this._scene.getViewports().forEach((vp: Viewport) => {
-                if (vp.onMouseWheelObserver.hasObservers()) {
-                    vp.onMouseWheelObserver.notifyObservers(evt);
-                }
+                vp.onMouseWheel$.emitEvent(evt);
+                // if (vp.onMouseWheel$.hasObservers()) {
+                // }
             });
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
-                if (this._scene.onMouseWheelObserver.hasObservers()) {
-                    this._scene.onMouseWheelObserver.notifyObservers(evt);
-                }
+                this._scene.onMouseWheel$.emitEvent(evt);
+                // if (this._scene.onMouseWheel$.hasObservers()) {
+                // }
             }
         };
 
         this._onKeyDown = (evt: IKeyboardEvent) => {
-            if (this._scene.onKeyDownObservable.hasObservers()) {
-                this._scene.onKeyDownObservable.notifyObservers(evt);
-            }
+            this._scene.onKeyDown$.emitEvent(evt);
         };
 
         this._onKeyUp = (evt: IKeyboardEvent) => {
-            if (this._scene.onKeyUpObservable.hasObservers()) {
-                this._scene.onKeyUpObservable.notifyObservers(evt);
-            }
+            this._scene.onKeyUp$.emitEvent(evt);
         };
 
         this._onDragEnter = (evt: IDragEvent) => {
@@ -311,10 +298,8 @@ export class InputManager extends Disposable {
             this.dragLeaveEnterHandler(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
-                if (this._scene.onDragOverObserver.hasObservers()) {
-                    this._scene.onDragOverObserver.notifyObservers(evt);
-                    this._scene.getEngine()?.setRemainCapture();
-                }
+                this._scene.onDragOver$.emitEvent(evt);
+                this._scene.getEngine()?.setRemainCapture();
             }
         };
 
@@ -323,14 +308,12 @@ export class InputManager extends Disposable {
             const isStop = currentObject?.triggerDrop(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
-                if (this._scene.onDropObserver.hasObservers()) {
-                    this._scene.onDropObserver.notifyObservers(evt);
-                }
+                this._scene.onDrop$.emitEvent(evt);
             }
         };
 
         // eslint-disable-next-line complexity
-        this._onInputObserver = engine.onInputChangedObservable.add((eventData: IEvent) => {
+        this._onInput$ = engine.onInputChanged$.subscribeEvent((eventData: IEvent) => {
             const evt: IEvent = eventData;
             // Keyboard Events
             if (eventData.deviceType === DeviceType.Keyboard) {
@@ -409,7 +392,7 @@ export class InputManager extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                this._onInputObserver
+                this._onInput$
             )
         );
 
@@ -429,7 +412,8 @@ export class InputManager extends Disposable {
         if (!engine) {
             return;
         }
-        engine.onInputChangedObservable.remove(this._onInputObserver);
+        // engine.onInputChanged$.remove(this._onInput$);
+        this._onInput$?.unsubscribe();
 
         this._alreadyAttached = false;
     }
@@ -484,17 +468,13 @@ export class InputManager extends Disposable {
         if (this._tripleClickState) {
             this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerTripleClick(evt);
 
-            if (this._scene.onTripleClickObserver.hasObservers()) {
-                this._scene.onTripleClickObserver.notifyObservers(evt);
-            }
+            this._scene.onTripleClick$.emitEvent(evt);
         }
 
         if (this._doubleClickOccurred === 2) {
             this._scene?.pick(Vector2.FromArray([evt.offsetX, evt.offsetY]))?.triggerDblclick(evt);
 
-            if (this._scene.onDblclickObserver.hasObservers()) {
-                this._scene.onDblclickObserver.notifyObservers(evt);
-            }
+            this._scene.onDblclick$.emitEvent(evt);
             this._resetDoubleClickParam();
             this._tripleClickState = true;
 

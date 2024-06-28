@@ -1621,9 +1621,8 @@ export class PromptController extends Disposable {
 
         const { mainComponent: documentComponent } = editorObject;
         if (documentComponent) {
-            this.disposeWithMe(documentComponent.onPointerDownObserver.add(() => {
+            this.disposeWithMe(documentComponent.onPointerDown$.subscribeEvent(() => {
                 this._arrowMoveActionState = ArrowMoveAction.moveCursor;
-
                 this._inputPanelState = InputPanelState.mouse;
             }));
         }
@@ -1824,7 +1823,7 @@ export class PromptController extends Disposable {
 
         const { mainComponent: documentComponent } = editorObject;
         if (documentComponent) {
-            this.disposeWithMe(documentComponent?.onPointerDownObserver.add(() => {
+            this.disposeWithMe(documentComponent?.onPointerDown$.subscribeEvent(() => {
                 this._userCursorMove = true;
             }));
         }

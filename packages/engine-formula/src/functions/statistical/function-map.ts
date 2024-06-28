@@ -29,9 +29,11 @@ import { VarS } from './var-s';
 import { Vara } from './vara';
 import { Varpa } from './varpa';
 import { Maxifs } from './maxifs';
+import { Averagea } from './averagea';
 
 export const functionStatistical = [
     [Average, FUNCTION_NAMES_STATISTICAL.AVERAGE],
+    [Averagea, FUNCTION_NAMES_STATISTICAL.AVERAGEA],
     [Count, FUNCTION_NAMES_STATISTICAL.COUNT],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Min, FUNCTION_NAMES_STATISTICAL.MIN],

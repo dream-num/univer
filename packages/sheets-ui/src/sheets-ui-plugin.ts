@@ -22,7 +22,6 @@ import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { UniverUIPlugin } from '@univerjs/ui';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
@@ -83,8 +82,9 @@ import { SheetPermissionUserManagerService } from './services/permission/sheet-p
 import { WorksheetProtectionRenderService } from './services/permission/worksheet-permission-render.service';
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
 import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
+import { MoveRangeController } from './controllers/move-range.controller';
 
-@DependentOn(UniverSheetsPlugin, UniverUIPlugin)
+@DependentOn(UniverSheetsPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN';
     static override type = UniverInstanceType.UNIVER_SHEET;
@@ -148,6 +148,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionInterceptorClipboardController],
             [SheetPermissionInterceptorBaseController],
             [SheetPermissionInitController],
+            [MoveRangeController],
         ] as Dependency[]
         ).forEach((d) => injector.add(d));
 

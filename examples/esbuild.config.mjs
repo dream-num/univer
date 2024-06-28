@@ -92,7 +92,12 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
 
         // uni
         './src/uni/main.ts',
+
+        // mobile sheet
+        './src/mobile-s/main.ts',
+        './src/mobile-s/worker.ts',
     ],
+
     outdir: './local',
 
     define: {

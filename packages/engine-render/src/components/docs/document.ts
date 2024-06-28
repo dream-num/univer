@@ -16,11 +16,12 @@
 
 import './extensions';
 
-import type { Nullable, Observer } from '@univerjs/core';
-import { CellValueType, HorizontalAlign, Observable, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
 
+import { Subject } from 'rxjs';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
-import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
 import { LineType } from '../../basics/i-document-skeleton-cached';
 import { degToRad } from '../../basics/tools';
 import type { Transform } from '../../basics/transform';
@@ -51,7 +52,8 @@ export interface IDocumentOffsetConfig extends IPageMarginLayout {
 }
 
 export class Documents extends DocComponent {
-    onPageRenderObservable = new Observable<IPageRenderConfig>();
+    private readonly _pageRender$ = new Subject<IPageRenderConfig>();
+    readonly pageRender$ = this._pageRender$.asObservable();
 
     docsLeft: number = 0;
 
@@ -59,22 +61,10 @@ export class Documents extends DocComponent {
 
     private _drawLiquid: Nullable<Liquid> = new Liquid();
 
-    // private _findLiquid: Nullable<Liquid> = new Liquid();
-
-    // private _hasEditor = false;
-
-    // private _editor: Nullable<DocsEditor>;
-
-    private _skeletonObserver: Nullable<Observer<IDocumentSkeletonCached>>;
-
-    // private _textAngleRotateOffset: number = 0;
-
     constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         super(oKey, documentSkeleton, config);
 
         this._initialDefaultExtension();
-
-        // this._addSkeletonChangeObserver(documentSkeleton);
 
         this.makeDirty(true);
     }
@@ -86,11 +76,8 @@ export class Documents extends DocComponent {
     override dispose() {
         super.dispose();
 
-        this._skeletonObserver?.dispose();
-        this._skeletonObserver = null;
-        this.onPageRenderObservable.clear();
+        this._pageRender$.complete();
         this._drawLiquid = null;
-        // this._findLiquid = null;
     }
 
     getOffsetConfig(): IDocumentOffsetConfig {
@@ -112,49 +99,6 @@ export class Documents extends DocComponent {
             docsTop,
         };
     }
-
-    // calculatePagePosition() {
-    //     const scene = this.getScene() as Scene;
-
-    //     const parent = scene?.getParent();
-    //     const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = this;
-    //     if (parent == null || docsWidth === Infinity || docsHeight === Infinity) {
-    //         return this;
-    //     }
-    //     const { width: engineWidth, height: engineHeight } = parent;
-    //     let docsLeft = 0;
-    //     let docsTop = 0;
-
-    //     let sceneWidth = 0;
-
-    //     let sceneHeight = 0;
-
-    //     if (engineWidth > docsWidth) {
-    //         docsLeft = engineWidth / 2 - docsWidth / 2;
-    //         sceneWidth = engineWidth - 30;
-    //     } else {
-    //         docsLeft = pageMarginLeft;
-    //         sceneWidth = docsWidth + pageMarginLeft * 2;
-    //     }
-
-    //     if (engineHeight > docsHeight) {
-    //         docsTop = engineHeight / 2 - docsHeight / 2;
-    //         sceneHeight = engineHeight - 30;
-    //     } else {
-    //         docsTop = pageMarginTop;
-    //         sceneHeight = docsHeight + pageMarginTop * 2;
-    //     }
-
-    //     this.docsLeft = docsLeft;
-
-    //     this.docsTop = docsTop;
-
-    //     scene.resize(sceneWidth, sceneHeight + 200);
-
-    //     this.translate(docsLeft, docsTop);
-
-    //     return this;
-    // }
 
     override getEngine() {
         return (this.getScene() as Scene).getEngine();
@@ -244,7 +188,7 @@ export class Documents extends DocComponent {
                 continue;
             }
 
-            this.onPageRenderObservable.notifyObservers({
+            this._pageRender$.next({
                 page,
                 pageLeft,
                 pageTop,
@@ -552,69 +496,4 @@ export class Documents extends DocComponent {
             this.register(extension);
         });
     }
-
-    // private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
-    //     if (!skeleton) {
-    //         return;
-    //     }
-
-    //     this._skeletonObserver = skeleton.onRecalculateChangeObservable.add((data) => {
-    //         const pages = data.pages;
-    //         let width = 0;
-    //         let height = 0;
-    //         for (let i = 0, len = pages.length; i < len; i++) {
-    //             const page = pages[i];
-    //             const { pageWidth, pageHeight } = page;
-    //             if (this.pageLayoutType === PageLayoutType.VERTICAL) {
-    //                 height += pageHeight;
-    //                 if (i !== len - 1) {
-    //                     height += this.pageMarginTop;
-    //                 }
-    //                 width = Math.max(width, pageWidth);
-    //             } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
-    //                 width += pageWidth;
-    //                 if (i !== len - 1) {
-    //                     width += this.pageMarginLeft;
-    //                 }
-    //                 height = Math.max(height, pageHeight);
-    //             }
-    //         }
-
-    //         this.resize(width, height);
-    //         this.calculatePagePosition();
-    //     });
-    // }
-
-    // private _disposeSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
-    //     if (!skeleton) {
-    //         return;
-    //     }
-    //     skeleton.onRecalculateChangeObservable.remove(this._skeletonObserver);
-    // }
-
-    // private _getPageBoundingBox(page: IDocumentSkeletonPage) {
-    //     const { pageWidth, pageHeight } = page;
-    //     const { x: startX, y: startY } = this._findLiquid;
-
-    //     let endX = -1;
-    //     let endY = -1;
-    //     if (this.pageLayoutType === PageLayoutType.VERTICAL) {
-    //         endX = pageWidth;
-    //         endY = startY + pageHeight;
-    //     } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
-    //         endX = startX + pageWidth;
-    //         endY = pageHeight;
-    //     }
-
-    //     return {
-    //         startX,
-    //         startY,
-    //         endX,
-    //         endY,
-    //     };
-    // }
-
-    // private _translatePage(page: IDocumentSkeletonPage) {
-    //     this._findLiquid.translatePage(page, this.pageLayoutType, this.pageMarginLeft, this.pageMarginTop);
-    // }
 }

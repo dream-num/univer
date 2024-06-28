@@ -23,15 +23,10 @@ import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBa
 import { permissionLockIconKey, permissionMenuIconKey } from '../../basics/const/permission';
 import { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionFormSheetBarCommand } from '../../commands/commands/worksheet-protection.command';
 import { getAddPermissionDisableBase$, getAddPermissionFromSheetBarDisable$, getAddPermissionHidden$, getEditPermissionHidden$, getPermissionDisableBase$, getRemovePermissionDisable$, getRemovePermissionFromSheetBarDisable$, getSetPermissionFromSheetBarDisable$, getViewPermissionDisable$ } from './permission-menu-util';
+import { SheetMenuPosition } from './menu';
 
 export const tmpIcon = 'data-validation-single';
 const SHEET_PERMISSION_CONTEXT_MENU_ID = 'sheet.contextMenu.permission';
-
-enum SheetMenuPosition {
-    ROW_HEADER_CONTEXT_MENU = 'rowHeaderContextMenu',
-    COL_HEADER_CONTEXT_MENU = 'colHeaderContextMenu',
-    SHEET_BAR = 'sheetBar',
-}
 
 export function sheetPermissionToolbarMenuFactory(accessor: IAccessor): IMenuItem {
     return {

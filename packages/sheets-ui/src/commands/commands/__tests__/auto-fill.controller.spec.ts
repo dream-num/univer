@@ -32,7 +32,7 @@ import {
     SetRangeValuesMutation,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
-import { DesktopPlatformService, DesktopShortcutService, EditorService, IEditorService, IPlatformService, IShortcutService } from '@univerjs/ui';
+import { EditorService, IEditorService, IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -283,8 +283,8 @@ describe('Test auto fill rules in controller', () => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
             [ISelectionRenderService, { useClass: BaseSelectionRenderService }],
             [IAutoFillService, { useClass: AutoFillService }],
-            [IShortcutService, { useClass: DesktopShortcutService }],
-            [IPlatformService, { useClass: DesktopPlatformService }],
+            [IShortcutService, { useClass: ShortcutService }],
+            [IPlatformService, { useClass: PlatformService }],
             [IEditorBridgeService, { useClass: EditorBridgeService }],
             [IEditorService, { useClass: EditorService }],
             [IRenderManagerService, { useClass: RenderManagerService }],

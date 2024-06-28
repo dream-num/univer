@@ -14,4 +14,26 @@
  * limitations under the License.
  */
 
-export * from './Menu';
+import React from 'react';
+
+// TODO@gggpound: Error checking needs to be implemented by the form control
+export const WrapperError = (props: {
+    errorText: string;
+    children: React.ReactElement;
+}) => {
+    return (
+        <div style={{ position: 'relative' }}>
+            <div style={{
+                position: 'absolute',
+                zIndex: 999,
+                bottom: '-13px',
+                fontSize: '10px',
+                color: 'red',
+            }}
+            >
+                {props.errorText}
+            </div>
+            {props.children}
+        </div>
+    );
+};

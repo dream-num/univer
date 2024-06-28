@@ -50,7 +50,7 @@ export default {
         },
     },
     AVERAGEA: {
-        description: 'Returns the average of its arguments, including numbers, text, and logical values',
+        description: 'Returns the average of its arguments, including numbers, text, and logical values.',
         abstract: 'Returns the average of its arguments, including numbers, text, and logical values',
         links: [
             {
@@ -59,8 +59,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: {
+                name: 'value1',
+                detail: 'The first number, cell reference, or range for which you want the average.',
+            },
+            value2: {
+                name: 'value2',
+                detail: 'Additional numbers, cell references or ranges for which you want the average, up to a maximum of 255.',
+            },
         },
     },
     AVERAGEIF: {

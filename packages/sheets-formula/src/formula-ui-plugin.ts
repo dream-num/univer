@@ -109,3 +109,47 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         dependencies.forEach((dependency) => j.add(dependency));
     }
 }
+
+export class UniverSheetsFormulaMobilePlugin extends Plugin {
+    static override pluginName = FORMULA_UI_PLUGIN_NAME;
+    static override type = UniverInstanceType.UNIVER_SHEET;
+
+    constructor(
+        private readonly _config: Partial<IUniverSheetsFormulaConfig> = {},
+        @Inject(Injector) override readonly _injector: Injector
+    ) {
+        super();
+
+        this._config = Tools.deepMerge({}, DefaultSheetFormulaConfig, this._config);
+    }
+
+    override onStarting(): void {
+        this._init();
+    }
+
+    _init(): void {
+        const dependencies: Dependency[] = [
+            // services
+            [IFormulaPromptService, { useClass: FormulaPromptService }],
+            [
+                IDescriptionService,
+                {
+                    useFactory: () => this._injector.createInstance(DescriptionService, this._config?.description),
+                },
+            ],
+            [IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }],
+            [IRegisterFunctionService, { useClass: RegisterFunctionService }],
+            [FormulaRefRangeService],
+            [RegisterOtherFormulaService],
+            [FormulaClipboardController],
+            [ArrayFormulaDisplayController],
+            [TriggerCalculationController],
+            [UpdateFormulaController],
+            [ActiveDirtyController],
+            [DefinedNameController],
+            [FormulaRenderManagerController],
+        ];
+
+        dependencies.forEach((dependency) => this._injector.add(dependency));
+    }
+}

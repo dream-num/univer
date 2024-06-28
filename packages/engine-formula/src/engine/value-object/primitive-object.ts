@@ -433,6 +433,9 @@ export class NumberValueObject extends BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.plus(this);
         }
+
+        const pattern = comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.PLUS);
+
         const object = this.plusBy(valueObject.getValue());
 
         // = 1 + #NAME? gets #NAME?, = 1 + #VALUE! gets #VALUE!
@@ -441,7 +444,7 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         // Set number format
-        object.setPattern(comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.PLUS));
+        object.setPattern(pattern);
 
         return object;
     }

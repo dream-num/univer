@@ -15,7 +15,8 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import { valueObjectCompare } from '../../../engine/utils/object-compare';
+import { findCompareToken, valueObjectCompare } from '../../../engine/utils/object-compare';
+import { filterSameValueObjectResult } from '../../../engine/utils/value-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -50,7 +51,11 @@ export class Sumif extends BaseFunction {
     }
 
     private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
-        const resultArrayObject = valueObjectCompare(range, criteria);
+        let resultArrayObject = valueObjectCompare(range, criteria);
+
+        const [, criteriaStringObject] = findCompareToken(`${criteria.getValue()}`);
+        // When comparing non-numbers and numbers, it does not take the result
+        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaStringObject);
 
         // sumRange has the same dimensions as range
         const sumRangeArray = sumRange

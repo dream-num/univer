@@ -16,10 +16,11 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { ArrayValueObject, transformToValue } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Countif } from '../index';
 import { StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test countif function', () => {
     const testFunction = new Countif(FUNCTION_NAMES_STATISTICAL.COUNTIF);
@@ -54,6 +55,18 @@ describe('Test countif function', () => {
             expect(resultObject.getValue()).toBe(2);
         });
 
+        it('Average range with boolean', async () => {
+            const range = ArrayValueObject.create(/*ts*/ `{
+                TRUE;
+                FALSE
+            }`);
+
+            const criteria = StringValueObject.create('>FALSE');
+
+            const resultObject = testFunction.calculate(range, criteria);
+            expect(resultObject.getValue()).toBe(1);
+        });
+
         it('ArrayValueObject range and ArrayValueObject criteria', async () => {
             const range = ArrayValueObject.create(/*ts*/ `{
                 1;
@@ -71,6 +84,68 @@ describe('Test countif function', () => {
 
             const resultObject = testFunction.calculate(range, criteria);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[1], [1], [1], [1]]);
+        });
+
+        it('ArrayValueObject range and ArrayValueObject criteria multi type cell', async () => {
+            const range = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false, null],
+                    [0, '100', '2.34', 'test', -3, ErrorType.NAME],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            const criteria = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['>1', '> ', '>1.23', '>true', '>false', '>'],
+                    ['>0', '>100', '>2.34', '>test', '>-3', ErrorType.NAME],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            const resultObject = testFunction.calculate(range, criteria);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[3, 1, 2, 0, 1, 0], [4, 0, 1, 0, 5, 1]]);
+        });
+
+        it('ArrayValueObject range equals ArrayValueObject criteria multi types cell', async () => {
+            const range = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false, null],
+                    [0, '100', '2.34', 'test', -3, ErrorType.NAME],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            const criteria = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['=1', '= ', '=1.23', '=true', '=false', '='],
+                    ['=0', '=100', '=2.34', '=test', '=-3', ErrorType.NAME],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            const resultObject = testFunction.calculate(range, criteria);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1]]);
         });
     });
 });

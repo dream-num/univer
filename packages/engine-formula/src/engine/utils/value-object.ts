@@ -23,7 +23,7 @@ import { ErrorValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
 import { ErrorType } from '../../basics/error-type';
 import { expandArrayValueObject } from './array-object';
-import { booleanObjectIntersection, isNumericComparison, valueObjectCompare } from './object-compare';
+import { booleanObjectIntersection, findCompareToken, valueObjectCompare } from './object-compare';
 
 export function convertTonNumber(valueObject: BaseValueObject) {
     const currentValue = valueObject.getValue();
@@ -196,10 +196,11 @@ export function getBooleanResults(variants: BaseValueObject[], maxRowLength: num
             // range must be an ArrayValueObject, criteria must be a BaseValueObject
             let resultArrayObject = valueObjectCompare(range, criteriaValueObject);
 
+            const [, criteriaStringObject] = findCompareToken(`${criteriaValueObject.getValue()}`);
+
             // When comparing non-numbers and numbers, countifs does not take the result
-            const isNumeric = isNumericComparison(criteriaValueObject.getValue());
-            if (isNumberSensitive && isNumeric) {
-                resultArrayObject = removeNonNumberValueObject(resultArrayObject as ArrayValueObject, range as ArrayValueObject);
+            if (isNumberSensitive) {
+                resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaStringObject);
             }
 
             if (booleanResults[rowIndex] === undefined) {
@@ -218,12 +219,51 @@ export function getBooleanResults(variants: BaseValueObject[], maxRowLength: num
     return booleanResults;
 }
 
-export function removeNonNumberValueObject(array: ArrayValueObject, range: ArrayValueObject) {
+/**
+ * Two valueObjects of the same type can be compared
+ * @param array
+ * @param range
+ * @param criteria
+ * @returns
+ */
+export function filterSameValueObjectResult(array: ArrayValueObject, range: ArrayValueObject, criteria: BaseValueObject) {
     return array.mapValue((valueObject, r, c) => {
-        if (range.get(r, c)?.isNumber()) {
+        const rangeValueObject = range.get(r, c);
+        if (rangeValueObject && isSameValueObjectType(rangeValueObject, criteria)) {
             return valueObject;
         } else {
             return BooleanValueObject.create(false);
         }
     });
+}
+
+/**
+ * Check if the two valueObjects are of the same type
+ * @param left
+ * @param right
+ * @returns
+ */
+export function isSameValueObjectType(left: BaseValueObject, right: BaseValueObject) {
+    if (left.isNumber() && right.isNumber()) {
+        return true;
+    }
+
+    // blank string is same as a blank cell
+    if (left.isString() && left.getValue() !== '' && right.isString() && right.getValue() !== '') {
+        return true;
+    }
+
+    if (left.isBoolean() && right.isBoolean()) {
+        return true;
+    }
+
+    if (left.isNull() && right.isNull()) {
+        return true;
+    }
+
+    if (left.isError() && right.isError()) {
+        return true;
+    }
+
+    return false;
 }

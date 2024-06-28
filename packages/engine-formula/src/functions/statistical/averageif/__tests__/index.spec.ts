@@ -264,7 +264,14 @@ describe('Test isref function', () => {
         it('ArrayValueObject range and ArrayValueObject criteria', async () => {
             const result = await calculate('=AVERAGEIF(A3:F4,A3:F4)');
 
-            expect(result).toBe([[1, 0, 1.23, ErrorType.DIV_BY_ZERO, ErrorType.DIV_BY_ZERO, 0], [0, 100, 2.34, ErrorType.DIV_BY_ZERO, -3, 0]]);
+            // [0][1] ErrorType.DIV_BY_ZERO refer to Google Sheets
+            expect(result).toStrictEqual([[1, ErrorType.DIV_BY_ZERO, 1.23, ErrorType.DIV_BY_ZERO, ErrorType.DIV_BY_ZERO, 0], [0, 100, 2.34, ErrorType.DIV_BY_ZERO, -3, 0]]);
+        });
+
+        it('ArrayValueObject range and string criteria', async () => {
+            const result = await calculate('=AVERAGEIF(A3:F4," ")');
+
+            expect(result).toBe(ErrorType.DIV_BY_ZERO);
         });
     });
 });

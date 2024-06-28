@@ -15,7 +15,8 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import { isNumericComparison, valueObjectCompare } from '../../../engine/utils/object-compare';
+import { findCompareToken, valueObjectCompare } from '../../../engine/utils/object-compare';
+import { filterSameValueObjectResult } from '../../../engine/utils/value-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -42,11 +43,13 @@ export class Countif extends BaseFunction {
     }
 
     private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject) {
-        const resultArrayObject = valueObjectCompare(range, criteria);
+        let resultArrayObject = valueObjectCompare(range, criteria);
+
+        const [, criteriaStringObject] = findCompareToken(`${criteria.getValue()}`);
+        // If the condition is a numeric comparison, only numbers are counted, otherwise text is counted.
+        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaStringObject);
 
         const picked = (range as ArrayValueObject).pick(resultArrayObject as ArrayValueObject);
-        // If the condition is a numeric comparison, only numbers are counted, otherwise text is counted.
-        const isNumeric = isNumericComparison(criteria.getValue());
-        return isNumeric ? picked.count() : picked.countA();
+        return picked.countA();
     }
 }

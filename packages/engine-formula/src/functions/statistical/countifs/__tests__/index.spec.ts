@@ -209,5 +209,32 @@ describe('Test countifs function', () => {
             const resultObject = testFunction.calculate(range1, criteria1, range2, criteria2);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[1], [0], [0], [0]]);
         });
+
+        it('2 ranges and criteria, 2 array criteria, compare string', async () => {
+            const range1 = ArrayValueObject.create(`{
+                1;
+                2;
+                3;
+                4;
+                5;
+                6
+            }`);
+
+            const criteria1 = StringValueObject.create('<5');
+
+            const range2 = ArrayValueObject.create(`{
+                40664;
+                40665;
+                40666;
+                40667;
+                40668;
+                40669
+            }`);
+
+            const criteria2 = StringValueObject.create('<5/3/2011');
+
+            const resultObject = testFunction.calculate(range1, criteria1, range2, criteria2);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[0]]);
+        });
     });
 });

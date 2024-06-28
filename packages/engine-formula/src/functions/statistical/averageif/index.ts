@@ -17,8 +17,8 @@
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import { createNewArray } from '../../../engine/utils/array-object';
-import { isNumericComparison, valueObjectCompare } from '../../../engine/utils/object-compare';
-import { removeNonNumberValueObject } from '../../../engine/utils/value-object';
+import { findCompareToken, valueObjectCompare } from '../../../engine/utils/object-compare';
+import { filterSameValueObjectResult } from '../../../engine/utils/value-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -73,15 +73,9 @@ export class Averageif extends BaseFunction {
     private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject, averageRange?: BaseReferenceObject) {
         let resultArrayObject = valueObjectCompare(range, criteria);
 
+        const [, criteriaStringObject] = findCompareToken(`${criteria.getValue()}`);
         // When comparing non-numbers and numbers, it does not take the result
-        const isNumeric = isNumericComparison(criteria.getValue());
-        if (isNumeric) {
-            // if(resultArrayObject.isArray()){
-            resultArrayObject = removeNonNumberValueObject(resultArrayObject as ArrayValueObject, range as ArrayValueObject);
-            // }else{
-            //     resultArrayObject = range.isNumber() ? resultArrayObject : BooleanValueObject.create(false);;
-            // }
-        }
+        resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaStringObject);
 
         // averageRange has the same dimensions as range
         let averageRangeArray = averageRange
@@ -122,7 +116,7 @@ export class Averageif extends BaseFunction {
         const rowCount = range.isArray() ? (range as ArrayValueObject).getRowCount() : 1;
         const columnCount = range.isArray() ? (range as ArrayValueObject).getColumnCount() : 1;
 
-        if (averageRangeRow === rowCount || averageRangeColumn === columnCount) {
+        if (averageRangeRow === rowCount && averageRangeColumn === columnCount) {
             return averageRange;
         }
 

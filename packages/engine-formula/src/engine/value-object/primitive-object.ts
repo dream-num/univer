@@ -250,23 +250,23 @@ export class BooleanValueObject extends BaseValueObject {
     }
 
     override plus(valueObject: BaseValueObject): BaseValueObject {
-        return this._convertTonNumber().plus(valueObject);
+        return this._convertToNumber().plus(valueObject);
     }
 
     override minus(valueObject: BaseValueObject): BaseValueObject {
-        return this._convertTonNumber().minus(valueObject);
+        return this._convertToNumber().minus(valueObject);
     }
 
     override multiply(valueObject: BaseValueObject): BaseValueObject {
-        return this._convertTonNumber().multiply(valueObject);
+        return this._convertToNumber().multiply(valueObject);
     }
 
     override divided(valueObject: BaseValueObject): BaseValueObject {
-        return this._convertTonNumber().divided(valueObject);
+        return this._convertToNumber().divided(valueObject);
     }
 
     override mod(valueObject: BaseValueObject): BaseValueObject {
-        return this._convertTonNumber().mod(valueObject);
+        return this._convertToNumber().mod(valueObject);
     }
 
     override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
@@ -274,6 +274,9 @@ export class BooleanValueObject extends BaseValueObject {
             return valueObject.compare(this, reverseCompareOperator(operator));
         }
 
+        if (valueObject.isNull()) {
+            return this._convertToNumber().compare(valueObject, operator);
+        }
         return this.compareBy(valueObject.getValue(), operator);
     }
 
@@ -284,7 +287,7 @@ export class BooleanValueObject extends BaseValueObject {
             result = this._compareString(operator);
         } else if (typeof value === 'boolean') {
             const booleanNumber = NumberValueObject.create(value ? 1 : 0);
-            return this._convertTonNumber().compare(booleanNumber, operator);
+            return this._convertToNumber().compare(booleanNumber, operator);
         }
 
         return BooleanValueObject.create(result);
@@ -292,10 +295,10 @@ export class BooleanValueObject extends BaseValueObject {
 
     private _compareString(operator: compareToken): boolean {
         switch (operator) {
-            case compareToken.EQUALS:
             case compareToken.GREATER_THAN:
             case compareToken.GREATER_THAN_OR_EQUAL:
                 return true;
+            case compareToken.EQUALS:
             case compareToken.LESS_THAN:
             case compareToken.LESS_THAN_OR_EQUAL:
             case compareToken.NOT_EQUAL:
@@ -304,14 +307,14 @@ export class BooleanValueObject extends BaseValueObject {
     }
 
     override concatenateFront(valueObject: BaseValueObject): BaseValueObject {
-        return this._convertTonNumber().concatenateFront(valueObject);
+        return this._convertToNumber().concatenateFront(valueObject);
     }
 
     override concatenateBack(valueObject: BaseValueObject): BaseValueObject {
-        return this._convertTonNumber().concatenateBack(valueObject);
+        return this._convertToNumber().concatenateBack(valueObject);
     }
 
-    private _convertTonNumber() {
+    private _convertToNumber() {
         const currentValue = this.getValue();
         let result = 0;
         if (currentValue) {
@@ -321,87 +324,87 @@ export class BooleanValueObject extends BaseValueObject {
     }
 
     override pow(valueObject: BaseValueObject): BaseValueObject {
-        return this._convertTonNumber().pow(valueObject);
+        return this._convertToNumber().pow(valueObject);
     }
 
     override sqrt(): BaseValueObject {
-        return this._convertTonNumber().sqrt();
+        return this._convertToNumber().sqrt();
     }
 
     override cbrt(): BaseValueObject {
-        return this._convertTonNumber().cbrt();
+        return this._convertToNumber().cbrt();
     }
 
     override cos(): BaseValueObject {
-        return this._convertTonNumber().cos();
+        return this._convertToNumber().cos();
     }
 
     override acos(): BaseValueObject {
-        return this._convertTonNumber().acos();
+        return this._convertToNumber().acos();
     }
 
     override acosh(): BaseValueObject {
-        return this._convertTonNumber().acosh();
+        return this._convertToNumber().acosh();
     }
 
     override sin(): BaseValueObject {
-        return this._convertTonNumber().sin();
+        return this._convertToNumber().sin();
     }
 
     override asin(): BaseValueObject {
-        return this._convertTonNumber().asin();
+        return this._convertToNumber().asin();
     }
 
     override asinh(): BaseValueObject {
-        return this._convertTonNumber().asinh();
+        return this._convertToNumber().asinh();
     }
 
     override tan(): BaseValueObject {
-        return this._convertTonNumber().tan();
+        return this._convertToNumber().tan();
     }
 
     override tanh(): BaseValueObject {
-        return this._convertTonNumber().tanh();
+        return this._convertToNumber().tanh();
     }
 
     override atan(): BaseValueObject {
-        return this._convertTonNumber().atan();
+        return this._convertToNumber().atan();
     }
 
     override atan2(valueObject: BaseValueObject): BaseValueObject {
-        return this._convertTonNumber().atan2(valueObject);
+        return this._convertToNumber().atan2(valueObject);
     }
 
     override atanh(): BaseValueObject {
-        return this._convertTonNumber().atanh();
+        return this._convertToNumber().atanh();
     }
 
     override log(): BaseValueObject {
-        return this._convertTonNumber().log();
+        return this._convertToNumber().log();
     }
 
     override log10(): BaseValueObject {
-        return this._convertTonNumber().log10();
+        return this._convertToNumber().log10();
     }
 
     override exp(): BaseValueObject {
-        return this._convertTonNumber().exp();
+        return this._convertToNumber().exp();
     }
 
     override abs(): BaseValueObject {
-        return this._convertTonNumber().abs();
+        return this._convertToNumber().abs();
     }
 
     override round(valueObject: BaseValueObject): BaseValueObject {
-        return this._convertTonNumber().round(valueObject);
+        return this._convertToNumber().round(valueObject);
     }
 
     override floor(valueObject: BaseValueObject): BaseValueObject {
-        return this._convertTonNumber().floor(valueObject);
+        return this._convertToNumber().floor(valueObject);
     }
 
     override ceil(valueObject: BaseValueObject): BaseValueObject {
-        return this._convertTonNumber().ceil(valueObject);
+        return this._convertToNumber().ceil(valueObject);
     }
 
     override convertToNumberObjectValue() {

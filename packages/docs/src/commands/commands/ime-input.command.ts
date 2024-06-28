@@ -40,6 +40,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IIMEInputCommandParams) => {
         const { unitId, newText, oldTextLen, isCompositionEnd, isCompositionStart } = params;
+        // console.log('===ime', params);
         const commandService = accessor.get(ICommandService);
         const imeInputManagerService = accessor.get(IMEInputManagerService);
         const previousActiveRange = imeInputManagerService.getActiveRange();
@@ -76,20 +77,23 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
+        let memoryCursor = 0;
         if (!previousActiveRange.collapsed && isCompositionStart) {
-            const { dos, retain } = getRetainAndDeleteFromReplace(previousActiveRange, segmentId, 0, body);
+            const { dos, retain, cursor } = getRetainAndDeleteFromReplace(previousActiveRange, segmentId, 0, body);
             textX.push(...dos);
             doMutation.params!.textRanges = [{
                 startOffset: startOffset + len + retain,
                 endOffset: startOffset + len + retain,
                 collapsed: true,
             }];
+            memoryCursor = cursor;
         } else {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: startOffset,
                 segmentId,
             });
+            memoryCursor = startOffset;
         }
 
         if (oldTextLen > 0) {

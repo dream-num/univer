@@ -32,11 +32,11 @@ export function normalizeSelection(selection: ITextRange) {
 
 export function getSelectionWithSymbolMax(selection: ITextRange, body: IDocumentBody) {
     let { startOffset, endOffset } = normalizeSelection(selection);
-    while (isCustomRangeSplitSymbol(body.dataStream[startOffset - 1])) {
+    while (body.dataStream[startOffset - 1] === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
         startOffset -= 1;
     }
 
-    while (isCustomRangeSplitSymbol(body.dataStream[endOffset])) {
+    while (body.dataStream[endOffset] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
         endOffset += 1;
     }
 

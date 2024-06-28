@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, IUniverInstanceService, JSONX } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, JSONX, Tools } from '@univerjs/core';
 import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
 import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
 import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
@@ -96,7 +96,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         const undoActions = JSONX.invertWithDoc(actions, documentDataModel.getSnapshot());
         documentDataModel.apply(actions);
         // Step 2: Update Doc View Model.
-        // console.log('===edit end', actions, documentDataModel.getBody());
+        // console.log('===edit end', actions, Tools.deepClone(documentDataModel.getBody()));
         const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
         const segmentViewModel = documentViewModel.getSelfOrHeaderFooterViewModel(segmentId);
         segmentViewModel.reset(segmentDocumentDataModel);

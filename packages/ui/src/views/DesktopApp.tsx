@@ -39,6 +39,7 @@ export interface IUniverAppProps extends IWorkbenchOptions {
 export function DesktopApp(props: IUniverAppProps) {
     const {
         header = true,
+        toolbar = true,
         footer = true,
         contextMenu = true,
         mountContainer,
@@ -107,7 +108,7 @@ export function DesktopApp(props: IUniverAppProps) {
               */}
             <div className={styles.appLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
                 {/* header */}
-                {header && (
+                {header && toolbar && (
                     <header className={styles.appContainerHeader}>
                         <Toolbar headerMenuComponents={headerMenuComponents} />
                     </header>

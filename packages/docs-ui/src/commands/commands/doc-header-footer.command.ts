@@ -17,7 +17,7 @@
 import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import { BooleanNumber, CommandType, ICommandService, IUniverInstanceService, JSONX, Tools } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSkeletonManagerService, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
 import { HeaderFooterType } from '../../controllers/doc-header-footer.controller';
 import { SidebarDocHeaderFooterPanelOperation } from '../operations/doc-header-footer-panel.operation';
@@ -107,7 +107,7 @@ function createHeaderFooterAction(segmentId: string, createType: HeaderFooterTyp
     return actions;
 }
 
-interface IHeaderFooterProps {
+export interface IHeaderFooterProps {
     marginHeader?: number; // marginHeader
     marginFooter?: number; // marginFooter
     useFirstPageHeaderFooter?: BooleanNumber; // useFirstPageHeaderFooter
@@ -135,6 +135,7 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const { unitId, segmentId, createType, headerFooterProps } = params;
         const docSkeletonManagerService = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
         const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
@@ -148,13 +149,25 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
 
         const { documentStyle } = docDataModel.getSnapshot();
 
-        const textRanges: ITextRangeWithStyle[] = [
-            {
+        const activeRange = textSelectionManagerService.getActiveRange();
+        const isUpdateMargin = headerFooterProps?.marginFooter != null || headerFooterProps?.marginHeader != null;
+        let textRanges: ITextRangeWithStyle[] = [];
+
+        if (activeRange && isUpdateMargin) {
+            const { startOffset, endOffset, collapsed, style } = activeRange;
+            textRanges = [{
+                startOffset,
+                endOffset,
+                collapsed,
+                style,
+            }];
+        } else {
+            textRanges = [{
                 startOffset: 0,
                 endOffset: 0,
                 collapsed: true,
-            },
-        ];
+            }];
+        }
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -177,6 +190,10 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
             Object.keys(headerFooterProps).forEach((key) => {
                 const value = headerFooterProps[key as keyof IHeaderFooterProps];
                 const oldValue = documentStyle[key as keyof IHeaderFooterProps];
+                if (value === oldValue) {
+                    return;
+                }
+
                 let action;
                 if (oldValue === undefined) {
                     action = jsonX.insertOp(['documentStyle', key], value);

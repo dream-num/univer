@@ -54,7 +54,7 @@ export const DocHeaderFooterPanel = () => {
     return (
         <div className={styles.panel}>
             {isEditHeaderFooter
-                ? <DocHeaderFooterOptions />
+                ? <DocHeaderFooterOptions unitId={unitId} />
                 : <div className={styles.panelDisableText}>{localeService.t('headerFooter.disableText')}</div>}
         </div>
     );

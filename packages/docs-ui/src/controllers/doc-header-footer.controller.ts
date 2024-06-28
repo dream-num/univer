@@ -21,7 +21,7 @@ import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager, P
 import { Inject } from '@wendellhu/redi';
 
 import { ComponentManager, IEditorService } from '@univerjs/ui';
-import { DocSkeletonManagerService, neoGetDocObject } from '@univerjs/docs';
+import { DocSkeletonManagerService, neoGetDocObject, TextSelectionManagerService } from '@univerjs/docs';
 import type { Nullable } from 'vitest';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
@@ -132,6 +132,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
@@ -231,7 +232,8 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                     });
                 } else if (headerFooterId != null) {
                     this._textSelectionRenderManager.setSegment(headerFooterId);
-                    // TODO: set selection to header or footer.
+                    this._textSelectionRenderManager.setSegmentPage(pageNumber);
+                    this._textSelectionRenderManager.setCursorManually(offsetX, offsetY);
                 }
             }
         }));

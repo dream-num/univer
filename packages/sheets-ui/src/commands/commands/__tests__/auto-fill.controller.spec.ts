@@ -41,11 +41,12 @@ import { AutoFillController } from '../../../controllers/auto-fill.controller';
 import { AutoFillService, IAutoFillService } from '../../../services/auto-fill/auto-fill.service';
 import { APPLY_TYPE } from '../../../services/auto-fill/type';
 import { EditorBridgeService, IEditorBridgeService } from '../../../services/editor-bridge.service';
-import { BaseSelectionRenderService, ISelectionRenderService } from '../../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { RefillCommand } from '../refill.command';
 import { AutoClearContentCommand, AutoFillCommand } from '../auto-fill.command';
 import { SheetsRenderService } from '../../../services/sheets-render.service';
+import { ISelectionRenderService } from '../../../services/selection/base-selection-render.service';
+import { SelectionRenderService } from '../../../services/selection/selection-render.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
@@ -281,7 +282,7 @@ describe('Test auto fill rules in controller', () => {
     let selectionManagerService: SelectionManagerService;
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
-            [ISelectionRenderService, { useClass: BaseSelectionRenderService }],
+            [ISelectionRenderService, { useClass: SelectionRenderService }],
             [IAutoFillService, { useClass: AutoFillService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],

@@ -34,9 +34,10 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SheetClipboardController } from '../../../controllers/clipboard/clipboard.controller';
 import { IMarkSelectionService } from '../../mark-selection/mark-selection.service';
-import { ISelectionRenderService, SelectionRenderService } from '../../selection/selection-render.service';
+import { SelectionRenderService } from '../../selection/selection-render.service';
 import { ISheetClipboardService, SheetClipboardService } from '../clipboard.service';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
+import { ISelectionRenderService } from '../../selection/base-selection-render.service';
 
 const cellData = {
     0: {
@@ -362,91 +363,91 @@ const mergeData = [
         startColumn: 10,
         endColumn: 11,
     },
-    // check
+  // check
     {
         startRow: 0,
         startColumn: 5,
         endRow: 0,
         endColumn: 6,
     },
-    // check
+  // check
     {
         startRow: 2,
         startColumn: 5,
         endRow: 2,
         endColumn: 7,
     },
-    // check
+  // check
     {
         startRow: 4,
         startColumn: 5,
         endRow: 4,
         endColumn: 8,
     },
-    // check
+  // check
     {
         startRow: 6,
         startColumn: 5,
         endRow: 7,
         endColumn: 6,
     },
-    // check
+  // check
     {
         startRow: 9,
         startColumn: 5,
         endRow: 9,
         endColumn: 6,
     },
-    // check
+  // check
     {
         startRow: 11,
         startColumn: 5,
         endRow: 12,
         endColumn: 6,
     },
-    // check
+  // check
     {
         startRow: 11,
         startColumn: 7,
         endRow: 12,
         endColumn: 7,
     },
-    // check
+  // check
     {
         startRow: 0,
         startColumn: 10,
         endRow: 0,
         endColumn: 11,
     },
-    // check
+  // check
     {
         startRow: 3,
         startColumn: 10,
         endRow: 3,
         endColumn: 12,
     },
-    // check
+  // check
     {
         startRow: 6,
         startColumn: 10,
         endRow: 6,
         endColumn: 11,
     },
-    // check
+  // check
     {
         startRow: 8,
         startColumn: 11,
         endRow: 9,
         endColumn: 12,
     },
-    // check
+  // check
     {
         startRow: 11,
         startColumn: 10,
         endRow: 11,
         endColumn: 12,
     },
-    // check
+  // check
     {
         startRow: 13,
         startColumn: 11,
@@ -489,15 +490,15 @@ export class testMarkSelectionService {
     }
 
     removeShape(id: string): void {
-        // empty
+    // empty
     }
 
     removeAllShapes(): void {
-        // empty
+    // empty
     }
 
     refreshShapes(): void {
-        // empty
+    // empty
     }
 
     getShapeMap(): Map<string, any> {
@@ -525,9 +526,9 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
 
-    /**
-     * This plugin hooks into Sheet's DI system to expose API to test scripts
-     */
+  /**
+   * This plugin hooks into Sheet's DI system to expose API to test scripts
+   */
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
         static override type = UniverInstanceType.UNIVER_SHEET;
@@ -555,7 +556,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
             injector.add([INotificationService, { useClass: testNotificationService }]);
             injector.add([IPlatformService, { useClass: testPlatformService }]);
 
-            // Because SheetClipboardController is initialized in the rendered life cycle, here we need to initialize it manually
+      // Because SheetClipboardController is initialized in the rendered life cycle, here we need to initialize it manually
             const sheetClipboardController = injector.createInstance(SheetClipboardController);
 
             injector.add([SheetClipboardController, { useValue: sheetClipboardController }]);
@@ -583,8 +584,8 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
 
-    // NOTE: This is pretty hack for the test. But with these hacks we can avoid to create
-    // real canvas-environment in univerjs/sheets-ui. If some we have to do that, this hack could be removed.
+  // NOTE: This is pretty hack for the test. But with these hacks we can avoid to create
+  // real canvas-environment in univerjs/sheets-ui. If some we have to do that, this hack could be removed.
     const fakeSheetSkeletonManagerService = new SheetSkeletonManagerService({
         unit: sheet,
         unitId: 'test',

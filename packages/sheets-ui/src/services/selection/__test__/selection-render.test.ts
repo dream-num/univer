@@ -30,7 +30,8 @@ import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
-import { BaseSelectionRenderService } from '../base-selection-render.service';
+import { ISelectionRenderService } from '../base-selection-render.service';
+import { SelectionRenderService } from '../selection-render.service';
 import { createCommandTestBed } from './create-service-test-bed';
 
 const theme = {
@@ -139,11 +140,11 @@ const mockEvent: IMouseEvent = {
 
 class MockEngine extends ThinEngine<Scene> {
     setRemainCapture(): void {
-        // empty
+    // empty
     }
 
     clearCanvas() {
-        // empty
+    // empty
     }
 
     getCanvas() {
@@ -155,7 +156,7 @@ class MockEngine extends ThinEngine<Scene> {
     }
 
     setCanvasCursor(val: CURSOR_TYPE) {
-        // empty
+    // empty
     }
 
     getPixelRatio() {
@@ -167,7 +168,7 @@ describe('Test indirect', () => {
     let get: Injector['get'];
 
     let themeService: ThemeService;
-    let selectionRenderService: BaseSelectionRenderService;
+    let selectionRenderService: ISelectionRenderService;
 
     let selectionStartParam: ISelectionWithCoordAndStyle[];
 
@@ -179,7 +180,7 @@ describe('Test indirect', () => {
         const testBed = createCommandTestBed(undefined, [
             [IShortcutService, { useClass: ShortcutService }],
             [SheetSkeletonManagerService],
-            [BaseSelectionRenderService],
+            [ISelectionRenderService, { useClass: SelectionRenderService }],
             [IPlatformService, { useClass: PlatformService }],
             [IRenderManagerService, { useClass: RenderManagerService }],
         ]);
@@ -192,7 +193,7 @@ describe('Test indirect', () => {
         themeService = get(ThemeService);
         themeService.setTheme(theme);
 
-        selectionRenderService = get(BaseSelectionRenderService);
+        selectionRenderService = get(ISelectionRenderService);
 
         const workbook = testBed.sheet;
 
@@ -211,6 +212,7 @@ describe('Test indirect', () => {
 
         const scene = new Scene('', new MockEngine());
 
+    // @ts-ignore
         selectionRenderService._changeRuntime(skeleton, scene);
 
         selectionRenderService.selectionMoveStart$.subscribe((param) => {
@@ -225,6 +227,7 @@ describe('Test indirect', () => {
             selectionEndParam = param;
         });
 
+    // @ts-ignore
         selectionRenderService._onPointerDown(mockEvent);
 
         scene.triggerPointerMove({ ...mockEvent, offsetX: 200 });

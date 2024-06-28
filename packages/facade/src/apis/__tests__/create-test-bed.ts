@@ -156,8 +156,8 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([WorksheetProtectionRuleModel]);
 
             const renderManagerService = injector.get(IRenderManagerService);
-            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService);
-            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, SheetRenderController);
+            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetSkeletonManagerService] as Dependency);
+            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetRenderController] as Dependency);
 
             ([
                 [ConditionalFormattingService],

@@ -62,7 +62,7 @@ export const SmartToggleSheetsFilterCommand: ICommand = {
         }
 
         const selectionManager = accessor.get(SelectionManagerService);
-        const lastSelection = selectionManager.getLast();
+        const lastSelection = selectionManager.getCurrentLastSelection();
         if (!lastSelection) return false;
 
         const startRange = lastSelection.range;

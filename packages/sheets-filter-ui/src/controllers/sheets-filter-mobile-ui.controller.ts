@@ -16,6 +16,7 @@
 
 import { LifecycleStages, runOnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { Dependency } from '@wendellhu/redi';
 import { SheetsFilterRenderController } from './sheets-filter-render.controller';
 
 export class SheetsFilterMobileUIController extends RxDisposable {
@@ -28,7 +29,7 @@ export class SheetsFilterMobileUIController extends RxDisposable {
     }
 
     private _initRenderControllers(): void {
-        this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, SheetsFilterRenderController));
+        this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [SheetsFilterRenderController] as Dependency));
     }
 }
 

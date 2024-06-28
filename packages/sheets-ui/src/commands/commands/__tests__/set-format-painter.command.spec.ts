@@ -47,7 +47,7 @@ import {
     SetOnceFormatPainterCommand,
 } from '../set-format-painter.command';
 import { IMarkSelectionService } from '../../../services/mark-selection/mark-selection.service';
-import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
+import { ISelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
@@ -279,7 +279,7 @@ describe('Test format painter rules in controller', () => {
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getMergeData()[2].startRow).toBe(3);
 
                 get(IUniverInstanceService).focusUnit('workbook-01');
-                // undo
+        // undo
                 await commandService.executeCommand(UndoCommand.id);
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(0, 2)?.s).toBe(undefined);
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(0, 3)?.s).toBe(undefined);
@@ -287,7 +287,7 @@ describe('Test format painter rules in controller', () => {
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(2, 3)?.s).toBe(undefined);
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getMergeData().length).toBe(1);
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getMergeData()[0].startRow).toBe(1);
-                //redo
+        //redo
                 await commandService.executeCommand(RedoCommand.id);
 
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(0, 3)?.s).toBe('M5JbP2');

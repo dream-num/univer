@@ -78,7 +78,7 @@ export const InsertHyperLinkOperation: ICommand = {
         }
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selection = selectionManagerService.getLast();
+        const selection = selectionManagerService.getCurrentLastSelection();
         if (!selection) {
             return false;
         }

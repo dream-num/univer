@@ -498,7 +498,7 @@ describe('Test insert function operation', () => {
             const selectionManager = get(SelectionManagerService);
 
             // A1
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 0, startColumn: 1, endRow: 0, endColumn: 1, rangeType: RANGE_TYPE.COLUMN },
                     primary: null,

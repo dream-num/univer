@@ -31,35 +31,34 @@ export const ShowAddSheetCommentModalOperation: ICommand = {
 
         const sheetsThreadCommentPopupService = accessor.get(SheetsThreadCommentPopupService);
         const threadCommentPanelService = accessor.get(ThreadCommentPanelService);
-        const activeCell = selectionManagerService.getLast()?.primary;
-        const current = selectionManagerService.getCurrent();
+        const activeCell = selectionManagerService.getCurrentLastSelection()?.primary;
         const model = accessor.get(SheetsThreadCommentModel);
 
-        if (!current || !activeCell) {
+        if (!activeCell) {
             return false;
         }
 
-        const { unitId, sheetId } = current;
-        const result = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId: sheetId });
+        const result = getSheetCommandTarget(univerInstanceService);
         if (!result) {
             return false;
         }
-        const { workbook, worksheet } = result;
+
+        const { workbook, worksheet, unitId, subUnitId } = result;
         const location: ISheetLocation = {
             workbook,
             worksheet,
             unitId,
-            subUnitId: sheetId,
+            subUnitId,
             row: activeCell.startRow,
             col: activeCell.startColumn,
         };
 
         sheetsThreadCommentPopupService.showPopup(location);
-        const rootId = model.getByLocation(unitId, sheetId, activeCell.startRow, activeCell.startColumn);
+        const rootId = model.getByLocation(unitId, subUnitId, activeCell.startRow, activeCell.startColumn);
         if (rootId) {
             threadCommentPanelService.setActiveComment({
                 unitId,
-                subUnitId: sheetId,
+                subUnitId,
                 commentId: rootId,
                 trigger: 'context-menu',
             });

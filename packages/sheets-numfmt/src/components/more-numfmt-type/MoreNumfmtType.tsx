@@ -45,7 +45,7 @@ export const Options = () => {
 
     const selectionManagerService = useDependency(SelectionManagerService);
     const setNumfmt = (pattern: string | null) => {
-        const selection = selectionManagerService.getLast();
+        const selection = selectionManagerService.getCurrentLastSelection();
         if (!selection) {
             return;
         }

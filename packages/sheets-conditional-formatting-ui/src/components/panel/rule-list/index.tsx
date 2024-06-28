@@ -142,7 +142,7 @@ export const RuleList = (props: IRuleListProps) => {
             return [];
         }
         if (selectValue === '1') {
-            const selection = selectionManagerService.getLast();
+            const selection = selectionManagerService.getCurrentLastSelection();
             if (!selection) {
                 return [];
             }

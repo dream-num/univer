@@ -18,6 +18,7 @@ import type { ICustomDecorationForInterceptor, ICustomRangeForInterceptor, IDocu
 import { DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentDataModel, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 
+import { BehaviorSubject } from 'rxjs';
 import { DataStreamTreeNode } from './data-stream-tree-node';
 
 export interface ICustomRangeInterceptor {
@@ -42,6 +43,9 @@ export class DocumentViewModel implements IDisposable {
     private _tableBlockCurrentIndex = 0;
     private _customRangeCurrentIndex = 0;
     private _editArea: DocumentEditArea = DocumentEditArea.BODY;
+
+    private readonly _editAreaChange$ = new BehaviorSubject<Nullable<DocumentEditArea>>(null);
+    readonly editAreaChange$ = this._editAreaChange$.asObservable();
 
     headerTreeMap: Map<string, DocumentViewModel> = new Map();
     footerTreeMap: Map<string, DocumentViewModel> = new Map();
@@ -76,7 +80,10 @@ export class DocumentViewModel implements IDisposable {
     }
 
     setEditArea(editArea: DocumentEditArea) {
-        this._editArea = editArea;
+        if (editArea !== this._editArea) {
+            this._editArea = editArea;
+            this._editAreaChange$.next(editArea);
+        }
     }
 
     getPositionInParent() {

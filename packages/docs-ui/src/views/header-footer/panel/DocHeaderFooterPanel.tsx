@@ -14,14 +14,48 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { DocSkeletonManagerService } from '@univerjs/docs';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+
 import styles from './index.module.less';
 import { DocHeaderFooterOptions } from './DocHeaderFooterOptions';
 
 export const DocHeaderFooterPanel = () => {
+    const localeService = useDependency(LocaleService);
+    const renderManagerService = useDependency(IRenderManagerService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const documentDataModel = univerInstanceService.getCurrentUniverDocInstance()!;
+    const unitId = documentDataModel.getUnitId()!;
+    const docSkeletonManagerService = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+
+    const viewModel = docSkeletonManagerService!.getViewModel();
+    const [isEditHeaderFooter, setIsEditHeaderFooter] = useState(true);
+
+    useEffect(() => {
+        const editArea = viewModel.getEditArea();
+        setIsEditHeaderFooter(editArea !== DocumentEditArea.BODY);
+
+        const subscription = viewModel.editAreaChange$.subscribe((editArea) => {
+            if (editArea == null) {
+                return;
+            }
+            setIsEditHeaderFooter(editArea !== DocumentEditArea.BODY);
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     return (
         <div className={styles.panel}>
-            <DocHeaderFooterOptions />
+            {isEditHeaderFooter
+                ? <DocHeaderFooterOptions />
+                : <div className={styles.panelDisableText}>{localeService.t('headerFooter.disableText')}</div>}
         </div>
     );
 };

@@ -218,6 +218,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
             if (editArea === DocumentEditArea.BODY) {
                 this._textSelectionRenderManager.setSegment('');
                 this._textSelectionRenderManager.setSegmentPage(-1);
+                this._textSelectionRenderManager.setCursorManually(offsetX, offsetY);
             } else {
                 if (createType != null) {
                     const SEGMENT_ID_LEN = 6;

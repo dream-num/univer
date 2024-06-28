@@ -107,7 +107,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
                 const viewModel = this._docSkeletonManagerService.getViewModel();
                 const preEditArea = viewModel.getEditArea();
 
-                if (preEditArea !== DocumentEditArea.BODY && editArea !== preEditArea) {
+                if (preEditArea !== DocumentEditArea.BODY && editArea !== DocumentEditArea.BODY && editArea !== preEditArea) {
                     viewModel.setEditArea(editArea);
                 }
             }

@@ -29,7 +29,7 @@ export interface IDocThreadCommentUIConfig {
     menu: MenuConfig;
 }
 
-@OnLifecycle(LifecycleStages.Starting, DocThreadCommentUIController)
+@OnLifecycle(LifecycleStages.Rendered, DocThreadCommentUIController)
 export class DocThreadCommentUIController extends Disposable {
     constructor(
         private _config: IDocThreadCommentUIConfig,

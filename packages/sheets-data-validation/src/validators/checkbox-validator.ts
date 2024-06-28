@@ -38,7 +38,7 @@ export class CheckboxValidator extends BaseDataValidator {
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
-    override skipDefaultFontRender(rule: ISheetDataValidationRule, cellValue: Nullable<CellValue>, pos: ISheetLocation) {
+    override skipDefaultFontRender(rule: ISheetDataValidationRule, cellValue: Nullable<CellValue>, pos: { unitId: string; subUnitId: string }) {
         const { formula1, formula2 } = this.parseFormulaSync(rule, pos.unitId, pos.subUnitId);
 
         const valueStr = `${cellValue ?? ''}`;

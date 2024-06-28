@@ -32,13 +32,13 @@ export interface IBaseComment {
     attachments?: string[];
     updated?: boolean;
     mentions?: string[];
+    parentId?: string;
+    resolved?: boolean;
+    unitId: string;
+    subUnitId: string;
+    children?: IBaseComment[];
 }
 
 export interface IThreadComment extends IBaseComment {
-    unitId: string;
-    subUnitId: string;
     ref: string;
-    parentId?: string;
-    resolved?: boolean;
-    children?: IThreadComment[];
 }

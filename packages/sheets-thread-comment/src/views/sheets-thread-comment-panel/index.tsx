@@ -50,20 +50,27 @@ export const SheetsThreadCommentPanel = () => {
             sheetIndex[sheet.getSheetId()] = i;
         });
 
-        return comments.map((comment) => {
-            const ref = singleReferenceToGrid(comment.ref);
-            const p = [sheetIndex[comment.subUnitId] ?? 0, ref.row, ref.column];
-            return { ...comment, p };
-        }).sort((pre, aft) => {
-            if (pre.p[0] === aft.p[0]) {
-                if (pre.p[1] === aft.p[1]) {
-                    return pre.p[2] - aft.p[2];
+        const sort = (comments: IThreadComment[]) => {
+            return comments.map((comment) => {
+                const ref = singleReferenceToGrid(comment.ref);
+                const p = [sheetIndex[comment.subUnitId] ?? 0, ref.row, ref.column];
+                return { ...comment, p };
+            }).sort((pre, aft) => {
+                if (pre.p[0] === aft.p[0]) {
+                    if (pre.p[1] === aft.p[1]) {
+                        return pre.p[2] - aft.p[2];
+                    }
+                    return pre.p[1] - aft.p[1];
                 }
-                return pre.p[1] - aft.p[1];
-            }
 
-            return pre.p[0] - aft.p[0];
-        });
+                return pre.p[0] - aft.p[0];
+            });
+        }
+
+        return [
+            ...sort(comments.filter(comment => !comment.resolved)),
+            ...sort(comments.filter(comment => comment.resolved)),
+        ]
     }, [workbook]);
 
     const showShape = useCallback((comment: IThreadComment) => {

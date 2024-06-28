@@ -19,8 +19,6 @@ import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
 import { ThreadCommentModel } from '../../models/thread-comment.model';
 import { AddCommentMutation, DeleteCommentMutation, type IUpdateCommentPayload, ResolveCommentMutation, UpdateCommentMutation } from '../mutations/comment.mutation';
 import { IThreadCommentDataSourceService } from '../../services/tc-datasource.service';
-import type { ICommentUpdateOperationProps } from '../operations/comment.operation';
-import { CommentUpdateOperation } from '../operations/comment.operation';
 
 export interface IAddCommentCommandParams {
     unitId: string;
@@ -70,19 +68,9 @@ export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
             return res;
         }
 
-        if (!syncUpdateMutationToColla) {
-            commandService.executeCommand(CommentUpdateOperation.id, {
-                unitId,
-                subUnitId,
-                commentId: comment.id,
-                threadId: comment.threadId,
-                rootId: comment.parentId || comment.id,
-                type: 'reply',
-            } as ICommentUpdateOperationProps);
-            return true;
-        }
-
-        return commandService.executeCommand(redo.id, redo.params);
+        return commandService.executeCommand(redo.id, redo.params, {
+            onlyLocal: !syncUpdateMutationToColla
+        });
     },
 };
 
@@ -124,24 +112,12 @@ export const UpdateCommentCommand: ICommand<IUpdateCommentCommandParams> = {
             return false;
         }
 
-        if (!syncUpdateMutationToColla) {
-            commandService.executeCommand(CommentUpdateOperation.id, {
-                unitId,
-                subUnitId,
-                commentId: currentComment.id,
-                threadId: currentComment.threadId,
-                rootId: currentComment.parentId || currentComment.id,
-                type: 'update',
-            } as ICommentUpdateOperationProps);
-            return true;
-        }
-
         const redo = {
             id: UpdateCommentMutation.id,
             params,
         };
 
-        commandService.executeCommand(redo.id, redo.params);
+        commandService.executeCommand(redo.id, redo.params, { onlyLocal: !syncUpdateMutationToColla });
         return true;
     },
 };
@@ -169,7 +145,7 @@ export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
             return false;
         }
 
-        const success = await dataSourceService.updateComment({
+        const success = await dataSourceService.resolveComment({
             ...currentComment,
             resolved,
         });
@@ -215,7 +191,7 @@ export const DeleteCommentCommand: ICommand<IDeleteCommentCommandParams> = {
             return false;
         }
 
-        if (!(await dataSourceService.deleteComment(commentId, comment.threadId, unitId, subUnitId))) {
+        if (!(await dataSourceService.deleteComment(unitId, subUnitId, comment.threadId, commentId))) {
             return false;
         }
 
@@ -224,19 +200,7 @@ export const DeleteCommentCommand: ICommand<IDeleteCommentCommandParams> = {
             params,
         };
 
-        if (!syncUpdateMutationToColla) {
-            commandService.executeCommand(CommentUpdateOperation.id, {
-                unitId,
-                subUnitId,
-                commentId: comment.id,
-                threadId: comment.threadId,
-                rootId: comment.parentId || comment.id,
-                type: 'delete',
-            });
-            return true;
-        }
-
-        return commandService.executeCommand(redo.id, redo.params);
+        return commandService.executeCommand(redo.id, redo.params, { onlyLocal: !syncUpdateMutationToColla });
     },
 };
 
@@ -263,7 +227,7 @@ export const DeleteCommentTreeCommand: ICommand<IDeleteCommentCommandParams> = {
             return false;
         }
 
-        if (!(await dataSourceService.deleteComment(commentId, commentWithChildren.root.threadId, unitId, subUnitId))) {
+        if (!(await dataSourceService.deleteComment(unitId, subUnitId, commentWithChildren.root.threadId, commentId))) {
             return false;
         }
 

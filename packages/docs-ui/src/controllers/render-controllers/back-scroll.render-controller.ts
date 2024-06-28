@@ -107,7 +107,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
         const delta = isEditor ? 0 : 100;
 
         if (top < boundTop) {
-            offsetY = top - boundTop;
+            offsetY = top - boundTop - delta;
         } else if (top > boundBottom - height) {
             offsetY = top - boundBottom + height + delta;
         }

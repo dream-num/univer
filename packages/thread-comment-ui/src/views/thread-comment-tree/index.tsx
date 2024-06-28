@@ -224,7 +224,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                 subUnitId,
                 threadId: '',
             }],
-        ...comments?.children ?? [],
+        ...(comments?.children ?? []) as IThreadComment[],
     ];
     const handleResolve = () => {
         commandService.executeCommand(ResolveCommentCommand.id, {

@@ -32,7 +32,7 @@ export type {
     IUpdateCommentPayload,
     IUpdateCommentRefMutationParams,
 } from './commands/mutations/comment.mutation';
-export type { IThreadComment, IThreadCommentMention } from './types/interfaces/i-thread-comment';
+export type { IThreadComment, IThreadCommentMention, IBaseComment } from './types/interfaces/i-thread-comment';
 export {
     AddCommentCommand,
     DeleteCommentCommand,
@@ -50,7 +50,7 @@ export type {
 export { UniverThreadCommentPlugin } from './plugin';
 export {
     IThreadCommentDataSourceService,
+    ThreadCommentDataSourceService,
     type IThreadCommentDataSource,
     type ThreadCommentJSON,
 } from './services/tc-datasource.service';
-export { CommentUpdateOperation, type ICommentUpdateOperationProps } from './commands/operations/comment.operation';

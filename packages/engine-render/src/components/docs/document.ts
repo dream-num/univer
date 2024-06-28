@@ -17,7 +17,7 @@
 import './extensions';
 
 import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import type { IDocumentRenderConfig, Nullable } from '@univerjs/core';
+import type { IDocumentRenderConfig, IScale, Nullable } from '@univerjs/core';
 
 import { Subject } from 'rxjs';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
@@ -32,7 +32,6 @@ import type { Scene } from '../../scene';
 import type { ComponentExtension, IExtensionConfig } from '../extension';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
-import type { IScale } from '../../../../core/lib/types';
 import { Liquid } from './liquid';
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import { DocComponent } from './doc-component';

@@ -64,26 +64,27 @@ export class SheetsFilterService extends Disposable {
     readonly errorMsg$ = this._errorMsg$.asObservable();
 
     private readonly _activeFilterModel$ = new BehaviorSubject<Nullable<FilterModel>>(null);
-  /** An observable value emitting the current Workbook's active Worksheet's filter model (if there is one). */
+    /** An observable value emitting the current Workbook's active Worksheet's filter model (if there is one). */
     readonly activeFilterModel$ = this._activeFilterModel$.asObservable();
-  /** The current Workbook's active Worksheet's filter model (if there is one). */
+    /** The current Workbook's active Worksheet's filter model (if there is one). */
     get activeFilterModel(): Nullable<FilterModel> { return this._activeFilterModel$.getValue(); }
 
     constructor(
         @IResourceManagerService private readonly _resourcesManagerService: IResourceManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService) {
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
         super();
 
         this._initModel();
         this._initActiveFilterModel();
     }
 
-  /**
-   *
-   * @param unitId
-   * @param subUnitId
-   */
+    /**
+     *
+     * @param unitId
+     * @param subUnitId
+     */
     ensureFilterModel(unitId: string, subUnitId: string): FilterModel {
         const already = this.getFilterModel(unitId, subUnitId);
         if (already) {
@@ -136,7 +137,7 @@ export class SheetsFilterService extends Disposable {
             return;
         }
 
-    // Use getActiveSheet to avoid automatically activating the next sheet when deleting the sheet, causing the sheet switching in ActiveWorksheetController to be invalid.
+        // Use getActiveSheet to avoid automatically activating the next sheet when deleting the sheet, causing the sheet switching in ActiveWorksheetController to be invalid.
         const activeSheet = workbook.getActiveSheet(true);
         if (!activeSheet) {
             this._activeFilterModel$.next(null);
@@ -152,11 +153,11 @@ export class SheetsFilterService extends Disposable {
     private _initActiveFilterModel() {
         this.disposeWithMe(
             merge(
-        // source1: executing filter related mutations
+                // source1: executing filter related mutations
                 fromCallback(this._commandService.onCommandExecuted.bind(this._commandService))
                     .pipe(filter(([command]) => command.type === CommandType.MUTATION && FILTER_MUTATIONS.has(command.id))),
 
-        // source2: activate sheet changes
+                // source2: activate sheet changes
                 this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
                     .pipe(switchMap((workbook) => workbook?.activeSheet$ ?? of(null)))
             ).subscribe(() => this._updateActiveFilterModel()));

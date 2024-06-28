@@ -141,8 +141,8 @@ describe('Test "Filter Interceptor"', () => {
     describe('Test "remove sheet Command"', () => {
         it('remove sheet command', async () => {
             const removeSheetCommandParams = { unitId: 'workbookId', subUnitId: 'worksheetId' } as IRemoveSheetCommandParams;
-            await commandService.executeCommand(RemoveSheetCommand.id, removeSheetCommandParams);
-            expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId')).toBe(null);
+            expect(await commandService.executeCommand(RemoveSheetCommand.id, removeSheetCommandParams)).toBeTruthy();
+            expect(sheetsFilterService.getFilterModel('workbookId', 'worksheetId') === null).toBeTruthy();
         });
     });
 });

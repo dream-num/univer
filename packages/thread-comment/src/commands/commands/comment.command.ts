@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, type ICommand, ICommandService } from '@univerjs/core';
 import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
 import { ThreadCommentModel } from '../../models/thread-comment.model';
 import { AddCommentMutation, DeleteCommentMutation, type IUpdateCommentPayload, ResolveCommentMutation, UpdateCommentMutation } from '../mutations/comment.mutation';
@@ -34,9 +34,9 @@ export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
             return false;
         }
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
+        // const undoRedoService = accessor.get(IUndoRedoService);
         const dataSourceService = accessor.get(IThreadCommentDataSourceService);
-        const { unitId, subUnitId, comment: originComment } = params;
+        const { comment: originComment } = params;
         const comment = await dataSourceService.addComment(originComment);
         const syncUpdateMutationToColla = dataSourceService.syncUpdateMutationToColla;
         const isRoot = !originComment.parentId;
@@ -51,19 +51,19 @@ export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
 
         if (isRoot) {
             const res = await commandService.executeCommand(redo.id, redo.params);
-            const undo = {
-                id: DeleteCommentMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    commentId: comment.id,
-                },
-            };
-            res && undoRedoService.pushUndoRedo({
-                undoMutations: [undo],
-                redoMutations: [redo],
-                unitID: unitId,
-            });
+            // const undo = {
+            //     id: DeleteCommentMutation.id,
+            //     params: {
+            //         unitId,
+            //         subUnitId,
+            //         commentId: comment.id,
+            //     },
+            // };
+            // res && undoRedoService.pushUndoRedo({
+            //     undoMutations: [undo],
+            //     redoMutations: [redo],
+            //     unitID: unitId,
+            // });
 
             return res;
         }

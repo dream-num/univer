@@ -17,7 +17,7 @@
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
 import { ICommandService, type IUser, LocaleService, Tools, type UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
@@ -251,6 +251,10 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         );
         onClose?.();
     };
+
+    useEffect(() => {
+        return onMouseLeave?.();
+    }, []);
 
     const subUnitName = getSubUnitName(comments?.root.subUnitId ?? subUnitId);
     const editorVisible = showEdit && !editingId && !resolved;

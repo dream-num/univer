@@ -63,18 +63,25 @@ export const StartAddCommentOperation: ICommand = {
         const userManagerService = accessor.get(UserManagerService);
         const docCommentService = accessor.get(DocThreadCommentService);
         const commandService = accessor.get(ICommandService);
+        const sidebarService = accessor.get(ISidebarService);
 
         const textRange = textSelectionManagerService.getActiveRange();
         if (!doc || !textRange) {
             return false;
         }
 
-        if (!panelService.panelVisible) {
-            commandService.executeCommand(ShowCommentPanelOperation.id);
+        if (textRange.collapsed) {
+            if (panelService.panelVisible) {
+                panelService.setPanelVisible(false);
+                sidebarService.close();
+            } else {
+                commandService.executeCommand(ShowCommentPanelOperation.id);
+            }
+            return true;
         }
 
-        if (textRange.collapsed) {
-            return true;
+        if (!panelService.panelVisible) {
+            commandService.executeCommand(ShowCommentPanelOperation.id);
         }
 
         const unitId = doc.getUnitId();

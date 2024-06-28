@@ -95,7 +95,7 @@ export class DrawingPopupMenuController extends RxDisposable {
         if (!transformer) {
             return;
         }
-        const disposePopups: IDisposable[] = [];
+        let singletonPopupDisposer: IDisposable;
         this.disposeWithMe(
             toDisposable(
                 transformer.onCreateControlObservable.add(() => {
@@ -107,7 +107,7 @@ export class DrawingPopupMenuController extends RxDisposable {
 
                     const selectedObjects = transformer.getSelectedObjectMap();
                     if (selectedObjects.size > 1) {
-                        disposePopups.forEach((dispose) => dispose.dispose());
+                        singletonPopupDisposer?.dispose();
                         return;
                     }
 
@@ -123,15 +123,15 @@ export class DrawingPopupMenuController extends RxDisposable {
                     }
 
                     const { unitId, subUnitId, drawingId } = drawingParam;
-
-                    disposePopups.push(this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
+                    singletonPopupDisposer?.dispose();
+                    singletonPopupDisposer = this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
                         componentKey: COMPONENT_IMAGE_POPUP_MENU,
                         direction: 'horizontal',
                         offset: [2, 0],
                         extraProps: {
                             menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId),
                         },
-                    })));
+                    }));
 
                     this._drawingManagerService.focusDrawing([{
                         unitId,
@@ -144,7 +144,7 @@ export class DrawingPopupMenuController extends RxDisposable {
         this.disposeWithMe(
             toDisposable(
                 transformer.onClearControlObservable.add(() => {
-                    disposePopups.forEach((dispose) => dispose.dispose());
+                    singletonPopupDisposer?.dispose();
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
                     this._drawingManagerService.focusDrawing(null);
                 })
@@ -153,7 +153,7 @@ export class DrawingPopupMenuController extends RxDisposable {
         this.disposeWithMe(
             toDisposable(
                 transformer.onChangingObservable.add(() => {
-                    disposePopups.forEach((dispose) => dispose.dispose());
+                    singletonPopupDisposer?.dispose();
                 })
             )
         );

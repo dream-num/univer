@@ -20,6 +20,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
 import type { IUniverSheetsDrawingConfig } from './controllers/sheet-drawing.controller';
@@ -41,7 +42,8 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
     constructor(
         config: Partial<IUniverSheetsDrawingConfig> = {},
         @Inject(Injector) protected _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -65,14 +67,18 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
                     useFactory: () => this._injector.createInstance(SheetDrawingUIController, this._pluginConfig),
                 },
             ],
-            [SheetDrawingUpdateController],
             [DrawingPopupMenuController],
-            [SheetDrawingTransformAffectedController],
             [SheetDrawingPrintingController],
             [SheetDrawingPermissionController],
 
         ];
 
+        const renderModules = [
+            SheetDrawingUpdateController,
+            SheetDrawingTransformAffectedController,
+        ];
+
         dependencies.forEach((dependency) => injector.add(dependency));
+        renderModules.forEach((controller) => this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, controller));
     }
 }

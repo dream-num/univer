@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { ISelectionRenderService } from '@univerjs/sheets-ui';
+import { ISelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { type IDrawingJsonUndo1, IDrawingManagerService, type IDrawingParam, type ITransformState } from '@univerjs/drawing';
 import type { IInsertColCommandParams, IInsertRowCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
 import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetActiveOperation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 
@@ -62,14 +63,16 @@ const REFRESH_MUTATIONS = [
 ];
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingTransformAffectedController)
-export class SheetDrawingTransformAffectedController extends Disposable {
+export class SheetDrawingTransformAffectedController extends Disposable implements IRenderModule {
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
 
@@ -243,7 +246,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         }
 
         if (newSheetTransform != null && newTransform != null) {
-            const newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            const newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
             updateDrawings.push({ ...drawing, sheetTransform: newSheetTransform, transform: newTransform });
         }
 
@@ -548,7 +551,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         }
                     }
 
-                    const newTransform = drawingPositionToTransform({ ...sheetTransform }, this._selectionRenderService);
+                    const newTransform = drawingPositionToTransform({ ...sheetTransform }, this._selectionRenderService, this._sheetSkeletonManagerService);
                     if (newTransform != null) {
                         updateDrawings.push({
                             ...drawing,
@@ -700,11 +703,12 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 const { from, to } = sheetTransform;
                 const { column: fromColumn } = from;
                 const { column: toColumn } = to;
-                if (fromColumn >= colStartIndex && toColumn <= colEndIndex) {
+                if (SheetDrawingAnchorType.Both === anchorType && fromColumn >= colStartIndex && toColumn <= colEndIndex) {
                     // delete drawing
                     deleteDrawings.push({ unitId, subUnitId, drawingId });
                 } else {
                     const param = this._shrinkCol(sheetTransform, transform, colStartIndex, colEndIndex, anchorType);
+
                     newSheetTransform = param?.newSheetTransform;
                     newTransform = param?.newTransform;
                 }
@@ -768,7 +772,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             //     from: { ...from, column: fromColumn + colCount },
             //     to: { ...to, column: toColumn + colCount },
             // };
-            // newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            // newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
 
             const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: colStartIndex, endColumn: colEndIndex, startRow: from.row, endRow: to.row });
             if (selectionCell == null) {
@@ -783,7 +787,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     from: { ...from },
                     to: { ...to, column: toColumn + colCount },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -822,10 +826,23 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from, column: fromColumn - colCount },
                 to: { ...to, column: toColumn - colCount },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
         } else if (fromColumn >= colStartIndex && toColumn <= colEndIndex) {
             // delete drawing
-            return null;
+            const newFromColumn = fromColumn - colCount;
+            const newToColumn = toColumn - colCount;
+
+            newSheetTransform = {
+                from: { ...from, column: newFromColumn },
+                to: { ...to, column: newToColumn },
+            };
+            const tempNewTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+            newTransform = {
+                ...tempNewTransform,
+                left: newFromColumn < 0 ? 0 : transform.left,
+                width: transform.width,
+                height: transform.height,
+            };
         } else if (fromColumn < colStartIndex && toColumn > colEndIndex) {
             // shrink end left only
             if (anchorType === SheetDrawingAnchorType.Both) {
@@ -833,7 +850,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     from: { ...from },
                     to: { ...to, column: toColumn - colCount },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -867,7 +884,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from },
                 to: { ...to, column: colStartIndex - 1, columnOffset: selectionCell.endX - selectionCell.startX },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
         }
 
         if (newSheetTransform != null && newTransform != null) {
@@ -916,7 +933,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         row: toRow + rowCount,
                     },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -959,7 +976,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from, row: fromRow - rowCount },
                 to: { ...to, row: toRow - rowCount },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
         } else if (fromRow >= rowStartIndex && toRow <= rowEndIndex) {
             // delete drawing
             return null;
@@ -970,7 +987,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     from: { ...from },
                     to: { ...to, row: toRow - rowCount },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -1000,7 +1017,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from },
                 to: { ...to, row: rowStartIndex - 1, rowOffset: selectionCell.endY - selectionCell.startY },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
         }
 
         if (newSheetTransform != null && newTransform != null) {
@@ -1094,7 +1111,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 ) || fromRow > endRow || fromColumn > endColumn) {
                     updateDrawings.push({
                         ...drawing,
-                        transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService),
+                        transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService),
                     });
                     break;
                 }

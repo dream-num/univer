@@ -17,9 +17,9 @@
 import type { ITransformState, Nullable } from '@univerjs/core';
 import { precisionTo } from '@univerjs/engine-render';
 import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
-import type { ISelectionRenderService } from '@univerjs/sheets-ui';
+import type { ISelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
-export function drawingPositionToTransform(position: ISheetDrawingPosition, selectionRenderService: ISelectionRenderService): Nullable<ITransformState> {
+export function drawingPositionToTransform(position: ISheetDrawingPosition, selectionRenderService: ISelectionRenderService, sheetSkeletonManagerService: SheetSkeletonManagerService): Nullable<ITransformState> {
     const { from, to } = position;
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
     const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
@@ -50,8 +50,8 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, sele
 
     const { startX: endSelectionX, startY: endSelectionY } = endSelectionCell;
 
-    const left = precisionTo(startSelectionX + fromColumnOffset, 1);
-    const top = precisionTo(startSelectionY + fromRowOffset, 1);
+    let left = precisionTo(startSelectionX + fromColumnOffset, 1);
+    let top = precisionTo(startSelectionY + fromRowOffset, 1);
 
     let width = precisionTo(endSelectionX + toColumnOffset - left, 1);
     let height = precisionTo(endSelectionY + toRowOffset - top, 1);
@@ -62,6 +62,14 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, sele
 
     if (startSelectionCell.startY === endSelectionCell.endY) {
         height = 0;
+    }
+
+    const skeleton = sheetSkeletonManagerService.getCurrentSkeleton();
+    if (left + width > skeleton.columnTotalWidth) {
+        left = skeleton.columnTotalWidth - width;
+    }
+    if (top + height > skeleton.rowTotalHeight) {
+        top = skeleton.rowTotalHeight - height;
     }
 
     return {

@@ -25,8 +25,8 @@ import { type Injector, Quantity } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { SelectionShape } from './selection-shape';
-import { ISelectionRenderService } from './selection-render.service';
 import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
+import { ISelectionRenderService } from './base-selection-render.service';
 
 const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
 

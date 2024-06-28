@@ -22,7 +22,6 @@ import type {
     ISelectionCellWithCoord,
     ISelectionWithCoord,
     Nullable,
-    Observer,
     ThemeService,
 } from '@univerjs/core';
 import { Disposable, InterceptorManager, makeCellToSelection, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
@@ -31,8 +30,8 @@ import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univ
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import { getNormalSelectionStyle } from '@univerjs/sheets';
 import type { IShortcutService } from '@univerjs/ui';
-import type { Injector } from '@wendellhu/redi';
-import type { Observable } from 'rxjs';
+import { createIdentifier, type Injector } from '@wendellhu/redi';
+import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -71,15 +70,15 @@ export interface ISelectionRenderService {
     getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithCoord>; // drawing
 }
 
+export const ISelectionRenderService = createIdentifier<ISelectionRenderService>('univer.sheet.selection-render-service');
+
 /**
  * The basic implementation of selection rendering logics. It is designed to be reused for different purposes.
  */
-export abstract class BaseSelectionRenderService extends Disposable implements ISelectionRenderService, IRenderModule {
-    private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+export class BaseSelectionRenderService extends Disposable implements ISelectionRenderService, IRenderModule {
+    private _downObserver: Nullable<Subscription>;
+    private _moveEventSubscription: Nullable<Subscription>;
+    private _upEventSubscription: Nullable<Subscription>;
 
     private _controlFillConfig$: BehaviorSubject<IControlFillConfig | null> =
         new BehaviorSubject<IControlFillConfig | null>(null);
@@ -105,9 +104,8 @@ export abstract class BaseSelectionRenderService extends Disposable implements I
 
     private _scrollTimer!: ScrollTimer;
 
-    private _cancelDownObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _cancelUpObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _cancelDownSubscription: Nullable<Subscription>;
+    private _cancelUpSubscription: Nullable<Subscription>;
 
     protected _skeleton!: SpreadsheetSkeleton;
     protected _scene!: Scene;
@@ -320,14 +318,12 @@ export abstract class BaseSelectionRenderService extends Disposable implements I
     protected _reset() {
         this._clearSelectionControls();
 
-        this._downObserver?.dispose();
+        this._downObserver?.unsubscribe();
         this._downObserver = null;
-
-        this._moveObserver?.dispose();
-        this._moveObserver = null;
-
-        this._upObserver?.dispose();
-        this._upObserver = null;
+        this._moveEventSubscription?.unsubscribe();
+        this._moveEventSubscription = null;
+        this._upEventSubscription?.unsubscribe();
+        this._upEventSubscription = null;
     }
 
     resetAndEndSelection() {
@@ -483,7 +479,7 @@ export abstract class BaseSelectionRenderService extends Disposable implements I
         this._setupPointerMoveListener(viewportMain, activeControl!, scrollTimer, rangeType, newEvtOffsetX, newEvtOffsetY);
 
         this._shortcutService.setDisable(true);
-        this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+        this._upEventSubscription = scene.onPointerUp$.subscribeEvent(() => {
             this._clearEndingListeners();
             this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
             this._shortcutService.setDisable(false);
@@ -507,7 +503,7 @@ export abstract class BaseSelectionRenderService extends Disposable implements I
         const scene = this._scene;
         const startViewport = scene.getActiveViewportByCoord(Vector2.FromArray([newEvtOffsetX, newEvtOffsetY]));
         // eslint-disable-next-line max-lines-per-function, complexity
-        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._moveEventSubscription = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
             const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
@@ -772,15 +768,19 @@ export abstract class BaseSelectionRenderService extends Disposable implements I
 
     private _clearEndingListeners() {
         const scene = this._scene;
-        scene.onPointerMoveObserver.remove(this._moveObserver);
-        scene.onPointerUpObserver.remove(this._upObserver);
         scene.enableEvent();
+
+        this._moveEventSubscription?.unsubscribe();
+        this._moveEventSubscription = null;
+        this._upEventSubscription?.unsubscribe();
+        this._upEventSubscription = null;
 
         this._scrollTimer?.dispose();
 
-        const mainScene = scene.getEngine()?.activeScene;
-        mainScene?.onPointerDownObserver.remove(this._cancelDownObserver);
-        mainScene?.onPointerUpObserver.remove(this._cancelUpObserver);
+        this._cancelDownSubscription?.unsubscribe();
+        this._cancelDownSubscription = null;
+        this._cancelUpSubscription?.unsubscribe();
+        this._cancelUpSubscription = null;
     }
 
     private _addEndingListeners() {
@@ -790,10 +790,13 @@ export abstract class BaseSelectionRenderService extends Disposable implements I
             return;
         }
 
-        mainScene.onPointerDownObserver.remove(this._cancelDownObserver);
-        mainScene.onPointerUpObserver.remove(this._cancelUpObserver);
-        this._cancelDownObserver = mainScene.onPointerDownObserver.add(() => this._clearEndingListeners());
-        this._cancelUpObserver = mainScene.onPointerUpObserver.add(() => this._clearEndingListeners());
+        this._cancelDownSubscription?.unsubscribe();
+        this._cancelDownSubscription = null;
+        this._cancelUpSubscription?.unsubscribe();
+        this._cancelUpSubscription = null;
+
+        this._cancelDownSubscription = mainScene.onPointerDown$.subscribeEvent(() => this._clearEndingListeners());
+        this._cancelUpSubscription = mainScene.onPointerUp$.subscribeEvent(() => this._clearEndingListeners());
     }
 
     private _getSelectedRangeWithMerge(

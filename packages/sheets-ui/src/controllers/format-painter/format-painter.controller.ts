@@ -39,8 +39,8 @@ import {
 } from '../../commands/commands/set-format-painter.command';
 import type { IFormatPainterHook, ISelectionFormatInfo } from '../../services/format-painter/format-painter.service';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
-import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
+import { ISelectionRenderService } from '../../services/selection/base-selection-render.service';
 
 @OnLifecycle(LifecycleStages.Steady, FormatPainterController)
 export class FormatPainterController extends Disposable {

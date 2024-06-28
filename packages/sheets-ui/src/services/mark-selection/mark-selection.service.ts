@@ -20,9 +20,9 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
-import { ISelectionRenderService } from '../selection/selection-render.service';
 import { SelectionShape } from '../selection/selection-shape';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { ISelectionRenderService } from '../selection/base-selection-render.service';
 
 export interface IMarkSelectionService {
     addShape(selection: ISelectionWithStyle, exits?: string[], zIndex?: number): string | null;

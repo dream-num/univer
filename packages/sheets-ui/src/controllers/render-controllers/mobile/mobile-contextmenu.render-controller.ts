@@ -20,7 +20,7 @@ import type { IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/eng
 import { IContextMenuService, ILayoutService, MenuPosition } from '@univerjs/ui';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
+import { ISelectionRenderService } from '../../../services/selection/base-selection-render.service';
 
 /**
  * On mobile devices, the context menu would popup when

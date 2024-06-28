@@ -21,7 +21,7 @@ import { IRenderManagerService, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } f
 import type { ISelectionWithCoordAndStyle, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
 import { convertSelectionDataToRange, getNormalSelectionStyle, SelectionManagerService, SelectionMoveType, SetSelectionsOperation, transformCellDataToSelectionData } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
-import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
@@ -225,8 +225,6 @@ export class SelectionRenderService extends BaseSelectionRenderService implement
         return getSheetObject(this._context.unit, this._context)!;
     }
 }
-
-export const ISelectionRenderService = createIdentifier<BaseSelectionRenderService>('univer.sheet.selection-render-service');
 
 export function getAllSelection(skeleton: SpreadsheetSkeleton): ISelectionWithStyle {
     return {

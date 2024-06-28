@@ -37,8 +37,8 @@ import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
-import { ISelectionRenderService } from './selection/selection-render.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
+import { ISelectionRenderService } from './selection/base-selection-render.service';
 
 export interface IEditorBridgeServiceVisibleParam {
     visible: boolean;

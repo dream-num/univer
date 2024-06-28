@@ -75,10 +75,10 @@ import type {
 } from '../services/auto-fill/type';
 import { APPLY_TYPE, AutoFillHookType, DATA_TYPE } from '../services/auto-fill/type';
 import { IEditorBridgeService } from '../services/editor-bridge.service';
-import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { SheetsRenderService } from '../services/sheets-render.service';
+import { ISelectionRenderService } from '../services/selection/base-selection-render.service';
 import type { IDiscreteRange } from './utils/range-tools';
 import { discreteRangeToRange, generateNullCellValueRowCol, rangeToDiscreteRange } from './utils/range-tools';
 

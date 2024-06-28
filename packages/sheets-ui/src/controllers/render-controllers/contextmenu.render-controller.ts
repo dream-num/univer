@@ -25,9 +25,9 @@ import { SelectionManagerService } from '@univerjs/sheets';
 import { IContextMenuService, MenuPosition } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
-import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { SheetMenuPosition } from '../menu/menu';
 import { SHEET_VIEW_KEY } from '../../common/keys';
+import { ISelectionRenderService } from '../../services/selection/base-selection-render.service';
 
 /**
  * This controller subscribe to context menu events in sheet rendering views and invoke context menu at a correct

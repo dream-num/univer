@@ -23,9 +23,9 @@ import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '
 import { UnitAction } from '@univerjs/protocol';
 import { HeaderMoveRenderController } from '../render-controllers/header-move.render-controller';
 import { HeaderResizeRenderController } from '../render-controllers/header-resize.render-controller';
-import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { HeaderFreezeRenderController } from '../render-controllers/freeze.render-controller';
 import { getTransformCoord } from '../utils/component-tools';
+import { ISelectionRenderService } from '../../services/selection/base-selection-render.service';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 

@@ -389,7 +389,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
             if (!subUnitId) return;
 
             const skeleton = this._renderManagerService.getRenderById(unitId)
-                ?.with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId)
+                ?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)
                 ?.skeleton;
             const currentRender = this._renderManagerService.getRenderById(unitId);
 
@@ -421,7 +421,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                         }
 
                         const skeleton = this._renderManagerService.getRenderById(unitId)
-                            ?.with(SheetSkeletonManagerService).getUnitSkeleton(unitId, subUnitId)
+                            ?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)
                             ?.skeleton;
                         if (!skeleton) {
                             return next(cell);

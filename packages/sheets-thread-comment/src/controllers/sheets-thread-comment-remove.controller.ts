@@ -48,10 +48,11 @@ export class ThreadCommentRemoveSheetsController extends Disposable {
                         if (!subUnitId) {
                             return { redos: [], undos: [] };
                         }
-                        const { commentChildrenMap } = this._threadCommentModel.ensureMap(unitId, subUnitId);
+                        const { commentMap } = this._threadCommentModel.ensureMap(unitId, subUnitId);
 
-                        const ids = Array.from(Object.keys(commentChildrenMap));
-                        const comments = Array.from(Object.values(commentChildrenMap));
+                        const comments = Array.from(Object.values(commentMap)).filter(comment => !comment.parentId);
+                        const ids = comments.map(comment => comment.id);
+
                         const redos = ids.map((id) => ({
                             id: DeleteCommentMutation.id,
                             params: {
@@ -69,7 +70,6 @@ export class ThreadCommentRemoveSheetsController extends Disposable {
                                 comment,
                             },
                         }));
-
                         return { redos, undos };
                     }
                     return { redos: [], undos: [] };

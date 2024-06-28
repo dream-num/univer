@@ -20,6 +20,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
 import { HeaderFooterType } from '../../controllers/doc-header-footer.controller';
+import { SidebarDocHeaderFooterPanelOperation } from '../operations/doc-header-footer-panel.operation';
 
 function getEmptyHeaderFooterBody() {
     return {
@@ -210,5 +211,18 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
         >(doMutation.id, doMutation.params);
 
         return Boolean(result);
+    },
+};
+
+interface IOpenHeaderFooterPanelParams { }
+
+export const OpenHeaderFooterPanelCommand: ICommand<IOpenHeaderFooterPanelParams> = {
+    id: 'doc.command.open-header-footer-panel',
+    type: CommandType.COMMAND,
+
+    handler: async (accessor, _params: IOpenHeaderFooterPanelParams) => {
+        const commandService = accessor.get(ICommandService);
+
+        return commandService.executeCommand(SidebarDocHeaderFooterPanelOperation.id, { value: 'open' });
     },
 };

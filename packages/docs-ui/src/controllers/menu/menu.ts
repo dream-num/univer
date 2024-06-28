@@ -61,6 +61,7 @@ import { Observable } from 'rxjs';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
+import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
 
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
@@ -399,6 +400,18 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         // disabled$: getCurrentSheetDisabled$(accessor),
+    };
+}
+
+export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: OpenHeaderFooterPanelCommand.id,
+        group: MenuGroup.TOOLBAR_OTHERS,
+        type: MenuItemType.BUTTON,
+        icon: 'FreezeRowSingle',
+        tooltip: 'toolbar.headerFooter',
+        positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
 

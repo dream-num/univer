@@ -41,10 +41,18 @@ const locale = {
         alignCenter: '居中对齐',
         alignRight: '右对齐',
         alignJustify: '两端对齐',
+        headerFooter: '页眉页脚',
     },
     headerFooter: {
         header: '页眉',
         footer: '页脚',
+        panel: '页眉页脚设置',
+        firstPageCheckBox: '首页不同',
+        oddEvenCheckBox: '奇偶页不同',
+        headerTopMargin: '页眉顶端距离（px）',
+        footerBottomMargin: '页脚底端距离（px）',
+        closeHeaderFooter: '关闭页眉页脚',
+        disableText: '页眉页脚设置不可用',
     },
 };
 

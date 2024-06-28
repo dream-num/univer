@@ -20,11 +20,14 @@ import type { Documents, DocumentViewModel, IMouseEvent, IPageRenderConfig, IPat
 import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager, PageLayoutType, Path, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
-import { IEditorService } from '@univerjs/ui';
+import { ComponentManager, IEditorService } from '@univerjs/ui';
 import { DocSkeletonManagerService, neoGetDocObject } from '@univerjs/docs';
 import type { Nullable } from 'vitest';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
-import { CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
+import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
+import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../views/header-footer/panel/component-name';
+import { DocHeaderFooterPanel } from '../views/header-footer/panel/DocHeaderFooterPanel';
+import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 
 const HEADER_FOOTER_STROKE_COLOR = 'rgba(58, 96, 247, 1)';
 const HEADER_FOOTER_FILL_COLOR = 'rgba(58, 96, 247, 0.08)';
@@ -129,7 +132,8 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
 
@@ -140,10 +144,20 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         this._init();
         this._drawHeaderFooterLabel();
         this._registerCommands();
+        this._initCustomComponents();
     }
 
     private _registerCommands() {
-        [CoreHeaderFooterCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        [
+            CoreHeaderFooterCommand,
+            OpenHeaderFooterPanelCommand,
+            SidebarDocHeaderFooterPanelOperation,
+        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+    }
+
+    private _initCustomComponents(): void {
+        const componentManager = this._componentManager;
+        this.disposeWithMe(componentManager.register(COMPONENT_DOC_HEADER_FOOTER_PANEL, DocHeaderFooterPanel));
     }
 
     private _init() {

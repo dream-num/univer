@@ -43,10 +43,18 @@ const locale: typeof zhCN = {
         alignCenter: 'Выровнять по центру',
         alignRight: 'Выровнять по правому краю',
         alignJustify: 'Выровнять по ширине',
+        headerFooter: 'Header & Footer',
     },
     headerFooter: {
         header: 'Header',
         footer: 'Footer',
+        panel: 'Header & Footer Settings',
+        firstPageCheckBox: 'Different first page',
+        oddEvenCheckBox: 'Different odd and even pages',
+        headerTopMargin: 'Header top margin(px)',
+        footerBottomMargin: 'Footer bottom margin(px)',
+        closeHeaderFooter: 'Close header & footer',
+        disableText: 'Header & footer settings are disabled',
     },
 };
 

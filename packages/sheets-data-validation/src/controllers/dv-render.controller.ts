@@ -15,7 +15,7 @@
  */
 
 import type { ICellDataForSheetInterceptor, ICellRenderContext, Workbook } from '@univerjs/core';
-import { DataValidationRenderMode, DataValidationStatus, DataValidationType, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, sequenceExecute, UniverInstanceType, WrapStrategy } from '@univerjs/core';
+import { DataValidationRenderMode, DataValidationStatus, DataValidationType, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, sequenceExecute, Tools, UniverInstanceType, WrapStrategy } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
@@ -257,7 +257,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
                         if (rule.type === DataValidationType.CHECKBOX) {
                             const { formula2 } = (validator as CheckboxValidator).parseFormulaSync(rule, pos.unitId, pos.subUnitId);
-                            if (!cellValue) {
+                            if (Tools.isBlank(cellValue)) {
                                 extra = {
                                     v: formula2,
                                     t: 1,
@@ -455,7 +455,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
 
                         if (rule.type === DataValidationType.CHECKBOX) {
                             const { formula2 } = (validator as CheckboxValidator).parseFormulaSync(rule, pos.unitId, pos.subUnitId);
-                            if (!cellValue) {
+                            if (Tools.isBlank(cellValue)) {
                                 extra = {
                                     v: formula2,
                                     t: 1,

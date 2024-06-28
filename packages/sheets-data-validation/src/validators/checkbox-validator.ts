@@ -42,7 +42,9 @@ export class CheckboxValidator extends BaseDataValidator {
         const { formula1, formula2 } = this.parseFormulaSync(rule, pos.unitId, pos.subUnitId);
 
         const valueStr = `${cellValue ?? ''}`;
-        return !valueStr || (valueStr === (`${formula1}`) || valueStr === `${formula2}`);
+
+        const res = !valueStr || (valueStr === (`${formula1}`) || valueStr === `${formula2}`);
+        return res;
     }
 
     override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {

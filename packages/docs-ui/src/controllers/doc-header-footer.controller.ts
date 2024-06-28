@@ -24,7 +24,7 @@ import { IEditorService } from '@univerjs/ui';
 import { DocSkeletonManagerService, neoGetDocObject } from '@univerjs/docs';
 import type { Nullable } from 'vitest';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
-import { CoreHeaderFooterCommand } from '../commands/commands/header-footer.command';
+import { CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
 
 const HEADER_FOOTER_STROKE_COLOR = 'rgba(58, 96, 247, 1)';
 const HEADER_FOOTER_FILL_COLOR = 'rgba(58, 96, 247, 0.08)';
@@ -205,10 +205,11 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                 this._textSelectionRenderManager.setSegmentPage(-1);
             } else {
                 if (createType != null) {
-                    // TODO: create header or footer and set segment.
-                    const segmentId = Tools.generateRandomId(6);
+                    const SEGMENT_ID_LEN = 6;
+                    const segmentId = Tools.generateRandomId(SEGMENT_ID_LEN);
                     this._textSelectionRenderManager.setSegment(segmentId);
                     this._textSelectionRenderManager.setSegmentPage(pageNumber);
+
                     await this._commandService.executeCommand(CoreHeaderFooterCommand.id, {
                         unitId,
                         createType,

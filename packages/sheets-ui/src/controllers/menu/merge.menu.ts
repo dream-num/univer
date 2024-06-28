@@ -57,6 +57,7 @@ export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         title: 'merge.all',
         icon: 'MergeAllSingle',
         positions: [AddWorksheetMergeCommand.id],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -67,6 +68,7 @@ export function CellMergeVerticalMenuItemFactory(accessor: IAccessor): IMenuButt
         title: 'merge.vertical',
         icon: 'VerticalIntegrationSingle',
         positions: [AddWorksheetMergeCommand.id],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -77,6 +79,7 @@ export function CellMergeHorizontalMenuItemFactory(accessor: IAccessor): IMenuBu
         title: 'merge.horizontal',
         icon: 'HorizontalMergeSingle',
         positions: [AddWorksheetMergeCommand.id],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -87,5 +90,6 @@ export function CellMergeCancelMenuItemFactory(accessor: IAccessor): IMenuButton
         title: 'merge.cancel',
         icon: 'CancelMergeSingle',
         positions: [AddWorksheetMergeCommand.id],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

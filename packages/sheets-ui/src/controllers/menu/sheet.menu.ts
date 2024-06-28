@@ -31,7 +31,7 @@ import {
     WorkbookRenameSheetPermission,
 } from '@univerjs/sheets';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { MenuItemType } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import type { Subscriber } from 'rxjs';
 import { combineLatest, combineLatestWith, map, Observable } from 'rxjs';
@@ -75,6 +75,7 @@ export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
                 return defaultDisabled || permissionDisabled;
             })
         ),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -85,6 +86,7 @@ export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.copy',
         disabled$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookCreateSheetPermission]),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -95,6 +97,7 @@ export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.rename',
         disabled$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookRenameSheetPermission]),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -145,6 +148,7 @@ export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookHideSheetPermission])),
             map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled)
         ),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -193,6 +197,7 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
             subscriber.next(hiddenList);
             return disposable.dispose;
         }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -230,6 +235,7 @@ export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         }).pipe(
             combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookHideSheetPermission])),
             map(([defaultDisabled, permissionDisabled]) => defaultDisabled || permissionDisabled)),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 

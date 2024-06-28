@@ -138,7 +138,7 @@ export class MoveCursorController extends Disposable {
                 : endOffset;
 
         let focusOffset = collapsed ? endOffset : rangeDirection === RANGE_DIRECTION.FORWARD ? endOffset : startOffset;
-        const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
+        const dataStreamLength = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             const preGlyph = skeleton.findNodeByCharIndex(focusOffset - 1, segmentId, segmentPage);
@@ -217,7 +217,7 @@ export class MoveCursorController extends Disposable {
 
         const { startOffset, endOffset, style, collapsed, segmentId, startNodePosition, endNodePosition, segmentPage } = activeRange;
 
-        const dataStreamLength = docDataModel.getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
+        const dataStreamLength = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()!.dataStream.length ?? Number.POSITIVE_INFINITY;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             let cursor;

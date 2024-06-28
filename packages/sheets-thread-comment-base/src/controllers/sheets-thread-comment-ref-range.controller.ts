@@ -72,6 +72,7 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
                         unitId,
                         subUnitId,
                         comment,
+                        sync: true
                     } as IAddCommentMutationParams,
                 }],
             };

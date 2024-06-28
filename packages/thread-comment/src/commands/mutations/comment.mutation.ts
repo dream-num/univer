@@ -23,6 +23,7 @@ export interface IAddCommentMutationParams {
     unitId: string;
     subUnitId: string;
     comment: IThreadComment;
+    sync?: boolean
 }
 
 export const AddCommentMutation: ICommand<IAddCommentMutationParams> = {
@@ -33,8 +34,8 @@ export const AddCommentMutation: ICommand<IAddCommentMutationParams> = {
             return false;
         }
         const threadCommentModel = accessor.get(ThreadCommentModel);
-        const { unitId, subUnitId, comment } = params;
-        const shouldSync = (options?.fromChangeset) && !comment.parentId;
+        const { unitId, subUnitId, comment, sync } = params;
+        const shouldSync = sync || ((options?.fromChangeset) && !comment.parentId);
         return threadCommentModel.addComment(unitId, subUnitId, comment, shouldSync);
     },
 };

@@ -19,7 +19,7 @@ import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Unive
 import { Inject } from '@wendellhu/redi';
 import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
 import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
-import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
+import { IDeleteCommentMutationParams, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 import { AddCommentMutation, DeleteCommentMutation, ThreadCommentModel } from '@univerjs/thread-comment';
 
 @OnLifecycle(LifecycleStages.Ready, ThreadCommentRemoveSheetsController)
@@ -27,7 +27,8 @@ export class ThreadCommentRemoveSheetsController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
-        @Inject(ThreadCommentModel) private _threadCommentModel: ThreadCommentModel
+        @Inject(ThreadCommentModel) private _threadCommentModel: ThreadCommentModel,
+        @IThreadCommentDataSourceService private _threadCommentDataSourceService: IThreadCommentDataSourceService
     ) {
         super();
         this._initSheetChange();
@@ -52,6 +53,7 @@ export class ThreadCommentRemoveSheetsController extends Disposable {
 
                         const comments = Array.from(Object.values(commentMap)).filter(comment => !comment.parentId);
                         const ids = comments.map(comment => comment.id);
+                        const shouldSync = this._threadCommentDataSourceService.syncUpdateMutationToColla;
 
                         const redos = ids.map((id) => ({
                             id: DeleteCommentMutation.id,
@@ -62,12 +64,16 @@ export class ThreadCommentRemoveSheetsController extends Disposable {
                             } as IDeleteCommentMutationParams,
                         }));
 
-                        const undos = comments.map((comment) => ({
+                        const undos = comments.map(({ children, ...comment }) => ({
                             id: AddCommentMutation.id,
                             params: {
                                 unitId,
                                 subUnitId,
-                                comment,
+                                comment: {
+                                    ...comment,
+                                    children: shouldSync ? children : undefined
+                                },
+                                sync: !shouldSync
                             },
                         }));
                         return { redos, undos };

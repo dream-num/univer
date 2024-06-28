@@ -22,6 +22,7 @@ import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params
 import { IMEInputManagerService } from '../../services/ime-input-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import { getInsertSelection } from '../../basics/selection';
 
 export interface IIMEInputCommandParams {
     unitId: string;
@@ -36,6 +37,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IIMEInputCommandParams) => {
         const { unitId, newText, oldTextLen, isCompositionEnd, isCompositionStart } = params;
         const commandService = accessor.get(ICommandService);
@@ -47,6 +49,8 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         if (!previousActiveRange || !body) {
             return false;
         }
+        const insertRange = getInsertSelection(previousActiveRange, body);
+        Object.assign(previousActiveRange, insertRange);
 
         const { startOffset, style, segmentId } = previousActiveRange;
         const len = newText.length;

@@ -15,14 +15,15 @@
  */
 
 import type { ICommandInfo, IMutationInfo, IRange, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { ISelectionRenderService } from '@univerjs/sheets-ui';
+import { ISelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { type IDrawingJsonUndo1, IDrawingManagerService, type IDrawingParam, type ITransformState } from '@univerjs/drawing';
 import type { IInsertColCommandParams, IInsertRowCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
 import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetActiveOperation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 
@@ -63,12 +64,26 @@ const REFRESH_MUTATIONS = [
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingTransformAffectedController)
 export class SheetDrawingTransformAffectedController extends Disposable {
+    // TODO@wzhudev: selection render service would be a render unit, we we cannot
+    // easily access it here.
+    private get _selectionRenderService(): ISelectionRenderService {
+        return this._renderManagerService.getRenderById(
+            this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
+        )!.with(ISelectionRenderService);
+    }
+
+    private get _skeletonManagerService(): SheetSkeletonManagerService {
+        return this._renderManagerService.getRenderById(
+            this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
+        )!.with(SheetSkeletonManagerService);
+    }
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
@@ -243,7 +258,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
         }
 
         if (newSheetTransform != null && newTransform != null) {
-            const newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            const newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
             updateDrawings.push({ ...drawing, sheetTransform: newSheetTransform, transform: newTransform });
         }
 
@@ -285,7 +300,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         let newSheetTransform: Nullable<ISheetDrawingPosition> = null;
                         let newTransform: Nullable<ITransformState> = null;
                         if (fromColumn >= startColumn && fromColumn <= endColumn) {
-                            const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: fromColumn, endColumn, startRow: from.row, endRow: to.row });
+                            const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: fromColumn, endColumn, startRow: from.row, endRow: to.row });
                             if (selectionCell == null) {
                                 return;
                             }
@@ -310,7 +325,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     let newTransform: Nullable<ITransformState> = null;
 
                     if (fromColumn >= startColumn && fromColumn <= endColumn) {
-                        const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: fromColumn, endColumn, startRow: from.row, endRow: to.row });
+                        const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: fromColumn, endColumn, startRow: from.row, endRow: to.row });
                         if (selectionCell == null) {
                             return;
                         }
@@ -320,7 +335,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                             width: (transform?.width || 0) - selectionCell.endX + selectionCell.startX,
                         };
                     } else if (toColumn >= startColumn && toColumn <= endColumn) {
-                        const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn, endColumn: toColumn, startRow: from.row, endRow: to.row });
+                        const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn, endColumn: toColumn, startRow: from.row, endRow: to.row });
                         if (selectionCell == null) {
                             return;
                         }
@@ -329,7 +344,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                             left: selectionCell.startX - (transform?.width || 0),
                         };
                     } else {
-                        const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn, endColumn, startRow: from.row, endRow: to.row });
+                        const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn, endColumn, startRow: from.row, endRow: to.row });
                         if (selectionCell == null) {
                             return;
                         }
@@ -424,7 +439,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         let newSheetTransform: Nullable<ISheetDrawingPosition> = null;
                         let newTransform: Nullable<ITransformState> = null;
                         if (fromRow >= startRow && fromRow <= endRow) {
-                            const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow: fromRow, endRow });
+                            const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow: fromRow, endRow });
                             if (selectionCell == null) {
                                 return;
                             }
@@ -449,7 +464,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     let newTransform: Nullable<ITransformState> = null;
 
                     if (fromRow >= startRow && fromRow <= endRow) {
-                        const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow: fromRow, endRow });
+                        const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow: fromRow, endRow });
                         if (selectionCell == null) {
                             return;
                         }
@@ -459,7 +474,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                             height: (transform?.height || 0) - selectionCell.endY + selectionCell.startY,
                         };
                     } else if (toRow >= startRow && toRow <= endRow) {
-                        const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow, endRow: toRow });
+                        const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow, endRow: toRow });
                         if (selectionCell == null) {
                             return;
                         }
@@ -468,7 +483,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                             top: selectionCell.startY - (transform?.height || 0),
                         };
                     } else {
-                        const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow, endRow });
+                        const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: from.column, endColumn: to.column, startRow, endRow });
                         if (selectionCell == null) {
                             return;
                         }
@@ -548,7 +563,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         }
                     }
 
-                    const newTransform = drawingPositionToTransform({ ...sheetTransform }, this._selectionRenderService);
+                    const newTransform = drawingPositionToTransform({ ...sheetTransform }, this._skeletonManagerService);
                     if (newTransform != null) {
                         updateDrawings.push({
                             ...drawing,
@@ -770,7 +785,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             // };
             // newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
 
-            const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: colStartIndex, endColumn: colEndIndex, startRow: from.row, endRow: to.row });
+            const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: colStartIndex, endColumn: colEndIndex, startRow: from.row, endRow: to.row });
             if (selectionCell == null) {
                 return;
             }
@@ -783,7 +798,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     from: { ...from },
                     to: { ...to, column: toColumn + colCount },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -822,7 +837,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from, column: fromColumn - colCount },
                 to: { ...to, column: toColumn - colCount },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
         } else if (fromColumn >= colStartIndex && toColumn <= colEndIndex) {
             // delete drawing
             return null;
@@ -833,7 +848,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     from: { ...from },
                     to: { ...to, column: toColumn - colCount },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -844,7 +859,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             if (fromColumn === colStartIndex) {
                 newTransform = { ...transform, left: (transform.left || 0) - sheetTransform.from.columnOffset };
             } else {
-                const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: colStartIndex, endColumn: fromColumn - 1, startRow: from.row, endRow: to.row });
+                const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: colStartIndex, endColumn: fromColumn - 1, startRow: from.row, endRow: to.row });
                 if (selectionCell == null) {
                     return;
                 }
@@ -853,7 +868,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             newSheetTransform = transformToDrawingPosition(newTransform, this._selectionRenderService);
         } else if (toColumn >= colStartIndex && toColumn <= colEndIndex && anchorType === SheetDrawingAnchorType.Both) {
             // shrink end col left, then set toColOffset to full cell width
-            const selectionCell = this._selectionRenderService.attachRangeWithCoord({
+            const selectionCell = this._skeletonManagerService.attachRangeWithCoord({
                 startColumn: colStartIndex - 1,
                 endColumn: colStartIndex - 1,
                 startRow: from.row,
@@ -867,7 +882,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from },
                 to: { ...to, column: colStartIndex - 1, columnOffset: selectionCell.endX - selectionCell.startX },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
         }
 
         if (newSheetTransform != null && newTransform != null) {
@@ -900,7 +915,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
 
         if (fromRow >= rowStartIndex) {
             // move start and end row down
-            const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startRow: rowStartIndex, endRow: rowEndIndex, startColumn: from.column, endColumn: to.column });
+            const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startRow: rowStartIndex, endRow: rowEndIndex, startColumn: from.column, endColumn: to.column });
             if (selectionCell == null) {
                 return;
             }
@@ -916,7 +931,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                         row: toRow + rowCount,
                     },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -959,7 +974,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from, row: fromRow - rowCount },
                 to: { ...to, row: toRow - rowCount },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
         } else if (fromRow >= rowStartIndex && toRow <= rowEndIndex) {
             // delete drawing
             return null;
@@ -970,7 +985,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                     from: { ...from },
                     to: { ...to, row: toRow - rowCount },
                 };
-                newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+                newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
             } else {
                 return {
                     newSheetTransform: transformToDrawingPosition({ ...transform }, this._selectionRenderService),
@@ -982,7 +997,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             if (fromRow === rowStartIndex) {
                 newTransform = { ...transform, top: (transform.top || 0) - sheetTransform.from.rowOffset };
             } else {
-                const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startRow: rowStartIndex, endRow: fromRow - 1, startColumn: from.column, endColumn: to.column });
+                const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startRow: rowStartIndex, endRow: fromRow - 1, startColumn: from.column, endColumn: to.column });
                 if (selectionCell == null) {
                     return;
                 }
@@ -991,7 +1006,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
             newSheetTransform = transformToDrawingPosition(newTransform, this._selectionRenderService);
         } else if (toRow >= rowStartIndex && toRow <= rowEndIndex && anchorType === SheetDrawingAnchorType.Both) {
             // shrink end row up, then set toRowOffset to full cell height
-            const selectionCell = this._selectionRenderService.attachRangeWithCoord({ startColumn: from.column, endColumn: from.column, startRow: rowStartIndex - 1, endRow: rowStartIndex - 1 });
+            const selectionCell = this._skeletonManagerService.attachRangeWithCoord({ startColumn: from.column, endColumn: from.column, startRow: rowStartIndex - 1, endRow: rowStartIndex - 1 });
 
             if (selectionCell == null) {
                 return;
@@ -1000,7 +1015,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 from: { ...from },
                 to: { ...to, row: rowStartIndex - 1, rowOffset: selectionCell.endY - selectionCell.startY },
             };
-            newTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService);
+            newTransform = drawingPositionToTransform(newSheetTransform, this._skeletonManagerService);
         }
 
         if (newSheetTransform != null && newTransform != null) {
@@ -1094,7 +1109,7 @@ export class SheetDrawingTransformAffectedController extends Disposable {
                 ) || fromRow > endRow || fromColumn > endColumn) {
                     updateDrawings.push({
                         ...drawing,
-                        transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService),
+                        transform: drawingPositionToTransform(sheetTransform, this._skeletonManagerService),
                     });
                     break;
                 }

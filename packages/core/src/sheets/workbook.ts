@@ -209,8 +209,8 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
      */
 
     getActiveSheet(): Worksheet;
-    getActiveSheet(allowNull?: true): Nullable<Worksheet>;
-    getActiveSheet(allowNull?: boolean): Nullable<Worksheet> {
+    getActiveSheet(allowNull: true): Nullable<Worksheet>;
+    getActiveSheet(allowNull?: true): Nullable<Worksheet> {
         if (!this._activeSheet && typeof allowNull === 'undefined') {
             throw new Error(`[Workbook]: no active Worksheet on Workbook ${this._unitId}!`);
         }

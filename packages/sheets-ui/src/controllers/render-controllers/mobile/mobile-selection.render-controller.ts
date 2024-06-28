@@ -144,7 +144,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         if (!viewportMain) return;
         // const sub = this._scrollManagerService.scrollInfo$.subscribe((param) => {
         // const sub = viewportMain.onScrollAfter$.subscribeEvent((param) => {
-        const sub = this._scrollManagerService.validScrollInfo$.subscribe((param) => {
+        const sub = this._scrollManagerService.validViewportScrollInfo$.subscribe((param) => {
             if (param == null) {
                 return;
             }

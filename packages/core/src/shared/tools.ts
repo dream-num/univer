@@ -85,6 +85,7 @@ export class Tools {
         return value;
     }
 
+    // eslint-disable-next-line complexity
     static getSystemType(): string {
         const sUserAgent = navigator.userAgent;
         const isWin = navigator.platform === 'Win32' || navigator.platform === 'Windows';

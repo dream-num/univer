@@ -63,12 +63,11 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
             offsetX: currentOffsetX = 0,
             offsetY: currentOffsetY = 0,
         } = currentScroll || {};
-
         // the receiver is scroll.operation.ts
         return commandService.executeCommand(SetScrollOperation.id, {
             unitId,
             sheetId: subUnitId,
-            // why + ySplit? receiver is scroll.operation.ts,  - ySplit
+            // why + ySplit? receiver - ySplit in scroll.operation.ts
             sheetViewStartRow: sheetViewStartRow + ySplit,
             sheetViewStartColumn: sheetViewStartColumn + xSplit,
             offsetX: currentOffsetX + offsetX, // currentOffsetX + offsetX may be negative or over max

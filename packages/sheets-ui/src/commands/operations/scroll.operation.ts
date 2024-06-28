@@ -30,7 +30,7 @@ export const SetScrollOperation: IOperation<IScrollManagerWithSearchParam> = {
         }
 
         const scrollManagerService = accessor.get(ScrollManagerService);
-        // freeze has handle in set-scroll.command.ts
+        // freeze is handled by set-scroll.command.ts
         const currentService = accessor.get(IUniverInstanceService);
         const workbook = currentService.getUniverSheetInstance(params!.unitId);
         const worksheet = workbook!.getSheetBySheetId(params!.sheetId);

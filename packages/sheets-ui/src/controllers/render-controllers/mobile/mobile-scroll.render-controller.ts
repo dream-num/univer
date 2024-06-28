@@ -29,7 +29,7 @@ import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-rend
 import { ScrollToCellOperation, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { ScrollCommand } from '../../../commands/commands/set-scroll.command';
+import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
 import type { IScrollManagerParam, IScrollManagerSearchParam, IViewportScrollState } from '../../../services/scroll-manager.service';
@@ -181,16 +181,14 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                 }
 
                 const { viewportScrollX = 0, viewportScrollY = 0 } = scrollAfterParam;
-
+                // console.log('onScrollAfter$', viewportScrollY);
                 // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
                 const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
                     viewportScrollX,
                     viewportScrollY
                 );
 
-                // Refresh the scroll details in the scroll manager service.
-                // The raw offsetX parameter from the scroll command might be out of bounds, being either negative or exceeding the maximum value.
-                // Additionally, there's no need to manually update viewportScrollXY in the latest scroll info; the _scrollManagerService's _setScrollInfo(setScrollInfoToCurrSheetWithoutNotify) method takes care of this.
+                // lastestScrollInfo derived from viewportScrollX, viewportScrollY from onScrollAfter$
                 const lastestScrollInfo: IScrollManagerParam = {
                     sheetViewStartRow: row,
                     sheetViewStartColumn: column,
@@ -199,7 +197,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                 };
                 // console.log('lastestScrollInfo', viewportScrollY, lastestScrollInfo);
                 this._scrollManagerService.justSetScrollInfoToCurrSheet(lastestScrollInfo);
-                this._scrollManagerService.validScrollInfo$.next({
+                this._scrollManagerService.validViewportScrollInfo$.next({
                     scrollX: scrollAfterParam.scrollX || 0,
                     scrollY: scrollAfterParam.scrollY || 0,
                     viewportScrollX: scrollAfterParam.viewportScrollX || 0,
@@ -241,8 +239,6 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
     }
 
     private _scrollInfo$Handler() {
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        if (!skeleton) return;
         const { unitId } = this._context;
         const scene = this._renderManagerService.getRenderById(unitId)?.scene;
         if (!scene) return;
@@ -261,6 +257,9 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                         });
                         return;
                     }
+
+                    const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                    if (!skeleton) return;
 
                     // data source: scroll-manager.service.ts@_scrollInfo
                     const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = param;
@@ -294,10 +293,12 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
                 const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
                 const currScrollInfo = this._scrollManagerService.getScrollInfoByParam(param as unknown as IScrollManagerSearchParam);
                 if (viewportMain) {
-                    if (currScrollInfo) {
-                        viewportMain.viewportScrollX = currScrollInfo.viewportScrollX || 0;
-                        viewportMain.viewportScrollY = currScrollInfo.viewportScrollY || 0;
-                    }
+                    // if (currScrollInfo) {
+                    viewportMain.viewportScrollX = currScrollInfo?.viewportScrollX || 0;
+                    viewportMain.viewportScrollY = currScrollInfo?.viewportScrollY || 0;
+                    // }
+                    // _updateSceneSize --> scene@transformByState --> viewport@resizeCanvas
+                    // --> viewport@scroll --> viewport onScrollAfter$
                     this._updateSceneSize(param as unknown as ISheetSkeletonManagerParam);
                 }
             })));
@@ -310,45 +311,48 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
     private _initPointerScrollEvent() {
         const sheetObject = this._getSheetObject();
         if (!sheetObject) return;
-        const { unitId } = this._context;
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const sheetId = workbook.getActiveSheet()!.getSheetId();
 
         const scrollManagerService = this._scrollManagerService;
         const scene = sheetObject.scene;
         const spreadsheet = sheetObject.spreadsheet;
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        const _lastPointerPos: IPoint = { x: 0, y: 0 };
+        const lastPointerPos: IPoint = { x: 0, y: 0 };
         let _pointerScrolling: boolean = false;
 
         const velocity = { x: 0, y: 0 };
-        const deceleration = 0.95; // 衰减系数
+        const deceleration = 0.95;
         let scrollInertiaAnimationID: null | number = null;
         const pointerScrollInertia = () => {
             if (!viewportMain) return;
             velocity.x *= deceleration;
             velocity.y *= deceleration;
-            _lastPointerPos.x += velocity.x;
-            _lastPointerPos.y += velocity.y;
-            // viewportMain.scrollByViewportScroll({
-            //     deltaX: velocity.x,
-            //     deltaY: velocity.y,
+            lastPointerPos.x += velocity.x;
+            lastPointerPos.y += velocity.y;
+            const offsetX = velocity.x;
+            const offsetY = velocity.y;
+
+            if (offsetY !== 0 || offsetX !== 0) {
+                this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY, offsetX });
+            }
+
+            const _currentScroll: Readonly<Nullable<IScrollManagerParam>> = scrollManagerService.getCurrentScrollInfo();
+            const { unitId } = this._context;
+            const sheetId = workbook.getActiveSheet()!.getSheetId();
+            // const {
+            //     sheetViewStartRow = 0,
+            //     sheetViewStartColumn = 0,
+            //     offsetX: currentOffsetX = 0,
+            //     offsetY: currentOffsetY = 0,
+            // } = currentScroll || {};
+            // scrollManagerService.setScrollInfoAndEmitEvent({
+            //     unitId,
+            //     sheetId,
+            //     sheetViewStartRow, // + ySplit,
+            //     sheetViewStartColumn, // + xSplit,
+            //     offsetX: currentOffsetX + velocity.x, // currentOffsetX + offsetX may be negative or over max
+            //     offsetY: currentOffsetY + velocity.y,
             // });
-            const currentScroll: Readonly<Nullable<IScrollManagerParam>> = scrollManagerService.getCurrentScrollInfo();
-            const {
-                sheetViewStartRow = 0,
-                sheetViewStartColumn = 0,
-                offsetX: currentOffsetX = 0,
-                offsetY: currentOffsetY = 0,
-            } = currentScroll || {};
-            scrollManagerService.setScrollInfoAndEmitEvent({
-                unitId,
-                sheetId,
-                sheetViewStartRow, // + ySplit,
-                sheetViewStartColumn, // + xSplit,
-                offsetX: currentOffsetX + velocity.x, // currentOffsetX + offsetX may be negative or over max
-                offsetY: currentOffsetY + velocity.y,
-            });
 
             if (Math.abs(velocity.x) > 1 || Math.abs(velocity.y) > 1) {
                 scrollInertiaAnimationID = requestAnimationFrame(pointerScrollInertia);
@@ -367,8 +371,8 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
 
             if (!viewportMain) return;
 
-            _lastPointerPos.x = evt.offsetX;
-            _lastPointerPos.y = evt.offsetY;
+            lastPointerPos.x = evt.offsetX;
+            lastPointerPos.y = evt.offsetY;
             _pointerScrolling = true;
             state.stopPropagation();
         });
@@ -379,41 +383,41 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
             if (!viewportMain) return;
             // console.log('spreadsheet into moving...........');
             const e = evt as IPointerEvent | IMouseEvent;
-            const deltaX = -(e.offsetX - _lastPointerPos.x);
-            const deltaY = -(e.offsetY - _lastPointerPos.y);
-            velocity.x = -(e.offsetX - _lastPointerPos.x);
-            velocity.y = -(e.offsetY - _lastPointerPos.y);
-
+            const deltaX = -(e.offsetX - lastPointerPos.x);
+            const deltaY = -(e.offsetY - lastPointerPos.y);
+            velocity.x = -(e.offsetX - lastPointerPos.x);
+            velocity.y = -(e.offsetY - lastPointerPos.y);
+            const offsetX = deltaX;
+            const offsetY = deltaY;
             if (deltaX !== 0 || deltaY !== 0) {
-                // console.log('....delta', deltaX, deltaY);
+                if (offsetY !== 0 || offsetX !== 0) {
+                    this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY, offsetX });
+                }
             }
 
             // get scrollInfo from packages/sheets-ui/src/commands/commands/set-scroll.command.ts
-            const currentScroll = scrollManagerService.getCurrentScrollInfo();
-            const {
-                sheetViewStartRow = 0,
-                sheetViewStartColumn = 0,
-                offsetX: currentOffsetX = 0,
-                offsetY: currentOffsetY = 0,
-            } = currentScroll || {};
+            const _currentScroll = scrollManagerService.getCurrentScrollInfo();
+            // const {
+            //     sheetViewStartRow = 0,
+            //     sheetViewStartColumn = 0,
+            //     offsetX: currentOffsetX = 0,
+            //     offsetY: currentOffsetY = 0,
+            // } = currentScroll || {};
             // console.log('spreadsheet into moving', deltaX, deltaY, currentOffsetX, currentOffsetY);
 
-            scrollManagerService.setScrollInfoAndEmitEvent({
-                unitId,
-                sheetId,
-                sheetViewStartRow, // + ySplit,
-                sheetViewStartColumn, // + xSplit,
-                offsetX: currentOffsetX + deltaX, // currentOffsetX + offsetX may be negative or over max
-                offsetY: currentOffsetY + deltaY,
-            });
+            // scrollManagerService.setScrollInfoAndEmitEvent({
+            //     unitId,
+            //     sheetId,
+            //     sheetViewStartRow, // + ySplit,
+            //     sheetViewStartColumn, // + xSplit,
+            //     offsetX: currentOffsetX + deltaX, // currentOffsetX + offsetX may be negative or over max
+            //     offsetY: currentOffsetY + deltaY,
+            // });
             // console.log('before set scrollInfo', currentOffsetY, deltaY);
             // console.log('after set scrollInfo', scrollManagerService.getCurrentScrollInfo());
-            // viewportMain.scrollByViewportScroll({
-            //     deltaX,
-            //     deltaY,
-            // });
-            _lastPointerPos.x = e.offsetX;
-            _lastPointerPos.y = e.offsetY;
+
+            lastPointerPos.x = e.offsetX;
+            lastPointerPos.y = e.offsetY;
 
             state.stopPropagation();
         });

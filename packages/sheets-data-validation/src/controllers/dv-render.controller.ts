@@ -257,17 +257,17 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
                         if (rule.type === DataValidationType.CHECKBOX) {
                             const { formula2 } = (validator as CheckboxValidator).parseFormulaSync(rule, pos.unitId, pos.subUnitId);
-                            if (Tools.isBlank(cellValue)) {
-                                extra = {
-                                    v: formula2,
-                                    t: 1,
-                                    p: null,
-                                    interceptorStyle: {
-                                        ...cell?.interceptorStyle,
-                                        tb: WrapStrategy.CLIP,
-                                    },
-                                };
-                            }
+                            // if (Tools.isBlank(cellValue)) {
+                            extra = {
+                                    // v: formula2,
+                                    // t: 1,
+                                    // p: null,
+                                interceptorStyle: {
+                                    ...cell?.interceptorStyle,
+                                    tb: WrapStrategy.CLIP,
+                                },
+                            };
+                            // }
                         }
 
                         if (rule.type === DataValidationType.LIST && (rule.renderMode === DataValidationRenderMode.ARROW || rule.renderMode === DataValidationRenderMode.TEXT)) {

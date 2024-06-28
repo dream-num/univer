@@ -30,6 +30,7 @@ const locale: typeof zhCN = {
             checkboxEqual: 'Для выбранных и не выбранных ячеек введите разные значения',
             formulaError: 'Диапазон ссылок содержит невидимые данные, пожалуйста, пересмотрите диапазон',
             listIntersects: 'Выбранный диапазон не может пересекаться с диапазоном правила.',
+            primitive: 'Formulas are not permitted for custom ticked and unticked values.',
         },
         panel: {
             title: 'Управление проверкой данных',

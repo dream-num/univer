@@ -28,6 +28,7 @@ const locale = {
             checkboxEqual: '为勾选和未勾选的单元格内容输入不同的值。',
             formulaError: '引用范围内包含不可见的数据，请重新调整范围',
             listIntersects: '所选范围不能和规则范围相交',
+            primitive: '自定义勾选和未勾选值不允许使用公式。',
         },
         panel: {
             title: '管理数据验证',

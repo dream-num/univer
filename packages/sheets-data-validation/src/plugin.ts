@@ -24,7 +24,7 @@ import { DefaultSheetsDataValidation, SheetsDataValidationRenderController } fro
 import { DataValidationController } from './controllers/dv.controller';
 import { SheetDataValidationService } from './services/dv.service';
 import { DataValidationAlertController } from './controllers/dv-alert.controller';
-import { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from './commands/commands/data-validation.command';
+import { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from './commands/commands/data-validation.command';
 import { DataValidationCacheService } from './services/dv-cache.service';
 import { DataValidationFormulaService } from './services/dv-formula.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
@@ -91,6 +91,8 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             AddSheetDataValidationCommand,
             AddSheetDataValidationAndOpenCommand,
             UpdateSheetDataValidationRangeCommand,
+            UpdateSheetDataValidationSettingCommand,
+            UpdateSheetDataValidationOptionsCommand,
 
              // operation
             ShowDataValidationDropdown,

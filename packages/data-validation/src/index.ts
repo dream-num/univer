@@ -22,8 +22,6 @@ export {
     AddDataValidationCommand,
     RemoveDataValidationCommand,
     RemoveAllDataValidationCommand,
-    UpdateDataValidationOptionsCommand,
-    UpdateDataValidationSettingCommand,
 } from './commands/commands/data-validation.command';
 
 export type {

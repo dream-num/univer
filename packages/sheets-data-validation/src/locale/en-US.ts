@@ -30,6 +30,7 @@ const locale: typeof zhCN = {
             checkboxEqual: 'Enter different values for ticked and unticked cell contents.',
             formulaError: 'The reference range contains invisible data, please readjust the range',
             listIntersects: 'The selected range cannot intersect with the scope of the rules',
+            primitive: 'Formulas are not permitted for custom ticked and unticked values.',
         },
         panel: {
             title: 'Data validation management',

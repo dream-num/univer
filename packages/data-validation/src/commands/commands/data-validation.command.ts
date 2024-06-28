@@ -32,6 +32,9 @@ export interface IAddDataValidationCommandParams extends ISheetCommandSharedPara
     index?: number;
 }
 
+/**
+ * @deprecated
+ */
 export const AddDataValidationCommand: ICommand<IAddDataValidationCommandParams> = {
     type: CommandType.COMMAND,
     id: 'data-validation.command.addRule',
@@ -151,6 +154,9 @@ export interface IUpdateDataValidationOptionsCommandParams extends ISheetCommand
     options: IDataValidationRuleOptions;
 }
 
+/**
+ * @deprecated
+ */
 export const UpdateDataValidationOptionsCommand: ICommand<IUpdateDataValidationOptionsCommandParams> = {
     type: CommandType.COMMAND,
     id: 'data-validation.command.updateDataValidationSetting',
@@ -213,6 +219,9 @@ export interface IUpdateDataValidationSettingCommandParams extends ISheetCommand
     setting: IDataValidationRuleBase;
 }
 
+/**
+ * @deprecated
+ */
 export const UpdateDataValidationSettingCommand: ICommand<IUpdateDataValidationSettingCommandParams> = {
     type: CommandType.COMMAND,
     id: 'data-validation.command.updateDataValidationOptions',

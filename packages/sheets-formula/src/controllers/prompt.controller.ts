@@ -396,11 +396,15 @@ export class PromptController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                this._refSelectionsService.selectionMoveEnd$.subscribe(() => {
+                this._refSelectionsService.selectionMoveEnd$.subscribe((selections) => {
                     // Each range change requires re-listening
                     disposableCollection.dispose();
 
                     this._formulaPromptService.disableSelectionMoving();
+
+                    if (selections.length === 0) {
+                        return;
+                    }
 
                     this._updateRefSelectionStyle(this._isSelectionMovingRefSelections);
 
@@ -1448,11 +1452,8 @@ export class PromptController extends Disposable {
 
         for (let i = 0, len = refSelections.length; i < len; i++) {
             const refSelection = refSelections[i];
-
             const { refIndex, themeColor, token } = refSelection;
-
             const rangeWithSheet = deserializeRangeWithSheet(token);
-
             const { unitId: refUnitId, sheetName, range } = rangeWithSheet;
 
             if (refUnitId != null && refUnitId.length > 0 && unitId !== refUnitId) {
@@ -1460,7 +1461,6 @@ export class PromptController extends Disposable {
             }
 
             const refSheetId = this._getSheetIdByName(unitId, sheetName.trim());
-
             if (refSheetId != null && refSheetId !== sheetId) {
                 continue;
             }

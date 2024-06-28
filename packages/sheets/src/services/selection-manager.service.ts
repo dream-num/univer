@@ -35,10 +35,11 @@ export enum SelectionMoveType {
 export interface ISelectionManager { }
 
 export class SelectionManagerService extends RxDisposable {
-    private get _currentSelectionPos(): ISelectionManagerSearchParam {
-        const workbook = this._instanceSrv.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet()!;
+    private get _currentSelectionPos(): Nullable<ISelectionManagerSearchParam> {
+        const workbook = this._instanceSrv.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) return null;
 
+        const worksheet = workbook.getActiveSheet();
         return { unitId: workbook.getUnitId(), sheetId: worksheet.getSheetId() };
     }
 
@@ -83,7 +84,12 @@ export class SelectionManagerService extends RxDisposable {
             return;
         }
 
-        const { unitId, sheetId } = this._currentSelectionPos;
+        const current = this._currentSelectionPos;
+        if (!current) {
+            throw new Error('[SelectionManagerService]: cannot find current selection position!');
+        }
+
+        const { unitId, sheetId } = current;
         this._ensureWorkbookSelection(unitId).addSelections(sheetId, unitIdOrSelections);
     }
 
@@ -100,7 +106,12 @@ export class SelectionManagerService extends RxDisposable {
             return;
         }
 
-        const { unitId, sheetId } = this._currentSelectionPos;
+        const current = this._currentSelectionPos;
+        if (!current) {
+            throw new Error('[SelectionManagerService]: cannot find current selection position!');
+        }
+
+        const { unitId, sheetId } = current;
         this._ensureWorkbookSelection(unitId).setSelections(sheetId, unitIdOrSelections, worksheetIdOrType as SelectionMoveType ?? SelectionMoveType.MOVE_END);
     }
 
@@ -136,7 +147,12 @@ export class SelectionManagerService extends RxDisposable {
     }
 
     private _getCurrentSelections() {
-        const { unitId, sheetId } = this._currentSelectionPos;
+        const current = this._currentSelectionPos;
+        if (!current) {
+            return [];
+        }
+
+        const { unitId, sheetId } = current;
         return this._ensureWorkbookSelection(unitId).getSelectionOfWorksheet(sheetId);
     }
 

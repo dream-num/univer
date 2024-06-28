@@ -23,7 +23,7 @@ export function getRetainAndDeleteFromReplace(
     segmentId: string = '',
     memoryCursor: number,
     body: IDocumentBody
-): Array<IRetainAction | IDeleteAction> {
+) {
     const { startOffset, endOffset } = range;
     const dos: Array<IRetainAction | IDeleteAction> = [];
     const textStart = startOffset - memoryCursor;
@@ -32,7 +32,6 @@ export function getRetainAndDeleteFromReplace(
     const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, startOffset, endOffset));
     const toDeleteRanges = new Set(relativeCustomRanges?.filter((customRange) => shouldDeleteCustomRange(startOffset, endOffset - startOffset, customRange, dataStream)));
     const retainPoints = new Set<number>();
-
     relativeCustomRanges?.forEach((range) => {
         if (toDeleteRanges.has(range)) {
             return;
@@ -59,7 +58,6 @@ export function getRetainAndDeleteFromReplace(
     }
 
     const sortedRetains = [...retainPoints].sort();
-
     let cursor = textStart;
     sortedRetains.forEach((pos) => {
         const len = pos - cursor;
@@ -86,6 +84,12 @@ export function getRetainAndDeleteFromReplace(
             line: 0,
             segmentId,
         });
+        cursor = textEnd + 1;
     }
-    return dos;
+
+    return {
+        dos,
+        cursor,
+        retain: retainPoints.size,
+    };
 }

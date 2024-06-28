@@ -98,7 +98,13 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
                 });
             }
         } else {
-            textX.push(...getRetainAndDeleteFromReplace(actualRange, segmentId, 0, body));
+            const { dos, retain } = getRetainAndDeleteFromReplace(actualRange, segmentId, 0, originBody);
+            textX.push(...dos);
+            doMutation.params.textRanges = [{
+                startOffset: startOffset + body.dataStream.length + retain,
+                endOffset: startOffset + body.dataStream.length + retain,
+                collapsed,
+            }];
         }
 
         textX.push({
@@ -108,7 +114,6 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             line: 0,
             segmentId,
         });
-
         doMutation.params.actions = jsonX.editOp(textX.serialize());
 
         const result = commandService.syncExecuteCommand<

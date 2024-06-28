@@ -77,7 +77,13 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const jsonX = JSONX.getInstance();
 
         if (!previousActiveRange.collapsed && isCompositionStart) {
-            textX.push(...getRetainAndDeleteFromReplace(previousActiveRange, segmentId, 0, body));
+            const { dos, retain } = getRetainAndDeleteFromReplace(previousActiveRange, segmentId, 0, body);
+            textX.push(...dos);
+            doMutation.params!.textRanges = [{
+                startOffset: startOffset + len + retain,
+                endOffset: startOffset + len + retain,
+                collapsed: true,
+            }];
         } else {
             textX.push({
                 t: TextXActionType.RETAIN,

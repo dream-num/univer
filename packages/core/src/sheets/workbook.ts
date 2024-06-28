@@ -207,8 +207,11 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
     /**
      * Get the active sheet.
      */
-    getActiveSheet(): Worksheet {
-        if (!this._activeSheet) {
+
+    getActiveSheet(): Worksheet;
+    getActiveSheet(allowNull?: true): Nullable<Worksheet>;
+    getActiveSheet(allowNull?: boolean): Nullable<Worksheet> {
+        if (!this._activeSheet && typeof allowNull === 'undefined') {
             throw new Error(`[Workbook]: no active Worksheet on Workbook ${this._unitId}!`);
         }
 
@@ -225,9 +228,10 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         if (currentActive) {
             return currentActive;
         }
-         /**
-          * If the first sheet is hidden, we should set the first unhidden sheet to be active.
-          */
+
+        /**
+         * If the first sheet is hidden, we should set the first unhidden sheet to be active.
+         */
         const sheetOrder = this._snapshot.sheetOrder;
         for (let i = 0, len = sheetOrder.length; i < len; i++) {
             const worksheet = this._worksheets.get(sheetOrder[i]);

@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { PageOrientType } from '@univerjs/core';
+import { BooleanNumber, PageOrientType } from '@univerjs/core';
 import type {
     IDocumentSkeletonHeaderFooter,
     IDocumentSkeletonPage,
@@ -83,10 +83,10 @@ export function createSkeletonPage(
 
     let headerId = defaultHeaderId ?? '';
     let footerId = defaultFooterId ?? '';
-    if (pageNumber === pageNumberStart && useFirstPageHeaderFooter) {
+    if (pageNumber === pageNumberStart && useFirstPageHeaderFooter === BooleanNumber.TRUE) {
         headerId = firstPageHeaderId ?? '';
         footerId = firstPageFooterId ?? '';
-    } else if (pageNumber % 2 === 0 && evenAndOddHeaders) {
+    } else if (pageNumber % 2 === 0 && evenAndOddHeaders === BooleanNumber.TRUE) {
         headerId = evenPageHeaderId ?? '';
         footerId = evenPageFooterId ?? '';
     }

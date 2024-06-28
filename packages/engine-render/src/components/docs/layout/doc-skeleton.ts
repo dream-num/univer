@@ -732,7 +732,7 @@ export class DocumentSkeleton extends Skeleton {
         for (let i = startSectionIndex, len = viewModel.children.length; i < len; i++) {
             const sectionNode = viewModel.children[i];
             const sectionBreakConfig = prepareSectionBreakConfig(ctx, i);
-            const { sectionType, columnProperties, columnSeparatorType, sectionTypeNext } = sectionBreakConfig;
+            const { sectionType, columnProperties, columnSeparatorType, sectionTypeNext, pageNumberStart = 1 } = sectionBreakConfig;
 
             let curSkeletonPage = getLastPage(allSkeletonPages);
             let isContinuous = false;
@@ -748,7 +748,7 @@ export class DocumentSkeleton extends Skeleton {
                     ctx,
                     sectionBreakConfig,
                     skeletonResourceReference,
-                    curSkeletonPage?.pageNumber
+                    curSkeletonPage?.pageNumber ?? pageNumberStart
                 );
             }
 
@@ -792,7 +792,7 @@ export class DocumentSkeleton extends Skeleton {
             updateBlockIndex(skeleton.pages);
 
             setPageParent(skeleton.pages, skeleton);
-            // console.log(skeleton);
+
             return skeleton;
         }
     }

@@ -60,12 +60,11 @@ export function getSheetSelectionsDisabled$(accessor: IAccessor) {
 }
 
 export function checkInHeaderRanges(
-    selectionManagerService: SelectionManagerService,
+    selections: Readonly<ISelectionWithStyle[]>,
     num: number,
     rType: RANGE_TYPE.ROW | RANGE_TYPE.COLUMN
 ): false | ISelectionWithStyle {
-    const selections = selectionManagerService.getCurrentSelections();
-    const matchSelectionData = selections?.find((sel) => {
+    const matchSelectionData = selections.find((sel) => {
         const range = sel.range;
         const { startRow, endRow, startColumn, endColumn, rangeType } = range;
 

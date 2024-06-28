@@ -52,6 +52,7 @@ export { WorksheetPermissionService } from './services/permission/worksheet-perm
 export { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
 export {
     SelectionManagerService,
+    WorkbookSelections,
     SelectionMoveType,
 } from './services/selection-manager.service';
 

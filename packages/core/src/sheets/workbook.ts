@@ -107,7 +107,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         this._name$ = new BehaviorSubject(workbookData.name || '');
         this.name$ = this._name$.asObservable();
 
-        this._passWorksheetSnapshots();
+        this._parseWorksheetSnapshots();
     }
 
     override dispose(): void {
@@ -205,9 +205,13 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
     }
 
     /**
-     * Get the active sheet
+     * Get the active sheet.
      */
-    getActiveSheet(): Nullable<Worksheet> {
+    getActiveSheet(): Worksheet {
+        if (!this._activeSheet) {
+            throw new Error(`[Workbook]: no active Worksheet on Workbook ${this._unitId}!`);
+        }
+
         return this._activeSheet;
     }
 
@@ -217,7 +221,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
      * @returns
      */
     ensureActiveSheet() {
-        const currentActive = this.getActiveSheet();
+        const currentActive = this._activeSheet;
         if (currentActive) {
             return currentActive;
         }
@@ -376,7 +380,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
     /**
      * Get Default Sheet
      */
-    private _passWorksheetSnapshots(): void {
+    private _parseWorksheetSnapshots(): void {
         const { _snapshot, _worksheets } = this;
         const { sheets, sheetOrder } = _snapshot;
 

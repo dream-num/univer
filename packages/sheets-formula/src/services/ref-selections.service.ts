@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import { SelectionRenderService } from '@univerjs/sheets-ui';
+import type { SelectionManagerService } from '@univerjs/sheets';
+import { createIdentifier } from '@wendellhu/redi';
 
-export class PromptSelectionsRenderService extends SelectionRenderService {
-    constructor() {
-        super();
-    }
-}
+/**
+ * Ref selections service reuses code of `SelectionManagerService`. And it only contains ref selections
+ * when user is editing formula.
+ *
+ * Its data should be cleared by the caller quit editing formula and reconstructed when user starts editing.
+ */
+export const IRefSelectionsService = createIdentifier<SelectionManagerService>('sheets-formula.ref-selections.service');
+

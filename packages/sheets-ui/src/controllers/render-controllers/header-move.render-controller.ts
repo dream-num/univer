@@ -206,15 +206,16 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
                     scrollType = ScrollTimerType.X;
                 }
 
+                const currentSelections = this._selectionManagerService.getCurrentSelections();
+                if (!currentSelections) return;
+
                 const matchSelectionData = checkInHeaderRanges(
-                    this._selectionManagerService,
+                    currentSelections,
                     initialType === RANGE_TYPE.ROW ? row : column,
                     initialType
                 );
 
-                if (matchSelectionData === false) {
-                    return;
-                }
+                if (matchSelectionData === false) return;
 
                 const startScrollXY = scene.getScrollXYByRelativeCoords(
                     Vector2.FromArray([this._startOffsetX, this._startOffsetY])

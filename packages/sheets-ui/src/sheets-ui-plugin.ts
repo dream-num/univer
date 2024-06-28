@@ -50,7 +50,7 @@ import { EditorBridgeService, IEditorBridgeService } from './services/editor-bri
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
-import { ISelectionRenderService, NormalSelectionRenderService } from './services/selection/selection-render.service';
+import { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
 import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
@@ -175,8 +175,7 @@ export class UniverSheetsUIPlugin extends Plugin {
         ([
             [SheetSkeletonManagerService],
             [SheetRenderController],
-
-            [ISelectionRenderService, { useClass: NormalSelectionRenderService }],
+            [ISelectionRenderService, { useClass: SelectionRenderService }],
         ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });

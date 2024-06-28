@@ -30,7 +30,7 @@ import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
-import { SelectionRenderService } from '../selection-render.service';
+import { BaseSelectionRenderService } from '../selection-render.service';
 import { createCommandTestBed } from './create-service-test-bed';
 
 const theme = {
@@ -167,7 +167,7 @@ describe('Test indirect', () => {
     let get: Injector['get'];
 
     let themeService: ThemeService;
-    let selectionRenderService: SelectionRenderService;
+    let selectionRenderService: BaseSelectionRenderService;
 
     let selectionStartParam: ISelectionWithCoordAndStyle[];
 
@@ -179,7 +179,7 @@ describe('Test indirect', () => {
         const testBed = createCommandTestBed(undefined, [
             [IShortcutService, { useClass: DesktopShortcutService }],
             [SheetSkeletonManagerService],
-            [SelectionRenderService],
+            [BaseSelectionRenderService],
             [IPlatformService, { useClass: DesktopPlatformService }],
             [IRenderManagerService, { useClass: RenderManagerService }],
         ]);
@@ -192,7 +192,7 @@ describe('Test indirect', () => {
         themeService = get(ThemeService);
         themeService.setTheme(theme);
 
-        selectionRenderService = get(SelectionRenderService);
+        selectionRenderService = get(BaseSelectionRenderService);
 
         const workbook = testBed.sheet;
 

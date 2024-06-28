@@ -32,7 +32,7 @@ export enum SelectionMoveType {
     MOVE_END,
 }
 
-export interface ISelectionManager {}
+export interface ISelectionManager { }
 
 export class SelectionManagerService extends RxDisposable {
     private get _currentSelectionPos(): ISelectionManagerSearchParam {
@@ -57,11 +57,16 @@ export class SelectionManagerService extends RxDisposable {
         this.selectionMoveEnd$ = c$.pipe(switchMap((workbook) => !workbook ? of([]) : this._ensureWorkbookSelection(workbook.getUnitId()).selectionMoveEnd$));
 
         this._instanceSrv.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
-            this._wbSelections.delete(workbook.getUnitId());
+            this._workbookSelections.delete(workbook.getUnitId());
         });
     }
 
-    getCurrentSelections(): Readonly<Nullable<ISelectionWithStyle[]>> {
+    /** Clear all selections in all workbooks. */
+    clear(): void {
+        this._workbookSelections.forEach((wbSelection) => wbSelection.clear());
+    }
+
+    getCurrentSelections(): Readonly<ISelectionWithStyle[]> {
         return this._getCurrentSelections();
     }
 
@@ -74,12 +79,12 @@ export class SelectionManagerService extends RxDisposable {
     addSelections(unitId: string, worksheetId: string, selectionDatas: ISelectionWithStyle[]): void;
     addSelections(unitIdOrSelections: string | ISelectionWithStyle[], worksheetId?: string, selectionDatas?: ISelectionWithStyle[]): void {
         if (typeof unitIdOrSelections === 'string') {
-            this._ensureWorkbookSelection(unitIdOrSelections).addSelection(worksheetId!, selectionDatas!);
+            this._ensureWorkbookSelection(unitIdOrSelections).addSelections(worksheetId!, selectionDatas!);
             return;
         }
 
         const { unitId, sheetId } = this._currentSelectionPos;
-        this._ensureWorkbookSelection(unitId).addSelection(sheetId, unitIdOrSelections);
+        this._ensureWorkbookSelection(unitId).addSelections(sheetId, unitIdOrSelections);
     }
 
     setSelections(selectionDatas: ISelectionWithStyle[], type?: SelectionMoveType): void;
@@ -91,12 +96,12 @@ export class SelectionManagerService extends RxDisposable {
         type?: SelectionMoveType
     ): void {
         if (typeof unitIdOrSelections === 'string') {
-            this._ensureWorkbookSelection(unitIdOrSelections).setSelection(worksheetIdOrType as string, selectionDatas!, type ?? SelectionMoveType.MOVE_END);
+            this._ensureWorkbookSelection(unitIdOrSelections).setSelections(worksheetIdOrType as string, selectionDatas!, type ?? SelectionMoveType.MOVE_END);
             return;
         }
 
         const { unitId, sheetId } = this._currentSelectionPos;
-        this._ensureWorkbookSelection(unitId).setSelection(sheetId, unitIdOrSelections, worksheetIdOrType as SelectionMoveType ?? SelectionMoveType.MOVE_END);
+        this._ensureWorkbookSelection(unitId).setSelections(sheetId, unitIdOrSelections, worksheetIdOrType as SelectionMoveType ?? SelectionMoveType.MOVE_END);
     }
 
     clearCurrentSelections(): void {
@@ -139,12 +144,17 @@ export class SelectionManagerService extends RxDisposable {
         return this._ensureWorkbookSelection(unitId);
     }
 
-    private _wbSelections = new Map<string, WorkbookSelections>();
+    private _workbookSelections = new Map<string, WorkbookSelections>();
     private _ensureWorkbookSelection(unitId: string): WorkbookSelections {
-        let wbSelection = this._wbSelections.get(unitId);
+        let wbSelection = this._workbookSelections.get(unitId);
         if (!wbSelection) {
-            wbSelection = new WorkbookSelections();
-            this._wbSelections.set(unitId, wbSelection);
+            const workbook = this._instanceSrv.getUnit<Workbook>(unitId);
+            if (!workbook) {
+                throw new Error(`[SelectionManagerService]: cannot resolve unit with id "${unitId}"!`);
+            }
+
+            wbSelection = new WorkbookSelections(workbook);
+            this._workbookSelections.set(unitId, wbSelection);
         }
 
         return wbSelection;
@@ -164,6 +174,12 @@ export class WorkbookSelections extends Disposable {
     private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
 
+    constructor(
+        private readonly _workbook: Workbook
+    ) {
+        super();
+    }
+
     override dispose(): void {
         super.dispose();
 
@@ -172,11 +188,19 @@ export class WorkbookSelections extends Disposable {
         this._selectionMoveStart$.complete();
     }
 
-    addSelection(sheetId: string, selectionDatas: ISelectionWithStyle[]) {
-        this._ensureSheetSelection(sheetId).push(...selectionDatas);
+    /** Clear all selections in this workbook. */
+    clear(): void {
+        this._worksheetSelections.clear();
+        this._selectionMoveEnd$.next([]);
     }
 
-    setSelection(sheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType = SelectionMoveType.MOVE_END) {
+    addSelections(sheetId: string, selectionDatas: ISelectionWithStyle[]) {
+        const selections = this._ensureSheetSelection(sheetId);
+        selections.push(...selectionDatas);
+        this._selectionMoveEnd$.next(selections);
+    }
+
+    setSelections(sheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType = SelectionMoveType.MOVE_END) {
         this._ensureSheetSelection(sheetId).splice(0, selectionDatas.length, ...selectionDatas);
 
         // WTF: why we would not refresh in add but in replace?
@@ -189,22 +213,35 @@ export class WorkbookSelections extends Disposable {
         }
     }
 
+    getCurrentSelections(): Readonly<ISelectionWithStyle[]> {
+        return this._getCurrentSelections();
+    }
+
     getSelectionOfWorksheet(sheetId: string): ISelectionWithStyle[] {
-        if (!this._wsSelections.has(sheetId)) {
+        if (!this._worksheetSelections.has(sheetId)) {
             return [];
         }
 
-        return this._wsSelections.get(sheetId)!;
+        return this._worksheetSelections.get(sheetId)!;
     }
 
-    private _wsSelections = new Map<string, ISelectionWithStyle[]>();
+    private _getCurrentSelections() {
+        return this.getSelectionOfWorksheet(this._workbook.getActiveSheet()!.getSheetId());
+    }
+
+    getCurrentLastSelection(): Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>> {
+        const selectionData = this._getCurrentSelections();
+        return selectionData[selectionData.length - 1] as Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>>;
+    }
+
+    private _worksheetSelections = new Map<string, ISelectionWithStyle[]>();
     private _ensureSheetSelection(sheetId: string): ISelectionWithStyle[] {
-        let wsSelection = this._wsSelections.get(sheetId);
-        if (!wsSelection) {
-            wsSelection = [];
-            this._wsSelections.set(sheetId, wsSelection);
+        let worksheetSelection = this._worksheetSelections.get(sheetId);
+        if (!worksheetSelection) {
+            worksheetSelection = [];
+            this._worksheetSelections.set(sheetId, worksheetSelection);
         }
 
-        return wsSelection;
+        return worksheetSelection;
     }
 }

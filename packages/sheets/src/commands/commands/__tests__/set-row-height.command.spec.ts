@@ -76,7 +76,7 @@ describe('Test set row height commands', () => {
         const maxColumn = worksheet.getMaxColumns() - 1;
         const selectionManager = get(SelectionManagerService);
 
-        selectionManager.setCurrentSelection({
+        selectionManager.setSelectionSeachParam({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId: 'test',
             sheetId: 'sheet1',

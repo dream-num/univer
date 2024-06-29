@@ -127,6 +127,10 @@ export const RANGE_FILL_PERMISSION_CHECK = createInterceptorKey<boolean, { x: nu
 export class SelectionRenderService implements ISelectionRenderService {
     hasSelection: boolean = false;
 
+    private _pointerdownSub: Nullable<Subscription>;
+
+    private _mainScenePointerUpSub: Nullable<Subscription>;
+
     private _scenePointerMoveSub: Nullable<Subscription>;
 
     private _scenePointerUpSub: Nullable<Subscription>;
@@ -154,9 +158,6 @@ export class SelectionRenderService implements ISelectionRenderService {
     private _startOffsetY: number = 0;
 
     private _scrollTimer!: ScrollTimer;
-
-    private _pointerdownSub: Nullable<Subscription>;
-    private _mainScenePointerUpSub: Nullable<Subscription>;
 
     private _skeleton: Nullable<SpreadsheetSkeleton>;
 
@@ -294,8 +295,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     /**
      * add a selection
-     * @param selectionRange
-     * @param curCellRange
+     * @param data
      */
     addCellSelectionControlBySelectionData(data: ISelectionWithCoordAndStyle) {
         const currentControls = this.getSelectionControls();
@@ -393,15 +393,12 @@ export class SelectionRenderService implements ISelectionRenderService {
     // }
 
     private _clearSelectionControls() {
-        const curControls = this.getSelectionControls();
-
-        if (curControls.length > 0) {
-            for (const control of curControls) {
-                control.dispose();
-            }
-
-            curControls.length = 0; // clear currentSelectionControls
+        const allSelectionControls = this.getSelectionControls();
+        for (const control of allSelectionControls) {
+            control.dispose();
         }
+
+        allSelectionControls.length = 0; // clear currentSelectionControls
     }
 
     private _getFreeze() {
@@ -636,11 +633,7 @@ export class SelectionRenderService implements ISelectionRenderService {
                 !this._isRemainLastEnable) ||
                 (curControls.length > 0 && this._isSingleSelection && !evt.shiftKey)
         ) {
-            for (const control of curControls) {
-                control.dispose();
-            }
-
-            curControls.length = 0;
+            this._clearSelectionControls();
         }
 
         const currentCell = selectionControl && selectionControl.model.currentCell;

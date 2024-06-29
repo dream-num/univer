@@ -48,7 +48,7 @@ describe('Test set col width commands', () => {
         const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         const maxRow = worksheet.getMaxRows() - 1;
         const selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
+        selectionManagerService.setSelectionSeachParam({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId: 'test',
             sheetId: 'sheet1',

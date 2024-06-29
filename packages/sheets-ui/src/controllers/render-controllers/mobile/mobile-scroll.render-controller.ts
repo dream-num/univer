@@ -238,6 +238,12 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         );
     }
 
+    /**
+     * for row & col selection.
+     * x value of row seleciton controlPoints is always half of viewport wide.
+     * y value of col selection controlPoints is always half of viewport height.
+     *
+     */
     private _scrollInfo$Handler() {
         const { unitId } = this._context;
         const scene = this._renderManagerService.getRenderById(unitId)?.scene;

@@ -51,7 +51,7 @@ describe('Test commands used for change selections', () => {
         isMerged: boolean,
         isMergedMainCell: boolean
     ) {
-        selectionManagerService.setCurrentSelection({
+        selectionManagerService.setSelectionSeachParam({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             ...currentInfo,
         });
@@ -103,7 +103,7 @@ describe('Test commands used for change selections', () => {
 
         commandService = get(ICommandService);
         selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
+        selectionManagerService.setSelectionSeachParam({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             ...currentInfo,
         });

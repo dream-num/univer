@@ -92,7 +92,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
         const unitId = workbook.getUnitId();
         const sheetId = worksheet.getSheetId();
-        this._selectionManagerService.setCurrentSelection({
+        this._selectionManagerService.setSelectionSeachParam({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId,
             sheetId,
@@ -475,7 +475,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                     this._refreshSelection(currentSelections);
                 }
             } else {
-                this._selectionManagerService.setCurrentSelection({
+                this._selectionManagerService.setSelectionSeachParam({
                     pluginName,
                     unitId,
                     sheetId,

@@ -240,7 +240,7 @@ describe('Test format painter rules in controller', () => {
         commandService.registerCommand(AddWorksheetMergeMutation);
 
         const selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
+        selectionManagerService.setSelectionSeachParam({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId: 'workbook-01',
             sheetId: 'sheet-0011',

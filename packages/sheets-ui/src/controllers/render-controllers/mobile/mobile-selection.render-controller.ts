@@ -95,7 +95,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         const unitId = workbook.getUnitId();
         if (!worksheet) return;
         const sheetId = worksheet.getSheetId();
-        this._selectionManagerService.setCurrentSelection({
+        this._selectionManagerService.setSelectionSeachParam({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId,
             sheetId,
@@ -370,8 +370,9 @@ export class MobileSelectionRenderController extends Disposable implements IRend
     private _initSelectionChangeListener() {
         this.disposeWithMe(
             toDisposable(
+                // selectionMoveEnd$ would also be invoked when changing sheet(_currentSkeleton$.next)
                 this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
-                    // this._selectionRenderService.reset();
+                    this._selectionRenderService.reset();
                     if (params == null) {
                         return;
                     }
@@ -380,9 +381,9 @@ export class MobileSelectionRenderController extends Disposable implements IRend
                         if (selectionWithStyle == null) {
                             continue;
                         }
-                        // const selectionData =
-                            // this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
-                        // this._selectionRenderService.addCellSelectionControlBySelectionData(selectionData);
+                        const selectionData =
+                            this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
+                        this._selectionRenderService.addCellSelectionControlBySelectionData(selectionData);
                     }
 
                     this._syncDefinedNameRange(params);
@@ -522,7 +523,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
                     this._refreshSelection(currentSelections);
                 }
             } else {
-                this._selectionManagerService.setCurrentSelection({
+                this._selectionManagerService.setSelectionSeachParam({
                     pluginName,
                     unitId,
                     sheetId,

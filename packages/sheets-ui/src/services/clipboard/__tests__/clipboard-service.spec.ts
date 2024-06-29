@@ -136,7 +136,7 @@ describe('Test clipboard', () => {
         it('The current selection is a single cell in 1 row and 1 column', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -221,7 +221,7 @@ describe('Test clipboard', () => {
         it('The current selection is a single cell in 1 row and 2 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -300,7 +300,7 @@ describe('Test clipboard', () => {
         it('The current selection is a single cell in 1 row and 3 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -381,7 +381,7 @@ describe('Test clipboard', () => {
         it('The current selection is a single cell in 2 rows and 2 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -514,7 +514,7 @@ describe('Test clipboard', () => {
         it('The current selection is a single cell in 4 rows and 4 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -688,7 +688,7 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 1 row and 2 columns.', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -769,7 +769,7 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 1 row and 3 columns.', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -796,7 +796,7 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 1 row and 4 columns.', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -823,7 +823,7 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 2 rows and 2 columns.', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -850,7 +850,7 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 1 row and 2 columns, with 1 ordinary cell', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -931,7 +931,7 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 2 rows and 2 columns, with a merged cell of 2 rows and 1 column', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -967,7 +967,7 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 1 row and 3 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -993,7 +993,7 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 1 row and 2 columns, with a merged cell of 2 rows and 2 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -1088,7 +1088,7 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 1 row and 3 columns, with a merged cell of 2 rows and 2 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -1146,7 +1146,7 @@ describe('Test clipboard', () => {
         it('The current selection is a merged cell of 2 rows and 2 columns, with a merged cell of 1 row and 2 columns', async () => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -1223,7 +1223,7 @@ describe('Test clipboard', () => {
 
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',

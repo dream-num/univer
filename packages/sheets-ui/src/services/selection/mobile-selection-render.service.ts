@@ -33,6 +33,7 @@ import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle 
 import { getNormalSelectionStyle } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
+import type { Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -55,11 +56,13 @@ enum ExpandingControl {
 export class MobileSelectionRenderService implements ISelectionRenderService {
     hasSelection: boolean = false;
 
-    private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _pointerdownSub: Nullable<Subscription>;
 
-    private _pointerMoveSub: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _mainScenePointerUpSub: Nullable<Subscription>;
 
-    private _pointerUpSub: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerMoveSub: Nullable<Subscription>;
+
+    private _scenePointerUpSub: Nullable<Subscription>;
 
     private _controlFillConfig$: BehaviorSubject<IControlFillConfig | null> =
         new BehaviorSubject<IControlFillConfig | null>(null);
@@ -84,10 +87,6 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
     private _startOffsetY: number = 0;
 
     private _scrollTimer!: ScrollTimer;
-
-    private _cancelDownObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _cancelUpObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _skeleton: Nullable<SpreadsheetSkeleton>;
 
@@ -159,18 +158,8 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         window.srs = this;
     }
 
-    private _getSheetObject() {
-        return getSheetObject(this._context.unit, this._context)!;
-    }
-
-    private _getActiveViewport(evt: IPointerEvent | IMouseEvent) {
-        const sheetObject = this._getSheetObject();
-
-        return sheetObject?.scene.getActiveViewportByCoord(Vector2.FromArray([evt.offsetX, evt.offsetY]));
-    }
-
     dispose() {
-
+        //...
     }
 
     enableHeaderHighlight() {
@@ -249,6 +238,10 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
      * init
      * selectionController@_initSkeletonChangeListener --> selectionManagerService.add --> selectionManagerService._selectionMoveEnd$ --> this.addControlToCurrentByRangeData
      *
+     * selectionMoveEnd$ --> this.addCellSelectionControlBySelectionData
+     *
+     *
+     *
      * pointer
      * engine@_pointerDownEvent --> spreadsheet?.onPointerDownObserve --> eventTrigger --> scene@disableEvent() --> then scene.input-manager currentObject is always scene until scene@enableEvent.
      * engine@_pointerUpEvent --> scene.input-manager@_onPointerUp --> this._selectionMoveEnd$ --> _selectionManagerService.selectionMoveEnd$ --> this.addControlToCurrentByRangeData
@@ -261,11 +254,11 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
      * @param data
      */
     addCellSelectionControlBySelectionData(data: ISelectionWithCoordAndStyle) {
-        const selectionControls = this.getSelectionControls();
+        // const selectionControls = this.getSelectionControls();
 
-        if (!selectionControls) {
-            return;
-        }
+        // if (!selectionControls) {
+        //     return;
+        // }
         const { rangeWithCoord, primaryWithCoord } = data;
 
         const skeleton = this._skeleton;
@@ -281,7 +274,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         if (scene == null || skeleton == null) {
             return;
         }
-        const control = this.addSelectionControl(scene, RANGE_TYPE.NORMAL);
+        const control = this.newSelectionControl(scene, RANGE_TYPE.NORMAL);
 
         // eslint-disable-next-line no-new
         new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
@@ -292,7 +285,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
     }
 
-    addSelectionControl(scene: Scene, rangeType: RANGE_TYPE) {
+    newSelectionControl(scene: Scene, rangeType: RANGE_TYPE) {
         const selectionControls = this.getSelectionControls();
 
         const control = new MobileSelectionControl(scene, selectionControls.length, this._isHeaderHighlight, this._themeService, rangeType);
@@ -397,15 +390,12 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
     }
 
     private _clearSelectionControls() {
-        const selectionControls = this.getSelectionControls();
-
-        if (selectionControls.length > 0) {
-            for (const control of selectionControls) {
-                control.dispose();
-            }
-
-            this._selectionControls.length = 0; // clear currentSelectionControls
+        const allSelectionControls = this.getSelectionControls();
+        for (const control of allSelectionControls) {
+            control.dispose();
         }
+
+        allSelectionControls.length = 0; // clear currentSelectionControls
     }
 
     private _getFreeze() {
@@ -517,13 +507,11 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
     reset() {
         this._clearSelectionControls();
 
-        this._pointerMoveSub?.dispose();
-        this._pointerUpSub?.dispose();
-        this._downObserver?.dispose();
+        this._scenePointerMoveSub?.unsubscribe();
+        this._scenePointerUpSub?.unsubscribe();
 
-        this._pointerMoveSub = null;
-        this._pointerUpSub = null;
-        this._downObserver = null;
+        this._scenePointerMoveSub = null;
+        this._scenePointerUpSub = null;
     }
 
     resetAndEndSelection() {
@@ -638,7 +626,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
 
         if (activeSelectionControl?.model.rangeType !== rangeType) {
             this._clearSelectionControls();
-            activeSelectionControl = this.addSelectionControl(scene, rangeType);
+            activeSelectionControl = this.newSelectionControl(scene, rangeType);
         }
 
         // const activeCellOfCurrSelection = activeSelectionControl && activeSelectionControl.model.currentCell;
@@ -865,7 +853,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         let lastY = newEvtOffsetY;
 
         // handle pointermove after control pointer has clicked
-        this._pointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             if (!this.expandingSelection) return;
 
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
@@ -1003,7 +991,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
             });
         });
 
-        this._pointerUpSub = scene.onPointerUp$.subscribeEvent((_evt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent((_evt: IPointerEvent | IMouseEvent) => {
             this._endSelection();
             this.expandingSelection = false;
             this.expandingControlMode = ExpandingControl.BOTTOM_RIGHT;
@@ -1249,12 +1237,21 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         if (scene == null) {
             return;
         }
-        this._pointerMoveSub?.unsubscribe();
-        this._pointerUpSub?.unsubscribe();
+
+        // scene.onPointerMove$.remove(this._scenePointerMoveSub);
+        // scene.onPointerUp$.remove(this._scenePointerUpSub);
+        this._scenePointerMoveSub?.unsubscribe();
+        this._scenePointerUpSub?.unsubscribe();
         scene.enableEvent();
+
         this._scrollTimer?.dispose();
-        this._cancelDownObserver?.unsubscribe();
-        this._cancelUpObserver?.unsubscribe();
+
+        // const mainScene = scene.getEngine()?.activeScene;
+        // mainScene?.onPointerUp$.remove(this._mainScenePointerUpSub);
+        this._mainScenePointerUpSub?.unsubscribe();
+
+        this._pointerdownSub?.unsubscribe();
+        this._pointerdownSub = null;
     }
 
     private _addCancelObserver() {
@@ -1268,10 +1265,12 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
             return;
         }
 
-        this._cancelDownObserver?.unsubscribe();
-        this._cancelUpObserver?.unsubscribe();
-        this._cancelDownObserver = mainScene.onPointerDown$.subscribeEvent(() => this._endSelection());
-        this._cancelUpObserver = mainScene.onPointerUp$.subscribeEvent(() => this._endSelection());
+        // mainScene.onPointerUp$.remove(this._mainScenePointerUpSub);
+        this._mainScenePointerUpSub?.unsubscribe();
+        this._mainScenePointerUpSub = mainScene.onPointerUp$.subscribeEvent(() => this._endSelection());
+
+        this._pointerdownSub?.unsubscribe();
+        this._pointerdownSub = mainScene.onPointerDown$.subscribeEvent(() => this._endSelection());
     }
 
     private _getCellRangeByCursorPosition(

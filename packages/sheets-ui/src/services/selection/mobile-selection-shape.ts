@@ -90,8 +90,8 @@ export class MobileSelectionControl extends SelectionControl {
         };
         this._fillControlTopLeftInner!.setProps({ ...fillProps });
         this._fillControlBottomRightInner!.setProps({ ...fillProps });
-        this.fillControlTopLeft!.setProps({ ...fillProps, ...{ fill: 'red' } });
-        this.fillControlBottomRight!.setProps({ ...fillProps, ...{ fill: 'black' } });
+        // this.fillControlTopLeft!.setProps({ ...fillProps, ...{ fill: 'red' } });
+        // this.fillControlBottomRight!.setProps({ ...fillProps, ...{ fill: 'black' } });
 
         // put into scene
         const objs = [this._fillControlTopLeft, this._fillControlBottomRight, this._fillControlTopLeftInner, this._fillControlBottomRightInner] as BaseObject[];
@@ -219,14 +219,13 @@ export class MobileSelectionControl extends SelectionControl {
                     left: -expandCornerSize / 2,
                     top: -expandCornerSize / 2,
                 });
-                this._fillControlTopLeftInner!.transformByState({
-                    left: -expandCornerSizeInner / 2,
-                    top: -expandCornerSizeInner / 2,
-                });
-
                 this.fillControlBottomRight!.transformByState({
                     left: endX - startX - expandCornerSize / 2,
                     top: endY - startY - expandCornerSize / 2,
+                });
+                this._fillControlTopLeftInner!.transformByState({
+                    left: -expandCornerSizeInner / 2,
+                    top: -expandCornerSizeInner / 2,
                 });
                 this._fillControlBottomRightInner!.transformByState({
                     left: endX - startX - expandCornerSizeInner / 2,
@@ -241,8 +240,17 @@ export class MobileSelectionControl extends SelectionControl {
                 });
                 this.fillControlBottomRight!.transformByState({
                     left: -expandCornerSize / 2 + viewportW / 2 + offsetX,
-                    top: endY - startY - expandCornerSize / 2,
+                    top: -expandCornerSize / 2 + endY - startY,
                 });
+                this._fillControlTopLeftInner!.transformByState({
+                    left: -expandCornerSizeInner / 2 + viewportW / 2 + offsetX,
+                    top: -expandCornerSizeInner / 2,
+                });
+                this._fillControlBottomRightInner!.transformByState({
+                    left: -expandCornerSizeInner / 2 + viewportW / 2 + offsetX,
+                    top: -expandCornerSizeInner / 2 + endY - startY,
+                });
+
                 break;
             case RANGE_TYPE.COLUMN:
                 this.fillControlTopLeft!.transformByState({
@@ -250,8 +258,16 @@ export class MobileSelectionControl extends SelectionControl {
                     top: -expandCornerSize / 2 + viewportH / 2 + offsetY,
                 });
                 this.fillControlBottomRight!.transformByState({
-                    left: endX - startX - expandCornerSize / 2,
+                    left: -expandCornerSize / 2 + endX - startX,
                     top: -expandCornerSize / 2 + viewportH / 2 + offsetY,
+                });
+                this._fillControlTopLeftInner!.transformByState({
+                    left: -expandCornerSizeInner / 2,
+                    top: -expandCornerSizeInner / 2 + viewportH / 2 + offsetY,
+                });
+                this._fillControlBottomRightInner!.transformByState({
+                    left: -expandCornerSizeInner / 2 + endX - startX,
+                    top: -expandCornerSizeInner / 2 + viewportH / 2 + offsetY,
                 });
                 break;
             default:

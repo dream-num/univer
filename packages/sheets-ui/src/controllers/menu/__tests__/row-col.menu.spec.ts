@@ -77,7 +77,7 @@ describe('Test row col menu items', () => {
         disposableCollection = new DisposableCollection();
 
         const selectionManager = get(SelectionManagerService);
-        selectionManager.setCurrentSelection({
+        selectionManager.setSelectionSeachParam({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId: 'test',
             sheetId: 'sheet1',

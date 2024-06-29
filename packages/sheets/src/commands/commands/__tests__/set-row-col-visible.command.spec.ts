@@ -64,7 +64,7 @@ describe('Test row col hide/unhine commands', () => {
         });
 
         const selectionManager = get(SelectionManagerService);
-        selectionManager.setCurrentSelection({
+        selectionManager.setSelectionSeachParam({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId: 'test',
             sheetId: 'sheet1',

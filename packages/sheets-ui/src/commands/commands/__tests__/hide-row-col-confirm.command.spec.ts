@@ -100,7 +100,7 @@ describe('Test hide row col confirm commands', () => {
     describe('Hide row', () => {
         it('Will apply when select some rows', async () => {
             const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -136,7 +136,7 @@ describe('Test hide row col confirm commands', () => {
 
         it('Will not apply when select all rows', async () => {
             const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -165,7 +165,7 @@ describe('Test hide row col confirm commands', () => {
     describe('Hide col', () => {
         it('Will apply when select some cols', async () => {
             const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',
@@ -201,7 +201,7 @@ describe('Test hide row col confirm commands', () => {
 
         it('Will not apply when select all cols', async () => {
             const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
+            selectionManager.setSelectionSeachParam({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',

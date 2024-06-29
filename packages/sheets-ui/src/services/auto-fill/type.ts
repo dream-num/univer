@@ -35,7 +35,7 @@ export interface ISheetAutoFillHook {
     type?: AutoFillHookType;
     bindUnit?: string;
     disable?: (location: IAutoFillLocation, direction: Direction, applyType: APPLY_TYPE) => boolean;
-    onBeforeFillData?(location: IAutoFillLocation, direction: Direction): boolean | void;
+    onBeforeFillData?(location: IAutoFillLocation, direction: Direction): APPLY_TYPE | void;
     onFillData?(
         location: IAutoFillLocation,
         direction: Direction,
@@ -98,8 +98,8 @@ export type APPLY_FUNCTIONS = {
 };
 
 export enum APPLY_TYPE {
-    COPY = '0',
-    SERIES = '1',
-    ONLY_FORMAT = '2',
-    NO_FORMAT = '3',
+    COPY = 'COPY',
+    SERIES = 'SERIES',
+    ONLY_FORMAT = 'ONLY_FORMAT',
+    NO_FORMAT = 'NO_FORMAT',
 }

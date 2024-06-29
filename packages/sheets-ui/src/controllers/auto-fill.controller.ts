@@ -107,7 +107,7 @@ export class AutoFillController extends Disposable {
             type: AutoFillHookType.Default,
             priority: 0,
             onBeforeFillData: (location: IAutoFillLocation, direction: Direction) => {
-                this._presetAndCacheData(location, direction);
+                return this._presetAndCacheData(location, direction);
             },
             onFillData: (location: IAutoFillLocation, direction: Direction, applyType: APPLY_TYPE) => {
                 return this._fillData(location, direction, applyType);
@@ -364,16 +364,27 @@ export class AutoFillController extends Disposable {
             subUnitId,
         };
 
+        const preferTypes: APPLY_TYPE[] = [];
         const activeHooks = this._autoFillService.getActiveHooks();
         activeHooks.forEach((hook) => {
-            hook?.onBeforeFillData?.({ source: autoFillSource, target: autoFillTarget, unitId, subUnitId }, direction!);
+            const type = hook?.onBeforeFillData?.({ source: autoFillSource, target: autoFillTarget, unitId, subUnitId }, direction!);
+            if (type) {
+                preferTypes.unshift(type);
+            }
         });
 
         // set apply type will trigger fillData
-        if (!this._autoFillService.menu.find((m) => m.value === APPLY_TYPE.SERIES)?.disable) {
-            this._autoFillService.applyType = APPLY_TYPE.SERIES;
-        } else {
-            this._autoFillService.applyType = APPLY_TYPE.COPY;
+        for (let i = 0; i < preferTypes.length; i++) {
+            const menuItem = this._autoFillService.menu.find((m) => m.value === preferTypes[i]);
+            if (menuItem && !menuItem.disable) {
+                this._autoFillService.applyType = preferTypes[i];
+                return;
+            }
+        }
+        // if no hook return apply type, use first available apply type
+        const first = this._autoFillService.menu.find((m) => m.disable === false)?.value;
+        if (first) {
+            this._autoFillService.applyType = first;
         }
     }
 
@@ -725,11 +736,13 @@ export class AutoFillController extends Disposable {
         this._beforeApplyData = applyData;
         this._copyData = this._getCopyData(source, direction);
         this._currentLocation = location;
-        if (this._hasSeries(this._copyData)) {
-            this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, false);
-        } else {
+        if (this._shouldDisableSeries(this._copyData)) {
             this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, true);
+            return APPLY_TYPE.COPY;
+        } else {
+            this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, false);
         }
+        return this._getPreferredApplyType(this._copyData);
     }
 
     // auto fill entry
@@ -937,18 +950,28 @@ export class AutoFillController extends Disposable {
         };
     }
 
-    private _hasSeries(copyData: ICopyDataPiece[]) {
-        return copyData.some((copyDataPiece) => {
-            const res = Object.keys(copyDataPiece).some((type) => {
-                if (
-                    copyDataPiece[type as DATA_TYPE]?.length &&
-                    ![DATA_TYPE.OTHER, DATA_TYPE.FORMULA].includes(type as DATA_TYPE)
-                ) {
-                    return true;
-                }
-                return false;
-            });
-            return res;
-        });
+    private _shouldDisableSeries(copyData: ICopyDataPiece[]) {
+        // only formula or other type data, disable series
+        return copyData.every((copyDataPiece) =>
+            Object.keys(copyDataPiece).every((type) => (
+                copyDataPiece[type as DATA_TYPE]?.length === 0
+                    || [DATA_TYPE.OTHER, DATA_TYPE.FORMULA].includes(type as DATA_TYPE)
+            )
+            )
+        );
+    }
+
+    private _getPreferredApplyType(copyData: ICopyDataPiece[]) {
+        // if all data is number and only one cell in piece, prefer copy
+        const preferCopy = copyData.every((copyDataPiece) =>
+            Object.keys(copyDataPiece).every((type) => (
+                copyDataPiece[type as DATA_TYPE]?.length === 0
+                    || (copyDataPiece[type as DATA_TYPE]?.length === 1
+                        && copyDataPiece[type as DATA_TYPE][0].data.length === 1
+                        && DATA_TYPE.NUMBER === type as DATA_TYPE)
+            )
+            )
+        );
+        return preferCopy ? APPLY_TYPE.COPY : APPLY_TYPE.SERIES;
     }
 }

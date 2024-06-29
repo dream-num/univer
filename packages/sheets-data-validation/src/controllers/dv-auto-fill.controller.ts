@@ -131,7 +131,6 @@ export class DataValidationAutoFillController extends Disposable {
                 return noopReturnFunc();
             },
             onAfterFillData: () => {
-                this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, false);
             },
         };
         this.disposeWithMe(this._autoFillService.addHook(hook));

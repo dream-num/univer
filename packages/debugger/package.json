@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/debugger",
-    "version": "0.1.16",
+    "version": "0.1.17",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -57,7 +57,7 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/docs-ui": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
@@ -70,7 +70,7 @@
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/docs-ui": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",

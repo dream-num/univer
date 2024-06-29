@@ -15,13 +15,14 @@
  */
 
 /* eslint-disable max-lines-per-function */
-import type { IFreeze, IRangeWithCoord, Nullable, Observer, ThemeService } from '@univerjs/core';
+import type { IFreeze, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import { ColorKit, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, isRectIntersect, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 
+import type { Subscription } from 'rxjs';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { SelectionShape } from './selection-shape';
 import { ISelectionRenderService, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './selection-render.service';
@@ -48,9 +49,9 @@ export class SelectionShapeExtension {
 
     private _relativeSelectionColumnLength = 0;
 
-    private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerMoveSub: Nullable<Subscription>;
 
-    private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scenePointerUpSub: Nullable<Subscription>;
 
     private _helperSelection: Nullable<Rect>;
 
@@ -140,17 +141,19 @@ export class SelectionShapeExtension {
     }
 
     private _clearObserverEvent() {
-        this._scene.onPointerMoveObserver.remove(this._moveObserver);
-        this._scene.onPointerUpObserver.remove(this._upObserver);
-        this._moveObserver = null;
-        this._upObserver = null;
+        // this._scene.onPointerMove$.remove(this._scenePointerMoveSub);
+        // this._scene.onPointerUp$.remove(this._scenePointerUpSub);
+        this._scenePointerMoveSub?.unsubscribe();
+        this._scenePointerUpSub?.unsubscribe();
+        this._scenePointerMoveSub = null;
+        this._scenePointerUpSub = null;
     }
 
     private _initialControl() {
         const { leftControl, rightControl, topControl, bottomControl } = this._control;
 
         [leftControl, rightControl, topControl, bottomControl].forEach((control) => {
-            control.onPointerEnterObserver.add(() => {
+            control.onPointerEnter$.subscribeEvent(() => {
                 const permissionCheck = this._injector.get(ISelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_MOVE_PERMISSION_CHECK)(false, null);
 
                 if (!permissionCheck) {
@@ -160,11 +163,11 @@ export class SelectionShapeExtension {
                 control.setCursor(CURSOR_TYPE.MOVE);
             });
 
-            control.onPointerLeaveObserver.add(() => {
+            control.onPointerLeave$.subscribeEvent(() => {
                 control.resetCursor();
             });
 
-            control.onPointerDownObserver.add(this._controlEvent.bind(this));
+            control.onPointerDown$.subscribeEvent(this._controlEvent.bind(this));
         });
     }
 
@@ -332,7 +335,7 @@ export class SelectionShapeExtension {
 
         scene.disableEvent();
 
-        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
             const permissionCheck = this._injector.get(ISelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_MOVE_PERMISSION_CHECK)(false, null);
@@ -354,7 +357,7 @@ export class SelectionShapeExtension {
             });
         });
 
-        this._upObserver = scene.onPointerUpObserver.add(() => {
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
             this._helperSelection?.dispose();
             const scene = this._scene;
             scene.resetCursor();
@@ -398,15 +401,15 @@ export class SelectionShapeExtension {
             bottomCenterWidget,
             bottomRightWidget,
         ].forEach((control, index) => {
-            control.onPointerEnterObserver.add(() => {
+            control.onPointerEnter$.subscribeEvent(() => {
                 control.setCursor(cursors[index]);
             });
 
-            control.onPointerLeaveObserver.add(() => {
+            control.onPointerLeave$.subscribeEvent(() => {
                 control.resetCursor();
             });
 
-            control.onPointerDownObserver.add((evt: IMouseEvent | IPointerEvent) => {
+            control.onPointerDown$.subscribeEvent((evt: IMouseEvent | IPointerEvent) => {
                 this._widgetEvent(evt, cursors[index]);
             });
         });
@@ -557,7 +560,7 @@ export class SelectionShapeExtension {
 
         scene.disableEvent();
 
-        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
             const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
@@ -573,7 +576,7 @@ export class SelectionShapeExtension {
             });
         });
 
-        this._upObserver = scene.onPointerUpObserver.add(() => {
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
             const scene = this._scene;
             scene.resetCursor();
             this._clearObserverEvent();
@@ -586,7 +589,7 @@ export class SelectionShapeExtension {
     private _initialFill() {
         const { fillControl } = this._control;
 
-        fillControl.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        fillControl.onPointerEnter$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
             const permissionCheck = this._injector.get(ISelectionRenderService).interceptor.fetchThroughInterceptors(RANGE_FILL_PERMISSION_CHECK)(false, { x: evt.offsetX, y: evt.offsetY, skeleton: this._skeleton, scene: this._scene });
 
             if (!permissionCheck) {
@@ -595,11 +598,11 @@ export class SelectionShapeExtension {
             fillControl.setCursor(CURSOR_TYPE.CROSSHAIR);
         });
 
-        fillControl.onPointerLeaveObserver.add(() => {
+        fillControl.onPointerLeave$.subscribeEvent(() => {
             fillControl.resetCursor();
         });
 
-        fillControl.onPointerDownObserver.add(this._fillEvent.bind(this));
+        fillControl.onPointerDown$.subscribeEvent(this._fillEvent.bind(this));
     }
 
     private _fillMoving(moveOffsetX: number, moveOffsetY: number) {
@@ -822,7 +825,7 @@ export class SelectionShapeExtension {
             this._fillControlColors.push(o.fill as string);
         });
 
-        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             const currentViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 
@@ -884,7 +887,7 @@ export class SelectionShapeExtension {
             });
         });
 
-        this._upObserver = scene.onPointerUpObserver.add(() => {
+        this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
             this._helperSelection?.dispose();
             const scene = this._scene;
             scene.resetCursor();

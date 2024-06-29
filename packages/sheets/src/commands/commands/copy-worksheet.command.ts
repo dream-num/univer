@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { ICommand, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -54,7 +54,7 @@ export const CopySheetCommand: ICommand = {
 
         const { workbook, worksheet, unitId } = target;
         const config = Tools.deepClone(worksheet.getConfig());
-        config.name += localeService.t('sheets.tabs.sheetCopy');
+        config.name = getCopyUniqueSheetName(workbook, localeService, config.name);
         config.id = Tools.generateRandomId();
         const sheetIndex = workbook.getSheetIndex(worksheet);
 
@@ -81,3 +81,15 @@ export const CopySheetCommand: ICommand = {
         return false;
     },
 };
+
+// If Sheet1(Copy) already exists and you copy Sheet1, you should get Sheet1(Copy2)
+export function getCopyUniqueSheetName(workbook: Workbook, localeService: LocaleService, name: string): string {
+    let output = name + localeService.t('sheets.tabs.sheetCopy', '');
+    let count = 2;
+
+    while (workbook.checkSheetName(output)) {
+        output = name + localeService.t('sheets.tabs.sheetCopy', `${count}`);
+        count++;
+    }
+    return output;
+}

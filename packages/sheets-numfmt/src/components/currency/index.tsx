@@ -54,6 +54,9 @@ export const CurrencyPanel: FC<IBusinessComponentProps> = (props) => {
     props.action.current = () => setPatternDecimal(pattern, decimal);
 
     const onSelect = (value: string) => {
+        if (value === undefined) {
+            return;
+        }
         suffixSet(value);
         const pattern = getCurrencyFormatOptions(value)[0].value;
         patternSet(pattern);
@@ -61,6 +64,9 @@ export const CurrencyPanel: FC<IBusinessComponentProps> = (props) => {
     };
 
     const onChange = (value: any) => {
+        if (value === undefined) {
+            return;
+        }
         patternSet(value);
         props.onChange(setPatternDecimal(value, decimal));
     };

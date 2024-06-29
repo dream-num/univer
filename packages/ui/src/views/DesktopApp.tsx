@@ -28,7 +28,7 @@ import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
 import { builtInGlobalComponents } from './parts';
-import { ContextMenu } from './components/context-menu/ContextMenu';
+import { DesktopContextMenu } from './components/context-menu/ContextMenu';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -36,9 +36,10 @@ export interface IUniverAppProps extends IWorkbenchOptions {
     onRendered?: (container: HTMLElement) => void;
 }
 
-export function App(props: IUniverAppProps) {
+export function DesktopApp(props: IUniverAppProps) {
     const {
         header = true,
+        toolbar = true,
         footer = true,
         contextMenu = true,
         mountContainer,
@@ -107,7 +108,7 @@ export function App(props: IUniverAppProps) {
               */}
             <div className={styles.appLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
                 {/* header */}
-                {header && (
+                {header && toolbar && (
                     <header className={styles.appContainerHeader}>
                         <Toolbar headerMenuComponents={headerMenuComponents} />
                     </header>
@@ -152,7 +153,7 @@ export function App(props: IUniverAppProps) {
             </div>
             <ComponentContainer key="global" components={globalComponents} />
             <ComponentContainer key="built-in-global" components={builtInGlobalComponents} />
-            {contextMenu && <ContextMenu />}
+            {contextMenu && <DesktopContextMenu />}
         </ConfigProvider>
     );
 }

@@ -101,7 +101,7 @@ export default {
     },
     CONCAT: {
         description: '複数の範囲や文字列からのテキストを結合しますが、区切り記号または IgnoreEmpty 引数は提供しません。',
-        abstract: '複数の範囲や文字列からのテキストを結合しますが、区切り記号または IgnoreEmpty 引数は提供しません。',
+        abstract: '複数の範囲や文字列からのテキストを結合しますが、区切り記号または IgnoreEmpty 引数は提供しません',
         links: [
             {
                 title: '指導',
@@ -109,8 +109,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text1: { name: 'テキスト1', detail: '結合するテキスト項目。 文字列またはセルの範囲などの文字列の配列。' },
+            text2: { name: 'テキスト2', detail: '結合する追加のテキスト項目。 テキスト項目には最大 253 のテキスト引数がを設定可能です。 各引数には、文字列、またはセルの範囲などの文字列の配列を指定できます。' },
         },
     },
     CONCATENATE: {

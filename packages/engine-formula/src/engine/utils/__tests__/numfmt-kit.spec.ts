@@ -180,5 +180,8 @@ describe('Test numfmt kit', () => {
         expect(comparePatternPriority(numfmtMap.date, numfmtMap.date, operatorToken.MULTIPLY)).toBe('');
         // Date / Date = General
         expect(comparePatternPriority(numfmtMap.date, numfmtMap.date, operatorToken.DIVIDED)).toBe('');
+
+        expect(comparePatternPriority(numfmtMap.date, '', operatorToken.PLUS)).toBe(numfmtMap.date);
+        expect(comparePatternPriority('', numfmtMap.accounting, operatorToken.MINUS)).toBe(numfmtMap.accounting);
     });
 });

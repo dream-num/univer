@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
-import { ObjectMatrix } from '@univerjs/core';
+import { ObjectMatrix, skipParseTagNames } from '@univerjs/core';
 import { handleStringToStyle } from '@univerjs/ui';
 
 import type { IPastePlugin } from '@univerjs/docs-ui';
@@ -309,6 +309,10 @@ export class HtmlToUSMService {
                     index: doc?.paragraphs?.length || 0,
                 });
             } else if (node.nodeType === Node.TEXT_NODE) {
+                if (node.nodeValue?.trim() === '') {
+                    continue;
+                }
+
                 // TODO: @JOCS, More characters need to be replaced, like `\b`
                 const text = node.nodeValue?.replace(/[\r\n]/g, '');
                 let style;
@@ -335,6 +339,8 @@ export class HtmlToUSMService {
                         ts: style,
                     });
                 }
+            } else if (skipParseTagNames.includes(node.nodeName.toLowerCase())) {
+                continue;
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 if (node.nodeName === 'STYLE') {
                     continue;

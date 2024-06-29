@@ -15,6 +15,8 @@
  */
 
 export { UniverSheetsDataValidationPlugin } from './plugin';
+export { UniverSheetsDataValidationMobilePlugin } from './mobile-plugin';
+
 export type { IAddSheetDataValidationCommandParams, IUpdateSheetDataValidationRangeCommandParams } from './commands/commands/data-validation.command';
 export { ICommandService, LocaleService, Plugin } from '@univerjs/core';
 export { SheetsDataValidationRenderController } from './controllers/dv-render.controller';

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { Nullable, Observer } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType, ILogService, RxDisposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
-import type { Observable } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
 
 import { CURSOR_TYPE } from '../../../basics/const';
@@ -33,7 +33,6 @@ import type {
     RANGE_DIRECTION,
 } from '../../../basics/range';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '../../../basics/range';
-import { getCurrentScrollXY } from '../../../basics/scroll-xy';
 import { Vector2 } from '../../../basics/vector2';
 import type { Engine } from '../../../engine';
 import type { Scene } from '../../../scene';
@@ -217,15 +216,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _input!: HTMLDivElement;
 
-    private _moveObservers: Nullable<Observer<IPointerEvent | IMouseEvent>>[] = [];
-
-    private _upObservers: Nullable<Observer<IPointerEvent | IMouseEvent>>[] = [];
-
     private _scrollTimers: ScrollTimer[] = [];
-
-    private _viewportScrollX: number = 0;
-
-    private _viewportScrollY: number = 0;
 
     private _rangeList: TextRange[] = [];
 
@@ -238,8 +229,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _viewPortObserverMap = new Map<
         string,
         {
-            scrollStop: Nullable<Observer<IScrollObserverParam>>;
-            scrollBefore: Nullable<Observer<IScrollObserverParam>>;
+            scrollStop: Nullable<Subscription>;
+            scrollBefore: Nullable<Subscription>;
         }
     >();
 
@@ -252,6 +243,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _scene: Nullable<Scene>;
 
     private _document: Nullable<Documents>;
+    private _scenePointerMoveSubs: Array<Subscription> = [];
+    private _scenePointerUpSubs: Array<Subscription> = [];
 
     constructor(@ILogService private readonly _logService: ILogService) {
         super();
@@ -512,11 +505,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._scrollTimers.push(scrollTimer);
         scrollTimer.startScroll(evtOffsetX, evtOffsetY);
 
-        const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
-
-        this._viewportScrollX = scrollX;
-        this._viewportScrollY = scrollY;
-
         this._onSelectionStart$.next(this._getActiveRangeInstance()?.startNodePosition);
 
         scene.getTransformer()?.clearSelectedObjects();
@@ -525,7 +513,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         let preMoveOffsetY = evtOffsetY;
 
-        this._moveObservers.push(scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._scenePointerMoveSubs.push(scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             scene.setCursor(CURSOR_TYPE.TEXT);
 
@@ -536,28 +524,19 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             this._moving(moveOffsetX, moveOffsetY);
 
             // scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-                // this._moving(moveOffsetX, moveOffsetY);
+            // this._moving(moveOffsetX, moveOffsetY);
             // });
 
             preMoveOffsetX = moveOffsetX;
             preMoveOffsetY = moveOffsetY;
         }));
 
-        this._upObservers.push(scene.onPointerUpObserver.add(() => {
+        this._scenePointerUpSubs.push(scene.onPointerUp$.subscribeEvent(() => {
             // scene.onPointerMoveObserver.remove(this._moveObserver);
             // scene.onPointerUpObserver.remove(this._upObserver);
-
-            this._moveObservers.forEach((obs) => {
-                obs?.dispose();
+            [...this._scenePointerMoveSubs, ...this._scenePointerUpSubs].forEach((e) => {
+                e.unsubscribe();
             });
-
-            this._upObservers.forEach((obs) => {
-                obs?.dispose();
-            });
-
-            this._moveObservers = [];
-
-            this._upObservers = [];
 
             scene.enableEvent();
 
@@ -882,7 +861,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const scrollBefore = viewport.onScrollBeforeObserver.add((param: IScrollObserverParam) => {
+        const scrollBefore = viewport.onScrollBefore$.subscribeEvent((param: IScrollObserverParam) => {
             const viewport = param.viewport;
             if (!viewport) {
                 return;
@@ -893,7 +872,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             activeRangeInstance?.activeStatic();
         });
 
-        const scrollStop = viewport.onScrollStopObserver.add((param: IScrollObserverParam) => {
+        const scrollStop = viewport.onScrollStop$.subscribeEvent((param: IScrollObserverParam) => {
             const viewport = param.viewport;
             if (!viewport) {
                 return;

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-hyper-link-ui",
-    "version": "0.1.16",
+    "version": "0.1.17",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -70,7 +70,6 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-hyper-link": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
@@ -89,7 +88,6 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.15.4",

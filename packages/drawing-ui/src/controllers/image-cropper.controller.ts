@@ -15,14 +15,14 @@
  */
 
 import type { ICommandInfo, ISrcRect, Nullable, Workbook } from '@univerjs/core';
-import { checkIfMove, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { checkIfMove, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { MessageType } from '@univerjs/design';
 import type { IDrawingSearch, IImageData, ITransformState } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { CURSOR_TYPE, degToRad, Image, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
 import { IMessageService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-import { MessageType } from '@univerjs/design';
 import { filter, switchMap } from 'rxjs';
 import type { IOpenImageCropOperationBySrcRectParams } from '../commands/operations/image-crop.operation';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
@@ -365,81 +365,67 @@ export class ImageCropperController extends Disposable {
 
         let startTransform: Nullable<ITransformState> = null;
         this.disposeWithMe(
-            toDisposable(
-                transformer.onChangeStartObservable.add((state) => {
-                    const { objects } = state;
-                    const cropObject = objects.values().next().value as ImageCropperObject;
-                    if (cropObject == null || !(cropObject instanceof ImageCropperObject)) {
-                        return;
-                    }
+            transformer.changeStart$.subscribe((state) => {
+                const { objects } = state;
+                const cropObject = objects.values().next().value as ImageCropperObject;
+                if (cropObject == null || !(cropObject instanceof ImageCropperObject)) {
+                    return;
+                }
 
-                    const { left, top, height, width, angle } = cropObject;
+                const { left, top, height, width, angle } = cropObject;
 
-                    startTransform = { left, top, height, width, angle };
+                startTransform = { left, top, height, width, angle };
 
-                    transformer.clearCopperControl();
-                })
-            )
+                transformer.clearCopperControl();
+            })
         );
-        // this.disposeWithMe(
-        //     toDisposable(
-        //         transformer.onChangingObservable.add((state) => {
 
-        //         })
-        //     )
-        // );
         this.disposeWithMe(
-            toDisposable(
-                transformer.onChangeEndObservable.add((state) => {
-                    const { objects } = state;
-                    const cropObject = objects.values().next().value as ImageCropperObject;
-                    if (cropObject == null || !(cropObject instanceof ImageCropperObject)) {
-                        return;
-                    }
+            transformer.changeEnd$.subscribe((state) => {
+                const { objects } = state;
+                const cropObject = objects.values().next().value as ImageCropperObject;
+                if (cropObject == null || !(cropObject instanceof ImageCropperObject)) {
+                    return;
+                }
 
-                    const { left, top, height, width, angle } = cropObject;
+                const { left, top, height, width, angle } = cropObject;
 
-                    if (!checkIfMove({ left, top, height, width, angle }, startTransform)) {
-                        return;
-                    }
+                if (!checkIfMove({ left, top, height, width, angle }, startTransform)) {
+                    return;
+                }
 
-                    const applyObject = this._getApplyObjectByCropObject(cropObject);
+                const applyObject = this._getApplyObjectByCropObject(cropObject);
 
-                    if (applyObject == null) {
-                        return;
-                    }
+                if (applyObject == null) {
+                    return;
+                }
 
-                    const srcRect = this._getSrcRectByTransformState(applyObject, cropObject);
+                const srcRect = this._getSrcRectByTransformState(applyObject, cropObject);
 
-                    cropObject.refreshSrcRect(srcRect.srcRect, applyObject.getState());
+                cropObject.refreshSrcRect(srcRect.srcRect, applyObject.getState());
 
-                    // cropObject.imageData = {
-                    //     ...cropObject.imageData,
-                    //     srcRect: srcRect.srcRect,
-                    // } as IImageData;
+                // cropObject.imageData = {
+                //     ...cropObject.imageData,
+                //     srcRect: srcRect.srcRect,
+                // } as IImageData;
 
-                    transformer.createControlForCopper(cropObject);
-                })
-            )
+                transformer.createControlForCopper(cropObject);
+            })
         );
         this._endCropListener(scene);
     }
 
     private _addHoverForImageCopper(o: ImageCropperObject) {
         this.disposeWithMe(
-            toDisposable(
-                o.onPointerEnterObserver.add(() => {
-                    o.cursor = CURSOR_TYPE.MOVE;
-                })
-            )
+            o.onPointerEnter$.subscribeEvent(() => {
+                o.cursor = CURSOR_TYPE.MOVE;
+            })
         );
 
         this.disposeWithMe(
-            toDisposable(
-                o.onPointerLeaveObserver.add(() => {
-                    o.cursor = CURSOR_TYPE.DEFAULT;
-                })
-            )
+            o.onPointerLeave$.subscribeEvent(() => {
+                o.cursor = CURSOR_TYPE.DEFAULT;
+            })
         );
     }
 
@@ -447,13 +433,11 @@ export class ImageCropperController extends Disposable {
         const transformer = scene.getTransformerByCreate();
 
         this.disposeWithMe(
-            toDisposable(
-                transformer.onClearControlObservable.add((changeSelf) => {
-                    if (changeSelf === true) {
-                        this._commandService.syncExecuteCommand(CloseImageCropOperation.id);
-                    }
-                })
-            )
+            transformer.clearControl$.subscribe((changeSelf) => {
+                if (changeSelf === true) {
+                    this._commandService.syncExecuteCommand(CloseImageCropOperation.id);
+                }
+            })
         );
     }
 

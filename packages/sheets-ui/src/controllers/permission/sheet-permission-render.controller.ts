@@ -15,14 +15,13 @@
  */
 
 import { Disposable, IPermissionService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
+import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { CheckMarkSingle, DeleteSingle, LockSingle, ProtectSingle, WriteSingle } from '@univerjs/icons';
 import { RangeProtectionRuleModel } from '@univerjs/sheets';
-import type { IRenderContext, Spreadsheet } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 import { merge, throttleTime } from 'rxjs';
-import { sheetPermissionAddProtectContextMenuFactory, sheetPermissionChangeSheetPermissionSheetBarMenuFactory, sheetPermissionContextMenuFactory, sheetPermissionEditProtectContextMenuFactory, sheetPermissionProtectSheetInSheetBarMenuFactory, sheetPermissionRemoveProtectContextMenuFactory, sheetPermissionRemoveProtectionSheetBarMenuFactory, sheetPermissionToolbarMenuFactory, sheetPermissionViewAllProtectRuleContextMenuFactory, sheetPermissionViewAllProtectRuleSheetBarMenuFactory } from '../menu/permission.menu';
 import { permissionCheckIconKey, permissionDeleteIconKey, permissionEditIconKey, permissionLockIconKey, permissionMenuIconKey, UNIVER_SHEET_PERMISSION_DIALOG, UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER, UNIVER_SHEET_PERMISSION_USER_DIALOG } from '../../basics/const/permission';
 import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionPanelFooter, SheetPermissionUserDialog } from '../../views/permission';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../../views/permission/error-msg-dialog/interface';
@@ -49,35 +48,7 @@ export class SheetPermissionRenderManagerController extends Disposable {
     }
 
     private _init() {
-        this._initToolbarMenu();
-        this._initContextMenu();
         this._initComponents();
-    }
-
-    private _initToolbarMenu() {
-        const { menu = {} } = this._config;
-        ([
-            sheetPermissionToolbarMenuFactory,
-        ]).forEach((menuFactory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(menuFactory), menu));
-        });
-    }
-
-    private _initContextMenu() {
-        const { menu = {} } = this._config;
-        ([
-            sheetPermissionContextMenuFactory,
-            sheetPermissionAddProtectContextMenuFactory,
-            sheetPermissionEditProtectContextMenuFactory,
-            sheetPermissionRemoveProtectContextMenuFactory,
-            sheetPermissionViewAllProtectRuleContextMenuFactory,
-            sheetPermissionProtectSheetInSheetBarMenuFactory,
-            sheetPermissionRemoveProtectionSheetBarMenuFactory,
-            sheetPermissionChangeSheetPermissionSheetBarMenuFactory,
-            sheetPermissionViewAllProtectRuleSheetBarMenuFactory,
-        ] as IMenuItemFactory[]).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
-        });
     }
 
     private _initComponents() {
@@ -101,7 +72,7 @@ export class SheetPermissionRenderManagerController extends Disposable {
     }
 }
 
-export class SheetPermissionRenderController extends Disposable {
+export class SheetPermissionRenderController extends Disposable implements IRenderModule {
     private _rangeProtectionCanViewRenderExtension = new RangeProtectionCanViewRenderExtension();
     private _rangeProtectionCanNotViewRenderExtension = new RangeProtectionCanNotViewRenderExtension();
 

@@ -461,9 +461,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
-      '@univerjs/docs-ui':
+      '@univerjs/engine-render':
         specifier: workspace:*
-        version: link:../docs-ui
+        version: link:../engine-render
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -1694,9 +1694,6 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-formula':
-        specifier: workspace:*
-        version: link:../sheets-formula
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui

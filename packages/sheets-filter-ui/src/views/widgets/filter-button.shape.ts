@@ -54,9 +54,9 @@ export class SheetsFilterButtonShape extends Shape<ISheetsFilterButtonShapeProps
         this.setShapeProps(props);
 
         // Here we need to make sure that the event is on the rectangle range.
-        this.onPointerDownObserver.add((evt) => this.onPointerDown(evt));
-        this.onPointerEnterObserver.add(() => this.onPointerEnter());
-        this.onPointerLeaveObserver.add(() => this.onPointerLeave());
+        this.onPointerDown$.subscribeEvent((evt) => this.onPointerDown(evt));
+        this.onPointerEnter$.subscribeEvent(() => this.onPointerEnter());
+        this.onPointerLeave$.subscribeEvent(() => this.onPointerLeave());
     }
 
     setShapeProps(props: Partial<ISheetsFilterButtonShapeProps>): void {
@@ -114,7 +114,9 @@ export class SheetsFilterButtonShape extends Shape<ISheetsFilterButtonShapeProps
 
         const { col, unitId, subUnitId } = this._filterParams!;
         const opened = this._contextService.getContextValue(FILTER_PANEL_OPENED_KEY);
-        if (opened) return;
+        if (opened || !this._commandService.hasCommand(OpenFilterPanelOperation.id)) {
+            return;
+        }
 
         setTimeout(() => {
             this._commandService.executeCommand(OpenFilterPanelOperation.id, {

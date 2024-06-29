@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DependentOn, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -56,8 +56,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverSheetsFormulaConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -69,10 +68,10 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     }
 
     override onRendered(): void {
-        this._registerRenderControllers();
+        this._registerRenderModules();
     }
 
-    private _registerRenderControllers(): void {
+    private _registerRenderModules(): void {
         ([
 
             FormulaAlertRenderController,
@@ -111,6 +110,50 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [TriggerCalculationController],
             [UpdateFormulaController],
             [FormulaEditorShowController],
+            [ActiveDirtyController],
+            [DefinedNameController],
+            [FormulaRenderManagerController],
+        ];
+
+        dependencies.forEach((dependency) => this._injector.add(dependency));
+    }
+}
+
+export class UniverSheetsFormulaMobilePlugin extends Plugin {
+    static override pluginName = FORMULA_UI_PLUGIN_NAME;
+    static override type = UniverInstanceType.UNIVER_SHEET;
+
+    constructor(
+        private readonly _config: Partial<IUniverSheetsFormulaConfig> = {},
+        @Inject(Injector) override readonly _injector: Injector
+    ) {
+        super();
+
+        this._config = Tools.deepMerge({}, DefaultSheetFormulaConfig, this._config);
+    }
+
+    override onStarting(): void {
+        this._init();
+    }
+
+    _init(): void {
+        const dependencies: Dependency[] = [
+            // services
+            [IFormulaPromptService, { useClass: FormulaPromptService }],
+            [
+                IDescriptionService,
+                {
+                    useFactory: () => this._injector.createInstance(DescriptionService, this._config?.description),
+                },
+            ],
+            [IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }],
+            [IRegisterFunctionService, { useClass: RegisterFunctionService }],
+            [FormulaRefRangeService],
+            [RegisterOtherFormulaService],
+            [FormulaClipboardController],
+            [ArrayFormulaDisplayController],
+            [TriggerCalculationController],
+            [UpdateFormulaController],
             [ActiveDirtyController],
             [DefinedNameController],
             [FormulaRenderManagerController],

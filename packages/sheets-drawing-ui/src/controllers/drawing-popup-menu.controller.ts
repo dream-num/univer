@@ -98,7 +98,7 @@ export class DrawingPopupMenuController extends RxDisposable {
         let singletonPopupDisposer: IDisposable;
         this.disposeWithMe(
             toDisposable(
-                transformer.onCreateControlObservable.add(() => {
+                transformer.createControl$.subscribe(() => {
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
 
                     if (this._hasCropObject(scene)) {
@@ -142,20 +142,16 @@ export class DrawingPopupMenuController extends RxDisposable {
             )
         );
         this.disposeWithMe(
-            toDisposable(
-                transformer.onClearControlObservable.add(() => {
-                    singletonPopupDisposer?.dispose();
-                    this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
-                    this._drawingManagerService.focusDrawing(null);
-                })
-            )
+            transformer.clearControl$.subscribe(() => {
+                singletonPopupDisposer?.dispose();
+                this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, false);
+                this._drawingManagerService.focusDrawing(null);
+            })
         );
         this.disposeWithMe(
-            toDisposable(
-                transformer.onChangingObservable.add(() => {
-                    singletonPopupDisposer?.dispose();
-                })
-            )
+            transformer.changing$.subscribe(() => {
+                singletonPopupDisposer?.dispose();
+            })
         );
     }
 

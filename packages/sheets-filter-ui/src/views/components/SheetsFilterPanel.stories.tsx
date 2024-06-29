@@ -20,9 +20,10 @@ import { RediContext } from '@wendellhu/redi/react-bindings';
 import type { Injector } from '@wendellhu/redi';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import type { IWorkbookData } from '@univerjs/core';
-import { ICommandService, ILogService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { RefRangeService, SelectionManagerService, SheetInterceptorService, WorksheetPermissionService, WorksheetProtectionPointModel } from '@univerjs/sheets';
-import { DesktopMenuService, DesktopShortcutService, IMenuService, IShortcutService } from '@univerjs/ui';
+import { CommandType, ICommandService, ILogService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import { RefRangeService, SelectionManagerService, SheetInterceptorService, WorksheetProtectionPointModel } from '@univerjs/sheets';
+import { IMenuService, IShortcutService, MenuService, ShortcutService } from '@univerjs/ui';
+import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../../commands/sheets-filter.command';
 import type { IOpenFilterPanelOperationParams } from '../../commands/sheets-filter.operation';
@@ -41,12 +42,15 @@ const meta: Meta<typeof FilterPanel> = {
 
 export default meta;
 
+const FakeCetCellEditVisibleOperation = {
+    id: SetCellEditVisibleOperation.id,
+    type: CommandType.OPERATION,
+    handler: () => true,
+};
+
 function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleType = LocaleType.EN_US) {
     const univer = new Univer();
     const injector = univer.__getInjector();
-    const get = injector.get.bind(injector);
-
-    const commandService = get(ICommandService);
 
     class TestPlugin extends Plugin {
         static override type = UniverInstanceType.UNIVER_SHEET;
@@ -58,15 +62,17 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
 
         override onStarting(injector: Injector): void {
             injector.add([SelectionManagerService]);
-            injector.add([IShortcutService, { useClass: DesktopShortcutService }]);
-            injector.add([IMenuService, { useClass: DesktopMenuService }]);
-            injector.add([WorksheetPermissionService]);
+            injector.add([IShortcutService, { useClass: ShortcutService }]);
+            injector.add([IMenuService, { useClass: MenuService }]);
             injector.add([WorksheetProtectionPointModel]);
             injector.add([SheetInterceptorService]);
             injector.add([SheetsFilterPanelService]);
             injector.add([RefRangeService]);
 
+            const commandService = injector.get(ICommandService);
+
             [
+                FakeCetCellEditVisibleOperation,
                 SmartToggleSheetsFilterCommand,
                 SetSheetsFilterCriteriaCommand,
                 ClearSheetsFilterCriteriaCommand,
@@ -75,11 +81,17 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
                 CloseFilterPanelOperation,
                 ChangeFilterByOperation,
             ].forEach((command) => commandService.registerCommand(command));
+
+            commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                col: 0,
+            } as IOpenFilterPanelOperationParams);
         }
     }
 
-    univer.registerPlugin(TestPlugin);
     univer.registerPlugin(UniverSheetsFilterPlugin);
+    univer.registerPlugin(TestPlugin);
 
     injector.get(LocaleService).setLocale(locale);
     injector.get(LocaleService).load({ enUS, zhCN, ruRU });
@@ -87,14 +99,10 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
 
     const sheet = univer.createUniverSheet(workbookData);
 
-    commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
-        unitId: 'test',
-        subUnitId: 'sheet1',
-        col: 0,
-    } as IOpenFilterPanelOperationParams);
-
     return { univer, injector, sheet };
 }
+
+// TODO@ybzky: not working properly
 
 export const FilterWithConditions = {
     render() {

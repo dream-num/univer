@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { Observable } from '../observer';
+import type { Plugin, PluginCtor } from '@univerjs/core';
+import { UniverSheetsFilterUIPlugin } from '@univerjs/sheets-filter-ui';
 
-/**
- * Get the type of the generic type of T
- */
-export type PropsFrom<T> = T extends Observable<infer Props> ? Props : void;
+export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> {
+    return [
+        [UniverSheetsFilterUIPlugin],
+    ];
+}

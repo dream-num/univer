@@ -15,6 +15,7 @@
  */
 
 export { UniverSheetsFilterUIPlugin } from './plugin';
+export { UniverSheetsFilterMobileUIPlugin } from './mobile-plugin';
 export { OpenFilterPanelOperation } from './commands/sheets-filter.operation';
 export type { IOpenFilterPanelOperationParams } from './commands/sheets-filter.operation';
 export { SmartToggleSheetsFilterCommand } from './commands/sheets-filter.command';

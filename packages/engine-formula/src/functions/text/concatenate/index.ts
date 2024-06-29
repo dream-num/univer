@@ -19,7 +19,7 @@ import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { createStringValueObjectByRawValue } from '../../../engine/value-object/primitive-object';
+import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Concatenate extends BaseFunction {
@@ -57,10 +57,21 @@ export class Concatenate extends BaseFunction {
                     return textValueObject;
                 }
 
-                const resultValueObjectString = resultValueObject?.isNull() ? '' : resultValueObject?.getValue() ?? '';
-                const textValueObjectString = textValueObject?.isNull() ? '' : textValueObject?.getValue() ?? '';
+                let resultValue = resultValueObject?.getValue();
+                let textValue = textValueObject?.getValue();
 
-                return createStringValueObjectByRawValue(`${resultValueObjectString}${textValueObjectString}`);
+                if (resultValueObject?.isBoolean()) {
+                    resultValue = `${resultValue}`.toLocaleUpperCase();
+                }
+
+                if (textValueObject?.isBoolean()) {
+                    textValue = `${textValue}`.toLocaleUpperCase();
+                }
+
+                const resultValueObjectString = resultValueObject?.isNull() ? '' : resultValue ?? '';
+                const textValueObjectString = textValueObject?.isNull() ? '' : textValue ?? '';
+
+                return StringValueObject.create(`${resultValueObjectString}${textValueObjectString}`);
             });
         }
 

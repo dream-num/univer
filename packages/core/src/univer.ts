@@ -174,7 +174,7 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
         [IUniverInstanceService, { useClass: UniverInstanceService }],
         [IPermissionService, { useClass: PermissionService }],
         [ILogService, { useClass: DesktopLogService, lazy: true }],
-        [ICommandService, { useClass: CommandService, lazy: true }],
+        [ICommandService, { useClass: CommandService }],
         [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
         [IConfigService, { useClass: ConfigService }],
         [IContextService, { useClass: ContextService }],

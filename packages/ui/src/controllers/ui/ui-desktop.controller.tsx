@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-import { Disposable, isInternalEditorID, IUniverInstanceService, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
+import { Disposable, isInternalEditorID, LifecycleService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Optional } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import React from 'react';
-import { delay, filter, take } from 'rxjs';
 
 import { ILayoutService } from '../../services/layout/layout.service';
-import { App } from '../../views/App';
+import { DesktopApp } from '../../views/DesktopApp';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { FloatDom } from '../../views/components/dom/FloatDom';
-import type { IWorkbenchOptions } from './ui.controller';
+import type { IUniverUIConfig, IWorkbenchOptions } from './ui.controller';
 
 const STEADY_TIMEOUT = 3000;
 
+@OnLifecycle(LifecycleStages.Ready, DesktopUIController)
 export class DesktopUIController extends Disposable {
     constructor(
-        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
+        private readonly _config: IUniverUIConfig,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
@@ -42,12 +42,15 @@ export class DesktopUIController extends Disposable {
         @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
     ) {
         super();
+
         this._initBuiltinComponents();
+
+        Promise.resolve().then(() => this._bootstrapWorkbench());
     }
 
-    bootstrapWorkbench(options: IWorkbenchOptions): void {
+    private _bootstrapWorkbench(): void {
         this.disposeWithMe(
-            bootstrap(this._injector, options, (canvasElement, containerElement) => {
+            bootstrap(this._injector, this._config, (canvasElement, containerElement) => {
                 if (this._layoutService) {
                     this.disposeWithMe(this._layoutService.registerRootContainerElement(containerElement));
                     this.disposeWithMe(this._layoutService.registerCanvasElement(canvasElement as HTMLCanvasElement));
@@ -64,16 +67,12 @@ export class DesktopUIController extends Disposable {
                     }
                 });
 
-                this._lifecycleService.lifecycle$.pipe(
-                    filter((lifecycle) => lifecycle === LifecycleStages.Ready),
-                    delay(300),
-                    take(1)
-                ).subscribe(() => {
+                setTimeout(() => {
                     const engine = this._renderManagerService.getFirst()?.engine;
                     engine?.setContainer(canvasElement);
                     this._lifecycleService.stage = LifecycleStages.Rendered;
                     setTimeout(() => this._lifecycleService.stage = LifecycleStages.Steady, STEADY_TIMEOUT);
-                });
+                }, 300);
             })
         );
     }
@@ -105,7 +104,7 @@ function bootstrap(
         mountContainer = createContainer('univer');
     }
 
-    const ConnectedApp = connectInjector(App, injector);
+    const ConnectedApp = connectInjector(DesktopApp, injector);
     const onRendered = (canvasElement: HTMLElement) => callback(canvasElement, mountContainer);
 
     function render() {

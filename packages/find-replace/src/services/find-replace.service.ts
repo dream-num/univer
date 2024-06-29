@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, DisposableCollection, IContextService, ILogService, IUniverInstanceService, toDisposable } from '@univerjs/core';
+import { Disposable, DisposableCollection, IContextService, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import { RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
@@ -207,8 +207,7 @@ export class FindReplaceModel extends Disposable {
     constructor(
         private readonly _state: FindReplaceState,
         private readonly _providers: Set<IFindReplaceProvider>,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ILogService private readonly _logService: ILogService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 

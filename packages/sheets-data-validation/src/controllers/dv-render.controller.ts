@@ -256,18 +256,12 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                         }
 
                         if (rule.type === DataValidationType.CHECKBOX) {
-                            const { formula2 } = (validator as CheckboxValidator).parseFormulaSync(rule, pos.unitId, pos.subUnitId);
-                            // if (Tools.isBlank(cellValue)) {
                             extra = {
-                                    // v: formula2,
-                                    // t: 1,
-                                    // p: null,
                                 interceptorStyle: {
                                     ...cell?.interceptorStyle,
                                     tb: WrapStrategy.CLIP,
                                 },
                             };
-                            // }
                         }
 
                         if (rule.type === DataValidationType.LIST && (rule.renderMode === DataValidationRenderMode.ARROW || rule.renderMode === DataValidationRenderMode.TEXT)) {
@@ -412,7 +406,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
                     priority: 200,
-                    // eslint-disable-next-line max-lines-per-function, complexity
+                    // eslint-disable-next-line max-lines-per-function
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
                         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
@@ -454,18 +448,13 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                         }
 
                         if (rule.type === DataValidationType.CHECKBOX) {
-                            const { formula2 } = (validator as CheckboxValidator).parseFormulaSync(rule, pos.unitId, pos.subUnitId);
-                            if (Tools.isBlank(cellValue)) {
-                                extra = {
-                                    v: formula2,
-                                    t: 1,
-                                    p: null,
-                                    interceptorStyle: {
-                                        ...cell?.interceptorStyle,
-                                        tb: WrapStrategy.CLIP,
-                                    },
-                                };
-                            }
+                            extra = {
+
+                                interceptorStyle: {
+                                    ...cell?.interceptorStyle,
+                                    tb: WrapStrategy.CLIP,
+                                },
+                            };
                         }
 
                         if (rule.type === DataValidationType.LIST && (rule.renderMode === DataValidationRenderMode.ARROW || rule.renderMode === DataValidationRenderMode.TEXT)) {

@@ -28,7 +28,7 @@ export const CHECKBOX_FORMULA_2 = 0;
 
 function getFailMessage(formula: string | undefined, localeService: LocaleService) {
     if (Tools.isBlank(formula)) {
-        return localeService.t('dataValidation.validFail.common');
+        return localeService.t('dataValidation.validFail.value');
     }
 
     if (isFormulaString(formula)) {

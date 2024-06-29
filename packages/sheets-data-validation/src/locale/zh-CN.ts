@@ -18,9 +18,10 @@ const locale = {
     dataValidation: {
         title: '数据验证',
         validFail: {
+            value: '请输入一个合法值',
             common: '请输入值或公式',
             number: '请输入合法的数字或公式',
-            formula: '请输入合法的公式或公式',
+            formula: '请输入合法的公式',
             integer: '请输入合法的整数或公式',
             date: '请输入合法的日期或公式',
             list: '请输入至少一个合法选项',
@@ -42,6 +43,7 @@ const locale = {
             removeRule: '删除规则',
             done: '确认',
             formulaPlaceholder: '请输入值或公式',
+            valuePlaceholder: '请输入值',
             formulaAnd: '与',
             invalid: '数据无效时',
             showWarning: '显示警告',

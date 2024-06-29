@@ -24,6 +24,10 @@ export class Countblank extends BaseFunction {
     override maxParams = 1;
 
     override calculate(variant: BaseValueObject) {
+        if (variant.isError()) {
+            return variant;
+        }
+
         if (variant.getValue() === '' || variant.isNull()) {
             return NumberValueObject.create(1);
         }

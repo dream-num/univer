@@ -16,10 +16,12 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 import { createNewArray } from '../../../engine/utils/array-object';
+import { ErrorType } from '../../../basics/error-type';
 
 export class Avedev extends BaseFunction {
     override minParams = 1;
@@ -61,6 +63,11 @@ export class Avedev extends BaseFunction {
                 accumulatorSum = accumulatorSum.plus(variant);
                 accumulatorCount = accumulatorCount.plus(NumberValueObject.create(1));
             }
+        }
+
+        // If there is no data in the range, this calculation cannot be performed and a #NUM! error will be generated.
+        if (accumulatorCount.getValue() === 0) {
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const average = accumulatorSum.divided(accumulatorCount);

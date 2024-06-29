@@ -231,6 +231,8 @@ export function filterSameValueObjectResult(array: ArrayValueObject, range: Arra
         const rangeValueObject = range.get(r, c);
         if (rangeValueObject && isSameValueObjectType(rangeValueObject, criteria)) {
             return valueObject;
+        } else if (rangeValueObject?.isError() && criteria.isError() && rangeValueObject.getValue() === criteria.getValue()) {
+            return BooleanValueObject.create(true);
         } else {
             return BooleanValueObject.create(false);
         }
@@ -248,20 +250,19 @@ export function isSameValueObjectType(left: BaseValueObject, right: BaseValueObj
         return true;
     }
 
-    // blank string is same as a blank cell
-    if (left.isString() && left.getValue() !== '' && right.isString() && right.getValue() !== '') {
-        return true;
-    }
-
     if (left.isBoolean() && right.isBoolean()) {
         return true;
     }
 
-    if (left.isNull() && right.isNull()) {
+    // blank string is same as a blank cell
+    const isLeftBlank = left.isString() && left.getValue() === '';
+    const isRightBlank = right.isString() && right.getValue() === '';
+
+    if ((isLeftBlank || left.isNull()) && (isRightBlank || right.isNull())) {
         return true;
     }
 
-    if (left.isError() && right.isError()) {
+    if (left.isString() && !isLeftBlank && right.isString() && !isRightBlank) {
         return true;
     }
 

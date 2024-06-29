@@ -28,9 +28,9 @@ describe('Test countblank function', () => {
 
     describe('Countblank', () => {
         it('Range is error', () => {
-            const range = ErrorValueObject.create(ErrorType.NA);
+            const range = ErrorValueObject.create(ErrorType.REF);
             const result = testFunction.calculate(range);
-            expect(result.getValue()).toBe(0);
+            expect(result.getValue()).toBe(ErrorType.REF);
         });
         it('Range is number', () => {
             const range = NumberValueObject.create(1);
@@ -73,6 +73,22 @@ describe('Test countblank function', () => {
             });
             const result = testFunction.calculate(range);
             expect(result.getValue()).toBe(3);
+        });
+
+        it('Range is array with ref', () => {
+            const range = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [ErrorType.REF],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(range);
+            expect(result.getValue()).toBe(0);
         });
     });
 });

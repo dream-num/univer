@@ -87,6 +87,23 @@ describe('Test avedev function', () => {
             expect(result.getValue()).toBe(ErrorType.VALUE);
         });
 
+        it('Var1 is array includes blank cells', () => {
+            const var1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [null],
+                    [null],
+                ]),
+                rowCount: 2,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(var1);
+            expect(result.getValue()).toBe(ErrorType.NUM);
+        });
+
         it('Var1 is number, var2 is array not includes error', () => {
             const var1 = NumberValueObject.create(2);
             const var2 = ArrayValueObject.create({

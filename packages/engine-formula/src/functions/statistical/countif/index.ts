@@ -19,6 +19,7 @@ import { findCompareToken, valueObjectCompare } from '../../../engine/utils/obje
 import { filterSameValueObjectResult } from '../../../engine/utils/value-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Countif extends BaseFunction {
@@ -36,7 +37,7 @@ export class Countif extends BaseFunction {
         }
 
         if (criteria.isArray()) {
-            return criteria.map((criteriaItem) => this._handleSingleObject(range, criteriaItem));
+            return criteria.mapValue((criteriaItem) => this._handleSingleObject(range, criteriaItem));
         }
 
         return this._handleSingleObject(range, criteria);
@@ -50,6 +51,19 @@ export class Countif extends BaseFunction {
         resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaStringObject);
 
         const picked = (range as ArrayValueObject).pick(resultArrayObject as ArrayValueObject);
-        return picked.countA();
+        return this._countA(picked);
+    }
+
+    private _countA(array: ArrayValueObject) {
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
+        array.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
+
+            accumulatorAll = accumulatorAll.plusBy(1);
+        });
+
+        return accumulatorAll;
     }
 }

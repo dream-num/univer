@@ -214,9 +214,9 @@ export class HtmlToUSMService {
             }
         }
         if (tableStrings) {
-            tableStrings.forEach((t) => {
+            tableStrings.forEach((t, index) => {
                 const curRow = valueMatrix.getDataRange().endRow + 1;
-                const { cellMatrix, rowProperties: tableRowProp, colProperties: tableColProp } = this._parseTable(t!);
+                const { cellMatrix, rowProperties: tableRowProp, colProperties: tableColProp } = this._parseTable(t!, index);
                 if (cellMatrix) {
                     cellMatrix.forValue((row, col, value) => {
                         valueMatrix.setValue(curRow + row, col, value);
@@ -294,11 +294,11 @@ export class HtmlToUSMService {
         return newStyleStr;
     }
 
-    private _parseTable(html: string) {
+    private _parseTable(html: string, tableElIndex: number) {
         const valueMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
         const colProperties = parseColGroup(html) ?? [];
         const { rowProperties = [] } = parseTableRows(html);
-        const parsedCellMatrix = this._parseTableByHtml(this._dom!, this._getCurrentSkeleton()?.skeleton);
+        const parsedCellMatrix = this._parseTableByHtml(this._dom!, tableElIndex, this._getCurrentSkeleton()?.skeleton);
         parsedCellMatrix &&
             parsedCellMatrix.forValue((row, col, value) => {
                 let style = handleStringToStyle(undefined, value.style);
@@ -341,9 +341,9 @@ export class HtmlToUSMService {
         };
     }
 
-    private _parseTableByHtml(htmlElement: HTMLElement, skeleton?: SpreadsheetSkeleton) {
+    private _parseTableByHtml(htmlElement: HTMLElement, tableElIndex: number, skeleton?: SpreadsheetSkeleton) {
         const cellMatrix = new ObjectMatrix<IParsedCellValueByClipboard>();
-        const tableEle = htmlElement.querySelector('table');
+        const tableEle = htmlElement.querySelectorAll('table')[tableElIndex];
         if (!tableEle) {
             return cellMatrix;
         }

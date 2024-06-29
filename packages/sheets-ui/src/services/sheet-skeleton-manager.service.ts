@@ -162,6 +162,15 @@ export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
         return newSkeleton;
     }
 
+    disposeSkeleton(searchParm: ISheetSkeletonManagerSearch) {
+        const index = this._sheetSkeletonParam.findIndex((param) => param.sheetId === searchParm.sheetId);
+        if (index > -1) {
+            const skeleton = this._sheetSkeletonParam[index];
+            skeleton.skeleton.dispose();
+            this._sheetSkeletonParam.splice(index, 1);
+        }
+    }
+
     private _getSkeleton(searchParm: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
         const item = this._sheetSkeletonParam.find((param) => param.sheetId === searchParm.sheetId);
         if (item != null) {

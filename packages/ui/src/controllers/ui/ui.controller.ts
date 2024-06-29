@@ -22,6 +22,7 @@ export interface IWorkbenchOptions {
     container?: string | HTMLElement;
 
     header?: boolean;
+    toolbar?: boolean;
     footer?: boolean;
     contextMenu?: boolean;
 }

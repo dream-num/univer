@@ -68,7 +68,6 @@ class WatchRange extends Disposable {
         if (mutation.params.unitId !== this._unitId || mutation.params.subUnitId !== this._subUnitId) {
             return;
         }
-
         if (!this._range) {
             return;
         }
@@ -122,7 +121,6 @@ export class RefRangeService extends Disposable {
         if (this._watchRanges.size === 0) {
             watchRangesListener = this._commandService.onCommandExecuted((command) => {
                 if (command.type !== CommandType.MUTATION) return false;
-
                 for (const watchRange of this._watchRanges) {
                     watchRange.onMutation(command as IMutationInfo<ISheetCommandSharedParams>);
                 }

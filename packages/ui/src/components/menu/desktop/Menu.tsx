@@ -207,6 +207,10 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const selectionsFromObservable = useObservable(isObservable(item.selections) ? item.selections : undefined);
     const [inputValue, setInputValue] = useState(value);
 
+    if (hidden) {
+        return null;
+    }
+
     /**
      * user input change value from CustomLabel
      * @param v
@@ -312,10 +316,6 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
             </DesignSubMenu>
         );
     };
-
-    if (hidden) {
-        return null;
-    }
 
     return (
         <>

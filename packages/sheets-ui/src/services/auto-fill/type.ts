@@ -15,6 +15,7 @@
  */
 
 import type { Direction, ICellData, IMutationInfo, Nullable } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
 import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 
 export enum AutoFillHookType {
@@ -72,7 +73,7 @@ export type ICopyDataInTypeIndexInfo = number[];
 
 export interface IAutoFillRule {
     type: string;
-    match: (cellData: Nullable<ICellData>) => boolean;
+    match: (cellData: Nullable<ICellData>, accessor: IAccessor) => boolean;
     isContinue: (prev: IRuleConfirmedData, cur: Nullable<ICellData>) => boolean;
     applyFunctions?: APPLY_FUNCTIONS;
     priority: number;

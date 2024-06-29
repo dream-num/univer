@@ -555,12 +555,6 @@ export class AutoFillController extends Disposable {
     }
 
     private _getCopyData(source: IDiscreteRange, direction: Direction) {
-        // const {
-        //     startRow: copyStartRow,
-        //     startColumn: copyStartColumn,
-        //     endRow: copyEndRow,
-        //     endColumn: copyEndColumn,
-        // } = source;
         const worksheet = this._univerInstanceService
             .getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!
             .getActiveSheet();
@@ -582,6 +576,11 @@ export class AutoFillController extends Disposable {
             aArray = source.rows;
             bArray = source.cols;
         }
+
+        const accessor = {
+            get: this._injector.get.bind(this._injector),
+        };
+
         aArray.forEach((a) => {
             // a copyDataPiece is an array of original cells in same column or row, depending on direction (horizontal or vertical)
             const copyDataPiece = this._getEmptyCopyDataPiece();
@@ -596,7 +595,7 @@ export class AutoFillController extends Disposable {
                 } else {
                     data = currentCellDatas.getValue(a, b);
                 }
-                const { type, isContinue } = rules.find((r) => r.match(data)) || otherRule;
+                const { type, isContinue } = rules.find((r) => r.match(data, accessor)) || otherRule;
                 if (isContinue(prevData, data)) {
                     const typeInfo = copyDataPiece[type];
 

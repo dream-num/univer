@@ -17,13 +17,24 @@
 export { UniverSheetsDataValidationPlugin } from './plugin';
 export { UniverSheetsDataValidationMobilePlugin } from './mobile-plugin';
 
-export type { IAddSheetDataValidationCommandParams, IUpdateSheetDataValidationRangeCommandParams } from './commands/commands/data-validation.command';
+export type {
+    IAddSheetDataValidationCommandParams,
+    IUpdateSheetDataValidationRangeCommandParams,
+    IUpdateSheetDataValidationOptionsCommandParams,
+    IUpdateSheetDataValidationSettingCommandParams,
+} from './commands/commands/data-validation.command';
 export { ICommandService, LocaleService, Plugin } from '@univerjs/core';
 export { SheetsDataValidationRenderController } from './controllers/dv-render.controller';
 export { DataValidationController } from './controllers/dv.controller';
 export { SheetDataValidationService } from './services/dv.service';
 export { DataValidationAlertController } from './controllers/dv-alert.controller';
-export { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from './commands/commands/data-validation.command';
+export {
+    AddSheetDataValidationAndOpenCommand,
+    AddSheetDataValidationCommand,
+    UpdateSheetDataValidationRangeCommand,
+    UpdateSheetDataValidationOptionsCommand,
+    UpdateSheetDataValidationSettingCommand,
+} from './commands/commands/data-validation.command';
 export { DataValidationCacheService } from './services/dv-cache.service';
 export { DataValidationFormulaService } from './services/dv-formula.service';
 export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';

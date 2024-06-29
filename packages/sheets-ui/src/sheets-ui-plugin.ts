@@ -83,6 +83,7 @@ import { SheetPermissionUserManagerService } from './services/permission/sheet-p
 import { WorksheetProtectionRenderService } from './services/permission/worksheet-permission-render.service';
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
 import { MoveRangeController } from './controllers/move-range.controller';
+import { SheetSkeletonRenderController } from './controllers/render-controllers/skeleton.render-controller';
 
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
@@ -150,6 +151,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [SheetPermissionInterceptorBaseController],
                 [SheetPermissionInitController],
                 [MoveRangeController],
+
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
 
@@ -218,6 +220,8 @@ export class UniverSheetsUIPlugin extends Plugin {
             SheetPermissionInterceptorCanvasRenderController,
             SheetPermissionInterceptorFormulaRenderController,
             SheetPermissionRenderController,
+
+            SheetSkeletonRenderController,
         ]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });

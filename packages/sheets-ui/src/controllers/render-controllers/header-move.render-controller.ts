@@ -15,10 +15,13 @@
  */
 
 import type {
+    EventState,
     IRange,
     Nullable,
-    Workbook } from '@univerjs/core';
-import { createInterceptorKey, Disposable, ICommandService,
+    Workbook,
+} from '@univerjs/core';
+import {
+    createInterceptorKey, Disposable, ICommandService,
     InterceptorManager,
     RANGE_TYPE,
 } from '@univerjs/core';
@@ -165,7 +168,9 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         };
 
         // eslint-disable-next-line max-lines-per-function
-        const pointerDownHandler = (evt: IPointerEvent | IMouseEvent) => {
+        const pointerDownHandler = (evt: IPointerEvent | IMouseEvent, state: EventState) => {
+            if (state.isStopPropagation) return;
+
             const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
             if (skeleton == null) {
                 return;

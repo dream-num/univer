@@ -27,6 +27,7 @@ import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { ThreadCommentEditor } from '../thread-comment-editor';
 import { transformDocument2TextNodes, transformTextNodes2Document } from '../thread-comment-editor/util';
 import { getDT } from '../../common/utils';
+import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import styles from './index.module.less';
 
 export interface IThreadCommentTreeProps {
@@ -46,6 +47,7 @@ export interface IThreadCommentTreeProps {
     onMouseLeave?: () => void;
     onAddComment?: (comment: IThreadComment) => boolean;
     onDeleteComment?: (comment: IThreadComment) => boolean;
+    onResolve?: (resolved: boolean) => void;
 }
 
 export interface IThreadCommentItemProps {
@@ -197,6 +199,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         onMouseLeave,
         onAddComment,
         onDeleteComment,
+        onResolve,
     } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [isHover, setIsHover] = useState(false);
@@ -226,17 +229,31 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             }],
         ...(comments?.children ?? []) as IThreadComment[],
     ];
-    const handleResolve = () => {
+    const handleResolve: React.MouseEventHandler<HTMLDivElement> = (e) => {
+        e.stopPropagation();
+        if (!resolved) {
+            commandService.executeCommand(SetActiveCommentOperation.id);
+        } else {
+            commandService.executeCommand(SetActiveCommentOperation.id, {
+                unitId,
+                subUnitId,
+                commentId: id,
+            });
+        }
+
         commandService.executeCommand(ResolveCommentCommand.id, {
             unitId,
             subUnitId,
             commentId: id,
             resolved: !resolved,
         });
-        onClose?.();
+
+        onResolve?.(!resolved);
     };
 
-    const handleDeleteRoot = () => {
+    const handleDeleteRoot: React.MouseEventHandler<HTMLDivElement> = (e) => {
+        e.stopPropagation();
+        commandService.executeCommand(SetActiveCommentOperation.id);
         if (comments?.root && (onDeleteComment?.(comments.root) === false)) {
             return;
         }

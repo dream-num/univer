@@ -65,12 +65,12 @@ export const SheetsThreadCommentPanel = () => {
 
                 return pre.p[0] - aft.p[0];
             });
-        }
+        };
 
         return [
-            ...sort(comments.filter(comment => !comment.resolved)),
-            ...sort(comments.filter(comment => comment.resolved)),
-        ]
+            ...sort(comments.filter((comment) => !comment.resolved)),
+            ...sort(comments.filter((comment) => comment.resolved)),
+        ];
     }, [workbook]);
 
     const showShape = useCallback((comment: IThreadComment) => {
@@ -105,10 +105,6 @@ export const SheetsThreadCommentPanel = () => {
         commandService.executeCommand(ShowAddSheetCommentModalOperation.id);
     };
 
-    const handleResolve = () => {
-        sheetsThreadCommentPopupService.hidePopup();
-    };
-
     const handleHover = (comment: IThreadComment) => {
         if (
             activeCommentId &&
@@ -131,6 +127,12 @@ export const SheetsThreadCommentPanel = () => {
         if (activeShapeId.current) {
             markSelectionService.removeShape(activeShapeId.current);
             activeShapeId.current = null;
+        }
+    };
+
+    const handleResolve = (id: string, resolved: boolean) => {
+        if (resolved) {
+            sheetsThreadCommentPopupService.hidePopup();
         }
     };
 
@@ -161,6 +163,10 @@ export const SheetsThreadCommentPanel = () => {
             sortComments={sortComments}
             onItemEnter={handleHover}
             onItemLeave={handleLeave}
+            onDeleteComment={() => {
+                handleLeave();
+                return true;
+            }}
         />
     );
 };

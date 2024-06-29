@@ -36,7 +36,7 @@ export interface IThreadCommentPanelProps {
     type: UniverInstanceType;
     onAdd: () => void;
     getSubUnitName: (subUnitId: string) => string;
-    onResolve?: (id: string) => void;
+    onResolve?: (id: string, resolved: boolean) => void;
     sortComments?: (comments: IThreadComment[]) => IThreadComment[];
     onItemLeave?: (comment: IThreadComment) => void;
     onItemEnter?: (comment: IThreadComment) => void;
@@ -217,21 +217,25 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     showHighlight={activeCommentId?.commentId === comment.id}
                     onClick={() => {
                         shouldScroll.current = false;
-                        commandService.executeCommand(
-                            SetActiveCommentOperation.id,
-                            {
-                                unitId: comment.unitId,
-                                subUnitId: comment.subUnitId,
-                                commentId: comment.id,
-                                temp: true,
-                            }
-                        );
+                        if (!comment.resolved) {
+                            commandService.executeCommand(
+                                SetActiveCommentOperation.id,
+                                {
+                                    unitId: comment.unitId,
+                                    subUnitId: comment.subUnitId,
+                                    commentId: comment.id,
+                                    temp: false,
+                                }
+                            );
+                        } else {
+                            commandService.executeCommand(SetActiveCommentOperation.id);
+                        }
                     }}
-                    onClose={() => onResolve?.(comment.id)}
                     onMouseEnter={() => onItemEnter?.(comment)}
                     onMouseLeave={() => onItemLeave?.(comment)}
                     onAddComment={onAddComment}
                     onDeleteComment={onDeleteComment}
+                    onResolve={(resolved: boolean) => onResolve?.(comment.id, resolved)}
                 />
             ))}
             {renderComments.length

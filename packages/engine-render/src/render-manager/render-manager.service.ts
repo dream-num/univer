@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, UnitModel, UnitType, UniverInstanceType } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, toDisposable } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, remove, toDisposable } from '@univerjs/core';
 import type { Dependency, DependencyIdentifier, IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -88,7 +88,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return this._defaultEngine;
     }
 
-    private readonly _renderDependencies = new Map<UnitType, Set<Dependency>>();
+    private readonly _renderDependencies = new Map<UnitType, Dependency[]>();
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -106,13 +106,33 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         this._currentRender$.complete();
     }
 
-    registerRenderModule(type: UnitType, ctor: Dependency): IDisposable {
+    registerRenderModules(type: UnitType, deps: Dependency[]): IDisposable {
         if (!this._renderDependencies.has(type)) {
-            this._renderDependencies.set(type, new Set());
+            this._renderDependencies.set(type, []);
         }
 
-        const set = this._renderDependencies.get(type)!;
-        set.add(ctor);
+        const dependencies = this._renderDependencies.get(type)!;
+        dependencies.push(...deps);
+
+        for (const [renderUnitId, render] of this._renderMap) {
+            const renderType = this._univerInstanceService.getUnitType(renderUnitId);
+            if (renderType === type) {
+                (render as RenderUnit).addRenderDependencies(deps);
+            }
+        }
+
+        return toDisposable(() => {
+            deps.forEach((dep) => remove(dependencies, dep));
+        });
+    }
+
+    registerRenderModule(type: UnitType, ctor: Dependency): IDisposable {
+        if (!this._renderDependencies.has(type)) {
+            this._renderDependencies.set(type, []);
+        }
+
+        const dependencies = this._renderDependencies.get(type)!;
+        dependencies.push(ctor);
 
         for (const [renderUnitId, render] of this._renderMap) {
             const renderType = this._univerInstanceService.getUnitType(renderUnitId);
@@ -121,7 +141,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
             }
         }
 
-        return toDisposable(() => set.delete(ctor));
+        return toDisposable(() => remove(dependencies, ctor));
     }
 
     private _getRenderControllersForType(type: UnitType): Array<Dependency> {
@@ -271,6 +291,6 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
 export const IRenderManagerService = createIdentifier<IRenderManagerService>('engine-render.render-manager.service');
 
 export function isDisposable(thing: unknown): thing is IDisposable {
-  // eslint-disable-next-line ts/no-explicit-any
+    // eslint-disable-next-line ts/no-explicit-any
     return !!thing && typeof (thing as any).dispose === 'function';
 }

@@ -34,3 +34,26 @@ export function fromCallback<T extends readonly unknown[]>(callback: CallbackFn<
         return () => disposable?.dispose();
     });
 };
+
+/**
+ * An operator that would complete the stream once a condition is met.
+ */
+export function completeAfter<T>(callback: (value: T) => boolean) {
+    return function complateAfter<U extends T>(source: Observable<U>) {
+        return new Observable<T>((subscriber) => {
+            source.subscribe({
+                next: (v) => {
+                    subscriber.next(v);
+                    if (callback(v)) {
+                        subscriber.complete();
+                    }
+                },
+                complete: () => subscriber.complete(),
+                error: (error) => subscriber.error(error),
+            });
+
+            return () => subscriber.unsubscribe();
+        });
+    };
+}
+

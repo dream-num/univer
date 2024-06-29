@@ -185,7 +185,7 @@ pnpm test:e2e
 
 ### Clean code
 
-> Programs are meant to be ready by humans and only icidentally for computers to execute. - Harold Abelson
+> Programs are meant to be ready by humans and only incidentally for computers to execute. - Harold Abelson
 
 -   Do not expose properties or methods those are not necessary to be exposed.
 -   Group related methods or properties together. Do not always use blank lines to separate them.

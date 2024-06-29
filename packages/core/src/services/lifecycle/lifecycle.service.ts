@@ -16,10 +16,12 @@
 
 import type { DependencyIdentifier } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, merge, of, skip } from 'rxjs';
 
 import { Disposable } from '../../shared/lifecycle';
 import { ILogService } from '../log/log.service';
+import { completeAfter } from '../../shared/rxjs';
 import { LifecycleNameMap, LifecycleStages, LifecycleToModules } from './lifecycle';
 
 /**
@@ -75,31 +77,8 @@ export class LifecycleService extends Disposable {
      * @returns
      */
     subscribeWithPrevious(): Observable<LifecycleStages> {
-        return new Observable<LifecycleStages>((subscriber) => {
-            // Before subscribe, emit the current stage and all previous stages.
-            // Since `this._lifecycle$` is a BehaviorSubject, it will emit the current stage immediately.
-            // So we just need to manually next all previous stages.
-            if (this.stage === LifecycleStages.Starting) {
-                // do nothing
-            } else if (this.stage === LifecycleStages.Ready) {
-                subscriber.next(LifecycleStages.Starting);
-            } else if (this.stage === LifecycleStages.Rendered) {
-                subscriber.next(LifecycleStages.Starting);
-                subscriber.next(LifecycleStages.Ready);
-            } else {
-                subscriber.next(LifecycleStages.Starting);
-                subscriber.next(LifecycleStages.Ready);
-                subscriber.next(LifecycleStages.Rendered);
-            }
-
-            this._lifecycle$.subscribe((stage) => {
-                subscriber.next(stage);
-
-                if (stage === LifecycleStages.Steady) {
-                    subscriber.complete();
-                }
-            });
-        });
+        return merge(getLifecycleStagesAndBefore(this.stage), this._lifecycle$.pipe(skip(1)))
+            .pipe(completeAfter((s) => s === LifecycleStages.Steady));
     }
 
     private _reportProgress(stage: LifecycleStages): void {
@@ -117,7 +96,6 @@ export class LifecycleInitializerService extends Disposable {
     private _seenTokens = new Set<DependencyIdentifier<unknown>>();
 
     constructor(
-        @Inject(LifecycleService) private _lifecycleService: LifecycleService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -132,5 +110,23 @@ export class LifecycleInitializerService extends Disposable {
                 this._seenTokens.add(m);
             }
         });
+    }
+}
+
+export function getLifecycleStagesAndBefore(lifecycleStage: LifecycleStages): Observable<LifecycleStages> {
+    switch (lifecycleStage) {
+        case LifecycleStages.Starting:
+            return of(LifecycleStages.Starting);
+        case LifecycleStages.Ready:
+            return of(LifecycleStages.Starting, LifecycleStages.Ready);
+        case LifecycleStages.Rendered:
+            return of(LifecycleStages.Starting, LifecycleStages.Ready, LifecycleStages.Rendered);
+        default:
+            return of(
+                LifecycleStages.Starting,
+                LifecycleStages.Ready,
+                LifecycleStages.Rendered,
+                LifecycleStages.Steady
+            );
     }
 }

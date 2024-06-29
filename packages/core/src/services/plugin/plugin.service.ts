@@ -16,14 +16,14 @@
 
 import type { Ctor, IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { finalize } from 'rxjs';
+import { skip } from 'rxjs';
 
 import { Disposable } from '../../shared/lifecycle';
 import { type UnitType, UniverInstanceType } from '../../common/unit';
 import { LifecycleStages } from '../lifecycle/lifecycle';
-import { LifecycleInitializerService, LifecycleService } from '../lifecycle/lifecycle.service';
+import { getLifecycleStagesAndBefore, LifecycleInitializerService, LifecycleService } from '../lifecycle/lifecycle.service';
 import { ILogService } from '../log/log.service';
-import { DependentOnSymbol, type Plugin, type PluginCtor, PluginRegistry, PluginStore } from './plugin';
+import type { DependentOnSymbol, Plugin, type PluginCtor, PluginRegistry, PluginStore } from './plugin';
 
 const INIT_LAZY_PLUGINS_TIMEOUT = 4;
 
@@ -180,6 +180,8 @@ export class PluginHolder extends Disposable {
     /** Stores initialized plugin instances. */
     protected readonly _pluginStore = new PluginStore();
 
+    private readonly _awaitingPlugins: Plugin[][] = [];
+
     constructor(
         private _checkPluginRegistered: (pluginCtor: PluginCtor) => boolean,
         private _registerPlugin: <T extends PluginCtor>(plugin: T, config?: ConstructorParameters<T>[0]) => void,
@@ -189,6 +191,10 @@ export class PluginHolder extends Disposable {
         @Inject(LifecycleInitializerService) protected readonly _lifecycleInitializerService: LifecycleInitializerService
     ) {
         super();
+
+        this.disposeWithMe(this._lifecycleService.lifecycle$.pipe(skip(1)).subscribe((stage) => {
+            this._awaitingPlugins.forEach((plugins) => this._runStage(plugins, stage));
+        }));
     }
 
     override dispose(): void {
@@ -198,6 +204,8 @@ export class PluginHolder extends Disposable {
         this._pluginStore.removePlugins();
 
         this._pluginRegistry.removePlugins();
+
+        this._awaitingPlugins.length = 0;
     }
 
     register<T extends PluginCtor<Plugin>>(pluginCtor: T, config?: ConstructorParameters<T>[0]): void {
@@ -222,6 +230,10 @@ export class PluginHolder extends Disposable {
         };
 
         const plugins = this._pluginRegistry.getRegisterPlugins().map(({ plugin, options }) => this._initPlugin(plugin, options));
+        if (!plugins.length) {
+            return;
+        }
+
         this._pluginsRunLifecycle(plugins);
         this._pluginRegistry.removePlugins();
     }
@@ -257,31 +269,35 @@ export class PluginHolder extends Disposable {
         return pluginInstance;
     }
 
-    protected _pluginsRunLifecycle(plugins: Plugin[]): void {
-        const run = (lifecycle: LifecycleStages) => {
-            plugins.forEach((p) => {
-                switch (lifecycle) {
-                    case LifecycleStages.Starting:
-                        p.onStarting(this._injector);
-                        break;
-                    case LifecycleStages.Ready:
-                        p.onReady();
-                        break;
-                    case LifecycleStages.Rendered:
-                        p.onRendered();
-                        break;
-                    case LifecycleStages.Steady:
-                        p.onSteady();
-                        break;
-                }
-                this._lifecycleInitializerService.initModulesOnStage(lifecycle);
-            });
-        };
+    // Here we should be careful with the sequence of which plugin should run first. We should manually add a queue here.
+    // Because laterly registered plugins may get executed first.
 
-        const subscription = this.disposeWithMe(this._lifecycleService.subscribeWithPrevious()
-            // It has to been async because the finalize may execute synchronously after we
-            // make the subscription. For example, the lifecycle service is already in stage "steady".
-            .pipe(finalize(() => { Promise.resolve().then(() => subscription.dispose()); }))
-            .subscribe((stage) => { run(stage); }));
+    protected _pluginsRunLifecycle(plugins: Plugin[]): void {
+        // Let plugins go through already reached lifecycle stages.
+        getLifecycleStagesAndBefore(this._lifecycleService.stage).subscribe((stage) => this._runStage(plugins, stage));
+        // Push to the queue for later lifecycles.
+        this._awaitingPlugins.push(plugins);
+    }
+
+    private _runStage(plugins: Plugin[], stage: LifecycleStages): void {
+        plugins.forEach((p) => {
+            switch (stage) {
+                case LifecycleStages.Starting:
+                    p.onStarting(this._injector);
+                    break;
+                case LifecycleStages.Ready:
+                    p.onReady();
+                    break;
+                case LifecycleStages.Rendered:
+                    p.onRendered();
+                    break;
+                case LifecycleStages.Steady:
+                    p.onSteady();
+                    break;
+            }
+        });
+
+        // Plugins run first, and then we should run the modules.
+        this._lifecycleInitializerService.initModulesOnStage(stage);
     }
 }

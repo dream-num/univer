@@ -63,7 +63,6 @@ export class FormatPainterController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        console.error('debug', this._renderManagerService);
         const selectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)!.with(ISelectionRenderService);
 
         this.disposeWithMe(

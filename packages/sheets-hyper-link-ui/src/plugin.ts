@@ -68,7 +68,9 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
         ];
 
         dependencies.forEach((dep) => injector.add(dep));
+    }
 
+    override onReady(): void {
         const renderDependencies: Dependency[] = [
             [SheetsHyperLinkRenderController],
         ];

@@ -287,6 +287,35 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._updateInputPosition();
     }
 
+    setCursorManually(evtOffsetX: number, evtOffsetY: number) {
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
+
+        const position = this._getNodePosition(startNode);
+
+        if (position == null) {
+            this._removeAllTextRanges();
+
+            return;
+        }
+
+        if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
+            position.isBack = true;
+        }
+
+        // TODO: @Jocs It's better to create a new textRange after remove all text ranges? because segment id will change.
+        this._updateTextRangeAnchorPosition(position);
+
+        this._activeSelectionRefresh();
+
+        this._textSelectionInner$.next({
+            textRanges: this._getAllTextRanges(),
+            segmentId: this._currentSegmentId,
+            segmentPage: this._currentSegmentPage,
+            style: this._selectionStyle,
+            isEditing: false,
+        });
+    }
+
     // Sync canvas selection to dom selection.
     sync() {
         this._updateInputPosition();
@@ -426,26 +455,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this.addTextRanges(textRanges, false);
     }
 
-    setCursorManually(evtOffsetX: number, evtOffsetY: number) {
-        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
-
-        const position = this._getNodePosition(startNode);
-
-        if (position == null) {
-            this._removeAllTextRanges();
-
-            return;
-        }
-
-        if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
-            position.isBack = true;
-        }
-
-        this._updateTextRangeAnchorPosition(position);
-
-        this._activeSelectionRefresh();
-    }
-
     // Handle pointer down.
     eventTrigger(evt: IPointerEvent | IMouseEvent) {
         if (!this._scene || !this._isSelectionEnabled) {
@@ -467,11 +476,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         }
         const { segmentId, segmentPage } = startNode;
 
-        if (segmentId !== this._currentSegmentId) {
+        if (segmentId && this._currentSegmentId && segmentId !== this._currentSegmentId) {
             this.setSegment(segmentId);
         }
 
-        if (segmentPage !== this._currentSegmentPage) {
+        if (segmentId && segmentPage !== this._currentSegmentPage) {
             this.setSegmentPage(segmentPage);
         }
 

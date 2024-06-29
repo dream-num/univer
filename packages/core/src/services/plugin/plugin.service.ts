@@ -23,7 +23,7 @@ import { type UnitType, UniverInstanceType } from '../../common/unit';
 import { LifecycleStages } from '../lifecycle/lifecycle';
 import { getLifecycleStagesAndBefore, LifecycleInitializerService, LifecycleService } from '../lifecycle/lifecycle.service';
 import { ILogService } from '../log/log.service';
-import { DependentOnSymbol, Plugin, type PluginCtor, PluginRegistry, PluginStore } from './plugin';
+import { DependentOnSymbol, type Plugin, type PluginCtor, PluginRegistry, PluginStore } from './plugin';
 
 const INIT_LAZY_PLUGINS_TIMEOUT = 4;
 

@@ -207,19 +207,15 @@ export class SheetsThreadCommentModel extends Disposable {
                     break;
                 }
                 case 'resolve': {
-                    // const { unitId, subUnitId, payload } = update;
-                    // const { commentId, resolved } = payload;
-                    // const { locationMap, matrix } = this._ensure(unitId, subUnitId);
-                    // const location = locationMap.get(payload.commentId);
-                    // if (location) {
-                    //     const { row, column } = location;
-                    //     if (resolved) {
-                    //         this._deleteCommentFromMatrix(matrix, row, column, commentId);
-                    //     } else {
-                    //         this._addCommentToMatrix(matrix, row, column, commentId);
-                    //         locationMap.set(commentId, location);
-                    //     }
-                    // }
+                    const { unitId, subUnitId, payload } = update;
+                    const { locationMap } = this._ensure(unitId, subUnitId);
+                    const location = locationMap.get(payload.commentId);
+                    if (location) {
+                        this._commentUpdate$.next({
+                            ...update,
+                            ...location,
+                        });
+                    }
                     break;
                 }
 
@@ -231,7 +227,7 @@ export class SheetsThreadCommentModel extends Disposable {
 
     getByLocation(unitId: string, subUnitId: string, row: number, column: number): string | undefined {
         const comments = this.getAllByLocation(unitId, subUnitId, row, column);
-        const activeComments = comments.filter(comment => !comment.resolved);
+        const activeComments = comments.filter((comment) => !comment.resolved);
         return activeComments[0]?.id;
     }
 
@@ -242,7 +238,7 @@ export class SheetsThreadCommentModel extends Disposable {
             return [];
         }
 
-        return Array.from(current).map(id => this.getComment(unitId, subUnitId, id)).filter(Boolean) as IThreadComment[]
+        return Array.from(current).map((id) => this.getComment(unitId, subUnitId, id)).filter(Boolean) as IThreadComment[];
     }
 
     getComment(unitId: string, subUnitId: string, commentId: string) {

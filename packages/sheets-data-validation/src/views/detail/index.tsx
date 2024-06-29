@@ -16,7 +16,6 @@
 
 import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange } from '@univerjs/core';
 import { createInternalEditorID, debounce, ICommandService, isUnitRangesEqual, isValidRange, LocaleService, RedoCommand, shallowEqual, UndoCommand } from '@univerjs/core';
-import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-validation';
 import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationCommand, TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation';
 import { Button, FormLayout, Select } from '@univerjs/design';
 import { ComponentManager, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
@@ -124,7 +123,7 @@ export function DataValidationDetail() {
             ...localRule,
             ...setting,
         });
-        const params: IUpdateDataValidationSettingCommandParams = {
+        const params = {
             unitId,
             subUnitId,
             ruleId,

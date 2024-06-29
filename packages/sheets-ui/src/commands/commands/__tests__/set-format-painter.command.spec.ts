@@ -34,7 +34,7 @@ import {
     SetRangeValuesMutation,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
-import type { Injector } from '@wendellhu/redi';
+import type { DependencyIdentifier, Injector } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -193,17 +193,6 @@ class MarkSelectionService extends Disposable implements IMarkSelectionService {
     }
 }
 
-class SelectionRenderService {
-    private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
-    readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
-}
-
-class RenderManagerService {
-    getRenderById(id: string) {
-        return null;
-    }
-}
-
 describe('Test format painter rules in controller', () => {
     let univer: Univer;
     let get: Injector['get'];
@@ -212,15 +201,38 @@ describe('Test format painter rules in controller', () => {
     let formatPainterController: FormatPainterController;
 
     beforeEach(() => {
+        class SelectionRenderService {
+            private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
+            readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
+        }
+
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
             [IMarkSelectionService, { useClass: MarkSelectionService }],
             [IFormatPainterService, { useClass: FormatPainterService }],
             [ISelectionRenderService, { useClass: SelectionRenderService }],
-            [IRenderManagerService, { useClass: RenderManagerService }],
             [FormatPainterController],
         ]);
+
         univer = testBed.univer;
         get = testBed.get;
+
+        class MockRenderManagerService {
+            getRenderById() {
+                return null;
+            }
+
+            getCurrentTypeOfRenderer() {
+                return {
+                    with: <T>(identifier: DependencyIdentifier<T>) => {
+                        return get(identifier);
+                    },
+                };
+            }
+        }
+
+        const injector = univer.__getInjector();
+        // @ts-ignore
+        injector.add([IRenderManagerService, { useClass: MockRenderManagerService }]);
 
         commandService = get(ICommandService);
         themeService = get(ThemeService);
@@ -279,7 +291,7 @@ describe('Test format painter rules in controller', () => {
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getMergeData()[2].startRow).toBe(3);
 
                 get(IUniverInstanceService).focusUnit('workbook-01');
-        // undo
+                // undo
                 await commandService.executeCommand(UndoCommand.id);
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(0, 2)?.s).toBe(undefined);
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(0, 3)?.s).toBe(undefined);
@@ -287,7 +299,7 @@ describe('Test format painter rules in controller', () => {
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(2, 3)?.s).toBe(undefined);
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getMergeData().length).toBe(1);
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getMergeData()[0].startRow).toBe(1);
-        //redo
+                //redo
                 await commandService.executeCommand(RedoCommand.id);
 
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(0, 3)?.s).toBe('M5JbP2');

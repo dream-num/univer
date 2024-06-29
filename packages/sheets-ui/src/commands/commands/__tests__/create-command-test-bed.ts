@@ -15,8 +15,8 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import {
-    BooleanNumber,
+import { BooleanNumber,
+    DisposableCollection,
     ILogService,
     IUniverInstanceService,
     LocaleService,
@@ -27,16 +27,21 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { BorderStyleManagerService,
+import {
+    BorderStyleManagerService,
     RangeProtectionRuleModel,
     SelectionManagerService,
 
-    SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+    SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel,
+} from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import type { IRenderContext } from '@univerjs/engine-render';
 import enUS from '../../../locale/en-US';
+import { ISelectionRenderService } from '../../../services/selection/base-selection-render.service';
+import { SelectionRenderService } from '../../../services/selection/selection-render.service';
 
 const getTestWorkbookDataDemo = (): IWorkbookData => {
     return {
@@ -108,18 +113,36 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([WorkbookPermissionService]);
             injector.add([WorksheetProtectionRuleModel]);
             injector.add([RangeProtectionRuleModel]);
+
             dependencies?.forEach((d) => injector.add(d));
         }
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(Tools.deepClone(workbookData || getTestWorkbookDataDemo()));
+
+    const snapshot = Tools.deepClone(workbookData || getTestWorkbookDataDemo());
+    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, snapshot);
+
+    if (!dependencies || !dependencies.find((d) => d[0] === ISelectionRenderService)) {
+        const context: IRenderContext<Workbook> = {
+            unitId: sheet.getUnitId(),
+            unit: sheet,
+            type: UniverInstanceType.UNIVER_SHEET,
+            engine: new DisposableCollection() as any,
+            scene: new DisposableCollection() as any,
+            mainComponent: null as any,
+            components: new Map(),
+            isMainScene: true,
+        };
+
+        injector.add([ISelectionRenderService, { useFactory: () => injector.createInstance(SelectionRenderService, context) }]);
+    }
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');
     const logService = injector.get(ILogService);
 
-    logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs
+    logService.setLogLevel(LogLevel.VERBOSE); // change this to `LogLevel.VERBOSE` to debug tests via logs
 
     const localeService = injector.get(LocaleService);
     localeService.load({ enUS });

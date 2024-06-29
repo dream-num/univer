@@ -34,6 +34,8 @@ export interface IShortcutExperienceParam extends IShortcutExperienceSearch {
 /**
  * This service is prepared for shortcut experience optimization,
  * including the combined use of enter and tab, the highlighting experience of formulas in the editor, and so on.
+ *
+ * @deprecated this class looks weired
  */
 export class ShortcutExperienceService implements IDisposable {
     private _current: Nullable<IShortcutExperienceSearch> = null;

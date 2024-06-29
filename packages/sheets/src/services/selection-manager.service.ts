@@ -217,7 +217,9 @@ export class WorkbookSelections extends Disposable {
     }
 
     setSelections(sheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType = SelectionMoveType.MOVE_END) {
-        this._ensureSheetSelection(sheetId).splice(0, selectionDatas.length, ...selectionDatas);
+        const selections = this._ensureSheetSelection(sheetId);
+        selections.length = 0;
+        selections.push(...selectionDatas);
 
         // WTF: why we would not refresh in add but in replace?
         if (type === SelectionMoveType.MOVE_START) {

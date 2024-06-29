@@ -24,7 +24,6 @@ import {
     LifecycleStages,
     ObjectMatrix,
     OnLifecycle,
-    toDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -64,30 +63,30 @@ export class FormatPainterController extends Disposable {
     }
 
     private _commandExecutedListener() {
+        console.error('debug', this._renderManagerService);
         const selectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)!.with(ISelectionRenderService);
 
         this.disposeWithMe(
-            toDisposable(
-                selectionRenderService.selectionMoveEnd$.subscribe((selections) => {
-                    if (this._formatPainterService.getStatus() !== FormatPainterStatus.OFF) {
-                        const { rangeWithCoord } = selections[selections.length - 1];
-                        this._commandService.executeCommand(ApplyFormatPainterCommand.id, {
-                            unitId: this._univerInstanceService.getFocusedUnit()?.getUnitId() || '',
-                            subUnitId: (this._univerInstanceService.getFocusedUnit() as Workbook).getActiveSheet()?.getSheetId() || '',
-                            range: {
-                                startRow: rangeWithCoord.startRow,
-                                startColumn: rangeWithCoord.startColumn,
-                                endRow: rangeWithCoord.endRow,
-                                endColumn: rangeWithCoord.endColumn,
-                            },
-                        });
-                        // if once, turn off the format painter
-                        if (this._formatPainterService.getStatus() === FormatPainterStatus.ONCE) {
-                            this._commandService.executeCommand(SetOnceFormatPainterCommand.id);
-                        }
+            selectionRenderService.selectionMoveEnd$.subscribe((selections) => {
+                if (this._formatPainterService.getStatus() !== FormatPainterStatus.OFF) {
+                    const { rangeWithCoord } = selections[selections.length - 1];
+                    this._commandService.executeCommand(ApplyFormatPainterCommand.id, {
+                        unitId: this._univerInstanceService.getFocusedUnit()?.getUnitId() || '',
+                        subUnitId: (this._univerInstanceService.getFocusedUnit() as Workbook).getActiveSheet()?.getSheetId() || '',
+                        range: {
+                            startRow: rangeWithCoord.startRow,
+                            startColumn: rangeWithCoord.startColumn,
+                            endRow: rangeWithCoord.endRow,
+                            endColumn: rangeWithCoord.endColumn,
+                        },
+                    });
+
+                    // if once, turn off the format painter
+                    if (this._formatPainterService.getStatus() === FormatPainterStatus.ONCE) {
+                        this._commandService.executeCommand(SetOnceFormatPainterCommand.id);
                     }
-                })
-            )
+                }
+            })
         );
     }
 

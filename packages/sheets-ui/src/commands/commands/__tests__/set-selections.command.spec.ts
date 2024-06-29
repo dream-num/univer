@@ -48,7 +48,7 @@ describe('Test commands used for change selections', () => {
     let commandService: ICommandService;
     let selectionManagerService: SelectionManagerService;
 
-    function select00() {
+    function selectTopLeft() {
         selectionManagerService.setSelections([
             {
                 range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -187,7 +187,7 @@ describe('Test commands used for change selections', () => {
         beforeEach(() => prepareTestBed());
 
         it('Should move selection with command', async () => {
-            select00();
+            selectTopLeft();
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.LEFT,
@@ -230,30 +230,30 @@ describe('Test commands used for change selections', () => {
             });
 
             selectRow(1, 1);
-            await commandService.executeCommand(SetRowHiddenCommand.id);
+            expect(await commandService.executeCommand(SetRowHiddenCommand.id)).toBeTruthy();
             selectColumn(1, 1);
-            await commandService.executeCommand(SetColHiddenCommand.id);
+            expect(await commandService.executeCommand(SetColHiddenCommand.id)).toBeTruthy();
 
-            select00();
+            selectTopLeft();
 
-            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+            expect(await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.RIGHT,
-            });
+            })).toBeTruthy();
             expectSelectionToBe(0, 2, 0, 2);
 
-            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+            expect(await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.DOWN,
-            });
+            })).toBeTruthy();
             expectSelectionToBe(2, 2, 2, 2);
 
-            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+            expect(await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.LEFT,
-            });
+            })).toBeTruthy();
             expectSelectionToBe(2, 0, 2, 0);
 
-            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+            expect(await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.UP,
-            });
+            })).toBeTruthy();
             expectSelectionToBe(0, 0, 0, 0);
         });
     });
@@ -269,7 +269,7 @@ describe('Test commands used for change selections', () => {
          * When user clicks on C2 and move cursor left twice, A2 should not selected not A1.
          */
         it('Should select merged cell and move to next cell', async () => {
-            select00();
+            selectTopLeft();
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.LEFT,
@@ -307,7 +307,7 @@ describe('Test commands used for change selections', () => {
         beforeEach(() => prepareTestBed(SELECTION_WITH_EMPTY_CELLS_DATA));
 
         it('Works on move', async () => {
-            select00();
+            selectTopLeft();
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.RIGHT,
@@ -345,7 +345,7 @@ describe('Test commands used for change selections', () => {
             selectColumn(3, 10);
             await commandService.executeCommand(SetColHiddenCommand.id);
 
-            select00();
+            selectTopLeft();
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.RIGHT,
@@ -366,7 +366,7 @@ describe('Test commands used for change selections', () => {
         beforeEach(() => prepareTestBed(SELECTION_WITH_EMPTY_CELLS_DATA));
 
         it('Works on expand', async () => {
-            select00();
+            selectTopLeft();
 
             // expand
 
@@ -462,7 +462,7 @@ describe('Test commands used for change selections', () => {
         beforeEach(() => prepareTestBed(SELECTION_WITH_EMPTY_CELLS_DATA));
 
         it('Works on gap expand', async () => {
-            select00();
+            selectTopLeft();
 
             // expand
 
@@ -510,7 +510,7 @@ describe('Test commands used for change selections', () => {
         beforeEach(() => prepareTestBed());
 
         it('Should first select all neighbor cells, and then the whole sheet', async () => {
-            select00();
+            selectTopLeft();
 
             const unchangedPrimaryInfo = {
                 startRow: 0,
@@ -564,7 +564,7 @@ describe('Test commands used for change selections', () => {
         });
 
         it('Should directly select all if `expandToGapFirst` is false', async () => {
-            select00();
+            selectTopLeft();
 
             await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
                 loop: true,
@@ -592,7 +592,7 @@ describe('Test commands used for change selections', () => {
         });
 
         it('Should not loop selection when `loop` is false', async () => {
-            select00();
+            selectTopLeft();
 
             await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
                 loop: false,

@@ -25,8 +25,7 @@ export class Today extends BaseFunction {
 
     override calculate() {
         const currentSerial = excelDateSerial(new Date());
-        const valueObject = NumberValueObject.create(currentSerial);
-        valueObject.setPattern(DEFAULT_DATE_FORMAT);
+        const valueObject = NumberValueObject.create(currentSerial, DEFAULT_DATE_FORMAT);
         return valueObject;
     }
 }

@@ -27,8 +27,7 @@ export class Now extends BaseFunction {
         const now = new Date();
         const utcNow = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds()));
         const currentSerial = excelDateTimeSerial(utcNow);
-        const valueObject = NumberValueObject.create(currentSerial);
-        valueObject.setPattern(DEFAULT_NOW_FORMAT);
+        const valueObject = NumberValueObject.create(currentSerial, DEFAULT_NOW_FORMAT);
         return valueObject;
     }
 }

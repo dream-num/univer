@@ -113,8 +113,7 @@ export class Time extends BaseFunction {
         const totalSeconds = hourValue * 3600 + minuteValue * 60 + secondValue;
         const fractionOfDay = totalSeconds / 86400; // Total seconds in a day
 
-        const valueObject = NumberValueObject.create(fractionOfDay);
-        valueObject.setPattern(DEFAULT_TIME_FORMAT);
+        const valueObject = NumberValueObject.create(fractionOfDay, DEFAULT_TIME_FORMAT);
 
         return valueObject;
     }

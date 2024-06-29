@@ -78,7 +78,7 @@ import { IEditorBridgeService } from '../services/editor-bridge.service';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { SheetsRenderService } from '../services/sheets-render.service';
-import { ISelectionRenderService } from '../services/selection/base-selection-render.service';
+import { ISheetSelectionRenderService } from '../services/selection/base-selection-render.service';
 import type { IDiscreteRange } from './utils/range-tools';
 import { discreteRangeToRange, generateNullCellValueRowCol, rangeToDiscreteRange } from './utils/range-tools';
 
@@ -182,7 +182,7 @@ export class AutoFillController extends Disposable {
             const currentRenderer = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
             if (!currentRenderer) return;
 
-            const selectionRenderService = currentRenderer.with(ISelectionRenderService);
+            const selectionRenderService = currentRenderer.with(ISheetSelectionRenderService);
             const selectionControls = selectionRenderService.getCurrentControls();
             selectionControls.forEach((controlSelection) => {
                 disposableCollection.add(

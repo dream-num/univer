@@ -26,7 +26,7 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 
 import type { IDeleteRangeMutationParams } from '../../basics/interfaces/mutation-interface';
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { getRemoveRangeMutations } from '../utils/handle-range-mutation';
 import { followSelectionOperation } from './utils/selection-utils';
@@ -48,7 +48,7 @@ export const DeleteRangeMoveUpCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const target = getSheetCommandTarget(univerInstanceService);

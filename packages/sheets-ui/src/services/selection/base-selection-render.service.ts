@@ -45,7 +45,7 @@ export interface IControlFillConfig {
     newRange: IRange;
 }
 
-export interface ISelectionRenderService {
+export interface ISheetSelectionRenderService {
     readonly selectionMoveEnd$: Observable<ISelectionWithCoordAndStyle[]>;
     readonly controlFillConfig$: Observable<IControlFillConfig | null>;
     readonly selectionMoving$: Observable<ISelectionWithCoordAndStyle[]>;
@@ -70,12 +70,12 @@ export interface ISelectionRenderService {
     getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithCoord>; // drawing
 }
 
-export const ISelectionRenderService = createIdentifier<ISelectionRenderService>('univer.sheet.selection-render-service');
+export const ISheetSelectionRenderService = createIdentifier<ISheetSelectionRenderService>('univer.sheet.selection-render-service');
 
 /**
  * The basic implementation of selection rendering logics. It is designed to be reused for different purposes.
  */
-export class BaseSelectionRenderService extends Disposable implements ISelectionRenderService, IRenderModule {
+export class BaseSelectionRenderService extends Disposable implements ISheetSelectionRenderService, IRenderModule {
     private _downObserver: Nullable<Subscription>;
     private _moveEventSubscription: Nullable<Subscription>;
     private _upEventSubscription: Nullable<Subscription>;

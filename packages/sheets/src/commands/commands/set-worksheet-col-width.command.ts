@@ -26,7 +26,7 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { ISetWorksheetColWidthMutationParams } from '../mutations/set-worksheet-col-width.mutation';
 import {
@@ -45,7 +45,7 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
     id: 'sheet.command.delta-column-width',
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IDeltaColumnWidthCommandParams) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const selections = selectionManagerService.getCurrentSelections();
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
@@ -154,7 +154,7 @@ export const SetColWidthCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-col-width',
     handler: async (accessor: IAccessor, params: ISetColWidthCommandParams) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);

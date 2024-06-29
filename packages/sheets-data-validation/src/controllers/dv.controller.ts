@@ -20,7 +20,7 @@ import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/dat
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidationSingle } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
-import { ClearSelectionAllCommand, SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import { ClearSelectionAllCommand, SheetInterceptorService, SheetsSelectionManagerService } from '@univerjs/sheets';
 import { SheetDataValidationService } from '../services/dv.service';
 import { CustomFormulaValidator } from '../validators/custom-validator';
 import { CheckboxValidator, DateValidator, DecimalValidator, ListValidator, TextLengthValidator } from '../validators';
@@ -38,7 +38,7 @@ export class DataValidationController extends RxDisposable {
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManger: ComponentManager,
-        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private _selectionManagerService: SheetsSelectionManagerService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
     ) {

@@ -30,7 +30,7 @@ import {
 
 import { Inject, Injector } from '@wendellhu/redi';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation, getAddMergeMutationRangeByType, RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
+import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation, getAddMergeMutationRangeByType, RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionManagerService } from '@univerjs/sheets';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     ApplyFormatPainterCommand,
@@ -39,7 +39,7 @@ import {
 import type { IFormatPainterHook, ISelectionFormatInfo } from '../../services/format-painter/format-painter.service';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
-import { ISelectionRenderService } from '../../services/selection/base-selection-render.service';
+import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 
 @OnLifecycle(LifecycleStages.Steady, FormatPainterController)
 export class FormatPainterController extends Disposable {
@@ -48,7 +48,7 @@ export class FormatPainterController extends Disposable {
         @IFormatPainterService private readonly _formatPainterService: IFormatPainterService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
@@ -63,7 +63,7 @@ export class FormatPainterController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const selectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)!.with(ISelectionRenderService);
+        const selectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)!.with(ISheetSelectionRenderService);
 
         this.disposeWithMe(
             selectionRenderService.selectionMoveEnd$.subscribe((selections) => {

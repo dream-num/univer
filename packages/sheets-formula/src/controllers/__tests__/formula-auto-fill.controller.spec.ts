@@ -29,17 +29,17 @@ import {
     RangeProtectionRuleModel,
     RangeProtectionService,
     RemoveWorksheetMergeMutation,
-    SelectionManagerService,
     SetRangeValuesMutation,
     SetSelectionsOperation,
+    SheetsSelectionManagerService,
 } from '@univerjs/sheets';
 import {
     AutoFillCommand,
     AutoFillController,
     AutoFillService,
     IAutoFillService,
-    ISelectionRenderService,
-    SelectionRenderService,
+    ISheetSelectionRenderService,
+    SheetSelectionRenderService,
     SheetsRenderService,
 } from '@univerjs/sheets-ui';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
@@ -73,7 +73,7 @@ describe('Test auto fill with formula', () => {
 
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
-            [ISelectionRenderService, { useClass: SelectionRenderService }],
+            [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
             [AutoFillController],
             [IAutoFillService, { useClass: AutoFillService }],
             [IShortcutService, { useClass: ShortcutService }],
@@ -115,7 +115,7 @@ describe('Test auto fill with formula', () => {
 
     describe('correct situations', () => {
         it('one cell with formula', async () => {
-            const selectionManager = get(SelectionManagerService);
+            const selectionManager = get(SheetsSelectionManagerService);
 
             selectionManager.addSelections([
                 {

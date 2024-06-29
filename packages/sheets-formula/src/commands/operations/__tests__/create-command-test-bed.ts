@@ -17,12 +17,12 @@
 import type { IWorkbookData } from '@univerjs/core';
 import { AuthzIoLocalService, IAuthzIoService, ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import { RangeProtectionRuleModel, SelectionManagerService, SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionManagerService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { EditorService, IEditorService } from '@univerjs/ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { EditorBridgeService, IEditorBridgeService, ISelectionRenderService, SelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { EditorBridgeService, IEditorBridgeService, ISheetSelectionRenderService, SheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { FormulaPromptService, IFormulaPromptService } from '../../../services/prompt.service';
 
 const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
@@ -68,8 +68,8 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([ISelectionRenderService, { useClass: SelectionRenderService }]);
-            injector.add([SelectionManagerService]);
+            injector.add([ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }]);
+            injector.add([SheetsSelectionManagerService]);
             injector.add([LexerTreeBuilder]);
             injector.add([IFormulaPromptService, { useClass: FormulaPromptService }]);
             injector.add([IEditorBridgeService, { useClass: EditorBridgeService }]);

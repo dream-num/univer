@@ -29,8 +29,8 @@ import { serializeRange } from '@univerjs/engine-formula';
 import {
     getCellAtRowCol,
     getSheetCommandTarget,
-    SelectionManagerService,
     SetSelectionsOperation,
+    SheetsSelectionManagerService,
 } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -49,7 +49,7 @@ export const InsertFunctionOperation: ICommand = {
     id: 'formula-ui.operation.insert-function',
     type: CommandType.OPERATION,
     handler: async (accessor: IAccessor, params: IInsertFunctionOperationParams) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const editorService = accessor.get(IEditorService);
         const currentSelections = selectionManagerService.getCurrentSelections();
         if (!currentSelections || !currentSelections.length) {

@@ -16,7 +16,7 @@
 
 import type { IOperation, IWorkbookData } from '@univerjs/core';
 import { CommandType, ICommandService, LocaleService, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { RefRangeService, SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import { RefRangeService, SheetInterceptorService, SheetsSelectionManagerService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
@@ -55,7 +55,7 @@ function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
         override onStarting(injector: Injector): void {
             ([
                 [RefRangeService],
-                [SelectionManagerService],
+                [SheetsSelectionManagerService],
                 [SheetInterceptorService],
                 [SheetsFilterPanelService],
             ] as Dependency[]).forEach((d) => injector.add(d));

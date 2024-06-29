@@ -50,7 +50,6 @@ import {
     MoveRowsCommand,
     RemoveColCommand,
     RemoveRowCommand,
-    SelectionManagerService,
     SetColHiddenMutation,
     SetColVisibleMutation,
     SetFrozenCommand,
@@ -63,6 +62,7 @@ import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SheetInterceptorService,
+    SheetsSelectionManagerService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -150,7 +150,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         // @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         // @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
         @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,

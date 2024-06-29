@@ -17,7 +17,7 @@
 import type { ITransformState, Nullable } from '@univerjs/core';
 import { precisionTo } from '@univerjs/engine-render';
 import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
-import type { ISelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import type { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export function drawingPositionToTransform(position: ISheetDrawingPosition, skeletonManagerService: SheetSkeletonManagerService): Nullable<ITransformState> {
     const { from, to } = position;
@@ -73,7 +73,7 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, skel
 }
 
 // use transform and originSize convert to  ISheetDrawingPosition
-export function transformToDrawingPosition(transform: ITransformState, selectionRenderService: ISelectionRenderService): Nullable<ISheetDrawingPosition> {
+export function transformToDrawingPosition(transform: ITransformState, selectionRenderService: ISheetSelectionRenderService): Nullable<ISheetDrawingPosition> {
     const { left = 0, top = 0, width = 0, height = 0 } = transform;
 
     const startSelectionCell = selectionRenderService.getSelectionCellByPosition(left, top);

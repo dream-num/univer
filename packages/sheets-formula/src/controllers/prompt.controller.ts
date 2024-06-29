@@ -72,7 +72,7 @@ import {
 } from '@univerjs/engine-render';
 import type {
     ISelectionWithStyle,
-    SelectionManagerService,
+    SheetsSelectionManagerService,
 } from '@univerjs/sheets';
 import {
     convertSelectionDataToRange,
@@ -174,7 +174,7 @@ export class PromptController extends Disposable {
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @IRefSelectionsService private readonly _refSelectionsService: SelectionManagerService,
+        @IRefSelectionsService private readonly _refSelectionsService: SheetsSelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,

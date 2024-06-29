@@ -24,7 +24,7 @@ import { RemoveSheetMutation } from '../../commands/mutations/remove-sheet.mutat
 import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../commands/mutations/insert-row-col.mutation';
 import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
-import type { SelectionManagerService } from '../selection-manager.service';
+import type { SheetsSelectionManagerService } from '../selection-manager.service';
 import type {
     EffectRefRangeParams,
     IDeleteRangeMoveLeftCommand,
@@ -965,7 +965,7 @@ export const handleDefaultRangeChangeWithEffectRefCommands = (range: IRange, com
     return resultRange;
 };
 
-export const handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests = (range: IRange, commandInfo: ICommandInfo, deps: { selectionManagerService: SelectionManagerService }) => {
+export const handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests = (range: IRange, commandInfo: ICommandInfo, deps: { selectionManagerService: SheetsSelectionManagerService }) => {
     const effectRanges = getEffectedRangesOnCommand(commandInfo as EffectRefRangeParams, deps);
     if (effectRanges.some((effectRange) => Rectangle.intersects(effectRange, range))) {
         return handleDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
@@ -1115,7 +1115,7 @@ export function adjustRangeOnMutation(range: Readonly<IRange>, mutation: IMutati
 }
 
 // eslint-disable-next-line max-lines-per-function
-export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: { selectionManagerService: SelectionManagerService }) {
+export function getEffectedRangesOnCommand(command: EffectRefRangeParams, deps: { selectionManagerService: SheetsSelectionManagerService }) {
     const { selectionManagerService } = deps;
     switch (command.id) {
         case EffectRefRangId.MoveColsCommandId: {

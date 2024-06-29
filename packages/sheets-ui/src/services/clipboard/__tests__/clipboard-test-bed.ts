@@ -19,7 +19,7 @@
 import type { IWorkbookData } from '@univerjs/core';
 import { DisposableCollection, ILogService, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import { SheetInterceptorService, SheetsSelectionManagerService } from '@univerjs/sheets';
 import {
     BrowserClipboardService,
     DesktopMessageService,
@@ -34,10 +34,10 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SheetClipboardController } from '../../../controllers/clipboard/clipboard.controller';
 import { IMarkSelectionService } from '../../mark-selection/mark-selection.service';
-import { SelectionRenderService } from '../../selection/selection-render.service';
+import { SheetSelectionRenderService } from '../../selection/selection-render.service';
 import { ISheetClipboardService, SheetClipboardService } from '../clipboard.service';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
-import { ISelectionRenderService } from '../../selection/base-selection-render.service';
+import { ISheetSelectionRenderService } from '../../selection/base-selection-render.service';
 
 const cellData = {
     0: {
@@ -541,7 +541,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([SelectionManagerService]);
+            injector.add([SheetsSelectionManagerService]);
             injector.add([IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }]);
             injector.add([ISheetClipboardService, { useClass: SheetClipboardService }]);
             injector.add([IMessageService, { useClass: DesktopMessageService, lazy: true }]);
@@ -552,7 +552,7 @@ export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: De
                 },
             ]);
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-            injector.add([ISelectionRenderService, { useClass: SelectionRenderService }]);
+            injector.add([ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }]);
             injector.add([INotificationService, { useClass: testNotificationService }]);
             injector.add([IPlatformService, { useClass: testPlatformService }]);
 

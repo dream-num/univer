@@ -17,7 +17,6 @@
 import type { IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import { Direction, ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import {
-    SelectionManagerService,
     SetColHiddenCommand,
     SetColHiddenMutation,
     SetColVisibleMutation,
@@ -26,6 +25,7 @@ import {
     SetRowVisibleMutation,
     SetSelectedColsVisibleCommand,
     SetSelectedRowsVisibleCommand,
+    SheetsSelectionManagerService,
 } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -46,7 +46,7 @@ describe('Test commands used for change selections', () => {
     let univer: Univer | null = null;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let selectionManagerService: SelectionManagerService;
+    let selectionManagerService: SheetsSelectionManagerService;
 
     function selectTopLeft() {
         selectionManagerService.setSelections([
@@ -120,7 +120,7 @@ describe('Test commands used for change selections', () => {
     }
 
     function selectRow(rowStart: number, rowEnd: number): void {
-        const selectionManagerService = get(SelectionManagerService);
+        const selectionManagerService = get(SheetsSelectionManagerService);
         const endColumn = getColCount() - 1;
         selectionManagerService.addSelections([
             {
@@ -141,7 +141,7 @@ describe('Test commands used for change selections', () => {
     }
 
     function selectColumn(columnStart: number, columnEnd: number): void {
-        const selectionManagerService = get(SelectionManagerService);
+        const selectionManagerService = get(SheetsSelectionManagerService);
         const endRow = getRowCount() - 1;
         selectionManagerService.addSelections([
             {
@@ -178,7 +178,7 @@ describe('Test commands used for change selections', () => {
         get = testBed.get;
 
         commandService = get(ICommandService);
-        selectionManagerService = get(SelectionManagerService);
+        selectionManagerService = get(SheetsSelectionManagerService);
     }
 
     afterEach(disposeTestBed);

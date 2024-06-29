@@ -38,7 +38,6 @@ import {
     RangeProtectionPermissionViewPoint,
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
-    SelectionManagerService,
     SetBackgroundColorCommand,
     SetColHiddenMutation,
     SetColVisibleMutation,
@@ -58,6 +57,7 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowIsAutoHeightCommand,
     SetWorksheetRowIsAutoHeightMutation,
+    SheetsSelectionManagerService,
     WorkbookCopyPermission,
     WorkbookEditablePermission,
     WorksheetCopyPermission,
@@ -158,7 +158,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const contextService = accessor.get(IContextService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
 
     return {
         id: SetRangeBoldCommand.id,
@@ -221,7 +221,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
     const contextService = accessor.get(IContextService);
 
     return {
@@ -277,7 +277,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
     const contextService = accessor.get(IContextService);
 
     return {
@@ -333,7 +333,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
     const contextService = accessor.get(IContextService);
 
     return {
@@ -393,7 +393,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
 
     const defaultValue = DEFAULT_STYLES.ff;
 
@@ -447,7 +447,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
     const contextService = accessor.get(IContextService);
 
     const defaultValue = DEFAULT_STYLES.fs;
@@ -627,7 +627,7 @@ export const HORIZONTAL_ALIGN_CHILDREN = [
 
 export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<HorizontalAlign> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
 
     const defaultValue = HorizontalAlign.LEFT;
 
@@ -692,7 +692,7 @@ export const VERTICAL_ALIGN_CHILDREN = [
 
 export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<VerticalAlign> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
 
     const defaultValue = VerticalAlign.BOTTOM;
 
@@ -756,7 +756,7 @@ export const TEXT_WRAP_CHILDREN = [
 ];
 
 export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<WrapStrategy> {
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
     const defaultValue = WrapStrategy.OVERFLOW;
@@ -836,7 +836,7 @@ export const TEXT_ROTATE_CHILDREN = [
 ];
 
 export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number | string> {
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
     const defaultValue = 0;
@@ -1127,7 +1127,7 @@ export function HideColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
 export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
 
     const commandService = accessor.get(ICommandService);
 
@@ -1165,7 +1165,7 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
 export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
     const commandService = accessor.get(ICommandService);
     const affectedCommands = [SetSelectionsOperation, SetColHiddenMutation, SetColVisibleMutation].map((c) => c.id);
 
@@ -1203,7 +1203,7 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
 
     const defaultValue = 0;
 
@@ -1246,7 +1246,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
 
     const defaultValue = 0;
 

@@ -22,7 +22,7 @@ import { createIdentifier, Inject } from '@wendellhu/redi';
 
 import { SelectionShape } from '../selection/selection-shape';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import { ISelectionRenderService } from '../selection/base-selection-render.service';
+import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
 
 export interface IMarkSelectionService {
     addShape(selection: ISelectionWithStyle, exits?: string[], zIndex?: number): string | null;
@@ -98,7 +98,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             const { scene } = renderUnit;
             const { rowHeaderWidth, columnHeaderHeight } = skeleton;
             const control = new SelectionShape(scene, zIndex, false, this._themeService);
-            const { rangeWithCoord, primaryWithCoord } = renderUnit.with(ISelectionRenderService).attachSelectionWithCoord(selection);
+            const { rangeWithCoord, primaryWithCoord } = renderUnit.with(ISheetSelectionRenderService).attachSelectionWithCoord(selection);
             control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
             shape.control = control;
         });

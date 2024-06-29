@@ -18,12 +18,12 @@ import type { IAccessor } from '@wendellhu/redi';
 import type { IRange } from '@univerjs/core';
 import { Dimension } from '@univerjs/core';
 import type { IAddMergeCommandParams } from '../commands/add-worksheet-merge.command';
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../../services/selection-manager.service';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 
 export const AddMergeRedoSelectionsOperationFactory = (accessor: IAccessor, params: IAddMergeCommandParams, ranges: IRange[]) => {
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
     const selectionsBeforeMutation = selectionManagerService.getCurrentSelections();
     const { value, selections, unitId, subUnitId } = params;
     if (selectionsBeforeMutation) {
@@ -81,7 +81,7 @@ export const AddMergeRedoSelectionsOperationFactory = (accessor: IAccessor, para
 };
 
 export const AddMergeUndoSelectionsOperationFactory = (accessor: IAccessor, params: IAddMergeCommandParams) => {
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
     const selectionsBeforeMutation = selectionManagerService.getCurrentSelections();
     const { unitId, subUnitId } = params;
     if (selectionsBeforeMutation) {

@@ -21,13 +21,13 @@ import {
     RANGE_TYPE,
 } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { SheetsSelectionManagerService } from '@univerjs/sheets';
 import { IContextMenuService, MenuPosition } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
 import { SheetMenuPosition } from '../menu/menu';
 import { SHEET_VIEW_KEY } from '../../common/keys';
-import { ISelectionRenderService } from '../../services/selection/base-selection-render.service';
+import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 
 /**
  * This controller subscribe to context menu events in sheet rendering views and invoke context menu at a correct
@@ -37,8 +37,8 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
+        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService
     ) {
         super();
 

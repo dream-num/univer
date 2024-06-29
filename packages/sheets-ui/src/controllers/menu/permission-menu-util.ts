@@ -16,7 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { RangeProtectionRuleModel, SelectionManagerService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { RangeProtectionRuleModel, SheetsSelectionManagerService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import { combineLatest, map, merge, of, startWith, switchMap } from 'rxjs';
 
@@ -38,7 +38,7 @@ export function getAddPermissionHidden$(accessor: IAccessor) {
                     }
                     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
                     const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
-                    const selectionManagerService = accessor.get(SelectionManagerService);
+                    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
                     return merge(
                         selectionManagerService.selectionMoveEnd$,
                         rangeProtectionRuleModel.ruleChange$,
@@ -92,7 +92,7 @@ export function getEditPermissionHidden$(accessor: IAccessor) {
                     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
                     const worksheetRuleModel = accessor.get(WorksheetProtectionRuleModel);
 
-                    const selectionManagerService = accessor.get(SelectionManagerService);
+                    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
                     return merge(
                         selectionManagerService.selectionMoveEnd$,
                         rangeProtectionRuleModel.ruleChange$,
@@ -149,7 +149,7 @@ export function getPermissionDisableBase$(accessor: IAccessor) {
                         return of(true);
                     }
                     const unitId = workbook.getUnitId();
-                    const selectionManagerService = accessor.get(SelectionManagerService);
+                    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
                     const selectionProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
                     const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
                     const permission$ = permissionService.composePermission$([new WorkbookManageCollaboratorPermission(unitId).id, new WorkbookEditablePermission(unitId).id]).pipe(map((permissions) => permissions.every((permission) => permission.value))) ?? of(false);
@@ -205,7 +205,7 @@ export function getAddPermissionDisableBase$(accessor: IAccessor) {
                     const subUnitId = worksheet.getSheetId();
                     const selectionProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
                     const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
-                    const selectionManagerService = accessor.get(SelectionManagerService);
+                    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
                     const permission$ = permissionService.composePermission$([new WorkbookManageCollaboratorPermission(unitId).id, new WorkbookEditablePermission(unitId).id]).pipe(map((permissions) => permissions.every((permission) => permission.value))) ?? of(false);
                     const ruleChange$ = merge(
                         selectionProtectionRuleModel.ruleChange$,
@@ -398,7 +398,7 @@ export function getRemovePermissionDisable$(accessor: IAccessor) {
                             if (!permission) {
                                 return true;
                             }
-                            const selections = accessor.get(SelectionManagerService).getCurrentSelections();
+                            const selections = accessor.get(SheetsSelectionManagerService).getCurrentSelections();
                             const selectionRanges = selections?.map((selection) => selection.range);
                             if (!selectionRanges?.length || selectionRanges.length > 1) {
                                 return true;

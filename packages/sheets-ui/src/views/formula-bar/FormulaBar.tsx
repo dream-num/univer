@@ -23,7 +23,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 
-import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SelectionManagerService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionManagerService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { merge } from 'rxjs';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -46,7 +46,7 @@ export function FormulaBar() {
     const progressBarColor = themeService.getCurrentTheme().primaryColor;
     const [disable, setDisable] = useState<boolean>(false);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const selectionManager = useDependency(SelectionManagerService);
+    const selectionManager = useDependency(SheetsSelectionManagerService);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
     const permissionService = useDependency(IPermissionService);

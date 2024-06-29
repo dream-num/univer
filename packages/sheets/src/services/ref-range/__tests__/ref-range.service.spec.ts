@@ -21,7 +21,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { RefRangeService } from '../ref-range.service';
-import { SelectionManagerService } from '../../selection-manager.service';
+import { SheetsSelectionManagerService } from '../../selection-manager.service';
 import { InsertColMutation } from '../../../commands/mutations/insert-row-col.mutation';
 import type { IInsertColMutationParams } from '../../../basics';
 import { SheetInterceptorService } from '../../sheet-interceptor/sheet-interceptor.service';
@@ -74,7 +74,7 @@ export function createRefRangeTestBed() {
 
     ([
         [RefRangeService],
-        [SelectionManagerService],
+        [SheetsSelectionManagerService],
         [SheetInterceptorService],
     ] as Dependency[]).forEach((d) => injector.add(d));
 

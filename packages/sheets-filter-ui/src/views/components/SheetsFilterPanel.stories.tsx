@@ -21,7 +21,7 @@ import type { Injector } from '@wendellhu/redi';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import type { IWorkbookData } from '@univerjs/core';
 import { CommandType, ICommandService, ILogService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { RefRangeService, SelectionManagerService, SheetInterceptorService, WorksheetProtectionPointModel } from '@univerjs/sheets';
+import { RefRangeService, SheetInterceptorService, SheetsSelectionManagerService, WorksheetProtectionPointModel } from '@univerjs/sheets';
 import { IMenuService, IShortcutService, MenuService, ShortcutService } from '@univerjs/ui';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
@@ -61,7 +61,7 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([SelectionManagerService]);
+            injector.add([SheetsSelectionManagerService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
             injector.add([IMenuService, { useClass: MenuService }]);
             injector.add([WorksheetProtectionPointModel]);

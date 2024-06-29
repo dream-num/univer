@@ -18,9 +18,9 @@ import type { Workbook } from '@univerjs/core';
 import { Disposable, Rectangle } from '@univerjs/core';
 import type { IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IContextMenuService, ILayoutService, MenuPosition } from '@univerjs/ui';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { SheetsSelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-import { ISelectionRenderService } from '../../../services/selection/base-selection-render.service';
+import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 
 /**
  * On mobile devices, the context menu would popup when
@@ -32,8 +32,8 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
         private readonly _context: IRenderContext<Workbook>,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
+        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService
     ) {
         super();
 

@@ -19,7 +19,7 @@ import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoC
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../../../services/selection-manager.service';
 import { SetWorksheetColWidthMutation } from '../../mutations/set-worksheet-col-width.mutation';
 import type { IDeltaColumnWidthCommandParams, ISetColWidthCommandParams } from '../set-worksheet-col-width.command';
 import { DeltaColumnWidthCommand, SetColWidthCommand } from '../set-worksheet-col-width.command';
@@ -47,7 +47,7 @@ describe('Test set col width commands', () => {
 
         const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         const maxRow = worksheet.getMaxRows() - 1;
-        const selectionManagerService = get(SelectionManagerService);
+        const selectionManagerService = get(SheetsSelectionManagerService);
         selectionManagerService.addSelections([
             {
                 range: { startRow: 0, startColumn: 1, endColumn: 2, endRow: maxRow, rangeType: RANGE_TYPE.COLUMN },

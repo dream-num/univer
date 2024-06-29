@@ -22,17 +22,17 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { IMoveRangeCommandParams } from '@univerjs/sheets';
-import { MoveRangeCommand, SelectionManagerService } from '@univerjs/sheets';
+import { MoveRangeCommand, SheetsSelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { ISelectionRenderService } from '../services/selection/base-selection-render.service';
+import { ISheetSelectionRenderService } from '../services/selection/base-selection-render.service';
 
 export class MoveRangeRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(ISelectionRenderService) private readonly _selectionRenderService: ISelectionRenderService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(ISheetSelectionRenderService) private readonly _selectionRenderService: ISheetSelectionRenderService,
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
         @Inject(ICommandService) private readonly _commandService: ICommandService
     ) {
         super();

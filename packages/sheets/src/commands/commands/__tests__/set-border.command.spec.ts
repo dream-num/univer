@@ -19,7 +19,7 @@ import { BorderStyleTypes, BorderType, ICommandService, IUniverInstanceService, 
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
@@ -65,7 +65,7 @@ describe('Test style commands', () => {
     describe('set border style', () => {
         describe('correct situations', () => {
             it('will set border style when there is a selected range', async () => {
-                const selectionManager = get(SelectionManagerService);
+                const selectionManager = get(SheetsSelectionManagerService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },

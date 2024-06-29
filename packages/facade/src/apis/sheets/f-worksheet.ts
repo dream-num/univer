@@ -16,7 +16,7 @@
 
 import { ICommandService, type IRange, type Workbook, type Worksheet } from '@univerjs/core';
 import type { ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
-import { SelectionManagerService, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation } from '@univerjs/sheets';
+import { SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetsSelectionManagerService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FRange } from './f-range';
@@ -27,7 +27,7 @@ export class FWorksheet {
         private readonly _workbook: Workbook,
         private readonly _worksheet: Worksheet,
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         // empty

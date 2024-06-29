@@ -21,8 +21,8 @@ import { DeviceInputEventType } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
-    SelectionManagerService,
     SetWorksheetActiveOperation,
+    SheetsSelectionManagerService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { merge, takeUntil } from 'rxjs';
@@ -43,7 +43,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IEditorService private readonly _editorService: IEditorService,
         @IContextService private readonly _contextService: IContextService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
         @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService
     ) {
         super();

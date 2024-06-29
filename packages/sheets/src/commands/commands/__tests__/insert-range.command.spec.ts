@@ -30,7 +30,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
-import { SelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
 import { MoveRangeMutation } from '../../mutations/move-range.mutation';
@@ -159,7 +159,7 @@ describe('Test insert range commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let selectionManager: SelectionManagerService;
+    let selectionManager: SheetsSelectionManagerService;
     let deduplicateRanges: (ranges: Array<Nullable<IRange>>) => IRange[];
     let getValueByPosition: (
         startRow: number,
@@ -206,7 +206,7 @@ describe('Test insert range commands', () => {
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(MoveRangeMutation);
 
-        selectionManager = get(SelectionManagerService);
+        selectionManager = get(SheetsSelectionManagerService);
 
         getValueByPosition = (
             startRow: number,

@@ -17,7 +17,7 @@
 import type { ICommandInfo, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { ISelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { type IDrawingJsonUndo1, IDrawingManagerService, type IDrawingParam, type ITransformState } from '@univerjs/drawing';
 import type { IInsertColCommandParams, IInsertRowCommandParams, IRemoveRowColCommandParams, ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetActiveOperationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowHeightMutationParams, ISetWorksheetRowIsAutoHeightMutationParams } from '@univerjs/sheets';
 import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertColCommand, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetActiveOperation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SheetInterceptorService } from '@univerjs/sheets';
@@ -66,10 +66,10 @@ const REFRESH_MUTATIONS = [
 export class SheetDrawingTransformAffectedController extends Disposable {
     // TODO@wzhudev: selection render service would be a render unit, we we cannot
     // easily access it here.
-    private get _selectionRenderService(): ISelectionRenderService {
+    private get _selectionRenderService(): ISheetSelectionRenderService {
         return this._renderManagerService.getRenderById(
             this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
-        )!.with(ISelectionRenderService);
+        )!.with(ISheetSelectionRenderService);
     }
 
     private get _skeletonManagerService(): SheetSkeletonManagerService {

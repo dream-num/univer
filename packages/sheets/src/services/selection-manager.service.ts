@@ -34,7 +34,7 @@ export enum SelectionMoveType {
 
 export interface ISelectionManager { }
 
-export class SelectionManagerService extends RxDisposable {
+export class SheetsSelectionManagerService extends RxDisposable {
     private get _currentSelectionPos(): Nullable<ISelectionManagerSearchParam> {
         const workbook = this._instanceSrv.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return null;
@@ -86,7 +86,7 @@ export class SelectionManagerService extends RxDisposable {
 
         const current = this._currentSelectionPos;
         if (!current) {
-            throw new Error('[SelectionManagerService]: cannot find current selection position!');
+            throw new Error('[SheetsSelectionManagerService]: cannot find current selection position!');
         }
 
         const { unitId, sheetId } = current;
@@ -108,7 +108,7 @@ export class SelectionManagerService extends RxDisposable {
 
         const current = this._currentSelectionPos;
         if (!current) {
-            throw new Error('[SelectionManagerService]: cannot find current selection position!');
+            throw new Error('[SheetsSelectionManagerService]: cannot find current selection position!');
         }
 
         const { unitId, sheetId } = current;
@@ -166,7 +166,7 @@ export class SelectionManagerService extends RxDisposable {
         if (!wbSelection) {
             const workbook = this._instanceSrv.getUnit<Workbook>(unitId);
             if (!workbook) {
-                throw new Error(`[SelectionManagerService]: cannot resolve unit with id "${unitId}"!`);
+                throw new Error(`[SheetsSelectionManagerService]: cannot resolve unit with id "${unitId}"!`);
             }
 
             wbSelection = new WorkbookSelections(workbook);

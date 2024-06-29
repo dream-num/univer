@@ -35,7 +35,7 @@ import type {
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import {
     InsertColMutation,
@@ -148,7 +148,7 @@ export const InsertRowBeforeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row-before',
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         let range: IRange;
 
@@ -206,7 +206,7 @@ export const InsertRowAfterCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row-after',
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         let range: IRange;
 
@@ -335,7 +335,7 @@ export const InsertColBeforeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col-before',
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const selections = selectionManagerService.getCurrentSelections();
         let range: IRange;
 
@@ -392,7 +392,7 @@ export const InsertColAfterCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col-after',
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const selections = selectionManagerService.getCurrentSelections();
         let range: IRange;
 

@@ -17,7 +17,7 @@
 import type { IRange, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, isValidRange, LifecycleStages, OnLifecycle, sequenceExecuteAsync, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import { handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SelectionManagerService } from '@univerjs/sheets';
+import { handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionManagerService } from '@univerjs/sheets';
 import type { IAddHyperLinkMutationParams, ICellHyperLink, IRemoveHyperLinkMutationParams, IUpdateHyperLinkMutationParams, IUpdateHyperLinkRefMutationParams } from '@univerjs/sheets-hyper-link';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '@univerjs/sheets-hyper-link';
 import type { IDisposable } from '@wendellhu/redi';
@@ -35,7 +35,7 @@ export class SheetsHyperLinkRefRangeController extends Disposable {
     constructor(
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
         @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();

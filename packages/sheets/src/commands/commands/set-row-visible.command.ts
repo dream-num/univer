@@ -25,7 +25,7 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../../services/selection-manager.service';
 import type { ISetRowHiddenMutationParams, ISetRowVisibleMutationParams } from '../mutations/set-row-visible.mutation';
 import {
     SetRowHiddenMutation,
@@ -122,7 +122,7 @@ export const SetSelectedRowsVisibleCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-selected-rows-visible',
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
@@ -146,7 +146,7 @@ export const SetRowHiddenCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-rows-hidden',
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

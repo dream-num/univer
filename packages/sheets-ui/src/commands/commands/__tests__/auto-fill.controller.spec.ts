@@ -28,9 +28,9 @@ import {
 import {
     AddWorksheetMergeMutation,
     RemoveWorksheetMergeMutation,
-    SelectionManagerService,
     SetRangeValuesMutation,
     SetSelectionsOperation,
+    SheetsSelectionManagerService,
 } from '@univerjs/sheets';
 import { EditorService, IEditorService, IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import type { Injector } from '@wendellhu/redi';
@@ -45,8 +45,8 @@ import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-ma
 import { RefillCommand } from '../refill.command';
 import { AutoClearContentCommand, AutoFillCommand } from '../auto-fill.command';
 import { SheetsRenderService } from '../../../services/sheets-render.service';
-import { ISelectionRenderService } from '../../../services/selection/base-selection-render.service';
-import { SelectionRenderService } from '../../../services/selection/selection-render.service';
+import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
+import { SheetSelectionRenderService } from '../../../services/selection/selection-render.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
@@ -279,10 +279,10 @@ describe('Test auto fill rules in controller', () => {
         endRow: number,
         endColumn: number
     ) => Array<Array<Nullable<IStyleData>>> | undefined;
-    let selectionManagerService: SelectionManagerService;
+    let selectionManagerService: SheetsSelectionManagerService;
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
-            [ISelectionRenderService, { useClass: SelectionRenderService }],
+            [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
             [IAutoFillService, { useClass: AutoFillService }],
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
@@ -300,7 +300,7 @@ describe('Test auto fill rules in controller', () => {
         themeService = get(ThemeService);
         themeService.setTheme(theme);
         autoFillController = get(AutoFillController);
-        selectionManagerService = get(SelectionManagerService);
+        selectionManagerService = get(SheetsSelectionManagerService);
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
@@ -542,7 +542,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
 
-                const selectionManagerService = get(SelectionManagerService);
+                const selectionManagerService = get(SheetsSelectionManagerService);
                 selectionManagerService.addSelections([{
                     style: null,
                     range: {
@@ -592,7 +592,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
 
-                const selectionManagerService = get(SelectionManagerService);
+                const selectionManagerService = get(SheetsSelectionManagerService);
                 selectionManagerService.addSelections([{
                     style: null,
                     range: {

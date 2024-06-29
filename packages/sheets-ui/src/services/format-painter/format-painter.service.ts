@@ -16,7 +16,7 @@
 
 import type { IMutationInfo, IRange, IStyleData } from '@univerjs/core';
 import { Disposable, ICommandService, ILogService, IUndoRedoService, ObjectMatrix, ThemeService } from '@univerjs/core';
-import { SelectionManagerService, SetRangeValuesMutation } from '@univerjs/sheets';
+import { SetRangeValuesMutation, SheetsSelectionManagerService } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
@@ -71,7 +71,7 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
     private _extendHooks: IFormatPainterHook[] = [];
 
     constructor(
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
         @ILogService private readonly _logService: ILogService,

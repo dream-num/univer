@@ -24,7 +24,7 @@ import type { ISetFrozenMutationParams } from '@univerjs/sheets';
 import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
 import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import { ISelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { ISheetSelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { IFloatDomLayout } from '@univerjs/ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
@@ -167,7 +167,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @Inject(ICommandService) private _commandService: ICommandService,
         @IDrawingManagerService private _drawingManagerService: IDrawingManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
+        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @Inject(CanvasFloatDomService) private readonly _canvasFloatDomService: CanvasFloatDomService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService
     ) {

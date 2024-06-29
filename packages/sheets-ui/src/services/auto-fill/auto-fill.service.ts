@@ -28,7 +28,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
+import { SetSelectionsOperation, SheetsSelectionManagerService } from '@univerjs/sheets';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -127,7 +127,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     readonly menu$ = this._menu$.asObservable();
     constructor(
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private _selectionManagerService: SheetsSelectionManagerService,
         @ICommandService private _commandService: ICommandService,
         @IUndoRedoService private _undoRedoService: IUndoRedoService
     ) {

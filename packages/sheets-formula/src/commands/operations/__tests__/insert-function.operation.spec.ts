@@ -17,10 +17,10 @@
 import type { Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
-    SelectionManagerService,
     SetRangeValuesCommand,
     SetRangeValuesMutation,
     SetSelectionsOperation,
+    SheetsSelectionManagerService,
 } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -60,7 +60,7 @@ describe('Test insert function operation', () => {
     describe('insert function', () => {
         describe('correct situations', () => {
             it('insert function, match the data range above, directly set values', async () => {
-                const selectionManager = get(SelectionManagerService);
+                const selectionManager = get(SheetsSelectionManagerService);
 
                 // B3:B4
                 selectionManager.addSelections([
@@ -97,7 +97,7 @@ describe('Test insert function operation', () => {
             });
 
             it('insert function, match the data range left, directly set values', async () => {
-                const selectionManager = get(SelectionManagerService);
+                const selectionManager = get(SheetsSelectionManagerService);
 
                 // C2:D2
                 selectionManager.addSelections([

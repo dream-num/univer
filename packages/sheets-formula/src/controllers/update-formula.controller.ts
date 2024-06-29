@@ -97,12 +97,12 @@ import {
     RemoveSheetCommand,
     RemoveSheetMutation,
     runRefRangeMutations,
-    SelectionManagerService,
     SetBorderCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
     SetWorksheetNameCommand,
     SheetInterceptorService,
+    SheetsSelectionManagerService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -170,7 +170,7 @@ export class UpdateFormulaController extends Disposable {
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private _selectionManagerService: SheetsSelectionManagerService,
         @Inject(Injector) readonly _injector: Injector
     ) {
         super();

@@ -17,7 +17,7 @@
 import { BooleanNumber, ILogService, IUniverInstanceService, type IWorkbookData, LocaleService, LocaleType, LogLevel, Plugin, Tools, Univer, UniverInstanceType, type Workbook } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import { SheetInterceptorService, SheetsSelectionManagerService } from '@univerjs/sheets';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import enUS from '../../locale/en-US';
 import { SheetsSortService } from '../../services/sheets-sort.service';
@@ -143,7 +143,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
         override onStarting(injector: Injector): void {
             injector.add([SheetsSortService]);
             injector.add([SheetsSortController]);
-            injector.add([SelectionManagerService, { useClass: mockSelectionManagerService as any }]);
+            injector.add([SheetsSelectionManagerService, { useClass: mockSelectionManagerService as any }]);
             injector.add([SheetInterceptorService]);
             injector.add([FormulaDataModel, { useClass: mockFormulaDataModel }]);
 

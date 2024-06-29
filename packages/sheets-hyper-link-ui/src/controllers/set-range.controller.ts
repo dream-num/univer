@@ -18,7 +18,7 @@ import type { IMutationInfo, Workbook } from '@univerjs/core';
 import { CellValueType, Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools, UniverInstanceType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
+import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionManagerService } from '@univerjs/sheets';
 import type { IAddHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link';
 import { AddHyperLinkCommand, AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link';
 import { isLegalLink, serializeUrl } from '../common/util';
@@ -29,7 +29,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();

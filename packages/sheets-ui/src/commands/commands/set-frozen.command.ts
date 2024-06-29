@@ -17,7 +17,7 @@
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
 import type { ISetFrozenMutationParams } from '@univerjs/sheets';
-import { getSheetCommandTarget, SelectionManagerService, SetFrozenMutation, SetFrozenMutationFactory } from '@univerjs/sheets';
+import { getSheetCommandTarget, SetFrozenMutation, SetFrozenMutationFactory, SheetsSelectionManagerService } from '@univerjs/sheets';
 
 import { ScrollManagerService } from '../../services/scroll-manager.service';
 
@@ -43,7 +43,7 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
 
         const { unitId, subUnitId } = target;
         const commandService = accessor.get(ICommandService);
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const selections = selectionManagerService.getCurrentSelections();
         if (!selections) {
             return false;

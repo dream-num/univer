@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { SelectionManagerService } from '@univerjs/sheets';
+import type { SheetsSelectionManagerService } from '@univerjs/sheets';
 import { createIdentifier } from '@wendellhu/redi';
 
 /**
@@ -23,5 +23,5 @@ import { createIdentifier } from '@wendellhu/redi';
  *
  * Its data should be cleared by the caller quit editing formula and reconstructed when user starts editing.
  */
-export const IRefSelectionsService = createIdentifier<SelectionManagerService>('sheets-formula.ref-selections.service');
+export const IRefSelectionsService = createIdentifier<SheetsSelectionManagerService>('sheets-formula.ref-selections.service');
 

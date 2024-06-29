@@ -32,7 +32,7 @@ import {
 } from '@univerjs/core';
 import { FormulaDataModel, FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import { RangeProtectionRuleModel, SelectionManagerService, SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionManagerService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import {
     DescriptionService,
     FormulaCustomFunctionService,
@@ -47,7 +47,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { ISelectionRenderService, SelectionRenderService, SheetRenderController, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
+import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
 
@@ -126,7 +126,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([SelectionManagerService]);
+            injector.add([SheetsSelectionManagerService]);
             injector.add([SheetInterceptorService]);
             injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
             injector.add([
@@ -141,7 +141,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([ISocketService, { useClass: WebSocketService }]);
             injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-            injector.add([ISelectionRenderService, { useClass: SelectionRenderService }]);
+            injector.add([ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }]);
             injector.add([SheetsRenderService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
             injector.add([IPlatformService, { useClass: PlatformService }]);

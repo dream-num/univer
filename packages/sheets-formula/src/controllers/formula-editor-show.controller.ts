@@ -35,7 +35,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import {
     IEditorBridgeService,
-    ISelectionRenderService,
+    ISheetSelectionRenderService,
     SelectionShape,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
@@ -217,7 +217,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         if (!renderUnit) return;
 
         const { scene } = renderUnit;
-        const { rangeWithCoord, primaryWithCoord } = renderUnit.with(ISelectionRenderService).attachSelectionWithCoord({
+        const { rangeWithCoord, primaryWithCoord } = renderUnit.with(ISheetSelectionRenderService).attachSelectionWithCoord({
             range: arrayRange,
             primary: null,
             style,

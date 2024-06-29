@@ -17,12 +17,12 @@
 import type { Workbook } from '@univerjs/core';
 import { IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { RangeProtectionRuleModel, SelectionManagerService } from '@univerjs/sheets';
+import { RangeProtectionRuleModel, SheetsSelectionManagerService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import { combineLatest, map } from 'rxjs';
 
 export function getSheetSelectionsDisabled$(accessor: IAccessor) {
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;

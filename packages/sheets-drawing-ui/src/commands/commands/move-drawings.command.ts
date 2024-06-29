@@ -19,7 +19,7 @@ import { CommandType, Direction, ICommandService } from '@univerjs/core';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import type { IAccessor } from '@wendellhu/redi';
-import { ISelectionRenderService } from '@univerjs/sheets-ui';
+import { ISheetSelectionRenderService } from '@univerjs/sheets-ui';
 
 import { transformToDrawingPosition } from '../../basics/transform-position';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
@@ -36,7 +36,7 @@ export const MoveDrawingsCommand: ICommand = {
     handler: (accessor: IAccessor, params: IMoveDrawingsCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const drawingManagerService = accessor.get(ISheetDrawingService);
-        const selectionRenderService = accessor.get(ISelectionRenderService);
+        const selectionRenderService = accessor.get(ISheetSelectionRenderService);
 
         const { direction } = params;
 

@@ -21,8 +21,8 @@ import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
-import { SelectionManagerService } from '@univerjs/sheets';
-import { attachRangeWithCoord, ISelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { SheetsSelectionManagerService } from '@univerjs/sheets';
+import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -41,10 +41,10 @@ import { drawingPositionToTransform, transformToDrawingPosition } from '../basic
 export class SheetDrawingUpdateController extends Disposable {
     // TODO@wzhudev: selection render service would be a render unit, we we cannot
     // easily access it here.
-    private get _selectionRenderService(): ISelectionRenderService {
+    private get _selectionRenderService(): ISheetSelectionRenderService {
         return this._renderManagerService.getRenderById(
             this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
-        )!.with(ISelectionRenderService);
+        )!.with(ISheetSelectionRenderService);
     }
 
     private get _skeletonManagerService(): SheetSkeletonManagerService {
@@ -56,7 +56,7 @@ export class SheetDrawingUpdateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,

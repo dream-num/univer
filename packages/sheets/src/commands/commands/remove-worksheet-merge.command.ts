@@ -22,7 +22,7 @@ import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../basics/interfaces/mutation-interface';
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import {
     RemoveMergeUndoMutationFactory,
@@ -38,7 +38,7 @@ export const RemoveWorksheetMergeCommand: ICommand = {
     id: 'sheet.command.remove-worksheet-merge',
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

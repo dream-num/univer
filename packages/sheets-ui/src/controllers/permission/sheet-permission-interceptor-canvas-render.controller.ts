@@ -16,7 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
 import { DisposableCollection, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { getSheetCommandTarget, RangeProtectionRuleModel, SelectionManagerService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
+import { getSheetCommandTarget, RangeProtectionRuleModel, SheetsSelectionManagerService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
 import { Inject, Optional } from '@wendellhu/redi';
 import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 
@@ -25,7 +25,7 @@ import { HeaderMoveRenderController } from '../render-controllers/header-move.re
 import { HeaderResizeRenderController } from '../render-controllers/header-resize.render-controller';
 import { HeaderFreezeRenderController } from '../render-controllers/freeze.render-controller';
 import { getTransformCoord } from '../utils/component-tools';
-import { ISelectionRenderService } from '../../services/selection/base-selection-render.service';
+import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 
@@ -39,10 +39,10 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
         private readonly _context: IRenderContext<Workbook>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(HeaderMoveRenderController) private _headerMoveRenderController: HeaderMoveRenderController,
-        @ISelectionRenderService private _selectionRenderService: ISelectionRenderService,
+        @ISheetSelectionRenderService private _selectionRenderService: ISheetSelectionRenderService,
         @Inject(HeaderFreezeRenderController) private _headerFreezeRenderController: HeaderFreezeRenderController,
         @Optional(HeaderResizeRenderController) private _headerResizeRenderController?: HeaderResizeRenderController
     ) {

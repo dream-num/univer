@@ -22,7 +22,7 @@ import type { ISelectionStyle, ISheetCommandSharedParams } from '@univerjs/sheet
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import type { FilterModel } from '@univerjs/sheets-filter';
 import { FILTER_MUTATIONS, ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
-import { getCoordByCell, ISelectionRenderService, SelectionShape, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
+import { getCoordByCell, ISheetSelectionRenderService, SelectionShape, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -57,7 +57,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         @Inject(SheetsRenderService) private _sheetsRenderService: SheetsRenderService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
+        @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService
     ) {
         super();
 

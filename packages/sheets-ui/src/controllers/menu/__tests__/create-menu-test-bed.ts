@@ -16,8 +16,8 @@
 
 import type { IWorkbookData } from '@univerjs/core';
 import { LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { RangeProtectionRefRangeService, RangeProtectionRenderModel, RangeProtectionRuleModel, RangeProtectionService, RefRangeService, SelectionManagerService,
-    SheetInterceptorService,
+import { RangeProtectionRefRangeService, RangeProtectionRenderModel, RangeProtectionRuleModel, RangeProtectionService, RefRangeService, SheetInterceptorService,
+    SheetsSelectionManagerService,
     WorkbookPermissionService,
     WorksheetPermissionService,
     WorksheetProtectionPointModel,
@@ -68,7 +68,7 @@ export function createMenuTestBed() {
 
         override onStarting(injector: Injector): void {
             injector.add([IPlatformService, { useClass: PlatformService }]);
-            injector.add([SelectionManagerService]);
+            injector.add([SheetsSelectionManagerService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
             injector.add([IMenuService, { useClass: MenuService }]);
             injector.add([WorkbookPermissionService]);

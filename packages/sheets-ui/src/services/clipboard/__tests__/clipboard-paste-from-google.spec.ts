@@ -20,11 +20,11 @@ import {
     AddWorksheetMergeMutation,
     MoveRangeMutation,
     RemoveWorksheetMergeMutation,
-    SelectionManagerService,
     SetRangeValuesMutation,
     SetSelectionsOperation,
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
+    SheetsSelectionManagerService,
 } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -124,7 +124,7 @@ describe('Test clipboard', () => {
 
     describe('Test paste from Google Sheet ', () => {
         beforeEach(() => {
-            const selectionManager = get(SelectionManagerService);
+            const selectionManager = get(SheetsSelectionManagerService);
 
             const startRow = 1;
             const startColumn = 1;

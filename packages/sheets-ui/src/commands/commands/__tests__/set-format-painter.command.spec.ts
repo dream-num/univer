@@ -47,7 +47,7 @@ import {
     SetOnceFormatPainterCommand,
 } from '../set-format-painter.command';
 import { IMarkSelectionService } from '../../../services/mark-selection/mark-selection.service';
-import { ISelectionRenderService } from '../../../services/selection/base-selection-render.service';
+import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
@@ -201,7 +201,7 @@ describe('Test format painter rules in controller', () => {
     let formatPainterController: FormatPainterController;
 
     beforeEach(() => {
-        class SelectionRenderService {
+        class SheetSelectionRenderService {
             private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
             readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
         }
@@ -209,7 +209,7 @@ describe('Test format painter rules in controller', () => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
             [IMarkSelectionService, { useClass: MarkSelectionService }],
             [IFormatPainterService, { useClass: FormatPainterService }],
-            [ISelectionRenderService, { useClass: SelectionRenderService }],
+            [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
             [FormatPainterController],
         ]);
 

@@ -23,7 +23,7 @@ import {
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import { CURSOR_TYPE, Rect } from '@univerjs/engine-render';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
+import { SetSelectionsOperation, SheetsSelectionManagerService } from '@univerjs/sheets';
 import { IContextMenuService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
@@ -70,7 +70,7 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService
     ) {
         super();
 

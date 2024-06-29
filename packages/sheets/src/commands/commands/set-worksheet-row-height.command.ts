@@ -27,7 +27,7 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type {
     ISetWorksheetRowHeightMutationParams,
@@ -51,7 +51,7 @@ export const DeltaRowHeightCommand: ICommand = {
     id: 'sheet.command.delta-row-height',
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IDeltaRowHeightCommand) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const selections = selectionManagerService.getCurrentSelections();
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
@@ -197,7 +197,7 @@ export const SetRowHeightCommand: ICommand = {
     id: 'sheet.command.set-row-height',
     // eslint-disable-next-line max-lines-per-function
     handler: (accessor: IAccessor, params: ISetRowHeightCommandParams) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -298,7 +298,7 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
     handler: async (accessor: IAccessor, params: ISetWorksheetRowIsAutoHeightCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const target = getSheetCommandTarget(univerInstanceService);

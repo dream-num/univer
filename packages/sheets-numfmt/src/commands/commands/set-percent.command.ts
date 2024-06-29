@@ -16,7 +16,7 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, Range } from '@univerjs/core';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { SheetsSelectionManagerService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 import type { ISetNumfmtCommandParams } from './set-numfmt.command';
@@ -27,7 +27,7 @@ export const SetPercentCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
 
         const selections = selectionManagerService.getCurrentSelections();
         if (!selections || !selections.length) {

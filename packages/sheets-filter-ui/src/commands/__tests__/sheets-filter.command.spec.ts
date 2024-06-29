@@ -17,7 +17,7 @@
 import type { IRange, IWorkbookData } from '@univerjs/core';
 import { AuthzIoLocalService, IAuthzIoService, ICommandService, IUniverInstanceService, LocaleType, Plugin, RANGE_TYPE, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
-import { RangeProtectionRuleModel, RefRangeService, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { RangeProtectionRuleModel, RefRangeService, SetRangeValuesCommand, SetRangeValuesMutation, SheetInterceptorService, SheetsSelectionManagerService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { FilterModel, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { SetSheetsFilterRangeMutation, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import type { Dependency } from '@wendellhu/redi';
@@ -93,7 +93,7 @@ function createFilterCommandTestBed() {
             ([
                 [RefRangeService],
                 [SheetInterceptorService],
-                [SelectionManagerService],
+                [SheetsSelectionManagerService],
                 [WorksheetPermissionService],
                 [WorksheetProtectionPointModel],
                 [WorkbookPermissionService],
@@ -131,7 +131,7 @@ describe('test sheets filter commands', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
     let sheetsFilterService: SheetsFilterService;
-    let selectionManagerService: SelectionManagerService;
+    let selectionManagerService: SheetsSelectionManagerService;
 
     beforeEach(() => {
         const testBed = createFilterCommandTestBed();
@@ -140,7 +140,7 @@ describe('test sheets filter commands', () => {
 
         commandService = get(ICommandService);
         sheetsFilterService = get(SheetsFilterService);
-        selectionManagerService = get(SelectionManagerService);
+        selectionManagerService = get(SheetsSelectionManagerService);
     });
 
     afterEach(() => {

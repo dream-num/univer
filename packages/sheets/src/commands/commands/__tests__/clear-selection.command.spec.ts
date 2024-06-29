@@ -28,7 +28,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
-import { SelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
@@ -69,7 +69,7 @@ describe('Test clear selection content commands', () => {
     describe('clear selection contents', () => {
         describe('correct situations', () => {
             it('will clear selection content when there is a selected range', async () => {
-                const selectionManager = get(SelectionManagerService);
+                const selectionManager = get(SheetsSelectionManagerService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -113,7 +113,7 @@ describe('Test clear selection content commands', () => {
     describe('clear selection formats', () => {
         describe('correct situations', () => {
             it('will clear selection format when there is a selected range', async () => {
-                const selectionManager = get(SelectionManagerService);
+                const selectionManager = get(SheetsSelectionManagerService);
 
                 selectionManager.addSelections([
                     {
@@ -173,7 +173,7 @@ describe('Test clear selection content commands', () => {
                 });
             });
             it('clear formats with merged cells', async () => {
-                const selectionManager = get(SelectionManagerService);
+                const selectionManager = get(SheetsSelectionManagerService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 1, endRow: 1, rangeType: RANGE_TYPE.NORMAL },
@@ -264,7 +264,7 @@ describe('Test clear selection content commands', () => {
     describe('clear selection all', () => {
         describe('correct situations', () => {
             it('will clear selection all when there is a selected range', async () => {
-                const selectionManager = get(SelectionManagerService);
+                const selectionManager = get(SheetsSelectionManagerService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -315,7 +315,7 @@ describe('Test clear selection content commands', () => {
                 expect(getValue()).toStrictEqual({});
             });
             it('clear all with merged cells', async () => {
-                const selectionManager = get(SelectionManagerService);
+                const selectionManager = get(SheetsSelectionManagerService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 1, endRow: 1, rangeType: RANGE_TYPE.NORMAL },

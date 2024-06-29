@@ -26,7 +26,7 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../../services/selection-manager.service';
 import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams } from '../mutations/set-col-visible.mutation';
 import {
     SetColHiddenMutation,
@@ -123,7 +123,7 @@ export const SetSelectedColsVisibleCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-selected-cols-visible',
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const commandService = accessor.get(ICommandService);
 
         const ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
@@ -148,7 +148,7 @@ export const SetColHiddenCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-col-hidden',
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);

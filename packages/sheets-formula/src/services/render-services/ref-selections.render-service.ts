@@ -18,7 +18,7 @@ import type { Nullable, Workbook } from '@univerjs/core';
 import { DisposableCollection, RANGE_TYPE, ThemeService } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, getNormalSelectionStyle, type ISelectionWithCoordAndStyle, type ISelectionWithStyle, type SelectionManagerService, SelectionMoveType, type WorkbookSelections } from '@univerjs/sheets';
+import { convertSelectionDataToRange, getNormalSelectionStyle, type ISelectionWithCoordAndStyle, type ISelectionWithStyle, SelectionMoveType, type SheetsSelectionManagerService, type WorkbookSelections } from '@univerjs/sheets';
 import { BaseSelectionRenderService, checkInHeaderRanges, getAllSelection, getCoordByOffset, getSheetObject, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
@@ -43,7 +43,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         @Inject(ThemeService) themeService: ThemeService,
         @IShortcutService shortcutService: IShortcutService,
         @IRenderManagerService renderManagerService: IRenderManagerService,
-        @IRefSelectionsService refSelectionsService: SelectionManagerService,
+        @IRefSelectionsService refSelectionsService: SheetsSelectionManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super(

@@ -26,7 +26,7 @@ import { Disposable, ICommandService,
     UniverInstanceType,
 } from '@univerjs/core';
 
-import { getPrimaryForRange, SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
+import { getPrimaryForRange, SetSelectionsOperation, SheetsSelectionManagerService } from '@univerjs/sheets';
 import type { ISheetRangeLocation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { expandToContinuousRange } from '@univerjs/sheets-ui';
@@ -68,7 +68,7 @@ export class SheetsSortUIService extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IConfirmService private readonly _confirmService: IConfirmService,
         @ILogService private readonly _logService: ILogService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
         @Inject(SheetsSortService) private readonly _sheetsSortService: SheetsSortService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService) {

@@ -65,7 +65,7 @@ import {
 } from '@univerjs/engine-render';
 import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-import { ClearSelectionFormatCommand, SelectionManagerService, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand } from '@univerjs/sheets';
+import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionManagerService } from '@univerjs/sheets';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 
@@ -112,7 +112,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,

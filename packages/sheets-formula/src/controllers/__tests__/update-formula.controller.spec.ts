@@ -17,7 +17,7 @@
 import type { ICellData, IObjectMatrixPrimitiveType, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import { CellValueType, Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
-import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SelectionManagerService, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation } from '@univerjs/sheets';
+import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionManagerService } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -364,7 +364,7 @@ describe('Test insert function operation', () => {
         });
 
         it('Move rows, update reference', async () => {
-            const selectionManager = get(SelectionManagerService);
+            const selectionManager = get(SheetsSelectionManagerService);
 
             // A1
             selectionManager.addSelections([
@@ -406,7 +406,7 @@ describe('Test insert function operation', () => {
         });
 
         it('Move rows, update reference and position', async () => {
-            const selectionManager = get(SelectionManagerService);
+            const selectionManager = get(SheetsSelectionManagerService);
             // A1
             selectionManager.addSelections([
                 {
@@ -453,7 +453,7 @@ describe('Test insert function operation', () => {
         });
 
         it('Move columns, update reference', async () => {
-            const selectionManager = get(SelectionManagerService);
+            const selectionManager = get(SheetsSelectionManagerService);
 
             // A1
             selectionManager.addSelections([
@@ -495,7 +495,7 @@ describe('Test insert function operation', () => {
         });
 
         it('Move columns, update reference and position', async () => {
-            const selectionManager = get(SelectionManagerService);
+            const selectionManager = get(SheetsSelectionManagerService);
 
             // A1
             selectionManager.addSelections([

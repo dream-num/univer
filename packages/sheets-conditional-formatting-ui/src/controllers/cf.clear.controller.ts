@@ -16,7 +16,7 @@
 
 import type { IMutationInfo, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
-import { ClearSelectionAllCommand, ClearSelectionFormatCommand, RangeMergeUtil, SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import { ClearSelectionAllCommand, ClearSelectionFormatCommand, RangeMergeUtil, SheetInterceptorService, SheetsSelectionManagerService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
 import type { IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
@@ -27,7 +27,7 @@ export class ConditionalFormattingClearController extends Disposable {
         @Inject(Injector) private _injector: Injector,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionManagerService) private _selectionManagerService: SheetsSelectionManagerService,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel
 
     ) {

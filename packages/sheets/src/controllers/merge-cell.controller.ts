@@ -65,7 +65,7 @@ import { RefRangeService } from '../services/ref-range/ref-range.service';
 import type { EffectRefRangeParams } from '../services/ref-range/type';
 import { EffectRefRangId } from '../services/ref-range/type';
 import { handleMoveCols, handleMoveRows, runRefRangeMutations } from '../services/ref-range/util';
-import { SelectionManagerService } from '../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../services/selection-manager.service';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 import type { IMoveRowsMutationParams } from '../commands/mutations/move-rows-cols.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
@@ -126,7 +126,7 @@ export class MergeCellController extends Disposable {
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private _injector: Injector,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService
+        @Inject(SheetsSelectionManagerService) private _selectionManagerService: SheetsSelectionManagerService
     ) {
         super();
         this._onRefRangeChange();

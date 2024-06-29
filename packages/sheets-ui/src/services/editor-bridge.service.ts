@@ -38,7 +38,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
-import { ISelectionRenderService } from './selection/base-selection-render.service';
+import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 
 export interface IEditorBridgeServiceVisibleParam {
     visible: boolean;
@@ -185,7 +185,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         if (!ru) return;
 
         const skeleton = ru.with(SheetSkeletonManagerService).getCurrentSkeleton();
-        const selectionRenderService = ru.with(ISelectionRenderService);
+        const selectionRenderService = ru.with(ISheetSelectionRenderService);
 
         const { primary, unitId, sheetId, scene, engine } = currentEditCell;
         const { startRow, startColumn } = primary;

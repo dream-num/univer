@@ -30,7 +30,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
-import { SelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../../../services/selection-manager.service';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
 import type { IRemoveRowColCommandParams } from '../remove-row-col.command';
 import { RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
@@ -65,7 +65,7 @@ describe('Test remove rows cols', () => {
     });
 
     function selectRow(rowStart: number, rowEnd: number): void {
-        const selectionManagerService = get(SelectionManagerService);
+        const selectionManagerService = get(SheetsSelectionManagerService);
         const endColumn = getColCount() - 1;
         selectionManagerService.addSelections([
             {

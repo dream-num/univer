@@ -15,7 +15,8 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { BooleanNumber,
+import {
+    BooleanNumber,
     DisposableCollection,
     ILogService,
     IUniverInstanceService,
@@ -30,9 +31,9 @@ import { BooleanNumber,
 import {
     BorderStyleManagerService,
     RangeProtectionRuleModel,
-    SelectionManagerService,
+    SheetInterceptorService,
 
-    SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel,
+    SheetsSelectionManagerService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -40,8 +41,8 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import type { IRenderContext } from '@univerjs/engine-render';
 import enUS from '../../../locale/en-US';
-import { ISelectionRenderService } from '../../../services/selection/base-selection-render.service';
-import { SelectionRenderService } from '../../../services/selection/selection-render.service';
+import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
+import { SheetSelectionRenderService } from '../../../services/selection/selection-render.service';
 
 const getTestWorkbookDataDemo = (): IWorkbookData => {
     return {
@@ -104,7 +105,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([SelectionManagerService]);
+            injector.add([SheetsSelectionManagerService]);
             injector.add([BorderStyleManagerService]);
             injector.add([SheetInterceptorService]);
             injector.add([LexerTreeBuilder]);
@@ -123,7 +124,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     const snapshot = Tools.deepClone(workbookData || getTestWorkbookDataDemo());
     const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, snapshot);
 
-    if (!dependencies || !dependencies.find((d) => d[0] === ISelectionRenderService)) {
+    if (!dependencies || !dependencies.find((d) => d[0] === ISheetSelectionRenderService)) {
         const context: IRenderContext<Workbook> = {
             unitId: sheet.getUnitId(),
             unit: sheet,
@@ -135,7 +136,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             isMainScene: true,
         };
 
-        injector.add([ISelectionRenderService, { useFactory: () => injector.createInstance(SelectionRenderService, context) }]);
+        injector.add([ISheetSelectionRenderService, { useFactory: () => injector.createInstance(SheetSelectionRenderService, context) }]);
     }
 
     const univerInstanceService = injector.get(IUniverInstanceService);

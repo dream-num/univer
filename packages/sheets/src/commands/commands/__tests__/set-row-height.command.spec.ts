@@ -27,7 +27,7 @@ import {
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionManagerService } from '../../../services/selection-manager.service';
 import {
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightMutation,
@@ -74,7 +74,7 @@ describe('Test set row height commands', () => {
 
         const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         const maxColumn = worksheet.getMaxColumns() - 1;
-        const selectionManager = get(SelectionManagerService);
+        const selectionManager = get(SheetsSelectionManagerService);
 
         // select row 2, 3
         selectionManager.addSelections([

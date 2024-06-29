@@ -16,7 +16,7 @@
 
 import type { IWorkbookData } from '@univerjs/core';
 import { AuthzIoLocalService, DisposableCollection, IAuthzIoService, ICommandService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { RangeProtectionRuleModel, RefRangeService, SelectionManagerService, SetWorksheetActiveOperation, SheetInterceptorService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { RangeProtectionRuleModel, RefRangeService, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionManagerService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { IMenuService, IPlatformService, IShortcutService, MenuService, PlatformService, ShortcutService } from '@univerjs/ui';
@@ -63,7 +63,7 @@ function createSheetsFilterMenuTestBed() {
         override onStarting(injector: Injector): void {
             injector.add([IPlatformService, { useClass: PlatformService }]);
             injector.add([RefRangeService]);
-            injector.add([SelectionManagerService]);
+            injector.add([SheetsSelectionManagerService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
             injector.add([IMenuService, { useClass: MenuService }]);
             injector.add([WorksheetPermissionService]);

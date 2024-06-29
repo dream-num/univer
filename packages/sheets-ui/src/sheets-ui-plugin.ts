@@ -49,7 +49,7 @@ import { EditorBridgeService, IEditorBridgeService } from './services/editor-bri
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
-import { SelectionRenderService } from './services/selection/selection-render.service';
+import { SheetSelectionRenderService } from './services/selection/selection-render.service';
 import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
@@ -83,7 +83,7 @@ import { WorksheetProtectionRenderService } from './services/permission/workshee
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
 import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
 import { MoveRangeRenderController } from './controllers/move-range.controller';
-import { ISelectionRenderService } from './services/selection/base-selection-render.service';
+import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
@@ -177,7 +177,7 @@ export class UniverSheetsUIPlugin extends Plugin {
         ([
             [SheetSkeletonManagerService],
             [SheetRenderController],
-            [ISelectionRenderService, { useClass: SelectionRenderService }],
+            [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
         ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });

@@ -23,7 +23,7 @@ import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import clsx from 'clsx';
-import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SelectionManagerService, SetDefinedNameCommand } from '@univerjs/sheets';
+import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SetDefinedNameCommand, SheetsSelectionManagerService } from '@univerjs/sheets';
 import { Confirm, Tooltip } from '@univerjs/design';
 import styles from './index.module.less';
 import { DefinedNameInput } from './DefinedNameInput';
@@ -35,7 +35,7 @@ export const DefinedNameContainer = () => {
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
-    const selectionManagerService = useDependency(SelectionManagerService);
+    const selectionManagerService = useDependency(SheetsSelectionManagerService);
 
     if (workbook == null) {
         return;

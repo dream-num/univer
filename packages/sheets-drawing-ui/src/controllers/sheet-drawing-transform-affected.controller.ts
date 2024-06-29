@@ -381,6 +381,10 @@ export class SheetDrawingTransformAffectedController extends Disposable {
     }
 
     private _createUndoAndRedoMutation(unitId: string, subUnitId: string, updateDrawings: ISheetDrawing[]) {
+        if (updateDrawings.length === 0) {
+            return { redos: [], undos: [] };
+        }
+
         const updateJsonOp = this._sheetDrawingService.getBatchUpdateOp(updateDrawings as ISheetDrawing[]) as IDrawingJsonUndo1;
         const { undo, redo, objects } = updateJsonOp;
         const redos: IMutationInfo[] = [

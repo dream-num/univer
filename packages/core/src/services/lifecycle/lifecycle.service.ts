@@ -21,7 +21,7 @@ import { BehaviorSubject, merge, of, skip } from 'rxjs';
 
 import { Disposable } from '../../shared/lifecycle';
 import { ILogService } from '../log/log.service';
-import { completeAfter } from '../../shared/rxjs';
+import { takeAfter } from '../../shared/rxjs';
 import { LifecycleNameMap, LifecycleStages, LifecycleToModules } from './lifecycle';
 
 /**
@@ -78,7 +78,7 @@ export class LifecycleService extends Disposable {
      */
     subscribeWithPrevious(): Observable<LifecycleStages> {
         return merge(getLifecycleStagesAndBefore(this.stage), this._lifecycle$.pipe(skip(1)))
-            .pipe(completeAfter((s) => s === LifecycleStages.Steady));
+            .pipe(takeAfter((s) => s === LifecycleStages.Steady));
     }
 
     private _reportProgress(stage: LifecycleStages): void {

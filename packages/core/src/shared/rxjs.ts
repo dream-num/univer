@@ -36,10 +36,10 @@ export function fromCallback<T extends readonly unknown[]>(callback: CallbackFn<
 };
 
 /**
- * An operator that would complete the stream once a condition is met.
+ * An operator that would complete the stream once a condition is met. Consider it as a shortcut of `takeUntil`.
  */
-export function completeAfter<T>(callback: (value: T) => boolean) {
-    return function complateAfter<U extends T>(source: Observable<U>) {
+export function takeAfter<T>(callback: (value: T) => boolean) {
+    return function complateAfter(source: Observable<T>) {
         return new Observable<T>((subscriber) => {
             source.subscribe({
                 next: (v) => {

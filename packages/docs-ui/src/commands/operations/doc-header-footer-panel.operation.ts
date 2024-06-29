@@ -37,7 +37,7 @@ export const SidebarDocHeaderFooterPanelOperation: ICommand = {
                     header: { title: localeService.t('headerFooter.panel') },
                     children: { label: COMPONENT_DOC_HEADER_FOOTER_PANEL },
                     onClose: () => {},
-                    width: 360,
+                    width: 400,
                 });
                 break;
             case 'close':

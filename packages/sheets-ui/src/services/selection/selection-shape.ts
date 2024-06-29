@@ -315,12 +315,14 @@ export class SelectionControl extends Disposable {
 
     updateRange(range: IRangeWithCoord) {
         this._selectionModel.setValue(range);
+        // why update rowHeaderWidth and columnHeaderHeight? Did they change when update range?
+        // TODO @lumixraku
         this._updateControl(null, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
-    updateRangeType(rangeType: RANGE_TYPE) {
-        this._selectionModel.setRangeType(rangeType);
-    }
+    // updateRangeType(rangeType: RANGE_TYPE) {
+    //     this._selectionModel.setRangeType(rangeType);
+    // }
 
     /**
      *

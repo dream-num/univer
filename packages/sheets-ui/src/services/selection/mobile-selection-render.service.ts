@@ -260,7 +260,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         //     return;
         // }
         const { rangeWithCoord, primaryWithCoord } = data;
-
+        const { rangeType } = rangeWithCoord;
         const skeleton = this._skeleton;
 
         let { style } = data;
@@ -274,7 +274,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         if (scene == null || skeleton == null) {
             return;
         }
-        const control = this.newSelectionControl(scene, RANGE_TYPE.NORMAL);
+        const control = this.newSelectionControl(scene, rangeType || RANGE_TYPE.NORMAL);
 
         // eslint-disable-next-line no-new
         new SelectionShapeExtension(control, skeleton, scene, this._themeService, this._injector);
@@ -522,7 +522,9 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
     expandingSelection: boolean = false;
 
     /**
-     * invoked when pointerup (or longpress? ), then move curr selection to cell at cursor
+     * invoked when pointerup or longpress on spreadsheet, or pointerdown on row&col
+     * then move curr selection to cell at cursor
+     * Main perpose to create a new selection, or update curr selection to a new range.
      * @param evt
      * @param _zIndex
      * @param rangeType
@@ -668,6 +670,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         // old function call
         if (rangeType === RANGE_TYPE.ROW || rangeType === RANGE_TYPE.COLUMN) {
             // _movingHandler would update activeSelectionControl range
+            // this update logic should split from _movingHandler!!!
             this._movingHandler(newEvtOffsetX, newEvtOffsetY, activeSelectionControl, rangeType);
         }
     }
@@ -852,7 +855,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         let lastX = newEvtOffsetX;
         let lastY = newEvtOffsetY;
 
-        // handle pointermove after control pointer has clicked
+        //#region  handle pointermove after control pointer has clicked
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             if (!this.expandingSelection) return;
 
@@ -990,7 +993,9 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
                 this._movingHandler(newMoveOffsetX, newMoveOffsetY, activeSelectionControl, rangeType);
             });
         });
+        //#endregion
 
+        //#region handle pointerup after control pointer has clicked
         this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent((_evt: IPointerEvent | IMouseEvent) => {
             this._endSelection();
             this.expandingSelection = false;
@@ -1000,6 +1005,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
             // when selection mouse up, enable the short cut service
             this._shortcutService.setDisable(false);
         });
+        //#endregion
 
         // when selection mouse down, disable the short cut service
         this._shortcutService.setDisable(true);
@@ -1223,7 +1229,8 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
             activeSelectionRange.endColumn !== newSelectionRange.endColumn
         ) {
             if (activeSelectionControl) {
-                activeSelectionControl.update(newSelectionRangeWithCoord, rowHeaderWidth, columnHeaderHeight, null, null, activeSelectionControl.model.rangeType);
+                // activeSelectionControl.update(newSelectionRangeWithCoord, rowHeaderWidth, columnHeaderHeight, null, null, activeSelectionControl.model.rangeType);
+                activeSelectionControl.updateRange(newSelectionRangeWithCoord);
                 this._selectionMoving$.next(this.getSelectionDataWithStyle());
             }
         }

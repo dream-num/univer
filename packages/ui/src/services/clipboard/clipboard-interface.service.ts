@@ -193,11 +193,10 @@ function createCopyTextContainer() {
 
 function createCopyHtmlContainer() {
     const div = document.createElement('div');
-    div.contentEditable = 'true';
     div.style.position = 'absolute';
-    div.style.opacity = '0';
     div.style.height = '1px';
     div.style.width = '1px';
+    div.style.opacity = '0';
     return div;
 }
 

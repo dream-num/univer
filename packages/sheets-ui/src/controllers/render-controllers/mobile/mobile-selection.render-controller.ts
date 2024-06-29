@@ -81,9 +81,9 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         const worksheet = workbook.getActiveSheet();
         const sheetObject = this._getSheetObject();
 
-        this._initViewMainListener(sheetObject);
-        this._initRowHeader(sheetObject);
-        this._initColumnHeader(sheetObject);
+        this._initSpreadsheetEvent(sheetObject);
+        this._initRowHeaderEvent(sheetObject);
+        this._initColumnHeaderEvent(sheetObject);
         this._initLeftTop(sheetObject);
         this._initSelectionChangeListener();
         this._initThemeChangeListener();
@@ -222,49 +222,61 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         return sheetObject?.scene.getActiveViewportByCoord(Vector2.FromArray([evt.offsetX, evt.offsetY]));
     }
 
-    private _initViewMainListener(sheetObject: ISheetObjectParam) {
+    private _initSpreadsheetEvent(sheetObject: ISheetObjectParam) {
         const { spreadsheet } = sheetObject;
-
+        let longPressTimer: ReturnType<typeof setTimeout>;
+        const longPressDuration = 500; // Longpress duration in milliseconds
         const pointerDownPos = { x: 0, y: 0 };
 
-        this.disposeWithMe(
-            toDisposable(
-                spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-                    this._selectionRenderService.enableDetectMergedCell();
-                    pointerDownPos.x = evt.offsetX;
-                    pointerDownPos.y = evt.offsetY;
-                    // this._selectionRenderService.eventTrigger(
-                    //     evt,
-                    //     spreadsheet.zIndex + 1,
-                    //     RANGE_TYPE.NORMAL,
-                    //     this._getActiveViewport(evt)
-                    // );
+        const clearLongPressTimer = () => {
+            // Clear the timer if pointer is moved or released
+            clearTimeout(longPressTimer);
+        };
 
-                    if (evt.button !== 2) {
-                        state.stopPropagation();
-                    }
-                })
-            )
-        );
-        const spreadsheetOb = spreadsheet?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-            const edge = 10;
-            if (Math.abs(evt.offsetX - pointerDownPos.x) > edge ||
-            Math.abs(evt.offsetY - pointerDownPos.y) > edge) {
-                return;
-            }
+        const createNewSelection = (evt: IPointerEvent | IMouseEvent, showContextMenu: boolean) => {
             this._selectionRenderService.enableDetectMergedCell();
-            (this._selectionRenderService as MobileSelectionRenderService).eventTrigger(
+            this._selectionRenderService.eventTrigger(
                 evt,
                 spreadsheet.zIndex + 1,
                 RANGE_TYPE.NORMAL,
                 this._getActiveViewport(evt)
             );
+            if (showContextMenu) {
+                this._selectionManagerService.refreshSelection();
+            }
+        };
+        spreadsheet?.onPointerMove$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state) => {
+            const edge = 10;
+            if (Math.abs(evt.offsetX - pointerDownPos.x) > edge ||
+            Math.abs(evt.offsetY - pointerDownPos.y) > edge) {
+                clearLongPressTimer();
+            }
+        });
+        const spreadsheetPointerDownSub = spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            this._selectionRenderService.enableDetectMergedCell();
+            pointerDownPos.x = evt.offsetX;
+            pointerDownPos.y = evt.offsetY;
+            longPressTimer = setTimeout(() => {
+                createNewSelection(evt, true);
+            }, longPressDuration);
+
+            if (evt.button !== 2) {
+                state.stopPropagation();
+            }
+        });
+        const spreadsheetPointerUpSub = spreadsheet?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            clearTimeout(longPressTimer);
+            const edge = 10;
+            if (Math.abs(evt.offsetX - pointerDownPos.x) > edge ||
+            Math.abs(evt.offsetY - pointerDownPos.y) > edge) {
+                return;
+            }
+            createNewSelection(evt, false);
             state.stopPropagation();
         });
-        this.disposeWithMe(toDisposable(spreadsheetOb));
 
-        // control 在不断的 dispose 和 创建， 这里为 controls 绑定 pointer 事件没用
-        // const controls = this._selectionRenderService.getCurrentControls();
+        this.disposeWithMe(toDisposable(spreadsheetPointerDownSub));
+        this.disposeWithMe(toDisposable(spreadsheetPointerUpSub));
     }
 
     private _initThemeChangeListener() {
@@ -295,11 +307,11 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         this._selectionRenderService.updateControlForCurrentByRangeData(selections);
     }
 
-    private _initRowHeader(sheetObject: ISheetObjectParam) {
+    private _initRowHeaderEvent(sheetObject: ISheetObjectParam) {
         const { spreadsheetRowHeader, spreadsheet } = sheetObject;
 
         this.disposeWithMe(
-            spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            spreadsheetRowHeader?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 this._selectionRenderService.disableDetectMergedCell();
                 this._selectionRenderService.eventTrigger(
                     evt,
@@ -308,21 +320,20 @@ export class MobileSelectionRenderController extends Disposable implements IRend
                     this._getActiveViewport(evt),
                     ScrollTimerType.Y
                 );
-
-                if (evt.button !== 2) {
-                    state.stopPropagation();
-                }
+                state.stopPropagation();
+                // use this to show contextmenu
+                this._selectionManagerService.refreshSelection();
             })
         );
 
         // spreadsheetRowHeader?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {});
     }
 
-    private _initColumnHeader(sheetObject: ISheetObjectParam) {
+    private _initColumnHeaderEvent(sheetObject: ISheetObjectParam) {
         const { spreadsheetColumnHeader, spreadsheet } = sheetObject;
 
         this.disposeWithMe(
-            spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            spreadsheetColumnHeader?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 this._selectionRenderService.disableDetectMergedCell();
 
                 this._selectionRenderService.eventTrigger(
@@ -332,10 +343,9 @@ export class MobileSelectionRenderController extends Disposable implements IRend
                     this._getActiveViewport(evt),
                     ScrollTimerType.X
                 );
-
-                if (evt.button !== 2) {
-                    state.stopPropagation();
-                }
+                state.stopPropagation();
+                // use this to show contextmenu
+                this._selectionManagerService.refreshSelection();
             })
         );
     }

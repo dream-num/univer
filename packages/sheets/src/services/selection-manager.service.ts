@@ -250,6 +250,7 @@ export class SelectionManagerService implements IDisposable {
         } else if (type === SelectionMoveType.MOVING) {
             this._refreshMoving(this._searchParamForSelection);
         } else {
+            // type == SelectionMoveType.MOVE_END
             this._refresh(this._searchParamForSelection);
         }
     }
@@ -343,6 +344,7 @@ export class SelectionManagerService implements IDisposable {
     }
 
     private _refresh(param?: ISelectionManagerSearchParam): void {
+        // _selectionMoveEndBefore$ listener:
         // selection.render-controller _selectionManagerService.selectionMoveEndBefore$.subscribe
         // --> _selectionRenderService.reset() --> _clearSelectionControls()
         // --> _selectionRenderService.addCellSelectionControlBySelectionData()

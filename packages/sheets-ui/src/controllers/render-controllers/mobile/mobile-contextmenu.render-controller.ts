@@ -54,9 +54,11 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
             listenToSelectionChangeEvent = false;
 
             const selectionRangeWithStyle = selectionsList[0];
-            if (!selectionRangeWithStyle.primary || Rectangle.equals(selectionRangeWithStyle.range, selectionRangeWithStyle.primary)) {
-                return;
-            }
+            // if (!selectionRangeWithStyle.primary || Rectangle.equals(selectionRangeWithStyle.range, selectionRangeWithStyle.primary)) {
+                // return;
+            // }
+
+            if (!selectionRangeWithStyle.primary) return;
 
             const canvasRect = this._layoutService.getCanvasElement().getBoundingClientRect();
             const range = this._selectionRenderService.attachSelectionWithCoord(selectionRangeWithStyle);

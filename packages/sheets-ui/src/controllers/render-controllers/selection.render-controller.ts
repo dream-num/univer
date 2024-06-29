@@ -79,7 +79,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         }
         const sheetObject = this._getSheetObject();
 
-        this._initViewMainListener(sheetObject);
+        this._initSpreadsheetEvent(sheetObject);
         this._initRowHeader(sheetObject);
         this._initColumnHeader(sheetObject);
         this._initLeftTop(sheetObject);
@@ -194,7 +194,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         return sheetObject?.scene.getActiveViewportByCoord(Vector2.FromArray([evt.offsetX, evt.offsetY]));
     }
 
-    private _initViewMainListener(sheetObject: ISheetObjectParam) {
+    private _initSpreadsheetEvent(sheetObject: ISheetObjectParam) {
         const { spreadsheet } = sheetObject;
 
         this.disposeWithMe(
@@ -332,6 +332,8 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                         }
                         const selectionData =
                             this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
+
+                        // TODO @lumixraku why why why !!!! you are just exanding selection, why add new one?
                         this._selectionRenderService.addCellSelectionControlBySelectionData(selectionData);
                     }
 

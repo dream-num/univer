@@ -20,7 +20,7 @@ import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/shee
 import { COPY_TYPE, ISelectionRenderService, ISheetClipboardService, PREDEFINED_HOOK_NAME, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
+import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsDrawingCopyPasteController)
@@ -69,7 +69,9 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         Object.keys(drawings).forEach((drawingId) => {
             const drawing = drawings[drawingId];
             const { transform } = drawing;
-
+            if (drawing.anchorType !== SheetDrawingAnchorType.Both) {
+                return;
+            }
             if (!transform) {
                 return;
             }

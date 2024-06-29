@@ -24,7 +24,8 @@ import type { IAccessor } from '@wendellhu/redi';
 import type { SheetDataValidationManager } from '../../models/sheet-data-validation-manager';
 import { OpenValidationPanelOperation } from '../operations/data-validation.operation';
 import type { RangeMutation } from '../../models/rule-matrix';
-import { CHECKBOX_FORMULA_2, type CheckboxValidator } from '../../validators';
+import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, type CheckboxValidator } from '../../validators';
+import { getStringCellValue } from '../../utils/get-cell-data-origin';
 
 export interface IUpdateSheetDataValidationRangeCommandParams {
     unitId: string;
@@ -72,7 +73,8 @@ export function getDataValidationDiffMutations(
         ranges.forEach((range) => {
             Range.foreach(range, (row, column) => {
                 const cellData = worksheet.getCellRaw(row, column);
-                if (isBlankCell(cellData) || cellData?.v === defaultValue) {
+                const value = getStringCellValue(cellData);
+                if (isBlankCell(cellData) || value === defaultValue) {
                     redoMatrix.setValue(row, column, {
                         v: defaultValue,
                         p: null,
@@ -380,15 +382,20 @@ export const UpdateSheetDataValidationSettingCommand: ICommand<IUpdateSheetDataV
             if (target) {
                 const redoMatrix = new ObjectMatrix<ICellData>();
                 const { worksheet } = target;
-                const { formula2: oldFormula2 = CHECKBOX_FORMULA_2 } = rule;
-                const { formula2 = CHECKBOX_FORMULA_2 } = setting;
+                const { formula2: oldFormula2 = CHECKBOX_FORMULA_2, formula1: oldFormula1 = CHECKBOX_FORMULA_1 } = rule;
+                const { formula2 = CHECKBOX_FORMULA_2, formula1 = CHECKBOX_FORMULA_1 } = setting;
                 ranges.forEach((range) => {
                     Range.foreach(range, (row, column) => {
                         const cellData = worksheet.getCellRaw(row, column);
-                        if (isBlankCell(cellData) || cellData?.v === oldFormula2) {
+                        const value = getStringCellValue(cellData);
+                        if (isBlankCell(cellData) || value === String(oldFormula2)) {
                             redoMatrix.setValue(row, column, {
                                 v: formula2,
-                                // t: 1,
+                                p: null,
+                            });
+                        } else if (value === String(oldFormula1)) {
+                            redoMatrix.setValue(row, column, {
+                                v: formula1,
                                 p: null,
                             });
                         }

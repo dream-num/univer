@@ -26,9 +26,7 @@ import type { ISidebarMethodOptions } from './interface';
 
 export function Sidebar() {
     const sidebarService = useDependency(ISidebarService);
-
     const [sidebarOptions, setSidebarOptions] = useState<ISidebarMethodOptions>({});
-
     useEffect(() => {
         const subscribtion = sidebarService.sidebarOptions$.subscribe((options: ISidebarMethodOptions) => {
             setSidebarOptions(options);
@@ -39,7 +37,7 @@ export function Sidebar() {
         };
     }, []);
 
-    const options = sidebarOptions as Omit<ISidebarMethodOptions, 'children'> & {
+    const options = { ...sidebarOptions } as Omit<ISidebarMethodOptions, 'children'> & {
         children?: React.ReactNode;
         header?: React.ReactNode;
         footer?: React.ReactNode;
@@ -80,7 +78,6 @@ export function Sidebar() {
         sidebarService.sidebarOptions$.next(options);
         options?.onClose?.();
     }
-
     return (
         <section className={_className} style={{ width }}>
             <section className={styles.sidebarContainer}>

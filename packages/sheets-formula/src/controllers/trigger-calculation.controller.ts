@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IUnitRange } from '@univerjs/core';
+import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle, throttle } from '@univerjs/core';
 import type {
     IDirtyUnitFeatureMap,
     IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetNameMap,
+    IExecutionInProgressParams,
+    IFormulaDirtyData,
     ISetFormulaCalculationNotificationMutation,
 } from '@univerjs/engine-formula';
 import {
@@ -29,6 +31,7 @@ import {
     IActiveDirtyManagerService,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
+    SetFormulaCalculationStopMutation,
 } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import {
@@ -46,7 +49,13 @@ import { Inject } from '@wendellhu/redi';
 export class TriggerCalculationController extends Disposable {
     private _waitingCommandQueue: ICommandInfo[] = [];
 
-    private _executingCommandQueue: ICommandInfo[] = [];
+    private _executingDirtyData: IFormulaDirtyData = {
+        dirtyRanges: [],
+        dirtyNameMap: {},
+        dirtyDefinedNameMap: {},
+        dirtyUnitFeatureMap: {},
+        dirtyUnitOtherFormulaMap: {},
+    };
 
     private _setTimeoutKey: NodeJS.Timeout | number = -1;
 
@@ -55,6 +64,10 @@ export class TriggerCalculationController extends Disposable {
     private _formulaCalculationDoneCount: number = 0;
 
     private _arrayFormulaCalculationDoneCount: number = 0;
+
+    private _executionInProgressParams: Nullable<IExecutionInProgressParams> = null;
+
+    private _restartCalculation = false;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -115,19 +128,25 @@ export class TriggerCalculationController extends Disposable {
                 clearTimeout(this._setTimeoutKey);
 
                 this._setTimeoutKey = setTimeout(() => {
-                    this._commandService.executeCommand(
-                        SetFormulaCalculationStartMutation.id,
-                        {
-                            ...this._generateDirty(this._waitingCommandQueue),
-                        },
-                        {
-                            onlyLocal: true,
-                        }
-                    );
+                    const dirtyData = this._generateDirty(this._waitingCommandQueue);
+                    this._executingDirtyData = this._mergeDirty(this._executingDirtyData, dirtyData);
+
+                    if (this._executionInProgressParams == null) {
+                        this._commandService.executeCommand(
+                            SetFormulaCalculationStartMutation.id,
+                            {
+                                ...this._executingDirtyData,
+                            },
+                            {
+                                onlyLocal: true,
+                            }
+                        );
+                    } else {
+                        this._restartCalculation = true;
+                        this._commandService.executeCommand(SetFormulaCalculationStopMutation.id, {});
+                    }
 
                     this._startExecutionTime = performance.now();
-
-                    this._executingCommandQueue = this._waitingCommandQueue;
 
                     this._waitingCommandQueue = [];
                 }, 100);
@@ -186,6 +205,27 @@ export class TriggerCalculationController extends Disposable {
         };
     }
 
+    private _mergeDirty(dirtyData1: IFormulaDirtyData, dirtyData2: IFormulaDirtyData) {
+        const allDirtyRanges: IUnitRange[] = [...dirtyData1.dirtyRanges, ...dirtyData2.dirtyRanges];
+        const allDirtyNameMap: IDirtyUnitSheetNameMap = { ...dirtyData1.dirtyNameMap };
+        const allDirtyDefinedNameMap: IDirtyUnitSheetNameMap = { ...dirtyData1.dirtyDefinedNameMap };
+        const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = { ...dirtyData1.dirtyUnitFeatureMap };
+        const allDirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = { ...dirtyData1.dirtyUnitOtherFormulaMap };
+
+        this._mergeDirtyNameMap(allDirtyNameMap, dirtyData2.dirtyNameMap);
+        this._mergeDirtyNameMap(allDirtyDefinedNameMap, dirtyData2.dirtyDefinedNameMap);
+        this._mergeDirtyUnitFeatureOrOtherFormulaMap(allDirtyUnitFeatureMap, dirtyData2.dirtyUnitFeatureMap);
+        this._mergeDirtyUnitFeatureOrOtherFormulaMap(allDirtyUnitOtherFormulaMap, dirtyData2.dirtyUnitOtherFormulaMap);
+
+        return {
+            dirtyRanges: allDirtyRanges,
+            dirtyNameMap: allDirtyNameMap,
+            dirtyDefinedNameMap: allDirtyDefinedNameMap,
+            dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
+            dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
+        };
+    }
+
     private _mergeDirtyNameMap(allDirtyNameMap: IDirtyUnitSheetNameMap, dirtyNameMap: IDirtyUnitSheetNameMap) {
         Object.keys(dirtyNameMap).forEach((unitId) => {
             if (allDirtyNameMap[unitId] == null) {
@@ -223,6 +263,7 @@ export class TriggerCalculationController extends Disposable {
         });
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initialExecuteFormulaProcessListener() {
         /**
          * Assignment operation after formula calculation.
@@ -237,6 +278,7 @@ export class TriggerCalculationController extends Disposable {
         let needStartArrayFormulaProgress = false;
 
         this.disposeWithMe(
+            // eslint-disable-next-line complexity, max-lines-per-function
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id !== SetFormulaCalculationNotificationMutation.id) {
                     return;
@@ -304,6 +346,8 @@ export class TriggerCalculationController extends Disposable {
                         }
                     }
 
+                    this._executionInProgressParams = params.stageInfo;
+
                     // if (totalArrayFormulasToCalculate > 0) {
                     // console.warn(
                     //     `Stage ${stage} Array formula.There are ${totalArrayFormulasToCalculate} functions to be executed, ${completedArrayFormulasCount} complete.`
@@ -319,22 +363,20 @@ export class TriggerCalculationController extends Disposable {
                     switch (state) {
                         case FormulaExecutedStateType.NOT_EXECUTED:
                             result = 'No tasks are being executed anymore';
-                            // this._waitingCommandQueue.unshift(...this._executingCommandQueue);
-                            this._executingCommandQueue = [];
+                            this._resetExecutingDirtyData();
                             break;
                         case FormulaExecutedStateType.STOP_EXECUTION:
                             result = 'The execution of the formula has been stopped';
-                            this._waitingCommandQueue.unshift(...this._executingCommandQueue);
-                            this._executingCommandQueue = [];
+                            // this._executingCommandQueue = [];
                             break;
                         case FormulaExecutedStateType.SUCCESS:
                             result = `Formula calculation succeeded, Total time consumed: ${performance.now() - this._startExecutionTime
                             } ms`;
-                            this._executingCommandQueue = [];
+                            this._resetExecutingDirtyData();
                             break;
                         case FormulaExecutedStateType.INITIAL:
                             result = 'Waiting for calculation';
-                            this._executingCommandQueue = [];
+                            this._resetExecutingDirtyData();
                             break;
                     }
 
@@ -361,10 +403,35 @@ export class TriggerCalculationController extends Disposable {
                         needStartArrayFormulaProgress = false;
                     }
 
+                    if (state === FormulaExecutedStateType.STOP_EXECUTION && this._restartCalculation) {
+                        this._restartCalculation = false;
+                        this._commandService.executeCommand(
+                            SetFormulaCalculationStartMutation.id,
+                            {
+                                ...this._executingDirtyData,
+                            },
+                            {
+                                onlyLocal: true,
+                            }
+                        );
+                    } else {
+                        this._executionInProgressParams = null;
+                    }
+
                     console.warn(`execution result${result}`);
                 }
             })
         );
+    }
+
+    private _resetExecutingDirtyData() {
+        this._executingDirtyData = {
+            dirtyRanges: [],
+            dirtyNameMap: {},
+            dirtyDefinedNameMap: {},
+            dirtyUnitFeatureMap: {},
+            dirtyUnitOtherFormulaMap: {},
+        };
     }
 
     private _initialExecuteFormula() {

@@ -79,6 +79,8 @@ export interface IExecutionInProgressParams {
     totalArrayFormulasToCalculate: number;
     completedArrayFormulasCount: number;
 
+    formulaCycleIndex: number;
+
     stage: FormulaExecuteStageType;
 }
 
@@ -117,6 +119,8 @@ export interface IFormulaRuntimeService {
     stopExecution(): void;
 
     setFormulaExecuteStage(type: FormulaExecuteStageType): void;
+
+    setFormulaCycleIndex(index: number): void;
 
     isStopExecution(): boolean;
 
@@ -212,6 +216,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     private _completedArrayFormulasCount: number = 0;
 
+    private _formulaCycleIndex: number = 0;
+
     private _isCycleDependency: boolean = false;
 
     constructor(@IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService) {
@@ -290,6 +296,14 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     getCompletedFormulasCount() {
         return this._completedFormulasCount;
+    }
+
+    setFormulaCycleIndex(index: number) {
+        this._formulaCycleIndex = index;
+    }
+
+    getFormulaCycleIndex() {
+        return this._formulaCycleIndex;
     }
 
     markedAsSuccessfullyExecuted() {
@@ -597,6 +611,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             completedArrayFormulasCount: this.getCompletedArrayFormulasCount(),
 
             stage: this.getFormulaExecuteStage(),
+
+            formulaCycleIndex: this.getFormulaCycleIndex(),
         };
     }
 

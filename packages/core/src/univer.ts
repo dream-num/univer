@@ -78,7 +78,6 @@ export class Univer {
         logLevel && this._injector.get(ILogService).setLogLevel(logLevel);
 
         this._init(injector);
-        const _a = this._pluginService;
     }
 
     __getInjector(): Injector {

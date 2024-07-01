@@ -14,4 +14,17 @@
  * limitations under the License.
  */
 
+export {
+    SortRangeAscCommand,
+    SortRangeAscExtCommand,
+    SortRangeAscExtInCtxMenuCommand,
+    SortRangeAscInCtxMenuCommand,
+    SortRangeCustomCommand,
+    SortRangeCustomInCtxMenuCommand,
+    SortRangeDescCommand,
+    SortRangeDescExtCommand,
+    SortRangeDescExtInCtxMenuCommand,
+    SortRangeDescInCtxMenuCommand,
+} from './commands/sheets-sort.command';
+
 export { UniverSheetsSortUIPlugin } from './plugin';

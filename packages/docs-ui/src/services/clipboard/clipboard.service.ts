@@ -91,7 +91,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
 
         try {
-            this._setClipboardData(documentBodyList);
+            const activeRange = this._textSelectionManagerService.getActiveRange();
+            const isCopyInHeaderFooter = !!activeRange?.segmentId;
+            this._setClipboardData(documentBodyList, !isCopyInHeaderFooter);
         } catch (e) {
             this._logService.error('[DocClipboardService] copy failed', e);
             return false;
@@ -112,6 +114,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     async legacyPaste(html?: string, text?: string): Promise<boolean> {
         const body = this._generateBodyFromHtmlAndText(html, text);
+
         return this._paste(body);
     }
 
@@ -205,7 +208,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
     }
 
-    private async _setClipboardData(documentBodyList: IDocumentBody[]): Promise<void> {
+    private async _setClipboardData(documentBodyList: IDocumentBody[], needCache = true): Promise<void> {
         const copyId = genId();
         const text =
             documentBodyList.length > 1
@@ -213,8 +216,8 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 : documentBodyList[0].dataStream;
         let html = this._umdToHtml.convert(documentBodyList);
 
-        // Only cache copy content when the range is 1.
-        if (documentBodyList.length === 1) {
+            // Only cache copy content when the range is 1.
+        if (documentBodyList.length === 1 && needCache) {
             html = html.replace(/(<[a-z]+)/, (_p0, p1) => `${p1} data-copy-id="${copyId}"`);
             copyContentCache.set(copyId, documentBodyList[0]);
         }

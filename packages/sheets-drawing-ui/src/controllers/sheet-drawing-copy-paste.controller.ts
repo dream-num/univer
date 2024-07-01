@@ -83,7 +83,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                 drawingEndY: top + height,
             };
 
-            if (startX < drawingEndX && drawingStartX < endX && startY < drawingEndY && drawingStartY < endY) {
+            if (startX <= drawingStartX && drawingEndX <= endX && startY <= drawingStartY && drawingEndY <= endY) {
                 containedDrawings.push(drawing);
             }
         });

@@ -65,11 +65,14 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, sele
     }
 
     const skeleton = sheetSkeletonManagerService.getCurrentSkeleton();
-    if (left + width > skeleton.columnTotalWidth) {
-        left = skeleton.columnTotalWidth - width;
+    const sheetWidth = skeleton.rowHeaderWidth + skeleton.columnTotalWidth;
+    const sheetHeight = skeleton.columnHeaderHeight + skeleton.rowTotalHeight;
+
+    if ((left + width) > sheetWidth) {
+        left = sheetWidth - width;
     }
-    if (top + height > skeleton.rowTotalHeight) {
-        top = skeleton.rowTotalHeight - height;
+    if ((top + height) > sheetHeight) {
+        top = sheetHeight - height;
     }
 
     return {

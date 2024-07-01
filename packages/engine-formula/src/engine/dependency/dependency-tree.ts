@@ -79,14 +79,25 @@ export class FormulaDependencyTree extends Disposable {
     override dispose(): void {
         super.dispose();
 
-        this.children.forEach((tree) => {
-            tree.dispose();
-        });
+        // this.children.forEach((tree) => {
+        //     tree.dispose();
+        // });
+
+        this.children = [];
+
         this.rangeList = [];
 
         this.parents = [];
 
         this.node?.dispose();
+    }
+
+    disposeWithChildren() {
+        this.children.forEach((tree) => {
+            tree.disposeWithChildren();
+        });
+
+        this.dispose();
     }
 
     resetState() {

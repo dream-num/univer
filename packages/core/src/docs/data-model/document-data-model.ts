@@ -237,6 +237,10 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         return this.snapshot.body?.customRanges;
     }
 
+    getCustomDecorations() {
+        return this.snapshot.body?.customDecorations;
+    }
+
     getRev(): number {
         return this.snapshot.rev ?? 1;
     }

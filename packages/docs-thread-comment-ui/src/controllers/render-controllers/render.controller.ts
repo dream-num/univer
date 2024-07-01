@@ -87,5 +87,32 @@ export class DocThreadCommentRenderController extends Disposable implements IRen
                 });
             },
         });
+
+        this._docInterceptorService.intercept(DOC_INTERCEPTOR_POINT.CUSTOM_DECORATION, {
+            handler: (data, pos, next) => {
+                if (!data) {
+                    return next(data);
+                }
+                const { unitId, index, customDecorations } = pos;
+                const activeComment = this._threadCommentPanelService.activeCommentId;
+                const { commentId, unitId: commentUnitID } = activeComment || {};
+                const activeCustomDecoration = customDecorations.find((i) => i.id === commentId);
+                const comment = this._threadCommentModel.getComment(unitId, DEFAULT_DOC_SUBUNIT_ID, data.id);
+                if (!comment) {
+                    return next({
+                        ...data,
+                        show: false,
+                    });
+                }
+
+                const isActiveIndex = activeCustomDecoration && index >= activeCustomDecoration.startIndex && index <= activeCustomDecoration.endIndex;
+                const isActive = commentUnitID === unitId && data.id === commentId;
+                return next({
+                    ...data,
+                    active: isActive || isActiveIndex,
+                    show: !comment.resolved,
+                });
+            },
+        });
     }
 }

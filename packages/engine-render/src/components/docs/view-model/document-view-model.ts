@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICustomRangeForInterceptor, IDocumentBody, ITextRun, Nullable } from '@univerjs/core';
+import type { ICustomDecorationForInterceptor, ICustomRangeForInterceptor, IDocumentBody, ITextRun, Nullable } from '@univerjs/core';
 import { DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentDataModel, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 
@@ -22,10 +22,11 @@ import { DataStreamTreeNode } from './data-stream-tree-node';
 
 export interface ICustomRangeInterceptor {
     getCustomRange: (index: number) => Nullable<ICustomRangeForInterceptor>;
+    getCustomDecoration: (index: number) => Nullable<ICustomDecorationForInterceptor>;
 }
 
 export class DocumentViewModel implements IDisposable {
-    private _customRangeInterceptor: Nullable<ICustomRangeInterceptor> = null;
+    private _interceptor: Nullable<ICustomRangeInterceptor> = null;
 
     children: DataStreamTreeNode[] = [];
 
@@ -56,12 +57,12 @@ export class DocumentViewModel implements IDisposable {
     }
 
     registerCustomRangeInterceptor(interceptor: ICustomRangeInterceptor): IDisposable {
-        if (this._customRangeInterceptor) {
+        if (this._interceptor) {
             throw new Error('[DocViewModel]: Interceptor already registered.');
         }
 
-        this._customRangeInterceptor = interceptor;
-        return toDisposable(() => this._customRangeInterceptor = null);
+        this._interceptor = interceptor;
+        return toDisposable(() => this._interceptor = null);
     }
 
     dispose(): void {
@@ -399,11 +400,33 @@ export class DocumentViewModel implements IDisposable {
     }
 
     getCustomRange(index: number): Nullable<ICustomRangeForInterceptor> {
-        if (this._customRangeInterceptor) {
-            return this._customRangeInterceptor.getCustomRange(index);
+        if (this._interceptor) {
+            return this._interceptor.getCustomRange(index);
         }
 
         return this.getCustomRangeRaw(index);
+    }
+
+    getCustomDecorationRaw(index: number) {
+        const customDecorations = this.getBody()!.customDecorations;
+        if (customDecorations == null) {
+            return;
+        }
+
+        for (let i = 0, customDecorationsLen = customDecorations.length; i < customDecorationsLen; i++) {
+            const customDecoration = customDecorations[i];
+            if (index >= customDecoration.startIndex && index <= customDecoration.endIndex) {
+                return customDecoration;
+            }
+        }
+    }
+
+    getCustomDecoration(index: number): Nullable<ICustomDecorationForInterceptor> {
+        if (this._interceptor) {
+            return this._interceptor.getCustomDecoration(index);
+        }
+
+        return this.getCustomDecorationRaw(index);
     }
 
     protected _transformToTree(dataStream: string) {

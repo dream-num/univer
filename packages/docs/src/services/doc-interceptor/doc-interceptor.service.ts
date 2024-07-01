@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomRangeForInterceptor, IInterceptor, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICustomDecorationForInterceptor, ICustomRangeForInterceptor, IInterceptor, Nullable } from '@univerjs/core';
 import { composeInterceptors, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, LifecycleStages, OnLifecycle, remove, toDisposable } from '@univerjs/core';
 import type { DocumentViewModel, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
@@ -32,7 +32,6 @@ export class DocInterceptorService extends Disposable implements IRenderModule {
         super();
 
         this.disposeWithMe(this._docSkeletonManagerService.currentViewModel$.subscribe((viewModel) => {
-
             if (viewModel) {
                 const unitId = viewModel.getDataModel().getUnitId();
                 if (unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY || unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
@@ -83,6 +82,16 @@ export class DocInterceptorService extends Disposable implements IRenderModule {
                         index,
                         unitId: viewModel.getDataModel().getUnitId(),
                         customRanges: viewModel.getDataModel().getCustomRanges() ?? [],
+                    }
+                );
+            },
+            getCustomDecoration: (index: number): Nullable<ICustomDecorationForInterceptor> => {
+                return this.fetchThroughInterceptors(DOC_INTERCEPTOR_POINT.CUSTOM_DECORATION)(
+                    viewModel.getCustomDecorationRaw(index),
+                    {
+                        index,
+                        unitId: viewModel.getDataModel().getUnitId(),
+                        customDecorations: viewModel.getDataModel().getCustomDecorations() ?? [],
                     }
                 );
             },

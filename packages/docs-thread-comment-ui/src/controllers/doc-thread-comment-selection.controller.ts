@@ -54,9 +54,9 @@ export class DocThreadCommentSelectionController extends Disposable {
                         let customRange;
 
                         if (collapsed) { // cursor
-                            customRange = doc.getBody()?.customRanges?.find((value) => value.startIndex <= startOffset - 2 && value.endIndex >= (endOffset + 1));
+                            customRange = doc.getBody()?.customDecorations?.find((value) => value.startIndex <= startOffset - 2 && value.endIndex >= (endOffset + 1));
                         } else { // range
-                            customRange = doc.getBody()?.customRanges?.find((value) => value.startIndex <= startOffset && value.endIndex >= (endOffset - 1));
+                            customRange = doc.getBody()?.customDecorations?.find((value) => value.startIndex <= startOffset && value.endIndex >= (endOffset - 1));
                         }
 
                         if (customRange) {
@@ -64,7 +64,7 @@ export class DocThreadCommentSelectionController extends Disposable {
                                 activeComment: {
                                     unitId,
                                     subUnitId: DEFAULT_DOC_SUBUNIT_ID,
-                                    commentId: customRange.rangeId,
+                                    commentId: customRange.id,
                                 },
                             });
                             return;

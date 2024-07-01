@@ -767,14 +767,14 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             },
         ],
         customBlocks: [],
-        customRanges: [
-            {
-                rangeId: '3tnTNMRA1jYWkcoxSEoCk',
-                rangeType: 4,
-                startIndex: 23,
-                endIndex: 110,
-            },
-        ],
+        // customRanges: [
+        //     {
+        //         rangeId: '3tnTNMRA1jYWkcoxSEoCk',
+        //         rangeType: 4,
+        //         startIndex: 23,
+        //         endIndex: 110,
+        //     },
+        // ],
     },
     resources: [
         {

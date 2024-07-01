@@ -17,7 +17,7 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import { BooleanNumber, Disposable, DocumentFlavor, ICommandService, IUniverInstanceService, LocaleService, toDisposable, Tools } from '@univerjs/core';
 import type { Documents, DocumentViewModel, IMouseEvent, IPageRenderConfig, IPathProps, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
-import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager, PageLayoutType, Path, Vector2 } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager, PageLayoutType, Path, Rect, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
 import { ComponentManager, IEditorService } from '@univerjs/ui';
@@ -267,6 +267,8 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
     // eslint-disable-next-line max-lines-per-function
     private _drawHeaderFooterLabel() {
         const localeService = this._localeService;
+
+        // eslint-disable-next-line max-lines-per-function
         this._renderManagerService.currentRender$.subscribe((unitId) => {
             if (unitId == null) {
                 return;
@@ -287,59 +289,92 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
             this.disposeWithMe(
                 toDisposable(
+                    // eslint-disable-next-line max-lines-per-function
                     docsComponent.pageRender$.subscribe((config: IPageRenderConfig) => {
-                        const viewModel = this._docSkeletonManagerService.getViewModel();
-                        const isEditBody = viewModel.getEditArea() === DocumentEditArea.BODY;
-                        if (this._editorService.isEditor(unitId) || isEditBody) {
+                        if (this._editorService.isEditor(unitId)) {
                             return;
                         }
-
-                        // Draw page borders
+                        const viewModel = this._docSkeletonManagerService.getViewModel();
+                        const editArea = viewModel.getEditArea();
+                        const isEditBody = editArea === DocumentEditArea.BODY;
                         const { page, pageLeft, pageTop, ctx } = config;
-
                         const { pageWidth, pageHeight, marginTop, marginBottom } = page;
 
+                        // Draw header footer label.
                         ctx.save();
-
                         ctx.translate(pageLeft - 0.5, pageTop - 0.5);
 
-                        const headerPathConfigIPathProps = {
-                            dataArray: [{
-                                command: 'M',
-                                points: [0, marginTop],
-                            }, {
-                                command: 'L',
-                                points: [pageWidth, marginTop],
-                            }] as unknown as IPathProps['dataArray'],
-                            strokeWidth: 1,
-                            stroke: HEADER_FOOTER_STROKE_COLOR,
-                        };
+                        // Cover header and footer.
+                        if (isEditBody) {
+                            Rect.drawWith(ctx, {
+                                left: 0,
+                                top: 0,
+                                width: pageWidth,
+                                height: marginTop,
+                                fill: 'rgba(255, 255, 255, 0.5)',
+                            });
+                            ctx.save();
+                            ctx.translate(0, pageHeight - marginBottom);
+                            Rect.drawWith(ctx, {
+                                left: 0,
+                                top: 0,
+                                width: pageWidth,
+                                height: marginBottom,
+                                fill: 'rgba(255, 255, 255, 0.5)',
+                            });
+                            ctx.restore();
+                        } else { // Cover body.
+                            ctx.save();
+                            ctx.translate(0, marginTop);
+                            Rect.drawWith(ctx, {
+                                left: 0,
+                                top: marginTop,
+                                width: pageWidth,
+                                height: pageHeight - marginTop - marginBottom,
+                                fill: 'rgba(255, 255, 255, 0.5)',
+                            });
+                            ctx.restore();
+                        }
 
-                        const footerPathConfigIPathProps = {
-                            dataArray: [{
-                                command: 'M',
-                                points: [0, pageHeight - marginBottom],
-                            }, {
-                                command: 'L',
-                                points: [pageWidth, pageHeight - marginBottom],
-                            }] as unknown as IPathProps['dataArray'],
-                            strokeWidth: 1,
-                            stroke: HEADER_FOOTER_STROKE_COLOR,
-                        };
+                        if (!isEditBody) {
+                            const headerPathConfigIPathProps = {
+                                dataArray: [{
+                                    command: 'M',
+                                    points: [0, marginTop],
+                                }, {
+                                    command: 'L',
+                                    points: [pageWidth, marginTop],
+                                }] as unknown as IPathProps['dataArray'],
+                                strokeWidth: 1,
+                                stroke: HEADER_FOOTER_STROKE_COLOR,
+                            };
 
-                        Path.drawWith(ctx, headerPathConfigIPathProps);
-                        Path.drawWith(ctx, footerPathConfigIPathProps);
+                            const footerPathConfigIPathProps = {
+                                dataArray: [{
+                                    command: 'M',
+                                    points: [0, pageHeight - marginBottom],
+                                }, {
+                                    command: 'L',
+                                    points: [pageWidth, pageHeight - marginBottom],
+                                }] as unknown as IPathProps['dataArray'],
+                                strokeWidth: 1,
+                                stroke: HEADER_FOOTER_STROKE_COLOR,
+                            };
 
-                        ctx.translate(0, marginTop + 1);
-                        TextBubbleShape.drawWith(ctx, {
-                            text: localeService.t('headerFooter.header'),
-                            color: HEADER_FOOTER_FILL_COLOR,
-                        });
-                        ctx.translate(0, pageHeight - marginTop - marginBottom);
-                        TextBubbleShape.drawWith(ctx, {
-                            text: localeService.t('headerFooter.footer'),
-                            color: HEADER_FOOTER_FILL_COLOR,
-                        });
+                            Path.drawWith(ctx, headerPathConfigIPathProps);
+                            Path.drawWith(ctx, footerPathConfigIPathProps);
+
+                            ctx.translate(0, marginTop + 1);
+                            TextBubbleShape.drawWith(ctx, {
+                                text: localeService.t('headerFooter.header'),
+                                color: HEADER_FOOTER_FILL_COLOR,
+                            });
+                            ctx.translate(0, pageHeight - marginTop - marginBottom);
+                            TextBubbleShape.drawWith(ctx, {
+                                text: localeService.t('headerFooter.footer'),
+                                color: HEADER_FOOTER_FILL_COLOR,
+                            });
+                        }
                         ctx.restore();
                     })
                 )

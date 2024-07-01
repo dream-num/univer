@@ -18,7 +18,6 @@ import './extensions';
 
 import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import type { IDocumentRenderConfig, IScale, Nullable } from '@univerjs/core';
-
 import { Subject } from 'rxjs';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
@@ -228,19 +227,12 @@ export class Documents extends DocComponent {
                 );
             }
 
-            this._pageRender$.next({
-                page,
-                pageLeft,
-                pageTop,
-                ctx,
-            });
-
             this._startRotation(ctx, finalAngle);
 
-            if (!isEditBody) {
-                ctx.save();
-                ctx.globalAlpha = 0.5;
-            }
+            // if (!isEditBody) {
+            //     ctx.save();
+            //     ctx.globalAlpha = 0.5;
+            // }
 
             for (const section of sections) {
                 const { columns } = section;
@@ -437,9 +429,9 @@ export class Documents extends DocComponent {
                 }
             }
 
-            if (!isEditBody) {
-                ctx.restore();
-            }
+            // if (!isEditBody) {
+            //     ctx.restore();
+            // }
 
             this._resetRotation(ctx, finalAngle);
 
@@ -464,6 +456,13 @@ export class Documents extends DocComponent {
                     parentScale
                 );
             }
+
+            this._pageRender$.next({
+                page,
+                pageLeft,
+                pageTop,
+                ctx,
+            });
 
             const { x, y } = this._drawLiquid.translatePage(
                 page,
@@ -494,10 +493,10 @@ export class Documents extends DocComponent {
         const editArea = this.getSkeleton()?.getViewModel().getEditArea();
         const isEditHeaderFooter = editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER;
 
-        if (!isEditHeaderFooter) {
-            ctx.save();
-            ctx.globalAlpha = 0.5;
-        }
+        // if (!isEditHeaderFooter) {
+        //     ctx.save();
+        //     ctx.globalAlpha = 0.5;
+        // }
         const { sections } = page;
 
         for (const section of sections) {
@@ -642,9 +641,9 @@ export class Documents extends DocComponent {
             this._drawLiquid.translateRestore();
         }
 
-        if (!isEditHeaderFooter) {
-            ctx.restore();
-        }
+        // if (!isEditHeaderFooter) {
+        //     ctx.restore();
+        // }
     }
 
     private _horizontalHandler(

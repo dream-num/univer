@@ -250,8 +250,8 @@ export class CalculateFormulaService extends Disposable {
              * For every functions, execute a setTimeout to wait for external command input.
              */
             await new Promise((resolve) => {
-                const calcelTask = requestImmediateMacroTask(resolve);
-                pendingTasks.push(calcelTask);
+                const calCancelTask = requestImmediateMacroTask(resolve);
+                pendingTasks.push(calCancelTask);
             });
 
             if (this._runtimeService.isStopExecution()) {

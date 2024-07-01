@@ -360,6 +360,10 @@ export class TriggerCalculationController extends Disposable {
                 } else {
                     const state = params.functionsExecutedState;
                     let result = '';
+
+                    // Decrement the calculation process count
+                    calculationProcessCount--;
+
                     switch (state) {
                         case FormulaExecutedStateType.NOT_EXECUTED:
                             result = 'No tasks are being executed anymore';
@@ -368,6 +372,8 @@ export class TriggerCalculationController extends Disposable {
                         case FormulaExecutedStateType.STOP_EXECUTION:
                             result = 'The execution of the formula has been stopped';
                             // this._executingCommandQueue = [];
+                            this._progressService.stop();
+                            calculationProcessCount = 0;
                             break;
                         case FormulaExecutedStateType.SUCCESS:
                             result = `Formula calculation succeeded, Total time consumed: ${performance.now() - this._startExecutionTime
@@ -380,9 +386,6 @@ export class TriggerCalculationController extends Disposable {
                             break;
                     }
 
-                    // Decrement the calculation process count
-                    calculationProcessCount--;
-
                     if (calculationProcessCount === 0) {
                         if (startDependencyTimer) {
                             // The total calculation time does not exceed 1s, and the progress bar is not displayed.
@@ -392,8 +395,6 @@ export class TriggerCalculationController extends Disposable {
                             // Manually hide the progress bar only if no other calculations are in process
                             if (state === FormulaExecutedStateType.SUCCESS) {
                                 this._progressService.complete();
-                            } else if (state === FormulaExecutedStateType.STOP_EXECUTION) {
-                                this._progressService.stop();
                             }
                         }
 

@@ -354,6 +354,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._functionDefinitionPrivacyVar.clear();
         this.markedAsInitialFunctionsExecuted();
 
+        this._stopState = false;
+
         this._isCycleDependency = false;
 
         this._totalFormulasToCalculate = 0;
@@ -423,6 +425,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         subComponentData![formulaId] = cellDatas;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     setRuntimeData(functionVariant: FunctionVariantType) {
         const row = this._currentRow;
         const column = this._currentColumn;

@@ -40,7 +40,6 @@ import { LockSingle } from '@univerjs/icons';
 import { merge } from 'rxjs';
 import { Quantity } from '@wendellhu/redi';
 import { SheetMenuPosition } from '../../../controllers/menu/menu';
-import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { useActiveWorkbook } from '../../../components/hook';
@@ -64,7 +63,6 @@ export function SheetBarTabs() {
     const sheetBarService = useDependency(ISheetBarService);
     const localeService = useDependency(LocaleService);
     const confirmService = useDependency(IConfirmService);
-    const selectionRenderService = useDependency(ISelectionRenderService);
     const editorBridgeService = useDependency(IEditorBridgeService, Quantity.OPTIONAL);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
@@ -264,7 +262,8 @@ export function SheetBarTabs() {
     };
 
     const focusTabEditor = () => {
-        selectionRenderService.endSelection();
+        // FIXME@Dushusir: too strongly coupled
+        // selectionRenderService.endSelection();
 
         // There is an asynchronous operation in endSelection, which will trigger blur immediately after focus, so it must be wrapped with setTimeout.
         setTimeout(() => {

@@ -16,7 +16,7 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, Range } from '@univerjs/core';
-import { getSheetCommandTarget, INumfmtService, SelectionManagerService } from '@univerjs/sheets';
+import { getSheetCommandTarget, INumfmtService, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
@@ -28,11 +28,11 @@ export const SubtractDecimalCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const numfmtService = accessor.get(INumfmtService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selections = selectionManagerService.getSelections();
+        const selections = selectionManagerService.getCurrentSelections();
         if (!selections || !selections.length) {
             return false;
         }

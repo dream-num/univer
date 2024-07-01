@@ -18,7 +18,7 @@ import { merge, Observable } from 'rxjs';
 import type { IMenuSelectorItem } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { RangeProtectionPermissionEditPoint, SelectionManagerService, SetWorksheetActiveOperation, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 
 import { debounceTime } from 'rxjs/operators';
 import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
@@ -77,7 +77,7 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
         },
     ];
 
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
@@ -95,7 +95,7 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
             return () => disposable.dispose();
         })
     ).pipe(debounceTime(16)).subscribe(() => {
-        const ranges = selectionManagerService.getSelections()?.map((selection) => selection.range) || [];
+        const ranges = selectionManagerService.getCurrentSelections()?.map((selection) => selection.range) || [];
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return;
         const worksheet = workbook.getActiveSheet();

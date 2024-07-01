@@ -30,7 +30,7 @@ import type {
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
 } from '../../basics/interfaces/mutation-interface';
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertColMutation, InsertRowMutation } from '../mutations/insert-row-col.mutation';
 import {
@@ -57,11 +57,11 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
 
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params?: IRemoveRowColCommandParams) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         let totalRange = params?.range;
-        if (!totalRange) totalRange = selectionManagerService.getLast()?.range;
+        if (!totalRange) totalRange = selectionManagerService.getCurrentLastSelection()?.range;
         if (!totalRange) return false;
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -172,11 +172,11 @@ export const RemoveColCommand: ICommand = {
     id: RemoveColCommandId,
 
     handler: async (accessor: IAccessor, params?: IRemoveRowColCommandParams) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         let range = params?.range;
-        if (!range) range = selectionManagerService.getLast()?.range;
+        if (!range) range = selectionManagerService.getCurrentLastSelection()?.range;
         if (!range) return false;
 
         const univerInstanceService = accessor.get(IUniverInstanceService);

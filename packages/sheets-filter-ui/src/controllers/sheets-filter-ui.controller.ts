@@ -47,7 +47,7 @@ export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 /**
  * This controller controls the UI of "filter" features. Menus, commands and filter panel etc. Except for the rendering.
  */
-@OnLifecycle(LifecycleStages.Ready, SheetsFilterUIController)
+@OnLifecycle(LifecycleStages.Rendered, SheetsFilterUIController)
 export class SheetsFilterUIController extends SheetsFilterMobileUIController {
     constructor(
         private readonly _config: Partial<IUniverSheetsFilterUIConfig>,

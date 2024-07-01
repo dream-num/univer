@@ -17,11 +17,10 @@
 import type { Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
     SetRangeValuesCommand,
     SetRangeValuesMutation,
     SetSelectionsOperation,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -61,14 +60,10 @@ describe('Test insert function operation', () => {
     describe('insert function', () => {
         describe('correct situations', () => {
             it('insert function, match the data range above, directly set values', async () => {
-                const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
+                const selectionManager = get(SheetsSelectionsService);
+
                 // B3:B4
-                selectionManager.add([
+                selectionManager.addSelections([
                     {
                         range: { startRow: 2, startColumn: 1, endRow: 3, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
@@ -102,14 +97,10 @@ describe('Test insert function operation', () => {
             });
 
             it('insert function, match the data range left, directly set values', async () => {
-                const selectionManager = get(SelectionManagerService);
-                selectionManager.setCurrentSelection({
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                    unitId: 'test',
-                    sheetId: 'sheet1',
-                });
+                const selectionManager = get(SheetsSelectionsService);
+
                 // C2:D2
-                selectionManager.add([
+                selectionManager.addSelections([
                     {
                         range: { startRow: 1, startColumn: 2, endRow: 1, endColumn: 3, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,

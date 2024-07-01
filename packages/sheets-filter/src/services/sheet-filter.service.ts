@@ -15,7 +15,8 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { CommandType, Disposable,
+import {
+    CommandType, Disposable,
     fromCallback,
     ICommandService,
     IResourceManagerService,
@@ -71,7 +72,8 @@ export class SheetsFilterService extends Disposable {
     constructor(
         @IResourceManagerService private readonly _resourcesManagerService: IResourceManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService) {
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
         super();
 
         this._initModel();
@@ -136,7 +138,7 @@ export class SheetsFilterService extends Disposable {
         }
 
         // Use getActiveSheet to avoid automatically activating the next sheet when deleting the sheet, causing the sheet switching in ActiveWorksheetController to be invalid.
-        const activeSheet = workbook.getActiveSheet();
+        const activeSheet = workbook.getActiveSheet(true);
         if (!activeSheet) {
             this._activeFilterModel$.next(null);
             return;

@@ -20,7 +20,7 @@
 import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
 import { Disposable, DisposableCollection, FOCUSING_EDITOR_STANDALONE, ICommandService, IContextService, IPermissionService, isICellData, IUniverInstanceService, LifecycleStages, LocaleService, ObjectMatrix, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, ISetRangeValuesCommandParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetNameMutationParams } from '@univerjs/sheets';
-import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SelectionManagerService, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookHideSheetPermission, WorkbookManageCollaboratorPermission, WorkbookMoveSheetPermission, WorkbookRenameSheetPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, SheetsSelectionsService, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookHideSheetPermission, WorkbookManageCollaboratorPermission, WorkbookMoveSheetPermission, WorkbookRenameSheetPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
 import { IMEInputCommand, InsertCommand } from '@univerjs/docs';
@@ -49,7 +49,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IDialogService private readonly _dialogService: IDialogService,
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
@@ -318,7 +318,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
             return false;
         }
         const { worksheet, unitId, subUnitId } = target;
-        const selectionRange = this._selectionManagerService.getLast()?.range;
+        const selectionRange = this._selectionManagerService.getCurrentLastSelection()?.range;
         if (!selectionRange) {
             return false;
         };
@@ -363,7 +363,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
             return false;
         }
         const { worksheet, unitId, subUnitId } = target;
-        const selection = this._selectionManagerService.getLast();
+        const selection = this._selectionManagerService.getCurrentLastSelection();
         if (!selection) {
             return true;
         }
@@ -423,7 +423,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         if (!subUnitId) {
             subUnitId = worksheet.getSheetId();
         }
-        const ranges = selectionRanges ?? this._selectionManagerService.getSelections()?.map((selection) => {
+        const ranges = selectionRanges ?? this._selectionManagerService.getCurrentSelections()?.map((selection) => {
             return selection.range;
         });
 

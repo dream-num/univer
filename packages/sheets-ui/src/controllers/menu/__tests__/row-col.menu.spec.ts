@@ -24,8 +24,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import {
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
     SetColHiddenCommand,
     SetColHiddenMutation,
     SetColVisibleMutation,
@@ -75,13 +73,6 @@ describe('Test row col menu items', () => {
         });
 
         disposableCollection = new DisposableCollection();
-
-        const selectionManager = get(SelectionManagerService);
-        selectionManager.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
     });
 
     afterEach(() => univer.dispose());
@@ -108,7 +99,7 @@ describe('Test row col menu items', () => {
         return commandService.executeCommand<ISetSelectionsOperationParams, boolean>(SetSelectionsOperation.id, {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [
                 {
                     range: { startRow: rowStart, startColumn: 0, endColumn, endRow: rowEnd, rangeType: RANGE_TYPE.ROW },
@@ -136,7 +127,7 @@ describe('Test row col menu items', () => {
         return commandService.executeCommand<ISetSelectionsOperationParams, boolean>(SetSelectionsOperation.id, {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [
                 {
                     range: {

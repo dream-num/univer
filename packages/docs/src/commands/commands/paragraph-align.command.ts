@@ -52,7 +52,7 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
         if (!dataModel) return false;
 
         const activeRange = textSelectionManagerService.getActiveRange();
-        const selections = textSelectionManagerService.getSelections() ?? [];
+        const selections = textSelectionManagerService.getCurrentSelections() ?? [];
         const paragraphs = dataModel.getBody()?.paragraphs;
         const serializedSelections = selections.map(serializeTextRange);
 

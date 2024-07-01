@@ -27,7 +27,7 @@ import {
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import {
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightMutation,
@@ -74,16 +74,10 @@ describe('Test set row height commands', () => {
 
         const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         const maxColumn = worksheet.getMaxColumns() - 1;
-        const selectionManager = get(SelectionManagerService);
-
-        selectionManager.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
+        const selectionManager = get(SheetsSelectionsService);
 
         // select row 2, 3
-        selectionManager.add([
+        selectionManager.addSelections([
             {
                 range: { startRow: 1, startColumn: 0, endRow: 2, endColumn: maxColumn, rangeType: RANGE_TYPE.ROW },
                 primary: {
@@ -101,7 +95,7 @@ describe('Test set row height commands', () => {
         ]);
 
         // and continue select row 5
-        selectionManager.add([
+        selectionManager.addSelections([
             {
                 range: { startRow: 5, startColumn: 0, endColumn: maxColumn, endRow: 5, rangeType: RANGE_TYPE.ROW },
                 primary: null,

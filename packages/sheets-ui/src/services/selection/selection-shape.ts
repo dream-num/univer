@@ -115,9 +115,9 @@ export class SelectionShape extends Disposable {
     private _dispose$ = new BehaviorSubject<SelectionShape>(this);
     readonly dispose$ = this._dispose$.asObservable();
 
-    readonly selectionMoving$ = new Subject<Nullable<IRangeWithCoord>>();
-    readonly selectionMoved$ = new Subject<Nullable<IRangeWithCoord>>();
-    readonly selectionScaling$ = new Subject<Nullable<IRangeWithCoord>>();
+    readonly selectionMoving$ = new Subject<IRangeWithCoord>();
+    readonly selectionMoved$ = new Subject<IRangeWithCoord>();
+    readonly selectionScaling$ = new Subject<IRangeWithCoord>();
     readonly selectionScaled$ = new Subject<Nullable<IRangeWithCoord>>();
     readonly selectionFilling$ = new Subject<Nullable<IRangeWithCoord>>();
 
@@ -238,14 +238,6 @@ export class SelectionShape extends Disposable {
         this.rightControl.evented = state;
         this.topControl.evented = state;
         this.bottomControl.evented = state;
-    }
-
-    enableHeaderHighlight() {
-        this._isHelperSelection = true;
-    }
-
-    disableHeaderHighlight() {
-        this._isHeaderHighlight = false;
     }
 
     refreshSelectionFilled(val: IRangeWithCoord) {

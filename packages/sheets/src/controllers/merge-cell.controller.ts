@@ -65,7 +65,7 @@ import { RefRangeService } from '../services/ref-range/ref-range.service';
 import type { EffectRefRangeParams } from '../services/ref-range/type';
 import { EffectRefRangId } from '../services/ref-range/type';
 import { handleMoveCols, handleMoveRows, runRefRangeMutations } from '../services/ref-range/util';
-import { SelectionManagerService } from '../services/selection-manager.service';
+import { SheetsSelectionsService } from '../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 import type { IMoveRowsMutationParams } from '../commands/mutations/move-rows-cols.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
@@ -126,7 +126,7 @@ export class MergeCellController extends Disposable {
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private _injector: Injector,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService
+        @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService
     ) {
         super();
         this._onRefRangeChange();
@@ -151,7 +151,7 @@ export class MergeCellController extends Disposable {
 
                         const subUnitId = worksheet.getSheetId();
                         const mergeData = worksheet.getConfig().mergeData;
-                        const selections = self._selectionManagerService.getSelectionRanges();
+                        const selections = self._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
                         if (selections && selections.length > 0) {
                             const isHasMerge = selections.some((range) =>
                                 mergeData.some((item) => Rectangle.intersects(item, range))

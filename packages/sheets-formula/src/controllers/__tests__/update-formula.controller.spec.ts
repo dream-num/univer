@@ -17,7 +17,7 @@
 import type { ICellData, IObjectMatrixPrimitiveType, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import { CellValueType, Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
-import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, NORMAL_SELECTION_PLUGIN_NAME, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SelectionManagerService, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation } from '@univerjs/sheets';
+import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -364,15 +364,10 @@ describe('Test insert function operation', () => {
         });
 
         it('Move rows, update reference', async () => {
-            const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
+            const selectionManager = get(SheetsSelectionsService);
 
             // A1
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 1, startColumn: 0, endRow: 1, endColumn: 0, rangeType: RANGE_TYPE.ROW },
                     primary: null,
@@ -411,15 +406,9 @@ describe('Test insert function operation', () => {
         });
 
         it('Move rows, update reference and position', async () => {
-            const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
-
+            const selectionManager = get(SheetsSelectionsService);
             // A1
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 1, startColumn: 0, endRow: 1, endColumn: 0, rangeType: RANGE_TYPE.ROW },
                     primary: null,
@@ -464,15 +453,10 @@ describe('Test insert function operation', () => {
         });
 
         it('Move columns, update reference', async () => {
-            const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
+            const selectionManager = get(SheetsSelectionsService);
 
             // A1
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN },
                     primary: null,
@@ -511,15 +495,10 @@ describe('Test insert function operation', () => {
         });
 
         it('Move columns, update reference and position', async () => {
-            const selectionManager = get(SelectionManagerService);
-            selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
+            const selectionManager = get(SheetsSelectionsService);
 
             // A1
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow: 0, startColumn: 1, endRow: 0, endColumn: 1, rangeType: RANGE_TYPE.COLUMN },
                     primary: null,

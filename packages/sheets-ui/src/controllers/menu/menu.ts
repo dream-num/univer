@@ -38,7 +38,6 @@ import {
     RangeProtectionPermissionViewPoint,
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
-    SelectionManagerService,
     SetBackgroundColorCommand,
     SetColHiddenMutation,
     SetColVisibleMutation,
@@ -58,6 +57,7 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowIsAutoHeightCommand,
     SetWorksheetRowIsAutoHeightMutation,
+    SheetsSelectionsService,
     WorkbookCopyPermission,
     WorkbookEditablePermission,
     WorksheetCopyPermission,
@@ -158,7 +158,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const contextService = accessor.get(IContextService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
 
     return {
         id: SetRangeBoldCommand.id,
@@ -173,7 +173,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
-                    const primary = selectionManagerService.getLast()?.primary;
+                    const primary = selectionManagerService.getCurrentLastSelection()?.primary;
                     let isBold = FontWeight.NORMAL;
 
                     if (primary != null) {
@@ -199,7 +199,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 }
             });
 
-            const primary = selectionManagerService.getLast()?.primary;
+            const primary = selectionManagerService.getCurrentLastSelection()?.primary;
             if (!worksheet) {
                 subscriber.next(false);
                 return;
@@ -221,7 +221,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
     const contextService = accessor.get(IContextService);
 
     return {
@@ -237,7 +237,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
-                    const primary = selectionManagerService.getLast()?.primary;
+                    const primary = selectionManagerService.getCurrentLastSelection()?.primary;
                     let isItalic = FontItalic.NORMAL;
                     if (primary != null) {
                         const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -260,7 +260,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 }
             });
 
-            const primary = selectionManagerService.getLast()?.primary;
+            const primary = selectionManagerService.getCurrentLastSelection()?.primary;
             let isItalic = FontItalic.NORMAL;
             if (primary != null) {
                 const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -277,7 +277,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
     const contextService = accessor.get(IContextService);
 
     return {
@@ -292,7 +292,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
-                    const primary = selectionManagerService.getLast()?.primary;
+                    const primary = selectionManagerService.getCurrentLastSelection()?.primary;
                     let isUnderline;
                     if (primary != null) {
                         const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -315,7 +315,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 }
             });
 
-            const primary = selectionManagerService.getLast()?.primary;
+            const primary = selectionManagerService.getCurrentLastSelection()?.primary;
             let isUnderline;
             if (primary != null) {
                 const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -333,7 +333,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
     const contextService = accessor.get(IContextService);
 
     return {
@@ -349,7 +349,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
-                    const primary = selectionManagerService.getLast()?.primary;
+                    const primary = selectionManagerService.getCurrentLastSelection()?.primary;
                     let st;
                     if (primary != null) {
                         const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -376,7 +376,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                 }
             });
 
-            const primary = selectionManagerService.getLast()?.primary;
+            const primary = selectionManagerService.getCurrentLastSelection()?.primary;
             let st;
             if (primary != null) {
                 const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -393,7 +393,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
 
     const defaultValue = DEFAULT_STYLES.ff;
 
@@ -420,7 +420,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                     return;
                 }
 
-                const primary = selectionManagerService.getLast()?.primary;
+                const primary = selectionManagerService.getCurrentLastSelection()?.primary;
                 let ff;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -430,7 +430,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                 subscriber.next(ff ?? defaultValue);
             });
 
-            const primary = selectionManagerService.getLast()?.primary;
+            const primary = selectionManagerService.getCurrentLastSelection()?.primary;
             let ff;
             if (primary != null) {
                 const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -447,7 +447,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
     const contextService = accessor.get(IContextService);
 
     const defaultValue = DEFAULT_STYLES.fs;
@@ -473,7 +473,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
-                    const primary = selectionManagerService.getLast()?.primary;
+                    const primary = selectionManagerService.getCurrentLastSelection()?.primary;
                     let fs;
                     if (primary != null) {
                         const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -498,7 +498,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                 }
             });
 
-            const primary = selectionManagerService.getLast()?.primary;
+            const primary = selectionManagerService.getCurrentLastSelection()?.primary;
             let fs;
             if (primary != null) {
                 const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -628,7 +628,7 @@ export const HORIZONTAL_ALIGN_CHILDREN = [
 
 export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<HorizontalAlign> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
 
     const defaultValue = HorizontalAlign.LEFT;
 
@@ -647,7 +647,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
                     return;
                 }
 
-                const primary = selectionManagerService.getLast()?.primary;
+                const primary = selectionManagerService.getCurrentLastSelection()?.primary;
                 let ha;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -657,7 +657,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
                 subscriber.next(ha ?? defaultValue);
             });
 
-            const primary = selectionManagerService.getLast()?.primary;
+            const primary = selectionManagerService.getCurrentLastSelection()?.primary;
             let ha;
             if (primary != null) {
                 const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -693,7 +693,7 @@ export const VERTICAL_ALIGN_CHILDREN = [
 
 export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<VerticalAlign> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
 
     const defaultValue = VerticalAlign.BOTTOM;
 
@@ -712,7 +712,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
                     return;
                 }
 
-                const primary = selectionManagerService.getLast()?.primary;
+                const primary = selectionManagerService.getCurrentLastSelection()?.primary;
                 let va;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -722,7 +722,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
                 subscriber.next(va ?? defaultValue);
             });
 
-            const primary = selectionManagerService.getLast()?.primary;
+            const primary = selectionManagerService.getCurrentLastSelection()?.primary;
             let va;
             if (primary != null) {
                 const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -757,7 +757,7 @@ export const TEXT_WRAP_CHILDREN = [
 ];
 
 export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<WrapStrategy> {
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
     const defaultValue = WrapStrategy.OVERFLOW;
@@ -777,7 +777,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
                     return;
                 }
 
-                const primary = selectionManagerService.getLast()?.primary;
+                const primary = selectionManagerService.getCurrentLastSelection()?.primary;
                 let ws;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -787,7 +787,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
                 subscriber.next(ws ?? defaultValue);
             });
 
-            const primary = selectionManagerService.getLast()?.primary;
+            const primary = selectionManagerService.getCurrentLastSelection()?.primary;
             let ws;
             if (primary != null) {
                 const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -837,7 +837,7 @@ export const TEXT_ROTATE_CHILDREN = [
 ];
 
 export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number | string> {
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
     const defaultValue = 0;
@@ -857,7 +857,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
                     return;
                 }
 
-                const primary = selectionManagerService.getLast()?.primary;
+                const primary = selectionManagerService.getCurrentLastSelection()?.primary;
                 let tr;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -871,7 +871,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
                 }
             });
 
-            const primary = selectionManagerService.getLast()?.primary;
+            const primary = selectionManagerService.getCurrentLastSelection()?.primary;
             let tr;
             if (primary != null) {
                 const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -1141,7 +1141,7 @@ export function HideColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
 export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
 
     const commandService = accessor.get(ICommandService);
 
@@ -1155,7 +1155,7 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'rightClick.showHideRow',
         hidden$: deriveStateFromActiveSheet$(univerInstanceService, true, ({ worksheet }) => new Observable((subscriber) => {
             function hasHiddenRowsInSelections(): boolean {
-                const rowRanges = selectionManagerService.getSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
+                const rowRanges = selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
                 return !!rowRanges?.some((range) => {
                     for (let r = range.startRow; r <= range.endRow; r++) {
                         if (!worksheet.getRowRawVisible(r)) return true; // should not take filtered out rows into account
@@ -1179,7 +1179,7 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
 export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
     const affectedCommands = [SetSelectionsOperation, SetColHiddenMutation, SetColVisibleMutation].map((c) => c.id);
 
@@ -1191,7 +1191,7 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         title: 'rightClick.showHideColumn',
         hidden$: deriveStateFromActiveSheet$(univerInstanceService, true, ({ worksheet }) => new Observable((subscriber) => {
             function hasHiddenColsInSelections(): boolean {
-                const colRanges = selectionManagerService.getSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
+                const colRanges = selectionManagerService.getCurrentSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
                 if (!colRanges || colRanges.length === 0) return false;
 
                 return !!colRanges.some((range) => {
@@ -1217,7 +1217,7 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
 
     const defaultValue = 0;
 
@@ -1238,7 +1238,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         },
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
             function update() {
-                const primary = selectionManagerService.getLast()?.primary;
+                const primary = selectionManagerService.getCurrentLastSelection()?.primary;
                 const rowHeight = primary ? worksheet.getRowHeight(primary.startRow) : defaultValue;
                 subscriber.next(rowHeight);
             }
@@ -1260,7 +1260,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const selectionManagerService = accessor.get(SelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
 
     const defaultValue = 0;
 
@@ -1281,7 +1281,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         },
         value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
             function update() {
-                const primary = selectionManagerService.getLast()?.primary;
+                const primary = selectionManagerService.getCurrentLastSelection()?.primary;
                 let colWidth: number = defaultValue;
                 if (primary != null) {
                     colWidth = worksheet.getColumnWidth(primary.startColumn);

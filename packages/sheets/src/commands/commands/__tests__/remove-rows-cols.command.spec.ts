@@ -30,7 +30,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
 import type { IRemoveRowColCommandParams } from '../remove-row-col.command';
 import { RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
@@ -62,18 +62,12 @@ describe('Test remove rows cols', () => {
             SetRangeValuesMutation,
         ].forEach((c) => commandService.registerCommand(c));
         get(MergeCellController);
-        const selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
     });
 
     function selectRow(rowStart: number, rowEnd: number): void {
-        const selectionManagerService = get(SelectionManagerService);
+        const selectionManagerService = get(SheetsSelectionsService);
         const endColumn = getColCount() - 1;
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: { startRow: rowStart, startColumn: 0, endColumn, endRow: rowEnd, rangeType: RANGE_TYPE.ROW },
                 primary: {

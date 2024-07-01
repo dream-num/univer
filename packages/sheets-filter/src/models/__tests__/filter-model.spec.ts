@@ -216,49 +216,6 @@ describe('Test filter model and related utils', () => {
             expect(filterColumn.filteredOutRows!.size).toBe(1);
         });
     });
-
-    describe('Test "FilterModel"', () => {
-        let univer: Univer;
-        let filterColumn: FilterColumn;
-        let get: Injector['get'];
-
-        beforeEach(() => {
-            const testBed = createFilterModelTestBed({
-                id: 'test',
-                appVersion: '3.0.0-alpha',
-                sheets: {
-                    sheet1: {
-                        id: 'sheet1',
-                        name: 'sheet1',
-                        cellData: {
-                            0: {
-                                1: { v: 'header' },
-                            },
-                            1: {
-                                1: { v: 123 },
-                            },
-                            2: {
-                                1: { v: 345 },
-                            },
-                        },
-                    },
-                },
-                locale: LocaleType.ZH_CN,
-                name: '',
-                sheetOrder: [],
-                styles: {},
-            });
-
-            univer = testBed.univer;
-            get = testBed.get;
-        });
-
-        // TODO@wzhudev: not implemented yet
-        // describe('Test serialization and deserialization', () => {
-        //     it('should serialize return a correct object', () => { });
-        //     it('should deserialize return a correct instance', () => { });
-        // });
-    });
 });
 
 function createFilterModelTestBed(workbookData: IWorkbookData) {

@@ -42,7 +42,7 @@ export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
         const prevBody = univerInstanceService.getUniverDocInstance(unitId)?.getSnapshot().body;
-        const selections = textSelectionManagerService.getSelections();
+        const selections = textSelectionManagerService.getCurrentSelections();
 
         if (prevBody == null) {
             return false;

@@ -87,7 +87,7 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
             dependencies?.forEach((d) => injector.add(d));
 
             const renderManagerService = injector.get(IRenderManagerService);
-            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_DOC, DocSkeletonManagerService);
+            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_DOC, [DocSkeletonManagerService] as Dependency);
         }
     }
 

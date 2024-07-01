@@ -21,8 +21,8 @@ import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
-import { SelectionManagerService } from '@univerjs/sheets';
-import { ISelectionRenderService } from '@univerjs/sheets-ui';
+import { SheetsSelectionsService } from '@univerjs/sheets';
+import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -39,11 +39,24 @@ import { drawingPositionToTransform, transformToDrawingPosition } from '../basic
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingUpdateController)
 export class SheetDrawingUpdateController extends Disposable {
+    // TODO@wzhudev: selection render service would be a render unit, we we cannot
+    // easily access it here.
+    private get _selectionRenderService(): ISheetSelectionRenderService {
+        return this._renderManagerService.getRenderById(
+            this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
+        )!.with(ISheetSelectionRenderService);
+    }
+
+    private get _skeletonManagerService(): SheetSkeletonManagerService {
+        return this._renderManagerService.getRenderById(
+            this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!.getUnitId()
+        )!.with(SheetSkeletonManagerService);
+    }
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
@@ -177,7 +190,7 @@ export class SheetDrawingUpdateController extends Disposable {
             drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType,
             source,
-            transform: drawingPositionToTransform(sheetTransform, this._selectionRenderService),
+            transform: drawingPositionToTransform(sheetTransform, this._skeletonManagerService),
             sheetTransform,
         };
 
@@ -208,7 +221,7 @@ export class SheetDrawingUpdateController extends Disposable {
     }
 
     private _getImagePosition(imageWidth: number, imageHeight: number, sceneWidth: number, sceneHeight: number): Nullable<ISheetDrawingPosition> {
-        const selections = this._selectionManagerService.getSelections();
+        const selections = this._selectionManagerService.getCurrentSelections();
         let range: IRange = {
             startRow: 0,
             endRow: 0,
@@ -219,7 +232,7 @@ export class SheetDrawingUpdateController extends Disposable {
             range = selections[selections.length - 1].range;
         }
 
-        const rangeWithCoord = this._selectionRenderService.attachRangeWithCoord(range);
+        const rangeWithCoord = attachRangeWithCoord(this._skeletonManagerService.getCurrent()!.skeleton, range);
         if (rangeWithCoord == null) {
             return;
         }
@@ -333,7 +346,7 @@ export class SheetDrawingUpdateController extends Disposable {
 
                 const newDrawing: Partial<ISheetDrawing> = {
                     ...param,
-                    transform: { ...sheetDrawing.transform, ...transform, ...drawingPositionToTransform(sheetTransform, this._selectionRenderService) },
+                    transform: { ...sheetDrawing.transform, ...transform, ...drawingPositionToTransform(sheetTransform, this._skeletonManagerService) },
                     sheetTransform: { ...sheetTransform },
                 };
 

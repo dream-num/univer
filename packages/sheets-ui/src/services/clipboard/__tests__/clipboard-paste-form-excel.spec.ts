@@ -19,13 +19,12 @@ import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from 
 import {
     AddWorksheetMergeMutation,
     MoveRangeMutation,
-    NORMAL_SELECTION_PLUGIN_NAME,
     RemoveWorksheetMergeMutation,
-    SelectionManagerService,
     SetRangeValuesMutation,
     SetSelectionsOperation,
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -124,19 +123,14 @@ describe('Test clipboard', () => {
 
     describe('Test paste from excel ', () => {
         beforeEach(() => {
-            const selectionManager = get(SelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
-            selectionManager.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId: 'test',
-                sheetId: 'sheet1',
-            });
             const startRow = 1;
             const startColumn = 1;
             const endRow = 1;
             const endColumn = 1;
 
-            selectionManager.add([
+            selectionManager.addSelections([
                 {
                     range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
                     primary: null,

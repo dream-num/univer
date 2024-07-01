@@ -19,7 +19,7 @@ import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoC
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../../mutations/set-col-visible.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../mutations/set-row-visible.mutation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
@@ -62,13 +62,6 @@ describe('Test row col hide/unhine commands', () => {
         ].forEach((command) => {
             commandService.registerCommand(command);
         });
-
-        const selectionManager = get(SelectionManagerService);
-        selectionManager.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
     });
 
     afterEach(() => univer.dispose());
@@ -100,9 +93,9 @@ describe('Test row col hide/unhine commands', () => {
     }
 
     function selectRow(rowStart: number, rowEnd: number): void {
-        const selectionManagerService = get(SelectionManagerService);
+        const selectionManagerService = get(SheetsSelectionsService);
         const endColumn = getColCount() - 1;
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: { startRow: rowStart, startColumn: 0, endColumn, endRow: rowEnd, rangeType: RANGE_TYPE.ROW },
                 primary: {
@@ -121,9 +114,9 @@ describe('Test row col hide/unhine commands', () => {
     }
 
     function selectColumn(columnStart: number, columnEnd: number): void {
-        const selectionManagerService = get(SelectionManagerService);
+        const selectionManagerService = get(SheetsSelectionsService);
         const endRow = getRowCount() - 1;
-        selectionManagerService.add([
+        selectionManagerService.addSelections([
             {
                 range: {
                     startRow: 0,

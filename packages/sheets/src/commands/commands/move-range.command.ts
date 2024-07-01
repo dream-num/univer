@@ -30,7 +30,6 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { NORMAL_SELECTION_PLUGIN_NAME } from '../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
 import { MoveRangeMutation } from '../mutations/move-range.mutation';
@@ -83,7 +82,7 @@ export const MoveRangeCommand: ICommand = {
                 params: {
                     unitId,
                     subUnitId,
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     selections: [{ range: params.toRange, primary: getPrimaryForRange(params.toRange, worksheet) }],
                 } as ISetSelectionsOperationParams,
             },
@@ -97,7 +96,7 @@ export const MoveRangeCommand: ICommand = {
                 params: {
                     unitId,
                     subUnitId,
-                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
                     selections: [{ range: params.fromRange, primary: getPrimaryForRange(params.fromRange, worksheet) }],
                 } as ISetSelectionsOperationParams,
             },

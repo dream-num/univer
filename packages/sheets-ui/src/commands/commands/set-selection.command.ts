@@ -18,9 +18,8 @@ import type { Direction, ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, Tools } from '@univerjs/core';
 import {
     getCellAtRowCol,
+    getSelectionsService,
     getSheetCommandTarget,
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
@@ -69,7 +68,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
         if (!target) return false;
 
         const { workbook, worksheet } = target;
-        const selection = accessor.get(SelectionManagerService).getLast();
+        const selection = getSelectionsService(accessor).getCurrentLastSelection();
         if (!selection) {
             return false;
         }
@@ -100,7 +99,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [
                 {
                     range: Rectangle.clone(destRange),
@@ -142,7 +141,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
 
         const { workbook, worksheet } = target;
 
-        const selection = accessor.get(SelectionManagerService).getLast();
+        const selection = getSelectionsService(accessor).getCurrentLastSelection();
         if (!selection) {
             return false;
         }
@@ -262,7 +261,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId: sheetId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [resultRange],
         });
     },
@@ -287,7 +286,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
 
         const { worksheet, unitId, subUnitId } = target;
 
-        const selection = accessor.get(SelectionManagerService).getLast();
+        const selection = getSelectionsService(accessor).getCurrentLastSelection();
         if (!selection) return false;
 
         const { range: startRange, primary } = selection;
@@ -314,7 +313,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [
                 {
                     range: destRange,
@@ -345,7 +344,7 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
         SELECTED_RANGE_WORKSHEET = '';
     },
     handler: async (accessor, params = { expandToGapFirst: true, loop: false }) => {
-        const selection = accessor.get(SelectionManagerService).getLast();
+        const selection = getSelectionsService(accessor).getCurrentLastSelection();
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
         if (!target) return false;
 
@@ -407,7 +406,7 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId,
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+
             selections: [
                 {
                     range: destRange,

@@ -22,7 +22,7 @@ import type {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../basics/interfaces/mutation-interface';
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import {
     RemoveMergeUndoMutationFactory,
@@ -38,12 +38,12 @@ export const RemoveWorksheetMergeCommand: ICommand = {
     id: 'sheet.command.remove-worksheet-merge',
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selections = selectionManagerService.getSelectionRanges();
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) return false;
 
         const target = getSheetCommandTarget(univerInstanceService);
@@ -67,7 +67,7 @@ export const RemoveWorksheetMergeCommand: ICommand = {
             removeMergeMutationParams
         );
 
-        const nowSelections = selectionManagerService.getSelections();
+        const nowSelections = selectionManagerService.getCurrentSelections();
         if (!nowSelections?.length) return false;
 
         const undoSelections = Tools.deepClone(nowSelections);

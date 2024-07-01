@@ -31,11 +31,7 @@ import { ColorBuilder } from './color/color';
 import { Tools } from './tools';
 import type { Nullable } from './types';
 
-export function makeCellToSelection(cellInfo: Nullable<ISelectionCellWithCoord>): Nullable<IRangeWithCoord> {
-    if (!cellInfo) {
-        return;
-    }
-
+export function makeCellToSelection(cellInfo: ISelectionCellWithCoord): IRangeWithCoord {
     const { actualRow, actualColumn, isMerged, isMergedMainCell, mergeInfo } = cellInfo;
     let { startY, endY, startX, endX } = cellInfo;
     let startRow = actualRow;

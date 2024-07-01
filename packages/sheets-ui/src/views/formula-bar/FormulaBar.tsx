@@ -23,7 +23,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 
-import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SelectionManagerService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { merge } from 'rxjs';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -46,7 +46,7 @@ export function FormulaBar() {
     const progressBarColor = themeService.getCurrentTheme().primaryColor;
     const [disable, setDisable] = useState<boolean>(false);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const selectionManager = useDependency(SelectionManagerService);
+    const selectionManager = useDependency(SheetsSelectionsService);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
     const permissionService = useDependency(IPermissionService);
@@ -62,7 +62,7 @@ export function FormulaBar() {
             const worksheet = workbook.getActiveSheet();
             if (!worksheet) return;
             const subUnitId = worksheet.getSheetId();
-            const range = selectionManager.getLast()?.range;
+            const range = selectionManager.getCurrentLastSelection()?.range;
             if (!range) return;
             const workbookEditPermission = permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value;
             const worksheetSetCellValuePermission = permissionService.getPermissionPoint(new WorksheetSetCellValuePermission(unitId, subUnitId).id)?.value;
@@ -73,7 +73,7 @@ export function FormulaBar() {
                 return;
             }
 
-            const selectionRanges = selectionManager.getSelections()?.map((selection) => selection.range);
+            const selectionRanges = selectionManager.getCurrentSelections()?.map((selection) => selection.range);
             const permissionList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
                 return rule.ranges.some((r) => {
                     return selectionRanges?.some((selectionRange) => {

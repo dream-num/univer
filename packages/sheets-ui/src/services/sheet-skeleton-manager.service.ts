@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { IRange, IRangeWithCoord, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
@@ -76,12 +76,11 @@ export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
         return this.getCurrent()!.skeleton;
     }
 
-    /** @deprecated */
     getCurrent(): Nullable<ISheetSkeletonManagerParam> {
         return this._getSkeleton(this._currentSkeletonSearchParam);
     }
 
-    getUnitSkeleton(unitId: string, sheetId: string): Nullable<ISheetSkeletonManagerParam> {
+    getWorksheetSkeleton(sheetId: string): Nullable<ISheetSkeletonManagerParam> {
         return this._getSkeleton({ sheetId });
     }
 
@@ -162,6 +161,12 @@ export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
         return newSkeleton;
     }
 
+    /** @deprecated Use function `attachRangeWithCoord` instead.  */
+    attachRangeWithCoord(range: IRange): Nullable<IRangeWithCoord> {
+        const skeleton = this.getCurrentSkeleton();
+        return attachRangeWithCoord(skeleton, range);
+    }
+
     private _getSkeleton(searchParm: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
         const item = this._sheetSkeletonParam.find((param) => param.sheetId === searchParm.sheetId);
         if (item != null) {
@@ -184,3 +189,22 @@ export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
         return spreadsheetSkeleton;
     }
 }
+
+export function attachRangeWithCoord(skeleton: SpreadsheetSkeleton, range: IRange): IRangeWithCoord {
+    const { startRow, startColumn, endRow, endColumn, rangeType } = range;
+    const startCell = skeleton.getNoMergeCellPositionByIndex(startRow, startColumn);
+    const endCell = skeleton.getNoMergeCellPositionByIndex(endRow, endColumn);
+
+    return {
+        startRow,
+        startColumn,
+        endRow,
+        endColumn,
+        rangeType,
+        startY: startCell?.startY || 0,
+        endY: endCell?.endY || 0,
+        startX: startCell?.startX || 0,
+        endX: endCell?.endX || 0,
+    };
+}
+

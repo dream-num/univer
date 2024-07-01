@@ -19,7 +19,7 @@ import { ICommandService, IUniverInstanceService, ObjectMatrix } from '@univerjs
 import { FormulaDataModel, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { type ISetRangeValuesMutationParams, SetRangeValuesMutation } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
-import { COPY_TYPE, ISelectionRenderService, PREDEFINED_HOOK_NAME, SelectionRenderService } from '@univerjs/sheets-ui';
+import { COPY_TYPE, ISheetSelectionRenderService, PREDEFINED_HOOK_NAME, SheetSelectionRenderService } from '@univerjs/sheets-ui';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -41,7 +41,7 @@ describe('Test paste with formula', () => {
 
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
-            [ISelectionRenderService, { useClass: SelectionRenderService }],
+            [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
         ]);
         univer = testBed.univer;
         get = testBed.get;

@@ -160,7 +160,7 @@ export function createCommandTestBed(workbookData?: IDocumentData, dependencies?
 export class MockRenderManagerService implements Pick<IRenderManagerService, 'getRenderById'> {
     constructor(
         @Inject(Injector) private readonly _injector: Injector
-    ) {}
+    ) { }
 
     getRenderById(_unitId: string): Nullable<IRender> {
         return {

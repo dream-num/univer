@@ -33,7 +33,7 @@ import {
     AddWorksheetMergeMutation,
     getAddMergeMutationRangeByType,
     RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation, SelectionManagerService,
+    RemoveWorksheetMergeMutation, SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
@@ -143,8 +143,8 @@ export const AddWorksheetMergeAllCommand: ICommand = {
     id: 'sheet.command.add-worksheet-merge-all',
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelectionRanges();
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         const mergeableSelections = getMergeableSelectionsByType(MergeType.MergeAll, selections);
         if (!mergeableSelections?.length) {
             return false;
@@ -174,8 +174,8 @@ export const AddWorksheetMergeVerticalCommand: ICommand = {
     id: 'sheet.command.add-worksheet-merge-vertical',
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelectionRanges();
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         const mergeableSelections = getMergeableSelectionsByType(MergeType.MergeVertical, selections);
         if (!mergeableSelections?.length) {
             return false;
@@ -206,8 +206,8 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
     id: 'sheet.command.add-worksheet-merge-horizontal',
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelectionRanges();
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         const mergeableSelections = getMergeableSelectionsByType(MergeType.MergeHorizontal, selections);
         if (!mergeableSelections?.length) {
             return false;

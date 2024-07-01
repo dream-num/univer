@@ -46,11 +46,7 @@ function isRenderManagerService(renderManagerService: IRenderManagerService | IR
 }
 
 /**
- * @deprecated
- *
- * @param univerInstanceService
- * @param renderManagerService
- * @returns
+ * Get render objects of a spreadsheet.
  */
 export function getSheetObject(
     univerInstanceService: IUniverInstanceService | Workbook,

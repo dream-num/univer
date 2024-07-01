@@ -19,56 +19,51 @@ import { findCompareToken, valueObjectCompare } from '../../../engine/utils/obje
 import { filterSameValueObjectResult } from '../../../engine/utils/value-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Sumif extends BaseFunction {
+export class Countif extends BaseFunction {
     override minParams = 2;
 
-    override maxParams = 3;
+    override maxParams = 2;
 
-    override calculate(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
-        if (range.isError()) {
-            return range;
+    override calculate(range: BaseValueObject, criteria: BaseValueObject) {
+        if (range.isError() || criteria.isError()) {
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
-        if (criteria.isError()) {
-            return criteria;
-        }
-
-        if (sumRange?.isError()) {
-            return sumRange;
-        }
-
-        if (!range.isArray() || (sumRange && !sumRange.isArray())) {
+        if (!range.isArray()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (criteria.isArray()) {
-            return criteria.map((criteriaItem) => this._handleSingleObject(range, criteriaItem, sumRange));
+            return criteria.mapValue((criteriaItem) => this._handleSingleObject(range, criteriaItem));
         }
 
-        return this._handleSingleObject(range, criteria, sumRange);
+        return this._handleSingleObject(range, criteria);
     }
 
-    private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
+    private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject) {
         let resultArrayObject = valueObjectCompare(range, criteria);
 
         const [, criteriaStringObject] = findCompareToken(`${criteria.getValue()}`);
-        // When comparing non-numbers and numbers, it does not take the result
+        // If the condition is a numeric comparison, only numbers are counted, otherwise text is counted.
         resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaStringObject);
 
-        // sumRange has the same dimensions as range
-        const sumRangeArray = sumRange
-            ? (sumRange as ArrayValueObject).slice(
-                [0, (range as ArrayValueObject).getRowCount()],
-                [0, (range as ArrayValueObject).getColumnCount()]
-            )
-            : (range as ArrayValueObject);
+        const picked = (range as ArrayValueObject).pick(resultArrayObject as ArrayValueObject);
+        return this._countA(picked);
+    }
 
-        if (!sumRangeArray) {
-            return ErrorValueObject.create(ErrorType.VALUE);
-        }
+    private _countA(array: ArrayValueObject) {
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
+        array.iterator((valueObject) => {
+            if (valueObject == null) {
+                return true; // continue
+            }
 
-        return sumRangeArray.pick(resultArrayObject as ArrayValueObject).sum();
+            accumulatorAll = accumulatorAll.plusBy(1);
+        });
+
+        return accumulatorAll;
     }
 }

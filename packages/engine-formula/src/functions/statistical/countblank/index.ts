@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
-import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Isref extends BaseFunction {
+export class Countblank extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
 
-    override needsReferenceObject = true;
-
-    override calculate(value: FunctionVariantType) {
-        if (value.isReferenceObject()) {
-            return BooleanValueObject.create(true);
+    override calculate(variant: BaseValueObject) {
+        if (variant.isError()) {
+            return variant;
         }
 
-        return BooleanValueObject.create(false);
+        if (variant.getValue() === '' || variant.isNull()) {
+            return NumberValueObject.create(1);
+        }
+
+        if (!variant.isArray()) {
+            return NumberValueObject.create(0);
+        }
+
+        return variant.countBlank();
     }
 }
+

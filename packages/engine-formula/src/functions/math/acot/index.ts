@@ -58,7 +58,14 @@ function acot(num: BaseValueObject) {
         return ErrorValueObject.create(ErrorType.VALUE);
     }
 
-    const result = Math.atan(1 / Number(currentValue));
+    currentValue = Number(currentValue);
+
+    let result = Math.atan(1 / currentValue);
+
+    // When the input value is negative, adjust the result to [0, π]
+    if (currentValue < 0) {
+        result += Math.PI;
+    }
 
     if (Number.isNaN(result)) {
         return ErrorValueObject.create(ErrorType.VALUE);

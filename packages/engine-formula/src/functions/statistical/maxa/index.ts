@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Min extends BaseFunction {
+export class Maxa extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 255;
 
     override calculate(...variants: BaseValueObject[]) {
-        let accumulatorAll: BaseValueObject = NumberValueObject.create(Number.POSITIVE_INFINITY);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(Number.NEGATIVE_INFINITY);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
@@ -36,18 +37,38 @@ export class Min extends BaseFunction {
                 variant = variant.convertToNumberObjectValue();
             }
 
-            if (variant.isArray()) {
-                variant = variant.min();
-            }
-
             if (variant.isError()) {
                 return variant as ErrorValueObject;
+            }
+
+            if (variant.isArray()) {
+                (variant as ArrayValueObject).iterator((valueObject) => {
+                    // Empty cells and text values in the array or reference are ignored.
+                    if (valueObject == null || valueObject.isNull() || valueObject.isString()) {
+                        valueObject = NumberValueObject.create(0);
+                    }
+
+                    if (valueObject.isBoolean()) {
+                        valueObject = valueObject.convertToNumberObjectValue();
+                    }
+
+                    if (valueObject.isError()) {
+                        accumulatorAll = valueObject;
+                        return false; // break
+                    }
+
+                    accumulatorAll = this._validator(accumulatorAll, valueObject as BaseValueObject);
+                });
+            }
+
+            if (accumulatorAll.isError()) {
+                return accumulatorAll;
             }
 
             accumulatorAll = this._validator(accumulatorAll, variant as BaseValueObject);
         }
 
-        if (accumulatorAll.getValue() === Number.POSITIVE_INFINITY) {
+        if (accumulatorAll.getValue() === Number.NEGATIVE_INFINITY) {
             return NumberValueObject.create(0);
         }
 
@@ -55,7 +76,7 @@ export class Min extends BaseFunction {
     }
 
     private _validator(accumulatorAll: BaseValueObject, valueObject: BaseValueObject) {
-        const validator = accumulatorAll.isGreaterThan(valueObject);
+        const validator = accumulatorAll.isLessThan(valueObject);
         if (validator.getValue()) {
             accumulatorAll = valueObject;
         }

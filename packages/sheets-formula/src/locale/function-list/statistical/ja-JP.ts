@@ -17,7 +17,7 @@
 export default {
     AVEDEV: {
         description: 'データ全体の平均値に対するそれぞれのデータの絶対偏差の平均を返します。',
-        abstract: 'データ全体の平均値に対するそれぞれのデータの絶対偏差の平均を返します。',
+        abstract: 'データ全体の平均値に対するそれぞれのデータの絶対偏差の平均を返します',
         links: [
             {
                 title: '指導',
@@ -25,13 +25,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '平均を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 21', detail: '平均を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     AVERAGE: {
         description: '引数の平均値を返します。',
-        abstract: '引数の平均値を返します。',
+        abstract: '引数の平均値を返します',
         links: [
             {
                 title: '指導',
@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '平均を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '平均を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     AVERAGEA: {
@@ -59,7 +59,7 @@ export default {
     },
     AVERAGEIF: {
         description: '範囲内の検索条件に一致するすべてのセルの平均値 (算術平均) を返します。',
-        abstract: '範囲内の検索条件に一致するすべてのセルの平均値 (算術平均) を返します。',
+        abstract: '範囲内の検索条件に一致するすべてのセルの平均値 (算術平均) を返します',
         links: [
             {
                 title: '指導',
@@ -67,13 +67,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: '範囲', detail: '平均する 1 つまたは複数のセル (数値、または数値を含む名前、配列、セル参照) を指定します。' },
+            criteria: { name: '検索条件', detail: '平均の対象となるセルを定義する条件を数値、式、セル参照、または文字列で指定します。 たとえば、検索条件は 32、"32"、">32"、"Windows"、または B4 のようになります。' },
+            averageRange: { name: '平均範囲', detail: '平均する実際のセルを指定します。 何も指定しないと、範囲が使用されます。' },
         },
     },
     AVERAGEIFS: {
         description: '複数の検索条件に一致するすべてのセルの平均値 (算術平均) を返します。',
-        abstract: '複数の検索条件に一致するすべてのセルの平均値 (算術平均) を返します。',
+        abstract: '複数の検索条件に一致するすべてのセルの平均値 (算術平均) を返します',
         links: [
             {
                 title: '指導',
@@ -81,8 +82,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            averageRange: { name: '平均範囲', detail: '平均する 1 つまたは複数のセル (数値、または数値を含む名前、配列、セル参照) を指定します。' },
+            criteriaRange1: { name: '条件範囲 1', detail: '条件で評価するセルのセットです。' },
+            criteria1: { name: '条件 1', detail: '平均を計算するセルを定義するために使用されます。 たとえば、条件は 32、"32"、">32"、"apple"、または B4 のように表現できます。' },
+            criteriaRange2: { name: '条件範囲 2', detail: '追加の範囲。 最大 127 の範囲のペアを入力できます。' },
+            criteria2: { name: '条件 2', detail: '追加対応する条件です。 最大 127 条件のペアを入力できます。' },
         },
     },
     BETA_DIST: {
@@ -297,7 +301,7 @@ export default {
     },
     COUNTBLANK: {
         description: '指定された範囲に含まれる空白セルの個数を返します。',
-        abstract: '指定された範囲に含まれる空白セルの個数を返します。',
+        abstract: '指定された範囲に含まれる空白セルの個数を返します',
         links: [
             {
                 title: '指導',
@@ -305,13 +309,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: '範囲', detail: '空白セルの個数を求めるセル範囲を指定します。' },
         },
     },
     COUNTIF: {
         description: '指定された範囲に含まれるセルのうち、検索条件に一致するセルの個数を返します。',
-        abstract: '指定された範囲に含まれるセルのうち、検索条件に一致するセルの個数を返します。',
+        abstract: '指定された範囲に含まれるセルのうち、検索条件に一致するセルの個数を返します',
         links: [
             {
                 title: '指導',
@@ -319,13 +322,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            range: { name: '範囲', detail: '数えるセルのグループ。 範囲には、数値、配列、名前付き範囲、(数値を含む) 参照が入ります。 空の値とテキスト値は無視されます。' },
+            criteria: { name: '検索条件', detail: '個数の計算対象となるセルを決定する条件を、数値、式、セル参照、または文字列で指定します。\nたとえば、数値として 32、比較演算子として ">32"、セル参照として B4、文字列として "リンゴ" などを指定できます。\nCOUNTIF で指定できるのは、単一の検索条件のみです。 複数の検索条件を指定する場合は、COUNTIFS を使います。' },
         },
     },
     COUNTIFS: {
         description: '指定された範囲に含まれるセルのうち、複数の検索条件に一致するセルの個数を返します。',
-        abstract: '指定された範囲に含まれるセルのうち、複数の検索条件に一致するセルの個数を返します。',
+        abstract: '指定された範囲に含まれるセルのうち、複数の検索条件に一致するセルの個数を返します',
         links: [
             {
                 title: '指導',
@@ -333,8 +336,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            criteriaRange1: { name: '条件範囲 1', detail: '対応する条件による評価の対象となる最初の範囲を指定します。' },
+            criteria1: { name: '検索条件 1', detail: '計算の対象となるセルを定義する条件を数値、式、セル参照、または文字列で指定します。 たとえば、条件は 32、">32"、B4、"Windows"、または "32" のようになります。' },
+            criteriaRange2: { name: '条件範囲 2', detail: '追加の範囲。 最大 127 の範囲のペアを入力できます。' },
+            criteria2: { name: '条件 2', detail: '追加対応する条件です。 最大 127 条件のペアを入力できます。' },
         },
     },
     COVARIANCE_P: {
@@ -829,7 +834,7 @@ export default {
     },
     MAX: {
         description: '引数リストに含まれる最大の数値を返します。',
-        abstract: '引数リストに含まれる最大の数値を返します。',
+        abstract: '引数リストに含まれる最大の数値を返します',
         links: [
             {
                 title: '指導',
@@ -837,13 +842,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '数値 1', detail: '最大の値を見つけるため、最初の数値引数を指定します。' },
+            value2: { name: '数値 2', detail: '最大の値を見つけるため、2 ～ 255 個までの数値引数を指定します。' },
         },
     },
     MAXA: {
         description: '数値、文字列、および論理値を含む引数リストから最大の数値を返します。',
-        abstract: '数値、文字列、および論理値を含む引数リストから最大の数値を返します。',
+        abstract: '数値、文字列、および論理値を含む引数リストから最大の数値を返します',
         links: [
             {
                 title: '指導',
@@ -851,8 +856,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '値 1', detail: '最大の値を見つけるため、最初の数値引数を指定します。' },
+            value2: { name: '値 2', detail: '最大の値を見つけるため、2 ～ 255 個までの数値引数を指定します。' },
         },
     },
     MAXIFS: {
@@ -896,8 +901,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: '最小値を計算する最初の数値、セル参照、またはセル範囲。' },
+            number2: { name: 'number2', detail: '最小値を計算するために、最大 255 個の追加の数値、セル参照、またはセル範囲を含めることができます。' },
         },
     },
     MINA: {
@@ -910,13 +915,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '値 1', detail: '最小値を計算する最初の数値、セル参照、またはセル範囲。' },
+            value2: { name: '値 2', detail: '最小値を計算するために、最大 255 個の追加の数値、セル参照、またはセル範囲を含めることができます。' },
         },
     },
     MINIFS: {
         description: '条件セットで指定されたセルの中の最小値を返します。',
-        abstract: '条件セットで指定されたセルの中の最小値を返します。',
+        abstract: '条件セットで指定されたセルの中の最小値を返します',
         links: [
             {
                 title: '指導',
@@ -924,8 +929,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            minRange: { name: '最少範囲', detail: '最小値を求めるセルの実際の範囲です。' },
+            criteriaRange1: { name: '条件範囲 1', detail: '条件で評価するセルのセットです。' },
+            criteria1: { name: '条件 1', detail: '最小として評価されるセルを定義する、数値、式、またはテキストの形式での条件です。 同じ条件セットを、MAXIFS、SUMIFS、および AVERAGEIFS 関数に対して使用できます。' },
+            criteriaRange2: { name: '条件範囲 2', detail: '追加の範囲。 最大 127 の範囲のペアを入力できます。' },
+            criteria2: { name: '条件 2', detail: '追加対応する条件です。 最大 127 条件のペアを入力できます。' },
         },
     },
     MODE_MULT: {

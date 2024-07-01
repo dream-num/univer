@@ -21,22 +21,22 @@ import type { BaseValueObject, IArrayValueObject } from '../../../engine/value-o
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
-export class Sumifs extends BaseFunction {
+export class Minifs extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 255;
 
-    override calculate(sumRange: BaseValueObject, ...variants: BaseValueObject[]) {
-        if (sumRange.isError()) {
-            return sumRange;
+    override calculate(minRange: BaseValueObject, ...variants: BaseValueObject[]) {
+        if (minRange.isError()) {
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
-        if (!sumRange.isArray()) {
+        if (!minRange.isArray()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         // Range and criteria must be paired
-        if (variants.length < 2 || variants.length % 2 !== 0) {
+        if (variants.length % 2 !== 0) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -47,7 +47,7 @@ export class Sumifs extends BaseFunction {
 
         const { maxRowLength, maxColumnLength } = calculateMaxDimensions(variants);
 
-        const errorArray = getErrorArray(variants, sumRange, maxRowLength, maxColumnLength);
+        const errorArray = getErrorArray(variants, minRange, maxRowLength, maxColumnLength);
 
         if (errorArray) {
             return errorArray;
@@ -55,20 +55,25 @@ export class Sumifs extends BaseFunction {
 
         const booleanResults = getBooleanResults(variants, maxRowLength, maxColumnLength, true);
 
-        return this._aggregateResults(sumRange, booleanResults);
+        return this._aggregateResults(minRange, booleanResults);
     }
 
-    private _aggregateResults(sumRange: BaseValueObject, booleanResults: BaseValueObject[][]): ArrayValueObject {
-        const sumResults = booleanResults.map((row) => {
+    private _aggregateResults(minRange: BaseValueObject, booleanResults: BaseValueObject[][]): ArrayValueObject {
+        const maxResults = booleanResults.map((row) => {
             return row.map((booleanResult) => {
-                return (sumRange as ArrayValueObject).pick(booleanResult as ArrayValueObject).sum();
+                const picked = (minRange as ArrayValueObject).pick(booleanResult as ArrayValueObject);
+                if (picked.getColumnCount() === 0) {
+                    return ArrayValueObject.create('0');
+                }
+
+                return picked.min();
             });
         });
 
         const arrayValueObjectData: IArrayValueObject = {
-            calculateValueList: sumResults,
-            rowCount: sumResults.length,
-            columnCount: sumResults[0].length,
+            calculateValueList: maxResults,
+            rowCount: maxResults.length,
+            columnCount: maxResults[0].length,
             unitId: this.unitId || '',
             sheetId: this.subUnitId || '',
             row: this.row,

@@ -17,21 +17,21 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
-import { Average } from '../index';
+import { Mina } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
-describe('Test average function', () => {
-    const testFunction = new Average(FUNCTION_NAMES_STATISTICAL.AVERAGE);
+describe('Test mina function', () => {
+    const testFunction = new Mina(FUNCTION_NAMES_STATISTICAL.MINA);
 
-    describe('Average', () => {
+    describe('Mina', () => {
         it('Var1 is number, var2 is number', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = NumberValueObject.create(2);
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1.5);
+            expect(result.getValue()).toBe(1);
         });
         it('Var1 is number, var2 is string', () => {
             const var1 = NumberValueObject.create(1);
@@ -40,21 +40,21 @@ describe('Test average function', () => {
             expect(result.getValue()).toBe(ErrorType.VALUE);
         });
         it('Var1 is number, var2 is string number', () => {
-            const var1 = NumberValueObject.create(1);
-            const var2 = StringValueObject.create('2');
+            const var1 = NumberValueObject.create(2);
+            const var2 = StringValueObject.create('1');
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1.5);
+            expect(result.getValue()).toBe(1);
         });
         it('Var1 is number, var2 is boolean', () => {
             const var1 = NumberValueObject.create(2);
 
             let var2 = BooleanValueObject.create(true);
             let result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1.5);
+            expect(result.getValue()).toBe(1);
 
             var2 = BooleanValueObject.create(false);
             result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1);
+            expect(result.getValue()).toBe(0);
         });
         it('Var1 is number, var2 is null', () => {
             const var1 = NumberValueObject.create(1);
@@ -86,6 +86,54 @@ describe('Test average function', () => {
             const result = testFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(ErrorType.VALUE);
         });
+        it('Var1 is array not includes error, includes boolean value ', () => {
+            const var1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [3, null],
+                    [false, true],
+                ]),
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(var1);
+            expect(result.getValue()).toBe(0);
+        });
+        it('Var1 is array not includes error, includes string ', () => {
+            const var1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [3, null],
+                    ['test', true],
+                ]),
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(var1);
+            expect(result.getValue()).toBe(0);
+        });
+        it('Var1 is array not includes error, includes null', () => {
+            const var1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [null, null],
+                    [null, null],
+                ]),
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(var1);
+            expect(result.getValue()).toBe(0);
+        });
 
         it('Var1 is number, var2 is array not includes error', () => {
             const var1 = NumberValueObject.create(2);
@@ -102,95 +150,33 @@ describe('Test average function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(14.795714285714286);
+            expect(result.getValue()).toBe(-3);
         });
-
-        it('Var1 is array includes string only', () => {
+        it('Var1 is array, var2 is array', () => {
             const var1 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    ['Hello'],
-                    ['Univer'],
+                    [null],
                 ]),
-                rowCount: 2,
+                rowCount: 1,
                 columnCount: 1,
                 unitId: '',
                 sheetId: '',
                 row: 0,
                 column: 0,
             });
-            const result = testFunction.calculate(var1);
-            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
-        });
-
-        it('Var1 is array includes blank cells only', () => {
-            const var1 = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [null],
-                    [null],
-                ]),
-                rowCount: 2,
-                columnCount: 1,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const result = testFunction.calculate(var1);
-            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
-        });
-
-        it('Var1 is array includes blank cells and string', () => {
-            const var1 = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [null],
-                    [null],
-                    ['Hello'],
-                ]),
-                rowCount: 3,
-                columnCount: 1,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const result = testFunction.calculate(var1);
-            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
-        });
-
-        it('Var1 is number, var2 is array not includes error, includes 0', () => {
-            const var1 = NumberValueObject.create(2);
             const var2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    [1, 0, 1.23, true, false, 0],
-                    [0, '100', '2.34', 0, -3, 0],
+                    ['a'],
                 ]),
-                rowCount: 2,
-                columnCount: 6,
+                rowCount: 1,
+                columnCount: 1,
                 unitId: '',
                 sheetId: '',
                 row: 0,
                 column: 0,
             });
             const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(9.415454545454546);
-        });
-
-        it('Var1 is number, var2 is array not includes boolean, includes 0', () => {
-            const var1 = NumberValueObject.create(2);
-            const var2 = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [1, 0, 1.23, 0, 0, 0],
-                    [0, '100', '2.34', 0, -3, 0],
-                ]),
-                rowCount: 2,
-                columnCount: 6,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const result = testFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(7.966923076923077);
+            expect(result.getValue()).toBe(0);
         });
     });
 });

@@ -30,15 +30,33 @@ import { Vara } from './vara';
 import { Varpa } from './varpa';
 import { Maxifs } from './maxifs';
 import { Averagea } from './averagea';
+import { Minifs } from './minifs';
+import { Averageif } from './averageif';
+import { Averageifs } from './averageifs';
+import { Countif } from './countif';
+import { Countifs } from './countifs';
+import { Countblank } from './countblank';
+import { Mina } from './mina';
+import { Maxa } from './maxa';
+import { Avedev } from './avedev';
 
 export const functionStatistical = [
+    [Avedev, FUNCTION_NAMES_STATISTICAL.AVEDEV],
     [Average, FUNCTION_NAMES_STATISTICAL.AVERAGE],
     [Averagea, FUNCTION_NAMES_STATISTICAL.AVERAGEA],
+    [Averageif, FUNCTION_NAMES_STATISTICAL.AVERAGEIF],
+    [Averageifs, FUNCTION_NAMES_STATISTICAL.AVERAGEIFS],
     [Count, FUNCTION_NAMES_STATISTICAL.COUNT],
-    [Max, FUNCTION_NAMES_STATISTICAL.MAX],
-    [Min, FUNCTION_NAMES_STATISTICAL.MIN],
-    [Min, FUNCTION_NAMES_STATISTICAL.MIN],
     [Counta, FUNCTION_NAMES_STATISTICAL.COUNTA],
+    [Countblank, FUNCTION_NAMES_STATISTICAL.COUNTBLANK],
+    [Countif, FUNCTION_NAMES_STATISTICAL.COUNTIF],
+    [Countifs, FUNCTION_NAMES_STATISTICAL.COUNTIFS],
+    [Max, FUNCTION_NAMES_STATISTICAL.MAX],
+    [Maxa, FUNCTION_NAMES_STATISTICAL.MAXA],
+    [Maxifs, FUNCTION_NAMES_STATISTICAL.MAXIFS],
+    [Min, FUNCTION_NAMES_STATISTICAL.MIN],
+    [Mina, FUNCTION_NAMES_STATISTICAL.MINA],
+    [Minifs, FUNCTION_NAMES_STATISTICAL.MINIFS],
     [StdevP, FUNCTION_NAMES_STATISTICAL.STDEV_P],
     [StdevS, FUNCTION_NAMES_STATISTICAL.STDEV_S],
     [Stdeva, FUNCTION_NAMES_STATISTICAL.STDEVA],
@@ -47,5 +65,4 @@ export const functionStatistical = [
     [VarS, FUNCTION_NAMES_STATISTICAL.VAR_S],
     [Vara, FUNCTION_NAMES_STATISTICAL.VARA],
     [Varpa, FUNCTION_NAMES_STATISTICAL.VARPA],
-    [Maxifs, FUNCTION_NAMES_STATISTICAL.MAXIFS],
 ];

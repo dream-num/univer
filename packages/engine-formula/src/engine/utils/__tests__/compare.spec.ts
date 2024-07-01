@@ -54,7 +54,10 @@ describe('Test compare', () => {
 
     it('Function compareWithWildcard', () => {
         expect(compareWithWildcard('test12', 'test*', compareToken.EQUALS)).toBe(true);
+        expect(compareWithWildcard('hello', 'test*', compareToken.NOT_EQUAL)).toBe(true);
         expect(compareWithWildcard('test12', 'test*', compareToken.GREATER_THAN)).toBe(true);
         expect(compareWithWildcard('test12', 'test*', compareToken.GREATER_THAN_OR_EQUAL)).toBe(true);
+        expect(compareWithWildcard('hello', 'test*', compareToken.LESS_THAN)).toBe(true);
+        expect(compareWithWildcard('hello', 'test*', compareToken.LESS_THAN_OR_EQUAL)).toBe(true);
     });
 });

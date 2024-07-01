@@ -16,16 +16,17 @@
 
 import { describe, expect, it } from 'vitest';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
-import { Maxifs } from '../index';
+import { Averageifs } from '../index';
 import { ArrayValueObject, transformToValue } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 
-describe('Test maxifs function', () => {
-    const testFunction = new Maxifs(FUNCTION_NAMES_STATISTICAL.MAXIFS);
+describe('Test averageifs function', () => {
+    const testFunction = new Averageifs(FUNCTION_NAMES_STATISTICAL.AVERAGEIFS);
 
-    describe('Maxifs', () => {
+    describe('Averageifs', () => {
         it('Range and criteria', async () => {
-            const maxRange = ArrayValueObject.create(`{
+            const averageRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
@@ -37,12 +38,12 @@ describe('Test maxifs function', () => {
             }`);
 
             const criteria = StringValueObject.create('>2');
-            const resultObject = testFunction.calculate(maxRange, range, criteria);
-            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[3]]);
+            const resultObject = testFunction.calculate(averageRange, range, criteria);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2.5]]);
         });
 
         it('Range and criteria, compare string', async () => {
-            const maxRange = ArrayValueObject.create(`{
+            const averageRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
@@ -54,12 +55,12 @@ describe('Test maxifs function', () => {
             }`);
 
             const criteria = StringValueObject.create('>2');
-            const resultObject = testFunction.calculate(maxRange, range, criteria);
-            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[0]]);
+            const resultObject = testFunction.calculate(averageRange, range, criteria);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[ErrorType.DIV_BY_ZERO]]);
         });
 
         it('Range and array criteria', async () => {
-            const maxRange = ArrayValueObject.create(`{
+            const averageRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
@@ -77,12 +78,12 @@ describe('Test maxifs function', () => {
                 >4
             }`);
 
-            const resultObject = testFunction.calculate(maxRange, range, criteria);
-            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[3], [3], [0]]);
+            const resultObject = testFunction.calculate(averageRange, range, criteria);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2.5], [3], [ErrorType.DIV_BY_ZERO]]);
         });
 
         it('2 ranges and criteria', async () => {
-            const maxRange = ArrayValueObject.create(`{
+            const averageRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
@@ -104,12 +105,12 @@ describe('Test maxifs function', () => {
 
             const criteria2 = StringValueObject.create('<5');
 
-            const resultObject = testFunction.calculate(maxRange, range1, criteria1, range2, criteria2);
+            const resultObject = testFunction.calculate(averageRange, range1, criteria1, range2, criteria2);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2]]);
         });
 
         it('2 ranges and criteria, 1 array criteria', async () => {
-            const maxRange = ArrayValueObject.create(`{
+            const averageRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
@@ -135,12 +136,12 @@ describe('Test maxifs function', () => {
 
             const criteria2 = NumberValueObject.create(5);
 
-            const resultObject = testFunction.calculate(maxRange, range1, criteria1, range2, criteria2);
-            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[3], [3], [0]]);
+            const resultObject = testFunction.calculate(averageRange, range1, criteria1, range2, criteria2);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[3], [3], [ErrorType.DIV_BY_ZERO]]);
         });
 
         it('2 ranges and criteria, 2 array criteria', async () => {
-            const maxRange = ArrayValueObject.create(`{
+            const averageRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
@@ -171,8 +172,8 @@ describe('Test maxifs function', () => {
                 4
             }`);
 
-            const resultObject = testFunction.calculate(maxRange, range1, criteria1, range2, criteria2);
-            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2], [0], [0], [0]]);
+            const resultObject = testFunction.calculate(averageRange, range1, criteria1, range2, criteria2);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2], [ErrorType.DIV_BY_ZERO], [ErrorType.DIV_BY_ZERO], [ErrorType.DIV_BY_ZERO]]);
         });
     });
 });

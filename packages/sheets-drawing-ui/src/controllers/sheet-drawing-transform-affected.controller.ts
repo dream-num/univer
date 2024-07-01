@@ -703,16 +703,10 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
                 const { from, to } = sheetTransform;
                 const { column: fromColumn } = from;
                 const { column: toColumn } = to;
-                const intersected = fromColumn >= colStartIndex && toColumn <= colEndIndex;
-                if (intersected) {
-                    if (SheetDrawingAnchorType.Both) {
-                        // delete drawing
-                        deleteDrawings.push({ unitId, subUnitId, drawingId });
-                    } else {
-                        const param = this._shrinkCol(sheetTransform, transform, colStartIndex, colEndIndex, anchorType);
-                        newSheetTransform = param?.newSheetTransform;
-                        newTransform = param?.newTransform;
-                    }
+                const contained = fromColumn >= colStartIndex && toColumn <= colEndIndex;
+                if (contained && anchorType === SheetDrawingAnchorType.Both) {
+                     // delete drawing
+                    deleteDrawings.push({ unitId, subUnitId, drawingId });
                 } else {
                     const param = this._shrinkCol(sheetTransform, transform, colStartIndex, colEndIndex, anchorType);
                     newSheetTransform = param?.newSheetTransform;
@@ -836,19 +830,21 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
             newSheetTransform = transformToDrawingPosition(newTransform, this._selectionRenderService);
         } else if (fromColumn >= colStartIndex && toColumn <= colEndIndex) {
             // delete drawing
-            const newFromColumn = fromColumn - colCount;
-            const newToColumn = toColumn - colCount;
+            const selectionRect = this._selectionRenderService.attachRangeWithCoord({
+                startColumn: colStartIndex,
+                endColumn: colEndIndex,
+                startRow: 0,
+                endRow: 0,
+            });
 
             newSheetTransform = {
-                from: { ...from, column: newFromColumn },
-                to: { ...to, column: newToColumn },
+                from: { ...from, columnOffset: 0 },
+                to: { ...to, columnOffset: to.columnOffset - from.columnOffset },
             };
-            const tempNewTransform = drawingPositionToTransform(newSheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+
             newTransform = {
-                ...tempNewTransform,
-                left: newFromColumn < 0 ? 0 : transform.left,
-                width: transform.width,
-                height: transform.height,
+                ...transform,
+                left: selectionRect?.startX,
             };
         } else if (fromColumn < colStartIndex && toColumn > colEndIndex) {
             // shrink end left only

@@ -485,8 +485,19 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 newValue.s = styles?.getStyleByCell(value);
                 cellMatrix.setValue(row, col, newValue);
             }
-        });
 
+            if (value.colSpan || value.rowSpan) {
+                for (let rStart = 0; rStart < value.rowSpan!; rStart++) {
+                    for (let cStart = 0; cStart < value.colSpan!; cStart++) {
+                        if (rStart === 0 && cStart === 0) continue;
+
+                        const r = row + rStart;
+                        const c = col + cStart;
+                        cellMatrix.setValue(r, c, { s: styles?.getStyleByCell(value) });
+                    }
+                }
+            }
+        });
         const pasteTarget = this._getPastedRange(cellMatrix);
         if (!pasteTarget) return false;
 

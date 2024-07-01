@@ -26,7 +26,7 @@ import type { ISheetRangeLocation } from '@univerjs/sheets';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { FormulaDataModel } from '@univerjs/engine-formula';
-import { type ICellValueCompareFn, SortRangeCommand } from '../commands/sheets-sort.command';
+import { type ICellValueCompareFn, SortRangeCommand } from '../commands/commands/sheets-sort.command';
 import { isNullValue } from '../controllers/utils';
 import type { ISortOption } from './interface';
 

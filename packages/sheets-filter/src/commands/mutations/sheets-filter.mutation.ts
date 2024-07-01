@@ -21,8 +21,8 @@ import { CommandType } from '@univerjs/core';
 import type { IMutation, IRange, Nullable } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 
-import { SheetsFilterService } from '../services/sheet-filter.service';
-import type { IFilterColumn } from '../models/types';
+import { SheetsFilterService } from '../../services/sheet-filter.service';
+import type { IFilterColumn } from '../../models/types';
 
 export interface ISetSheetsFilterRangeMutationParams extends ISheetCommandSharedParams {
     range: IRange;

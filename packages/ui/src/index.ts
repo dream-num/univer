@@ -85,7 +85,6 @@ export { type IConfirmPartMethodOptions } from './views/components/confirm-part/
 export { ComponentContainer, useComponentsOfPart, type IComponentContainerProps } from './views/components/ComponentContainer';
 export { IEditorService, EditorService } from './services/editor/editor.service';
 export { TextEditor } from './components/editor/TextEditor';
-export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';
 export { RangeSelector } from './components/range-selector/RangeSelector';
 export { IRangeSelectorService } from './services/range-selector/range-selector.service';
 export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
@@ -110,3 +109,9 @@ export { MobileContextMenu } from './views/components/context-menu/MobileContext
 
 // #endregion
 
+// #region - all commands
+
+export { ToggleShortcutPanelOperation } from './commands/operations/toggle-shortcut-panel.operation';
+export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';
+
+// #endregion

@@ -17,6 +17,13 @@
 export { ThreadCommentModel, type CommentUpdate } from './models/thread-comment.model';
 export { ThreadCommentResourceController } from './controllers/tc-resource.controller';
 export { TC_PLUGIN_NAME } from './types/const';
+export type { IThreadComment, IThreadCommentMention } from './types/interfaces/i-thread-comment';
+
+export { UniverThreadCommentPlugin } from './plugin';
+export { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
+
+// #region - all commands
+
 export {
     AddCommentMutation,
     DeleteCommentMutation,
@@ -32,7 +39,6 @@ export type {
     IUpdateCommentPayload,
     IUpdateCommentRefMutationParams,
 } from './commands/mutations/comment.mutation';
-export type { IThreadComment, IThreadCommentMention } from './types/interfaces/i-thread-comment';
 export {
     AddCommentCommand,
     DeleteCommentCommand,
@@ -49,5 +55,5 @@ export type {
     IUpdateCommentRefCommandParams,
     IUpdateCommentRefPayload,
 } from './commands/commands/comment.command';
-export { UniverThreadCommentPlugin } from './plugin';
-export { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
+
+// #endregion

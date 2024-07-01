@@ -18,7 +18,7 @@ import { merge, Observable } from 'rxjs';
 import type { IMenuSelectorItem } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { RangeProtectionPermissionEditPoint, SetWorksheetActiveOperation, SheetsSelectionManagerService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
+import { RangeProtectionPermissionEditPoint, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 
 import { debounceTime } from 'rxjs/operators';
 import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
@@ -77,7 +77,7 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
         },
     ];
 
-    const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);

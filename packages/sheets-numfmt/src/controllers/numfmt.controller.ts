@@ -37,7 +37,7 @@ import {
     RemoveNumfmtMutation,
     SetNumfmtMutation,
     SheetInterceptorService,
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
@@ -74,7 +74,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         @Inject(ThemeService) private _themeService: ThemeService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @ICommandService private _commandService: ICommandService,
-        @Inject(SheetsSelectionManagerService) private _selectionManagerService: SheetsSelectionManagerService,
+        @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService,
         @IRenderManagerService private _renderManagerService: IRenderManagerService,
         @INumfmtService private _numfmtService: INumfmtService,
         @Inject(ComponentManager) private _componentManager: ComponentManager,

@@ -39,7 +39,7 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { SheetsSelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
@@ -79,7 +79,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
         const { range, style } = params;
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
 
         const ranges = range ? [range] : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!ranges?.length) {
@@ -156,7 +156,7 @@ export const SetBoldCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-bold',
     handler: async (accessor) => {
-        const selection = accessor.get(SheetsSelectionManagerService).getCurrentLastSelection();
+        const selection = accessor.get(SheetsSelectionsService).getCurrentLastSelection();
         if (!selection) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
@@ -185,7 +185,7 @@ export const SetItalicCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-italic',
     handler: async (accessor) => {
-        const selection = accessor.get(SheetsSelectionManagerService).getCurrentLastSelection();
+        const selection = accessor.get(SheetsSelectionsService).getCurrentLastSelection();
         if (!selection) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
@@ -218,7 +218,7 @@ export const SetUnderlineCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-underline',
     handler: async (accessor) => {
-        const selection = accessor.get(SheetsSelectionManagerService).getCurrentLastSelection();
+        const selection = accessor.get(SheetsSelectionsService).getCurrentLastSelection();
         if (!selection) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
@@ -253,7 +253,7 @@ export const SetStrikeThroughCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-stroke',
     handler: async (accessor) => {
-        const selection = accessor.get(SheetsSelectionManagerService).getCurrentLastSelection();
+        const selection = accessor.get(SheetsSelectionsService).getCurrentLastSelection();
         if (!selection) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
@@ -286,7 +286,7 @@ export const SetOverlineCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-overline',
     handler: async (accessor) => {
-        const selection = accessor.get(SheetsSelectionManagerService).getCurrentLastSelection();
+        const selection = accessor.get(SheetsSelectionsService).getCurrentLastSelection();
         if (!selection) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));

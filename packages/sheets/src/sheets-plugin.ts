@@ -29,7 +29,7 @@ import { INumfmtService } from './services/numfmt/type';
 import { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
 
 import { RefRangeService } from './services/ref-range/ref-range.service';
-import { SheetsSelectionManagerService } from './services/selection-manager.service';
+import { SheetsSelectionsService } from './services/selections/selection-manager.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 import { WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from './services/permission/worksheet-permission';
@@ -87,7 +87,7 @@ export class UniverSheetsPlugin extends Plugin {
         const dependencies: Dependency[] = [
             // services
             [BorderStyleManagerService],
-            [SheetsSelectionManagerService],
+            [SheetsSelectionsService],
             [RefRangeService],
             [WorkbookPermissionService],
             [INumfmtService, { useClass: NumfmtService }],

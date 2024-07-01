@@ -47,7 +47,7 @@ import {
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
     SetSelectionsOperation,
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { type IConfirmPartMethodOptions, IConfirmService } from '@univerjs/ui';
 import type { IDisposable, Injector } from '@wendellhu/redi';
@@ -66,7 +66,7 @@ describe('Test add worksheet merge commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let selectionManager: SheetsSelectionManagerService;
+    let selectionManager: SheetsSelectionsService;
 
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
@@ -131,7 +131,7 @@ describe('Test add worksheet merge commands', () => {
         get(LocaleService).load({});
         get(MergeCellController);
 
-        selectionManager = get(SheetsSelectionManagerService);
+        selectionManager = get(SheetsSelectionsService);
     });
 
     afterEach(() => {
@@ -141,7 +141,7 @@ describe('Test add worksheet merge commands', () => {
     describe('add merge all', () => {
         describe('correct situations', () => {
             it('will merge all cells of the selected range when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
@@ -187,7 +187,7 @@ describe('Test add worksheet merge commands', () => {
     describe('add merge vertical', () => {
         describe('correct situations', () => {
             it('will merge all vertical cells of the selected range when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
@@ -231,7 +231,7 @@ describe('Test add worksheet merge commands', () => {
     describe('add merge horizontal', () => {
         describe('correct situations', () => {
             it('will merge all horizontal cells of the selected range when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
@@ -270,7 +270,7 @@ describe('Test add worksheet merge commands', () => {
     describe('cancel merge', () => {
         describe('correct situations', () => {
             it('will cancel the merge of the selected range when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },

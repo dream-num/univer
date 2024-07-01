@@ -33,7 +33,7 @@ import {
     RangeProtectionRuleModel,
     SheetInterceptorService,
 
-    SheetsSelectionManagerService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel,
+    SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -105,7 +105,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([SheetsSelectionManagerService]);
+            injector.add([SheetsSelectionsService]);
             injector.add([BorderStyleManagerService]);
             injector.add([SheetInterceptorService]);
             injector.add([LexerTreeBuilder]);

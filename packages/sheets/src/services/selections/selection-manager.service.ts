@@ -19,7 +19,7 @@ import { Disposable, IUniverInstanceService, RxDisposable, UniverInstanceType } 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
 
-import type { ISelectionWithStyle } from '../basics/selection';
+import type { ISelectionWithStyle } from '../../basics/selection';
 
 export interface ISelectionManagerSearchParam {
     unitId: string;
@@ -32,9 +32,7 @@ export enum SelectionMoveType {
     MOVE_END,
 }
 
-export interface ISelectionManager { }
-
-export class SheetsSelectionManagerService extends RxDisposable {
+export class SheetsSelectionsService extends RxDisposable {
     private get _currentSelectionPos(): Nullable<ISelectionManagerSearchParam> {
         const workbook = this._instanceSrv.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return null;
@@ -86,7 +84,7 @@ export class SheetsSelectionManagerService extends RxDisposable {
 
         const current = this._currentSelectionPos;
         if (!current) {
-            throw new Error('[SheetsSelectionManagerService]: cannot find current selection position!');
+            throw new Error('[SheetsSelectionsService]: cannot find current selection position!');
         }
 
         const { unitId, sheetId } = current;
@@ -108,7 +106,7 @@ export class SheetsSelectionManagerService extends RxDisposable {
 
         const current = this._currentSelectionPos;
         if (!current) {
-            throw new Error('[SheetsSelectionManagerService]: cannot find current selection position!');
+            throw new Error('[SheetsSelectionsService]: cannot find current selection position!');
         }
 
         const { unitId, sheetId } = current;
@@ -166,7 +164,7 @@ export class SheetsSelectionManagerService extends RxDisposable {
         if (!wbSelection) {
             const workbook = this._instanceSrv.getUnit<Workbook>(unitId);
             if (!workbook) {
-                throw new Error(`[SheetsSelectionManagerService]: cannot resolve unit with id "${unitId}"!`);
+                throw new Error(`[SheetsSelectionsService]: cannot resolve unit with id "${unitId}"!`);
             }
 
             wbSelection = new WorkbookSelections(workbook);
@@ -190,6 +188,9 @@ export class WorkbookSelections extends Disposable {
     private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
 
+    private readonly _beforeSelectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
+    readonly beforeSelectionMoveEnd$ = this._beforeSelectionMoveEnd$.asObservable();
+
     constructor(
         private readonly _workbook: Workbook
     ) {
@@ -199,6 +200,7 @@ export class WorkbookSelections extends Disposable {
     override dispose(): void {
         super.dispose();
 
+        this._beforeSelectionMoveEnd$.complete();
         this._selectionMoveEnd$.complete();
         this._selectionMoving$.complete();
         this._selectionMoveStart$.complete();
@@ -207,13 +209,13 @@ export class WorkbookSelections extends Disposable {
     /** Clear all selections in this workbook. */
     clear(): void {
         this._worksheetSelections.clear();
-        this._selectionMoveEnd$.next([]);
+        this._emitOnEnd([]);
     }
 
     addSelections(sheetId: string, selectionDatas: ISelectionWithStyle[]) {
         const selections = this._ensureSheetSelection(sheetId);
         selections.push(...selectionDatas);
-        this._selectionMoveEnd$.next(selections);
+        this._emitOnEnd(selections);
     }
 
     setSelections(sheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType = SelectionMoveType.MOVE_END) {
@@ -227,7 +229,7 @@ export class WorkbookSelections extends Disposable {
         } else if (type === SelectionMoveType.MOVING) {
             this._selectionMoving$.next(selectionDatas);
         } else {
-            this._selectionMoveEnd$.next(selectionDatas);
+            this._emitOnEnd(selectionDatas);
         }
     }
 
@@ -262,4 +264,12 @@ export class WorkbookSelections extends Disposable {
 
         return worksheetSelection;
     }
+
+    private _emitOnEnd(selections: ISelectionWithStyle[]): void {
+        this._beforeSelectionMoveEnd$.next(selections);
+        this._selectionMoveEnd$.next(selections);
+    }
 }
+
+/** An context key to disable normal selections if its value is set to `true`. */
+export const DISABLE_NORMAL_SELECTIONS = 'DISABLE_NORMAL_SELECTIONS';

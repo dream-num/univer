@@ -38,7 +38,7 @@ import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyl
 import {
     MoveColsCommand,
     MoveRowsCommand,
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
@@ -87,7 +87,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(SheetsSelectionManagerService) selectionManagerService: SheetsSelectionManagerService,
+        @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {

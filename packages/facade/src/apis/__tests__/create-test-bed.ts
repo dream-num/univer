@@ -32,7 +32,7 @@ import {
 } from '@univerjs/core';
 import { FormulaDataModel, FunctionService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import { RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionManagerService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import {
     DescriptionService,
     FormulaCustomFunctionService,
@@ -126,7 +126,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([SheetsSelectionManagerService]);
+            injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
             injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
             injector.add([

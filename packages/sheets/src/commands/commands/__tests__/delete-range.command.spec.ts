@@ -27,7 +27,7 @@ import {
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SheetsSelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
 import { MoveRangeMutation } from '../../mutations/move-range.mutation';
@@ -156,7 +156,7 @@ describe('Test delete range commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let selectionManager: SheetsSelectionManagerService;
+    let selectionManager: SheetsSelectionsService;
     let getValueByPosition: (
         startRow: number,
         startColumn: number,
@@ -200,7 +200,7 @@ describe('Test delete range commands', () => {
         commandService.registerCommand(MoveRangeMutation);
         commandService.registerCommand(SetRangeValuesMutation);
 
-        selectionManager = get(SheetsSelectionManagerService);
+        selectionManager = get(SheetsSelectionsService);
 
         getValueByPosition = (
             startRow: number,

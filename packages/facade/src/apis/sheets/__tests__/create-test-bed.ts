@@ -27,7 +27,7 @@ import {
 } from '@univerjs/core';
 import { FunctionService, IFunctionService } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import { SheetInterceptorService, SheetsSelectionManagerService } from '@univerjs/sheets';
+import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import {
     DescriptionService,
     FormulaCustomFunctionService,
@@ -86,7 +86,7 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([SheetsSelectionManagerService]);
+            injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
             injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
             injector.add([

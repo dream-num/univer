@@ -20,7 +20,7 @@ import './index.less';
 import { ICommandService, LocaleService, Range } from '@univerjs/core';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { FormatType } from '@univerjs/sheets';
-import { SheetsSelectionManagerService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 
@@ -43,7 +43,7 @@ export const Options = () => {
     const localeService = useDependency(LocaleService);
     const injector = useInjector();
 
-    const selectionManagerService = useDependency(SheetsSelectionManagerService);
+    const selectionManagerService = useDependency(SheetsSelectionsService);
     const setNumfmt = (pattern: string | null) => {
         const selection = selectionManagerService.getCurrentLastSelection();
         if (!selection) {

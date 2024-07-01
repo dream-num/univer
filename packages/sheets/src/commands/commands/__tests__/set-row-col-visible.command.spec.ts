@@ -19,7 +19,7 @@ import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoC
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SheetsSelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../../mutations/set-col-visible.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../mutations/set-row-visible.mutation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
@@ -93,7 +93,7 @@ describe('Test row col hide/unhine commands', () => {
     }
 
     function selectRow(rowStart: number, rowEnd: number): void {
-        const selectionManagerService = get(SheetsSelectionManagerService);
+        const selectionManagerService = get(SheetsSelectionsService);
         const endColumn = getColCount() - 1;
         selectionManagerService.addSelections([
             {
@@ -114,7 +114,7 @@ describe('Test row col hide/unhine commands', () => {
     }
 
     function selectColumn(columnStart: number, columnEnd: number): void {
-        const selectionManagerService = get(SheetsSelectionManagerService);
+        const selectionManagerService = get(SheetsSelectionsService);
         const endRow = getRowCount() - 1;
         selectionManagerService.addSelections([
             {

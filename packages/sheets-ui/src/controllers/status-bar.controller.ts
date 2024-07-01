@@ -41,7 +41,7 @@ import type {
 import {
     INumfmtService,
     SetRangeValuesMutation,
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
@@ -58,7 +58,7 @@ export class StatusBarController extends Disposable {
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IFunctionService private readonly _functionService: IFunctionService,
         @IStatusBarService private readonly _statusBarService: IStatusBarService,
         @ICommandService private readonly _commandService: ICommandService,

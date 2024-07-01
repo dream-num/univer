@@ -24,7 +24,7 @@ import { MoveRangeCommand } from '../../commands/commands/move-range.command';
 import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
 import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
 import { RefRangeService } from '../ref-range/ref-range.service';
-import { SheetsSelectionManagerService } from '../selection-manager.service';
+import { SheetsSelectionsService } from '../selections/selection-manager.service';
 import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
 import { createTestBase, TEST_WORKBOOK_DATA_DEMO } from './util';
 
@@ -51,7 +51,7 @@ describe('Test ref-range.service', () => {
 
     beforeEach(() => {
         const testBed = createTestBase(TEST_WORKBOOK_DATA_DEMO, [
-            [SheetsSelectionManagerService],
+            [SheetsSelectionsService],
             [RefRangeService],
             [SheetInterceptorService],
         ]);

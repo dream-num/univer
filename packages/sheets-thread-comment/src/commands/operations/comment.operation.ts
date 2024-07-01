@@ -17,7 +17,7 @@
 import type { ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
-import { getSheetCommandTarget, SheetsSelectionManagerService } from '@univerjs/sheets';
+import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
@@ -26,7 +26,7 @@ export const ShowAddSheetCommentModalOperation: ICommand = {
     type: CommandType.OPERATION,
     id: 'sheets.operation.show-comment-modal',
     handler(accessor) {
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const sheetsThreadCommentPopupService = accessor.get(SheetsThreadCommentPopupService);

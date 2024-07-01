@@ -18,7 +18,7 @@ import type { ICommand, IMutationInfo, Nullable, Workbook } from '@univerjs/core
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, LocaleService, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
-import { isSingleCellSelection, SheetsSelectionManagerService } from '@univerjs/sheets';
+import { isSingleCellSelection, SheetsSelectionsService } from '@univerjs/sheets';
 import type { FilterColumn, IAutoFilter, IFilterColumn, IReCalcSheetsFilterMutationParams, ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
 import { expandToContinuousRange } from '@univerjs/sheets-ui';
@@ -61,7 +61,7 @@ export const SmartToggleSheetsFilterCommand: ICommand = {
             return result;
         }
 
-        const selectionManager = accessor.get(SheetsSelectionManagerService);
+        const selectionManager = accessor.get(SheetsSelectionsService);
         const lastSelection = selectionManager.getCurrentLastSelection();
         if (!lastSelection) return false;
 

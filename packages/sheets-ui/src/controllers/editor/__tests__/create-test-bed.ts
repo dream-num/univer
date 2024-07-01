@@ -16,7 +16,7 @@
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
-import { SheetInterceptorService, SheetsSelectionManagerService } from '@univerjs/sheets';
+import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -61,7 +61,7 @@ export function createTestBed(workbookData?: IWorkbookData, dependencies?: Depen
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([SheetsSelectionManagerService]);
+            injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
 
             dependencies?.forEach((d) => injector.add(d));

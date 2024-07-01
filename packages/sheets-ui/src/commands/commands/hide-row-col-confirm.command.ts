@@ -16,7 +16,7 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { getSheetCommandTarget, SetColHiddenCommand, SetRowHiddenCommand, SheetsSelectionManagerService } from '@univerjs/sheets';
+import { getSheetCommandTarget, SetColHiddenCommand, SetRowHiddenCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -26,7 +26,7 @@ export const HideRowConfirmCommand: ICommand = {
     id: 'sheet.command.hide-row-confirm',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
 
         const ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!ranges?.length) return false;
@@ -66,7 +66,7 @@ export const HideColConfirmCommand: ICommand = {
     id: 'sheet.command.hide-col-confirm',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
 
         const ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!ranges?.length) {

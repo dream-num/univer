@@ -31,7 +31,7 @@ import {
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
     SetSelectionsOperation,
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import {
     AutoFillCommand,
@@ -115,7 +115,7 @@ describe('Test auto fill with formula', () => {
 
     describe('correct situations', () => {
         it('one cell with formula', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             selectionManager.addSelections([
                 {

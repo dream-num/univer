@@ -22,7 +22,7 @@ import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     SetWorksheetActiveOperation,
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { merge, takeUntil } from 'rxjs';
@@ -43,7 +43,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IEditorService private readonly _editorService: IEditorService,
         @IContextService private readonly _contextService: IContextService,
-        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService
     ) {
         super();

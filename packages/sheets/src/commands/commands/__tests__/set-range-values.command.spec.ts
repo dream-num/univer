@@ -30,7 +30,7 @@ import {
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SheetsSelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import { SetRangeValuesCommand } from '../set-range-values.command';
@@ -101,7 +101,7 @@ describe('Test set range values commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let selectionManager: SheetsSelectionManagerService;
+    let selectionManager: SheetsSelectionsService;
     let getValue: (sheetId?: string) => Nullable<ICellData>;
     let getValues: (
         startRow: number,
@@ -120,7 +120,7 @@ describe('Test set range values commands', () => {
         commandService.registerCommand(SetRangeValuesCommand);
         commandService.registerCommand(SetRangeValuesMutation);
 
-        selectionManager = get(SheetsSelectionManagerService);
+        selectionManager = get(SheetsSelectionsService);
         selectionManager.addSelections([
             {
                 range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },

@@ -15,15 +15,14 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { DisposableCollection, RANGE_TYPE, ThemeService } from '@univerjs/core';
+import { DisposableCollection, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { convertSelectionDataToRange, getNormalSelectionStyle, type ISelectionWithCoordAndStyle, type ISelectionWithStyle, SelectionMoveType, type SheetsSelectionManagerService, type WorkbookSelections } from '@univerjs/sheets';
+import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, type ISelectionWithCoordAndStyle, type SheetsSelectionsService, type WorkbookSelections } from '@univerjs/sheets';
 import { BaseSelectionRenderService, checkInHeaderRanges, getAllSelection, getCoordByOffset, getSheetObject, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { IRefSelectionsService } from '../ref-selections.service';
 
 /**
  * This service extends the existing `SelectionRenderService` to provide the rendering of prompt selections
@@ -43,7 +42,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         @Inject(ThemeService) themeService: ThemeService,
         @IShortcutService shortcutService: IShortcutService,
         @IRenderManagerService renderManagerService: IRenderManagerService,
-        @IRefSelectionsService refSelectionsService: SheetsSelectionManagerService,
+        @IRefSelectionsService refSelectionsService: SheetsSelectionsService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super(
@@ -63,20 +62,6 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._remainLastEnabled = true; // For ref range selections, we should always remain others.
     }
 
-    /**
-     * Add ref range selections. This method should be called when user is editing a formula string.
-     */
-    add(selections: ISelectionWithStyle[]): void {
-        for (const s of selections) {
-            const selection = this.attachSelectionWithCoord(s);
-            this._addControlToCurrentByRangeData(selection);
-        }
-    }
-
-    clear(): void {
-        this._reset();
-    }
-
     setRemainLastEnabled(enabled: boolean): void {
         this._remainLastEnabled = enabled;
     }
@@ -88,17 +73,18 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     /**
      * Call this method and user will be able to select on the canvas to update selections.
      */
-    enableSelectionChanging(): void {
-        this.disableSelectionChanges();
-        this._eventDisposables = this._initEventListeners();
+    enableSelectionChanging(): IDisposable {
+        this._disableSelectionChanging();
+        this._eventDisposables = this._initCanvasEventListeners();
+        return toDisposable(() => this._disableSelectionChanging());
     }
 
-    disableSelectionChanges(): void {
+    private _disableSelectionChanging(): void {
         this._eventDisposables?.dispose();
         this._eventDisposables = null;
     }
 
-    private _initEventListeners(): IDisposable {
+    private _initCanvasEventListeners(): IDisposable {
         const sheetObject = this._getSheetObject();
         const { spreadsheetRowHeader, spreadsheetColumnHeader, spreadsheet, spreadsheetLeftTopPlaceholder } = sheetObject;
         const { scene } = this._context;
@@ -157,18 +143,17 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 
     private _initUserActionSyncListener() {
-        // When user completes range selection, we should update the range into the `IRefSelectionService`.
-        this.disposeWithMe(this.selectionMoveEnd$.subscribe((params) => this._updateSelections(params, SelectionMoveType.MOVE_END)));
+        // When user completes range selection, we should update the range into the `IRefSelectionService`,
+        // and later the selections would be updated to the `SelectionManagerService`.
+        // Note that it would also trigger the callback in `_initSelectionChangeListener`.
+        this.disposeWithMe(this.selectionMoveEnd$.subscribe((params) => this._updateSelections(params)));
     }
 
-    private _updateSelections(selectionDataWithStyleList: ISelectionWithCoordAndStyle[], _type: SelectionMoveType) {
+    private _updateSelections(selectionDataWithStyleList: ISelectionWithCoordAndStyle[]) {
         const workbook = this._context.unit;
-        const sheetId = workbook.getActiveSheet()?.getSheetId();
-        if (!sheetId) return;
+        const sheetId = workbook.getActiveSheet()!.getSheetId();
 
-        if (selectionDataWithStyleList == null || selectionDataWithStyleList.length === 0) {
-            return;
-        }
+        if (selectionDataWithStyleList.length === 0) return;
 
         this._workbookSelections.setSelections(
             sheetId,
@@ -178,9 +163,11 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
     private _initSelectionChangeListener(): void {
         // When selection completes, we need to update the selections' rendering and clear event handlers.
-        this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((params) => {
+        this.disposeWithMe(this._workbookSelections.beforeSelectionMoveEnd$.subscribe((selectionsWithStyles) => {
+            // Clear already existed selections.
             this._reset();
-            for (const selectionWithStyle of params) {
+
+            for (const selectionWithStyle of selectionsWithStyles) {
                 const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
                 this._addControlToCurrentByRangeData(selectionData);
             }
@@ -210,12 +197,16 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
     }
 }
 
+/**
+ * Return the selections style while adding a range into the formula string (blue dashed).
+ * @param themeService
+ * @returns The selection's style.
+ */
 function getRefSelectionStyle(themeService: ThemeService) {
     const style = getNormalSelectionStyle(themeService);
     style.strokeDash = 8;
     style.hasAutoFill = false;
     style.hasRowHeader = false;
     style.hasColumnHeader = false;
-
     return style;
 }

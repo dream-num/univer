@@ -120,6 +120,7 @@ export interface ITextSelectionRenderManager {
     readonly onInputBefore$: Observable<Nullable<IEditorInputConfig>>;
     readonly onKeydown$: Observable<Nullable<IEditorInputConfig>>;
     readonly onInput$: Observable<Nullable<IEditorInputConfig>>;
+    readonly onPointerDown$: Observable<void>;
     readonly onCompositionstart$: Observable<Nullable<IEditorInputConfig>>;
     readonly onCompositionupdate$: Observable<Nullable<IEditorInputConfig>>;
     readonly onCompositionend$: Observable<Nullable<IEditorInputConfig>>;
@@ -209,6 +210,9 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private readonly _onBlur$ = new Subject<Nullable<IEditorInputConfig>>();
     readonly onBlur$ = this._onBlur$.asObservable();
+
+    private readonly _onPointerDown$ = new Subject<void>();
+    readonly onPointerDown$ = this._onPointerDown$.asObservable();
 
     private _container!: HTMLDivElement;
 
@@ -974,6 +978,14 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             fromEvent(this._input, 'focus').subscribe((e) => {
                 this._eventHandle(e, (config) => {
                     this._onFocus$.next(config);
+                });
+            })
+        );
+
+        this.disposeWithMe(
+            fromEvent(this._input, 'pointerdown').subscribe((e) => {
+                this._eventHandle(e, () => {
+                    this._onBlur$.next();
                 });
             })
         );

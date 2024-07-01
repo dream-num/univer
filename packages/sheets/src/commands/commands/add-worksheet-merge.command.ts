@@ -32,7 +32,7 @@ import type {
     IRemoveWorksheetMergeMutationParams,
 } from '../../basics/interfaces/mutation-interface';
 import { getAddMergeMutationRangeByType } from '../../controllers/merge-cell.controller';
-import { SheetsSelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import {
     RemoveMergeUndoMutationFactory,
@@ -181,7 +181,7 @@ export const AddWorksheetMergeAllCommand: ICommand = {
     id: 'sheet.command.add-worksheet-merge-all',
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) {
             return false;
@@ -210,7 +210,7 @@ export const AddWorksheetMergeVerticalCommand: ICommand = {
     id: 'sheet.command.add-worksheet-merge-vertical',
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) {
             return false;
@@ -240,7 +240,7 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
     id: 'sheet.command.add-worksheet-merge-horizontal',
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
         if (!selections?.length) {
             return false;

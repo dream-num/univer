@@ -25,7 +25,7 @@ import {
     SetRowVisibleMutation,
     SetSelectedColsVisibleCommand,
     SetSelectedRowsVisibleCommand,
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -46,7 +46,7 @@ describe('Test commands used for change selections', () => {
     let univer: Univer | null = null;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let selectionManagerService: SheetsSelectionManagerService;
+    let selectionManagerService: SheetsSelectionsService;
 
     function selectTopLeft() {
         selectionManagerService.setSelections([
@@ -120,7 +120,7 @@ describe('Test commands used for change selections', () => {
     }
 
     function selectRow(rowStart: number, rowEnd: number): void {
-        const selectionManagerService = get(SheetsSelectionManagerService);
+        const selectionManagerService = get(SheetsSelectionsService);
         const endColumn = getColCount() - 1;
         selectionManagerService.addSelections([
             {
@@ -141,7 +141,7 @@ describe('Test commands used for change selections', () => {
     }
 
     function selectColumn(columnStart: number, columnEnd: number): void {
-        const selectionManagerService = get(SheetsSelectionManagerService);
+        const selectionManagerService = get(SheetsSelectionsService);
         const endRow = getRowCount() - 1;
         selectionManagerService.addSelections([
             {
@@ -178,7 +178,7 @@ describe('Test commands used for change selections', () => {
         get = testBed.get;
 
         commandService = get(ICommandService);
-        selectionManagerService = get(SheetsSelectionManagerService);
+        selectionManagerService = get(SheetsSelectionsService);
     }
 
     afterEach(disposeTestBed);

@@ -21,7 +21,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import type { IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRowsCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionManagerService } from '@univerjs/sheets';
+import { InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
 import { SheetsFilterController } from '../../controllers/sheets-filter.controller';
 
@@ -203,7 +203,7 @@ function createFilterTestUniver(dependencies?: Dependency[], workbookData?: IWor
 
             injector.add([SheetInterceptorService]);
             injector.add([SheetsFilterService]);
-            injector.add([SheetsSelectionManagerService]);
+            injector.add([SheetsSelectionsService]);
             injector.add([RefRangeService]);
             injector.add([SheetsFilterController]);
         }

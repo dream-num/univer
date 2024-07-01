@@ -32,7 +32,7 @@ import {
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 
-import { SheetsSelectionManagerService } from '../selection-manager.service';
+import { SheetsSelectionsService } from '../selections/selection-manager.service';
 import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
 import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
 import type { EffectRefRangeParams } from './type';
@@ -103,7 +103,7 @@ export class RefRangeService extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetsSelectionManagerService) private _selectionManagerService: SheetsSelectionManagerService
+        @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService
     ) {
         super();
         this._onRefRangeChange();
@@ -426,7 +426,7 @@ function getSubUnitId(univerInstanceService: IUniverInstanceService) {
     return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
 }
 
-function getSelectionRanges(selectionManagerService: SheetsSelectionManagerService) {
+function getSelectionRanges(selectionManagerService: SheetsSelectionsService) {
     return selectionManagerService.getCurrentSelections()?.map((s) => s.range) || [];
 }
 

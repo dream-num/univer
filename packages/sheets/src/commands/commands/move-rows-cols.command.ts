@@ -29,7 +29,7 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { SheetsSelectionManagerService } from '../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
 import {
@@ -56,7 +56,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
     id: MoveRowsCommandId,
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IMoveRowsCommandParams) => {
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const selections = selectionManagerService.getCurrentSelections();
         const {
             fromRange: { startRow: fromRow },
@@ -186,7 +186,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
     id: MoveColsCommandId,
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IMoveColsCommandParams) => {
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const selections = selectionManagerService.getCurrentSelections();
         const {
             fromRange: { startColumn: fromCol },

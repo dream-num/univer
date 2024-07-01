@@ -18,7 +18,7 @@ import type { Workbook } from '@univerjs/core';
 import { Disposable, Rectangle } from '@univerjs/core';
 import type { IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IContextMenuService, ILayoutService, MenuPosition } from '@univerjs/ui';
-import { SheetsSelectionManagerService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 
@@ -32,7 +32,7 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
         private readonly _context: IRenderContext<Workbook>,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
-        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService
     ) {
         super();

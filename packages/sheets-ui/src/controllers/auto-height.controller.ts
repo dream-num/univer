@@ -29,7 +29,7 @@ import {
     SetWorksheetRowAutoHeightMutationFactory,
     SetWorksheetRowIsAutoHeightCommand,
     SheetInterceptorService,
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { RenderManagerService } from '@univerjs/engine-render';
@@ -42,7 +42,7 @@ export class AutoHeightController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();

@@ -18,9 +18,9 @@ import type { Direction, ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, Tools } from '@univerjs/core';
 import {
     getCellAtRowCol,
+    getSelectionsService,
     getSheetCommandTarget,
     SetSelectionsOperation,
-    SheetsSelectionManagerService,
 } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
 
@@ -68,7 +68,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
         if (!target) return false;
 
         const { workbook, worksheet } = target;
-        const selection = accessor.get(SheetsSelectionManagerService).getCurrentLastSelection();
+        const selection = getSelectionsService(accessor).getCurrentLastSelection();
         if (!selection) {
             return false;
         }
@@ -141,7 +141,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
 
         const { workbook, worksheet } = target;
 
-        const selection = accessor.get(SheetsSelectionManagerService).getCurrentLastSelection();
+        const selection = getSelectionsService(accessor).getCurrentLastSelection();
         if (!selection) {
             return false;
         }
@@ -286,7 +286,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
 
         const { worksheet, unitId, subUnitId } = target;
 
-        const selection = accessor.get(SheetsSelectionManagerService).getCurrentLastSelection();
+        const selection = getSelectionsService(accessor).getCurrentLastSelection();
         if (!selection) return false;
 
         const { range: startRange, primary } = selection;
@@ -344,7 +344,7 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
         SELECTED_RANGE_WORKSHEET = '';
     },
     handler: async (accessor, params = { expandToGapFirst: true, loop: false }) => {
-        const selection = accessor.get(SheetsSelectionManagerService).getCurrentLastSelection();
+        const selection = getSelectionsService(accessor).getCurrentLastSelection();
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
         if (!target) return false;
 

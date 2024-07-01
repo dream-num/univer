@@ -16,7 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
 import { DisposableCollection, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { getSheetCommandTarget, RangeProtectionRuleModel, SheetsSelectionManagerService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
+import { getSheetCommandTarget, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
 import { Inject, Optional } from '@wendellhu/redi';
 import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 
@@ -39,7 +39,7 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
         private readonly _context: IRenderContext<Workbook>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IPermissionService private readonly _permissionService: IPermissionService,
-        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(HeaderMoveRenderController) private _headerMoveRenderController: HeaderMoveRenderController,
         @ISheetSelectionRenderService private _selectionRenderService: ISheetSelectionRenderService,

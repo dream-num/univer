@@ -26,7 +26,7 @@ import {
     Range,
     sequenceExecute,
 } from '@univerjs/core';
-import { createTopMatrixFromMatrix, findAllRectangle, getSheetCommandTarget, SheetsSelectionManagerService } from '@univerjs/sheets';
+import { createTopMatrixFromMatrix, findAllRectangle, getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 
 import { ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
 import type { IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
@@ -47,7 +47,7 @@ export const ClearRangeCfCommand: ICommand<IClearRangeCfParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;

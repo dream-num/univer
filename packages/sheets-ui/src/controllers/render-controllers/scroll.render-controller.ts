@@ -24,8 +24,9 @@ import {
 } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { ScrollToCellOperation, SheetsSelectionManagerService } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
+import type { SheetsSelectionsService } from '@univerjs/sheets';
+import { getSelectionsService, ScrollToCellOperation } from '@univerjs/sheets';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
@@ -44,10 +45,10 @@ const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAn
 export class SheetsScrollRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
+        @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
         @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService
     ) {
         super();
@@ -100,7 +101,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
     private _scrollToSelectionForExpand(param: IExpandSelectionCommandParams) {
         setTimeout(() => {
-            const selection = this._selectionManagerService.getCurrentLastSelection();
+            const selection = this._getSelectionsService().getCurrentLastSelection();
             if (selection == null) {
                 return;
             }
@@ -363,7 +364,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
     }
 
     private _scrollToSelection(targetIsActualRowAndColumn = true) {
-        const selection = this._selectionManagerService.getCurrentLastSelection();
+        const selection = this._getSelectionsService().getCurrentLastSelection();
         if (selection == null) {
             return;
         }
@@ -373,6 +374,10 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         const selectionStartColumn = targetIsActualRowAndColumn ? actualColumn : startColumn;
 
         this._scrollToCell(selectionStartRow, selectionStartColumn);
+    }
+
+    private _getSelectionsService(): SheetsSelectionsService {
+        return getSelectionsService(this._injector);
     }
 
     private _getViewportBounding() {

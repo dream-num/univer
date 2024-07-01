@@ -26,6 +26,8 @@ export enum KeyCode {
     TAB = 9,
 
     ENTER = 13,
+    SHIFT = 16,
+    CTRL = 17,
     ESC = 27,
     SPACE = 32,
 

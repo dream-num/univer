@@ -19,7 +19,7 @@ import { Disposable, ICommandService, LifecycleStages, OnLifecycle, sequenceExec
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import { handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionManagerService } from '@univerjs/sheets';
+import { handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IAddCommentMutationParams, IUpdateCommentRefMutationParams } from '@univerjs/thread-comment';
 import { AddCommentMutation, DeleteCommentMutation, ThreadCommentModel, UpdateCommentRefMutation } from '@univerjs/thread-comment';
 import { serializeRange, singleReferenceToGrid } from '@univerjs/engine-formula';
@@ -35,7 +35,7 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
         @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel,
         @Inject(ThreadCommentModel) private readonly _threadCommentModel: ThreadCommentModel,
-        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();

@@ -21,7 +21,7 @@ import { SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerj
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { RefRangeService, SheetInterceptorService, SheetsSelectionManagerService } from '@univerjs/sheets';
+import { RefRangeService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import { CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../sheets-filter.operation';
 import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
@@ -79,7 +79,7 @@ function createFilterOperationTestBed() {
                 [SheetInterceptorService],
                 [SheetsFilterPanelService],
                 [RefRangeService],
-                [SheetsSelectionManagerService],
+                [SheetsSelectionsService],
             ] as Dependency[]).forEach((d) => injector.add(d));
         }
     }

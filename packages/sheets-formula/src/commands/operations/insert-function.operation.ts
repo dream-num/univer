@@ -30,7 +30,7 @@ import {
     getCellAtRowCol,
     getSheetCommandTarget,
     SetSelectionsOperation,
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -49,7 +49,7 @@ export const InsertFunctionOperation: ICommand = {
     id: 'formula-ui.operation.insert-function',
     type: CommandType.OPERATION,
     handler: async (accessor: IAccessor, params: IInsertFunctionOperationParams) => {
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const editorService = accessor.get(IEditorService);
         const currentSelections = selectionManagerService.getCurrentSelections();
         if (!currentSelections || !currentSelections.length) {

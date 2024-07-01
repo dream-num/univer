@@ -23,7 +23,7 @@ import {
     SetSelectionsOperation,
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -117,7 +117,7 @@ describe('Test clipboard', () => {
 
     describe('Test paste from external ', () => {
         beforeEach(() => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             const startRow = 1;
             const startColumn = 1;

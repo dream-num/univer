@@ -16,7 +16,7 @@
 
 import type { ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
-import { DeleteRangeMoveUpCommand, getSheetCommandTarget, SheetsSelectionManagerService } from '@univerjs/sheets';
+import { DeleteRangeMoveUpCommand, getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 
 export const DeleteRangeMoveUpConfirmCommand: ICommand = {
@@ -26,7 +26,7 @@ export const DeleteRangeMoveUpConfirmCommand: ICommand = {
         const confirmService = accessor.get(IConfirmService);
         const commandService = accessor.get(ICommandService);
         const localeService = accessor.get(LocaleService);
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const selection = selectionManagerService.getCurrentSelections();

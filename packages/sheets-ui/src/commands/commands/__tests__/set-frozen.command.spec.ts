@@ -16,7 +16,7 @@
 
 import type { IFreeze, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import { SheetsSelectionManagerService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -33,7 +33,7 @@ describe('Test commands used for change selections', () => {
     let univer: Univer | null = null;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let selectionManagerService: SheetsSelectionManagerService;
+    let selectionManagerService: SheetsSelectionsService;
     let scrollManagerService: ScrollManagerService;
 
     const currentInfo = {
@@ -97,7 +97,7 @@ describe('Test commands used for change selections', () => {
         get = testBed.get;
 
         commandService = get(ICommandService);
-        selectionManagerService = get(SheetsSelectionManagerService);
+        selectionManagerService = get(SheetsSelectionsService);
         scrollManagerService = get(ScrollManagerService);
         scrollManagerService.setSearchParamAndRefresh({
             ...currentInfo,

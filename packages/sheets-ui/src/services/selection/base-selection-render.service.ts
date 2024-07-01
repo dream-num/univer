@@ -119,9 +119,6 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     // The style of the selection area, including dashed lines, color, thickness, autofill, other points for modifying the range of the selection area, title highlighting, and so on, can all be customized.
     private _selectionStyle!: ISelectionStyle;
 
-    // Whether to enable the selection area. If set to false, the user cannot draw a selection area in the content area by clicking with the mouse.
-    private _isSelectionEnabled: boolean = true;
-
     // #region For ref range selection - we put the properties here for simplicity
     // Used in the formula selection feature, a new selection string is added by drawing a box with the mouse.
     protected _remainLastEnabled: boolean = false;
@@ -317,11 +314,10 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     protected _reset() {
         this._clearSelectionControls();
+        this._clearMove();
 
         this._downObserver?.unsubscribe();
         this._downObserver = null;
-        this._moveEventSubscription?.unsubscribe();
-        this._moveEventSubscription = null;
         this._upEventSubscription?.unsubscribe();
         this._upEventSubscription = null;
     }
@@ -766,12 +762,15 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         }
     }
 
+    private _clearMove(): void {
+        this._moveEventSubscription?.unsubscribe();
+        this._moveEventSubscription = null;
+    }
+
     private _clearEndingListeners() {
         const scene = this._scene;
         scene.enableEvent();
 
-        this._moveEventSubscription?.unsubscribe();
-        this._moveEventSubscription = null;
         this._upEventSubscription?.unsubscribe();
         this._upEventSubscription = null;
 

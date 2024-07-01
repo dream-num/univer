@@ -15,7 +15,7 @@
  */
 
 import { CommandType, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { getSheetCommandTarget, type ISheetCommandSharedParams, SheetsSelectionManagerService } from '@univerjs/sheets';
+import { getSheetCommandTarget, type ISheetCommandSharedParams, SheetsSelectionsService } from '@univerjs/sheets';
 import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import { ISidebarService } from '@univerjs/ui';
 import { CellLinkEdit } from '../../views/CellLinkEdit';
@@ -77,7 +77,7 @@ export const InsertHyperLinkOperation: ICommand = {
             return false;
         }
         const commandService = accessor.get(ICommandService);
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
         const selection = selectionManagerService.getCurrentLastSelection();
         if (!selection) {
             return false;

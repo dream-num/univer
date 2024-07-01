@@ -16,7 +16,7 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, Range } from '@univerjs/core';
-import { SheetsSelectionManagerService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { CURRENCYFORMAT } from '../../base/const/FORMATDETAIL';
@@ -28,7 +28,7 @@ export const SetCurrencyCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
 
         const selections = selectionManagerService.getCurrentSelections();
         if (!selections || !selections.length) {

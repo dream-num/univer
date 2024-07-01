@@ -65,7 +65,7 @@ import {
 } from '@univerjs/engine-render';
 import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionManagerService } from '@univerjs/sheets';
+import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 
@@ -112,7 +112,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -780,7 +780,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-        const worksheet = workbook?.getSheetBySheetId(sheetId);
+        const worksheet = workbook?.getActiveSheet();
 
         if (worksheet == null) {
             return;

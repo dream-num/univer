@@ -24,7 +24,7 @@ import {
     SetBoldCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -59,7 +59,7 @@ describe('test menu items', () => {
     });
 
     function select(range: IRange) {
-        const selectionManager = get(SheetsSelectionManagerService);
+        const selectionManager = get(SheetsSelectionsService);
 
         const { startColumn, startRow, endColumn, endRow } = range;
         selectionManager.addSelections([

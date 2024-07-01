@@ -22,7 +22,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { ICellPermission } from '@univerjs/sheets';
-import { SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionManagerService } from '@univerjs/sheets';
+import { SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import GridLayout from 'react-grid-layout';
@@ -110,7 +110,7 @@ export const RuleList = (props: IRuleListProps) => {
     const { onClick } = props;
     const conditionalFormattingRuleModel = useDependency(ConditionalFormattingRuleModel);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const selectionManagerService = useDependency(SheetsSelectionManagerService);
+    const selectionManagerService = useDependency(SheetsSelectionsService);
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const conditionalFormattingI18nController = useDependency(ConditionalFormattingI18nController);

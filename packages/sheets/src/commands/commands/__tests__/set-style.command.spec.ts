@@ -31,7 +31,7 @@ import {
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SheetsSelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import type { ISetStyleCommandParams } from '../set-style.command';
 import {
@@ -129,7 +129,7 @@ describe("Test commands used for updating cells' styles", () => {
     describe('bold', () => {
         describe('correct situations', () => {
             it('will toggle bold style when there is a selected range', async () => {
-                const selectionManagerService = get(SheetsSelectionManagerService);
+                const selectionManagerService = get(SheetsSelectionsService);
                 selectionManagerService.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -179,7 +179,7 @@ describe("Test commands used for updating cells' styles", () => {
     describe('italic', () => {
         describe('correct situations', () => {
             it('will toggle italic style when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 1, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -229,7 +229,7 @@ describe("Test commands used for updating cells' styles", () => {
     describe('underline', () => {
         describe('correct situations', () => {
             it('will toggle underline style when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -281,7 +281,7 @@ describe("Test commands used for updating cells' styles", () => {
     describe('strike-through', () => {
         describe('correct situations', () => {
             it('will toggle strike-through style when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -333,7 +333,7 @@ describe("Test commands used for updating cells' styles", () => {
     describe('font size', () => {
         describe('correct situations', () => {
             it('will change font size when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -374,7 +374,7 @@ describe("Test commands used for updating cells' styles", () => {
     describe('font family', () => {
         describe('correct situations', () => {
             it('will change font family when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -415,7 +415,7 @@ describe("Test commands used for updating cells' styles", () => {
     describe('font color', () => {
         describe('correct situations', () => {
             it('will change font color when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -512,7 +512,7 @@ describe("Test commands used for updating cells' styles", () => {
     describe('background color', () => {
         describe('correct situations', () => {
             it('will change background color when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -555,7 +555,7 @@ describe("Test commands used for updating cells' styles", () => {
     describe('vertical text align', () => {
         describe('correct situations', () => {
             it('will change vertical text align when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -598,7 +598,7 @@ describe("Test commands used for updating cells' styles", () => {
     describe('horizontal text align', () => {
         describe('correct situations', () => {
             it('will change horizontal text align when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -643,7 +643,7 @@ describe("Test commands used for updating cells' styles", () => {
     describe('text wrap', () => {
         describe('correct situations', () => {
             it('will change text wrap when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -688,7 +688,7 @@ describe("Test commands used for updating cells' styles", () => {
     describe('text rotation', () => {
         describe('correct situations', () => {
             it('will change text rotation when there is a selected range', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
                 selectionManager.addSelections([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },

@@ -33,7 +33,7 @@ import { WorkbookPermissionService } from '../../../services/permission/workbook
 import { WorksheetPermissionService } from '../../../services/permission/worksheet-permission/worksheet-permission.service';
 import enUS from '../../../locale/en-US';
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
-import { SheetsSelectionManagerService } from '../../../services/selection-manager.service';
+import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
 import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../../../services/permission/worksheet-permission';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
@@ -102,7 +102,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([RangeProtectionRuleModel]);
             injector.add([WorkbookPermissionService]);
             injector.add([WorksheetProtectionRuleModel]);
-            injector.add([SheetsSelectionManagerService]);
+            injector.add([SheetsSelectionsService]);
             injector.add([BorderStyleManagerService]);
             injector.add([SheetInterceptorService]);
 

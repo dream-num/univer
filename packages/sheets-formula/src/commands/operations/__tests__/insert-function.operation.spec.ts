@@ -20,7 +20,7 @@ import {
     SetRangeValuesCommand,
     SetRangeValuesMutation,
     SetSelectionsOperation,
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -60,7 +60,7 @@ describe('Test insert function operation', () => {
     describe('insert function', () => {
         describe('correct situations', () => {
             it('insert function, match the data range above, directly set values', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
 
                 // B3:B4
                 selectionManager.addSelections([
@@ -97,7 +97,7 @@ describe('Test insert function operation', () => {
             });
 
             it('insert function, match the data range left, directly set values', async () => {
-                const selectionManager = get(SheetsSelectionManagerService);
+                const selectionManager = get(SheetsSelectionsService);
 
                 // C2:D2
                 selectionManager.addSelections([

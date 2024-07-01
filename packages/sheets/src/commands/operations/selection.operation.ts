@@ -18,8 +18,8 @@ import type { IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
 import type { ISelectionWithStyle } from '../../basics/selection';
-import type { SelectionMoveType } from '../../services/selection-manager.service';
-import { SheetsSelectionManagerService } from '../../services/selection-manager.service';
+import type { SelectionMoveType } from '../../services/selections/selection-manager.service';
+import { getSelectionsService } from '../utils/selection-command-util';
 
 export interface ISetSelectionsOperationParams {
     unitId: string;
@@ -32,12 +32,10 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
     id: 'sheet.operation.set-selections',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
-        const selectionManagerService = accessor.get(SheetsSelectionManagerService);
-        if (!params) {
-            return false;
-        }
+        if (!params) return false;
 
         const { selections, type, unitId, subUnitId } = params;
+        const selectionManagerService = getSelectionsService(accessor);
         selectionManagerService.setSelections(unitId, subUnitId, selections, type);
 
         return true;

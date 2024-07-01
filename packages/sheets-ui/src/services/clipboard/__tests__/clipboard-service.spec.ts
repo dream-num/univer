@@ -24,7 +24,7 @@ import {
     SetSelectionsOperation,
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -133,7 +133,7 @@ describe('Test clipboard', () => {
 
     describe('Test paste, the original data is a merged cell of 1 row and 2 columns, the current selection consists only of ordinary cells', () => {
         it('The current selection is a single cell in 1 row and 1 column', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to A1
             const startRow = 0;
@@ -212,7 +212,7 @@ describe('Test clipboard', () => {
             });
         });
         it('The current selection is a single cell in 1 row and 2 columns', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to A2:B2
             const startRow = 1;
@@ -285,7 +285,7 @@ describe('Test clipboard', () => {
             });
         });
         it('The current selection is a single cell in 1 row and 3 columns', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to A3:C3
             const startRow = 2;
@@ -360,7 +360,7 @@ describe('Test clipboard', () => {
             });
         });
         it('The current selection is a single cell in 2 rows and 2 columns', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to A4:B5
             const startRow = 3;
@@ -487,7 +487,7 @@ describe('Test clipboard', () => {
             ]);
         });
         it('The current selection is a single cell in 4 rows and 4 columns', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to A6:D9
             const startRow = 5;
@@ -655,7 +655,7 @@ describe('Test clipboard', () => {
 
     describe('Test paste, the original data is a merged cell of 1 row and 2 columns, the current selection contains merged cells and no content', () => {
         it('The current selection is a merged cell of 1 row and 2 columns.', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to F1:G2
             const startRow = 0;
@@ -730,7 +730,7 @@ describe('Test clipboard', () => {
         });
 
         it('The current selection is a merged cell of 1 row and 3 columns.', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to F3:H3
             const startRow = 2;
@@ -751,7 +751,7 @@ describe('Test clipboard', () => {
         });
 
         it('The current selection is a merged cell of 1 row and 4 columns.', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to F5:I5
             const startRow = 4;
@@ -772,7 +772,7 @@ describe('Test clipboard', () => {
         });
 
         it('The current selection is a merged cell of 2 rows and 2 columns.', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to F7:G8
             const startRow = 6;
@@ -793,7 +793,7 @@ describe('Test clipboard', () => {
         });
 
         it('The current selection is a merged cell of 1 row and 2 columns, with 1 ordinary cell', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to F10:H10
             const startRow = 9;
@@ -868,7 +868,7 @@ describe('Test clipboard', () => {
         });
 
         it('The current selection is a merged cell of 2 rows and 2 columns, with a merged cell of 2 rows and 1 column', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to F12:H13
             const startRow = 11;
@@ -898,7 +898,7 @@ describe('Test clipboard', () => {
 
     describe('Test paste, the original data is a merged cell of 1 row and 2 columns, the current selection contains merged cells with content and style', () => {
         it('The current selection is a merged cell of 1 row and 3 columns', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to K4:M4
             const startRow = 3;
@@ -918,7 +918,7 @@ describe('Test clipboard', () => {
             expect(res).toBeFalsy();
         });
         it('The current selection is a merged cell of 1 row and 2 columns, with a merged cell of 2 rows and 2 columns', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to K7:M10
             const startRow = 6;
@@ -1007,7 +1007,7 @@ describe('Test clipboard', () => {
             ]);
         });
         it('The current selection is a merged cell of 1 row and 3 columns, with a merged cell of 2 rows and 2 columns', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to K12:M15
             const startRow = 11;
@@ -1059,7 +1059,7 @@ describe('Test clipboard', () => {
             ]);
         });
         it('The current selection is a merged cell of 2 rows and 2 columns, with a merged cell of 1 row and 2 columns', async () => {
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             // set selection to K22:M24
             const startRow = 21;
@@ -1130,7 +1130,7 @@ describe('Test clipboard', () => {
                 copyType: COPY_TYPE.CUT,
             });
 
-            const selectionManager = get(SheetsSelectionManagerService);
+            const selectionManager = get(SheetsSelectionsService);
 
             selectionManager.addSelections([
                 {

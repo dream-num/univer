@@ -72,7 +72,7 @@ export {
 } from './services/editor-bridge.service';
 export { MarkSelectionService } from './services/mark-selection/mark-selection.service';
 export { IMarkSelectionService } from './services/mark-selection/mark-selection.service';
-export { SheetSelectionRenderService, DISABLE_NORMAL_SELECTIONS, getAllSelection, getTopLeftSelection } from './services/selection/selection-render.service';
+export { SheetSelectionRenderService, getAllSelection, getTopLeftSelection } from './services/selection/selection-render.service';
 export { BaseSelectionRenderService, ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 export { SelectionShape } from './services/selection/selection-shape';
 export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manager.service';

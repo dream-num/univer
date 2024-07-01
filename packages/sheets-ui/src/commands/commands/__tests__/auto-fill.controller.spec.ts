@@ -30,7 +30,7 @@ import {
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
     SetSelectionsOperation,
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { EditorService, IEditorService, IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import type { Injector } from '@wendellhu/redi';
@@ -279,7 +279,7 @@ describe('Test auto fill rules in controller', () => {
         endRow: number,
         endColumn: number
     ) => Array<Array<Nullable<IStyleData>>> | undefined;
-    let selectionManagerService: SheetsSelectionManagerService;
+    let selectionManagerService: SheetsSelectionsService;
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
             [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
@@ -300,7 +300,7 @@ describe('Test auto fill rules in controller', () => {
         themeService = get(ThemeService);
         themeService.setTheme(theme);
         autoFillController = get(AutoFillController);
-        selectionManagerService = get(SheetsSelectionManagerService);
+        selectionManagerService = get(SheetsSelectionsService);
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
@@ -542,7 +542,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
 
-                const selectionManagerService = get(SheetsSelectionManagerService);
+                const selectionManagerService = get(SheetsSelectionsService);
                 selectionManagerService.addSelections([{
                     style: null,
                     range: {
@@ -592,7 +592,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
 
-                const selectionManagerService = get(SheetsSelectionManagerService);
+                const selectionManagerService = get(SheetsSelectionsService);
                 selectionManagerService.addSelections([{
                     style: null,
                     range: {

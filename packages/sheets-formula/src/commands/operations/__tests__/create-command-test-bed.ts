@@ -17,7 +17,7 @@
 import type { IWorkbookData } from '@univerjs/core';
 import { AuthzIoLocalService, IAuthzIoService, ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import { RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionManagerService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { EditorService, IEditorService } from '@univerjs/ui';
@@ -69,7 +69,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
 
         override onStarting(injector: Injector): void {
             injector.add([ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }]);
-            injector.add([SheetsSelectionManagerService]);
+            injector.add([SheetsSelectionsService]);
             injector.add([LexerTreeBuilder]);
             injector.add([IFormulaPromptService, { useClass: FormulaPromptService }]);
             injector.add([IEditorBridgeService, { useClass: EditorBridgeService }]);

@@ -20,7 +20,7 @@ import { IRenderManagerService, RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-
 import type { IFindComplete, IFindMatch, IFindMoveParams, IFindQuery, IFindReplaceProvider, IReplaceAllResult } from '@univerjs/find-replace';
 import { FindBy, FindDirection, FindModel, FindReplaceController, FindScope, IFindReplaceService } from '@univerjs/find-replace';
 import type { ISelectionWithStyle, ISetRangeValuesCommandParams, ISetSelectionsOperationParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import { SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetsSelectionManagerService } from '@univerjs/sheets';
+import { SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IScrollToCellCommandParams } from '@univerjs/sheets-ui';
 import { getCoordByCell, getSheetObject, ScrollToCellCommand, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { type IDisposable, Inject, Injector } from '@wendellhu/redi';
@@ -126,7 +126,7 @@ export class SheetFindModel extends FindModel {
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService
     ) {
         super();
     }

@@ -51,10 +51,12 @@ export * from './services/permission/permission-point';
 export { WorksheetPermissionService } from './services/permission/worksheet-permission/worksheet-permission.service';
 export { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
 export {
-    SheetsSelectionManagerService,
+    SheetsSelectionsService,
     WorkbookSelections,
     SelectionMoveType,
-} from './services/selection-manager.service';
+    DISABLE_NORMAL_SELECTIONS,
+} from './services/selections/selection-manager.service';
+export { IRefSelectionsService } from './services/selections/ref-selections.service';
 
 // #region commands
 
@@ -259,6 +261,7 @@ export {
     SetWorksheetRowIsAutoHeightMutation,
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
+export { getSelectionsService } from './commands/utils/selection-command-util';
 export { SetWorksheetActiveOperation } from './commands/operations/set-worksheet-active.operation';
 export { type ISetWorksheetActiveOperationParams } from './commands/operations/set-worksheet-active.operation';
 export { handleDeleteRangeMutation } from './commands/utils/handle-range-mutation';

@@ -20,7 +20,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IRange, Workbook } from '@univerjs/core';
 import { createInternalEditorID, IAuthzIoService, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { IDialogService, ISidebarService, RangeSelector, useObservable } from '@univerjs/ui';
-import { RangeProtectionRuleModel, setEndForRange, SheetsSelectionManagerService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { RangeProtectionRuleModel, setEndForRange, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';
 import type { ICollaborator, IUser } from '@univerjs/protocol';
 import { UnitObject, UnitRole } from '@univerjs/protocol';
@@ -36,7 +36,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
     const localeService = useDependency(LocaleService);
     const dialogService = useDependency(IDialogService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const selectionManagerService = useDependency(SheetsSelectionManagerService);
+    const selectionManagerService = useDependency(SheetsSelectionsService);
     const sheetPermissionPanelModel = useDependency(SheetPermissionPanelModel);
     const activeRule = useObservable(sheetPermissionPanelModel.rule$, sheetPermissionPanelModel.rule);
     const userManagerService = useDependency(UserManagerService);

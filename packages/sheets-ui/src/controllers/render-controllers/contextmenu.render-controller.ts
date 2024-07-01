@@ -21,7 +21,7 @@ import {
     RANGE_TYPE,
 } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
-import { SheetsSelectionManagerService } from '@univerjs/sheets';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { IContextMenuService, MenuPosition } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
@@ -37,7 +37,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
-        @Inject(SheetsSelectionManagerService) private readonly _selectionManagerService: SheetsSelectionManagerService,
+        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService
     ) {
         super();

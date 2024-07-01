@@ -19,7 +19,7 @@ import { ICommandService, IContextService, ILogService, RANGE_TYPE, ThemeService
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle, ISelectionWithStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
-import { convertSelectionDataToRange, getNormalSelectionStyle, SelectionMoveType, SetSelectionsOperation, SheetsSelectionManagerService, transformCellDataToSelectionData } from '@univerjs/sheets';
+import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, getNormalSelectionStyle, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService, transformCellDataToSelectionData } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -27,9 +27,6 @@ import type { ISheetObjectParam } from '../../controllers/utils/component-tools'
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { checkInHeaderRanges } from '../../controllers/utils/selections-tools';
 import { BaseSelectionRenderService } from './base-selection-render.service';
-
-/** An context key to disable normal selections if its value is set to `true`. */
-export const DISABLE_NORMAL_SELECTIONS = 'DISABLE_NORMAL_SELECTIONS';
 
 /**
  * This services controls rendering of normal selections in a render unit.
@@ -44,7 +41,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         @Inject(ThemeService) themeService: ThemeService,
         @IShortcutService shortcutService: IShortcutService,
         @IRenderManagerService renderManagerService: IRenderManagerService,
-        @Inject(SheetsSelectionManagerService) selectionManagerService: SheetsSelectionManagerService,
+        @Inject(SheetsSelectionsService) selectionManagerService: SheetsSelectionsService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,

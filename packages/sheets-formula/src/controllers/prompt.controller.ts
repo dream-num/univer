@@ -71,7 +71,8 @@ import {
     ITextSelectionRenderManager,
 } from '@univerjs/engine-render';
 import type {
-    ISelectionWithStyle } from '@univerjs/sheets';
+    ISelectionWithStyle,
+} from '@univerjs/sheets';
 import {
     convertSelectionDataToRange,
 
@@ -79,7 +80,8 @@ import {
     getPrimaryForRange,
     IRefSelectionsService,
     setEndForRange,
-    SheetsSelectionsService } from '@univerjs/sheets';
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
 import {
     ExpandSelectionCommand,
@@ -309,7 +311,7 @@ export class PromptController extends Disposable {
                     return !event || !arrows.includes(event.which);
                 })),
             this._textSelectionRenderManager.onPointerDown$
-        ).subscribe(() => this._quitSelectingMode()));
+        ).subscribe(() => this._quitSelectingMode(true)));
 
         this.disposeWithMe(
             this._textSelectionRenderManager.onInputBefore$.subscribe((param) => {
@@ -706,9 +708,17 @@ export class PromptController extends Disposable {
      * Disable the ref string generation mode. In the ref string generation mode,
      * users can select a certain area using the mouse and arrow keys, and convert the area into a ref string.
      */
-    private _quitSelectingMode() {
+    private _quitSelectingMode(soft = false) {
         if (!this._isSelectingMode) {
             return;
+        }
+
+        // Never quit selecing mode if after a special char.
+        if (soft) {
+            const char = this._getCurrentChar();
+            if (char && matchRefDrawToken(char)) {
+                return;
+            }
         }
 
         this._editorBridgeService.disableForceKeepVisible();
@@ -1581,7 +1591,6 @@ export class PromptController extends Disposable {
             eventType: DeviceInputEventType.Keyboard,
             keycode,
         });
-        // Don't move the selection here, because changeVisible will update the selection.
     }
 
     private _pressTab(params: ISelectEditorFormulaOperationParam) {
@@ -1600,7 +1609,6 @@ export class PromptController extends Disposable {
             eventType: DeviceInputEventType.Keyboard,
             keycode,
         });
-        // Don't move the selection here, because changeVisible will update the selection.
     }
 
     private _pressEsc(params: ISelectEditorFormulaOperationParam) {
@@ -1665,6 +1673,7 @@ export class PromptController extends Disposable {
                         this._pressEnter(params);
                         return;
                     }
+
                     if (keycode === KeyCode.TAB) {
                         this._pressTab(params);
                         return;

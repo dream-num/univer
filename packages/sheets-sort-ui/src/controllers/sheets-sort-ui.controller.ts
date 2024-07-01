@@ -25,7 +25,7 @@ import { AscendingSingle, CustomSortSingle, DescendingSingle, ExpandAscendingSin
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { SheetsRenderService, SheetsUIPart } from '@univerjs/sheets-ui';
 import { SortRangeCommand } from '@univerjs/sheets-sort';
-import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/sheets-sort.command';
+import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/commands/sheets-sort.command';
 import { CustomSortPanel } from '../views/CustomSortPanel';
 import type { ISheetSortLocation } from '../services/sheets-sort-ui.service';
 import { SheetsSortUIService } from '../services/sheets-sort-ui.service';

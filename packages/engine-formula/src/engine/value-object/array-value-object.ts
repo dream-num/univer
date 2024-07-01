@@ -892,11 +892,9 @@ export class ArrayValueObject extends BaseValueObject {
     override countBlank() {
         let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         this.iterator((valueObject) => {
-            if (valueObject != null && !valueObject.isNull()) {
-                return true; // continue
+            if (valueObject == null || valueObject.isNull() || (valueObject.getValue() === '')) {
+                accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
             }
-
-            accumulatorAll = accumulatorAll.plusBy(1) as BaseValueObject;
         });
 
         return accumulatorAll;
@@ -1431,6 +1429,7 @@ export class ArrayValueObject extends BaseValueObject {
         return newArray;
     }
 
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _batchOperatorValue(
         valueObject: BaseValueObject,
         column: number,
@@ -1619,7 +1618,13 @@ export class ArrayValueObject extends BaseValueObject {
                     r + startRow
                 );
             } else if (currentValue.isNull()) {
-                CELL_INVERTED_INDEX_CACHE.set(unitId, sheetId, column + startColumn, null, r + startRow);
+                // In comparison operations, these two situations are equivalent
+
+                // ">"&A1 (A1 is an empty cell)
+                // ">"
+
+                // So the empty cell is also cached as an empty string so that it can be retrieved next time
+                CELL_INVERTED_INDEX_CACHE.set(unitId, sheetId, column + startColumn, '', r + startRow);
             } else {
                 CELL_INVERTED_INDEX_CACHE.set(
                     unitId,

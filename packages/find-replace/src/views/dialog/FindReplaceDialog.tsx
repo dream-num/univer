@@ -26,7 +26,7 @@ import { fromEvent } from 'rxjs';
 
 import { FindBy, FindDirection, FindScope, IFindReplaceService } from '../../services/find-replace.service';
 import { FIND_REPLACE_DIALOG_FOCUS, FIND_REPLACE_INPUT_FOCUS } from '../../services/context-keys';
-import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/command/replace.command';
+import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/commands/replace.command';
 import { OpenReplaceDialogOperation } from '../../commands/operations/find-replace.operation';
 import { SearchInput } from './SearchInput';
 

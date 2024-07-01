@@ -19,11 +19,9 @@ import { DataStreamTreeTokenType, Tools } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
 export default function parseToDom(rawHtml: string) {
-    const parser = new DOMParser();
-    const html = `<x-univer id="univer-root">${rawHtml}</x-univer>`;
-    const doc = parser.parseFromString(html, 'text/html');
-
-    return doc.querySelector('#univer-root');
+    const template = document.createElement('body');
+    template.innerHTML = rawHtml;
+    return template;
 }
 
 // TODO: @JOCS, Complete other missing attributes that exist in IParagraphStyle

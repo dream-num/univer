@@ -150,6 +150,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [SheetPermissionInterceptorBaseController],
                 [SheetPermissionInitController],
                 [MoveRangeController],
+
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
 
@@ -218,6 +219,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             SheetPermissionInterceptorCanvasRenderController,
             SheetPermissionInterceptorFormulaRenderController,
             SheetPermissionRenderController,
+
         ]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });

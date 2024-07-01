@@ -16,7 +16,7 @@
 
 import { CommandType, type ICommand } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
-import { SheetsSortUIService } from './../services/sheets-sort-ui.service';
+import { SheetsSortUIService } from './../../services/sheets-sort-ui.service';
 
 export const SortRangeAscCommand: ICommand = {
     id: 'sheet.command.sort-range-asc',

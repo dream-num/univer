@@ -15,7 +15,6 @@
  */
 
 import { DEFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -24,10 +23,9 @@ export class Today extends BaseFunction {
 
     override maxParams = 0;
 
-    override calculate(value?: BaseValueObject) {
+    override calculate() {
         const currentSerial = excelDateSerial(new Date());
-        const valueObject = NumberValueObject.create(currentSerial);
-        valueObject.setPattern(DEFAULT_DATE_FORMAT);
+        const valueObject = NumberValueObject.create(currentSerial, DEFAULT_DATE_FORMAT);
         return valueObject;
     }
 }

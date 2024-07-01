@@ -27,7 +27,7 @@ export interface ICellRenderContext {
     data: ICellDataForSheetInterceptor;
     style: Nullable<IStyleData>;
     primaryWithCoord: ISelectionCellWithCoord;
-    unitId?: string;
+    unitId: string;
     subUnitId: string;
     row: number;
     col: number;

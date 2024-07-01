@@ -126,17 +126,17 @@ describe('arrayValueObject test', () => {
         it('CountBlank', () => {
             const originValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    [1, ' ', 1.23, true, false],
-                    [0, '100', '2.34', 'test', -3],
+                    [1, ' ', 1.23, true, false, '', null],
+                    [0, '100', '2.34', 'test', -3, ErrorType.VALUE, null],
                 ]),
                 rowCount: 2,
-                columnCount: 5,
+                columnCount: 7,
                 unitId: '',
                 sheetId: '',
                 row: 0,
                 column: 0,
             });
-            expect(originValueObject.countBlank()?.getValue()).toBe(0);
+            expect(originValueObject.countBlank()?.getValue()).toBe(3);
         });
     });
 

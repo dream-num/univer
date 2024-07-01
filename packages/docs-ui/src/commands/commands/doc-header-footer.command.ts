@@ -25,7 +25,13 @@ import { SidebarDocHeaderFooterPanelOperation } from '../operations/doc-header-f
 function getEmptyHeaderFooterBody() {
     return {
         dataStream: '\r\n',
-        textRuns: [],
+        textRuns: [{
+            st: 0,
+            ed: 0,
+            ts: {
+                fs: 9, // The default header footer text size.
+            },
+        }],
         paragraphs: [
             {
                 startIndex: 0,

@@ -36,7 +36,6 @@ import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
-import { DocumentEditArea } from './view-model/document-view-model';
 
 export interface IPageRenderConfig {
     page: IDocumentSkeletonPage;
@@ -120,8 +119,6 @@ export class Documents extends DocComponent {
         if (skeletonData == null || this._drawLiquid == null) {
             return;
         }
-
-        const isEditBody = this.getSkeleton()?.getViewModel().getEditArea() === DocumentEditArea.BODY;
 
         this._drawLiquid.reset();
 
@@ -223,16 +220,13 @@ export class Documents extends DocComponent {
                     centerAngle,
                     vertexAngle,
                     renderConfig,
-                    parentScale
+                    parentScale,
+                    page,
+                    true
                 );
             }
 
             this._startRotation(ctx, finalAngle);
-
-            // if (!isEditBody) {
-            //     ctx.save();
-            //     ctx.globalAlpha = 0.5;
-            // }
 
             for (const section of sections) {
                 const { columns } = section;
@@ -429,10 +423,6 @@ export class Documents extends DocComponent {
                 }
             }
 
-            // if (!isEditBody) {
-            //     ctx.restore();
-            // }
-
             this._resetRotation(ctx, finalAngle);
 
             const footerSkeletonPage = skeFooters.get(footerId)?.get(pageWidth);
@@ -453,7 +443,9 @@ export class Documents extends DocComponent {
                     centerAngle,
                     vertexAngle,
                     renderConfig,
-                    parentScale
+                    parentScale,
+                    page,
+                    false
                 );
             }
 
@@ -485,19 +477,15 @@ export class Documents extends DocComponent {
         centerAngle: number,
         vertexAngle: number,
         renderConfig: IDocumentRenderConfig,
-        parentScale: IScale
+        parentScale: IScale,
+        parentPage: IDocumentSkeletonPage,
+        isHeader = true
     ) {
         if (this._drawLiquid == null) {
             return;
         }
-        const editArea = this.getSkeleton()?.getViewModel().getEditArea();
-        const isEditHeaderFooter = editArea === DocumentEditArea.HEADER || editArea === DocumentEditArea.FOOTER;
-
-        // if (!isEditHeaderFooter) {
-        //     ctx.save();
-        //     ctx.globalAlpha = 0.5;
-        // }
         const { sections } = page;
+        const { y: originY } = this._drawLiquid;
 
         for (const section of sections) {
             const { columns } = section;
@@ -536,8 +524,20 @@ export class Documents extends DocComponent {
                         }
                     } else {
                         this._drawLiquid.translateSave();
-
                         this._drawLiquid.translateLine(line, true);
+                        const { y } = this._drawLiquid;
+
+                        if (isHeader) {
+                            if ((y - originY + alignOffset.y) > (parentPage.pageHeight - 100) / 2) {
+                                this._drawLiquid.translateRestore();
+                                continue;
+                            }
+                        } else {
+                            if ((y - originY + alignOffset.y) < (parentPage.pageHeight - 100) / 2 + 100) {
+                                this._drawLiquid.translateRestore();
+                                continue;
+                            }
+                        }
 
                         const divideLength = divides.length;
 

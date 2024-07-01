@@ -68,7 +68,6 @@ export function createSkeletonPage(
     page.pageNumber = pageNumber;
     page.pageNumberStart = pageNumberStart;
     page.renderConfig = renderConfig;
-
     page.marginLeft = marginLeft;
     page.marginRight = marginRight;
     page.breakType = breakType;
@@ -126,8 +125,8 @@ export function createSkeletonPage(
 
     page.originMarginTop = marginTop;
     page.originMarginBottom = marginBottom;
-    page.marginTop = _getVerticalMargin(marginTop, marginHeader, header);
-    page.marginBottom = _getVerticalMargin(marginBottom, marginFooter, footer);
+    page.marginTop = _getVerticalMargin(marginTop, header, pageHeight);
+    page.marginBottom = _getVerticalMargin(marginBottom, footer, pageHeight);
 
     const sections = page.sections;
     const lastSection = sections[sections.length - 1];
@@ -234,14 +233,18 @@ function _createSkeletonHeaderFooter(
 
 function _getVerticalMargin(
     marginTB: number,
-    marginHF: number,
-    headerOrFooter: Nullable<IDocumentSkeletonHeaderFooter>
+    headerOrFooter: Nullable<IDocumentSkeletonHeaderFooter>,
+    pageHeight: number
 ) {
     if (!headerOrFooter || headerOrFooter.sections[0].columns[0].lines.length === 0) {
         return marginTB;
     }
 
-    return Math.max(marginTB, (headerOrFooter.marginTop + headerOrFooter.height + headerOrFooter.marginBottom || 0));
+    const HeaderFooterPageHeight = headerOrFooter.height + headerOrFooter.marginTop + headerOrFooter.marginBottom;
+    // Content height should be at least 100px.
+    const maxMargin = (pageHeight - 100) / 2;
+
+    return Math.min(maxMargin, Math.max(marginTB, HeaderFooterPageHeight));
 }
 
 function __getHeaderMarginTop(marginTop: number, marginHeader: number, height: number) {

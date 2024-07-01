@@ -153,7 +153,8 @@ export class DataValidationCopyPasteController extends Disposable {
             const { redoMutations, undoMutations } = getDataValidationDiffMutations(
                 copyInfo.unitId,
                 copyInfo.subUnitId,
-                ruleMatrix.diffWithAddition(manager.getDataValidations(), additionRules.values())
+                ruleMatrix.diffWithAddition(manager.getDataValidations(), additionRules.values()),
+                this._injector
             );
 
             return {
@@ -187,7 +188,8 @@ export class DataValidationCopyPasteController extends Disposable {
             const { redoMutations, undoMutations } = getDataValidationDiffMutations(
                 unitId,
                 subUnitId,
-                ruleMatrix.diff(manager.getDataValidations())
+                ruleMatrix.diff(manager.getDataValidations()),
+                this._injector
             );
 
             return {

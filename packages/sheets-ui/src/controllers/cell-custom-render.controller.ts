@@ -56,6 +56,7 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
             const currentRender = this._renderManagerService.getRenderById(unitId);
             if (currentRender && currentRender.mainComponent) {
                 const spreadsheet = currentRender.mainComponent as Spreadsheet;
+                // eslint-disable-next-line max-lines-per-function
                 const getActiveRender = (evt: IPointerEvent | IMouseEvent) => {
                     const { offsetX, offsetY } = evt;
                     const scene = currentRender.scene;

@@ -21,8 +21,6 @@ export { DataValidationModel } from './models/data-validation-model';
 export type {
     IRemoveDataValidationCommandParams,
     IAddDataValidationCommandParams,
-    IUpdateDataValidationOptionsCommandParams,
-    IUpdateDataValidationSettingCommandParams,
     IRemoveAllDataValidationCommandParams,
 } from './commands/commands/data-validation.command';
 
@@ -30,7 +28,6 @@ export {
     AddDataValidationMutation,
     RemoveDataValidationMutation,
     UpdateDataValidationMutation,
-
 } from './commands/mutations/data-validation.mutation';
 
 export type {

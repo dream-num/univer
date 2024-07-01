@@ -15,3 +15,21 @@
  */
 
 export { UniverDocsDrawingUIPlugin } from './plugin';
+
+// #region - all commands
+
+export { DeleteDocDrawingsCommand } from './commands/commands/delete-drawings.command';
+export { GroupDocDrawingCommand } from './commands/commands/group-doc-drawing.command';
+export { InsertDocDrawingCommand } from './commands/commands/insert-doc-drawing.command';
+export { MoveDocDrawingsCommand } from './commands/commands/move-drawings.command';
+export { RemoveDocDrawingCommand } from './commands/commands/remove-doc-drawing.command';
+export { SetDocDrawingCommand } from './commands/commands/set-doc-drawing.command';
+export { SetDocDrawingArrangeCommand } from './commands/commands/set-drawing-arrange.command';
+export { UngroupDocDrawingCommand } from './commands/commands/ungroup-doc-drawing.command';
+
+export { ClearDocDrawingTransformerOperation } from './commands/operations/clear-drawing-transformer.operation';
+export { EditDocDrawingOperation } from './commands/operations/edit-doc-drawing.operation';
+export { InsertDocImageOperation } from './commands/operations/insert-image.operation';
+export { SidebarDocDrawingOperation } from './commands/operations/open-drawing-panel.operation';
+
+// #endregion

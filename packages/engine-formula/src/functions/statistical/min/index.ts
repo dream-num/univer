@@ -28,6 +28,10 @@ export class Min extends BaseFunction {
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
+            if (variant.isNull()) {
+                continue;
+            }
+
             if (variant.isString() || variant.isBoolean()) {
                 variant = variant.convertToNumberObjectValue();
             }
@@ -38,10 +42,6 @@ export class Min extends BaseFunction {
 
             if (variant.isError()) {
                 return variant as ErrorValueObject;
-            }
-
-            if (variant.isNull()) {
-                continue;
             }
 
             accumulatorAll = this._validator(accumulatorAll, variant as BaseValueObject);

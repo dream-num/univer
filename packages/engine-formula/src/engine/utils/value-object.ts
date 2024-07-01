@@ -18,8 +18,12 @@ import type { ICellData, Nullable } from '@univerjs/core';
 import { CellValueType } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { ArrayValueObject } from '../value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
-import { NumberValueObject } from '../value-object/primitive-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
+import { ErrorValueObject } from '../value-object/base-value-object';
+import { BooleanValueObject, NumberValueObject } from '../value-object/primitive-object';
+import { ErrorType } from '../../basics/error-type';
+import { expandArrayValueObject } from './array-object';
+import { booleanObjectIntersection, findCompareToken, valueObjectCompare } from './object-compare';
 
 export function convertTonNumber(valueObject: BaseValueObject) {
     const currentValue = valueObject.getValue();
@@ -128,4 +132,139 @@ export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): 
             ...cellWithStyle,
         };
     }
+}
+
+/**
+ * The size of the extended range is determined by the maximum width and height of the criteria range.
+ * @param variants
+ * @returns
+ */
+export function calculateMaxDimensions(variants: BaseValueObject[]) {
+    let maxRowLength = 0;
+    let maxColumnLength = 0;
+
+    variants.forEach((variant, i) => {
+        if (i % 2 === 1) {
+            if (variant.isArray()) {
+                const arrayValue = variant as ArrayValueObject;
+                maxRowLength = Math.max(maxRowLength, arrayValue.getRowCount());
+                maxColumnLength = Math.max(maxColumnLength, arrayValue.getColumnCount());
+            } else {
+                maxRowLength = Math.max(maxRowLength, 1);
+                maxColumnLength = Math.max(maxColumnLength, 1);
+            }
+        }
+    });
+
+    return { maxRowLength, maxColumnLength };
+}
+
+export function getErrorArray(variants: BaseValueObject[], sumRange: BaseValueObject, maxRowLength: number, maxColumnLength: number) {
+    const sumRowLength = (sumRange as ArrayValueObject).getRowCount();
+    const sumColumnLength = (sumRange as ArrayValueObject).getColumnCount();
+
+    for (let i = 0; i < variants.length; i++) {
+        if (i % 2 === 1) continue;
+
+        const range = variants[i];
+
+        const rangeRowLength = (range as ArrayValueObject).getRowCount();
+        const rangeColumnLength = (range as ArrayValueObject).getColumnCount();
+        if (rangeRowLength !== sumRowLength || rangeColumnLength !== sumColumnLength) {
+            return expandArrayValueObject(maxRowLength, maxColumnLength, ErrorValueObject.create(ErrorType.VALUE));
+        }
+    }
+
+    return null;
+}
+
+export function getBooleanResults(variants: BaseValueObject[], maxRowLength: number, maxColumnLength: number, isNumberSensitive: boolean = false) {
+    const booleanResults: BaseValueObject[][] = [];
+
+    for (let i = 0; i < variants.length; i++) {
+        if (i % 2 === 1) continue;
+
+        const range = variants[i];
+        const criteria = variants[i + 1];
+        const criteriaArray = expandArrayValueObject(maxRowLength, maxColumnLength, criteria, ErrorValueObject.create(ErrorType.NA));
+
+        criteriaArray.iterator((criteriaValueObject, rowIndex, columnIndex) => {
+            if (!criteriaValueObject) {
+                return;
+            }
+
+            // range must be an ArrayValueObject, criteria must be a BaseValueObject
+            let resultArrayObject = valueObjectCompare(range, criteriaValueObject);
+
+            const [, criteriaStringObject] = findCompareToken(`${criteriaValueObject.getValue()}`);
+
+            // When comparing non-numbers and numbers, countifs does not take the result
+            if (isNumberSensitive) {
+                resultArrayObject = filterSameValueObjectResult(resultArrayObject as ArrayValueObject, range as ArrayValueObject, criteriaStringObject);
+            }
+
+            if (booleanResults[rowIndex] === undefined) {
+                booleanResults[rowIndex] = [];
+            }
+
+            if (booleanResults[rowIndex][columnIndex] === undefined) {
+                booleanResults[rowIndex][columnIndex] = resultArrayObject;
+                return;
+            }
+
+            booleanResults[rowIndex][columnIndex] = booleanObjectIntersection(booleanResults[rowIndex][columnIndex], resultArrayObject);
+        });
+    }
+
+    return booleanResults;
+}
+
+/**
+ * Two valueObjects of the same type can be compared
+ * @param array
+ * @param range
+ * @param criteria
+ * @returns
+ */
+export function filterSameValueObjectResult(array: ArrayValueObject, range: ArrayValueObject, criteria: BaseValueObject) {
+    return array.mapValue((valueObject, r, c) => {
+        const rangeValueObject = range.get(r, c);
+        if (rangeValueObject && isSameValueObjectType(rangeValueObject, criteria)) {
+            return valueObject;
+        } else if (rangeValueObject?.isError() && criteria.isError() && rangeValueObject.getValue() === criteria.getValue()) {
+            return BooleanValueObject.create(true);
+        } else {
+            return BooleanValueObject.create(false);
+        }
+    });
+}
+
+/**
+ * Check if the two valueObjects are of the same type
+ * @param left
+ * @param right
+ * @returns
+ */
+export function isSameValueObjectType(left: BaseValueObject, right: BaseValueObject) {
+    if (left.isNumber() && right.isNumber()) {
+        return true;
+    }
+
+    if (left.isBoolean() && right.isBoolean()) {
+        return true;
+    }
+
+    // blank string is same as a blank cell
+    const isLeftBlank = left.isString() && left.getValue() === '';
+    const isRightBlank = right.isString() && right.getValue() === '';
+
+    if ((isLeftBlank || left.isNull()) && (isRightBlank || right.isNull())) {
+        return true;
+    }
+
+    if (left.isString() && !isLeftBlank && right.isString() && !isRightBlank) {
+        return true;
+    }
+
+    return false;
 }

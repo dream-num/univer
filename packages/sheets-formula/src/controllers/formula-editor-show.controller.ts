@@ -16,7 +16,6 @@
 
 import type { ICellDataForSheetInterceptor, ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import {
-    CellValueType,
     ColorKit,
     Disposable,
     ICommandService,
@@ -33,7 +32,7 @@ import {
 } from '@univerjs/engine-formula';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { SheetInterceptorService } from '@univerjs/sheets';
 import {
     IEditorBridgeService,
     ISelectionRenderService,
@@ -62,7 +61,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
 
         this._commandExecutedListener();
 
-        this._initInterceptorCell();
+        // Do not intercept v:null and add t: CellValueType.NUMBER. When the cell =TODAY() is automatically filled, the number format will recognize the Number type and parse it as 1900-01-00 date format.
     }
 
     private _initInterceptorEditorStart() {
@@ -160,34 +159,6 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
                     }
                 )
             )
-        );
-    }
-
-    private _initInterceptorCell() {
-        this.disposeWithMe(
-            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-                handler: (cell, location, next) => {
-                    // const { row, col, unitId, subUnitId } = location;
-
-                    // const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
-
-                    // const arrayValue = arrayFormulaMatrixCell?.[unitId]?.[subUnitId]?.[row]?.[col];
-
-                    // if (arrayValue) {
-                    //     return next({ ...cell, ...arrayValue });
-                    // }
-
-                    if (cell && cell.v == null && cell.t == null && cell.f != null) {
-                        return next({ ...cell,
-                                      v: null, // Default value for empty cell, information displayed before calculation
-                                      t: CellValueType.NUMBER,
-                        });
-                    }
-
-                    return next(cell);
-                },
-                priority: 10,
-            })
         );
     }
 

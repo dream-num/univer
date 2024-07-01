@@ -15,18 +15,26 @@
  */
 
 import { DateFunction } from './date';
+import { Datevalue } from './datevalue';
 import { Day } from './day';
 import { Edate } from './edate';
 import { FUNCTION_NAMES_DATE } from './function-names';
 import { Month } from './month';
+import { Now } from './now';
+import { Time } from './time';
+import { Timevalue } from './timevalue';
 import { Today } from './today';
 import { Year } from './year';
 
 export const functionDate = [
     [DateFunction, FUNCTION_NAMES_DATE.DATE],
+    [Datevalue, FUNCTION_NAMES_DATE.DATEVALUE],
     [Day, FUNCTION_NAMES_DATE.DAY],
     [Edate, FUNCTION_NAMES_DATE.EDATE],
     [Month, FUNCTION_NAMES_DATE.MONTH],
+    [Now, FUNCTION_NAMES_DATE.NOW],
+    [Time, FUNCTION_NAMES_DATE.TIME],
+    [Timevalue, FUNCTION_NAMES_DATE.TIMEVALUE],
     [Today, FUNCTION_NAMES_DATE.TODAY],
     [Year, FUNCTION_NAMES_DATE.YEAR],
 ];

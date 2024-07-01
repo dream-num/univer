@@ -22,8 +22,8 @@ import type { ICellData, ICommand, IRange, Nullable, Worksheet } from '@univerjs
 import type { IReorderRangeCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { getSheetCommandTarget, ReorderRangeCommand } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-import type { IOrderRule, SortType } from '../services/interface';
-import { SheetsSortService } from '../services/sheets-sort.service';
+import type { IOrderRule, SortType } from '../../services/interface';
+import { SheetsSortService } from '../../services/sheets-sort.service';
 
 export interface ISortRangeCommandParams extends ISheetCommandSharedParams {
     range: IRange;

@@ -43,7 +43,7 @@ import {
 } from '../commands/operations/find-replace.operation';
 import { IFindReplaceService } from '../services/find-replace.service';
 import { FindReplaceDialog } from '../views/dialog/FindReplaceDialog';
-import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../commands/command/replace.command';
+import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../commands/commands/replace.command';
 import {
     GoToNextFindMatchShortcutItem,
     GoToPreviousFindMatchShortcutItem,

@@ -143,7 +143,7 @@ describe('Test clipboard', () => {
             expect(res).toBeTruthy();
 
             const cellData = worksheet.getCellMatrix();
-            expect(getStyles(cellData.getValue(1, 1)!.s)?.tr!.a).toBeFalsy();
+            expect(getStyles(cellData.getValue(1, 1)!.s)?.tr?.a).toBeFalsy();
             expect(getStyles(cellData.getValue(2, 1)!.s)?.tr!.a).toBe(-45);
             expect(getStyles(cellData.getValue(3, 1)!.s)?.tr!.a).toBe(45);
             expect(getStyles(cellData.getValue(4, 1)!.s)?.tr).toStrictEqual({ a: 0, v: 1 });

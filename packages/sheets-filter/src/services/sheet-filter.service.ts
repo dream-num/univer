@@ -33,7 +33,7 @@ import {
     RemoveSheetsFilterMutation,
     SetSheetsFilterCriteriaMutation,
     SetSheetsFilterRangeMutation,
-} from '../commands/sheets-filter.mutation';
+} from '../commands/mutations/sheets-filter.mutation';
 import type { IAutoFilter } from '../models/types';
 
 export const FILTER_MUTATIONS = new Set([

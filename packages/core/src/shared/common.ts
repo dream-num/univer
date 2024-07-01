@@ -266,7 +266,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
                     if (str.indexOf('text-decoration-line') > -1) {
                         str = str.replace(/(text-decoration-line:\s*[^;]+)(?=;)/g, (_, p1) => `${p1} underline`);
                     } else {
-                        str += 'text-decoration-line: underline; ';
+                        str += 'text-decoration: underline; ';
                     }
                     if (style.ul.cl && str.indexOf('text-decoration-color') === -1) {
                         str += `text-decoration-color: ${getColorStyle(style.ul.cl)}; `;
@@ -370,7 +370,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'tr',
             () => {
                 if (style.tr) {
-                    str += `data-rotate: (${style.tr?.a}deg${style.tr?.v ? ` ,${style.tr?.v}` : ''});`;
+                    str += `--data-rotate: (${style.tr?.a}deg${style.tr?.v ? ` ,${style.tr?.v}` : ''});`;
                 }
             },
         ],

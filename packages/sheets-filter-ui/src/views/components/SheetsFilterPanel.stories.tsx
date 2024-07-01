@@ -25,9 +25,9 @@ import { RefRangeService, SheetInterceptorService, SheetsSelectionsService, Work
 import { IMenuService, IShortcutService, MenuService, ShortcutService } from '@univerjs/ui';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../../commands/sheets-filter.command';
-import type { IOpenFilterPanelOperationParams } from '../../commands/sheets-filter.operation';
-import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/sheets-filter.operation';
+import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../../commands/commands/sheets-filter.command';
+import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
+import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import enUS from '../../locale/en-US';
 import zhCN from '../../locale/zh-CN';
 import ruRU from '../../locale/ru-RU';

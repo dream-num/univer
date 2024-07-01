@@ -162,27 +162,26 @@ describe('Test clipboard', () => {
 
             expect(convertBorderColor(getStyles(cellData.getValue(2, 2)?.s)?.bd)).toStrictEqual({
                 b: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
-                l: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
                 r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
-                t: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
             });
 
             expect(worksheet.getMergeData().length).toBe(1);
+            // Cells within merged cells inherit the style of the main cell by default.
             expect(convertBorderColor(getStyles(cellData.getValue(9, 2)?.s)?.bd)).toStrictEqual({
-                l: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
-                t: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
+                b: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
+                r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
             });
             expect(convertBorderColor(getStyles(cellData.getValue(13, 2)?.s)?.bd)).toStrictEqual({
-                l: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
                 b: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
+                r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
             });
             expect(convertBorderColor(getStyles(cellData.getValue(9, 3)?.s)?.bd)).toStrictEqual({
+                b: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
                 r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
-                t: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
             });
             expect(convertBorderColor(getStyles(cellData.getValue(13, 3)?.s)?.bd)).toStrictEqual({
-                r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
                 b: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
+                r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
             });
         });
 
@@ -212,16 +211,16 @@ describe('Test clipboard', () => {
 
             expect(worksheet.getMergeData().length).toBe(1);
             expect(convertBorderColor(getStyles(cellData.getValue(9, 2)?.s)?.bd)).toStrictEqual({
-                l: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
-                t: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
+                r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
+                b: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
             });
             expect(convertBorderColor(getStyles(cellData.getValue(13, 2)?.s)?.bd)).toStrictEqual({
-                l: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
+                r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
                 b: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
             });
             expect(convertBorderColor(getStyles(cellData.getValue(9, 3)?.s)?.bd)).toStrictEqual({
                 r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
-                t: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
+                b: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
             });
             expect(convertBorderColor(getStyles(cellData.getValue(13, 3)?.s)?.bd)).toStrictEqual({
                 r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
@@ -255,27 +254,25 @@ describe('Test clipboard', () => {
 
             expect(convertBorderColor(getStyles(cellData.getValue(2, 2)?.s)?.bd)).toStrictEqual({
                 b: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
-                l: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
                 r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
-                t: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
             });
 
             expect(worksheet.getMergeData().length).toBe(1);
             expect(convertBorderColor(getStyles(cellData.getValue(9, 2)?.s)?.bd)).toStrictEqual({
-                l: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
-                t: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
+                b: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
+                r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
             });
             expect(convertBorderColor(getStyles(cellData.getValue(13, 2)?.s)?.bd)).toStrictEqual({
-                l: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
                 b: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
+                r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
             });
             expect(convertBorderColor(getStyles(cellData.getValue(9, 3)?.s)?.bd)).toStrictEqual({
+                b: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
                 r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
-                t: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
             });
             expect(convertBorderColor(getStyles(cellData.getValue(13, 3)?.s)?.bd)).toStrictEqual({
-                r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
                 b: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
+                r: { cl: { rgb: 'rgb(0,0,0)' }, s: 1 },
             });
         });
     });

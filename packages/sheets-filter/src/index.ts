@@ -26,15 +26,20 @@ export {
     lessThanOrEqualTo,
 } from './models/custom-filters';
 export { SheetsFilterService, FILTER_MUTATIONS, SHEET_FILTER_SNAPSHOT_ID } from './services/sheet-filter.service';
-export {
-    type IReCalcSheetsFilterMutationParams,
-    type IRemoveSheetsFilterMutationParams,
-    type ISetSheetsFilterCriteriaMutationParams,
-    type ISetSheetsFilterRangeMutationParams,
-    SetSheetsFilterCriteriaMutation,
-    SetSheetsFilterRangeMutation,
-    ReCalcSheetsFilterMutation,
-    RemoveSheetsFilterMutation,
-} from './commands/sheets-filter.mutation';
 export type { IAutoFilter, IFilterColumn, IFilters, ICustomFilters, ICustomFilter } from './models/types';
 export { CustomFilterOperator } from './models/types';
+
+// #region - all commands
+
+export {
+    type ISetSheetsFilterRangeMutationParams,
+    type ISetSheetsFilterCriteriaMutationParams,
+    type IRemoveSheetsFilterMutationParams,
+    type IReCalcSheetsFilterMutationParams,
+    SetSheetsFilterRangeMutation,
+    SetSheetsFilterCriteriaMutation,
+    RemoveSheetsFilterMutation,
+    ReCalcSheetsFilterMutation,
+} from './commands/mutations/sheets-filter.mutation';
+
+// #endregion

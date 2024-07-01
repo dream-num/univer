@@ -17,7 +17,7 @@
 import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import { BooleanNumber, CommandType, ICommandService, IUniverInstanceService, JSONX, Tools } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { DocSkeletonManagerService, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
+import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
 import { HeaderFooterType } from '../../controllers/doc-header-footer.controller';
 import { SidebarDocHeaderFooterPanelOperation } from '../operations/doc-header-footer-panel.operation';
@@ -135,7 +135,6 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const { unitId, segmentId, createType, headerFooterProps } = params;
         const docSkeletonManagerService = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
         const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
@@ -149,26 +148,12 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
 
         const { documentStyle } = docDataModel.getSnapshot();
 
-        const activeRange = textSelectionManagerService.getActiveRange();
         const isUpdateMargin = headerFooterProps?.marginFooter != null || headerFooterProps?.marginHeader != null;
-        let textRanges: ITextRangeWithStyle[] = [];
-
-        if (activeRange && isUpdateMargin) {
-            const { startOffset, endOffset, collapsed, style } = activeRange;
-            textRanges = [{
-                startOffset,
-                endOffset,
-                collapsed,
-                style,
-            }];
-        } else {
-            textRanges = [{
-                startOffset: 0,
-                endOffset: 0,
-                collapsed: true,
-            }];
-        }
-
+        const textRanges: ITextRangeWithStyle[] = [{
+            startOffset: 0,
+            endOffset: 0,
+            collapsed: true,
+        }];
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
@@ -178,6 +163,10 @@ export const CoreHeaderFooterCommand: ICommand<ICoreHeaderFooterParams> = {
                 debounce: true,
             },
         };
+
+        if (isUpdateMargin) {
+            doMutation.params.noNeedSetTextRange = true;
+        }
 
         const jsonX = JSONX.getInstance();
         const rawActions: JSONXActions = [];

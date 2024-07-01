@@ -95,18 +95,22 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
         }
     };
 
-    const handleMarginChange = (val: number, type: 'marginHeader' | 'marginFooter') => {
+    const handleMarginChange = async (val: number, type: 'marginHeader' | 'marginFooter') => {
         setOptions((prev) => ({
             ...prev,
             [type]: val,
         }));
 
-        commandService.executeCommand(CoreHeaderFooterCommandId, {
+        await commandService.executeCommand(CoreHeaderFooterCommandId, {
             unitId,
             headerFooterProps: {
                 [type]: val,
             },
         });
+
+        // To make sure input always has focus.
+        textSelectionRenderService.removeAllTextRanges();
+        textSelectionRenderService.blur();
     };
 
     const closeHeaderFooter = () => {
@@ -169,6 +173,8 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                 <div className={styles.optionsMarginItem}>
                     <span>{localeService.t('headerFooter.headerTopMargin')}</span>
                     <InputNumber
+                        min={0}
+                        max={200}
                         precision={1}
                         value={options.marginHeader}
                         onChange={(val) => { handleMarginChange(val as number, 'marginHeader'); }}
@@ -178,6 +184,8 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                 <div className={styles.optionsMarginItem}>
                     <span>{localeService.t('headerFooter.footerBottomMargin')}</span>
                     <InputNumber
+                        min={0}
+                        max={200}
                         precision={1}
                         value={options.marginFooter}
                         onChange={(val) => { handleMarginChange(val as number, 'marginFooter'); }}

@@ -278,6 +278,7 @@ export class PromptController extends Disposable {
                     } else if (params.isEditing) {
                         this._checkShouldEnterSelectingMode();
                     } else {
+                        // 如果是因为其他因素导致选区变化，默认关闭选区
                         this._quitSelectingMode();
                     }
 

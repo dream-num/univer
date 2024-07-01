@@ -17,7 +17,7 @@
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
 import { BuiltInUIPart, ComponentManager, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
-import type { Ctor } from '@wendellhu/redi';
+import type { Ctor, Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
@@ -125,6 +125,6 @@ export class FormulaUIController extends Disposable {
     }
 
     private _registerRenderModules(): void {
-        this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [FormulaEditorShowController]));
+        this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, [FormulaEditorShowController] as Dependency));
     }
 }

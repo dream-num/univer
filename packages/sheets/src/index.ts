@@ -46,6 +46,7 @@ export {
 export { rangeMerge, createTopMatrixFromRanges, createTopMatrixFromMatrix, findAllRectangle, RangeMergeUtil } from './basics/rangeMerge';
 export { getSheetCommandTarget, getSheetCommandTargetWorkbook, getSheetMutationTarget } from './commands/commands/utils/target-util';
 export { alignToMergedCellsBorders, getCellAtRowCol, setEndForRange, isSingleCellSelection } from './commands/commands/utils/selection-utils';
+export { getSelectionsService } from './commands/utils/selection-command-util';
 export { followSelectionOperation, getPrimaryForRange } from './commands/commands/utils/selection-utils';
 export { handleDeleteRangeMutation } from './commands/utils/handle-range-mutation';
 export { getInsertRangeMutations, getRemoveRangeMutations } from './commands/utils/handle-range-mutation';

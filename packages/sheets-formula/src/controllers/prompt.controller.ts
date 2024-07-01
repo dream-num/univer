@@ -71,7 +71,8 @@ import {
     ITextSelectionRenderManager,
 } from '@univerjs/engine-render';
 import type {
-    ISelectionWithStyle } from '@univerjs/sheets';
+    ISelectionWithStyle,
+} from '@univerjs/sheets';
 import {
     convertSelectionDataToRange,
 
@@ -79,7 +80,8 @@ import {
     getPrimaryForRange,
     IRefSelectionsService,
     setEndForRange,
-    SheetsSelectionsService } from '@univerjs/sheets';
+    SheetsSelectionsService,
+} from '@univerjs/sheets';
 import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
 import {
     ExpandSelectionCommand,
@@ -93,7 +95,6 @@ import { IContextMenuService, IEditorService, KeyCode, MetaKeys, SetEditorResize
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 
-import { filter, merge } from 'rxjs';
 import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
@@ -267,20 +268,17 @@ export class PromptController extends Disposable {
                         return;
                     }
 
-                    // Change selection with canvas dragging and mouse events
-                    if (params.isEditing && this._isSelectingMode) {
-                        // 如果是因为方向键移动导致的 text selection change，需要执行 highlight formula
-                        // 以把公式的颜色改成特定的高亮色
-                        // this._highlightFormula();
+                    const onlyInputRange = editor.onlyInputRange();
+
+                    // @ts-ignore
+                    if (params?.options?.fromSelection) {
                         return;
-                    } else if (params.isEditing) {
-                        this._checkShouldEnterSelectingMode();
                     } else {
                         this._quitSelectingMode();
                     }
 
                     this._contextSwitch();
-                    this._checkShouldEnterSelectingMode();
+                    this._checkShouldEnterSelectingMode(onlyInputRange);
 
                     if (this._formulaPromptService.isLockedSelectionChange()) {
                         return;
@@ -288,7 +286,7 @@ export class PromptController extends Disposable {
 
                     this._highlightFormula();
 
-                    if (editor.onlyInputRange()) {
+                    if (onlyInputRange) {
                         return;
                     }
 
@@ -301,15 +299,6 @@ export class PromptController extends Disposable {
 
     private _initialEditorInputChange() {
         const arrows = [KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT, KeyCode.CTRL, KeyCode.SHIFT];
-
-        this.disposeWithMe(merge(
-            this._textSelectionRenderManager.onKeydown$.pipe(
-                filter((param) => {
-                    const event = param?.event as KeyboardEvent;
-                    return !event || !arrows.includes(event.which);
-                })),
-            this._textSelectionRenderManager.onPointerDown$
-        ).subscribe(() => this._quitSelectingMode()));
 
         this.disposeWithMe(
             this._textSelectionRenderManager.onInputBefore$.subscribe((param) => {
@@ -388,6 +377,7 @@ export class PromptController extends Disposable {
         }
 
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+        this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
 
         this._quitSelectingMode();
 
@@ -546,9 +536,6 @@ export class PromptController extends Disposable {
                             continue;
                         }
 
-                        // node.startIndex += formulaStringCount;
-                        // node.endIndex += formulaStringCount;
-
                         const newNode = { ...node };
 
                         newNode.startIndex += formulaStringCount;
@@ -562,7 +549,7 @@ export class PromptController extends Disposable {
                         selectionIndex += 1;
                     }
 
-                    this._syncToEditor(lastSequenceNodes, selectionIndex);
+                    this._syncToEditor(lastSequenceNodes, selectionIndex, undefined, false, false);
                 })
             )
         );
@@ -648,10 +635,17 @@ export class PromptController extends Disposable {
         });
     }
 
-    private _checkShouldEnterSelectingMode(): void {
+    private _checkShouldEnterSelectingMode(isOnlyInputRangeEditor = false): void {
+        if (isOnlyInputRangeEditor) {
+            this._enterSelectingMode();
+            return;
+        }
+
         const char = this._getCurrentChar();
         if (char && matchRefDrawToken(char)) {
             this._enterSelectingMode();
+        } else {
+            this._quitSelectingMode();
         }
     }
 
@@ -689,7 +683,6 @@ export class PromptController extends Disposable {
         this._contextMenuService.disable();
         this._formulaPromptService.enableLockedSelectionInsert();
         this._selectionRenderService.setRemainLastEnabled(true);
-        this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
 
         // Maybe `enterSelectingMode` should be merged with `_enableRefSelectionsRenderService`.
         this._enableRefSelectionsRenderService();
@@ -715,7 +708,6 @@ export class PromptController extends Disposable {
         this._contextMenuService.enable();
         this._formulaPromptService.disableLockedSelectionInsert();
         this._currentInsertRefStringIndex = -1;
-        this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
 
         this._disposeSelectionsChangeListeners();
 
@@ -776,6 +768,7 @@ export class PromptController extends Disposable {
 
         if (config && isFormulaString(config.dataStream)) {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
+            this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
 
             const lastSequenceNodes =
                 this._lexerTreeBuilder.sequenceNodesBuilder(config.dataStream.replace(/\r/g, '').replace(/\n/g, '')) ||
@@ -797,6 +790,7 @@ export class PromptController extends Disposable {
         }
 
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+        this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
 
         this._formulaPromptService.disableLockedSelectionChange();
 
@@ -900,8 +894,6 @@ export class PromptController extends Disposable {
                 });
             }
         }
-
-        // console.log('sequenceNodes', sequenceNodes, textRuns);
 
         return { textRuns, refSelections };
     }
@@ -1177,7 +1169,8 @@ export class PromptController extends Disposable {
         sequenceNodes: Array<string | ISequenceNode>,
         textSelectionOffset: number,
         editorUnitId?: string,
-        canUndo: boolean = true
+        canUndo: boolean = true,
+        fromSelection = true
     ) {
         let dataStream = generateStringWithSequence(sequenceNodes);
 
@@ -1231,6 +1224,7 @@ export class PromptController extends Disposable {
                     },
                 ],
                 segmentId: null,
+                options: { fromSelection },
             });
         } else {
             this._updateEditorModel(`${formulaString}\r\n`, textRuns);
@@ -1240,7 +1234,7 @@ export class PromptController extends Disposable {
                     endOffset: textSelectionOffset + 1 - offset,
                     style,
                 },
-            ]);
+            ], true, { fromSelection });
         }
 
         /**
@@ -1581,7 +1575,6 @@ export class PromptController extends Disposable {
             eventType: DeviceInputEventType.Keyboard,
             keycode,
         });
-        // Don't move the selection here, because changeVisible will update the selection.
     }
 
     private _pressTab(params: ISelectEditorFormulaOperationParam) {
@@ -1600,7 +1593,6 @@ export class PromptController extends Disposable {
             eventType: DeviceInputEventType.Keyboard,
             keycode,
         });
-        // Don't move the selection here, because changeVisible will update the selection.
     }
 
     private _pressEsc(params: ISelectEditorFormulaOperationParam) {
@@ -1665,6 +1657,7 @@ export class PromptController extends Disposable {
                         this._pressEnter(params);
                         return;
                     }
+
                     if (keycode === KeyCode.TAB) {
                         this._pressTab(params);
                         return;

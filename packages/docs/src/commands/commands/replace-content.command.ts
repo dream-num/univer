@@ -27,6 +27,7 @@ interface IReplaceContentCommandParams {
     body: IDocumentBody; // Do not contain `\r\n` at the end.
     textRanges: ITextRangeWithStyle[];
     segmentId?: string;
+    options: { [key: string]: boolean };
 }
 
 // Replace all content with new body, and reserve undo/redo stack.
@@ -53,6 +54,7 @@ export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
         }
 
         const doMutation = getMutationParams(unitId, segmentId, prevBody, body);
+        doMutation.params.options = params.options;
 
         doMutation.params.textRanges = textRanges;
 

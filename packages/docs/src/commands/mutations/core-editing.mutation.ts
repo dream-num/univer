@@ -34,6 +34,7 @@ export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     noHistory?: boolean;
     // Do you need to compose the undo and redo of history, and compose of the change states.
     debounce?: boolean;
+    options?: { [key: string]: boolean };
 }
 
 const RichTextEditingMutationId = 'doc.mutation.rich-text-editing';
@@ -105,7 +106,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         // Make sure update cursor & selection after doc skeleton is calculated.
         if (!noNeedSetTextRange && textRanges && trigger != null) {
             queueMicrotask(() => {
-                textSelectionManagerService.replaceTextRanges(textRanges);
+                textSelectionManagerService.replaceTextRanges(textRanges, true, params.options);
             });
         }
 

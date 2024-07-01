@@ -24,7 +24,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { RefRangeService, SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import { CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../sheets-filter.operation';
-import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
+import { SheetsFilterPanelService } from '../../../services/sheets-filter-panel.service';
 
 const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
     id: 'sheet.operation.set-cell-edit-visible',

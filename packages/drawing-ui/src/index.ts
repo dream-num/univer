@@ -16,10 +16,16 @@
 
 export { DrawingRenderService } from './services/drawing-render.service';
 export { getUpdateParams } from './utils/get-update-params';
-export { ImageResetSizeOperation } from './commands/operations/image-reset-size.operation';
-export { CloseImageCropOperation, OpenImageCropOperation } from './commands/operations/image-crop.operation';
 export { DrawingCommonPanel } from './views/panel/DrawingCommonPanel';
 export { ImagePopupMenu } from './views/image-popup-menu/ImagePopupMenu';
 export { COMPONENT_IMAGE_POPUP_MENU } from './views/image-popup-menu/component-name';
 export { UniverDrawingUIPlugin } from './plugin';
 export { ImageCropperObject } from './views/crop/image-cropper-object';
+
+// #region - all commands
+
+export { SetDrawingAlignOperation } from './commands/operations/drawing-align.operation';
+export { OpenImageCropOperation, CloseImageCropOperation, AutoImageCropOperation } from './commands/operations/image-crop.operation';
+export { ImageResetSizeOperation } from './commands/operations/image-reset-size.operation';
+
+// #endregion

@@ -16,7 +16,26 @@
 
 export { UniverSheetsConditionalFormattingMobileUIPlugin } from './mobile-plugin';
 export { UniverSheetsConditionalFormattingUIPlugin } from './plugin';
-export { AddCfCommand } from './commands/commands/add-cf.command';
-export type { IAddCfCommandParams } from './commands/commands/add-cf.command';
 export { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
 
+// #region - all commands
+
+export { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
+export { AddCfCommand, type IAddCfCommandParams } from './commands/commands/add-cf.command';
+export { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
+export { AddDataBarConditionalRuleCommand } from './commands/commands/add-data-bar-cf.command';
+export { AddDuplicateValuesCfCommand } from './commands/commands/add-duplicate-values-cf.command';
+export { AddNumberCfCommand } from './commands/commands/add-number-cf.command';
+export { AddRankCfCommand } from './commands/commands/add-rank-cf.command';
+export { AddTextCfCommand } from './commands/commands/add-text-cf.command';
+export { AddTimePeriodCfCommand } from './commands/commands/add-time-period-cf.command';
+export { AddUniqueValuesCfCommand } from './commands/commands/add-unique-values-cf.command';
+export { ClearRangeCfCommand } from './commands/commands/clear-range-cf.command';
+export { ClearWorksheetCfCommand } from './commands/commands/clear-worksheet-cf.command';
+export { DeleteCfCommand } from './commands/commands/delete-cf.command';
+export { MoveCfCommand } from './commands/commands/move-cf.command';
+export { SetCfCommand } from './commands/commands/set-cf.command';
+
+export { OpenConditionalFormattingOperator } from './commands/operations/open-conditional-formatting-panel';
+
+// #endregion

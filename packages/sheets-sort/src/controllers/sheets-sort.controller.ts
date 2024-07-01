@@ -18,8 +18,8 @@ import type { ICellData, Nullable } from '@univerjs/core';
 import { CellValueType, Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 
 import { Inject } from '@wendellhu/redi';
-import type { ICellValueCompareFn } from '../commands/sheets-sort.command';
-import { SortRangeCommand } from '../commands/sheets-sort.command';
+import type { ICellValueCompareFn } from '../commands/commands/sheets-sort.command';
+import { SortRangeCommand } from '../commands/commands/sheets-sort.command';
 import { SheetsSortService } from '../services/sheets-sort.service';
 import { compareNull, compareNumber, compareString, isNullValue } from './utils';
 

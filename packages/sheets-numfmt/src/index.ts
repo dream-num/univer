@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
-export { type ISetNumfmtCommandParams, SetNumfmtCommand } from './commands/commands/set-numfmt.command';
 export { UniverSheetsNumfmtPlugin } from './numfmt-plugin';
 export { getPatternPreview } from './utils/pattern';
+
+// #region - all commands
+
+export { AddDecimalCommand } from './commands/commands/add-decimal.command';
+export { SetCurrencyCommand } from './commands/commands/set-currency.command';
+export { type ISetNumfmtCommandParams, SetNumfmtCommand } from './commands/commands/set-numfmt.command';
+export { SetPercentCommand } from './commands/commands/set-percent.command';
+export { SubtractDecimalCommand } from './commands/commands/subtract-decimal.command';
+export { CloseNumfmtPanelOperator } from './commands/operations/close.numfmt.panel.operation';
+export { OpenNumfmtPanelOperator } from './commands/operations/open.numfmt.panel.operation';
+
+// #endregion

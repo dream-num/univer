@@ -50,13 +50,14 @@ import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
+    getHeaderFooterMenuHiddenObservable,
     getMenuHiddenObservable,
     MenuGroup,
     MenuItemType,
     MenuPosition,
 } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
@@ -411,7 +412,9 @@ export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         icon: 'FreezeRowSingle',
         tooltip: 'toolbar.headerFooter',
         positions: [MenuPosition.TOOLBAR_START],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getHeaderFooterMenuHiddenObservable(accessor), (one, two) => {
+            return one || two;
+        }),
     };
 }
 

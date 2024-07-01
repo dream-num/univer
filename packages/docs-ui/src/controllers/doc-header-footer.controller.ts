@@ -15,13 +15,13 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { BooleanNumber, Disposable, ICommandService, IUniverInstanceService, LocaleService, toDisposable, Tools } from '@univerjs/core';
+import { BooleanNumber, Disposable, DocumentFlavor, ICommandService, IUniverInstanceService, LocaleService, toDisposable, Tools } from '@univerjs/core';
 import type { Documents, DocumentViewModel, IMouseEvent, IPageRenderConfig, IPathProps, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
 import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager, PageLayoutType, Path, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
 import { ComponentManager, IEditorService } from '@univerjs/ui';
-import { DocSkeletonManagerService, neoGetDocObject, TextSelectionManagerService } from '@univerjs/docs';
+import { DocSkeletonManagerService, neoGetDocObject } from '@univerjs/docs';
 import type { Nullable } from 'vitest';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
@@ -132,7 +132,6 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
@@ -142,6 +141,16 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
     }
 
     private _initialize() {
+        // FIXME: @Jocs, NO need to register this controller in Modern Document???
+        const docDataModel = this._context.unit;
+
+        const documentFlavor = docDataModel.getSnapshot().documentStyle.documentFlavor;
+
+        // Only traditional document support header/footer.
+        if (documentFlavor !== DocumentFlavor.TRADITIONAL) {
+            return;
+        }
+
         this._init();
         this._drawHeaderFooterLabel();
         this._registerCommands();

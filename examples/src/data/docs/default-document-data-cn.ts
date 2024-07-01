@@ -15,74 +15,8 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber, DrawingTypeEnum, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, DocumentFlavor, DrawingTypeEnum, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
-
-function getDefaultHeaderFooterBody(type: 'header' | 'footer') {
-    return {
-        dataStream: type === 'header' ? '苍茫夜色\r作者：朱自清\rToday Office\r我是页眉页眉\r\n' : '苍茫月色\r作者：朱自清\rToday Office\r我是页脚页脚\r\n',
-        textRuns: [
-            {
-                st: 0,
-                ed: 4,
-                ts: {
-                    fs: 10,
-                    ff: 'Microsoft YaHei',
-                    cl: {
-                        rgb: 'rgb(155, 155, 0)',
-                    },
-                    bl: BooleanNumber.TRUE,
-                    ul: {
-                        s: BooleanNumber.TRUE,
-                    },
-                },
-            },
-            {
-                st: 5,
-                ed: 31,
-                ts: {
-                    fs: 10,
-                    ff: 'Times New Roman',
-                    cl: {
-                        rgb: 'rgb(30, 30, 30)',
-                    },
-                    bl: BooleanNumber.FALSE,
-                },
-            },
-        ],
-        paragraphs: [
-            {
-                startIndex: 4,
-                spaceAbove: 0,
-                lineSpacing: 1.5,
-                spaceBelow: 0,
-            },
-            {
-                startIndex: 11,
-                spaceAbove: 0,
-                lineSpacing: 1.5,
-                spaceBelow: 0,
-            },
-            {
-                startIndex: 24,
-                spaceAbove: 0,
-                lineSpacing: 1.5,
-                spaceBelow: 0,
-            },
-            {
-                startIndex: 31,
-                spaceAbove: 0,
-                lineSpacing: 1.5,
-                spaceBelow: 0,
-            },
-        ],
-        sectionBreaks: [
-            {
-                startIndex: 32,
-            },
-        ],
-    };
-}
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
     id: 'd',
@@ -851,6 +785,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             width: ptToPixel(595),
             height: ptToPixel(842),
         },
+        documentFlavor: DocumentFlavor.TRADITIONAL,
         marginTop: ptToPixel(50),
         marginBottom: ptToPixel(50),
         marginRight: ptToPixel(50),

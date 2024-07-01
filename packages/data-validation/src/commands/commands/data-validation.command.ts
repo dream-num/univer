@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommandService, ILogService, IUndoRedoService } from '@univerjs/core';
 import type { ICommand, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, IRange, ISheetDataValidationRule } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
@@ -39,7 +39,8 @@ export const AddDataValidationCommand: ICommand<IAddDataValidationCommandParams>
     type: CommandType.COMMAND,
     id: 'data-validation.command.addRule',
     async  handler(accessor, params) {
-        console.warn('[Deprecated] AddDataValidationCommand is deprecated, please use AddSheetDataValidationCommand in @univerjs/sheets-data-validation instead!');
+        const logService = accessor.get(ILogService);
+        logService.warn('[Deprecated] AddDataValidationCommand is deprecated, please use AddSheetDataValidationCommand in @univerjs/sheets-data-validation instead!');
         if (!params) {
             return false;
         }
@@ -162,7 +163,8 @@ export const UpdateDataValidationOptionsCommand: ICommand<IUpdateDataValidationO
     type: CommandType.COMMAND,
     id: 'data-validation.command.updateDataValidationSetting',
     handler(accessor, params) {
-        console.warn('[Deprecated] UpdateDataValidationOptionsCommand is deprecated, please use UpdateSheetDataValidationOptionsCommand in @univerjs/sheets-data-validation instead!');
+        const logService = accessor.get(ILogService);
+        logService.warn('[Deprecated] UpdateDataValidationOptionsCommand is deprecated, please use UpdateSheetDataValidationOptionsCommand in @univerjs/sheets-data-validation instead!');
         if (!params) {
             return false;
         }
@@ -228,7 +230,8 @@ export const UpdateDataValidationSettingCommand: ICommand<IUpdateDataValidationS
     type: CommandType.COMMAND,
     id: 'data-validation.command.updateDataValidationOptions',
     handler(accessor, params) {
-        console.warn('[Deprecated] UpdateDataValidationSettingCommand is deprecated, please use UpdateSheetDataValidationSettingCommand in @univerjs/sheets-data-validation instead!');
+        const logService = accessor.get(ILogService);
+        logService.warn('[Deprecated] UpdateDataValidationSettingCommand is deprecated, please use UpdateSheetDataValidationSettingCommand in @univerjs/sheets-data-validation instead!');
         if (!params) {
             return false;
         }

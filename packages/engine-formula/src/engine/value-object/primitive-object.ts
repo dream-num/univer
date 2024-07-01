@@ -390,15 +390,19 @@ export const NumberValueObjectCache = new FormulaAstLRU<NumberValueObject>(NUMBE
 export class NumberValueObject extends BaseValueObject {
     private _value: number = 0;
 
-    static create(value: number) {
-        const key = `${value}`;
+    static create(value: number, pattern: string = '') {
+        // The same number may have different number formats
+        const key = `${value}-${pattern}`;
         const cached = NumberValueObjectCache.get(key);
         if (cached) {
-            // The NumberValueObject may be cached with a number format, but the next time the cache is retrieved, the number format is not required.
-            cached.setPattern('');
             return cached;
         }
+
         const instance = new NumberValueObject(value);
+        if (pattern) {
+            instance.setPattern(pattern);
+        }
+
         NumberValueObjectCache.set(key, instance);
         return instance;
     }
@@ -434,9 +438,7 @@ export class NumberValueObject extends BaseValueObject {
             return valueObject.plus(this);
         }
 
-        const pattern = comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.PLUS);
-
-        const object = this.plusBy(valueObject.getValue());
+        let object = this.plusBy(valueObject.getValue());
 
         // = 1 + #NAME? gets #NAME?, = 1 + #VALUE! gets #VALUE!
         if (object.isError()) {
@@ -444,7 +446,8 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         // Set number format
-        object.setPattern(pattern);
+        const pattern = comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.PLUS);
+        object = NumberValueObject.create(Number(object.getValue()), pattern);
 
         return object;
     }
@@ -461,7 +464,7 @@ export class NumberValueObject extends BaseValueObject {
             }
             return (o as BaseValueObject).plus(this);
         }
-        const object = this.minusBy(valueObject.getValue());
+        let object = this.minusBy(valueObject.getValue());
 
         // = 1 - #NAME? gets #NAME?, = 1 - #VALUE! gets #VALUE!
         if (object.isError()) {
@@ -469,7 +472,8 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         // Set number format
-        object.setPattern(comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.MINUS));
+        const pattern = comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.MINUS);
+        object = NumberValueObject.create(Number(object.getValue()), pattern);
 
         return object;
     }
@@ -478,7 +482,7 @@ export class NumberValueObject extends BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.multiply(this);
         }
-        const object = this.multiplyBy(valueObject.getValue());
+        let object = this.multiplyBy(valueObject.getValue());
 
         // = 1 * #NAME? gets #NAME?, = 1 * #VALUE! gets #VALUE!
         if (object.isError()) {
@@ -486,7 +490,8 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         // Set number format
-        object.setPattern(comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.MULTIPLY));
+        const pattern = comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.MULTIPLY);
+        object = NumberValueObject.create(Number(object.getValue()), pattern);
 
         return object;
     }
@@ -499,7 +504,7 @@ export class NumberValueObject extends BaseValueObject {
             }
             return (o as BaseValueObject).multiply(this);
         }
-        const object = this.dividedBy(valueObject.getValue());
+        let object = this.dividedBy(valueObject.getValue());
 
         // = 1 / #NAME? gets #NAME?, = 1 / #VALUE! gets #VALUE!
         if (object.isError()) {
@@ -507,7 +512,8 @@ export class NumberValueObject extends BaseValueObject {
         }
 
         // Set number format
-        object.setPattern(comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.DIVIDED));
+        const pattern = comparePatternPriority(this.getPattern(), valueObject.getPattern(), operatorToken.DIVIDED);
+        object = NumberValueObject.create(Number(object.getValue()), pattern);
 
         return object;
     }

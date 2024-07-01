@@ -20,6 +20,8 @@ import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Day } from '../index';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test day function', () => {
     const testFunction = new Day(FUNCTION_NAMES_DATE.DAY);
@@ -29,6 +31,11 @@ describe('Test day function', () => {
             const serialNumber = NumberValueObject.create(43832);
             const result = testFunction.calculate(serialNumber);
             expect(result.getValue()).toStrictEqual(2);
+        });
+        it('Serial number is error', () => {
+            const serialNumber = ErrorValueObject.create(ErrorType.NAME);
+            const result = testFunction.calculate(serialNumber);
+            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
         });
 
         it('Serial number is date string', () => {

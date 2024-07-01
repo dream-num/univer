@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt, stripErrorMargin } from '../math-kit';
+import { ceil, divide, equals, floor, getFractionalPart, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt, stripErrorMargin } from '../math-kit';
 
 describe('Test math kit', () => {
     it('Function plus', () => {
@@ -224,5 +224,11 @@ describe('Test math kit', () => {
         expect(lessThanOrEquals(1.2, 1.1)).toBe(false);
         expect(lessThanOrEquals(1.11, 1.11)).toBe(true);
         expect(lessThanOrEquals(1.11, 1.12)).toBe(true);
+    });
+
+    it('Function getFractionalPart', () => {
+        expect(stripErrorMargin(getFractionalPart(123.456))).toBe(0.456000000000003);
+        expect(stripErrorMargin(getFractionalPart(-123.456))).toBe(-0.456000000000003);
+        expect(getFractionalPart(123)).toBe(0);
     });
 });

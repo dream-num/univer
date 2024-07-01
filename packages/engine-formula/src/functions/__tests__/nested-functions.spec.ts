@@ -77,6 +77,10 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                             v: 'D',
                             t: 1,
                         },
+                        4: {
+                            v: '"test"',
+                            t: 1,
+                        },
                     },
                     1: {
                         0: {
@@ -359,6 +363,14 @@ describe('Test nested functions', () => {
             result = calculate('=SUM(CHOOSE({1,2},A2:B2))');
 
             expect(result).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Parsing of double-quoted strings', () => {
+            let result = calculate('=E1');
+            expect(result).toStrictEqual([['"test"']]);
+
+            result = calculate('="test"');
+            expect(result).toStrictEqual('test');
         });
     });
 });

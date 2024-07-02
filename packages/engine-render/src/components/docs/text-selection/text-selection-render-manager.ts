@@ -103,6 +103,7 @@ export interface ITextSelectionInnerParam {
     segmentId: string;
     isEditing: boolean;
     style: ITextSelectionStyle;
+    options?: { [key: string]: boolean };
 }
 
 export interface IActiveTextRange {
@@ -146,7 +147,7 @@ export interface ITextSelectionRenderManager {
 
     removeAllTextRanges(): void;
 
-    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing?: boolean): void;
+    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing?: boolean, options?: { [key: string]: boolean }): void;
 
     sync(): void;
 
@@ -286,7 +287,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._isSelectionEnabled = false;
     }
 
-    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing = true) {
+    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
         const { _scene: scene, _docSkeleton: docSkeleton } = this;
 
         for (const range of ranges) {
@@ -303,6 +304,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             segmentId: this._currentSegmentId,
             style: this._selectionStyle,
             isEditing,
+            options,
         });
 
         this._updateInputPosition();

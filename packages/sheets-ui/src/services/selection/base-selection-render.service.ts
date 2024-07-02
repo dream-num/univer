@@ -35,9 +35,9 @@ import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { SelectionShape } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
-import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { attachPrimaryWithCoord, attachSelectionWithCoord } from './util';
 
 export interface IControlFillConfig {
@@ -771,6 +771,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const scene = this._scene;
         scene.enableEvent();
 
+        this._clearMove();
         this._upEventSubscription?.unsubscribe();
         this._upEventSubscription = null;
 

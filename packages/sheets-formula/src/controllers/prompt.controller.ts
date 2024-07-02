@@ -95,7 +95,6 @@ import { IContextMenuService, IEditorService, KeyCode, MetaKeys, SetEditorResize
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 
-import { filter, merge } from 'rxjs';
 import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
@@ -269,21 +268,17 @@ export class PromptController extends Disposable {
                         return;
                     }
 
-                    // Change selection with canvas dragging and mouse events
-                    if (params.isEditing && this._isSelectingMode) {
-                        // 如果是因为方向键移动导致的 text selection change，需要执行 highlight formula
-                        // 以把公式的颜色改成特定的高亮色
-                        // this._highlightFormula();
+                    const onlyInputRange = editor.onlyInputRange();
+
+                    // @ts-ignore
+                    if (params?.options?.fromSelection) {
                         return;
-                    } else if (params.isEditing) {
-                        this._checkShouldEnterSelectingMode();
                     } else {
-                        // 如果是因为其他因素导致选区变化，默认关闭选区
                         this._quitSelectingMode();
                     }
 
                     this._contextSwitch();
-                    this._checkShouldEnterSelectingMode();
+                    this._checkShouldEnterSelectingMode(onlyInputRange);
 
                     if (this._formulaPromptService.isLockedSelectionChange()) {
                         return;
@@ -291,7 +286,7 @@ export class PromptController extends Disposable {
 
                     this._highlightFormula();
 
-                    if (editor.onlyInputRange()) {
+                    if (onlyInputRange) {
                         return;
                     }
 
@@ -304,15 +299,6 @@ export class PromptController extends Disposable {
 
     private _initialEditorInputChange() {
         const arrows = [KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT, KeyCode.CTRL, KeyCode.SHIFT];
-
-        this.disposeWithMe(merge(
-            this._textSelectionRenderManager.onKeydown$.pipe(
-                filter((param) => {
-                    const event = param?.event as KeyboardEvent;
-                    return !event || !arrows.includes(event.which);
-                })),
-            this._textSelectionRenderManager.onPointerDown$
-        ).subscribe(() => this._quitSelectingMode(true)));
 
         this.disposeWithMe(
             this._textSelectionRenderManager.onInputBefore$.subscribe((param) => {
@@ -549,9 +535,6 @@ export class PromptController extends Disposable {
                             continue;
                         }
 
-                        // node.startIndex += formulaStringCount;
-                        // node.endIndex += formulaStringCount;
-
                         const newNode = { ...node };
 
                         newNode.startIndex += formulaStringCount;
@@ -565,7 +548,7 @@ export class PromptController extends Disposable {
                         selectionIndex += 1;
                     }
 
-                    this._syncToEditor(lastSequenceNodes, selectionIndex);
+                    this._syncToEditor(lastSequenceNodes, selectionIndex, undefined, false, false);
                 })
             )
         );
@@ -651,10 +634,17 @@ export class PromptController extends Disposable {
         });
     }
 
-    private _checkShouldEnterSelectingMode(): void {
+    private _checkShouldEnterSelectingMode(isOnlyInputRangeEditor = false): void {
+        if (isOnlyInputRangeEditor) {
+            this._enterSelectingMode();
+            return;
+        }
+
         const char = this._getCurrentChar();
         if (char && matchRefDrawToken(char)) {
             this._enterSelectingMode();
+        } else {
+            this._quitSelectingMode();
         }
     }
 
@@ -709,17 +699,9 @@ export class PromptController extends Disposable {
      * Disable the ref string generation mode. In the ref string generation mode,
      * users can select a certain area using the mouse and arrow keys, and convert the area into a ref string.
      */
-    private _quitSelectingMode(soft = false) {
+    private _quitSelectingMode() {
         if (!this._isSelectingMode) {
             return;
-        }
-
-        // Never quit selecing mode if after a special char.
-        if (soft) {
-            const char = this._getCurrentChar();
-            if (char && matchRefDrawToken(char)) {
-                return;
-            }
         }
 
         this._editorBridgeService.disableForceKeepVisible();
@@ -911,8 +893,6 @@ export class PromptController extends Disposable {
                 });
             }
         }
-
-        // console.log('sequenceNodes', sequenceNodes, textRuns);
 
         return { textRuns, refSelections };
     }
@@ -1188,7 +1168,8 @@ export class PromptController extends Disposable {
         sequenceNodes: Array<string | ISequenceNode>,
         textSelectionOffset: number,
         editorUnitId?: string,
-        canUndo: boolean = true
+        canUndo: boolean = true,
+        fromSelection = true
     ) {
         let dataStream = generateStringWithSequence(sequenceNodes);
 
@@ -1242,6 +1223,7 @@ export class PromptController extends Disposable {
                     },
                 ],
                 segmentId: null,
+                options: { fromSelection },
             });
         } else {
             this._updateEditorModel(`${formulaString}\r\n`, textRuns);
@@ -1251,7 +1233,7 @@ export class PromptController extends Disposable {
                     endOffset: textSelectionOffset + 1 - offset,
                     style,
                 },
-            ]);
+            ], true, { fromSelection });
         }
 
         /**

@@ -178,7 +178,7 @@ export class TextSelectionManagerService extends RxDisposable {
         });
     }
 
-    replaceTextRanges(textRanges: ISuccinctTextRangeParam[], isEditing = true) {
+    replaceTextRanges(textRanges: ISuccinctTextRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
         if (this._currentSelection == null) {
             return;
         }
@@ -186,7 +186,7 @@ export class TextSelectionManagerService extends RxDisposable {
         // Remove all textRanges.
         this._textSelectionRenderManager.removeAllTextRanges();
         // Add new textRanges.
-        this._textSelectionRenderManager.addTextRanges(textRanges, isEditing);
+        this._textSelectionRenderManager.addTextRanges(textRanges, isEditing, options);
     }
 
     // All textRanges should be synchronized from the render layer.

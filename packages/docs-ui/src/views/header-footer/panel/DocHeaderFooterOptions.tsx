@@ -57,11 +57,17 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
         const editArea = viewModel.getEditArea();
 
         let needCreateHeaderFooter = false;
+        const segmentPage = textSelectionRenderService.getSegmentPage();
+        let needChangeSegmentId = false;
         if (type === 'useFirstPageHeaderFooter' && val === true) {
             if (editArea === DocumentEditArea.HEADER && !documentStyle.firstPageHeaderId) {
                 needCreateHeaderFooter = true;
             } else if (editArea === DocumentEditArea.FOOTER && !documentStyle.firstPageFooterId) {
                 needCreateHeaderFooter = true;
+            }
+
+            if (needCreateHeaderFooter && segmentPage === 0) {
+                needChangeSegmentId = true;
             }
         }
 
@@ -71,13 +77,20 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
             } else if (editArea === DocumentEditArea.FOOTER && !documentStyle.evenPageFooterId) {
                 needCreateHeaderFooter = true;
             }
+
+            if (needCreateHeaderFooter && segmentPage % 2 === 1) {
+                needChangeSegmentId = true;
+            }
         }
 
         if (needCreateHeaderFooter) {
             const SEGMENT_ID_LEN = 6;
             const segmentId = Tools.generateRandomId(SEGMENT_ID_LEN);
             // Set segment id first, then exec command.
-            textSelectionRenderService.setSegment(segmentId);
+            if (needChangeSegmentId) {
+                textSelectionRenderService.setSegment(segmentId);
+            }
+
             commandService.executeCommand(CoreHeaderFooterCommandId, {
                 unitId,
                 segmentId,

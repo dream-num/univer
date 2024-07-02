@@ -137,6 +137,7 @@ export interface ITextSelectionRenderManager {
     disableSelection(): void;
     setSegment(id: string): void;
     setSegmentPage(pageIndex: number): void;
+    getSegmentPage(): number;
     setStyle(style: ITextSelectionStyle): void;
     resetStyle(): void;
     removeAllTextRanges(): void;
@@ -244,6 +245,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     setSegmentPage(pageIndex: number) {
         this._currentSegmentPage = pageIndex;
+    }
+
+    getSegmentPage() {
+        return this._currentSegmentPage;
     }
 
     setStyle(style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE) {

@@ -163,7 +163,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         // Build the reverse dependency relationship between the trees.
         allTrees.forEach((tree) => {
             dependencyTrees.forEach((dependencyTree) => {
-                if (dependencyTree.children.length > 0 || dependencyTree.parents.length > 0 || tree === dependencyTree) {
+                if (tree === dependencyTree || tree.children.includes(dependencyTree)) {
                     return true;
                 }
 

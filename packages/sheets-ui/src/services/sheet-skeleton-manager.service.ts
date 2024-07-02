@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { Disposable, type Nullable, type Workbook, type Worksheet } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -43,7 +42,7 @@ export interface ISheetSkeletonManagerSearch {
  * The viewModel is also a temporary storage variable, which does not need to be persisted,
  * so it is managed uniformly through the service.
  */
-export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
+export class SheetSkeletonManagerService extends Disposable implements IRenderModule {
     private _currentSkeletonSearchParam: ISheetSkeletonManagerSearch = {
         sheetId: '',
     };
@@ -64,12 +63,23 @@ export class SheetSkeletonManagerService implements IDisposable, IRenderModule {
         @Inject(Injector) private readonly _injector: Injector
     ) {
         // empty
+        super();
+
+        this.disposeWithMe(() => {
+            this._currentSkeletonBefore$.complete();
+            this._currentSkeleton$.complete();
+            this._sheetSkeletonParam = [];
+        });
+
+        this._initRemoveSheet();
     }
 
-    dispose(): void {
-        this._currentSkeletonBefore$.complete();
-        this._currentSkeleton$.complete();
-        this._sheetSkeletonParam = [];
+    private _initRemoveSheet() {
+        this.disposeWithMe(this._context.unit.sheetDisposed$.subscribe((sheet) => {
+            this.disposeSkeleton({
+                sheetId: sheet.getSheetId(),
+            });
+        }));
     }
 
     getCurrentSkeleton(): SpreadsheetSkeleton {

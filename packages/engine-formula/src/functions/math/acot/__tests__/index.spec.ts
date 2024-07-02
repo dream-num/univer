@@ -52,7 +52,7 @@ describe('Test acot function', () => {
             });
             const result = testFunction.calculate(valueArray);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[0.7853981633974483, '#VALUE!', 0.682622552417217, 0.7853981633974483, 1.5707963267948966],
-                [1.5707963267948966, 0.009999666686665238, 0.40385979490737667, '#VALUE!', -0.3217505543966422]]);
+                [1.5707963267948966, 0.009999666686665238, 0.40385979490737667, '#VALUE!', 2.819842099193151]]);
         });
     });
 });

@@ -16,10 +16,6 @@
 
 export { SheetsConditionalFormattingPlugin } from './plugin';
 export * from './base/const';
-export * from './commands/mutations/add-conditional-rule.mutation';
-export * from './commands/mutations/delete-conditional-rule.mutation';
-export * from './commands/mutations/move-conditional-rule.mutation';
-export * from './commands/mutations/set-conditional-rule.mutation';
 export * from './models/type';
 export * from './models/conditional-formatting-rule-model';
 export * from './models/conditional-formatting-view-model';
@@ -37,3 +33,14 @@ export * from './models/icon-map';
 export * from './services/conditional-formatting-formula.service';
 export * from './utils/anchor';
 export * from './utils/create-cf-id';
+
+// #region - all commands
+
+export { AddConditionalRuleMutationUndoFactory, AddConditionalRuleMutation, type IAddConditionalRuleMutationParams } from './commands/mutations/add-conditional-rule.mutation';
+export { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, type IDeleteConditionalRuleMutationParams } from './commands/mutations/delete-conditional-rule.mutation';
+export { ConditionalFormattingFormulaMarkDirty } from './commands/mutations/formula-mark-dirty.mutation';
+export { MoveConditionalRuleMutation, MoveConditionalRuleMutationUndoFactory, type IMoveConditionalRuleMutationParams } from './commands/mutations/move-conditional-rule.mutation';
+export { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, type ISetConditionalRuleMutationParams } from './commands/mutations/set-conditional-rule.mutation';
+
+// #endregion
+

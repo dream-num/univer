@@ -196,3 +196,12 @@ export function stripErrorMargin(num: number, precision = 12) {
     const stripResult = strip(num, precision);
     return withinErrorMargin(num, stripResult) ? stripResult : strip(num);
 }
+
+/**
+ * Get the fractional part of the number
+ * @param num
+ * @returns
+ */
+export function getFractionalPart(num: number): number {
+    return num - Math.trunc(num);
+}

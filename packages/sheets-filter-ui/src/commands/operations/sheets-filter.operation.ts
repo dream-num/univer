@@ -19,8 +19,8 @@ import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { ILayoutService } from '@univerjs/ui';
 import { Quantity } from '@wendellhu/redi';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
-import type { FilterBy } from '../services/sheets-filter-panel.service';
-import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
+import type { FilterBy } from '../../services/sheets-filter-panel.service';
+import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 
 export const FILTER_PANEL_OPENED_KEY = 'FILTER_PANEL_OPENED';
 

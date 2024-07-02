@@ -92,6 +92,7 @@ export class FormulaAutoFillController extends Disposable {
                     d.f = null;
                     d.v = null;
                     d.p = null;
+                    d.t = null;
 
                     if (direction === Direction.DOWN || direction === Direction.RIGHT) {
                         applyData.push(d);
@@ -117,12 +118,14 @@ export class FormulaAutoFillController extends Disposable {
                         d.f = shiftedFormula;
                         d.v = null;
                         d.p = null;
+                        d.t = null;
                     } else {
                         // At the beginning of the second formula, set formulaId only
                         d.si = formulaId;
                         d.f = null;
                         d.v = null;
                         d.p = null;
+                        d.t = null;
                     }
 
                     if (direction === Direction.DOWN || direction === Direction.RIGHT) {

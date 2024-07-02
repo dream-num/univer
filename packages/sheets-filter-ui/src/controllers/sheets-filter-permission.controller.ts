@@ -23,9 +23,8 @@ import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { RangeProtectionPermissionViewPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetFilterPermission } from '@univerjs/sheets';
-import { SmartToggleSheetsFilterCommand } from '../commands/sheets-filter.command';
-import type { IOpenFilterPanelOperationParams } from '../commands/sheets-filter.operation';
-import { OpenFilterPanelOperation } from '../commands/sheets-filter.operation';
+import { SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
+import { type IOpenFilterPanelOperationParams, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
 
 export interface IUniverSheetsFilterUIConfig {
     menu: MenuConfig;

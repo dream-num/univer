@@ -100,10 +100,14 @@ export class Line extends docExtension {
         _scale: number,
         lineWidth = 1
     ) {
-        const { s: show, cl: colorStyle, t: lineType, c = BooleanNumber.TRUE } = line;
+        let { s: show, cl: colorStyle, t: lineType, c = BooleanNumber.TRUE } = line;
 
         if (show !== BooleanNumber.TRUE) {
             return;
+        }
+
+        if (c == null) {
+            c = BooleanNumber.TRUE;
         }
 
         const {

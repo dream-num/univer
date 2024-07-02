@@ -16,7 +16,7 @@
 
 import { type IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
 import { whenSheetEditorFocused } from '@univerjs/sheets-ui';
-import { SmartToggleSheetsFilterCommand } from '../commands/sheets-filter.command';
+import { SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
 
 export const SmartToggleFilterShortcut: IShortcutItem = {
     id: SmartToggleSheetsFilterCommand.id,

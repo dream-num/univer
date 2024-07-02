@@ -156,5 +156,41 @@ describe('Test average function', () => {
             const result = testFunction.calculate(var1);
             expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
         });
+
+        it('Var1 is number, var2 is array not includes error, includes 0', () => {
+            const var1 = NumberValueObject.create(2);
+            const var2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 0, 1.23, true, false, 0],
+                    [0, '100', '2.34', 0, -3, 0],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(var1, var2);
+            expect(result.getValue()).toBe(9.415454545454546);
+        });
+
+        it('Var1 is number, var2 is array not includes boolean, includes 0', () => {
+            const var1 = NumberValueObject.create(2);
+            const var2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 0, 1.23, 0, 0, 0],
+                    [0, '100', '2.34', 0, -3, 0],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(var1, var2);
+            expect(result.getValue()).toBe(7.966923076923077);
+        });
     });
 });

@@ -18,8 +18,7 @@ import { ICommandService, IContextService, ThemeService } from '@univerjs/core';
 import { type IMouseEvent, type IPointerEvent, type IShapeProps, Shape, type UniverRenderingContext2D } from '@univerjs/engine-render';
 
 import { Inject } from '@wendellhu/redi';
-import type { IOpenFilterPanelOperationParams } from '../../commands/sheets-filter.operation';
-import { FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../../commands/sheets-filter.operation';
+import { FILTER_PANEL_OPENED_KEY, type IOpenFilterPanelOperationParams, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { FilterButton } from './drawings';
 
 export const FILTER_ICON_SIZE = 16;

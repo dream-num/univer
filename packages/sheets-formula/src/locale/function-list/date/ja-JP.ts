@@ -46,7 +46,7 @@ export default {
     },
     DATEVALUE: {
         description: '日付を表す文字列をシリアル値に変換します。',
-        abstract: '日付を表す文字列をシリアル値に変換します。',
+        abstract: '日付を表す文字列をシリアル値に変換します',
         links: [
             {
                 title: '指導',
@@ -54,8 +54,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dateText: { name: '日付文字列', detail: 'Excel の日付形式で日付を表すテキスト、または Excel の日付形式で日付を表すテキストを含むセルへの参照。 たとえば、"1/30/2008" や "30-Jan-2008" は、日付を表す引用符内のテキスト文字列です。\nWindows 版 Excel の標準の日付システムを使用する場合、日付文字列の引数には、1900 年 1 月 1 日～ 9999 年 12 月 31 日までの間の日付を指定する必要があります。 DATEVALUE 関数は、#VALUE を返します。 が返されます。\n日付文字列 引数の年の部分を省略すると、DATEVALUE 関数はコンピューターのシステム時計による現在の年を使用します。 日付文字列引数に時刻の情報が含まれていても無視されます。' },
         },
     },
     DAY: {
@@ -212,7 +211,7 @@ export default {
     },
     NOW: {
         description: '現在の日付と時刻に対応するシリアル値を返します。',
-        abstract: '現在の日付と時刻に対応するシリアル値を返します。',
+        abstract: '現在の日付と時刻に対応するシリアル値を返します',
         links: [
             {
                 title: '指導',
@@ -220,8 +219,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     SECOND: {
@@ -240,7 +237,7 @@ export default {
     },
     TIME: {
         description: '指定した時刻に対応するシリアル値を返します。',
-        abstract: '指定した時刻に対応するシリアル値を返します。',
+        abstract: '指定した時刻に対応するシリアル値を返します',
         links: [
             {
                 title: '指導',
@@ -248,13 +245,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            hour: { name: '時', detail: '時間を表す 0 (ゼロ) から 32767 までの数値。 23 より大きい値は 24 で割られ、残りは時間値として扱われます。 たとえば、TIME(27,0,0) = TIME(3,0,0) = .125 または 3:00 AM。' },
+            minute: { name: '分', detail: '分を表す 0 から 32767 までの数値。 59 より大きい値は、時間と分に変換されます。 たとえば、TIME(0,750,0) = TIME(12,30,0) = .520833 または 12:30 PM。' },
+            second: { name: '秒', detail: '2 番目を表す 0 から 32767 までの数値。 59 を超える値は、時間、分、秒に変換されます。 たとえば、TIME(0,0,2000) = TIME(0,33,22) = .023148 または 12:33:20 AM。' },
         },
     },
     TIMEVALUE: {
         description: '時刻を表す文字列をシリアル値に変換します。',
-        abstract: '時刻を表す文字列をシリアル値に変換します。',
+        abstract: '時刻を表す文字列をシリアル値に変換します',
         links: [
             {
                 title: '指導',
@@ -262,8 +260,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            timeText: { name: '時刻文字列', detail: 'Microsoft Excel のいずれかの時刻形式で時刻を表すテキスト文字列。たとえば、"6:45 PM" と "18:45" のテキスト文字列は、時間を表す引用符で囲みます。' },
         },
     },
     TODAY: {

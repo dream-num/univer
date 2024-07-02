@@ -19,9 +19,9 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import { FormulaDataModel } from '@univerjs/engine-formula';
-import enUS from '../../locale/en-US';
-import { SheetsSortService } from '../../services/sheets-sort.service';
-import { SheetsSortController } from '../../controllers/sheets-sort.controller';
+import enUS from '../../../locale/en-US';
+import { SheetsSortService } from '../../../services/sheets-sort.service';
+import { SheetsSortController } from '../../../controllers/sheets-sort.controller';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',

@@ -22,3 +22,9 @@ export * from './services';
 export { DocsRenderService } from './services/docs-render.service';
 export { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
+
+// #region - all commands
+
+export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
+
+// #endregion

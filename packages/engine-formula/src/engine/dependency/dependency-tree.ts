@@ -327,7 +327,7 @@ export class FormulaDependencyTreeCache extends Disposable {
                 dependenceTree.inRangeData(range)
             ) {
                 treeList.forEach((tree) => {
-                    if (tree === dependenceTree) {
+                    if (tree === dependenceTree || tree.children.includes(dependenceTree)) {
                         return true;
                     }
                     tree.pushChildren(dependenceTree);

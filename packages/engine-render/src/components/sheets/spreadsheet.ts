@@ -67,7 +67,6 @@ export class Spreadsheet extends SheetComponent {
     ) {
         super(oKey, spreadsheetSkeleton);
         this._initialDefaultExtension();
-        this.initUserEvents();
         this.makeDirty(true);
     }
 
@@ -776,9 +775,5 @@ export class Spreadsheet extends SheetComponent {
         }
 
         return color;
-    }
-
-    initUserEvents() {
-        // control spreadsheet scrolling
     }
 }

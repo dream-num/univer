@@ -377,12 +377,6 @@ export class Scene extends ThinScene {
     }
 
     override addObject(o: BaseObject, zIndex: number = 1) {
-        // objects.forEach((o) => {
-        //     if (o.oKey === '__SpreadsheetSelectionFillControlTopLeft__0') {
-        //         // eslint-disable-next-line no-debugger
-        //         debugger;
-        //     }
-        // });
         this.getLayer(zIndex)?.addObject(o);
         this._addObject$.next(this);
         return this;

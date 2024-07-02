@@ -25,7 +25,6 @@ import { DeviceType, PointerInput } from './basics/i-events';
 import { Vector2 } from './basics/vector2';
 import type { ThinScene } from './thin-scene';
 import type { Viewport } from './viewport';
-import type { Scene } from './scene';
 
 export class InputManager extends Disposable {
     /** The distance in pixel that you have to move to prevent some events */
@@ -162,7 +161,7 @@ export class InputManager extends Disposable {
     attachControl(
         hasDown: boolean = true,
         hasUp: boolean = true,
-        hasMove: boolean = true,
+        enableMove: boolean = true,
         hasWheel: boolean = true,
         hasEnter: boolean = true,
         hasLeave: boolean = true
@@ -173,10 +172,10 @@ export class InputManager extends Disposable {
             return;
         }
 
-        this._onPointerEnter = (evt: IMouseEvent) => {
+        this._onPointerEnter = (evt: IPointerEvent) => {
             // preserve compatibility with Safari when pointerId is not present
-            if ((evt as IPointerEvent).pointerId === undefined) {
-                (evt as unknown as PointerEvent).pointerId = 0;
+            if (evt.pointerId === undefined) {
+                evt.pointerId = 0;
             }
 
             this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
@@ -191,10 +190,10 @@ export class InputManager extends Disposable {
             // }
         };
 
-        this._onPointerLeave = (evt: IMouseEvent) => {
+        this._onPointerLeave = (evt: IPointerEvent) => {
             // preserve compatibility with Safari when pointerId is not present
-            if ((evt as IPointerEvent).pointerId === undefined) {
-                (evt as unknown as PointerEvent).pointerId = 0;
+            if (evt.pointerId === undefined) {
+                evt.pointerId = 0;
             }
 
             // this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
@@ -342,7 +341,7 @@ export class InputManager extends Disposable {
 
             // Drag Events
             if ((eventData as IDragEvent).dataTransfer) {
-                if (hasMove &&
+                if (enableMove &&
                     (eventData.inputIndex === PointerInput.Horizontal ||
                         eventData.inputIndex === PointerInput.Vertical ||
                         eventData.inputIndex === PointerInput.DeltaHorizontal ||
@@ -380,11 +379,7 @@ export class InputManager extends Disposable {
                 }
 
                 if (
-                    hasMove &&
-                    (eventData.inputIndex === PointerInput.Horizontal ||
-                        eventData.inputIndex === PointerInput.Vertical ||
-                        eventData.inputIndex === PointerInput.DeltaHorizontal ||
-                        eventData.inputIndex === PointerInput.DeltaVertical)
+                    enableMove && eventData.type === 'pointermove'
                 ) {
                     this._onPointerMove(evt as IPointerEvent);
                 } else if (

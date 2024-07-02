@@ -509,6 +509,10 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._shortcutService.setDisable(false);
     }
 
+    /**
+     * first, clear All selection controls
+     * then unsubscribe all events
+     */
     reset() {
         this._clearSelectionControls();
 

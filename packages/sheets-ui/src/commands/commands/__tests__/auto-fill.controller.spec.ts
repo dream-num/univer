@@ -301,7 +301,7 @@ describe('Test auto fill rules in controller', () => {
         themeService.setTheme(theme);
         autoFillController = get(AutoFillController);
         selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setSelectionSeachParam({
+        selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId: 'test',
             sheetId: 'sheet1',

@@ -92,7 +92,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
         const unitId = workbook.getUnitId();
         const sheetId = worksheet.getSheetId();
-        this._selectionManagerService.setSelectionSeachParam({
+        this._selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId,
             sheetId,
@@ -321,6 +321,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         this.disposeWithMe(
             toDisposable(
                 this._selectionManagerService.selectionMoveEndBefore$.subscribe((params) => {
+                    // clear selection controls
                     this._selectionRenderService.reset();
                     if (params == null) {
                         return;
@@ -333,7 +334,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                         const selectionData =
                             this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
 
-                        // TODO @lumixraku why why why !!!! you are just exanding selection, why add new one?
+                        // then add a new selection control.
                         this._selectionRenderService.addCellSelectionControlBySelectionData(selectionData);
                     }
 
@@ -477,7 +478,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                     this._refreshSelection(currentSelections);
                 }
             } else {
-                this._selectionManagerService.setSelectionSeachParam({
+                this._selectionManagerService.setCurrentSelection({
                     pluginName,
                     unitId,
                     sheetId,

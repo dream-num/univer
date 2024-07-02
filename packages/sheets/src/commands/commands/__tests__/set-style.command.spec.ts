@@ -130,7 +130,7 @@ describe("Test commands used for updating cells' styles", () => {
         describe('correct situations', () => {
             it('will toggle bold style when there is a selected range', async () => {
                 const selectionManagerService = get(SelectionManagerService);
-                selectionManagerService.setSelectionSeachParam({
+                selectionManagerService.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     unitId: 'test',
                     sheetId: 'sheet1',
@@ -185,7 +185,7 @@ describe("Test commands used for updating cells' styles", () => {
         describe('correct situations', () => {
             it('will toggle italic style when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setSelectionSeachParam({
+                selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     unitId: 'test',
                     sheetId: 'sheet1',
@@ -240,7 +240,7 @@ describe("Test commands used for updating cells' styles", () => {
         describe('correct situations', () => {
             it('will toggle underline style when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setSelectionSeachParam({
+                selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     unitId: 'test',
                     sheetId: 'sheet1',
@@ -297,7 +297,7 @@ describe("Test commands used for updating cells' styles", () => {
         describe('correct situations', () => {
             it('will toggle strike-through style when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setSelectionSeachParam({
+                selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     unitId: 'test',
                     sheetId: 'sheet1',
@@ -354,7 +354,7 @@ describe("Test commands used for updating cells' styles", () => {
         describe('correct situations', () => {
             it('will change font size when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setSelectionSeachParam({
+                selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     unitId: 'test',
                     sheetId: 'sheet1',
@@ -400,7 +400,7 @@ describe("Test commands used for updating cells' styles", () => {
         describe('correct situations', () => {
             it('will change font family when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setSelectionSeachParam({
+                selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     unitId: 'test',
                     sheetId: 'sheet1',
@@ -446,7 +446,7 @@ describe("Test commands used for updating cells' styles", () => {
         describe('correct situations', () => {
             it('will change font color when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setSelectionSeachParam({
+                selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     unitId: 'test',
                     sheetId: 'sheet1',
@@ -548,7 +548,7 @@ describe("Test commands used for updating cells' styles", () => {
         describe('correct situations', () => {
             it('will change background color when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setSelectionSeachParam({
+                selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     unitId: 'test',
                     sheetId: 'sheet1',
@@ -596,7 +596,7 @@ describe("Test commands used for updating cells' styles", () => {
         describe('correct situations', () => {
             it('will change vertical text align when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setSelectionSeachParam({
+                selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     unitId: 'test',
                     sheetId: 'sheet1',
@@ -644,7 +644,7 @@ describe("Test commands used for updating cells' styles", () => {
         describe('correct situations', () => {
             it('will change horizontal text align when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setSelectionSeachParam({
+                selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     unitId: 'test',
                     sheetId: 'sheet1',
@@ -694,7 +694,7 @@ describe("Test commands used for updating cells' styles", () => {
         describe('correct situations', () => {
             it('will change text wrap when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setSelectionSeachParam({
+                selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     unitId: 'test',
                     sheetId: 'sheet1',
@@ -744,7 +744,7 @@ describe("Test commands used for updating cells' styles", () => {
         describe('correct situations', () => {
             it('will change text rotation when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
-                selectionManager.setSelectionSeachParam({
+                selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     unitId: 'test',
                     sheetId: 'sheet1',

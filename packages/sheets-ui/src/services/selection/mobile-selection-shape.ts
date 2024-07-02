@@ -110,10 +110,15 @@ export class MobileSelectionControl extends SelectionControl {
         const objs = [this._fillControlTopLeft, this._fillControlBottomRight, this._fillControlTopLeftInner, this._fillControlBottomRightInner] as BaseObject[];
 
         // do not use this.model.rangeType, model has not been initialized yet
-        if (this._rangeType === RANGE_TYPE.COLUMN) {
-            this._columnHeaderGroup.addObjects(...objs);
-        } else {
-            this._selectionShapeGroup.addObjects(...objs);
+        switch (this._rangeType) {
+            case RANGE_TYPE.ROW:
+                this.rowHeaderGroup.addObjects(...objs);
+                break;
+            case RANGE_TYPE.COLUMN:
+                this.columnHeaderGroup.addObjects(...objs);
+                break;
+            case RANGE_TYPE.NORMAL:
+                this.selectionShapeGroup.addObjects(...objs);
         }
 
         const scene = this.getScene();
@@ -158,9 +163,9 @@ export class MobileSelectionControl extends SelectionControl {
     protected override _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
         super._updateControl(style, rowHeaderWidth, columnHeaderHeight);
 
-        const rangeType = this.rangeType;
+        // const rangeType = this.rangeType;
         // startX startY shares same coordinate with viewport.(include row & colheader)
-        // const { startX, startY, endX, endY } =  this.selectionModel;
+
         const defaultStyle = this.defaultStyle;
         if (style == null) {
             style = defaultStyle;
@@ -174,11 +179,9 @@ export class MobileSelectionControl extends SelectionControl {
 
         // this condition is derived from selection-shape, I do not understand.
         if (autoFillEnabled === true && !super._hasWidgets(widgets)) {
-            if (rangeType) {
-                this.selectionModel.setRangeType(rangeType);
-            }
-            const { offsetX, offsetY } = this.getViewportMainScrollingOffset();
-            this.transformControlPoint(offsetX, offsetY);
+            const { viewportScrollX, viewportScrollY } = this.getViewportMainScrollInfo();
+            const { endX, endY } = this.selectionModel;
+            this.transformControlPoint(viewportScrollX, viewportScrollY, endX, endY);
 
             this.fillControlTopLeft!.show();
             this.fillControlBottomRight!.show();
@@ -190,26 +193,13 @@ export class MobileSelectionControl extends SelectionControl {
             this._fillControlTopLeftInner?.hide();
             this._fillControlBottomRightInner?.hide();
         }
-        // if (rangeType) {
-        //     this.selectionModel.setRangeType(rangeType);
-        //     if (rangeType === RANGE_TYPE.COLUMN) {
-        //         this.fillControlTopLeft!.transformByState({
-        //             left: -expandCornerSize / 2,
-        //             top: (endY - startY) / 2,
-        //         });
-        //         this.fillControlBottomRight!.transformByState({
-        //             left: endX - startX - expandCornerSize / 2,
-        //             top: (endY - startY) / 2,
-        //         });
-        //     }
-        // }
     }
 
-    getViewportMainScrollingOffset() {
+    getViewportMainScrollInfo() {
         const viewMain = this.getScene().getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         return {
-            offsetX: viewMain?.viewportScrollX || 0,
-            offsetY: viewMain?.viewportScrollY || 0,
+            viewportScrollX: viewMain?.viewportScrollX || 0,
+            viewportScrollY: viewMain?.viewportScrollY || 0,
             width: viewMain?.width || 0,
             height: viewMain?.height || 0,
         };
@@ -231,7 +221,7 @@ export class MobileSelectionControl extends SelectionControl {
         const { startX, startY, endX, endY } = this.selectionModel;
 
         // const scene = this.getScene();
-        const viewportSizeInfo = this.getViewportMainScrollingOffset();
+        const viewportSizeInfo = this.getViewportMainScrollInfo();
         const viewportW = viewportSizeInfo.width;
         const viewportH = viewportSizeInfo.height;
 

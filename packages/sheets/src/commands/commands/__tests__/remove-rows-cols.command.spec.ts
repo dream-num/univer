@@ -63,7 +63,7 @@ describe('Test remove rows cols', () => {
         ].forEach((c) => commandService.registerCommand(c));
         get(MergeCellController);
         const selectionManagerService = get(SelectionManagerService);
-        selectionManagerService.setSelectionSeachParam({
+        selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId: 'test',
             sheetId: 'sheet1',

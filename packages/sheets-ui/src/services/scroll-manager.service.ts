@@ -93,13 +93,11 @@ export class ScrollManagerService {
      * a subject for current valid scrollInfo, viewport@_scrollCore would limit rawScrollInfo$ exclude negative value or over max value.
      * use this subject not rawScrollInfo$ when get scrolling state of viewport.
      */
-    // readonly validScrollInfo$ = this._validScrollInfo.asObservable();
 
     private _searchParamForScroll: Nullable<IScrollManagerSearchParam> = null;
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        // @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         // init

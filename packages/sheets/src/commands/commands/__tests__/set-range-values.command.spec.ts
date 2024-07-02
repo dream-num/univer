@@ -121,7 +121,7 @@ describe('Test set range values commands', () => {
         commandService.registerCommand(SetRangeValuesMutation);
 
         selectionManager = get(SelectionManagerService);
-        selectionManager.setSelectionSeachParam({
+        selectionManager.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId: 'test',
             sheetId: 'sheet1',

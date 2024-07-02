@@ -95,7 +95,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         const unitId = workbook.getUnitId();
         if (!worksheet) return;
         const sheetId = worksheet.getSheetId();
-        this._selectionManagerService.setSelectionSeachParam({
+        this._selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId,
             sheetId,
@@ -536,7 +536,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
                     this._refreshSelection(currentSelections);
                 }
             } else {
-                this._selectionManagerService.setSelectionSeachParam({
+                this._selectionManagerService.setCurrentSelection({
                     pluginName,
                     unitId,
                     sheetId,

@@ -278,17 +278,6 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                 })
             )
         );
-
-        // this.disposeWithMe(
-        //     toDisposable(viewMain.onScrollAfter$.subscribeEvent((param: any) => {
-        //         this._scrollManagerService.validViewportScrollInfo$.next({
-        //             scrollX: param.scrollX,
-        //             scrollY: param.scrollY,
-        //             viewportScrollX: param.viewportScrollX,
-        //             viewportScrollY: param.viewportScrollY,
-        //         });
-        //     }))
-        // );
     }
 
     private _initSkeletonListener() {

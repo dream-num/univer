@@ -111,7 +111,7 @@ describe('Test clipboard', () => {
         beforeEach(() => {
             const selectionManager = get(SelectionManagerService);
 
-            selectionManager.setSelectionSeachParam({
+            selectionManager.setCurrentSelection({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 unitId: 'test',
                 sheetId: 'sheet1',

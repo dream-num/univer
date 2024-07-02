@@ -429,22 +429,21 @@ export class Engine extends ThinEngine<Scene> {
     private _handlePointerAction() {
         const eventPrefix = getPointerPrefix();
 
-        this._pointerMoveEvent = (evt: any) => {
+        this._pointerMoveEvent = (e: Event) => {
+            const evt = e as PointerEvent | MouseEvent;
             const deviceType = this._getPointerType(evt);
             // Store previous values for event
             // const previousHorizontal = this.pointer[PointerInput.Horizontal];
             // const previousVertical = this.pointer[PointerInput.Vertical];
             // const previousDeltaHorizontal = this.pointer[PointerInput.DeltaHorizontal];
             // const previousDeltaVertical = this.pointer[PointerInput.DeltaVertical];
-
             this.pointer[PointerInput.Horizontal] = evt.clientX;
             this.pointer[PointerInput.Vertical] = evt.clientY;
             this.pointer[PointerInput.DeltaHorizontal] = evt.movementX;
             this.pointer[PointerInput.DeltaVertical] = evt.movementY;
-            // console.log('pointerMoveEvent_1', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this._pointer);
-            const deviceEvent = evt as IPointerEvent;
+            const deviceEvent = evt as unknown as IPointerEvent;
             deviceEvent.deviceType = deviceType;
-            deviceEvent.inputIndex = PointerInput.Horizontal;
+            deviceEvent.inputIndex = PointerInput.Horizontal;// horizon 0 vertical 1
             this.onInputChanged$.emitEvent(deviceEvent);
 
             // TODO @lumixraku

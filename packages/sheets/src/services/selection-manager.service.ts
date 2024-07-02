@@ -166,7 +166,7 @@ export class SelectionManagerService implements IDisposable {
         this._refresh(this._searchParamForSelection);
     }
 
-    setSelectionSeachParam(param: ISelectionManagerSearchParam) {
+    setCurrentSelection(param: ISelectionManagerSearchParam) {
         if (this._dirty === false) {
             return;
         }

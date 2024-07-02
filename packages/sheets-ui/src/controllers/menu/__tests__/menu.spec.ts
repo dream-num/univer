@@ -61,7 +61,7 @@ describe('test menu items', () => {
 
     function select(range: IRange) {
         const selectionManager = get(SelectionManagerService);
-        selectionManager.setSelectionSeachParam({
+        selectionManager.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId: 'test',
             sheetId: 'sheet1',

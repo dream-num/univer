@@ -1370,8 +1370,7 @@ export class Viewport {
             }
         }
 
-        const limited = this.limitedScroll(); // 限制滚动范围
-        console.log('scrollCore limit', limited, scrollBarPos.y, this.scrollY);
+        const limited = this.limitedScroll();
         this.onScrollBefore$.emitEvent({
             viewport: this,
             scrollX: this.scrollX,

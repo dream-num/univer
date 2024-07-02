@@ -75,42 +75,39 @@ const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
  * The main selection canvas component
  */
 export class SelectionControl extends Disposable {
-    protected _leftControl!: Rect;
-    protected _rightControl!: Rect;
-    protected _topControl!: Rect;
-    protected _bottomControl!: Rect;
+    private _leftControl!: Rect;
+    private _rightControl!: Rect;
+    private _topControl!: Rect;
+    private _bottomControl!: Rect;
 
-    protected _backgroundControlTop!: Rect;
-    protected _backgroundControlBottom!: Rect;
-    protected _backgroundControlMiddleLeft!: Rect;
-    protected _backgroundControlMiddleRight!: Rect;
+    private _backgroundControlTop!: Rect;
+    private _backgroundControlBottom!: Rect;
+    private _backgroundControlMiddleLeft!: Rect;
+    private _backgroundControlMiddleRight!: Rect;
 
-    /**
-     * right bottom small rect
-     */
-    protected _fillControl: Rect;
+    private _fillControl: Rect;
 
-    protected _selectionShapeGroup!: Group;
+    private _selectionShapeGroup!: Group;
 
-    protected _rowHeaderBackground!: Rect;
-    protected _rowHeaderBorder!: Rect;
-    protected _rowHeaderGroup!: Group;
-    protected _rowHeaderHighlight!: Rect;
-    protected _columnHeaderBackground!: Rect;
-    protected _columnHeaderBorder!: Rect;
-    protected _columnHeaderGroup!: Group;
-    protected _columnHeaderHighlight!: Rect;
+    private _rowHeaderBackground!: Rect;
+    private _rowHeaderBorder!: Rect;
+    private _rowHeaderGroup!: Group;
+    private _rowHeaderHighlight!: Rect;
+    private _columnHeaderBackground!: Rect;
+    private _columnHeaderBorder!: Rect;
+    private _columnHeaderGroup!: Group;
+    private _columnHeaderHighlight!: Rect;
 
-    protected _topLeftWidget!: Rect;
-    protected _topCenterWidget!: Rect;
-    protected _topRightWidget!: Rect;
-    protected _middleLeftWidget!: Rect;
-    protected _middleRightWidget!: Rect;
-    protected _bottomLeftWidget!: Rect;
-    protected _bottomCenterWidget!: Rect;
-    protected _bottomRightWidget!: Rect;
+    private _topLeftWidget!: Rect;
+    private _topCenterWidget!: Rect;
+    private _topRightWidget!: Rect;
+    private _middleLeftWidget!: Rect;
+    private _middleRightWidget!: Rect;
+    private _bottomLeftWidget!: Rect;
+    private _bottomCenterWidget!: Rect;
+    private _bottomRightWidget!: Rect;
 
-    protected _dashRect!: Rect;
+    private _dashRect!: Rect;
 
     protected _selectionModel!: SelectionRenderModel;
 
@@ -191,6 +188,18 @@ export class SelectionControl extends Disposable {
     }
 
     get selectionShape() {
+        return this._selectionShapeGroup;
+    }
+
+    get columnHeaderGroup() {
+        return this._columnHeaderGroup;
+    }
+
+    get rowHeaderGroup() {
+        return this._rowHeaderGroup;
+    }
+
+    get selectionShapeGroup() {
         return this._selectionShapeGroup;
     }
 

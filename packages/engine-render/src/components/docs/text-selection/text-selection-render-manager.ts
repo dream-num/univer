@@ -263,24 +263,28 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing = true) {
-        const { _scene: scene, _docSkeleton: docSkeleton } = this;
+        const {
+            _scene: scene, _docSkeleton: docSkeleton, _document: document,
+            _currentSegmentId: segmentId, _currentSegmentPage: segmentPage,
+            _selectionStyle: style,
+        } = this;
 
         for (const range of ranges) {
             const textSelection = cursorConvertToTextRange(scene!, {
                 style: this._selectionStyle,
                 ...range,
-                segmentId: this._currentSegmentId,
-                segmentPage: this._currentSegmentPage,
-            }, docSkeleton!, this._document!);
+                segmentId,
+                segmentPage,
+            }, docSkeleton!, document!);
 
             this._add(textSelection);
         }
 
         this._textSelectionInner$.next({
             textRanges: this._getAllTextRanges(),
-            segmentId: this._currentSegmentId,
-            segmentPage: this._currentSegmentPage,
-            style: this._selectionStyle,
+            segmentId,
+            segmentPage,
+            style,
             isEditing,
         });
 

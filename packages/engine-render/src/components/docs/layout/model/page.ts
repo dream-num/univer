@@ -29,6 +29,10 @@ import type { ILayoutContext } from '../tools';
 import { updateBlockIndex } from '../tools';
 import { createSkeletonSection } from './section';
 
+function getHeaderFooterMaxHeight(pageHeight: number) {
+    return (pageHeight - 100) / 2;
+}
+
 // 新增数据结构框架
 // 判断奇数和偶数页码
 export function createSkeletonPage(
@@ -193,13 +197,14 @@ function _createSkeletonHeaderFooter(
         marginHeader = 0, marginFooter = 0,
     } = sectionBreakConfig;
     const pageWidth = pageSize?.width || Number.POSITIVE_INFINITY;
+    const pageHeight = pageSize?.height || Number.POSITIVE_INFINITY;
     const headerFooterConfig: ISectionBreakConfig = {
         lists,
         footerTreeMap,
         headerTreeMap,
         pageSize: {
             width: pageWidth - marginLeft - marginRight,
-            height: Number.POSITIVE_INFINITY,
+            height: getHeaderFooterMaxHeight(pageHeight) - (isHeader ? marginHeader : marginFooter) - 5,
         },
         localeService,
         drawings,
@@ -242,7 +247,7 @@ function _getVerticalMargin(
 
     const HeaderFooterPageHeight = headerOrFooter.height + headerOrFooter.marginTop + headerOrFooter.marginBottom;
     // Content height should be at least 100px.
-    const maxMargin = (pageHeight - 100) / 2;
+    const maxMargin = getHeaderFooterMaxHeight(pageHeight);
 
     return Math.min(maxMargin, Math.max(marginTB, HeaderFooterPageHeight));
 }

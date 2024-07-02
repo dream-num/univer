@@ -36,7 +36,7 @@ describe('Test acot function', () => {
         it('Value is number negative', () => {
             const value = NumberValueObject.create(-2);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(2.677945045);
+            expect(result.getValue()).toBe(2.677945044588987);
         });
 
         it('Value is number string', () => {
@@ -54,12 +54,12 @@ describe('Test acot function', () => {
         it('Value is boolean', () => {
             const value = BooleanValueObject.create(false);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(1.570796327);
+            expect(result.getValue()).toBe(1.5707963267948966);
         });
         it('Value is blank cell', () => {
             const value = NullValueObject.create();
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(1.570796327);
+            expect(result.getValue()).toBe(1.5707963267948966);
         });
         it('Value is error', () => {
             const value = ErrorValueObject.create(ErrorType.NAME);

@@ -16,7 +16,7 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, sequenceExecute } from '@univerjs/core';
-import { deleteCustomRange } from '@univerjs/docs';
+import { deleteCustomDecorationFactory } from '@univerjs/docs';
 
 export interface IDeleteDocCommentComment {
     unitId: string;
@@ -33,21 +33,12 @@ export const DeleteDocCommentComment: ICommand<IDeleteDocCommentComment> = {
         const { commentId, unitId } = params;
         const commandService = accessor.get(ICommandService);
 
-        const doMutation = deleteCustomRange(accessor, {
-            rangeId: commentId,
+        const doMutation = deleteCustomDecorationFactory(accessor, {
+            id: commentId,
             unitId,
         });
 
         if (doMutation) {
-            // const commentMutation = {
-            //     id: DeleteCommentMutation.id,
-            //     params: {
-            //         unitId,
-            //         subUnitId: DEFAULT_DOC_SUBUNIT_ID,
-            //         commentId,
-            //     },
-            // };
-
             return (await sequenceExecute([doMutation], commandService)).result;
         }
 

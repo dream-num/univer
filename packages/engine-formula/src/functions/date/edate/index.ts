@@ -87,8 +87,7 @@ export class Edate extends BaseFunction {
             const resultDate = new Date(Date.UTC(year, month, day));
             const currentSerial = excelDateSerial(resultDate);
 
-            const valueObject = NumberValueObject.create(currentSerial);
-            valueObject.setPattern(DEFAULT_DATE_FORMAT);
+            const valueObject = NumberValueObject.create(currentSerial, DEFAULT_DATE_FORMAT);
 
             return valueObject;
         });

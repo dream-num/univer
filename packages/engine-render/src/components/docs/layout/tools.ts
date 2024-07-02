@@ -61,7 +61,7 @@ import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { Hyphen } from './hyphenation/hyphen';
 import type { LanguageDetector } from './hyphenation/language-detector';
-import { getCustomRangeStyle } from './style/custom-range';
+import { getCustomDecorationStyle } from './style/custom-decoration';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages[pages.length - 1];
@@ -761,19 +761,19 @@ export function getFontCreateConfig(
     const textRun = isRenderStyle === BooleanNumber.FALSE
         ? { ts: {}, st: 0, ed: 0 }
         : bodyModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
-    const customRange = bodyModel.getCustomRange(index + startIndex);
-    const showCustomRange = customRange && (customRange.show !== false);
-    const customRangeStyle = showCustomRange ? getCustomRangeStyle(customRange) : null;
+    const customDecoration = bodyModel.getCustomDecoration(index + startIndex);
+    const showCustomDecoration = customDecoration && (customDecoration.show !== false);
+    const customDecorationStyle = showCustomDecoration ? getCustomDecorationStyle(customDecoration) : null;
 
     const { st, ed } = textRun;
     let { ts: textStyle = {} } = textRun;
     const cache = fontCreateConfigCache.getValue(st, ed);
-    if (cache && !customRange) {
+    if (cache && !customDecoration) {
         return cache;
     }
 
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
-    textStyle = { ...documentTextStyle, ...textStyle, ...customRangeStyle };
+    textStyle = { ...documentTextStyle, ...textStyle, ...customDecorationStyle };
 
     const fontStyle = getFontStyleString(textStyle, localeService);
 
@@ -793,7 +793,7 @@ export function getFontCreateConfig(
         pageWidth,
     };
 
-    if (!showCustomRange) {
+    if (!showCustomDecoration) {
         fontCreateConfigCache.setValue(st, ed, result);
     }
 

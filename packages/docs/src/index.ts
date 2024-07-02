@@ -18,33 +18,44 @@ export { getSelectionText, getDeleteSelection, getInsertSelection } from './basi
 export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObject, neoGetDocObject, getDocObjectById } from './basics/component-tools';
 export * from './basics/docs-view-key';
+
+export { type IUniverDocsConfig, UniverDocsPlugin } from './doc-plugin';
+export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
+export { TextSelectionManagerService, serializeTextRange } from './services/text-selection-manager.service';
+export { DocStateChangeManagerService, type IDocStateChangeParams } from './services/doc-state-change-manager.service';
+export { IMEInputManagerService } from './services/ime-input-manager.service';
+
+// #region - all commands
+
 export { BreakLineCommand } from './commands/commands/break-line.command';
+export { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 export {
+    InsertCommand,
     DeleteCommand,
+    UpdateCommand,
+    EditorInsertTextCommandId,
     type ICoverCommandParams,
     type IDeleteCommandParams,
     type IInsertCommandParams,
-    InsertCommand,
     type IUpdateCommandParams,
-    UpdateCommand,
-    EditorInsertTextCommandId,
 } from './commands/commands/core-editing.command';
-export { DeleteLeftCommand, DeleteRightCommand } from './commands/commands/delete.command';
-export { type IIMEInputCommandParams, IMEInputCommand } from './commands/commands/ime-input.command';
+export { DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';
+export { IMEInputCommand, type IIMEInputCommandParams } from './commands/commands/ime-input.command';
 export {
     SetInlineFormatBoldCommand,
-    SetInlineFormatCommand,
-    SetInlineFormatFontFamilyCommand,
-    SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
+    SetInlineFormatUnderlineCommand,
     SetInlineFormatStrikethroughCommand,
     SetInlineFormatSubscriptCommand,
     SetInlineFormatSuperscriptCommand,
+    SetInlineFormatFontSizeCommand,
+    SetInlineFormatFontFamilyCommand,
     SetInlineFormatTextColorCommand,
-    SetInlineFormatUnderlineCommand,
-    ResetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatTextBackgroundColorCommand,
+    ResetInlineFormatTextBackgroundColorCommand,
+    SetInlineFormatCommand,
 } from './commands/commands/inline-format.command';
+export { ListOperationCommand, BulletListCommand, OrderListCommand } from './commands/commands/list.command';
 export {
     AlignOperationCommand,
     AlignLeftCommand,
@@ -52,26 +63,24 @@ export {
     AlignRightCommand,
     AlignJustifyCommand,
 } from './commands/commands/paragraph-align.command';
-export { BulletListCommand, OrderListCommand } from './commands/commands/list.command';
-export { CoverContentCommand, ReplaceContentCommand } from './commands/commands/replace-content.command';
-export {
-    type IRichTextEditingMutationParams,
-    RichTextEditingMutation,
-} from './commands/mutations/core-editing.mutation';
-export { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/cursor.operation';
-export {
-    type ISetTextSelectionsOperationParams,
-    SetTextSelectionsOperation,
-} from './commands/operations/text-selection.operation';
-export { type IUniverDocsConfig, UniverDocsPlugin } from './doc-plugin';
-export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
-export { TextSelectionManagerService, serializeTextRange } from './services/text-selection-manager.service';
-export { DocStateChangeManagerService, type IDocStateChangeParams } from './services/doc-state-change-manager.service';
-export { IMEInputManagerService } from './services/ime-input-manager.service';
-export { SelectAllOperation } from './commands/operations/select-all.operation';
-export { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
-export { SetDocZoomRatioOperation, type ISetDocZoomRatioOperationParams } from './commands/operations/set-doc-zoom-ratio.operation';
+export { ReplaceContentCommand, CoverContentCommand } from './commands/commands/replace-content.command';
 export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 export { addCustomRangeFactory, addCustomRangeBySelectionFactory, deleteCustomRange } from './basics/custom-range-factory';
+export { addCustomDecorationBySelectionFactory, addCustomDecorationFactory, deleteCustomDecorationFactory } from './basics/custom-decoration-factory';
 export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
+
+export {
+    RichTextEditingMutation,
+    type IRichTextEditingMutationParams,
+} from './commands/mutations/core-editing.mutation';
+
+export { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/cursor.operation';
+export { SelectAllOperation } from './commands/operations/select-all.operation';
+export { SetDocZoomRatioOperation, type ISetDocZoomRatioOperationParams } from './commands/operations/set-doc-zoom-ratio.operation';
+export {
+    SetTextSelectionsOperation,
+    type ISetTextSelectionsOperationParams,
+} from './commands/operations/text-selection.operation';
+
+// #endregion

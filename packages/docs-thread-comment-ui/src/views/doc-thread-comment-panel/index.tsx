@@ -41,13 +41,23 @@ export const DocThreadCommentPanel = () => {
     const [commentIds, setCommentIds] = useState<string[]>([]);
 
     useEffect(() => {
-        const customRanges = doc?.getCustomRanges();
-        setCommentIds(customRanges?.map((r) => r.rangeId) ?? []);
+        const set = new Set<string>();
+        const customRanges = doc?.getCustomDecorations();
+        setCommentIds(customRanges?.map((r) => r.id).filter((i) => {
+            const hasRepeat = set.has(i);
+            set.add(i);
+            return !hasRepeat;
+        }) ?? []);
 
         const dispose = commandService.onCommandExecuted((command) => {
             if (command.id === RichTextEditingMutation.id) {
-                const customRanges = doc?.getCustomRanges();
-                setCommentIds(customRanges?.map((r) => r.rangeId) ?? []);
+                const set = new Set<string>();
+                const customRanges = doc?.getCustomDecorations();
+                setCommentIds(customRanges?.map((r) => r.id).filter((i) => {
+                    const hasRepeat = set.has(i);
+                    set.add(i);
+                    return !hasRepeat;
+                }) ?? []);
             }
         });
         return () => {

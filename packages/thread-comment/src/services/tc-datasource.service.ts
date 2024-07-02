@@ -135,7 +135,7 @@ export class ThreadCommentDataSourceService extends Disposable implements IThrea
 
     async listThreadComments(unitId: string, subUnitId: string, threadIds: string[]) {
         if (this.dataSource) {
-            return this.dataSource.listComments(unitId, subUnitId, threadIds)
+            return this.dataSource.listComments(unitId, subUnitId, threadIds);
         }
 
         return [];

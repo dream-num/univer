@@ -74,7 +74,9 @@ export function compareWithWildcard(currentValue: string, value: string, operato
         case compareToken.EQUALS:
             result = isMatchWildcard(currentValue, value);
             break;
-
+        case compareToken.NOT_EQUAL:
+            result = !isMatchWildcard(currentValue, value);
+            break;
         case compareToken.GREATER_THAN:
         case compareToken.GREATER_THAN_OR_EQUAL:
             result = isMatchWildcard(currentValue, value) || currentValue > replaceWildcard(value);

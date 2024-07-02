@@ -129,6 +129,7 @@ export interface IDocumentBody {
     // links?: { [index: number]: IHyperlink }; // links
 
     customRanges?: ICustomRange[]; // plugin register，implement special logic for streams， hyperlink, field，structured document tags， bookmark，comment
+    customDecorations?: ICustomDecoration[];
 }
 
 export interface IDocStyle {
@@ -277,6 +278,11 @@ export interface ICustomRangeForInterceptor extends ICustomRange {
     show?: boolean;
 }
 
+export interface ICustomDecorationForInterceptor extends ICustomDecoration {
+    active?: boolean;
+    show?: boolean;
+}
+
 export enum CustomRangeType {
     HYPERLINK,
     FIELD, // 17.16 Fields and Hyperlinks
@@ -295,6 +301,17 @@ export interface ICustomBlock {
     blockType?: BlockType;
     // A unique ID associated with a custom block.
     blockId: string;
+}
+
+export enum CustomDecorationType {
+    COMMENT,
+}
+
+export interface ICustomDecoration {
+    startIndex: number;
+    endIndex: number;
+    id: string;
+    type: CustomDecorationType;
 }
 
 /**

@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export * from './slides-ui-plugin';
+export { UniverSlidesUIPlugin } from './slides-ui-plugin';
+
+// #region - all commands
+
+export { ActivateSlidePageOperation } from './commands/operations/activate.operation';
+export { SetSlidePageThumbOperation } from './commands/operations/set-thumb.operation';
+
+// #endregion

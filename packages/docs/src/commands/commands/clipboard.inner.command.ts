@@ -64,7 +64,8 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         }
 
         const docsModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!docsModel) {
+        const originBody = docsModel?.getBody();
+        if (!docsModel || !originBody) {
             return false;
         }
 
@@ -98,7 +99,13 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                     segmentId,
                 });
             } else {
-                textX.push(...getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor, body));
+                const { dos } = getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor, originBody);
+                textX.push(...dos);
+                // doMutation.params.textRanges = [{
+                //     startOffset: cursor + body.dataStream.length,
+                //     endOffset: cursor + body.dataStream.length,
+                //     collapsed,
+                // }];
             }
 
             textX.push({

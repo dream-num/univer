@@ -16,7 +16,7 @@
 
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
-import type { ICustomRange, IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
+import type { ICustomDecoration, ICustomRange, IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
 import type { IRetainAction } from './action-types';
 import { coverTextRuns } from './apply-utils/update-apply';
 
@@ -94,6 +94,7 @@ export function getBodySlice(
     }
 
     docBody.customRanges = getDeleteCustomRange(body, startOffset, endOffset);
+    docBody.customDecorations = getCustomDecorationSlice(body, startOffset, endOffset);
     return docBody;
 }
 
@@ -130,6 +131,28 @@ export function getDeleteCustomRange(body: IDocumentBody, startOffset: number, e
     });
 
     return deletedCustomRange;
+}
+
+export function getCustomDecorationSlice(body: IDocumentBody, startOffset: number, endOffset: number) {
+    const { customDecorations = [] } = body;
+
+    const customDecorationSlice: ICustomDecoration[] = [];
+    customDecorations.forEach((range) => {
+        // custom-range contain slice-range
+        if (
+            (startOffset >= range.startIndex && endOffset > range.startIndex) ||
+            (startOffset >= range.endIndex && endOffset > range.endIndex)
+        ) {
+            const copy = Tools.deepClone(range);
+            customDecorationSlice.push({
+                ...copy,
+                startIndex: Math.max(copy.startIndex - startOffset, 0),
+                endIndex: Math.min(copy.endIndex, endOffset) - startOffset,
+            });
+        }
+    });
+
+    return customDecorationSlice;
 }
 
 export function composeBody(

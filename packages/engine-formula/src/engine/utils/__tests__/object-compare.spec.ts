@@ -16,10 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { ArrayValueObject, transformToValue } from '../../value-object/array-value-object';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../value-object/array-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../value-object/primitive-object';
 import { valueObjectCompare } from '../object-compare';
 import { compareToken } from '../../../basics/token';
+import { ErrorType } from '../../../basics/error-type';
+import { getObjectValue } from '../../../functions/__tests__/create-function-test-bed';
 
 const range = ArrayValueObject.create(/*ts*/ `{
     Ada;
@@ -207,6 +209,24 @@ describe('Test object compare', () => {
                 const value = valueObjectCompare(num, bool, token);
                 expect(value.getValue()).toStrictEqual(result[i]);
             });
+        });
+        it('Array contains multi types cell, and compare string', () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false, null],
+                    [0, '100', '2.34', 'test', -3, ErrorType.NAME],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const str = StringValueObject.create('> ');
+
+            const value = valueObjectCompare(array, str);
+            expect(getObjectValue(value)).toStrictEqual([[false, false, false, true, true, false], [false, false, false, true, false, ErrorType.NAME]]);
         });
     });
 });

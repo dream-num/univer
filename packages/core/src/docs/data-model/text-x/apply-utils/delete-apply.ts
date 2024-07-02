@@ -18,6 +18,7 @@ import { deleteContent } from '../../../../shared';
 import type { IDocumentBody } from '../../../../types/interfaces';
 import {
     deleteCustomBlocks,
+    deleteCustomDecorations,
     deleteCustomRanges,
     deleteParagraphs,
     deleteSectionBreaks,
@@ -44,6 +45,8 @@ export function updateAttributeByDelete(body: IDocumentBody, textLength: number,
 
     const removeCustomRanges = deleteCustomRanges(body, textLength, currentIndex);
 
+    const removeCustomDecorations = deleteCustomDecorations(body, textLength, currentIndex);
+
     let removeDataStream = '';
     if (dataStream) {
         body.dataStream = deleteContent(dataStream, startIndex, endIndex);
@@ -59,6 +62,7 @@ export function updateAttributeByDelete(body: IDocumentBody, textLength: number,
         customBlocks: removeCustomBlocks,
         tables: removeTables,
         customRanges: removeCustomRanges,
+        customDecorations: removeCustomDecorations,
     };
 }
 

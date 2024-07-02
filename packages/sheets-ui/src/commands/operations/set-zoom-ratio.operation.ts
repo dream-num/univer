@@ -15,9 +15,8 @@
  */
 
 import type { IOperation } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IAccessor } from '@wendellhu/redi';
 import { SheetsZoomRenderController } from '../../controllers/render-controllers/zoom.render-controller';
 
 export interface ISetZoomRatioOperationParams {
@@ -25,19 +24,6 @@ export interface ISetZoomRatioOperationParams {
     unitId: string;
     subUnitId: string;
 }
-
-export const SetZoomRatioUndoMutationFactory = (
-    accessor: IAccessor,
-    params: ISetZoomRatioOperationParams
-): ISetZoomRatioOperationParams => {
-    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
-    const worksheet = workbook!.getSheetBySheetId(params.subUnitId);
-    const old = worksheet!.getConfig().zoomRatio;
-    return {
-        ...Tools.deepClone(params),
-        zoomRatio: old,
-    };
-};
 
 export const SetZoomRatioOperation: IOperation<ISetZoomRatioOperationParams> = {
     id: 'sheet.operation.set-zoom-ratio',

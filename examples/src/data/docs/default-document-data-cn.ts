@@ -15,8 +15,6 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber, DrawingTypeEnum, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
-import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
     id: 'd',
@@ -767,14 +765,14 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             },
         ],
         customBlocks: [],
-        customRanges: [
-            {
-                rangeId: '3tnTNMRA1jYWkcoxSEoCk',
-                rangeType: 4,
-                startIndex: 23,
-                endIndex: 110,
-            },
-        ],
+        // customRanges: [
+        //     {
+        //         rangeId: '3tnTNMRA1jYWkcoxSEoCk',
+        //         rangeType: 4,
+        //         startIndex: 23,
+        //         endIndex: 110,
+        //     },
+        // ],
     },
     resources: [
         {

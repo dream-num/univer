@@ -18,12 +18,6 @@ export { UniverDataValidationPlugin } from './plugin';
 export { DataValidatorRegistryService, DataValidatorRegistryScope } from './services/data-validator-registry.service';
 export { DataValidationModel } from './models/data-validation-model';
 
-export {
-    AddDataValidationCommand,
-    RemoveDataValidationCommand,
-    RemoveAllDataValidationCommand,
-} from './commands/commands/data-validation.command';
-
 export type {
     IRemoveDataValidationCommandParams,
     IAddDataValidationCommandParams,
@@ -58,8 +52,20 @@ export type { IFormulaResult, IValidatorCellInfo } from './validators/base-data-
 export type { IBaseDataValidationWidget } from './validators/base-widget';
 export { DataValidationManager } from './models/data-validation-manager';
 export type { IFormulaValidResult } from './validators/base-data-validator';
-export { removeDataValidationUndoFactory } from './commands/commands/data-validation.command';
 export { TWO_FORMULA_OPERATOR_COUNT } from './types/const/two-formula-operators';
 export { DataValidationResourceController } from './controllers/dv-resource.controller';
 export { DataValidationSheetController } from './controllers/dv-sheet.controller';
 export { TextLengthErrorTitleMap } from './types/const/operator-text-map';
+
+// #region - all commands
+
+export {
+    AddDataValidationCommand,
+    RemoveDataValidationCommand,
+    UpdateDataValidationOptionsCommand,
+    UpdateDataValidationSettingCommand,
+    RemoveAllDataValidationCommand,
+    removeDataValidationUndoFactory,
+} from './commands/commands/data-validation.command';
+
+// #endregion

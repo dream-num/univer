@@ -19,6 +19,7 @@ import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../.
 import { isSameStyleTextRun } from '../../../../shared/compare';
 import type {
     ICustomBlock,
+    ICustomDecoration,
     ICustomRange,
     IDocumentBody,
     IParagraph,
@@ -405,6 +406,85 @@ export function insertCustomRanges(
     }
 }
 
+interface IIndexRange {
+    startIndex: number;
+    endIndex: number;
+}
+
+function mergeRanges<T extends IIndexRange>(lineSegments: T[]): T[] {
+    lineSegments.sort((a, b) => a.startIndex - b.startIndex); // 按照起始值排序
+
+    const mergedSegments: T[] = [];
+    let currentSegment = lineSegments[0];
+
+    for (let i = 1; i < lineSegments.length; i++) {
+        if (currentSegment.endIndex + 1 >= lineSegments[i].startIndex) { // 判断是否连续
+            currentSegment.endIndex = Math.max(currentSegment.endIndex, lineSegments[i].endIndex);
+        } else {
+            mergedSegments.push(currentSegment);
+            currentSegment = lineSegments[i];
+        }
+    }
+
+    mergedSegments.push(currentSegment);
+
+    return mergedSegments;
+}
+
+export function mergeDecorations(customDecorations: ICustomDecoration[]) {
+    const customDecorationMap: Record<string, ICustomDecoration[]> = {};
+    for (let i = 0, len = customDecorations.length; i < len; i++) {
+        const customDecoration = customDecorations[i];
+        const currentDecorations = customDecorationMap[customDecoration.id];
+        customDecorationMap[customDecoration.id] = [...currentDecorations ?? [], customDecoration];
+    }
+
+    Object.keys(customDecorationMap).forEach((id) => {
+        const decorations = customDecorationMap[id];
+        const newRanges = mergeRanges(decorations);
+        customDecorationMap[id] = newRanges;
+    });
+
+    return Object.values(customDecorationMap).flat();
+}
+
+export function insertCustomDecorations(
+    body: IDocumentBody,
+    insertBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
+    if (!body.customDecorations) {
+        body.customDecorations = [];
+    }
+
+    const { customDecorations } = body;
+    for (let i = 0, len = customDecorations.length; i < len; i++) {
+        const customDecoration = customDecorations[i];
+        const { startIndex, endIndex } = customDecoration;
+        if (startIndex >= currentIndex) {
+            customDecoration.startIndex += textLength;
+            customDecoration.endIndex += textLength;
+        } else if (endIndex > currentIndex - 1) {
+            customDecoration.endIndex += textLength;
+        }
+    }
+
+    const insertCustomDecorations: ICustomDecoration[] = [];
+    if (insertBody.customDecorations) {
+        for (let i = 0, len = insertBody.customDecorations.length; i < len; i++) {
+            const customDecoration = insertBody.customDecorations[i];
+            insertCustomDecorations.push(customDecoration);
+            customDecoration.startIndex += currentIndex;
+            customDecoration.endIndex += currentIndex;
+        }
+
+        customDecorations.push(...insertCustomDecorations);
+        body.customDecorations = mergeDecorations(customDecorations);
+        body.customDecorations.sort(sortRulesFactory('startIndex'));
+    }
+}
+
 // eslint-disable-next-line max-lines-per-function
 export function deleteTextRuns(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { textRuns } = body;
@@ -695,4 +775,36 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
         body.customRanges = newCustomRanges;
     }
     return removeCustomRanges;
+}
+
+export function deleteCustomDecorations(body: IDocumentBody, textLength: number, currentIndex: number) {
+    const { customDecorations } = body;
+
+    const startIndex = currentIndex;
+    const endIndex = currentIndex + textLength - 1;
+
+    const removeCustomDecorations: ICustomDecoration[] = [];
+    if (customDecorations) {
+        const newCustomDecorations = [];
+        for (let i = 0, len = customDecorations.length; i < len; i++) {
+            const customDecoration = customDecorations[i];
+            const { startIndex: st, endIndex: ed } = customDecoration;
+            // delete decoration
+            if (st >= startIndex && ed <= endIndex) {
+                removeCustomDecorations.push(customDecoration);
+                continue;
+                // substr decoration
+            } else if (Math.max(startIndex, st) <= Math.min(endIndex, ed)) {
+                const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
+                customDecoration.startIndex = segments[0];
+                customDecoration.endIndex = segments[1];
+            } else if (endIndex < st) {
+                customDecoration.startIndex -= textLength;
+                customDecoration.endIndex -= textLength;
+            }
+            newCustomDecorations.push(customDecoration);
+        }
+        body.customDecorations = newCustomDecorations;
+    }
+    return removeCustomDecorations;
 }

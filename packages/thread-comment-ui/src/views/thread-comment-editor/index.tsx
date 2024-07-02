@@ -21,6 +21,8 @@ import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IDocumentBody } from '@univerjs/core';
 import { ICommandService, LocaleService } from '@univerjs/core';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { TextSelectionManagerService } from '@univerjs/docs';
 import { IThreadCommentMentionDataService } from '../../services/thread-comment-mention-data.service';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import styles from './index.module.less';
@@ -60,6 +62,8 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
     const [localComment, setLocalComment] = useState({ ...comment });
     const [editing, setEditing] = useState(false);
     const inputRef = useRef(null);
+    const textSelectionRenderManager = useDependency(ITextSelectionRenderManager);
+    const textSelectionManagerService = useDependency(TextSelectionManagerService);
 
     useImperativeHandle(ref, () => ({
         reply(text) {
@@ -88,6 +92,11 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                     setLocalComment?.({ ...comment, text: transformTextNodes2Document(parseMentions(e.target.value)) });
                 }}
                 onFocus={() => {
+                    const activeRange = textSelectionManagerService.getActiveRange();
+                    if (activeRange && activeRange.collapsed) {
+                        textSelectionRenderManager.removeAllTextRanges();
+                    }
+                    textSelectionRenderManager.blur();
                     setEditing(true);
                 }}
             >

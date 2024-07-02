@@ -23,7 +23,7 @@ import { StartAddCommentOperation } from '../commands/operations/show-comment-pa
 export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: StartAddCommentOperation.id,
-        group: MenuGroup.TOOLBAR_FORMAT,
+        group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'CommentSingle',
         title: 'threadCommentUI.panel.addComment',

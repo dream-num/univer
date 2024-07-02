@@ -18,6 +18,7 @@ import type { Nullable } from '../../../../shared';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import type {
     ICustomBlock,
+    ICustomDecoration,
     ICustomRange,
     IDocumentBody,
     IParagraph,
@@ -28,12 +29,14 @@ import type {
 import { PresetListType } from '../../preset-list-type';
 import {
     deleteCustomBlocks,
+    deleteCustomDecorations,
     deleteCustomRanges,
     deleteParagraphs,
     deleteSectionBreaks,
     deleteTables,
     deleteTextRuns,
     insertCustomBlocks,
+    insertCustomDecorations,
     insertCustomRanges,
     insertParagraphs,
     insertTables,
@@ -54,6 +57,7 @@ export function updateAttribute(
     const removeCustomBlocks = updateCustomBlocks(body, updateBody, textLength, currentIndex, coverType);
     const removeTables = updateTables(body, updateBody, textLength, currentIndex, coverType);
     const removeCustomRanges = updateCustomRanges(body, updateBody, textLength, currentIndex, coverType);
+    const removeCustomDecorations = updateCustomDecorations(body, updateBody, textLength, currentIndex, coverType);
 
     return {
         dataStream: '',
@@ -63,6 +67,7 @@ export function updateAttribute(
         customBlocks: removeCustomBlocks,
         tables: removeTables,
         customRanges: removeCustomRanges,
+        customDecorations: removeCustomDecorations,
     };
 }
 
@@ -459,4 +464,26 @@ function updateCustomRanges(
     // retain
     insertCustomRanges(body, updateBody, 0, currentIndex);
     return removeCustomRanges;
+}
+
+// retain
+function updateCustomDecorations(
+    body: IDocumentBody,
+    updateBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number,
+    coverType: UpdateDocsAttributeType
+) {
+    if (!body.customDecorations) {
+        body.customDecorations = [];
+    }
+
+    let removeCustomDecorations: ICustomDecoration[] = [];
+    if (coverType === UpdateDocsAttributeType.REPLACE) {
+        removeCustomDecorations = deleteCustomDecorations(body, textLength, currentIndex);
+    }
+
+    insertCustomDecorations(body, updateBody, 0, currentIndex);
+
+    return removeCustomDecorations;
 }

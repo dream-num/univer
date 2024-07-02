@@ -75,7 +75,7 @@ export class ThreadCommentResourceController extends Disposable {
                             this._threadCommentModel.addComment(unitID, subunitId, comment);
                         });
 
-                        this._threadCommentModel.syncThreadComments(unitID, subunitId, commentList.map(i => i.threadId));
+                        this._threadCommentModel.syncThreadComments(unitID, subunitId, commentList.map((i) => i.threadId));
                     });
                 },
             })

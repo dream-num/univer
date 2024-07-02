@@ -106,7 +106,8 @@ import {
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { map, merge } from 'rxjs';
+import { filter, map, merge } from 'rxjs';
+import { IEditorService } from '@univerjs/ui';
 import type { IRefRangeWithPosition } from './utils/offset-formula-data';
 import { removeFormulaData } from './utils/offset-formula-data';
 import { getFormulaReferenceMoveUndoRedo } from './utils/ref-range-formula';
@@ -171,6 +172,7 @@ export class UpdateFormulaController extends Disposable {
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
+        @IEditorService private readonly _editorService: IEditorService,
         @Inject(Injector) readonly _injector: Injector
     ) {
         super();
@@ -221,6 +223,8 @@ export class UpdateFormulaController extends Disposable {
                     this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET),
                     this._univerInstanceService.getTypeOfUnitAdded$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC),
                     this._univerInstanceService.getTypeOfUnitAdded$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)
+                ).pipe(
+                    filter((unit) => this._editorService.getEditor(unit.getUnitId()) == null)
                 ).subscribe((unit) => this._handleUnitAdded(unit))
             )
         );
@@ -231,6 +235,8 @@ export class UpdateFormulaController extends Disposable {
                     this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(map((sheet) => sheet.getUnitId())),
                     this._univerInstanceService.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(map((doc) => doc.getUnitId())),
                     this._univerInstanceService.getTypeOfUnitDisposed$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE).pipe(map((slide) => slide.getUnitId()))
+                ).pipe(
+                    filter((unitId) => this._editorService.getEditor(unitId) == null)
                 ).subscribe((id) => this._handleRemoveSheetMutation(id))
             )
         );

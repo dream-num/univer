@@ -938,7 +938,7 @@ function __updatePreLineDrawingPosition(
     const isPageBreak = __checkPageBreak(column);
 
     const drawings: Map<string, IDocumentSkeletonDrawing> = new Map();
-    const { top } = line;
+    const { top, lineHeight } = line;
 
     for (const divide of line.divides) {
         for (const glyph of divide.glyphGroup) {
@@ -963,7 +963,7 @@ function __updatePreLineDrawingPosition(
                 const { width = 0, height = 0 } = size;
 
                 drawing.aLeft = glyph.left || 0;
-                drawing.aTop = top || 0;
+                drawing.aTop = top || 0; // + (lineHeight - height) / 2
                 drawing.width = width;
                 drawing.height = height;
                 drawing.angle = angle;

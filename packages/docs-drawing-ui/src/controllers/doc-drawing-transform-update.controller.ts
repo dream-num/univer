@@ -123,7 +123,7 @@ export class DocDrawingTransformUpdateController extends Disposable {
 
             const docsComponent = mainComponent as Documents;
 
-            // TODO: Why NEED change skeleton here?
+            // TODO: @Jocs, Why NEED change skeleton here?
             docsComponent.changeSkeleton(documentSkeleton);
 
             this._refreshDrawing(unitId, documentSkeleton, currentRender);

@@ -171,8 +171,8 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         },
         editor);
 
-        editorService.setValueNoRefresh(props.value || '', id);
-        placeholderSet(props.placeholder || '');
+        editorService.setValueNoRefresh(value || '', id);
+        placeholderSet(placeholder || '');
 
         const activeChange = debounce((state: boolean) => {
             setActive(state);

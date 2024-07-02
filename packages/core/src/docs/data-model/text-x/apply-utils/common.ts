@@ -411,10 +411,10 @@ interface IIndexRange {
     endIndex: number;
 }
 
-function mergeRanges(lineSegments: IIndexRange[]): IIndexRange[] {
+function mergeRanges<T extends IIndexRange>(lineSegments: T[]): T[] {
     lineSegments.sort((a, b) => a.startIndex - b.startIndex); // 按照起始值排序
 
-    const mergedSegments: IIndexRange[] = [];
+    const mergedSegments: T[] = [];
     let currentSegment = lineSegments[0];
 
     for (let i = 1; i < lineSegments.length; i++) {

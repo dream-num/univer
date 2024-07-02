@@ -57,10 +57,6 @@ export class DocumentViewModel implements IDisposable {
     }
 
     registerCustomRangeInterceptor(interceptor: ICustomRangeInterceptor): IDisposable {
-        if (this._interceptor) {
-            throw new Error('[DocViewModel]: Interceptor already registered.');
-        }
-
         this._interceptor = interceptor;
         return toDisposable(() => this._interceptor = null);
     }

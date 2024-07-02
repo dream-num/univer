@@ -27,7 +27,7 @@ export {
     SharedController,
     UndoShortcutItem,
 } from './controllers/shared-shortcut.controller';
-export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
+export { UI_CONFIG_KEY, IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { IUIPartsService, BuiltInUIPart, UIPartsService } from './services/parts/parts.service';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';

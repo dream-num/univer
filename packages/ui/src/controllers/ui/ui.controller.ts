@@ -39,3 +39,5 @@ export interface IUniverUIConfig extends IWorkbenchOptions {
 
     menu?: MenuConfig;
 }
+
+export const UI_CONFIG_KEY = 'UNIVER_UI_CONFIG_KEY';

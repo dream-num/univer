@@ -533,7 +533,7 @@ export class Documents extends DocComponent {
                                 continue;
                             }
                         } else {
-                            if ((y - originY + alignOffset.y) < (parentPage.pageHeight - 100) / 2 + 100) {
+                            if ((y - originY + alignOffset.y + lineHeight) < (parentPage.pageHeight - 100) / 2 + 100) {
                                 this._drawLiquid.translateRestore();
                                 continue;
                             }

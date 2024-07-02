@@ -242,7 +242,7 @@ function getCustomBlockIdsInSelections(body: IDocumentBody, selections: TextRang
         for (const customBlock of customBlocks) {
             const { startIndex } = customBlock;
 
-            if (startIndex >= startOffset && startIndex <= endOffset) {
+            if (startIndex >= startOffset && startIndex < endOffset) {
                 customBlockIds.push(customBlock.blockId);
             }
         }

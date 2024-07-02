@@ -456,7 +456,7 @@ export class TriggerCalculationController extends Disposable {
     private _initialProgressBar() {
         this.disposeWithMe(this._progressService.progressVisible$.subscribe((isVisible) => {
             if (!isVisible) {
-                this._commandService.executeCommand(SetFormulaCalculationStopMutation.id);
+                this._commandService.executeCommand(SetFormulaCalculationStopMutation.id, {});
             }
         }));
     }

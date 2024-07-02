@@ -59,15 +59,13 @@ export class Averageif extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        range = range as BaseValueObject;
         criteria = criteria as BaseValueObject;
-        averageRange = averageRange as BaseReferenceObject;
 
         if (criteria.isArray()) {
-            return (criteria as ArrayValueObject).map((criteriaItem) => this._handleSingleObject(range, criteriaItem, averageRange));
+            return (criteria as ArrayValueObject).map((criteriaItem) => this._handleSingleObject(range as BaseValueObject, criteriaItem, averageRange as BaseReferenceObject));
         }
 
-        return this._handleSingleObject(range, criteria, averageRange);
+        return this._handleSingleObject(range as BaseValueObject, criteria, averageRange as BaseReferenceObject);
     }
 
     private _handleSingleObject(range: BaseValueObject, criteria: BaseValueObject, averageRange?: BaseReferenceObject) {

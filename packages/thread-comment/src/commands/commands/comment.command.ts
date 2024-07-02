@@ -69,7 +69,7 @@ export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
         }
 
         return commandService.executeCommand(redo.id, redo.params, {
-            onlyLocal: !syncUpdateMutationToColla
+            onlyLocal: !syncUpdateMutationToColla,
         });
     },
 };

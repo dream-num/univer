@@ -65,12 +65,12 @@ export const SheetsThreadCommentPanel = () => {
 
                 return pre.p[0] - aft.p[0];
             });
-        }
+        };
 
         return [
-            ...sort(comments.filter(comment => !comment.resolved)),
-            ...sort(comments.filter(comment => comment.resolved)),
-        ]
+            ...sort(comments.filter((comment) => !comment.resolved)),
+            ...sort(comments.filter((comment) => comment.resolved)),
+        ];
     }, [workbook]);
 
     const showShape = useCallback((comment: IThreadComment) => {

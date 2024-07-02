@@ -126,7 +126,7 @@ export class SheetsThreadCommentModel extends Disposable {
         const commentId = comment.id;
         const { matrix, locationMap } = this._ensure(unitId, subUnitId);
         if (!parentId && row >= 0 && column >= 0) {
-            if(!comment.resolved){
+            if (!comment.resolved) {
                 this._addCommentToMatrix(matrix, row, column, commentId);
             }
             locationMap.set(commentId, { row, column });

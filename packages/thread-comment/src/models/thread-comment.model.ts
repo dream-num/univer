@@ -138,13 +138,13 @@ export class ThreadCommentModel {
         if (currentComment) {
             const newComment = {
                 ...comment,
-                ref: currentComment.ref
-            }
+                ref: currentComment.ref,
+            };
             commentMap[comment.id] = newComment;
             comment.children?.forEach((child) => {
                 commentMap[child.id] = {
                     ...child,
-                    ref: ''
+                    ref: '',
                 };
             });
             commentChildrenMap.set(comment.id, newComment);
@@ -175,16 +175,16 @@ export class ThreadCommentModel {
             return;
         }
         const deleteThreads = new Set<string>(threadIds);
-        comments.forEach(comment => {
+        comments.forEach((comment) => {
             this._replaceComment(unitId, subUnitId, comment);
             deleteThreads.delete(comment.threadId);
-        })
-        deleteThreads.forEach(id => {
+        });
+        deleteThreads.forEach((id) => {
             const thread = this.getThread(unitId, id);
             if (thread) {
                 this.deleteComment(thread.unitId, thread.subUnitId, thread.id);
             }
-        })
+        });
         this._refreshCommentsMap$();
     }
 
@@ -215,9 +215,9 @@ export class ThreadCommentModel {
             const threadMap = this._ensureThreadMap(unitId);
             threadMap.set(comment.threadId, comment);
             addCommentItem(comment);
-            comment.children?.forEach(child => addCommentItem({
+            comment.children?.forEach((child) => addCommentItem({
                 ...child,
-                ref: ''
+                ref: '',
             }));
         }
 
@@ -251,8 +251,7 @@ export class ThreadCommentModel {
     }
 
     updateCommentRef(unitId: string, subUnitId: string, payload: IUpdateCommentRefPayload, silent?: boolean) {
-
-        const { commentMap, } = this.ensureMap(unitId, subUnitId);
+        const { commentMap } = this.ensureMap(unitId, subUnitId);
         const oldComment = commentMap[payload.commentId];
         if (!oldComment) {
             return false;

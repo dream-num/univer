@@ -86,7 +86,7 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
                     break;
                 case RANGE_TYPE.ROW:
                     // slightly left than control point for easy to drag control point.
-                    clientX = rowHeaderWidth + (canvasRect.width - rowHeaderWidth) / 2 + 20;
+                    clientX = (canvasRect.width - rowHeaderWidth) / 2 + 20;
                     clientY = range.rangeWithCoord.endY + canvasRect.top - viewportScrollY;
                     break;
                 default:

@@ -54,7 +54,7 @@ export class DocThreadCommentSelectionController extends Disposable {
                         let customRange;
 
                         if (collapsed) { // cursor
-                            customRange = doc.getBody()?.customDecorations?.find((value) => value.startIndex <= startOffset - 2 && value.endIndex >= (endOffset + 1));
+                            customRange = doc.getBody()?.customDecorations?.find((value) => value.startIndex <= startOffset && value.endIndex >= (endOffset - 1));
                         } else { // range
                             customRange = doc.getBody()?.customDecorations?.find((value) => value.startIndex <= startOffset && value.endIndex >= (endOffset - 1));
                         }

@@ -58,18 +58,15 @@ export default {
         },
     },
     FALSE: {
-        description: '返回逻辑值 FALSE',
-        abstract: '返回逻辑值 FALSE',
+        description: '返回逻辑值 FALSE。',
+        abstract: '返回逻辑值 FALSE。',
         links: [
             {
                 title: '教学',
                 url: 'https://support.microsoft.com/zh-cn/office/false-%E5%87%BD%E6%95%B0-2d58dfa5-9c03-4259-bf8f-f0ae14346904',
             },
         ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
+        functionParameter: {},
     },
     IF: {
         description: '指定要执行的逻辑检测',
@@ -101,8 +98,8 @@ export default {
         },
     },
     IFNA: {
-        description: '如果该表达式解析为 #N/A，则返回指定值；否则返回该表达式的结果',
-        abstract: '如果该表达式解析为 #N/A，则返回指定值；否则返回该表达式的结果',
+        description: '如果表达式的结果为 #N/A，则返回您指定的值，否则返回表达式的结果',
+        abstract: '如果表达式的结果为 #N/A，则返回您指定的值，否则返回表达式的结果',
         links: [
             {
                 title: '教学',
@@ -110,13 +107,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '值', detail: '检查是否存在 #N/A 错误值的参数。' },
+            valueIfNa: { name: '如果为#N/A的值', detail: '如果公式结果为 #N/A 错误值，则返回的值。' },
         },
     },
     IFS: {
-        description: ' 检查是否满足一个或多个条件，且是否返回与第一个 TRUE 条件对应的值。',
-        abstract: ' 检查是否满足一个或多个条件，且是否返回与第一个 TRUE 条件对应的值。',
+        description: '检查一个或多个条件是否满足，并返回第一个为 TRUE 的条件对应的值。',
+        abstract: '检查一个或多个条件是否满足，并返回第一个为 TRUE 的条件对应的值。',
         links: [
             {
                 title: '教学',
@@ -124,8 +121,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logicalTest1: { name: '逻辑测试1', detail: '计算结果为 TRUE 或 FALSE 的条件。' },
+            valueIfTrue1: { name: '如果为 TRUE 的值1', detail: '如果 logical_test1 的计算结果为 TRUE，返回的结果。可以为空。' },
+            logicalTest2: { name: '逻辑测试2...逻辑测试127', detail: '计算结果为 TRUE 或 FALSE 的条件。' },
+            valueIfTrue2: { name: '如果为 TRUE 的值2...如果为 TRUE 的值127', detail: '如果 logical_testN 的计算结果为 TRUE，返回的结果。每个 value_if_trueN 对应于一个条件 logical_testN。可以为空。' },
         },
     },
     LAMBDA: {
@@ -196,8 +195,8 @@ export default {
         },
     },
     NOT: {
-        description: '对其参数的逻辑求反',
-        abstract: '对其参数的逻辑求反',
+        description: '反转其参数的逻辑值。',
+        abstract: '反转其参数的逻辑值。',
         links: [
             {
                 title: '教学',
@@ -205,8 +204,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical: { name: '逻辑表达式', detail: '您要反转逻辑的条件，可评估为 TRUE 或 FALSE。' },
         },
     },
     OR: {
@@ -252,8 +250,8 @@ export default {
         },
     },
     SWITCH: {
-        description: '根据值列表计算表达式，并返回与第一个匹配值对应的结果。 如果不匹配，则可能返回可选默认值。',
-        abstract: '根据值列表计算表达式，并返回与第一个匹配值对应的结果。 如果不匹配，则可能返回可选默认值。',
+        description: '将表达式与值列表进行比较，并返回与第一个匹配值对应的结果。如果没有匹配项，可以返回一个可选的默认值。',
+        abstract: '将表达式与值列表进行比较，并返回与第一个匹配值对应的结果。如果没有匹配项，可以返回一个可选的默认值。',
         links: [
             {
                 title: '教学',
@@ -261,27 +259,26 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            expression: { name: '表达式', detail: '表达式是将要与 value1…value126 进行比较的值（例如数字、日期或一些文本）。' },
+            value: { name: '值1...值126', detail: '值N 是将要与表达式进行比较的值。' },
+            result: { name: '结果1...结果126', detail: '结果N 是当对应的值N 参数与表达式匹配时要返回的值。必须为每个对应的值N 参数提供结果N。' },
+            default: { name: '默认', detail: '默认是在值N 表达式中找不到匹配项时要返回的值。默认参数通过没有对应的结果N 表达式来识别（参见示例）。默认必须是函数中的最后一个参数。' },
         },
     },
     TRUE: {
-        description: '返回逻辑值 TRUE',
-        abstract: '返回逻辑值 TRUE',
+        description: '返回逻辑值 TRUE。',
+        abstract: '返回逻辑值 TRUE。',
         links: [
             {
                 title: '教学',
                 url: 'https://support.microsoft.com/zh-cn/office/true-%E5%87%BD%E6%95%B0-7652c6e3-8987-48d0-97cd-ef223246b3fb',
             },
         ],
-        functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
-        },
+        functionParameter: {},
     },
     XOR: {
-        description: '返回所有参数的逻辑“异或”值',
-        abstract: '返回所有参数的逻辑“异或”值',
+        description: '如果参数中计算结果为 TRUE 的数量为奇数，则返回 TRUE；如果计算结果为 TRUE 的数量为偶数，则返回 FALSE。',
+        abstract: '如果参数中 TRUE 的数量为奇数，则返回 TRUE',
         links: [
             {
                 title: '教学',
@@ -289,8 +286,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical1: { name: '逻辑表达式 1', detail: '第一个想要测试且计算结果可为 TRUE 或 FALSE 的条件。' },
+            logical2: { name: '逻辑表达式 2', detail: '其他想要测试且计算结果可为 TRUE 或 FALSE 的条件（最多 255 个条件）。' },
         },
     },
 };

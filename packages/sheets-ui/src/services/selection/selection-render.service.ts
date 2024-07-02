@@ -223,7 +223,8 @@ export class SelectionRenderService implements ISelectionRenderService {
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
-        window.srs = this;
+        // TODO @lumixraku test
+        (window as any).srs = this;
     }
 
     enableHeaderHighlight() {

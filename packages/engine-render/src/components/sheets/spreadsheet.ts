@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { EventState, IRange, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { IRange, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
 import { BooleanNumber, sortRules } from '@univerjs/core';
 
-import { EVENT_TYPE, FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
+import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 
 // import { clearLineByBorderType } from '../../basics/draw';
 import { getCellPositionByIndex, getColor } from '../../basics/tools';
-import type { IBoundRectNoAngle, IPoint, IViewportInfo, Vector2 } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext } from '../../context';
 import type { Engine } from '../../engine';
@@ -29,7 +29,6 @@ import type { Scene } from '../../scene';
 import type { SceneViewer } from '../../scene-viewer';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
-import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
@@ -103,9 +102,6 @@ export class Spreadsheet extends SheetComponent {
         super.dispose();
         this._documents?.dispose();
         this._documents = null as unknown as Documents;
-        // cacheCanvas 已经移动到 viewport 中了, cacheCanvas 的 dispose 在 viewport@dispose 中处理
-        // this._cacheCanvas?.dispose();
-        // this._cacheCanvas = null as unknown as Canvas;
         this._backgroundExtension = null as unknown as Background;
         this._borderExtension = null as unknown as Border;
         this._fontExtension = null as unknown as Font;
@@ -227,7 +223,6 @@ export class Spreadsheet extends SheetComponent {
     /**
      * Since multiple controllers, not just the sheet-render.controller, invoke spreadsheet.makeDirty() — for instance, the cf.render-controller — it's essential to also call viewport.markDirty() whenever spreadsheet.makeDirty() is triggered.
      * @param state
-     * @returns
      */
     override makeDirty(state: boolean = true) {
         (this.getParent() as Scene)?.getViewports().forEach((vp) => vp.markDirty(state));

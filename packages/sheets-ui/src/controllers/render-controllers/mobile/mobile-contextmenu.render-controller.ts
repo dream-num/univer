@@ -15,13 +15,12 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { Disposable, RANGE_TYPE, Rectangle, Tools } from '@univerjs/core';
+import { Disposable, RANGE_TYPE, Tools } from '@univerjs/core';
 import { type IPointerEvent, type IRenderContext, type IRenderModule, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { IContextMenuService, ILayoutService, MenuPosition } from '@univerjs/ui';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-import { defaultTheme } from '@univerjs/design';
 import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
 
 /**

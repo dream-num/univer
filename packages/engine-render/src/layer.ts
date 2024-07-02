@@ -111,17 +111,6 @@ export class Layer extends Disposable {
                 if (this.scene.getObject(object.oKey)) {
                     continue;
                 }
-                // if (object.oKey === '__SpreadsheetSelectionFillControlTopLeft__0') {
-                //     console.log('!!!!add 0');
-
-                //     // debugger;
-                // }
-                // if (object.oKey === '__SpreadsheetSelectionFillControlTopLeft__1') {
-                //     console.log('!!!!add 1');
-
-                //     // debugger;
-                // }
-
                 this._objects.push(object);
                 this.scene.setObjectBehavior(object);
                 this._layerBehavior(object);
@@ -141,14 +130,6 @@ export class Layer extends Disposable {
         if (object instanceof BaseObject) {
             for (let i = 0; i < objectsLength; i++) {
                 const o = objects[i];
-                if (o.oKey === '__SpreadsheetSelectionFillControlTopLeft__0') {
-                    console.log('!!!!! rm 0');
-                    // debugger;
-                }
-                if (o.oKey === '__SpreadsheetSelectionFillControlTopLeft__1') {
-                    console.log('!!!!! rm 1');
-                    // debugger;
-                }
 
                 if (o === object) {
                     objects.splice(i, 1);
@@ -158,11 +139,6 @@ export class Layer extends Disposable {
         } else {
             for (let i = 0; i < objectsLength; i++) {
                 const o = objects[i];
-                if (o.oKey === '__SpreadsheetSelectionFillControlTopLeft__0') {
-                    console.log('!!!!! rm 0');
-
-                    // debugger;
-                }
                 if (o.oKey === object) {
                     objects.splice(i, 1);
                     return;

@@ -32,7 +32,7 @@ import { Inject } from '@wendellhu/redi';
 import { ScrollCommand, SetScrollRelativeCommand } from '../../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../../commands/commands/set-selection.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../../commands/commands/set-selection.command';
-import type { IScrollManagerParam, IScrollManagerSearchParam, IViewportScrollState } from '../../../services/scroll-manager.service';
+import type { IScrollManagerParam, IScrollManagerSearchParam } from '../../../services/scroll-manager.service';
 import { ScrollManagerService } from '../../../services/scroll-manager.service';
 import type { ISheetSkeletonManagerParam } from '../../../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';

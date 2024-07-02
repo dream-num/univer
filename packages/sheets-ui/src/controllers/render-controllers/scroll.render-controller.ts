@@ -22,9 +22,8 @@ import {
     IUniverInstanceService,
     RANGE_TYPE,
     toDisposable,
-    UniverInstanceType,
 } from '@univerjs/core';
-import type { IMouseEvent, IPoint, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
@@ -32,7 +31,7 @@ import { Inject } from '@wendellhu/redi';
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
-import type { IScrollManagerParam, IScrollManagerSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
+import type { IScrollManagerParam, IScrollManagerSearchParam } from '../../services/scroll-manager.service';
 import { ScrollManagerService } from '../../services/scroll-manager.service';
 import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
@@ -198,7 +197,6 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     viewportScrollX,
                     viewportScrollY,
                 };
-                console.log('lastestScrollInfo', viewportScrollY, lastestScrollInfo);
                 this._scrollManagerService.justSetScrollInfoToCurrSheet(lastestScrollInfo);
                 this._scrollManagerService.validViewportScrollInfo$.next({
                     scrollX: scrollAfterParam.scrollX || 0,

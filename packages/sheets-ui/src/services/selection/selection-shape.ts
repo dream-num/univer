@@ -17,7 +17,7 @@
 import type { IRangeWithCoord, ISelectionCellWithMergeInfo, Nullable, ThemeService } from '@univerjs/core';
 import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
 import type { IObjectFullState, IRectProps, Scene } from '@univerjs/engine-render';
-import { cancelRequestFrame, DashedRect, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import { cancelRequestFrame, DashedRect, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     getNormalSelectionStyle,
@@ -134,11 +134,11 @@ export class SelectionControl extends Disposable {
 
     readonly selectionFilled$ = this._selectionFilled$.asObservable();
 
-    protected _defaultStyle!: ISelectionStyle;
+    private _defaultStyle!: ISelectionStyle;
 
-    protected _currentStyle: Nullable<ISelectionStyle>;
+    private _currentStyle: Nullable<ISelectionStyle>;
 
-    protected _isHelperSelection: boolean = true;
+    private _isHelperSelection: boolean = true;
 
     constructor(
         protected _scene: Scene,
@@ -315,31 +315,26 @@ export class SelectionControl extends Disposable {
 
     updateRange(range: IRangeWithCoord) {
         this._selectionModel.setValue(range);
-        // why update rowHeaderWidth and columnHeaderHeight? Did they change when update range?
         // TODO @lumixraku
+        // why update rowHeaderWidth and columnHeaderHeight at the same time? Did they change when update range?
         this._updateControl(null, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
-    // updateRangeType(rangeType: RANGE_TYPE) {
-    //     this._selectionModel.setRangeType(rangeType);
-    // }
-
     /**
-     *
+     * update seleciton model(new range)
      * @param newSelectionRange update new selection range!!
      * @param rowHeaderWidth
      * @param columnHeaderHeight
      * @param style
      * @param highlight
-     * @param rangeType
      */
     update(
         newSelectionRange: IRangeWithCoord,
         rowHeaderWidth: number = 0,
         columnHeaderHeight: number = 0,
         style?: Nullable<ISelectionStyle>,
-        highlight?: Nullable<ISelectionCellWithMergeInfo>,
-        rangeType?: RANGE_TYPE
+        highlight?: Nullable<ISelectionCellWithMergeInfo>
+        // rangeType?: RANGE_TYPE
     ) {
         this._selectionModel.setValue(newSelectionRange, highlight);
         if (style == null) {
@@ -574,7 +569,6 @@ export class SelectionControl extends Disposable {
             });
 
             this.dashRect.setProps({
-                // startX, startY, endX, endY,
                 strokeDashArray: [0, strokeDash / scale],
             });
 
@@ -626,7 +620,7 @@ export class SelectionControl extends Disposable {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    protected _initialize() {
+    private _initialize() {
         this._defaultStyle = getNormalSelectionStyle(this._themeService);
 
         this._selectionModel = new SelectionRenderModel();
@@ -709,7 +703,7 @@ export class SelectionControl extends Disposable {
         this._initialTitle();
     }
 
-    protected _initialTitle() {
+    private _initialTitle() {
         const zIndex = this._zIndex;
         this._rowHeaderBackground = new Rect(SELECTION_MANAGER_KEY.rowHeaderBackground + zIndex, {
             zIndex: zIndex - 1,
@@ -738,11 +732,6 @@ export class SelectionControl extends Disposable {
             evented: false,
         });
 
-        // TODO @lumixraku
-        this._columnHeaderBackground.onPointerDown$.subscribeEvent(() => {
-            console.log('.........');
-        });
-
         this._columnHeaderBorder = new Rect(SELECTION_MANAGER_KEY.columnHeaderBorder + zIndex, {
             zIndex: zIndex - 1,
             evented: false,
@@ -764,7 +753,7 @@ export class SelectionControl extends Disposable {
         scene.addObjects([this._rowHeaderGroup, this._columnHeaderGroup], SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX);
     }
 
-    protected _initialWidget() {
+    private _initialWidget() {
         const zIndex = this._zIndex;
         this._topLeftWidget = new Rect(SELECTION_MANAGER_KEY.topLeftWidget + zIndex, {
             zIndex: zIndex + 1,
@@ -810,7 +799,7 @@ export class SelectionControl extends Disposable {
         ];
     }
 
-    protected _updateBackgroundTitle(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
+    private _updateBackgroundTitle(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
         const { startX, startY, endX, endY, rangeType } = this._selectionModel;
         const defaultStyle = this._defaultStyle;
 
@@ -890,7 +879,7 @@ export class SelectionControl extends Disposable {
         this._rowHeaderGroup.makeDirty(true);
     }
 
-    protected _updateBackgroundControl(style: Nullable<ISelectionStyle>) {
+    private _updateBackgroundControl(style: Nullable<ISelectionStyle>) {
         const { startX, startY, endX, endY } = this._selectionModel;
 
         const defaultStyle = this._defaultStyle;
@@ -971,7 +960,7 @@ export class SelectionControl extends Disposable {
         this._backgroundControlBottom.setProps({ fill });
     }
 
-    protected _updateWidgets(style: Nullable<ISelectionStyle>) {
+    private _updateWidgets(style: Nullable<ISelectionStyle>) {
         const { startX, startY, endX, endY } = this._selectionModel;
         const defaultStyle = this._defaultStyle;
 
@@ -1070,7 +1059,7 @@ export class SelectionControl extends Disposable {
         return true;
     }
 
-    protected _getScale() {
+    private _getScale() {
         const { scaleX, scaleY } = this._scene.getAncestorScale();
         return Math.max(scaleX, scaleY);
     }
@@ -1079,12 +1068,12 @@ export class SelectionControl extends Disposable {
 
     private _antRequestNewFrame: number = -1;
 
-    protected _stopAntLineAnimation() {
+    private _stopAntLineAnimation() {
         this._antLineOffset = 0;
         cancelRequestFrame(this._antRequestNewFrame);
     }
 
-    protected _startAntLineAnimation() {
+    private _startAntLineAnimation() {
         const scale = this._getScale();
         this._antLineOffset += 0.6 / scale;
         if (this._antLineOffset > 160 / scale) {

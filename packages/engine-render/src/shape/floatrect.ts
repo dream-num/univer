@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { Rectangle } from '@univerjs/core';
 import type { IViewportInfo } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 import type { IRectProps } from './rect';

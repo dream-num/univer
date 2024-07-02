@@ -17,6 +17,7 @@
 import { Disposable, type Nullable, toDisposable } from '@univerjs/core';
 
 import type { Subscription } from 'rxjs';
+import type { PointerEvent } from 'react';
 import type { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import type { IDragEvent, IEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
@@ -80,7 +81,7 @@ export class InputManager extends Disposable {
 
     private _onDrop!: (evt: IDragEvent) => void;
 
-    private _scene!: Scene;
+    private _scene!: ThinScene;
 
     private _currentMouseEnterPicked: Nullable<BaseObject | ThinScene>;
 
@@ -157,8 +158,6 @@ export class InputManager extends Disposable {
         }
     }
 
-    private _pointerId = 0;
-
     // eslint-disable-next-line max-lines-per-function
     attachControl(
         hasDown: boolean = true,
@@ -177,11 +176,11 @@ export class InputManager extends Disposable {
         this._onPointerEnter = (evt: IMouseEvent) => {
             // preserve compatibility with Safari when pointerId is not present
             if ((evt as IPointerEvent).pointerId === undefined) {
-                (evt as IPointerEvent as any).pointerId = 0;
+                (evt as unknown as PointerEvent).pointerId = 0;
             }
 
             this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
-            const isStop = this._currentObject?.triggerPointerMove(evt);
+            const _isStop = this._currentObject?.triggerPointerMove(evt);
 
             this.mouseLeaveEnterHandler(evt);
 
@@ -195,7 +194,7 @@ export class InputManager extends Disposable {
         this._onPointerLeave = (evt: IMouseEvent) => {
             // preserve compatibility with Safari when pointerId is not present
             if ((evt as IPointerEvent).pointerId === undefined) {
-                (evt as IPointerEvent as any).pointerId = 0;
+                (evt as unknown as PointerEvent).pointerId = 0;
             }
 
             // this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
@@ -211,19 +210,16 @@ export class InputManager extends Disposable {
             //     }
             // }
         };
-        //this._onPointerMove(
+
         this._onPointerMove = (evt: IMouseEvent) => {
             // preserve compatibility with Safari when pointerId is not present
             if ((evt as IPointerEvent).pointerId === undefined) {
-                (evt as IPointerEvent as any).pointerId = 0;
+                (evt as unknown as PointerEvent).pointerId = 0;
             }
-            // if (this.pointerId === (evt as IPointerEvent).pointerId) {
-            //     debugger;
-            // }
             const currentObject = this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
-            Math.random() < 0.01 && console.log('!!!scene _onPointerMove', currentObject?.oKey);
+            // Math.random() < 0.01 && console.log('!!!scene _onPointerMove', currentObject?.oKey);
 
-            const isStop = this._currentObject?.triggerPointerMove(evt);
+            const isStop = currentObject?.triggerPointerMove(evt);
 
             this.mouseLeaveEnterHandler(evt);
 
@@ -235,12 +231,11 @@ export class InputManager extends Disposable {
         this._onPointerDown = (evt: IPointerEvent) => {
             // preserve compatibility with Safari when pointerId is not present
             if (evt.pointerId === undefined) {
-                (evt as any).pointerId = 0;
+                (evt as unknown as PointerEvent).pointerId = 0;
             }
-            this._pointerId = evt.pointerId;
+
             const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
 
-            console.log('!!!scene _onPointerDown', currentObject?.oKey);
             const isStop = currentObject?.triggerPointerDown(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
@@ -255,7 +250,6 @@ export class InputManager extends Disposable {
             }
 
             const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
-            console.log('!!!scene _onPointerUp', currentObject?.oKey);
             const isStop = currentObject?.triggerPointerUp(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {

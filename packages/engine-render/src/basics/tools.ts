@@ -18,7 +18,6 @@ import type {
     IRange,
     IRangeWithCoord,
     IScale,
-    ISelectionCell,
     ISelectionCellWithMergeInfo,
     IStyleBase,
     LocaleService,

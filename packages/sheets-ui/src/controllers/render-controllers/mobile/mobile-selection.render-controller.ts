@@ -42,7 +42,6 @@ import { Inject } from '@wendellhu/redi';
 import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
 import type { ISetZoomRatioOperationParams } from '../../../commands/operations/set-zoom-ratio.operation';
 import { SetZoomRatioOperation } from '../../../commands/operations/set-zoom-ratio.operation';
-import type { MobileSelectionRenderService } from '../../../services/selection/mobile-selection-render.service';
 import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import type { ISheetObjectParam } from '../../utils/component-tools';
@@ -65,7 +64,8 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         super();
 
         this._init();
-        window.src = this;
+        // TODO @lumixraku test
+        (window as any).src = this;
     }
 
     override dispose(): void {

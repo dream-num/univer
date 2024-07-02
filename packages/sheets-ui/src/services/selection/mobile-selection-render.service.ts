@@ -24,9 +24,8 @@ import type {
     ISelectionCellWithMergeInfo,
     ISelectionWithCoord,
     Nullable,
-    Observer,
 } from '@univerjs/core';
-import { InterceptorManager, IUniverInstanceService, makeCellToSelection, RANGE_TYPE, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
+import { InterceptorManager, IUniverInstanceService, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
@@ -37,8 +36,6 @@ import type { Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import { getSheetObject } from '../../controllers/utils/component-tools';
-import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import type { SelectionRenderModel } from './selection-render-model';
 import type { SelectionControl } from './selection-shape';
 import { type IControlFillConfig, type ISelectionRenderService, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './selection-render.service';
@@ -156,7 +153,8 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
-        window.srs = this;
+        // TODO @lumixraku test
+        (window as any).srs = this;
     }
 
     dispose() {
@@ -453,9 +451,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
 
     /**
      * Returns the list of active ranges in the active sheet or null if there are no active ranges.
-     * If there is a single range selected, this behaves as a getActiveRange() call.
-     *
-     * @returns
+     * If there is a single range selected, this method behaves like a getActiveRange() call.
      */
     getActiveSelections(): Nullable<ISelection[]> {
         const controls = this.getSelectionControls();
@@ -492,8 +488,6 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
 
     /**
      * Returns the selected range in the active sheet, or null if there is no active range. If multiple ranges are selected this method returns only the last selected range.
-     * TODO: 默认最后一个选区为当前激活选区，或者当前激活单元格所在选区为激活选区
-     * @returns
      */
     getActiveRange(): Nullable<IRange> {
         const control = this.getActiveSelectionControl();
@@ -509,8 +503,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
     }
 
     /**
-     * get last active selection control
-     * @returns
+     * get last selection control
      */
     getActiveSelectionControl(): Nullable<SelectionControl> {
         const controls = this.getSelectionControls();
@@ -678,8 +671,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
                 rowHeaderWidth,
                 columnHeaderHeight,
                 this._selectionStyle,
-                primaryCursorCellRange,
-                rangeType
+                primaryCursorCellRange
             );
         }
 

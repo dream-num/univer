@@ -103,7 +103,8 @@ export class ScrollManagerService {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         // init
-        window.sms = this;
+        // TODO @lumixraku test
+        (window as any).sms = this;
     }
 
     dispose(): void {
@@ -167,11 +168,14 @@ export class ScrollManagerService {
         }, true);
     }
 
+    /**
+     * call _setScrollInfo but no _scrollInfo$.next
+     * @param scroll
+     */
     justSetScrollInfoToCurrSheet(scroll: IScrollManagerParam) {
         if (this._searchParamForScroll == null) {
             return;
         }
-        console.log('justSetScrollInfoToCurrSheet', this._searchParamForScroll);
 
         this._setScrollInfo(
             {

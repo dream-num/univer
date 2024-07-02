@@ -27,12 +27,15 @@ import type {
 } from '../../basics/common';
 import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../../services/runtime.service';
 
-export interface ISetFormulaCalculationStartMutation {
+export interface IFormulaDirtyData {
     dirtyRanges: IUnitRange[];
     dirtyNameMap: IDirtyUnitSheetNameMap;
     dirtyDefinedNameMap: IDirtyUnitSheetDefinedNameMap;
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
+}
+
+export interface ISetFormulaCalculationStartMutation extends IFormulaDirtyData {
     options: Nullable<IExecutionOptions>;
     forceCalculation?: boolean;
 }

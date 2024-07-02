@@ -111,6 +111,7 @@ export class CalculateFormulaService extends Disposable {
             DEFAULT_CYCLE_REFERENCE_COUNT) as number;
 
         for (let i = 0; i < cycleReferenceCount; i++) {
+            this._runtimeService.setFormulaCycleIndex(i);
             await this._execute();
             const isCycleDependency = this._runtimeService.isCycleDependency();
             if (!isCycleDependency) {
@@ -216,6 +217,7 @@ export class CalculateFormulaService extends Disposable {
         return { dirtyRanges, excludedCell };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private async _apply(isArrayFormulaState = false) {
         if (isArrayFormulaState) {
             this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_DEPENDENCY_ARRAY_FORMULA);
@@ -248,8 +250,8 @@ export class CalculateFormulaService extends Disposable {
              * For every functions, execute a setTimeout to wait for external command input.
              */
             await new Promise((resolve) => {
-                const calcelTask = requestImmediateMacroTask(resolve);
-                pendingTasks.push(calcelTask);
+                const calCancelTask = requestImmediateMacroTask(resolve);
+                pendingTasks.push(calCancelTask);
             });
 
             if (this._runtimeService.isStopExecution()) {

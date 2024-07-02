@@ -79,6 +79,8 @@ export interface IExecutionInProgressParams {
     totalArrayFormulasToCalculate: number;
     completedArrayFormulasCount: number;
 
+    formulaCycleIndex: number;
+
     stage: FormulaExecuteStageType;
 }
 
@@ -117,6 +119,8 @@ export interface IFormulaRuntimeService {
     stopExecution(): void;
 
     setFormulaExecuteStage(type: FormulaExecuteStageType): void;
+
+    setFormulaCycleIndex(index: number): void;
 
     isStopExecution(): boolean;
 
@@ -212,6 +216,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     private _completedArrayFormulasCount: number = 0;
 
+    private _formulaCycleIndex: number = 0;
+
     private _isCycleDependency: boolean = false;
 
     constructor(@IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService) {
@@ -292,6 +298,14 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return this._completedFormulasCount;
     }
 
+    setFormulaCycleIndex(index: number) {
+        this._formulaCycleIndex = index;
+    }
+
+    getFormulaCycleIndex() {
+        return this._formulaCycleIndex;
+    }
+
     markedAsSuccessfullyExecuted() {
         this._functionsExecutedState = FormulaExecutedStateType.SUCCESS;
     }
@@ -339,6 +353,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         this._functionDefinitionPrivacyVar.clear();
         this.markedAsInitialFunctionsExecuted();
+
+        this._stopState = false;
 
         this._isCycleDependency = false;
 
@@ -409,6 +425,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         subComponentData![formulaId] = cellDatas;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     setRuntimeData(functionVariant: FunctionVariantType) {
         const row = this._currentRow;
         const column = this._currentColumn;
@@ -597,6 +614,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             completedArrayFormulasCount: this.getCompletedArrayFormulasCount(),
 
             stage: this.getFormulaExecuteStage(),
+
+            formulaCycleIndex: this.getFormulaCycleIndex(),
         };
     }
 

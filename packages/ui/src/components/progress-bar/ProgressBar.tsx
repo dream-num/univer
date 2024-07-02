@@ -16,6 +16,7 @@
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
+import { CloseSingle } from '@univerjs/icons';
 import type { IProgressStep } from '../../services/progress/progress.service';
 import { IProgressService } from '../../services/progress/progress.service';
 import styles from './index.module.less';
@@ -62,15 +63,23 @@ export function ProgressBar(props: IProgressBarProps) {
         };
     }, []);
 
+    function handleClose() {
+        progressService.stop();
+    };
+
     return (
-        <div className={styles.progressBar} style={{ display: visible ? 'block' : 'none' }}>
-            <div
-                ref={progressBarInnerRef}
-                className={styles.progressBarInner}
-                style={{
-                    backgroundColor: barColor,
-                }}
-            />
+        <div className={styles.progressBarContainer} style={{ display: visible ? 'flex' : 'none' }}>
+            <div className={styles.progressBar}>
+                <div
+                    ref={progressBarInnerRef}
+                    className={styles.progressBarInner}
+                    style={{
+                        backgroundColor: barColor,
+                    }}
+                />
+            </div>
+            <div className={styles.closeButton} onClick={handleClose}><CloseSingle /></div>
+
         </div>
     );
 };

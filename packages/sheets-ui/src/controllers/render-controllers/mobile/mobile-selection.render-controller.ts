@@ -153,11 +153,14 @@ export class MobileSelectionRenderController extends Disposable implements IRend
             if (activeControl == null) {
                 return;
             }
+            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            const sheetContentHeight = skeleton?.rowTotalHeight;
+            const sheetContentWidth = skeleton?.columnTotalWidth;
             const rangeType = activeControl.rangeType;
             if (rangeType === RANGE_TYPE.COLUMN) {
-                activeControl.transformControlPoint(0, viewportScrollY);
+                activeControl.transformControlPoint(0, viewportScrollY, sheetContentWidth, sheetContentHeight);
             } else if (rangeType === RANGE_TYPE.ROW) {
-                activeControl.transformControlPoint(viewportScrollX, 0);
+                activeControl.transformControlPoint(viewportScrollX, 0, sheetContentWidth, sheetContentHeight);
             }
         });
         this.disposeWithMe(toDisposable(sub));

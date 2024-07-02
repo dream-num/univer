@@ -69,9 +69,12 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
             const viewportScrollX = viewMain?.viewportScrollX || 0;
             const viewportScrollY = viewMain?.viewportScrollY || 0;
 
-            let clientX = range.rangeWithCoord.startX + canvasRect.left - viewportScrollX;
-            let clientY = range.rangeWithCoord.endY + canvasRect.top - viewportScrollY;
+            let clientX = 0;
+            let clientY = 0;
 
+            const rowHeaderWidth = 46;
+            // TODO @lumixraku popup should positioned by transform not topleft.
+            // using transform & transform-origin would be easy to position popup
             switch (rangeType) {
                 case RANGE_TYPE.NORMAL:
                     clientX = range.rangeWithCoord.startX + canvasRect.left - viewportScrollX;
@@ -79,17 +82,19 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
                     break;
                 case RANGE_TYPE.COLUMN:
                     clientX = range.rangeWithCoord.startX + canvasRect.left - viewportScrollX;
-                    clientY = canvasRect.height / 2;
+                    // slightly lower than control point for easy to drag control point.
+                    clientY = Math.min(canvasRect.height / 2, range.rangeWithCoord.endY) + 40;
                     break;
                 case RANGE_TYPE.ROW:
-                    clientX = canvasRect.width / 2;
+                    // slightly left than control point for easy to drag control point.
+                    clientX = rowHeaderWidth + (canvasRect.width - rowHeaderWidth) / 2 + 20;
                     clientY = range.rangeWithCoord.endY + canvasRect.top - viewportScrollY;
                     break;
                 default:
                     break;
             }
-
-            clientX = Tools.clamp(clientX, 46, canvasRect.width);
+            // in case clientXY is not in screen area.
+            clientX = Tools.clamp(clientX, rowHeaderWidth, canvasRect.width);
             clientY = Tools.clamp(clientY, canvasRect.top, canvasRect.height);
 
             this._contextMenuService.triggerContextMenu({

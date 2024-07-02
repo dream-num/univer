@@ -24,9 +24,21 @@ import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { SELECTION_MANAGER_KEY, SelectionControl } from './selection-shape';
 
 export class MobileSelectionControl extends SelectionControl {
+    /**
+     * topLeft controlPointer, it is not visible, just transparent, for handling event.
+     */
     private _fillControlTopLeft: Rect | null;
+    /**
+     * bottomRight controlPointer, it is not visible, just transparent, for handling event.
+     */
     private _fillControlBottomRight: Rect | null;
+    /**
+     * a very small visible point, placed in control pointer
+     */
     private _fillControlTopLeftInner: Rect | null;
+    /**
+     * a very small visible point, placed in control pointer
+     */
     private _fillControlBottomRightInner: Rect | null;
 
     constructor(
@@ -90,12 +102,14 @@ export class MobileSelectionControl extends SelectionControl {
         };
         this._fillControlTopLeftInner!.setProps({ ...fillProps });
         this._fillControlBottomRightInner!.setProps({ ...fillProps });
+        // for test
         // this.fillControlTopLeft!.setProps({ ...fillProps, ...{ fill: 'red' } });
         // this.fillControlBottomRight!.setProps({ ...fillProps, ...{ fill: 'black' } });
 
         // put into scene
         const objs = [this._fillControlTopLeft, this._fillControlBottomRight, this._fillControlTopLeftInner, this._fillControlBottomRightInner] as BaseObject[];
 
+        // do not use this.model.rangeType, model has not been initialized yet
         if (this._rangeType === RANGE_TYPE.COLUMN) {
             this._columnHeaderGroup.addObjects(...objs);
         } else {
@@ -158,7 +172,7 @@ export class MobileSelectionControl extends SelectionControl {
         } = style;
         this.currentStyle = style;
 
-        // this condition is derived from selection-shape
+        // this condition is derived from selection-shape, I do not understand.
         if (autoFillEnabled === true && !super._hasWidgets(widgets)) {
             if (rangeType) {
                 this.selectionModel.setRangeType(rangeType);
@@ -202,11 +216,14 @@ export class MobileSelectionControl extends SelectionControl {
     }
 
     /**
-     *
-     * @param offsetX viewport viewportScrollX
-     * @param offsetY viewport viewportScrollY
+     * Mainly for row & col selection control point position. update control point position by when scrolling.
+     * @param viewportScrollX viewportScrollX
+     * @param viewportScrollY
+     * @param sheetContentWidth
+     * @param sheetContentHeight max sheet content height, for very short sheet, control pointer shoud not out of sheet
      */
-    transformControlPoint(offsetX: number = 0, offsetY: number = 0) {
+    // eslint-disable-next-line max-lines-per-function
+    transformControlPoint(viewportScrollX: number = 0, viewportScrollY: number = 0, sheetContentWidth: number = 0, sheetContentHeight: number = 0) {
         const style = this.currentStyle!;
         const rangeType = this.selectionModel.rangeType;
         const expandCornerSizeInner = style.expandCornerSize! / 4;
@@ -238,42 +255,51 @@ export class MobileSelectionControl extends SelectionControl {
                 });
                 break;
 
-            case RANGE_TYPE.ROW:
+            case RANGE_TYPE.ROW: {
+                const left = Math.min(viewportW / 2 + viewportScrollX, sheetContentWidth);
+                const controlLeft = -expandCornerSize / 2 + left;
+                const innerLeft = -expandCornerSizeInner / 2 + left;
                 this.fillControlTopLeft!.transformByState({
-                    left: -expandCornerSize / 2 + viewportW / 2 + offsetX,
+                    left: controlLeft,
                     top: -expandCornerSize / 2,
                 });
                 this.fillControlBottomRight!.transformByState({
-                    left: -expandCornerSize / 2 + viewportW / 2 + offsetX,
+                    left: controlLeft,
                     top: -expandCornerSize / 2 + endY - startY,
                 });
                 this._fillControlTopLeftInner!.transformByState({
-                    left: -expandCornerSizeInner / 2 + viewportW / 2 + offsetX,
+                    left: innerLeft,
                     top: -expandCornerSizeInner / 2,
                 });
                 this._fillControlBottomRightInner!.transformByState({
-                    left: -expandCornerSizeInner / 2 + viewportW / 2 + offsetX,
+                    left: innerLeft,
                     top: -expandCornerSizeInner / 2 + endY - startY,
                 });
-
+            }
                 break;
             case RANGE_TYPE.COLUMN:
-                this.fillControlTopLeft!.transformByState({
-                    left: -expandCornerSize / 2,
-                    top: -expandCornerSize / 2 + viewportH / 2 + offsetY,
-                });
-                this.fillControlBottomRight!.transformByState({
-                    left: -expandCornerSize / 2 + endX - startX,
-                    top: -expandCornerSize / 2 + viewportH / 2 + offsetY,
-                });
-                this._fillControlTopLeftInner!.transformByState({
-                    left: -expandCornerSizeInner / 2,
-                    top: -expandCornerSizeInner / 2 + viewportH / 2 + offsetY,
-                });
-                this._fillControlBottomRightInner!.transformByState({
-                    left: -expandCornerSizeInner / 2 + endX - startX,
-                    top: -expandCornerSizeInner / 2 + viewportH / 2 + offsetY,
-                });
+                {
+                    const top = Math.min(+viewportH / 2 + viewportScrollY, sheetContentHeight);
+                    const controlTop = -expandCornerSize / 2 + top;
+                    const innerTop = -expandCornerSizeInner / 2 + top;
+
+                    this.fillControlTopLeft!.transformByState({
+                        left: -expandCornerSize / 2,
+                        top: controlTop,
+                    });
+                    this.fillControlBottomRight!.transformByState({
+                        left: -expandCornerSize / 2 + endX - startX,
+                        top: controlTop,
+                    });
+                    this._fillControlTopLeftInner!.transformByState({
+                        left: -expandCornerSizeInner / 2,
+                        top: innerTop,
+                    });
+                    this._fillControlBottomRightInner!.transformByState({
+                        left: -expandCornerSizeInner / 2 + endX - startX,
+                        top: innerTop,
+                    });
+                }
                 break;
             default:
                 console.error('unknown range type');

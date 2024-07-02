@@ -152,6 +152,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         // @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
+
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
@@ -251,19 +252,19 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
      *
      *
      *
-     * @param data
+     * @param selectionData
      */
-    addCellSelectionControlBySelectionData(data: ISelectionWithCoordAndStyle) {
+    addCellSelectionControlBySelectionData(selectionData: ISelectionWithCoordAndStyle) {
         // const selectionControls = this.getSelectionControls();
 
         // if (!selectionControls) {
         //     return;
         // }
-        const { rangeWithCoord, primaryWithCoord } = data;
+        const { rangeWithCoord, primaryWithCoord } = selectionData;
         const { rangeType } = rangeWithCoord;
         const skeleton = this._skeleton;
 
-        let { style } = data;
+        let { style } = selectionData;
 
         if (style == null) {
             style = getNormalSelectionStyle(this._themeService);
@@ -283,6 +284,13 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
 
         // update control
         control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
+
+        const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        if (!viewportMain) return;
+        const { viewportScrollX, viewportScrollY } = viewportMain;
+        const selectionEndY = rangeWithCoord.endY;
+        const selectionEndX = rangeWithCoord.endX;
+        control.transformControlPoint(viewportScrollX, viewportScrollY, selectionEndX, selectionEndY);
     }
 
     newSelectionControl(scene: Scene, rangeType: RANGE_TYPE) {
@@ -341,6 +349,19 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
                 this._activeViewport!
             );
         });
+        if (rangeType === RANGE_TYPE.ROW || rangeType === RANGE_TYPE.COLUMN) {
+            const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+            if (!viewportMain) return control;
+
+            // const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            // const sheetContentHeight = skeleton?.rowTotalHeight;
+            // const sheetContentWidth = skeleton?.columnTotalWidth;
+
+            // const scrollX = viewportMain.viewportScrollX;
+            // const scrollY = viewportMain.viewportScrollY;
+
+            // control.transformControlPoint(scrollX, scrollY, sheetContentWidth, sheetContentHeight);
+        }
 
         return control;
     }

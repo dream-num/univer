@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
+import { type BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Vlookup } from '../index';
@@ -223,6 +223,18 @@ describe('Test vlookup', () => {
                 StringValueObject.create('rangeLookup')
             ) as BaseValueObject;
             expect(getObjectValue(resultObject)).toStrictEqual([[ErrorType.VALUE], [ErrorType.VALUE]]);
+        });
+
+        it('LookupValue is array, tableArray is error', async () => {
+            const resultObject = testFunction.calculate(
+                ArrayValueObject.create(/*ts*/ `{
+                    "Univer";
+                    2
+                }`),
+                ErrorValueObject.create(ErrorType.NAME),
+                NumberValueObject.create(2)
+            ) as BaseValueObject;
+            expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.NAME);
         });
 
         it('LookupValue is array, colIndexNum is array, rangeLookup is array', async () => {

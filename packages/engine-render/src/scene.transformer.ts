@@ -706,7 +706,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             case TransformerManagerType.RESIZE_LB:
                 state.width = width - moveLeft < MINI_WIDTH_LIMIT ? MINI_WIDTH_LIMIT : width - moveLeft;
                 state.height = height + moveTop < MINI_HEIGHT_LIMIT ? MINI_HEIGHT_LIMIT : height + moveTop;
-                state.left = left + moveLeft;
+                state.left = state.width <= MINI_WIDTH_LIMIT ? left : left + moveLeft;
                 break;
             case TransformerManagerType.RESIZE_CB:
                 state.height = moveTop + height < MINI_HEIGHT_LIMIT ? MINI_HEIGHT_LIMIT : moveTop + height;

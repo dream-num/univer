@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, ISrcRect, Nullable } from '@univerjs/core';
-import { checkIfMove, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import type { ICommandInfo, ISrcRect, Nullable, Workbook } from '@univerjs/core';
+import { checkIfMove, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { MessageType } from '@univerjs/design';
 import type { IDrawingSearch, IImageData, ITransformState } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
 import { CURSOR_TYPE, degToRad, Image, IRenderManagerService, precisionTo, Vector2 } from '@univerjs/engine-render';
 import { IMessageService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-import { MessageType } from '@univerjs/design';
+import { filter, switchMap } from 'rxjs';
 import type { IOpenImageCropOperationBySrcRectParams } from '../commands/operations/image-crop.operation';
 import { AutoImageCropOperation, CloseImageCropOperation, CropType, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
 import { ImageCropperObject } from '../views/crop/image-cropper-object';
@@ -335,6 +336,16 @@ export class ImageCropperController extends Disposable {
                 imageCropperObject?.dispose();
             })
         );
+        const sheetUnit = this._univerInstanceService
+            .getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .pipe(
+                filter((workbook) => Boolean(workbook)),
+                switchMap((workbook) => workbook!.activeSheet$)
+            );
+
+        this.disposeWithMe(sheetUnit.subscribe(() => {
+            this._commandService.syncExecuteCommand(CloseImageCropOperation.id);
+        }));
     }
 
     private _getApplyObjectByCropObject(cropObject: ImageCropperObject): Nullable<Image> {

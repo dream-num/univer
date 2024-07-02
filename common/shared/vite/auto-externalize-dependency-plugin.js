@@ -45,7 +45,7 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
             version: '>=1.11.0',
         },
         lodash: {
-            global: 'lodash',
+            global: '_',
             name: 'lodash',
             version: '>=4.0.0',
         },

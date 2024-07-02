@@ -457,21 +457,22 @@ export function insertCustomDecorations(
     if (!body.customDecorations) {
         body.customDecorations = [];
     }
-
     const { customDecorations } = body;
-    for (let i = 0, len = customDecorations.length; i < len; i++) {
-        const customDecoration = customDecorations[i];
-        const { startIndex, endIndex } = customDecoration;
-        if (startIndex >= currentIndex) {
-            customDecoration.startIndex += textLength;
-            customDecoration.endIndex += textLength;
-        } else if (endIndex > currentIndex - 1) {
-            customDecoration.endIndex += textLength;
+    if (textLength > 0) {
+        for (let i = 0, len = customDecorations.length; i < len; i++) {
+            const customDecoration = customDecorations[i];
+            const { startIndex, endIndex } = customDecoration;
+            if (startIndex >= currentIndex) {
+                customDecoration.startIndex += textLength;
+                customDecoration.endIndex += textLength;
+            } else if (endIndex > currentIndex - 1) {
+                customDecoration.endIndex += textLength;
+            }
         }
     }
 
-    const insertCustomDecorations: ICustomDecoration[] = [];
     if (insertBody.customDecorations) {
+        const insertCustomDecorations: ICustomDecoration[] = [];
         for (let i = 0, len = insertBody.customDecorations.length; i < len; i++) {
             const customDecoration = insertBody.customDecorations[i];
             insertCustomDecorations.push(customDecoration);
@@ -777,12 +778,11 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
     return removeCustomRanges;
 }
 
-export function deleteCustomDecorations(body: IDocumentBody, textLength: number, currentIndex: number) {
+export function deleteCustomDecorations(body: IDocumentBody, textLength: number, currentIndex: number, needOffset = true) {
     const { customDecorations } = body;
 
     const startIndex = currentIndex;
     const endIndex = currentIndex + textLength - 1;
-
     const removeCustomDecorations: ICustomDecoration[] = [];
     if (customDecorations) {
         const newCustomDecorations = [];
@@ -799,8 +799,10 @@ export function deleteCustomDecorations(body: IDocumentBody, textLength: number,
                 customDecoration.startIndex = segments[0];
                 customDecoration.endIndex = segments[1];
             } else if (endIndex < st) {
-                customDecoration.startIndex -= textLength;
-                customDecoration.endIndex -= textLength;
+                if (needOffset) {
+                    customDecoration.startIndex -= textLength;
+                    customDecoration.endIndex -= textLength;
+                }
             }
             newCustomDecorations.push(customDecoration);
         }

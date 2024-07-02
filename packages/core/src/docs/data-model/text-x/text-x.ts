@@ -162,7 +162,6 @@ export class TextX {
 
             if (action.t === TextXActionType.RETAIN && action.body != null) {
                 const { textRuns, customDecorations } = getBodySlice(doc, index, index + action.len, true);
-
                 action.oldBody = {
                     dataStream: '',
                     textRuns,

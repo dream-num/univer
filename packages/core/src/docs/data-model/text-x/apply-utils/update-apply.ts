@@ -480,10 +480,9 @@ function updateCustomDecorations(
 
     let removeCustomDecorations: ICustomDecoration[] = [];
     if (coverType === UpdateDocsAttributeType.REPLACE) {
-        removeCustomDecorations = deleteCustomDecorations(body, textLength, currentIndex);
+        removeCustomDecorations = deleteCustomDecorations(body, textLength, currentIndex, false);
     }
 
     insertCustomDecorations(body, updateBody, 0, currentIndex);
-
     return removeCustomDecorations;
 }

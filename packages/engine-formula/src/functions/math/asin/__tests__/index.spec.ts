@@ -17,20 +17,20 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_MATH } from '../../function-names';
-import { Acosh } from '../index';
+import { Asin } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
-describe('Test acosh function', () => {
-    const testFunction = new Acosh(FUNCTION_NAMES_MATH.ACOSH);
+describe('Test asin function', () => {
+    const testFunction = new Asin(FUNCTION_NAMES_MATH.ASIN);
 
-    describe('Acosh', () => {
+    describe('Asin', () => {
         it('Value is normal number', () => {
             const value = NumberValueObject.create(1);
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(0);
+            expect(result.getValue()).toBe(1.5707963267948966);
         });
 
         it('Value is number valid', () => {
@@ -40,9 +40,9 @@ describe('Test acosh function', () => {
         });
 
         it('Value is number string', () => {
-            const value = StringValueObject.create('1.5');
+            const value = StringValueObject.create('0.5');
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(0.9624236501192069);
+            expect(result.getValue()).toBe(0.5235987755982989);
         });
 
         it('Value is normal string', () => {
@@ -52,14 +52,14 @@ describe('Test acosh function', () => {
         });
 
         it('Value is boolean', () => {
-            const value = BooleanValueObject.create(true);
+            const value = BooleanValueObject.create(false);
             const result = testFunction.calculate(value);
             expect(result.getValue()).toBe(0);
         });
         it('Value is blank cell', () => {
             const value = NullValueObject.create();
             const result = testFunction.calculate(value);
-            expect(result.getValue()).toBe(ErrorType.NUM);
+            expect(result.getValue()).toBe(0);
         });
         it('Value is error', () => {
             const value = ErrorValueObject.create(ErrorType.NAME);
@@ -81,7 +81,7 @@ describe('Test acosh function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(valueArray);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[0, ErrorType.VALUE, 0.6658635291565548, 0, ErrorType.NUM, ErrorType.NUM], [ErrorType.NUM, 5.298292365610484, 1.494153066724473, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME]]);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([[1.5707963267948966, '#VALUE!', ErrorType.NUM, 1.5707963267948966, 0, 0], [0, ErrorType.NUM, ErrorType.NUM, '#VALUE!', ErrorType.NUM, '#NAME?']]);
         });
     });
 });

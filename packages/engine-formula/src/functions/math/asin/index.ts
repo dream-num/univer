@@ -17,7 +17,7 @@
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
-export class Abs extends BaseFunction {
+export class Asin extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
@@ -31,6 +31,6 @@ export class Abs extends BaseFunction {
             return variant;
         }
 
-        return variant.abs();
+        return variant.asin();
     }
 }

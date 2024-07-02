@@ -114,7 +114,7 @@ export default {
     },
     ASIN: {
         description: '数値のアークサインを返します。',
-        abstract: '数値のアークサインを返します。',
+        abstract: '数値のアークサインを返します',
         links: [
             {
                 title: '指導',
@@ -122,13 +122,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '求める角度のサインの値を -1 ～ 1 の範囲で指定します。' },
         },
     },
     ASINH: {
         description: '数値の双曲線逆正弦 (ハイパーボリック サインの逆関数) を返します。',
-        abstract: '数値の双曲線逆正弦 (ハイパーボリック サインの逆関数) を返します。',
+        abstract: '数値の双曲線逆正弦 (ハイパーボリック サインの逆関数) を返します',
         links: [
             {
                 title: '指導',
@@ -136,13 +135,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '実数を指定します。' },
         },
     },
     ATAN: {
         description: '数値のアークタンジェントを返します。',
-        abstract: '数値のアークタンジェントを返します。',
+        abstract: '数値のアークタンジェントを返します',
         links: [
             {
                 title: '指導',
@@ -150,13 +148,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '求める角度のタンジェントの値を指定します。' },
         },
     },
     ATAN2: {
         description: '指定された x-y 座標のアークタンジェントを返します。',
-        abstract: '指定された x-y 座標のアークタンジェントを返します。',
+        abstract: '指定された x-y 座標のアークタンジェントを返します',
         links: [
             {
                 title: '指導',
@@ -164,13 +161,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xNum: { name: 'x 座標', detail: '点の x 座標を指定します。' },
+            yNum: { name: 'y 座標', detail: '点の y 座標を指定します。' },
         },
     },
     ATANH: {
         description: '数値の双曲線逆正接 (ハイパーボリック タンジェントの逆関数) を返します。',
-        abstract: '数値の双曲線逆正接 (ハイパーボリック タンジェントの逆関数) を返します。',
+        abstract: '数値の双曲線逆正接 (ハイパーボリック タンジェントの逆関数) を返します',
         links: [
             {
                 title: '指導',
@@ -178,8 +175,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '-1 より大きく 1 より小さい実数を指定します。' },
         },
     },
     BASE: {
@@ -268,7 +264,7 @@ export default {
     },
     COS: {
         description: '指定された角度のコサインを返します。',
-        abstract: '指定された角度のコサインを返します。',
+        abstract: '指定された角度のコサインを返します',
         links: [
             {
                 title: '指導',
@@ -276,8 +272,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: 'コサインを求める角度をラジアンで指定します。' },
         },
     },
     COSH: {
@@ -1133,7 +1128,7 @@ export default {
     },
     TAN: {
         description: '指定された角度のタンジェントを返します。',
-        abstract: '指定された角度のタンジェントを返します。',
+        abstract: '指定された角度のタンジェントを返します',
         links: [
             {
                 title: '指導',
@@ -1141,13 +1136,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: 'タンジェントを求める角度をラジアンを単位として指定します。' },
         },
     },
     TANH: {
         description: '数値の双曲線正接 (ハイパーボリック タンジェント) を返します。',
-        abstract: '数値の双曲線正接 (ハイパーボリック タンジェント) を返します。',
+        abstract: '数値の双曲線正接 (ハイパーボリック タンジェント) を返します',
         links: [
             {
                 title: '指導',
@@ -1155,8 +1149,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '実数を指定します。' },
         },
     },
     TRUNC: {

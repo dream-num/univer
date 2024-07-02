@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Acosh extends BaseFunction {
@@ -30,7 +28,7 @@ export class Acosh extends BaseFunction {
         }
 
         if (variant.isError()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return variant;
         }
         return variant.acosh();
     }

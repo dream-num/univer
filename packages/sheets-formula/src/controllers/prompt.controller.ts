@@ -377,6 +377,7 @@ export class PromptController extends Disposable {
         }
 
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+        this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
 
         this._quitSelectingMode();
 
@@ -682,7 +683,6 @@ export class PromptController extends Disposable {
         this._contextMenuService.disable();
         this._formulaPromptService.enableLockedSelectionInsert();
         this._selectionRenderService.setRemainLastEnabled(true);
-        this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
 
         // Maybe `enterSelectingMode` should be merged with `_enableRefSelectionsRenderService`.
         this._enableRefSelectionsRenderService();
@@ -708,7 +708,6 @@ export class PromptController extends Disposable {
         this._contextMenuService.enable();
         this._formulaPromptService.disableLockedSelectionInsert();
         this._currentInsertRefStringIndex = -1;
-        this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
 
         this._disposeSelectionsChangeListeners();
 
@@ -769,6 +768,7 @@ export class PromptController extends Disposable {
 
         if (config && isFormulaString(config.dataStream)) {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
+            this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
 
             const lastSequenceNodes =
                 this._lexerTreeBuilder.sequenceNodesBuilder(config.dataStream.replace(/\r/g, '').replace(/\n/g, '')) ||
@@ -790,6 +790,7 @@ export class PromptController extends Disposable {
         }
 
         this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+        this._contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
 
         this._formulaPromptService.disableLockedSelectionChange();
 

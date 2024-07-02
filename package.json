@@ -74,7 +74,7 @@
         "release-it": "^17.3.0",
         "serve": "^14.2.3",
         "turbo": "^2.0.4",
-        "typescript": "^5.4.5",
+        "typescript": "^5.5.3",
         "vitest": "^1.6.0"
     },
     "lint-staged": {

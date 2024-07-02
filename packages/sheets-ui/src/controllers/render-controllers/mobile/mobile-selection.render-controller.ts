@@ -62,10 +62,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
         @Inject(ScrollManagerService) private _scrollManagerService: ScrollManagerService
     ) {
         super();
-
         this._init();
-        // TODO @lumixraku test
-        (window as any).src = this;
     }
 
     override dispose(): void {
@@ -367,7 +364,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
                 const selectionWithStyle = this._getAllRange(skeleton);
 
                 const selectionData = this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
-                this._selectionRenderService.addCellSelectionControlBySelectionData(selectionData);
+                this._selectionRenderService.addSelectionControlBySelectionData(selectionData);
 
                 this._selectionRenderService.refreshSelectionMoveStart();
 
@@ -396,7 +393,7 @@ export class MobileSelectionRenderController extends Disposable implements IRend
                         }
                         const selectionData =
                             this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
-                        this._selectionRenderService.addCellSelectionControlBySelectionData(selectionData);
+                        this._selectionRenderService.addSelectionControlBySelectionData(selectionData);
                     }
 
                     this._syncDefinedNameRange(params);

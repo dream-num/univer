@@ -25,7 +25,7 @@ import type {
     ISelectionWithCoord,
     Nullable,
 } from '@univerjs/core';
-import { InterceptorManager, IUniverInstanceService, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { InterceptorManager, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
@@ -143,22 +143,12 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
     expandingControlMode: ExpandingControl = ExpandingControl.BOTTOM_RIGHT;
 
     constructor(
-        // private readonly _context: IRenderContext<Workbook>,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
-        // @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
-
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
-        // TODO @lumixraku test
-        (window as any).srs = this;
-    }
-
-    dispose() {
-        //...
     }
 
     enableHeaderHighlight() {
@@ -237,7 +227,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
      * init
      * selectionController@_initSkeletonChangeListener --> selectionManagerService.add --> selectionManagerService._selectionMoveEnd$ --> this.addControlToCurrentByRangeData
      *
-     * selectionMoveEnd$ --> this.addCellSelectionControlBySelectionData
+     * selectionMoveEnd$ --> this.addSelectionControlBySelectionData
      *
      *
      *
@@ -252,7 +242,7 @@ export class MobileSelectionRenderService implements ISelectionRenderService {
      *
      * @param selectionData
      */
-    addCellSelectionControlBySelectionData(selectionData: ISelectionWithCoordAndStyle) {
+    addSelectionControlBySelectionData(selectionData: ISelectionWithCoordAndStyle) {
         // const selectionControls = this.getSelectionControls();
 
         // if (!selectionControls) {

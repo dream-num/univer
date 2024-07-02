@@ -304,7 +304,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                 const selectionWithStyle = this._getAllRange(skeleton);
 
                 const selectionData = this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
-                this._selectionRenderService.addCellSelectionControlBySelectionData(selectionData);
+                this._selectionRenderService.addSelectionControlBySelectionData(selectionData);
 
                 this._selectionRenderService.refreshSelectionMoveStart();
 
@@ -335,7 +335,7 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                             this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
 
                         // then add a new selection control.
-                        this._selectionRenderService.addCellSelectionControlBySelectionData(selectionData);
+                        this._selectionRenderService.addSelectionControlBySelectionData(selectionData);
                     }
 
                     this._syncDefinedNameRange(params);

@@ -27,7 +27,7 @@ import type {
     ISelectionWithCoord,
     Nullable,
 } from '@univerjs/core';
-import { createInterceptorKey, InterceptorManager, IUniverInstanceService, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { createInterceptorKey, InterceptorManager, makeCellToSelection, RANGE_TYPE, ThemeService, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { IRenderManagerService, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
@@ -75,7 +75,7 @@ export interface ISelectionRenderService {
     enableSkipRemainLast(): void;
     disableSkipRemainLast(): void;
 
-    addCellSelectionControlBySelectionData(data: ISelectionWithCoordAndStyle): void;
+    addSelectionControlBySelectionData(data: ISelectionWithCoordAndStyle): void;
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]): void;
     changeRuntime(skeleton: Nullable<SpreadsheetSkeleton>, scene: Nullable<Scene>, viewport?: Viewport): void;
 
@@ -219,12 +219,9 @@ export class SelectionRenderService implements ISelectionRenderService {
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
-        // TODO @lumixraku test
-        (window as any).srs = this;
     }
 
     enableHeaderHighlight() {
@@ -299,7 +296,7 @@ export class SelectionRenderService implements ISelectionRenderService {
      * add a selection
      * @param data
      */
-    addCellSelectionControlBySelectionData(data: ISelectionWithCoordAndStyle) {
+    addSelectionControlBySelectionData(data: ISelectionWithCoordAndStyle) {
         const currentControls = this.getSelectionControls();
 
         if (!currentControls) {

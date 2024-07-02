@@ -101,8 +101,6 @@ export class ScrollManagerService {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         // init
-        // TODO @lumixraku test
-        (window as any).sms = this;
     }
 
     dispose(): void {

@@ -174,7 +174,7 @@ export class SlideTabItem {
 
             const inputAction = (e: Event) => {
                 if (!input) return;
-                const maxLength = 50;
+                const maxLength = 31;
 
                 setTimeout(() => {
                     if (compositionFlag) {

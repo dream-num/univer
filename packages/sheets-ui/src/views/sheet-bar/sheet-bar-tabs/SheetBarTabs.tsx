@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
-import { ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IPermissionService, IUniverInstanceService, LocaleService, nameCharacterCheck, UniverInstanceType } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import {
     InsertSheetMutation,
@@ -180,7 +180,7 @@ export function SheetBarTabs() {
                 sheetBarService.setScroll(state);
             },
             onNameCheckAlert: (text: string) => {
-                return nameEmptyCheck(text) || nameRepeatCheck(text);
+                return nameEmptyCheck(text) || sheetNameSpecCharCheck(text) || nameRepeatCheck(text);
             },
             onNameChangeCheck: () => {
                 const unitId = workbook.getUnitId();
@@ -215,6 +215,30 @@ export function SheetBarTabs() {
                 id,
                 title: { title: localeService.t('sheetConfig.sheetNameErrorTitle') },
                 children: { title: localeService.t('sheetConfig.sheetNameCannotIsEmptyError') },
+                cancelText: localeService.t('button.cancel'),
+                confirmText: localeService.t('button.confirm'),
+                onClose() {
+                    focusTabEditor();
+                    confirmService.close(id);
+                },
+                onConfirm() {
+                    focusTabEditor();
+                    confirmService.close(id);
+                },
+            });
+
+            return true;
+        }
+        return false;
+    };
+
+    const sheetNameSpecCharCheck = (name: string) => {
+        if (!nameCharacterCheck(name)) {
+            const id = 'sheetNameSpecCharAlert';
+            confirmService.open({
+                id,
+                title: { title: localeService.t('sheetConfig.sheetNameErrorTitle') },
+                children: { title: localeService.t('sheetConfig.sheetNameSpecCharError') },
                 cancelText: localeService.t('button.cancel'),
                 confirmText: localeService.t('button.confirm'),
                 onClose() {

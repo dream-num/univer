@@ -24,7 +24,7 @@ import type { Injector } from '@wendellhu/redi';
 
 import type { Subscription } from 'rxjs';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import type { SelectionShape } from './selection-shape';
+import type { SelectionControl } from './selection-shape';
 import { ISelectionRenderService, RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './selection-render.service';
 
 const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
@@ -32,10 +32,14 @@ const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
 const SELECTION_CONTROL_DELETING_LIGHTEN = 35;
 
 export interface ISelectionShapeTargetSelection {
-    originControl: SelectionShape;
+    originControl: SelectionControl;
     targetSelection: IRangeWithCoord;
 }
 
+/**
+ * for auto-fill (crosshair expand selection range)
+ * drag selection range
+ */
 export class SelectionShapeExtension {
     private _startOffsetX: number = 0;
 
@@ -75,7 +79,7 @@ export class SelectionShapeExtension {
     private _fillControlColors: string[] = [];
 
     constructor(
-        private _control: SelectionShape,
+        private _control: SelectionControl,
         private _skeleton: SpreadsheetSkeleton,
         private _scene: Scene,
         private readonly _themeService: ThemeService,
@@ -825,6 +829,7 @@ export class SelectionShapeExtension {
             this._fillControlColors.push(o.fill as string);
         });
 
+        // Controls the border of the expanding selection area
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             const currentViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));

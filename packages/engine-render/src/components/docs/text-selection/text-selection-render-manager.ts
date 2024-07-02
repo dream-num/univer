@@ -1009,7 +1009,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const originCoord = this._activeViewport.getRelativeVector(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const originCoord = this._activeViewport.transformVector2SceneCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         if (!originCoord) {
             return;

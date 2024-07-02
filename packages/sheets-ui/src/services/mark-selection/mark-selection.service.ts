@@ -15,13 +15,13 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, ThemeService, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
 import { ISelectionRenderService } from '../selection/selection-render.service';
-import { SelectionShape } from '../selection/selection-shape';
+import { SelectionControl } from '../selection/selection-shape';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 export interface IMarkSelectionService {
@@ -37,7 +37,7 @@ interface IMarkSelectionInfo {
     subUnitId: string;
     selection: ISelectionWithStyle;
     zIndex: number;
-    control: SelectionShape | null;
+    control: SelectionControl | null;
     exits: string[];
 }
 
@@ -54,6 +54,11 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
+
+        const selectionMovingStartOb = this._selectionRenderService.selectionMoveStart$.subscribe(() => {
+            this.removeAllShapes();
+        });
+        this.disposeWithMe(toDisposable(selectionMovingStartOb));
     }
 
     addShape(selection: ISelectionWithStyle, exits: string[] = [], zIndex: number = DEFAULT_Z_INDEX): string | null {
@@ -99,7 +104,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
             if (!scene || !skeleton) return;
 
             const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-            const control = new SelectionShape(scene, zIndex, false, this._themeService);
+            const control = new SelectionControl(scene, zIndex, false, this._themeService);
             control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
             shape.control = control;
         });

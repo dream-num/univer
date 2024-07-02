@@ -21,6 +21,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
 export interface ISheetSkeletonManagerParam {
+    unitId?: string;
     sheetId: string;
     skeleton: SpreadsheetSkeleton;
     dirty: boolean;
@@ -91,8 +92,15 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         return this._getSkeleton(this._currentSkeletonSearchParam);
     }
 
+    /**
+     * unitId is never read?
+     */
     getUnitSkeleton(unitId: string, sheetId: string): Nullable<ISheetSkeletonManagerParam> {
-        return this._getSkeleton({ sheetId });
+        const param = this._getSkeleton({ sheetId });
+        if (param != null) {
+            param.unitId = unitId;
+        }
+        return param;
     }
 
     setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
@@ -120,10 +128,11 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         }
 
         this._currentSkeletonSearchParam = searchParam;
-
-        const nextParam = this.getCurrent();
-        this._currentSkeletonBefore$.next(nextParam);
-        this._currentSkeleton$.next(nextParam);
+        const unitId = this._context.unitId;
+        const sheetId = this._currentSkeletonSearchParam.sheetId;
+        const sheetSkeletonManagerParam = this.getUnitSkeleton(unitId, sheetId);
+        this._currentSkeletonBefore$.next(sheetSkeletonManagerParam);
+        this._currentSkeleton$.next(sheetSkeletonManagerParam);
     }
 
     reCalculate() {

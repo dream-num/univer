@@ -30,7 +30,6 @@ import { FormatPainterRenderController } from './controllers/render-controllers/
 import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 import { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
-import { SelectionRenderController } from './controllers/render-controllers/selection.render-controller';
 import { SheetsRenderService } from './services/sheets-render.service';
 import type { IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
 import { DefaultSheetUiConfig } from './controllers/sheet-ui.controller';
@@ -40,7 +39,7 @@ import { ISheetClipboardService, SheetClipboardService } from './services/clipbo
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { IMarkSelectionService, MarkSelectionService } from './services/mark-selection/mark-selection.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
-import { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
+import { ISelectionRenderService } from './services/selection/selection-render.service';
 import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
@@ -54,7 +53,7 @@ import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.serv
 import { ForceStringRenderController } from './controllers/force-string-render.controller';
 import { ForceStringAlertRenderController } from './controllers/force-string-alert-render.controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
-import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
+import { MobileSheetsScrollRenderController } from './controllers/render-controllers/mobile/mobile-scroll.render-controller';
 // import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 import { DragRenderController } from './controllers/drag-render.controller';
 import { DragManagerService } from './services/drag-manager.service';
@@ -71,6 +70,8 @@ import { SheetPrintInterceptorService } from './services/print-interceptor.servi
 import { SheetUIMobileController } from './controllers/mobile/mobile-sheet-ui.controller';
 import { SheetContextMenuMobileRenderController } from './controllers/render-controllers/mobile/mobile-contextmenu.render-controller';
 import { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
+import { MobileSelectionRenderService } from './services/selection/mobile-selection-render.service';
+import { MobileSelectionRenderController } from './controllers/render-controllers/mobile/mobile-selection.render-controller';
 
 /**
  * @ignore
@@ -105,7 +106,7 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [ScrollManagerService],
                 // This would be removed from global injector and moved into RenderUnit provider.
                 // [SheetSkeletonManagerService],
-                [ISelectionRenderService, { useClass: SelectionRenderService }],
+                [ISelectionRenderService, { useClass: MobileSelectionRenderService }],
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
                 [HoverManagerService],
@@ -177,12 +178,15 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             // Before HMRC expected selections remain unchanged when user clicks on the header. If we don't initialize HMRC before SRC,
             // the selections will be changed by SRC first. Maybe we should merge row/col header related render controllers to one class.
             HeaderMoveRenderController,
-            SelectionRenderController,
+            MobileSelectionRenderController,
             HeaderFreezeRenderController,
             // HeaderUnhideRenderController,
             // HeaderResizeRenderController,
+            // Caution: ScrollRenderController should placed before ZoomRenderController
+            // because ZoomRenderController would change scrollInfo in currentSkeletonBefore$
+            // currentSkeletonBefore$ --> ZoomRenderController ---> viewport.resize --> setScrollInfo, but ScrollRenderController needs scrollInfo
+            MobileSheetsScrollRenderController,
             SheetsZoomRenderController,
-            SheetsScrollRenderController,
             FormatPainterRenderController,
             // HeaderMenuRenderController,
             CellAlertRenderController,
@@ -193,7 +197,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
             ForceStringRenderController,
             CellCustomRenderController,
             SheetContextMenuMobileRenderController,
-
             SheetPermissionInterceptorCanvasRenderController,
             SheetPermissionInterceptorFormulaRenderController,
             SheetPermissionRenderController,

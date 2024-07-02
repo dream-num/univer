@@ -75,7 +75,7 @@ describe('Test commands used for change selections', () => {
     }
 
     const scrollTo = (startRow: number, startColumn: number, offsetX = 0, offsetY = 0) => {
-        scrollManagerService.setScrollInfoToCurrSheet({
+        scrollManagerService.setScrollInfoToCurrSheetAndEmitEvent({
             sheetViewStartRow: startRow,
             sheetViewStartColumn: startColumn,
             offsetX,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, ISelectionCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { IRange, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
 import { BooleanNumber, sortRules } from '@univerjs/core';
 
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
@@ -67,7 +67,6 @@ export class Spreadsheet extends SheetComponent {
     ) {
         super(oKey, spreadsheetSkeleton);
         this._initialDefaultExtension();
-
         this.makeDirty(true);
     }
 
@@ -102,9 +101,6 @@ export class Spreadsheet extends SheetComponent {
         super.dispose();
         this._documents?.dispose();
         this._documents = null as unknown as Documents;
-        // cacheCanvas 已经移动到 viewport 中了, cacheCanvas 的 dispose 在 viewport@dispose 中处理
-        // this._cacheCanvas?.dispose();
-        // this._cacheCanvas = null as unknown as Canvas;
         this._backgroundExtension = null as unknown as Background;
         this._borderExtension = null as unknown as Border;
         this._fontExtension = null as unknown as Font;
@@ -226,7 +222,6 @@ export class Spreadsheet extends SheetComponent {
     /**
      * Since multiple controllers, not just the sheet-render.controller, invoke spreadsheet.makeDirty() — for instance, the cf.render-controller — it's essential to also call viewport.markDirty() whenever spreadsheet.makeDirty() is triggered.
      * @param state
-     * @returns
      */
     override makeDirty(state: boolean = true) {
         (this.getParent() as Scene)?.getViewports().forEach((vp) => vp.markDirty(state));
@@ -684,7 +679,7 @@ export class Spreadsheet extends SheetComponent {
         }
     }
 
-    private _clearBackground(ctx: UniverRenderingContext, backgroundPositions?: ObjectMatrix<ISelectionCellWithCoord>) {
+    private _clearBackground(ctx: UniverRenderingContext, backgroundPositions?: ObjectMatrix<ISelectionCellWithMergeInfo>) {
         backgroundPositions?.forValue((row, column, cellInfo) => {
             let { startY, endY, startX, endX } = cellInfo;
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
@@ -772,7 +767,6 @@ export class Spreadsheet extends SheetComponent {
             color += letters[Math.floor(Math.random() * 6)];
         }
 
-        // 确保生成的颜色足够亮
         const r = Number.parseInt(color.substring(1, 3), 16);
         const g = Number.parseInt(color.substring(3, 5), 16);
         const b = Number.parseInt(color.substring(5, 7), 16);

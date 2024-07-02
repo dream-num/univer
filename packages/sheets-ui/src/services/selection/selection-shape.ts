@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IRangeWithCoord, ISelectionCellWithCoord, Nullable, ThemeService } from '@univerjs/core';
+import type { IRangeWithCoord, ISelectionCellWithMergeInfo, Nullable, ThemeService } from '@univerjs/core';
 import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
-import type { Scene } from '@univerjs/engine-render';
-import { cancelRequestFrame, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import type { IObjectFullState, IRectProps, Scene } from '@univerjs/engine-render';
+import { cancelRequestFrame, DashedRect, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     getNormalSelectionStyle,
@@ -29,7 +29,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX, SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { SelectionRenderModel } from './selection-render-model';
 
-enum SELECTION_MANAGER_KEY {
+export enum SELECTION_MANAGER_KEY {
     Selection = '__SpreadsheetSelectionShape__',
     top = '__SpreadsheetSelectionTopControl__',
     bottom = '__SpreadsheetSelectionBottomControl__',
@@ -40,6 +40,12 @@ enum SELECTION_MANAGER_KEY {
     backgroundMiddleRight = '__SpreadsheetSelectionBackgroundControlMiddleRight__',
     backgroundBottom = '__SpreadsheetSelectionBackgroundControlBottom__',
     fill = '__SpreadsheetSelectionFillControl__',
+    // fillTopLeft & fillBottomRight are used for mobile selection
+    fillTopLeft = '__SpreadsheetSelectionFillControlTopLeft__',
+    fillBottomRight = '__SpreadsheetSelectionFillControlBottomRight__',
+    fillTopLeftInner = '__SpreadsheetSelectionFillControlTopLeftInner__',
+    fillBottomRightInner = '__SpreadsheetSelectionFillControlBottomRightInner__',
+
     lineMain = '__SpreadsheetDragLineMainControl__',
     lineContent = '__SpreadsheetDragLineContentControl__',
     line = '__SpreadsheetDragLineControl__',
@@ -68,7 +74,7 @@ const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
 /**
  * The main selection canvas component
  */
-export class SelectionShape extends Disposable {
+export class SelectionControl extends Disposable {
     private _leftControl!: Rect;
     private _rightControl!: Rect;
     private _topControl!: Rect;
@@ -79,9 +85,9 @@ export class SelectionShape extends Disposable {
     private _backgroundControlMiddleLeft!: Rect;
     private _backgroundControlMiddleRight!: Rect;
 
-    private _fillControl!: Rect;
+    private _fillControl: Rect;
 
-    private _selectionShape!: Group;
+    private _selectionShapeGroup!: Group;
 
     private _rowHeaderBackground!: Rect;
     private _rowHeaderBorder!: Rect;
@@ -103,16 +109,16 @@ export class SelectionShape extends Disposable {
 
     private _dashRect!: Rect;
 
-    private _selectionModel!: SelectionRenderModel;
+    protected _selectionModel!: SelectionRenderModel;
 
-    private _selectionStyle: Nullable<ISelectionStyle>;
+    protected _selectionStyle: Nullable<ISelectionStyle>;
 
-    private _rowHeaderWidth: number = 0;
-    private _columnHeaderHeight: number = 0;
+    protected _rowHeaderWidth: number = 0;
+    protected _columnHeaderHeight: number = 0;
 
-    private _widgetRects: Rect[] = [];
+    protected _widgetRects: Rect[] = [];
 
-    private _dispose$ = new BehaviorSubject<SelectionShape>(this);
+    private _dispose$ = new BehaviorSubject<SelectionControl>(this);
     readonly dispose$ = this._dispose$.asObservable();
 
     readonly selectionMoving$ = new Subject<Nullable<IRangeWithCoord>>();
@@ -132,10 +138,10 @@ export class SelectionShape extends Disposable {
     private _isHelperSelection: boolean = true;
 
     constructor(
-        private _scene: Scene,
-        private _zIndex: number,
-        private _isHeaderHighlight: boolean = true,
-        private readonly _themeService: ThemeService
+        protected _scene: Scene,
+        protected _zIndex: number,
+        protected _isHeaderHighlight: boolean = true,
+        protected readonly _themeService: ThemeService
     ) {
         super();
         this._initialize();
@@ -182,7 +188,19 @@ export class SelectionShape extends Disposable {
     }
 
     get selectionShape() {
-        return this._selectionShape;
+        return this._selectionShapeGroup;
+    }
+
+    get columnHeaderGroup() {
+        return this._columnHeaderGroup;
+    }
+
+    get rowHeaderGroup() {
+        return this._rowHeaderGroup;
+    }
+
+    get selectionShapeGroup() {
+        return this._selectionShapeGroup;
     }
 
     get model() {
@@ -221,16 +239,64 @@ export class SelectionShape extends Disposable {
         return this._bottomRightWidget;
     }
 
+    get themeService() {
+        return this._themeService;
+    }
+
     get selectionStyle() {
         return this._selectionStyle;
+    }
+
+    set selectionStyle(style: Nullable<ISelectionStyle>) {
+        this._selectionStyle = style;
+    }
+
+    get selectionModel() {
+        return this._selectionModel;
+    }
+
+    set selectionModel(model: SelectionRenderModel) {
+        this._selectionModel = model;
+    }
+
+    get defaultStyle() {
+        return this._defaultStyle;
+    }
+
+    set defaultStyle(style: ISelectionStyle) {
+        this._defaultStyle = style;
     }
 
     get dashRect() {
         return this._dashRect;
     }
 
+    get currentStyle() {
+        return this._currentStyle;
+    }
+
+    set currentStyle(style: Nullable<ISelectionStyle>) {
+        this._currentStyle = style;
+    }
+
     get isHelperSelection() {
         return this._isHelperSelection;
+    }
+
+    get rowHeaderWidth() {
+        return this._rowHeaderWidth;
+    }
+
+    set rowHeaderWidth(width: number) {
+        this._rowHeaderWidth = width;
+    }
+
+    get columnHeaderHeight() {
+        return this._columnHeaderHeight;
+    }
+
+    set columnHeaderHeight(height: number) {
+        this._columnHeaderHeight = height;
     }
 
     setEvent(state: boolean) {
@@ -256,18 +322,38 @@ export class SelectionShape extends Disposable {
         this._updateControl(style, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
+    updateRange(range: IRangeWithCoord) {
+        this._selectionModel.setValue(range);
+        // TODO @lumixraku
+        // why update rowHeaderWidth and columnHeaderHeight at the same time? Did they change when update range?
+        this._updateControl(null, this._rowHeaderWidth, this._columnHeaderHeight);
+    }
+
+    /**
+     * update seleciton model(new range)
+     * @param newSelectionRange update new selection range!!
+     * @param rowHeaderWidth
+     * @param columnHeaderHeight
+     * @param style
+     * @param highlight
+     */
     update(
         newSelectionRange: IRangeWithCoord,
         rowHeaderWidth: number = 0,
         columnHeaderHeight: number = 0,
         style?: Nullable<ISelectionStyle>,
-        highlight?: Nullable<ISelectionCellWithCoord>
+        highlight?: Nullable<ISelectionCellWithMergeInfo>
+        // rangeType?: RANGE_TYPE
     ) {
         this._selectionModel.setValue(newSelectionRange, highlight);
         if (style == null) {
             style = this._selectionStyle;
         }
         this._updateControl(style, rowHeaderWidth, columnHeaderHeight);
+    }
+
+    updateCurrCell(highlight?: Nullable<ISelectionCellWithMergeInfo>) {
+        this._selectionModel.setCurrentCell(highlight);
     }
 
     clearHighlight() {
@@ -288,8 +374,8 @@ export class SelectionShape extends Disposable {
         this._backgroundControlMiddleLeft?.dispose();
         this._backgroundControlMiddleRight?.dispose();
         this._backgroundControlBottom?.dispose();
-        this._fillControl?.dispose();
-        this._selectionShape?.dispose();
+        this._fillControl.dispose();
+        this._selectionShapeGroup?.dispose();
 
         this._rowHeaderBackground?.dispose();
         this._rowHeaderBorder?.dispose();
@@ -381,12 +467,10 @@ export class SelectionShape extends Disposable {
     }
 
     /**
-     * just handle the view
-     *
-     * inner update
+     * invoked when update selection style & range change
      */
     // eslint-disable-next-line max-lines-per-function
-    private _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
+    protected _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
         // startX startY shares same coordinate with viewport.(include row & colheader)
         const { startX, startY, endX, endY } = this._selectionModel;
         const defaultStyle = this._defaultStyle;
@@ -507,18 +591,20 @@ export class SelectionShape extends Disposable {
         }
 
         if (hasAutoFill === true && !this._hasWidgets(widgets)) {
-            this.fillControl.setProps({
+            const fillProps: IRectProps = {
                 fill: stroke,
                 stroke: AutofillStroke,
                 strokeScaleEnabled: false,
-            });
-            this.fillControl.transformByState({
+            };
+            const sizeState: IObjectFullState = {
                 width: AutofillSize - AutofillStrokeWidth,
                 height: AutofillSize - AutofillStrokeWidth,
                 left: endX - startX - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
                 top: endY - startY - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
                 strokeWidth: AutofillStrokeWidth,
-            });
+            };
+            this.fillControl.setProps(fillProps);
+            this.fillControl.transformByState(sizeState);
             this.fillControl.show();
         } else {
             this.fillControl.hide();
@@ -542,6 +628,7 @@ export class SelectionShape extends Disposable {
         this.selectionShape.makeDirtyNoDebounce(true);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initialize() {
         this._defaultStyle = getNormalSelectionStyle(this._themeService);
 
@@ -586,26 +673,29 @@ export class SelectionShape extends Disposable {
             zIndex: zIndex + 1,
         });
 
-        this._dashRect = new Rect(SELECTION_MANAGER_KEY.dash + zIndex, {
+        this._dashRect = new DashedRect(SELECTION_MANAGER_KEY.dash + zIndex, {
             zIndex: zIndex + 2,
             evented: false,
             stroke: '#fff',
         });
 
-        const shapes = [this._fillControl, this._leftControl, this._rightControl, this._topControl,
-            this._bottomControl, this._backgroundControlTop, this._backgroundControlMiddleLeft,
-            this._backgroundControlMiddleRight, this._backgroundControlBottom, this._dashRect,
+        const shapes = [
+            this._fillControl,
+            this._leftControl, this._rightControl, this._topControl, this._bottomControl,
+            this._backgroundControlTop, this._backgroundControlMiddleLeft,
+            this._backgroundControlMiddleRight, this._backgroundControlBottom,
+            this._dashRect,
         ];
 
         this._widgetRects = this._initialWidget();
-        this._selectionShape = new Group(SELECTION_MANAGER_KEY.Selection + zIndex, ...shapes, ...this._widgetRects);
-        this._selectionShape.hide();
-        this._selectionShape.evented = false;
-        this._selectionShape.zIndex = zIndex;
+        this._selectionShapeGroup = new Group(SELECTION_MANAGER_KEY.Selection + zIndex, ...shapes, ...this._widgetRects);
+        this._selectionShapeGroup.hide();
+        this._selectionShapeGroup.evented = false;
+        this._selectionShapeGroup.zIndex = zIndex;
 
         const scene = this.getScene();
 
-        scene.addObject(this._selectionShape, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
+        scene.addObject(this._selectionShapeGroup, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
 
         this.disposeWithMe(
             toDisposable(
@@ -958,7 +1048,7 @@ export class SelectionShape extends Disposable {
         }
     }
 
-    private _hasWidgets(widgets: ISelectionWidgetConfig) {
+    protected _hasWidgets(widgets: ISelectionWidgetConfig) {
         if (widgets == null) {
             return false;
         }

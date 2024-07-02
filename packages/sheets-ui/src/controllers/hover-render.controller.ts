@@ -60,6 +60,6 @@ export class HoverRenderController extends Disposable implements IRenderModule {
     }
 
     private _initScrollEvent() {
-        this.disposeWithMe(this._scrollManagerService.scrollInfo$.subscribe(() => this._hoverManagerService.onScroll()));
+        this.disposeWithMe(this._scrollManagerService.rawScrollInfo$.subscribe(() => this._hoverManagerService.onScroll()));
     }
 }

@@ -36,6 +36,9 @@ export interface ISheetObjectParam {
     spreadsheet: Spreadsheet;
     spreadsheetRowHeader: SpreadsheetHeader;
     spreadsheetColumnHeader: SpreadsheetColumnHeader;
+    /**
+     * sheet corner: a rect which placed on the intersection of rowHeader & columnHeader
+     */
     spreadsheetLeftTopPlaceholder: Rect;
     scene: Scene;
     engine: Engine;

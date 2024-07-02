@@ -59,7 +59,7 @@ export class MoveRangeController extends Disposable {
                         return;
                     }
 
-                    const selectionControls = this._selectionRenderService.getCurrentControls();
+                    const selectionControls = this._selectionRenderService.getSelectionControls();
                     selectionControls.forEach((controlSelection) => {
                         disposableCollection.add(
                             toDisposable(

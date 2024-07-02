@@ -421,7 +421,7 @@ export class PromptController extends Disposable {
 
                     this._updateRefSelectionStyle(this._isSelectionMovingRefSelections);
 
-                    const selectionControls = this._selectionRenderService.getCurrentControls();
+                    const selectionControls = this._selectionRenderService.getSelectionControls();
                     selectionControls.forEach((controlSelection) => {
                         controlSelection.disableHelperSelection();
 
@@ -1511,7 +1511,7 @@ export class PromptController extends Disposable {
     }
 
     private _updateRefSelectionStyle(refSelections: IRefSelection[]) {
-        const controls = this._selectionRenderService.getCurrentControls();
+        const controls = this._selectionRenderService.getSelectionControls();
 
         const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
 

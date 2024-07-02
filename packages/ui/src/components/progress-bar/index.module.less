@@ -1,15 +1,37 @@
 @height: 4px;
-.progress-bar {
-    margin: 12px 8px 0 8px;
+.progressBarContainer {
+    display: flex;
+    align-items: center;
+    margin: 0 8px 0 8px;
+}
 
+.progressBar {
     width: 160px;
     height: @height;
     background-color: rgb(var(--border-color));
     border-radius: var(--border-radius-lg);
+    margin-right: 8px;
 
     &-inner {
         height: @height;
         border-radius: var(--border-radius-lg);
         transition: width 0.5s;
+    }
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 12px;
+    color: rgb(var(--text-color));
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+        color: rgb(var(--text-color-secondary));
     }
 }

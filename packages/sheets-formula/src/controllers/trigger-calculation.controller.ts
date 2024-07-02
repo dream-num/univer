@@ -87,6 +87,8 @@ export class TriggerCalculationController extends Disposable {
         this._initialExecuteFormulaProcessListener();
 
         this._initialExecuteFormula();
+
+        this._initialProgressBar();
     }
 
     private _commandExecutedListener() {
@@ -446,6 +448,17 @@ export class TriggerCalculationController extends Disposable {
                 onlyLocal: true,
             }
         );
+    }
+
+    /**
+     * The user manually stops the progress bar
+     */
+    private _initialProgressBar() {
+        this.disposeWithMe(this._progressService.progressVisible$.subscribe((isVisible) => {
+            if (!isVisible) {
+                this._commandService.executeCommand(SetFormulaCalculationStopMutation.id);
+            }
+        }));
     }
 
     /**

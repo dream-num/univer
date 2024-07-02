@@ -15,7 +15,7 @@
  */
 
 import type { CustomDecorationType, DocumentDataModel, IMutationInfo, ITextRange } from '@univerjs/core';
-import { getBodySlice, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
+import { getBodySlice, IUniverInstanceService, JSONX, TextX, TextXActionType, Tools, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
@@ -136,10 +136,16 @@ export function deleteCustomDecorationFactory(accessor: IAccessor, params: IDele
         return false;
     }
 
-    const bodySlices = decorations.map((i) => {
-        const bodySlice = getBodySlice(body, i.startIndex, i.endIndex);
-        bodySlice.customDecorations = bodySlice.customDecorations?.filter((decoration) => decoration.id !== id);
+    const oldBodySlices = decorations.map((i) => {
+        const bodySlice = getBodySlice(body, i.startIndex, i.endIndex + 1);
+        // bodySlice.customDecorations = bodySlice.customDecorations?.filter((decoration) => decoration.id !== id);
         return bodySlice;
+    });
+
+    const bodySlices = oldBodySlices.map((bodySlice) => {
+        const copy = Tools.deepClone(bodySlice);
+        copy.customDecorations = copy.customDecorations?.filter((decoration) => decoration.id !== id);
+        return copy;
     });
 
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -157,6 +163,7 @@ export function deleteCustomDecorationFactory(accessor: IAccessor, params: IDele
     let cursor = 0;
     decorations.forEach((decoration, i) => {
         const bodySlice = bodySlices[i];
+        const oldBody = oldBodySlices[i];
         if (decoration.startIndex !== cursor) {
             textX.push({
                 t: TextXActionType.RETAIN,
@@ -164,14 +171,16 @@ export function deleteCustomDecorationFactory(accessor: IAccessor, params: IDele
                 segmentId,
             });
         }
+        cursor = (decoration.startIndex);
         textX.push({
             t: TextXActionType.RETAIN,
             len: decoration.endIndex - decoration.startIndex + 1,
             segmentId,
             body: bodySlice,
+            oldBody,
             coverType: UpdateDocsAttributeType.REPLACE,
         });
-        cursor = decoration.endIndex + 1;
+        cursor = cursor + (decoration.endIndex - decoration.startIndex + 1);
     });
 
     doMutation.params.actions = jsonX.editOp(textX.serialize());

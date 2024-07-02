@@ -138,11 +138,9 @@ export function getCustomDecorationSlice(body: IDocumentBody, startOffset: numbe
 
     const customDecorationSlice: ICustomDecoration[] = [];
     customDecorations.forEach((range) => {
-        // custom-range contain slice-range
-        if (
-            (startOffset >= range.startIndex && endOffset > range.startIndex) ||
-            (startOffset >= range.endIndex && endOffset > range.endIndex)
-        ) {
+        // 34 35
+        // ranges and selection has overlap
+        if (Math.max(range.startIndex, startOffset) <= Math.min(range.endIndex, endOffset - 1)) {
             const copy = Tools.deepClone(range);
             customDecorationSlice.push({
                 ...copy,

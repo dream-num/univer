@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, ITextRun, Nullable } from '@univerjs/core';
-import { DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentDataModel } from '@univerjs/core';
+import type { ICustomDecorationForInterceptor, ICustomRangeForInterceptor, IDocumentBody, ITextRun, Nullable } from '@univerjs/core';
+import { DataStreamTreeNodeType, DataStreamTreeTokenType, DocumentDataModel, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 
 import { DataStreamTreeNode } from './data-stream-tree-node';
 
+export interface ICustomRangeInterceptor {
+    getCustomRange: (index: number) => Nullable<ICustomRangeForInterceptor>;
+    getCustomDecoration: (index: number) => Nullable<ICustomDecorationForInterceptor>;
+}
+
 export class DocumentViewModel implements IDisposable {
+    private _interceptor: Nullable<ICustomRangeInterceptor> = null;
+
     children: DataStreamTreeNode[] = [];
 
     private _sectionBreakCurrentIndex = 0;
@@ -47,6 +54,11 @@ export class DocumentViewModel implements IDisposable {
         this.children = this._transformToTree(_documentDataModel.getBody()!.dataStream);
 
         this._buildHeaderFooterViewModel();
+    }
+
+    registerCustomRangeInterceptor(interceptor: ICustomRangeInterceptor): IDisposable {
+        this._interceptor = interceptor;
+        return toDisposable(() => this._interceptor = null);
     }
 
     dispose(): void {
@@ -369,17 +381,48 @@ export class DocumentViewModel implements IDisposable {
         }
     }
 
-    getCustomRange(index: number) {
+    getCustomRangeRaw(index: number) {
         const customRanges = this.getBody()!.customRanges;
         if (customRanges == null) {
             return;
         }
+
         for (let i = 0, customRangesLen = customRanges.length; i < customRangesLen; i++) {
             const customRange = customRanges[i];
             if (index >= customRange.startIndex && index <= customRange.endIndex) {
                 return customRange;
             }
         }
+    }
+
+    getCustomRange(index: number): Nullable<ICustomRangeForInterceptor> {
+        if (this._interceptor) {
+            return this._interceptor.getCustomRange(index);
+        }
+
+        return this.getCustomRangeRaw(index);
+    }
+
+    getCustomDecorationRaw(index: number) {
+        const customDecorations = this.getBody()!.customDecorations;
+        if (customDecorations == null) {
+            return;
+        }
+
+        for (let i = 0, customDecorationsLen = customDecorations.length; i < customDecorationsLen; i++) {
+            const customDecoration = customDecorations[i];
+            if (index >= customDecoration.startIndex && index <= customDecoration.endIndex) {
+                return customDecoration;
+            }
+        }
+    }
+
+    getCustomDecoration(index: number): Nullable<ICustomDecorationForInterceptor> {
+        if (this._interceptor) {
+            return this._interceptor.getCustomDecoration(index);
+        }
+
+        return this.getCustomDecorationRaw(index);
     }
 
     protected _transformToTree(dataStream: string) {

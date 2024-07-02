@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { getSelectionText, getDeleteSelection, getInsertSelection } from './basics/selection';
 export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObject, neoGetDocObject, getDocObjectById } from './basics/component-tools';
 export * from './basics/docs-view-key';
@@ -64,6 +65,10 @@ export {
 } from './commands/commands/paragraph-align.command';
 export { ReplaceContentCommand, CoverContentCommand } from './commands/commands/replace-content.command';
 export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
+export { addCustomRangeFactory, addCustomRangeBySelectionFactory, deleteCustomRange } from './basics/custom-range-factory';
+export { addCustomDecorationBySelectionFactory, addCustomDecorationFactory, deleteCustomDecorationFactory } from './basics/custom-decoration-factory';
+export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
+export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
 
 export {
     RichTextEditingMutation,

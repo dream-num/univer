@@ -15,7 +15,7 @@
  */
 
 /* eslint-disable node/prefer-global/process */
-import type { ICommand, IStyleData, IWorkbookData, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IStyleData, IWorkbookData, Workbook } from '@univerjs/core';
 import { CommandType, IResourceLoaderService, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import { RecordController } from '../../controllers/local-save/record.controller';
@@ -51,18 +51,29 @@ export const SaveSnapshotOptions: ICommand = {
         const resourceLoaderService = accessor.get(IResourceLoaderService);
         const exportController = accessor.get(ExportController);
         const recordController = accessor.get(RecordController);
+        const gitHash = process.env.GIT_COMMIT_HASH;
+        const gitBranch = process.env.GIT_REF_NAME;
+        const buildTime = process.env.BUILD_TIME;
+        const preName = new Date().toLocaleString();
 
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        if (!workbook) {
+            const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)!;
+            const snapshot = resourceLoaderService.saveDoc(doc);
+            (snapshot as any).__env__ = { gitHash, gitBranch, buildTime };
+            const text = JSON.stringify(snapshot, null, 2);
+            exportController.exportJson(text, `${preName} snapshot`);
+            return true;
+        }
+
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) {
             return false;
         }
         const snapshot = resourceLoaderService.saveWorkbook(workbook);
-        const gitHash = process.env.GIT_COMMIT_HASH;
-        const gitBranch = process.env.GIT_REF_NAME;
-        const buildTime = process.env.BUILD_TIME;
+
         (snapshot as any).__env__ = { gitHash, gitBranch, buildTime };
-        const preName = new Date().toLocaleString();
+
         switch (params.value) {
             case 'sheet': {
                 const sheetId = worksheet.getSheetId();

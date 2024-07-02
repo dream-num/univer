@@ -15,6 +15,7 @@
  */
 
 import type {
+    DocumentDataModel,
     ICommand,
     IDocumentBody,
     IDocumentData,
@@ -22,18 +23,20 @@ import type {
     ITextRange,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import { CommandType, ICommandService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import { isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
+import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import { getInsertSelection } from '../../basics/selection';
 
 export interface IInsertCommandParams {
     unitId: string;
     body: IDocumentBody;
     range: ITextRange;
-    textRanges: ITextRangeWithStyle[];
+    textRanges?: ITextRangeWithStyle[];
     segmentId?: string;
 }
 
@@ -50,15 +53,35 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
 
-        const { range, segmentId, body, unitId, textRanges } = params;
-        const { startOffset, collapsed } = range;
+        const { range, segmentId, body, unitId, textRanges: propTextRanges } = params;
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        const originBody = doc?.getBody();
+        const activeRange = textSelectionManagerService.getActiveRange();
+        if (activeRange == null) {
+            return false;
+        }
+        if (!originBody) {
+            return false;
+        }
+        const actualRange = getInsertSelection(range, originBody);
+        const { startOffset, collapsed } = actualRange;
+        const textRanges = [
+            {
+                startOffset: startOffset + body.dataStream.length,
+                endOffset: startOffset + body.dataStream.length,
+                style: activeRange.style,
+                collapsed,
+            },
+        ];
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
                 actions: [],
-                textRanges,
+                textRanges: propTextRanges ?? textRanges,
                 debounce: true,
             },
         };
@@ -75,7 +98,13 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
                 });
             }
         } else {
-            textX.push(...getRetainAndDeleteFromReplace(range, segmentId));
+            const { dos, retain } = getRetainAndDeleteFromReplace(actualRange, segmentId, 0, originBody);
+            textX.push(...dos);
+            doMutation.params.textRanges = [{
+                startOffset: startOffset + body.dataStream.length + retain,
+                endOffset: startOffset + body.dataStream.length + retain,
+                collapsed,
+            }];
         }
 
         textX.push({
@@ -85,7 +114,6 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             line: 0,
             segmentId,
         });
-
         doMutation.params.actions = jsonX.editOp(textX.serialize());
 
         const result = commandService.syncExecuteCommand<
@@ -106,7 +134,6 @@ export interface IDeleteCommandParams {
     unitId: string;
     range: ITextRange;
     direction: DeleteDirection;
-    textRanges: ITextRangeWithStyle[];
     len?: number;
     segmentId?: string;
 }
@@ -116,22 +143,45 @@ export interface IDeleteCommandParams {
  */
 export const DeleteCommand: ICommand<IDeleteCommandParams> = {
     id: 'doc.command.delete-text',
-
     type: CommandType.COMMAND,
-
     handler: async (accessor, params: IDeleteCommandParams) => {
         const commandService = accessor.get(ICommandService);
-
-        const { range, segmentId, unitId, direction, textRanges, len = 1 } = params;
-
+        const { range, segmentId, unitId, direction, len = 1 } = params;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const { startOffset } = range;
+        const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        if (!documentDataModel) {
+            return false;
+        }
 
+        const body = documentDataModel.getBody();
+        if (!body) {
+            return false;
+        }
+        const dataStream = body.dataStream;
+        const start = direction === DeleteDirection.LEFT ? startOffset - len : startOffset;
+        const end = start + len - 1;
+        const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, start, end));
+        const toDeleteRanges = relativeCustomRanges?.filter((customRange) => shouldDeleteCustomRange(start, len, customRange, dataStream));
+        const deleteIndexes: number[] = [];
+        for (let i = 0; i < len; i++) {
+            deleteIndexes.push(start + i);
+        }
+        toDeleteRanges?.forEach((range) => {
+            deleteIndexes.push(range.startIndex, range.endIndex);
+        });
+        deleteIndexes.sort();
+        const deleteStart = deleteIndexes[0];
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
                 actions: [],
-                textRanges,
+                textRanges: [{
+                    startOffset: deleteStart,
+                    endOffset: deleteStart,
+                    collapsed: true,
+                }],
                 debounce: true,
             },
         };
@@ -139,20 +189,24 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
-        if (startOffset > 0) {
+        let cursor = 0;
+        for (let i = 0; i < deleteIndexes.length; i++) {
+            const deleteIndex = deleteIndexes[i];
+            if (deleteIndex - cursor > 0) {
+                textX.push({
+                    t: TextXActionType.RETAIN,
+                    len: deleteIndex - cursor,
+                    segmentId,
+                });
+            }
             textX.push({
-                t: TextXActionType.RETAIN,
-                len: direction === DeleteDirection.LEFT ? startOffset - len : startOffset,
+                t: TextXActionType.DELETE,
+                len: 1,
                 segmentId,
+                line: 0,
             });
+            cursor = deleteIndex + 1;
         }
-
-        textX.push({
-            t: TextXActionType.DELETE,
-            len,
-            line: 0,
-            segmentId,
-        });
 
         doMutation.params.actions = jsonX.editOp(textX.serialize());
 

@@ -95,12 +95,11 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         // Step 1: Update Doc Data Model.
         const undoActions = JSONX.invertWithDoc(actions, documentDataModel.getSnapshot());
         documentDataModel.apply(actions);
-
         // Step 2: Update Doc View Model.
+        // console.log('===edit end', { actions, undoActions }, Tools.deepClone(documentDataModel.getBody()));
         const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
         const segmentViewModel = documentViewModel.getSelfOrHeaderFooterViewModel(segmentId);
         segmentViewModel.reset(segmentDocumentDataModel);
-
         // Step 3: Update cursor & selection.
         // Make sure update cursor & selection after doc skeleton is calculated.
         if (!noNeedSetTextRange && textRanges && trigger != null) {

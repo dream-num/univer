@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
@@ -26,6 +27,7 @@ import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-cond
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
+import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
 import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
@@ -115,6 +117,7 @@ const mockUser = {
 };
 
 class CustomMentionDataService implements IThreadCommentMentionDataService {
+    dataSource: Nullable<IThreadCommentMentionDataSource>;
     trigger: string = '@';
 
     async getMentions() {

@@ -17,6 +17,7 @@
 import { Subject } from 'rxjs';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
+import type { UniverInstanceType } from '../../common/unit';
 import type { IResourceHook, IResourceManagerService, IResourceName } from './type';
 
 export class ResourceManagerService extends Disposable implements IResourceManagerService {
@@ -32,6 +33,18 @@ export class ResourceManagerService extends Disposable implements IResourceManag
 
     public getResources(unitId: string) {
         const resourceHooks = this.getAllResourceHooks();
+        const resources = resourceHooks.map((resourceHook) => {
+            const data = resourceHook.toJson(unitId);
+            return {
+                name: resourceHook.pluginName,
+                data,
+            };
+        });
+        return resources;
+    }
+
+    public getResourcesByType(unitId: string, type: UniverInstanceType) {
+        const resourceHooks = this.getAllResourceHooks().filter((hook) => hook.businesses.includes(type));
         const resources = resourceHooks.map((resourceHook) => {
             const data = resourceHook.toJson(unitId);
             return {

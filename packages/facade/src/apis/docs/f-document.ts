@@ -78,16 +78,7 @@ export class FDocument {
             segmentId: '',
         };
 
-        const { startOffset, segmentId } = activeRange;
-
-        const len = text.length;
-
-        const textRanges = [
-            {
-                startOffset: startOffset + len,
-                endOffset: startOffset + len,
-            },
-        ];
+        const { segmentId } = activeRange;
 
         return this._commandService.executeCommand(InsertCommand.id, {
             unitId,
@@ -95,7 +86,6 @@ export class FDocument {
                 dataStream: text,
             },
             range: activeRange,
-            textRanges,
             segmentId,
         });
     }

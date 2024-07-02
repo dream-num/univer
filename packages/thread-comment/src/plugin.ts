@@ -44,9 +44,10 @@ export class UniverThreadCommentPlugin extends Plugin {
 
     override onStarting(injector: Injector): void {
         (mergeOverrideWithDependencies([
+            [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
             [ThreadCommentModel],
             [ThreadCommentResourceController],
-            [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
+
         ], this._config?.overrides) as Dependency[]).forEach(
             (d) => {
                 injector.add(d);

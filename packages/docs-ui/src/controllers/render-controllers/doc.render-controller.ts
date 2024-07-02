@@ -19,7 +19,7 @@ import { ICommandService, IConfigService, RxDisposable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSkeletonManagerService, RichTextEditingMutation, VIEWPORT_KEY } from '@univerjs/docs';
 import type { DocumentSkeleton, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
-import { DocBackground, Documents, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
+import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
@@ -30,13 +30,38 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IConfigService private readonly _configService: IConfigService,
-        @IEditorService private readonly _editorService: IEditorService
+        @IEditorService private readonly _editorService: IEditorService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
         this._addNewRender();
         this._initRenderRefresh();
         this._initCommandListener();
+    }
+
+    reRender(unitId: string) {
+        const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+        const skeleton = docSkeletonManagerService?.getSkeleton();
+        if (!skeleton) {
+            return;
+        }
+
+        // TODO: `disabled` is only used for read only demo, and will be removed in the future.
+        const disabled = !!skeleton.getViewModel().getDataModel().getSnapshot().disabled;
+        if (disabled) {
+            return;
+        }
+
+        skeleton.calculate();
+
+        if (this._editorService.isEditor(unitId)) {
+            this._context.mainComponent?.makeDirty();
+
+            return;
+        }
+
+        this._recalculateSizeBySkeleton(skeleton);
     }
 
     private _addNewRender() {
@@ -156,26 +181,7 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
                 const params = command.params as IRichTextEditingMutationParams;
                 const { unitId } = params;
 
-                const skeleton = this._docSkeletonManagerService.getSkeleton();
-                if (!skeleton) {
-                    return;
-                }
-
-                // TODO: `disabled` is only used for read only demo, and will be removed in the future.
-                const disabled = !!skeleton.getViewModel().getDataModel().getSnapshot().disabled;
-                if (disabled) {
-                    return;
-                }
-
-                skeleton.calculate();
-
-                if (this._editorService.isEditor(unitId)) {
-                    this._context.mainComponent?.makeDirty();
-
-                    return;
-                }
-
-                this._recalculateSizeBySkeleton(skeleton);
+                this.reRender(unitId);
             }
         }));
     }

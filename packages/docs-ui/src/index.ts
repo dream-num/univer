@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 export * from './basics';
 export * from './docs-ui-plugin';
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';

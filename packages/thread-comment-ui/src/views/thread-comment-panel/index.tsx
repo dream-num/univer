@@ -18,11 +18,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
-import { ICommandService, LocaleService, type UniverInstanceType, UserManagerService } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { ICommandService, LocaleService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import { Button, Select } from '@univerjs/design';
 import { IncreaseSingle } from '@univerjs/icons';
 import type { Observable } from 'rxjs';
+import type { IThreadCommentTreeProps } from '../thread-comment-tree';
 import { ThreadCommentTree } from '../thread-comment-tree';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
@@ -34,14 +36,34 @@ export interface IThreadCommentPanelProps {
     type: UniverInstanceType;
     onAdd: () => void;
     getSubUnitName: (subUnitId: string) => string;
-    onResolve?: (id: string) => void;
+    onResolve?: (id: string, resolved: boolean) => void;
     sortComments?: (comments: IThreadComment[]) => IThreadComment[];
     onItemLeave?: (comment: IThreadComment) => void;
     onItemEnter?: (comment: IThreadComment) => void;
+    disableAdd?: boolean;
+    tempComment?: Nullable<IThreadComment>;
+    onAddComment?: IThreadCommentTreeProps['onAddComment'];
+    onDeleteComment?: IThreadCommentTreeProps['onDeleteComment'];
+    showComments?: string[];
 }
 
 export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
-    const { unitId, subUnitId$, type, onAdd, getSubUnitName, onResolve, sortComments, onItemLeave, onItemEnter } = props;
+    const {
+        unitId,
+        subUnitId$,
+        type,
+        onAdd,
+        getSubUnitName,
+        onResolve,
+        sortComments,
+        onItemLeave,
+        onItemEnter,
+        disableAdd,
+        tempComment,
+        onAddComment,
+        onDeleteComment,
+        showComments,
+    } = props;
     const [unit, setUnit] = useState('all');
     const [status, setStatus] = useState('all');
     const localeService = useDependency(LocaleService);
@@ -53,32 +75,48 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const update = useObservable(threadCommentModel.commentUpdate$);
     const commandService = useDependency(ICommandService);
     const subUnitId = useObservable(subUnitId$);
-    const currentUser = userService.getCurrentUser();
     const shouldScroll = useRef(true);
     const prefix = 'panel';
+    const currentUser = useObservable(userService.currentUser$);
     const comments = useMemo(() => {
-        if (unit === 'all') {
-            const filteredComments = unitComments.map((i) => i[1]).flat().filter((i) => !i.parentId);
-            return sortComments ? sortComments(filteredComments) : filteredComments;
+        const allComments =
+            (unit === 'all' ? unitComments.map((i) => i[1]).flat() : unitComments.find((i) => i[0] === subUnitId)?.[1] ?? [])
+                .filter((i) => !i.parentId);
+
+        const sort = sortComments ?? ((a) => a);
+        const res = allComments;
+
+        if (showComments) {
+            const map = new Map<string, IThreadComment>();
+            res.forEach((comment) => {
+                map.set(comment.id, comment);
+            });
+
+            return [...showComments, ''].map((id) => map.get(id)).filter(Boolean) as IThreadComment[];
         } else {
-            return unitComments.find((i) => i[0] === subUnitId)?.[1] ?? [];
+            return sort(res);
         }
-    }, [unit, unitComments, subUnitId, sortComments]);
+    }, [showComments, unit, unitComments, sortComments, subUnitId]);
+
+    const commentsSorted = useMemo(() => [
+        ...comments.filter((comment) => !comment.resolved),
+        ...comments.filter((comment) => comment.resolved),
+    ], [comments]);
 
     const statuedComments = useMemo(() => {
         if (status === 'resolved') {
-            return comments.filter((comment) => comment.resolved);
+            return commentsSorted.filter((comment) => comment.resolved);
         }
 
         if (status === 'unsolved') {
-            return comments.filter((comment) => !comment.resolved);
+            return commentsSorted.filter((comment) => !comment.resolved);
         }
         if (status === 'concern_me') {
             if (!currentUser?.userID) {
-                return comments;
+                return commentsSorted;
             }
 
-            return comments.map((comment) => threadCommentModel.getCommentWithChildren(comment.unitId, comment.subUnitId, comment.id)).map((comment) => {
+            return commentsSorted.map((comment) => threadCommentModel.getCommentWithChildren(comment.unitId, comment.subUnitId, comment.id)).map((comment) => {
                 if (comment?.relativeUsers.has(currentUser.userID)) {
                     return comment.root;
                 }
@@ -86,8 +124,12 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
             }).filter(Boolean) as IThreadComment[];
         }
 
-        return comments;
-    }, [comments, currentUser?.userID, status, threadCommentModel]);
+        return commentsSorted;
+    }, [commentsSorted, currentUser?.userID, status, threadCommentModel]);
+
+    const renderComments = tempComment
+        ? [tempComment, ...statuedComments]
+        : statuedComments;
 
     const isFiltering = status !== 'all' || unit !== 'all';
 
@@ -120,20 +162,24 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     return (
         <div className={styles.threadCommentPanel}>
             <div className={styles.threadCommentPanelForms}>
-                <Select
-                    borderless
-                    value={unit}
-                    onChange={(e) => setUnit(e)}
-                    options={[
-                        {
-                            value: 'current',
-                            label: localeService.t('threadCommentUI.filter.sheet.current'),
-                        }, {
-                            value: 'all',
-                            label: localeService.t('threadCommentUI.filter.sheet.all'),
-                        },
-                    ]}
-                />
+                {type === UniverInstanceType.UNIVER_SHEET
+                    ? (
+                        <Select
+                            borderless
+                            value={unit}
+                            onChange={(e) => setUnit(e)}
+                            options={[
+                                {
+                                    value: 'current',
+                                    label: localeService.t('threadCommentUI.filter.sheet.current'),
+                                }, {
+                                    value: 'all',
+                                    label: localeService.t('threadCommentUI.filter.sheet.all'),
+                                },
+                            ]}
+                        />
+                    )
+                    : null}
                 <Select
                     borderless
                     value={status}
@@ -157,7 +203,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     ]}
                 />
             </div>
-            {statuedComments?.map((comment) => (
+            {renderComments.map((comment) => (
                 <ThreadCommentTree
                     prefix={prefix}
                     getSubUnitName={getSubUnitName}
@@ -165,24 +211,34 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                     id={comment.id}
                     unitId={comment.unitId}
                     subUnitId={comment.subUnitId}
+                    refStr={comment.ref}
                     type={type}
                     showEdit={activeCommentId?.commentId === comment.id}
                     showHighlight={activeCommentId?.commentId === comment.id}
                     onClick={() => {
                         shouldScroll.current = false;
-                        commandService.executeCommand(SetActiveCommentOperation.id, {
-                            unitId: comment.unitId,
-                            subUnitId: comment.subUnitId,
-                            commentId: comment.id,
-                            temp: true,
-                        });
+                        if (!comment.resolved) {
+                            commandService.executeCommand(
+                                SetActiveCommentOperation.id,
+                                {
+                                    unitId: comment.unitId,
+                                    subUnitId: comment.subUnitId,
+                                    commentId: comment.id,
+                                    temp: false,
+                                }
+                            );
+                        } else {
+                            commandService.executeCommand(SetActiveCommentOperation.id);
+                        }
                     }}
-                    onClose={() => onResolve?.(comment.id)}
                     onMouseEnter={() => onItemEnter?.(comment)}
                     onMouseLeave={() => onItemLeave?.(comment)}
+                    onAddComment={onAddComment}
+                    onDeleteComment={onDeleteComment}
+                    onResolve={(resolved: boolean) => onResolve?.(comment.id, resolved)}
                 />
             ))}
-            {statuedComments.length
+            {renderComments.length
                 ? null
                 : (
                     <div className={styles.threadCommentPanelEmpty}>
@@ -204,6 +260,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                                     className={styles.threadCommentPanelAdd}
                                     type="primary"
                                     onClick={onAdd}
+                                    disabled={disableAdd}
                                 >
                                     <IncreaseSingle />
                                     {localeService.t('threadCommentUI.panel.addComment')}

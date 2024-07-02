@@ -75,17 +75,7 @@ export class NormalInputController extends Disposable {
                 return;
             }
 
-            const { startOffset, segmentId, style } = activeRange;
-
-            const len = content.length;
-
-            const textRanges = [
-                {
-                    startOffset: startOffset + len,
-                    endOffset: startOffset + len,
-                    style,
-                },
-            ];
+            const { segmentId } = activeRange;
 
             await this._commandService.executeCommand(InsertCommand.id, {
                 unitId,
@@ -93,7 +83,6 @@ export class NormalInputController extends Disposable {
                     dataStream: content,
                 },
                 range: activeRange,
-                textRanges,
                 segmentId,
             });
         });

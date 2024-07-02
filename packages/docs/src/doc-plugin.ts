@@ -137,11 +137,11 @@ export class UniverDocsPlugin extends Plugin {
                     },
                 ],
                 [TextSelectionManagerService],
-
                 // controllers
                 [NormalInputController],
                 [IMEInputController],
                 [MoveCursorController],
+
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
     }

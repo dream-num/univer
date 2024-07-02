@@ -124,6 +124,8 @@ export interface IExecutionOptions {
     /** This command is from collaboration peers. */
     fromCollab?: boolean;
 
+    fromChangeset?: boolean;
+
     [key: PropertyKey]: string | number | boolean | undefined;
 }
 

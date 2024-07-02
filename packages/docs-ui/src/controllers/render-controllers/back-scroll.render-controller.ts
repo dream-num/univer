@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
-import { RxDisposable } from '@univerjs/core';
-import { DocSkeletonManagerService, neoGetDocObject, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { getAnchorBounding, NodePositionConvertToCursor } from '@univerjs/engine-render';
+import type { DocumentDataModel, ITextRange, Nullable } from '@univerjs/core';
+import { IUniverInstanceService, RxDisposable } from '@univerjs/core';
+import { DocSkeletonManagerService, getDocObject, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
+import type { INodePosition, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { getAnchorBounding, IRenderManagerService, NodePositionConvertToCursor } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
@@ -28,9 +28,10 @@ const ANCHOR_WIDTH = 1.5;
 export class DocBackScrollRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @IEditorService private readonly _editorService: IEditorService
+        @IEditorService private readonly _editorService: IEditorService,
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -51,19 +52,24 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
         });
     }
 
-    // Let the selection show on the current screen.
-    private _scrollToSelection(unitId: string) {
-        const activeTextRange = this._textSelectionManagerService.getActiveRange();
-        const docObject = neoGetDocObject(this._context);
-        const skeleton = this._docSkeletonManagerService.getSkeleton();
-
-        if (activeTextRange == null || docObject == null) {
+    scrollToRange(unitId: string, range: ITextRange) {
+        const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+        const skeleton = docSkeletonManagerService?.getSkeleton();
+        if (!skeleton) {
             return;
         }
+        const { startOffset } = range;
+        const anchorNodePosition = skeleton.findNodePositionByCharIndex(startOffset);
+        // const focusNodePosition = startOffset !== endOffset ? skeleton.findNodePositionByCharIndex(endOffset) : null;
+        this.scrollToNode(unitId, anchorNodePosition);
+    }
 
-        const { collapsed, startNodePosition } = activeTextRange;
+    scrollToNode(unitId: string, startNodePosition: Nullable<INodePosition>) {
+        const docObject = this._getDocObject();
+        const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
+        const skeleton = docSkeletonManagerService?.getSkeleton();
 
-        if (!collapsed) {
+        if (docObject == null || skeleton == null) {
             return;
         }
 
@@ -101,7 +107,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
         const delta = isEditor ? 0 : 100;
 
         if (top < boundTop) {
-            offsetY = top - boundTop;
+            offsetY = top - boundTop - delta;
         } else if (top > boundBottom - height) {
             offsetY = top - boundBottom + height + delta;
         }
@@ -114,5 +120,25 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
 
         const config = viewportMain.transViewportScroll2ScrollValue(offsetX, offsetY);
         viewportMain.scrollBy(config);
+    }
+
+    // Let the selection show on the current screen.
+    private _scrollToSelection(unitId: string) {
+        const activeTextRange = this._textSelectionManagerService.getActiveRange();
+        if (activeTextRange == null) {
+            return;
+        }
+
+        const { collapsed, startNodePosition } = activeTextRange;
+
+        if (!collapsed) {
+            return;
+        }
+
+        this.scrollToNode(unitId, startNodePosition);
+    }
+
+    private _getDocObject() {
+        return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
 }

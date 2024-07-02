@@ -88,7 +88,7 @@ export class SheetsThreadCommentRenderController extends Disposable {
             }
         };
 
-        this.disposeWithMe(this._sheetsThreadCommentModel.commentUpdate$.subscribe(() => {
+        this.disposeWithMe(this._sheetsThreadCommentModel.commentUpdate$.subscribe((update) => {
             markSkeletonDirty();
         }));
     }

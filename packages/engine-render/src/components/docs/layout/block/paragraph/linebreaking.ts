@@ -24,6 +24,7 @@ import type { ILayoutContext } from '../../tools';
 import { getLastNotFullColumnInfo } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { IShapedText } from './shaping';
 import { layoutParagraph } from './layout-ruler';
 import { dealWithBullet } from './bullet';
@@ -111,12 +112,13 @@ function _getNextPageNumber(lastPage: IDocumentSkeletonPage) {
 
 export function lineBreaking(
     ctx: ILayoutContext,
+    viewModel: DocumentViewModel,
     shapedTextList: IShapedText[],
     curPage: IDocumentSkeletonPage,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig
 ): IDocumentSkeletonPage[] {
-    const { viewModel, skeletonResourceReference } = ctx;
+    const { skeletonResourceReference } = ctx;
     const {
         lists,
         drawings = {},

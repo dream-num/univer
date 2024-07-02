@@ -50,17 +50,19 @@ import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     FONT_FAMILY_LIST,
     FONT_SIZE_LIST,
+    getHeaderFooterMenuHiddenObservable,
     getMenuHiddenObservable,
     MenuGroup,
     MenuItemType,
     MenuPosition,
 } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
+import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
 
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
@@ -402,6 +404,20 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
     };
 }
 
+export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: OpenHeaderFooterPanelCommand.id,
+        group: MenuGroup.TOOLBAR_OTHERS,
+        type: MenuItemType.BUTTON,
+        icon: 'FreezeRowSingle',
+        tooltip: 'toolbar.headerFooter',
+        positions: [MenuPosition.TOOLBAR_START],
+        hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getHeaderFooterMenuHiddenObservable(accessor), (one, two) => {
+            return one || two;
+        }),
+    };
+}
+
 export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
 
@@ -614,20 +630,20 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
 function getFontStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(TextSelectionManagerService);
-    const editorDataModel = univerInstanceService.getCurrentUniverDocInstance();
+    const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
     const activeTextRange = textSelectionService.getActiveRange();
 
-    if (editorDataModel == null || activeTextRange == null) {
+    if (docDataModel == null || activeTextRange == null) {
         return;
     }
 
-    const textRuns = editorDataModel.getBody()?.textRuns;
+    const { startOffset, segmentId } = activeTextRange;
+
+    const textRuns = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.textRuns;
 
     if (textRuns == null) {
         return;
     }
-
-    const { startOffset } = activeTextRange;
 
     let textRun;
 
@@ -652,20 +668,20 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 function getParagraphStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(TextSelectionManagerService);
-    const editorDataModel = univerInstanceService.getCurrentUniverDocInstance();
+    const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
     const activeTextRange = textSelectionService.getActiveRange();
 
-    if (editorDataModel == null || activeTextRange == null) {
+    if (docDataModel == null || activeTextRange == null) {
         return;
     }
 
-    const paragraphs = editorDataModel.getBody()?.paragraphs;
+    const { startOffset, segmentId } = activeTextRange;
+
+    const paragraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs;
 
     if (paragraphs == null) {
         return;
     }
-
-    const { startOffset } = activeTextRange;
 
     let prevIndex = -1;
 

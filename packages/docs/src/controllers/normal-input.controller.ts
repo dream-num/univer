@@ -75,7 +75,7 @@ export class NormalInputController extends Disposable {
                 return;
             }
 
-            const { startOffset, segmentId, style } = activeRange;
+            const { startOffset, segmentId, style, segmentPage } = activeRange;
 
             const len = content.length;
 
@@ -83,6 +83,8 @@ export class NormalInputController extends Disposable {
                 {
                     startOffset: startOffset + len,
                     endOffset: startOffset + len,
+                    segmentId,
+                    segmentPage,
                     style,
                 },
             ];

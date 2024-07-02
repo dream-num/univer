@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber } from '@univerjs/core';
+import { BooleanNumber, DocumentFlavor } from '@univerjs/core';
 
 export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
     id: 'default-document-id',
@@ -89,6 +89,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
             width: 595,
             height: 842,
         },
+        documentFlavor: DocumentFlavor.TRADITIONAL,
         marginTop: 50,
         marginBottom: 50,
         marginRight: 40,

@@ -70,6 +70,7 @@ export interface ITextRange extends ITextRangeStart {
 
 export interface ITextRangeParam extends ITextRange {
     segmentId?: string; //The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.
+    segmentPage?: number; //The page number of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.
     isActive?: boolean; // Whether the text range is active or current range.
 }
 

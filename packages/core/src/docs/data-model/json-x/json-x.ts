@@ -113,9 +113,9 @@ export class JSONX {
         return json1.replaceOp(path, oldVal, newVal);
     }
 
-    editOp(subOp: TextXAction[]) {
+    editOp(subOp: TextXAction[], path = ['body']) {
         // Hardcode the path to ['body'] for now. Because rich text is in the body property.
-        return json1.editOp(['body'], TextX.name, subOp);
+        return json1.editOp(path, TextX.name, subOp);
     }
 }
 

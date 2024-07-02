@@ -96,10 +96,13 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         const undoActions = JSONX.invertWithDoc(actions, documentDataModel.getSnapshot());
         documentDataModel.apply(actions);
 
+        // console.log(params.trigger);
+        // console.log(actions);
+        // // console.log(undoActions);
+        // console.log(documentDataModel.getSnapshot());
+
         // Step 2: Update Doc View Model.
-        const segmentDocumentDataModel = documentDataModel.getSelfOrHeaderFooterModel(segmentId);
-        const segmentViewModel = documentViewModel.getSelfOrHeaderFooterViewModel(segmentId);
-        segmentViewModel.reset(segmentDocumentDataModel);
+        documentViewModel.reset(documentDataModel);
 
         // Step 3: Update cursor & selection.
         // Make sure update cursor & selection after doc skeleton is calculated.

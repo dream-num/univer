@@ -278,7 +278,16 @@ export class DocumentDataModel extends DocumentDataModelSimple {
             return;
         }
 
-        return JSONX.apply(this.snapshot, actions);
+        this.snapshot = JSONX.apply(this.snapshot, actions) as unknown as IDocumentData;
+
+        // FIXME: @JOCS, ANY better solution to find action that create or delete header/footer?
+        if (actions?.some((a) => Array.isArray(a) && (a?.[0] === 'headers' || a?.[0] === 'footers'))) {
+            this.headerModelMap.clear();
+            this.footerModelMap.clear();
+            this._initializeHeaderFooterModel();
+        }
+
+        return this.snapshot;
     }
 
     sliceBody(startOffset: number, endOffset: number): Nullable<IDocumentBody> {

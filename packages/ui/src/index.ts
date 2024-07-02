@@ -15,7 +15,7 @@
  */
 
 export * from './common';
-export { getMenuHiddenObservable } from './common/menu-hidden-observable';
+export { getMenuHiddenObservable, getHeaderFooterMenuHiddenObservable } from './common/menu-hidden-observable';
 export * from './components';
 export { t } from './components/hooks/locale';
 export { useObservable } from './components/hooks/observable';

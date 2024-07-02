@@ -61,6 +61,14 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
         this._currentSkeleton$.complete();
     }
 
+    getSkeleton(): DocumentSkeleton {
+        return this._skeleton;
+    }
+
+    getViewModel(): DocumentViewModel {
+        return this._docViewModel;
+    }
+
     private _init() {
         const documentDataModel = this._context.unit;
         this._update(documentDataModel);
@@ -92,14 +100,6 @@ export class DocSkeletonManagerService extends RxDisposable implements IRenderMo
 
         this._currentSkeletonBefore$.next(skeleton);
         this._currentSkeleton$.next(skeleton);
-    }
-
-    getSkeleton(): DocumentSkeleton {
-        return this._skeleton;
-    }
-
-    getViewModel(): DocumentViewModel {
-        return this._docViewModel;
     }
 
     private _buildSkeleton(documentViewModel: DocumentViewModel) {

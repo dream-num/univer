@@ -337,6 +337,7 @@ export class Path extends Shape<IPathProps> {
      *  rendering
      */
 
+    // eslint-disable-next-line max-lines-per-function, complexity
     static parsePathData(data: string) {
         // Path Data Segment must begin with a moveTo
         //m (x y)+  Relative moveTo (subsequent points are treated as lineTo)

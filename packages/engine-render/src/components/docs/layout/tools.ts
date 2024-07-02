@@ -736,7 +736,7 @@ export function getFontConfigFromLastGlyph(
 
 export function getFontCreateConfig(
     index: number,
-    bodyModel: DocumentViewModel,
+    viewModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
@@ -757,9 +757,10 @@ export function getFontCreateConfig(
     } = sectionBreakConfig;
     const { isRenderStyle } = renderConfig;
     const { startIndex } = paragraphNode;
+
     const textRun = isRenderStyle === BooleanNumber.FALSE
         ? { ts: {}, st: 0, ed: 0 }
-        : bodyModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
+        : viewModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
     const { st, ed } = textRun;
     let { ts: textStyle = {} } = textRun;
     const cache = fontCreateConfigCache.getValue(st, ed);
@@ -878,7 +879,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         firstPageHeaderId: global_firstPageHeaderId,
         firstPageFooterId: global_firstPageFooterId,
         useFirstPageHeaderFooter: global_useFirstPageHeaderFooter,
-        useEvenPageHeaderFooter: global_useEvenPageHeaderFooter,
+        evenAndOddHeaders: global_evenAndOddHeaders,
 
         marginTop: global_marginTop = 0,
         marginBottom: global_marginBottom = 0,
@@ -918,7 +919,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         firstPageHeaderId = global_firstPageHeaderId,
         firstPageFooterId = global_firstPageFooterId,
         useFirstPageHeaderFooter = global_useFirstPageHeaderFooter,
-        useEvenPageHeaderFooter = global_useEvenPageHeaderFooter,
+        evenAndOddHeaders = global_evenAndOddHeaders,
 
         columnProperties = [],
         columnSeparatorType = ColumnSeparatorType.NONE,
@@ -957,7 +958,7 @@ export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number
         footerIds,
 
         useFirstPageHeaderFooter,
-        useEvenPageHeaderFooter,
+        evenAndOddHeaders,
 
         columnProperties,
         columnSeparatorType,

@@ -206,7 +206,7 @@ export class Liquid {
         };
     }
 
-    translateSpan(glyph: IDocumentSkeletonGlyph) {
+    translateGlyph(glyph: IDocumentSkeletonGlyph) {
         const { left: spanLeft } = glyph;
         this.translate(spanLeft, 0);
 

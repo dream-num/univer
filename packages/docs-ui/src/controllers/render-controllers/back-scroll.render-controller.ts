@@ -61,7 +61,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
             return;
         }
 
-        const { collapsed, startNodePosition } = activeTextRange;
+        const { collapsed, startNodePosition, segmentId } = activeTextRange;
 
         if (!collapsed) {
             return;

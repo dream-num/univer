@@ -38,6 +38,7 @@ import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import { getRichTextEditPath } from '../util';
 
 export interface IInnerPasteCommandParams {
     segmentId: string;
@@ -62,12 +63,12 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             return false;
         }
 
-        const docsModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!docsModel) {
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (docDataModel == null) {
             return false;
         }
 
-        const unitId = docsModel.getUnitId();
+        const unitId = docDataModel.getUnitId();
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -79,7 +80,6 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         };
 
         const memoryCursor = new MemoryCursor();
-
         memoryCursor.reset();
 
         const textX = new TextX();
@@ -112,7 +112,8 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -150,9 +151,9 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             return false;
         }
 
-        const documentModel = univerInstanceService.getUniverDocInstance(unitId);
-        const originBody = getDocsUpdateBody(documentModel!.getSnapshot(), segmentId);
-        if (originBody == null) {
+        const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
+        const originBody = getDocsUpdateBody(docDataModel!.getSnapshot(), segmentId);
+        if (docDataModel == null || originBody == null) {
             return false;
         }
 
@@ -191,7 +192,8 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             memoryCursor.moveCursor(endOffset);
         }
 
-        doMutation.params.actions = jsonX.editOp(textX.serialize());
+        const path = getRichTextEditPath(docDataModel, segmentId);
+        doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

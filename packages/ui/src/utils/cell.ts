@@ -41,6 +41,7 @@ export const DEFAULT_BACKGROUND_COLOR_RGB = 'rgb(0,0,0)';
  * @param $dom
  * @returns
  */
+// eslint-disable-next-line max-lines-per-function
 export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
     let nodeList = $dom.childNodes; // skip container itself
 

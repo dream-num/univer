@@ -36,9 +36,8 @@ import type {
     IDocumentSkeletonDrawing,
     IDocumentSkeletonDrawingAnchor,
     IDocumentSkeletonFontStyle,
-    IDocumentSkeletonFooter,
     IDocumentSkeletonGlyph,
-    IDocumentSkeletonHeader,
+    IDocumentSkeletonHeaderFooter,
 } from './i-document-skeleton-cached';
 import type { Vector2 } from './vector2';
 import type { ITransformerConfig } from './transformer-config';
@@ -103,7 +102,7 @@ export interface ISectionBreakConfig extends IDocStyleBase, ISectionBreakBase, I
     headerIds?: IHeaderIds;
     footerIds?: IFooterIds;
     useFirstPageHeaderFooter?: BooleanNumber;
-    useEvenPageHeaderFooter?: BooleanNumber;
+    evenAndOddHeaders?: BooleanNumber;
 }
 
 export interface IParagraphConfig {
@@ -115,8 +114,8 @@ export interface IParagraphConfig {
     // pageContentWidth: number;
     // pageContentHeight: number;
     paragraphStyle?: IParagraphStyle;
-    skeHeaders: Map<string, Map<number, IDocumentSkeletonHeader>>;
-    skeFooters: Map<string, Map<number, IDocumentSkeletonFooter>>;
+    skeHeaders: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
+    skeFooters: Map<string, Map<number, IDocumentSkeletonHeaderFooter>>;
     drawingAnchor?: Map<number, IDocumentSkeletonDrawingAnchor>;
     // sectionBreakConfig: ISectionBreakConfig;
 }
@@ -138,13 +137,15 @@ export interface IFontCreateConfig {
 //     footers?: IFooters;
 //     headers?: IHeaders;
 //     useFirstPageHeaderFooter?: boolean;
-//     useEvenPageHeaderFooter?: boolean;
+//     evenAndOddHeaders?: boolean;
 // }
 
 export interface INodeInfo {
     node: IDocumentSkeletonGlyph;
     ratioX: number;
     ratioY: number;
+    segmentId: string;
+    segmentPage: number; // The index of the page where node is located.
 }
 
 export interface INodeSearch {
@@ -154,6 +155,8 @@ export interface INodeSearch {
     column: number;
     section: number;
     page: number;
+    segmentPage: number; // The index of the page where the header and footer reside.
+    isInBody: boolean;
 }
 
 export interface INodePosition extends INodeSearch {

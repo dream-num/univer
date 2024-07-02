@@ -18,6 +18,7 @@ import type { IDocumentData } from '@univerjs/core';
 import {
     BooleanNumber,
     ColumnSeparatorType,
+    DocumentFlavor,
     DrawingTypeEnum,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
@@ -445,6 +446,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             width: ptToPixel(595),
             height: ptToPixel(842),
         },
+        documentFlavor: DocumentFlavor.TRADITIONAL,
         marginTop: ptToPixel(50),
         marginBottom: ptToPixel(50),
         marginRight: ptToPixel(50),

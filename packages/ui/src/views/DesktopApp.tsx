@@ -144,7 +144,7 @@ export function DesktopApp(props: IUniverAppProps) {
                     {/* footer */}
                     {footer && (
                         <footer className={styles.appFooter}>
-                            <ComponentContainer key="footer" components={footerComponents} />
+                            <ComponentContainer key="footer" components={footerComponents} sharedProps={{ contextMenu }} />
                         </footer>
                     )}
 

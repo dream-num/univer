@@ -29,7 +29,7 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        positions: [MenuPosition.TOOLBAR_START],
+        positions: [MenuPosition.TOOLBAR_START, MenuPosition.TOOLBAR_INSERT],
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         icon: IMAGE_UPLOAD_ICON,
         tooltip: 'sheetImage.title',

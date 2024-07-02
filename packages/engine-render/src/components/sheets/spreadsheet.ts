@@ -364,6 +364,10 @@ export class Spreadsheet extends SheetComponent {
 
         const segment = spreadsheetSkeleton.rowColumnSegment;
 
+        if (!segment) {
+            return;
+        }
+
         if (
             (segment.startRow === -1 && segment.endRow === -1) ||
                 (segment.startColumn === -1 && segment.endColumn === -1)

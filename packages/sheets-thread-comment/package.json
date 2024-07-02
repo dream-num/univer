@@ -74,7 +74,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.57",
+        "@univerjs/icons": "^0.1.58",
         "@univerjs/sheets-thread-comment-base": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*"
@@ -91,8 +91,8 @@
         "clsx": "^2.1.1",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.4.5",
-        "vite": "^5.3.1",
+        "typescript": "^5.5.3",
+        "vite": "^5.3.2",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

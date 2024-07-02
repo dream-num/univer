@@ -292,7 +292,7 @@ const locale: typeof zhCN = {
         noHide: "Can't hide, at least keep one sheet tag",
         chartEditNoOpt: 'This operation is not allowed in chart editing mode!',
         sheetNameErrorTitle: 'There was a problem',
-        sheetNameSpecCharError: 'The name cannot contain:[ ] :  ? * / \' "',
+        sheetNameSpecCharError: "The name cannot exceed 31 characters, cannot start or end with ', and cannot contain: [ ] : \\ ? * /",
         sheetNameCannotIsEmptyError: 'The sheet name cannot be empty.',
         sheetNameAlreadyExistsError: 'The sheet name already exists. Please enter another name.',
         deleteSheet: 'Delete worksheet',

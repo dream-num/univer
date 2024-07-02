@@ -40,7 +40,7 @@ export class Vlookup extends BaseFunction {
         }
 
         if (tableArray.isError()) {
-            return ErrorValueObject.create(ErrorType.REF);
+            return tableArray;
         }
 
         if (!tableArray.isArray()) {
@@ -48,11 +48,11 @@ export class Vlookup extends BaseFunction {
         }
 
         if (colIndexNum.isError()) {
-            return ErrorValueObject.create(ErrorType.NA);
+            return colIndexNum;
         }
 
         if (rangeLookup?.isError()) {
-            return ErrorValueObject.create(ErrorType.NA);
+            return rangeLookup;
         }
 
         rangeLookup = rangeLookup ?? BooleanValueObject.create(true);

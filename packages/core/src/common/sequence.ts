@@ -36,7 +36,6 @@ export async function sequenceAsync(tasks: Array<() => Promise<boolean> | boolea
                 };
             }
         } catch (e: unknown) {
-            console.error(e);
             return {
                 index,
                 result: false,
@@ -67,7 +66,6 @@ export function sequence(tasks: Array<() => boolean>): ISequenceExecuteResult {
                 };
             }
         } catch (e: unknown) {
-            console.error(e);
             return {
                 index,
                 result: false,

@@ -51,5 +51,5 @@ export { getCharSpaceApply, getNumberUnitValue } from './components/docs/layout/
 export { type IChangeObserverConfig } from './scene.transformer';
 export { DEFAULT_PADDING_DATA } from './components/sheets/sheet-skeleton';
 export { DocumentEditArea } from './components/docs/view-model/document-view-model';
-export { lineIterator, spanIterator } from './components/docs/layout/tools';
+export { lineIterator, glyphIterator } from './components/docs/layout/tools';
 export { getOneTextSelectionRange } from './components/docs/text-selection/convert-cursor';

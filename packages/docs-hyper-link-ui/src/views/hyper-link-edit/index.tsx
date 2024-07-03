@@ -20,7 +20,7 @@ import { CloseSingle } from '@univerjs/icons';
 import { useDependency, useObservable } from '@wendellhu/redi/react-bindings';
 import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import type { DocumentDataModel } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocHyperLinkService } from '../../services/hyper-link.service';
 import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
@@ -33,6 +33,8 @@ export const DocHyperLinkEdit = () => {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const [link, setLink] = useState('');
+    const [showError, setShowError] = useState(false);
+    const isLegal = Tools.isLegalUrl(link);
     const doc = editingId
         ? univerInstanceService.getUnit<DocumentDataModel>(editingId.unitId, UniverInstanceType.UNIVER_DOC) :
         univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
@@ -45,9 +47,11 @@ export const DocHyperLinkEdit = () => {
         hyperLinkService.hideEditPopup();
     };
     const handleConfirm = () => {
-        if (!doc) {
+        setShowError(true);
+        if (!isLegal || !doc) {
             return;
         }
+
         if (!editingId) {
             commandService.executeCommand(AddDocHyperLinkCommand.id, {
                 unitId: doc.getUnitId(),
@@ -74,13 +78,28 @@ export const DocHyperLinkEdit = () => {
                 <CloseSingle className={styles.docsLinkEditClose} onClick={handleCancel} />
             </div>
             <div>
-                <FormLayout label="Link address">
-                    <Input value={link} onChange={setLink} />
+                <FormLayout
+                    label="Link address"
+                    error={showError && !isLegal ? 'Please input a legal link' : ''}
+                >
+                    <Input value={link} onChange={setLink} autoFocus />
                 </FormLayout>
             </div>
             <div className={styles.docsLinkEditButtons}>
-                <Button className={styles.docsLinkEditButton} onClick={handleCancel}>Cancel</Button>
-                <Button className={styles.docsLinkEditButton} type="primary" onClick={handleConfirm}>Confirm</Button>
+                <Button
+                    className={styles.docsLinkEditButton}
+                    onClick={handleCancel}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    disabled={!link}
+                    className={styles.docsLinkEditButton}
+                    type="primary"
+                    onClick={handleConfirm}
+                >
+                    Confirm
+                </Button>
             </div>
         </div>
     );

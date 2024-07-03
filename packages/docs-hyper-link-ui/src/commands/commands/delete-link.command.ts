@@ -14,17 +14,36 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand } from '@univerjs/core';
+import type { DocumentDataModel, ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { deleteCustomRangeFactory } from '@univerjs/docs';
+import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 
 export interface IDeleteDocHyperLinkMutationParams {
     unitId: string;
     linkId: string;
 }
 
-export const DeleteDocHyperLinkCommand: ICommand = {
+export const DeleteDocHyperLinkCommand: ICommand<IDeleteDocHyperLinkMutationParams> = {
     type: CommandType.COMMAND,
     id: 'docs.command.delete-hyper-link',
-    handler(accessor, params, options) {
-        return true;
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const { unitId, linkId } = params;
+        const commandService = accessor.get(ICommandService);
+        const hyperLinkModel = accessor.get(DocHyperLinkModel);
+        const link = hyperLinkModel.getLink(unitId, linkId);
+        if (!link) {
+            return false;
+        }
+
+        const doMutation = deleteCustomRangeFactory(accessor, { unitId, rangeId: linkId });
+        if (!doMutation) {
+            return false;
+        }
+
+        return commandService.executeCommand(doMutation.id, doMutation.params);
     },
 };

@@ -16,6 +16,7 @@
 
 import { customAlphabet, nanoid } from 'nanoid';
 
+import { isLegalUrl } from '../common/url';
 import type { Class, IKeyValue } from './types';
 
 const rmsPrefix = /^-ms-/;
@@ -439,6 +440,10 @@ export class Tools {
 
     static isIPhone(): boolean {
         return /iPhone/i.test(navigator.userAgent);
+    }
+
+    static isLegalUrl(url: string): boolean {
+        return isLegalUrl(url);
     }
 
     static itCount(count: number): Function {

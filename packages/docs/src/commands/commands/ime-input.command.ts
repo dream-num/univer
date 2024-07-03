@@ -40,7 +40,6 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IIMEInputCommandParams) => {
         const { unitId, newText, oldTextLen, isCompositionEnd, isCompositionStart } = params;
-        // console.log('===ime', params);
         const commandService = accessor.get(ICommandService);
         const imeInputManagerService = accessor.get(IMEInputManagerService);
         const previousActiveRange = imeInputManagerService.getActiveRange();

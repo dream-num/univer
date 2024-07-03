@@ -62,14 +62,6 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam, body: IDocume
         t: TextXActionType.INSERT,
         body: {
             dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_START,
-            customRanges: [
-                {
-                    rangeId,
-                    rangeType,
-                    startIndex: 0,
-                    endIndex: 0,
-                },
-            ],
         },
         len: 1,
         line: 0,
@@ -92,7 +84,7 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam, body: IDocume
                 {
                     rangeId,
                     rangeType,
-                    startIndex: 0,
+                    startIndex: -(end - start) - 1,
                     endIndex: 0,
                 },
             ],
@@ -155,7 +147,7 @@ export interface IDeleteCustomRangeParam {
     segmentId?: string;
 }
 
-export function deleteCustomRange(accessor: IAccessor, params: IDeleteCustomRangeParam) {
+export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCustomRangeParam) {
     const { unitId, rangeId, segmentId } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
 

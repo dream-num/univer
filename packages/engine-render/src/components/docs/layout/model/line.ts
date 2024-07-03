@@ -160,13 +160,13 @@ function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHe
 
     if (angle === 0) {
         const newAtop = aTop - distT;
-        const newHeight = height + distB;
+        const newHeight = distT + height + distB;
 
         if (newAtop + newHeight < lineTop || newAtop > lineHeight + lineTop) {
             return;
         }
 
-        return newAtop + height;
+        return newAtop + newHeight;
     }
     // 旋转的情况，要考虑行首位与drawing旋转后得到的最大区域
     let { top: sTop = 0, height: sHeight = 0 } = getBoundingBox(angle, aLeft, width, aTop, height);
@@ -385,7 +385,7 @@ function __getSplitWidthNoAngle(
     } = drawingOrigin;
 
     const newAtop = top - (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distT : 0);
-    const newHeight = height + (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distB : 0);
+    const newHeight = height + (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distB + distT : 0);
 
     if (newAtop + newHeight <= lineTop || newAtop >= lineHeight + lineTop) {
         return;

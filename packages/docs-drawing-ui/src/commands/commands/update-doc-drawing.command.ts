@@ -71,35 +71,23 @@ export const UpdateDocDrawingWrappingStyleCommand: ICommand = {
             return false;
         }
 
-        const commandService = accessor.get(ICommandService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const docSkeletonManagerService = accessor.get(DocSkeletonManagerService);
-
-        const docsSkeletonObject = docSkeletonManagerService.getCurrent();
-        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (documentDataModel == null || docsSkeletonObject == null) {
-            return false;
-        }
-
         const { drawings, wrappingStyle, unitId } = params;
 
-        if (docsSkeletonObject.unitId !== unitId) {
-            return false;
-        }
-
-        const { skeleton } = docsSkeletonObject;
-        const skeletonData = skeleton.getSkeletonData();
-
-        if (skeletonData == null) {
-            return false;
-        }
-
+        const commandService = accessor.get(ICommandService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
-        const renderObject = renderManagerService.getRenderById(params.unitId);
+
+        const renderObject = renderManagerService.getRenderById(unitId);
+        const skeletonData = renderObject?.with(DocSkeletonManagerService)
+            .getSkeleton()
+            .getSkeletonData();
         const scene = renderObject?.scene;
-        if (scene == null) {
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+
+        if (documentDataModel == null || skeletonData == null || scene == null) {
             return false;
         }
+
         const transformer = scene.getTransformerByCreate();
 
         const { pages } = skeletonData;

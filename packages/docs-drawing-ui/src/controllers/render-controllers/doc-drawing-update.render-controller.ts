@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
-import { BooleanNumber, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, OnLifecycle, PositionedObjectLayoutType, UniverInstanceType, WrapTextType } from '@univerjs/core';
+import { BooleanNumber, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
@@ -25,7 +25,7 @@ import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
 import { docDrawingPositionToTransform, transformToDocDrawingPosition } from '@univerjs/docs-ui';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { type Documents, type IRenderContext, IRenderManagerService, type IRenderModule } from '@univerjs/engine-render';
 
 import type { IInsertImageOperationParams } from '../../commands/operations/insert-image.operation';
 import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';
@@ -41,8 +41,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         private readonly _context: IRenderContext<DocumentDataModel>,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IDocDrawingService private readonly _sheetDrawingService: IDocDrawingService,
+        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
         @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
@@ -264,8 +263,10 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     }
 
     private _refreshDocSkeleton() {
-        const skeleton = this._docSkeletonManagerService.getSkeleton();
-        const { mainComponent } = this._context;
+        const { mainComponent, unitId } = this._context;
+        const skeleton = this._renderManagerSrv.getRenderById(unitId)
+            ?.with(DocSkeletonManagerService).getSkeleton();
+
         skeleton?.calculate();
         mainComponent?.makeDirty();
     }
@@ -281,20 +282,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     }
 
     private _getCurrentSceneAndTransformer() {
-        const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
-        if (docsSkeletonObject == null) {
-            return;
-        }
-
-        const { unitId } = docsSkeletonObject;
-
-        const renderObject = this._renderManagerService.getRenderById(unitId);
-
-        if (renderObject == null) {
-            return;
-        }
-
-        const { scene, mainComponent } = renderObject;
+        const { scene, mainComponent } = this._context;
 
         if (scene == null || mainComponent == null) {
             return;

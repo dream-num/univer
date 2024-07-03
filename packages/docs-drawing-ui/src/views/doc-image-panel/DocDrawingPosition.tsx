@@ -39,7 +39,6 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const docSkeletonManagerService = useDependency(DocSkeletonManagerService);
 
     const { drawings } = props;
 
@@ -148,11 +147,14 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
         }
 
         const drawingId = focusDrawings[0].drawingId;
+        const unitId = focusDrawings[0].unitId;
 
         let drawing: Nullable<IDocumentSkeletonDrawing> = null;
         let pageMarginLeft = 0;
-        const skeleton = docSkeletonManagerService.getCurrent();
-        const skeletonData = skeleton?.skeleton.getSkeletonData();
+        const skeleton = renderManagerService.getRenderById(unitId)
+            ?.with(DocSkeletonManagerService).getSkeleton();
+
+        const skeletonData = skeleton?.getSkeletonData();
 
         if (skeletonData == null) {
             return;
@@ -212,7 +214,8 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
 
         const { drawingId, unitId } = focusDrawings[0];
         const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
-        const { skeleton } = docSkeletonManagerService.getSkeletonByUnitId(unitId) ?? {};
+        const skeleton = renderManagerService.getRenderById(unitId)
+            ?.with(DocSkeletonManagerService).getSkeleton();
 
         const drawing = documentDataModel?.getBody()?.customBlocks?.find((c) => c.blockId === drawingId);
 

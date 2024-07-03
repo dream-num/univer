@@ -23,7 +23,6 @@ import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, Documents, IDocumentSkeletonGlyph } from '@univerjs/engine-render';
 import { getOneTextSelectionRange, IRenderManagerService, Liquid, NodePositionConvertToCursor } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
 
@@ -54,7 +53,7 @@ export class DocDrawingTransformerController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
@@ -97,7 +96,7 @@ export class DocDrawingTransformerController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                transformer.onChangeStartObservable.add((state) => {
+                transformer.changeStart$.subscribe((state) => {
                     this._transformerCache.clear();
                     const { objects } = state;
 
@@ -131,7 +130,7 @@ export class DocDrawingTransformerController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                transformer.onChangingObservable.add((state) => {
+                transformer.changing$.subscribe((state) => {
                     const { objects } = state;
 
                     if (objects.size > 1) {
@@ -162,7 +161,7 @@ export class DocDrawingTransformerController extends Disposable {
         // Handle transformer mouseup.
         this.disposeWithMe(
             toDisposable(
-                transformer.onChangeEndObservable.add((state) => {
+                transformer.changeEnd$.subscribe((state) => {
                     const { objects } = state;
                     if (objects.size > 1) {
                         this._updateMultipleDrawingDocTransform(objects);
@@ -304,9 +303,10 @@ export class DocDrawingTransformerController extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     private _getDrawingAnchor(drawing: IDocDrawingBase, object: BaseObject, isInline = true): Nullable<IDrawingAnchor> {
-        const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(drawing.unitId);
+        const skeleton = this._renderManagerSrv.getRenderById(drawing.unitId)
+            ?.with(DocSkeletonManagerService).getSkeleton();
         const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
-        const skeletonData = skeleton?.skeleton.getSkeletonData();
+        const skeletonData = skeleton?.getSkeletonData();
 
         if (skeletonData == null || currentRender == null) {
             return;
@@ -445,7 +445,7 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
-        const nodePosition = skeleton?.skeleton.findPositionByGlyph(glyphAnchor);
+        const nodePosition = skeleton?.findPositionByGlyph(glyphAnchor);
 
         const docObject = this._getDocObject();
 
@@ -459,7 +459,7 @@ export class DocDrawingTransformerController extends Disposable {
         };
 
         const documentOffsetConfig = docObject.document.getOffsetConfig();
-        const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton.skeleton);
+        const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
         const { cursorList } = convertor.getRangePointData(positionWithIsBack, positionWithIsBack);
 
         const { startOffset } = getOneTextSelectionRange(cursorList) ?? {};
@@ -527,9 +527,10 @@ export class DocDrawingTransformerController extends Disposable {
     // and the upper and lower limits cannot exceed the page margin area.
     private _limitDrawingInPage(drawing: IDocDrawingBase, object: BaseObject) {
         const { left, top, width, height, angle } = object;
-        const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(drawing.unitId);
+        const skeleton = this._renderManagerSrv.getRenderById(drawing.unitId)
+            ?.with(DocSkeletonManagerService).getSkeleton();
         const currentRender = this._renderManagerService.getRenderById(drawing.unitId);
-        const skeletonData = skeleton?.skeleton.getSkeletonData();
+        const skeletonData = skeleton?.getSkeletonData();
         const { pages } = skeletonData ?? {};
 
         if (skeletonData == null || currentRender == null || pages == null) {

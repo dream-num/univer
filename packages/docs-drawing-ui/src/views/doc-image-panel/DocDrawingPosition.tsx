@@ -29,6 +29,9 @@ import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/do
 import { UpdateDrawingDocTransformCommand } from '../../commands/commands/update-doc-drawing.command';
 import styles from './index.module.less';
 
+const MIN_OFFSET = -1000;
+const MAX_OFFSET = 1000;
+
 export interface IDocDrawingPositionProps {
     drawings: IDrawingParam[];
 }
@@ -348,6 +351,8 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
                                 <InputNumber
+                                    min={MIN_OFFSET}
+                                    max={MAX_OFFSET}
                                     precision={1}
                                     disabled={disabled}
                                     value={hPosition.posOffset}
@@ -401,6 +406,8 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
                                 <InputNumber
+                                    min={MIN_OFFSET}
+                                    max={MAX_OFFSET}
                                     precision={1}
                                     disabled={disabled}
                                     value={vPosition.posOffset}

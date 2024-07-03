@@ -18,9 +18,9 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { BaseFunction } from '../../base-function';
 
 export class Atan2 extends BaseFunction {
-    override minParams = 1;
+    override minParams = 2;
 
-    override maxParams = 1;
+    override maxParams = 2;
 
     override calculate(xNum: BaseValueObject, yNum: BaseValueObject) {
         if (xNum.isString()) {

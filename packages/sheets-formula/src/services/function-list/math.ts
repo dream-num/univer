@@ -196,16 +196,16 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         abstract: 'formula.functionList.ATAN2.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ATAN2.functionParameter.number1.name',
-                detail: 'formula.functionList.ATAN2.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ATAN2.functionParameter.xNum.name',
+                detail: 'formula.functionList.ATAN2.functionParameter.xNum.detail',
+                example: '4',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.ATAN2.functionParameter.number2.name',
-                detail: 'formula.functionList.ATAN2.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ATAN2.functionParameter.yNum.name',
+                detail: 'formula.functionList.ATAN2.functionParameter.yNum.detail',
+                example: '3',
                 require: 1,
                 repeat: 0,
             },

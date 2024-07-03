@@ -33,6 +33,12 @@ describe('Test atan2 function', () => {
             const result = testFunction.calculate(xNum, yNum);
             expect(result.getValue()).toBe(1.1071487177940904);
         });
+        it('Value is normal number 2', () => {
+            const xNum = NumberValueObject.create(8);
+            const yNum = NumberValueObject.create(9);
+            const result = testFunction.calculate(xNum, yNum);
+            expect(result.getValue()).toBe(0.844153986113171);
+        });
 
         it('Value is number valid', () => {
             const xNum = NumberValueObject.create(-2);
@@ -72,6 +78,12 @@ describe('Test atan2 function', () => {
             const yNum = NumberValueObject.create(1);
             const result = testFunction.calculate(xNum, yNum);
             expect(result.getValue()).toBe(ErrorType.NAME);
+        });
+        it('Result is error', () => {
+            const xNum = NumberValueObject.create(0);
+            const yNum = NumberValueObject.create(0);
+            const result = testFunction.calculate(xNum, yNum);
+            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
         });
 
         it('Value is array and number', () => {

@@ -17,6 +17,7 @@
 import type { CommandListener, ICommandInfo, IRange, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     ICommandService,
+    IPermissionService,
     IResourceLoaderService,
     IUniverInstanceService,
     mergeWorksheetSnapshotWithDefault,
@@ -28,7 +29,7 @@ import {
 import type {
     ISheetCommandSharedParams,
 } from '@univerjs/sheets';
-import { InsertSheetCommand, RemoveSheetCommand, SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { InsertSheetCommand, RemoveSheetCommand, SelectionManagerService, SetWorksheetActiveOperation, WorkbookEditablePermission } from '@univerjs/sheets';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -43,7 +44,8 @@ export class FWorkbook {
         @Inject(IResourceLoaderService) private readonly _resourceLoaderService: IResourceLoaderService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IPermissionService private readonly _permissionService: IPermissionService
 
     ) {
         this.id = this._workbook.getUnitId();
@@ -258,6 +260,19 @@ export class FWorkbook {
                 }
             })
         );
+    }
+
+    /**
+     * Used to modify the editing permissions of the workbook. When the value is false, editing is not allowed.
+     * @param {boolean} value  editable value want to set
+     */
+    setEditable(value: boolean): void {
+        const instance = new WorkbookEditablePermission(this._workbook.getUnitId());
+        const editPermissionPoint = this._permissionService.getPermissionPoint(instance.id);
+        if (!editPermissionPoint) {
+            this._permissionService.addPermissionPoint(instance);
+        }
+        this._permissionService.updatePermissionPoint(instance.id, value);
     }
 
     // #region callbacks

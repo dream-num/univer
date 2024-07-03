@@ -266,7 +266,7 @@ export class FWorkbook {
      * Used to modify the editing permissions of the workbook. When the value is false, editing is not allowed.
      * @param {boolean} value  editable value want to set
      */
-    setEditablePermission(value: boolean) {
+    setEditable(value: boolean): void {
         const instance = new WorkbookEditablePermission(this._workbook.getUnitId());
         const editPermissionPoint = this._permissionService.getPermissionPoint(instance.id);
         if (!editPermissionPoint) {

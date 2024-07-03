@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, Workbook } from '@univerjs/core';
-import { ICommandService, IPermissionService, IUniverInstanceService, LocaleService, nameCharacterCheck, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, IPermissionService, IUniverInstanceService, LocaleService, nameCharacterCheck, UniverInstanceType } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import {
     InsertSheetMutation,
@@ -32,7 +32,7 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { IConfirmService, Menu, useObservable } from '@univerjs/ui';
+import { IConfirmService, Menu, UI_CONFIG_KEY, useObservable } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -72,6 +72,11 @@ export function SheetBarTabs() {
 
     const workbook = useActiveWorkbook()!;
     const permissionService = useDependency(IPermissionService);
+
+    const configService = useDependency(IConfigService);
+    const uiConfigs = configService.getConfig<{ contextMenu?: boolean }>(UI_CONFIG_KEY);
+
+    const contextMenu = uiConfigs?.contextMenu ?? true;
 
     const updateSheetItems = useCallback(() => {
         const currentSubUnitId = workbook.getActiveSheet()?.getSheetId() || '';
@@ -387,6 +392,8 @@ export function SheetBarTabs() {
     };
 
     const onVisibleChange = (visible: boolean) => {
+        if (!contextMenu) return;
+
         if (editorBridgeService?.isForceKeepVisible()) {
             return;
         }
@@ -410,6 +417,7 @@ export function SheetBarTabs() {
             visible={visible}
             align={{ offset }}
             trigger={['contextMenu']}
+            disabled={!contextMenu}
             overlay={(
                 <Menu
                     menuType={SheetMenuPosition.SHEET_BAR}
@@ -422,7 +430,12 @@ export function SheetBarTabs() {
             )}
             onVisibleChange={onVisibleChange}
         >
-            <div className={styles.slideTabBarContainer} ref={slideTabBarContainerRef} onDragStart={(e) => e.preventDefault()}>
+            <div
+                className={styles.slideTabBarContainer}
+                ref={slideTabBarContainerRef}
+                onDragStart={(e) => e.preventDefault()}
+                onContextMenu={(e) => e.preventDefault()}
+            >
                 <div className={styles.slideTabBar} style={{ boxShadow }}>
                     {sheetList.map((item) => (
                         <SheetBarItem {...item} key={item.sheetId} selected={activeKey === item.sheetId} />

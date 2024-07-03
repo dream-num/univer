@@ -398,7 +398,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
             const { sheetTransform } = drawingParam;
 
-            drawingParam.transform = drawingPositionToTransform(sheetTransform, this._selectionRenderService);
+            drawingParam.transform = drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
         });
 
         const unitId = params[0].unitId;

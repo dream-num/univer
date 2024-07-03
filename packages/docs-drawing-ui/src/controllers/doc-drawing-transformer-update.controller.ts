@@ -511,6 +511,7 @@ export class DocDrawingTransformerController extends Disposable {
     private _moveInlineDrawing(drawing: IDocDrawingBase, object: BaseObject) {
         const anchor = this._getDrawingAnchor(drawing, object);
         const { offset } = anchor ?? {};
+
         if (offset == null) {
             return;
         }

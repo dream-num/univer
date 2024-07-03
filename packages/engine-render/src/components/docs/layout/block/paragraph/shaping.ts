@@ -207,7 +207,7 @@ export function shaping(
                 if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
                     const config = getFontCreateConfig(i, viewModel, paragraphNode, sectionBreakConfig, paragraphStyle);
                     let newGlyph: Nullable<IDocumentSkeletonGlyph> = null;
-                    const customBlock = viewModel.getCustomBlock(paragraphNode.startIndex + i);
+                    const customBlock = viewModel.getCustomBlockWithoutSetCurrentIndex(paragraphNode.startIndex + i);
 
                     if (customBlock != null) {
                         const { blockId } = customBlock;

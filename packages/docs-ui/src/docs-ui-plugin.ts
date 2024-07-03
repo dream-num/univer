@@ -50,7 +50,6 @@ import { DocClipboardService, IDocClipboardService } from './services/clipboard/
 import { DocClipboardController } from './controllers/clipboard.controller';
 import { DocEditorBridgeController } from './controllers/doc-editor-bridge.controller';
 import { DocRenderController } from './controllers/render-controllers/doc.render-controller';
-import { DocFloatingObjectRenderController } from './controllers/render-controllers/doc-floating-object.render-controller';
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { DocTextSelectionRenderController } from './controllers/render-controllers/text-selection.render-controller';
 import { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
@@ -152,7 +151,6 @@ export class UniverDocsUIPlugin extends Plugin {
     private _initRenderModules(): void {
         ([
             DocBackScrollRenderController,
-            DocFloatingObjectRenderController,
             DocTextSelectionRenderController,
             DocHeaderFooterController,
         ]).forEach((m) => {

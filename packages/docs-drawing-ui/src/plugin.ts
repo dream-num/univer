@@ -24,7 +24,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocDrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
 import { DocDrawingUIController } from './controllers/doc-drawing.controller';
 import { DocDrawingUpdateRenderController } from './controllers/render-controllers/doc-drawing-update.render-controller';
-import { DocDrawingTransformUpdateController } from './controllers/doc-drawing-transform-update.controller';
+import { DocDrawingTransformUpdateController } from './controllers/render-controllers/doc-drawing-transform-update.controller';
 import { DocDrawingAddRemoveController } from './controllers/doc-drawing-notification.controller';
 import { DocDrawingTransformerController } from './controllers/doc-drawing-transformer-update.controller';
 
@@ -47,7 +47,6 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
         const dependencies: Dependency[] = [
             [DocDrawingUIController],
             [DocDrawingPopupMenuController],
-            [DocDrawingTransformUpdateController],
             [DocDrawingTransformerController],
             [DocDrawingAddRemoveController],
         ];
@@ -58,6 +57,7 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
     override onReady(): void {
         ([
             DocDrawingUpdateRenderController,
+            DocDrawingTransformUpdateController,
         ]).forEach((m) => this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m));
     }
 }

@@ -46,7 +46,13 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
 
     const dirname = process.cwd();
 
+    /** @type {import('vite').UserConfig} */
     const originalConfig = {
+        optimizeDeps: {
+            esbuildOptions: {
+                keepNames: true,
+            },
+        },
         build: {
             target: 'chrome70',
             outDir: 'lib',

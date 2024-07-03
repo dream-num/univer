@@ -31,6 +31,9 @@ const locale: ILocale = {
             ...dajsZhCN,
             ...PickerZhCN,
         },
+        CascaderList: {
+            empty: '无',
+        },
     },
 };
 

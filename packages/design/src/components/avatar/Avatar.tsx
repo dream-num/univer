@@ -83,8 +83,8 @@ export function Avatar(props: IAvatarProps) {
     const sizeStyle =
         typeof size === 'number'
             ? {
-                width: size,
-                height: size,
+                width: `${size}px`,
+                height: `${size}px`,
                 lineHeight: `${size}px`,
             }
             : {};
@@ -97,7 +97,7 @@ export function Avatar(props: IAvatarProps) {
         [styles.avatarSmall]: size === 'small',
     });
 
-    const fitStyle = fit ? { objectFit: fit } : {};
+    const fitStyle = { objectFit: fit };
 
     if (src) {
         return (

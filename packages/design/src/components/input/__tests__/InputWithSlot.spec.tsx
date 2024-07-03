@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 import React from 'react';
-import { describe, expect, it } from 'vitest';
+import { cleanup, render } from '@testing-library/react';
+import { InputWithSlot } from '../InputWithSlot';
 
-import { Container } from '../Container';
+describe('InputWithSlot', () => {
+    afterEach(cleanup);
 
-describe('Container', () => {
-    it('should display initial Container', () => {
-        const { container } = render(<Container>container content Text</Container>);
+    it('renders correctly', () => {
+        const { container } = render(<InputWithSlot slot="prefix" />);
 
-        expect(container.textContent).toMatch('container content Text');
+        expect(container.innerHTML).toContain('prefix');
     });
 });

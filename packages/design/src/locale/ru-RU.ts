@@ -31,6 +31,9 @@ const locale: ILocale = {
             ...dajsRuRU,
             ...PickerRuRU,
         },
+        CascaderList: {
+            empty: 'Нет',
+        },
     },
 };
 

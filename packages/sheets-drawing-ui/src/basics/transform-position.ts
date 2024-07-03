@@ -21,7 +21,7 @@ import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import type { ISelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export function drawingPositionToTransform(position: ISheetDrawingPosition, selectionRenderService: ISelectionRenderService, sheetSkeletonManagerService: SheetSkeletonManagerService): Nullable<ITransformState> {
-    const { from, to, flipY, flipX, angle, skewX, skewY } = position;
+    const { from, to, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = position;
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
     const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
 
@@ -87,7 +87,7 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, sele
 
 // use transform and originSize convert to  ISheetDrawingPosition
 export function transformToDrawingPosition(transform: ITransformState, selectionRenderService: ISelectionRenderService): Nullable<ISheetDrawingPosition> {
-    const { left = 0, top = 0, width = 0, height = 0, flipY, flipX, angle, skewX, skewY } = transform;
+    const { left = 0, top = 0, width = 0, height = 0, flipY = false, flipX = false, angle = 0, skewX = 0, skewY = 0 } = transform;
 
     const startSelectionCell = selectionRenderService.getSelectionCellByPosition(left, top);
 

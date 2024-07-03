@@ -1675,6 +1675,9 @@ importers:
       '@univerjs/sheets-hyper-link':
         specifier: workspace:*
         version: link:../sheets-hyper-link
+      react:
+        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
+        version: 18.3.1
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*

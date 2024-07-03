@@ -68,7 +68,7 @@ const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
 /**
  * The main selection canvas component
  */
-export class SelectionShape extends Disposable {
+export class SelectionControl extends Disposable {
     private _leftControl!: Rect;
     private _rightControl!: Rect;
     private _topControl!: Rect;
@@ -112,7 +112,7 @@ export class SelectionShape extends Disposable {
 
     private _widgetRects: Rect[] = [];
 
-    private _dispose$ = new BehaviorSubject<SelectionShape>(this);
+    private _dispose$ = new BehaviorSubject<SelectionControl>(this);
     readonly dispose$ = this._dispose$.asObservable();
 
     readonly selectionMoving$ = new Subject<IRangeWithCoord>();

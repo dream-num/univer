@@ -175,7 +175,7 @@ export class ScrollTimer {
     getViewportByCoord(scene?: Scene) {
         // return scene?.getActiveViewportByCoord(Vector2.FromArray([this._offsetX, this._offsetY]));
 
-        return scene?.getActiveViewportByRelativeCoord(Vector2.FromArray([this._offsetX, this._offsetY]));
+        return scene?.findViewportByPosToViewport(Vector2.FromArray([this._offsetX, this._offsetY]));
     }
 
     getScene() {

@@ -382,7 +382,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                             Vector2.FromArray([this._startOffsetX, this._startOffsetY])
                         );
 
-                        const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords, viewPort);
+                        const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords, viewPort);
 
                         const transformCoord = getTransformCoord(moveEvt.offsetX, moveEvt.offsetY, scene, skeleton);
 

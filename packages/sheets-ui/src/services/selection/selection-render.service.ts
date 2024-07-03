@@ -123,7 +123,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
             const selectionWithStyle = getAllSelection(skeleton);
             const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
-            this._addControlToCurrentByRangeData(selectionData);
+            this._addSelectionControlBySelectionData(selectionData);
             this.refreshSelectionMoveStart();
 
             if (evt.button !== 2) {
@@ -162,7 +162,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             this._reset();
             for (const selectionWithStyle of params) {
                 const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
-                this._addControlToCurrentByRangeData(selectionData);
+                this._addSelectionControlBySelectionData(selectionData);
             }
         }));
     }

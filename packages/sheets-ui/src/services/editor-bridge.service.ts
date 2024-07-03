@@ -201,7 +201,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const scrollXY = scene.getScrollXY(selectionRenderService.getViewPort());
+        const scrollXY = scene.getViewportScrollXY(selectionRenderService.getViewPort());
         startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
         startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
         endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);

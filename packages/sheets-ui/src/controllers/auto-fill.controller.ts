@@ -183,7 +183,7 @@ export class AutoFillController extends Disposable {
             if (!currentRenderer) return;
 
             const selectionRenderService = currentRenderer.with(ISheetSelectionRenderService);
-            const selectionControls = selectionRenderService.getCurrentControls();
+            const selectionControls = selectionRenderService.getSelectionControls();
             selectionControls.forEach((controlSelection) => {
                 disposableCollection.add(
                     toDisposable(

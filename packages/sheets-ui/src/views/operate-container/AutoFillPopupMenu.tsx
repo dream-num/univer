@@ -160,7 +160,7 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
     const viewport = selectionRenderService.getViewPort();
     const scaleX = scene?.scaleX;
     const scaleY = scene?.scaleY;
-    const scrollXY = scene?.getScrollXY(viewport);
+    const scrollXY = scene?.getViewportScrollXY(viewport);
     if (!scaleX || !scene || !scaleX || !scaleY || !scrollXY) return null;
     const x = skeleton?.getNoMergeCellPositionByIndex(anchor.row, anchor.col).endX || 0;
     const y = skeleton?.getNoMergeCellPositionByIndex(anchor.row, anchor.col).endY || 0;

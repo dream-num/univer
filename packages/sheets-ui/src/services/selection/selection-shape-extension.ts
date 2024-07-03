@@ -24,7 +24,7 @@ import { type Injector, Quantity } from '@wendellhu/redi';
 
 import type { Subscription } from 'rxjs';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import type { SelectionShape } from './selection-shape';
+import type { SelectionControl } from './selection-shape';
 import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { ISheetSelectionRenderService } from './base-selection-render.service';
 
@@ -33,7 +33,7 @@ const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
 const SELECTION_CONTROL_DELETING_LIGHTEN = 35;
 
 export interface ISelectionShapeTargetSelection {
-    originControl: SelectionShape;
+    originControl: SelectionControl;
     targetSelection: IRangeWithCoord;
 }
 
@@ -76,7 +76,7 @@ export class SelectionShapeExtension {
     private _fillControlColors: string[] = [];
 
     constructor(
-        private _control: SelectionShape,
+        private _control: SelectionControl,
         private _skeleton: SpreadsheetSkeleton,
         private _scene: Scene,
         private readonly _themeService: ThemeService,
@@ -176,7 +176,7 @@ export class SelectionShapeExtension {
     private _controlMoving(moveOffsetX: number, moveOffsetY: number) {
         const scene = this._scene;
 
-        const scrollXY = scene.getScrollXYByRelativeCoords(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+        const scrollXY = scene.getVpScrollXYInfoByPosToVp(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
@@ -264,7 +264,7 @@ export class SelectionShapeExtension {
 
         const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
 
-        const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords);
+        const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords);
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
@@ -420,7 +420,7 @@ export class SelectionShapeExtension {
     private _widgetMoving(moveOffsetX: number, moveOffsetY: number, cursor: CURSOR_TYPE) {
         const scene = this._scene;
 
-        const scrollXY = scene.getScrollXYByRelativeCoords(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
+        const scrollXY = scene.getVpScrollXYInfoByPosToVp(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
@@ -611,7 +611,7 @@ export class SelectionShapeExtension {
         const scene = this._scene;
         // const activeViewport = scene.getActiveViewportByCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
         // const scrollXY = activeViewport ? scene.getScrollXY(activeViewport) : { x: 0, y: 0 };
-        const scrollXY = scene.getScrollXY(this._activeViewport);
+        const scrollXY = scene.getViewportScrollXY(this._activeViewport);
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 

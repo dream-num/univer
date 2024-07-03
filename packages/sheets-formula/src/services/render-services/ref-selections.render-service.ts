@@ -59,11 +59,11 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._initUserActionSyncListener();
 
         this._setStyle(getRefSelectionStyle(this._themeService));
-        this._remainLastEnabled = true; // For ref range selections, we should always remain others.
+        this._refRangeRemainLastEnabled = true; // For ref range selections, we should always remain others.
     }
 
     setRemainLastEnabled(enabled: boolean): void {
-        this._remainLastEnabled = enabled;
+        this._refRangeRemainLastEnabled = enabled;
     }
 
     setSkipLastEnabled(enabled: boolean): void {
@@ -131,7 +131,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
             const selectionWithStyle = getAllSelection(skeleton);
             const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
-            this._addControlToCurrentByRangeData(selectionData);
+            this._addSelectionControlBySelectionData(selectionData);
             this.refreshSelectionMoveStart();
 
             if (evt.button !== 2) {
@@ -169,7 +169,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
 
             for (const selectionWithStyle of selectionsWithStyles) {
                 const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
-                this._addControlToCurrentByRangeData(selectionData);
+                this._addSelectionControlBySelectionData(selectionData);
             }
         }));
     }

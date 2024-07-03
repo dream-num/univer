@@ -217,7 +217,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
                 return;
             }
 
-            const startScrollXY = scene.getScrollXYByRelativeCoords(
+            const startScrollXY = scene.getVpScrollXYInfoByPosToVp(
                 Vector2.FromArray([this._startOffsetX, this._startOffsetY])
             );
 
@@ -371,7 +371,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
         const { rowHeaderWidth, columnHeaderHeight, rowTotalHeight, columnTotalWidth } = skeleton;
 
         // const scrollXY = scene.getScrollXYByRelativeCoords(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
-        const scrollXY = scene.getScrollXY(scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!);
+        const scrollXY = scene.getViewportScrollXY(scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!);
         const { scaleX, scaleY } = scene.getAncestorScale();
 
         const moveActualSelection = skeleton.getCellPositionByOffset(

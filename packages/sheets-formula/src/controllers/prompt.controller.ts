@@ -397,7 +397,7 @@ export class PromptController extends Disposable {
             // Rebuild selections when the selection is changed from cache refs in the formula string (not current selections)!
             this._updateRefSelectionStyle(this._isSelectionMovingRefSelections);
 
-            const selectionControls = this._selectionRenderService.getCurrentControls();
+            const selectionControls = this._selectionRenderService.getSelectionControls();
             selectionControls.forEach((c) => {
                 c.disableHelperSelection();
 
@@ -1382,7 +1382,7 @@ export class PromptController extends Disposable {
     }
 
     private _updateRefSelectionStyle(refSelections: IRefSelection[]) {
-        const controls = this._selectionRenderService.getCurrentControls();
+        const controls = this._selectionRenderService.getSelectionControls();
         const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
 
         for (let i = 0, len = refSelections.length; i < len; i++) {

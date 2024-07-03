@@ -189,7 +189,7 @@ export class Spreadsheet extends SheetComponent {
         const scene = this.getParent() as Scene;
         let x = 0;
         let y = 0;
-        const viewPort = scene.getActiveViewportByRelativeCoord(coord);
+        const viewPort = scene.findViewportByPosToViewport(coord);
         if (viewPort) {
             const actualX = viewPort.viewportScrollX || 0;
             const actualY = viewPort.viewportScrollY || 0;

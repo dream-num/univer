@@ -36,7 +36,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
-import { SelectionShape } from './selection-shape';
+import { SelectionControl } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
 import { attachPrimaryWithCoord, attachSelectionWithCoord } from './util';
 
@@ -58,7 +58,7 @@ export interface ISheetSelectionRenderService {
 
     /** @deprecated This should not be provided by the selection render service. */
     getViewPort(): Viewport; // AutoFill
-    getCurrentControls(): SelectionShape[]; // AutoFill
+    getSelectionControls(): SelectionControl[]; // AutoFill
 
     // The following methods are used to get range locations in a worksheet. Though `attachRangeWithCoord` should not happens here.
     // And `attachPrimaryWithCoord` is redundant.
@@ -85,7 +85,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     readonly controlFillConfig$ = this._controlFillConfig$.asObservable();
 
-    private _selectionControls: SelectionShape[] = []; // sheetID:Controls
+    private _selectionControls: SelectionControl[] = []; // sheetID:Controls
 
     private _startSelectionRange: IRangeWithCoord = {
         startY: 0,
@@ -121,7 +121,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     // #region For ref range selection - we put the properties here for simplicity
     // Used in the formula selection feature, a new selection string is added by drawing a box with the mouse.
-    protected _remainLastEnabled: boolean = false;
+    protected _refRangeRemainLastEnabled: boolean = false;
     protected _skipLastEnabled: boolean = false;
     protected _singleSelectionEnabled: boolean = false;
     // #endregion
@@ -166,7 +166,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * @param selectionRange
      * @param curCellRange
      */
-    protected _addControlToCurrentByRangeData(selection: ISelectionWithCoordAndStyle) {
+    protected _addSelectionControlBySelectionData(selection: ISelectionWithCoordAndStyle) {
         const { rangeWithCoord, primaryWithCoord } = selection;
         const skeleton = this._skeleton;
         const style = selection.style ?? getNormalSelectionStyle(this._themeService);
@@ -177,7 +177,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         }
 
         const currentControls = this._selectionControls;
-        const control = new SelectionShape(scene, currentControls.length, this._isHeaderHighlight, this._themeService);
+        const control = new SelectionControl(scene, currentControls.length, this._isHeaderHighlight, this._themeService);
 
         // TODO: memory leak? This extension seems never released.
         // eslint-disable-next-line no-new
@@ -192,7 +192,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]) {
-        const currentControls = this.getCurrentControls();
+        const currentControls = this.getSelectionControls();
         if (!currentControls) {
             return;
         }
@@ -229,12 +229,12 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         return selectionControls.map((control) => control.getValue());
     }
 
-    getCurrentControls() {
+    getSelectionControls() {
         return this._selectionControls;
     }
 
     private _clearSelectionControls() {
-        const curControls = this.getCurrentControls();
+        const curControls = this.getSelectionControls();
 
         if (curControls.length > 0) {
             for (const control of curControls) {
@@ -283,7 +283,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * @returns
      */
     getActiveRange(): Nullable<IRange> {
-        const controls = this.getCurrentControls();
+        const controls = this.getSelectionControls();
         const model = controls && controls[controls.length - 1].model;
         return (
             model && {
@@ -299,8 +299,8 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      * get active selection control
      * @returns
      */
-    getActiveSelection(): Nullable<SelectionShape> {
-        const controls = this.getCurrentControls();
+    getActiveSelection(): Nullable<SelectionControl> {
+        const controls = this.getSelectionControls();
         return controls && controls[controls.length - 1];
     }
 
@@ -368,7 +368,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             newEvtOffsetY = 0;
         }
 
-        const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords);
+        const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords);
         const { scaleX, scaleY } = scene.getAncestorScale();
         const targetedSelection = this._getSelectedRangeWithMerge(newEvtOffsetX, newEvtOffsetY, scaleX, scaleY, scrollXY);
         if (!targetedSelection) return false;
@@ -389,17 +389,17 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         this._startSelectionRange = startSelectionRange;
 
-        let activeControl: Nullable<SelectionShape> = this.getActiveSelection();
-        const curControls = this.getCurrentControls();
+        let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelection();
+        const curControls = this.getSelectionControls();
         for (const control of curControls) {
             // right click
             if (evt.button === 2 && control.model.isInclude(startSelectionRange)) {
-                activeControl = control;
+                activeSelectionControl = control;
                 return;
             }
             // Click to an existing selection
             if (control.model.isEqual(startSelectionRange)) {
-                activeControl = control;
+                activeSelectionControl = control;
                 break;
             }
 
@@ -412,7 +412,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._checkClearPreviousControls(evt);
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-        const currentCell = activeControl?.model.currentCell;
+        const currentCell = activeSelectionControl?.model.currentCell;
 
         // Perform pointer down selection.
         if (evt.shiftKey && currentCell) {
@@ -421,15 +421,15 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
                 startSelectionRange,
                 skeleton,
                 rangeType,
-                activeControl!, // Get updated in this method
+                activeSelectionControl!, // Get updated in this method
                 rowHeaderWidth,
                 columnHeaderHeight
             );
-        } else if (this._remainLastEnabled && activeControl && !evt.ctrlKey && !evt.shiftKey && !this._skipLastEnabled && !this._singleSelectionEnabled
+        } else if (this._refRangeRemainLastEnabled && activeSelectionControl && !evt.ctrlKey && !evt.shiftKey && !this._skipLastEnabled && !this._singleSelectionEnabled
         ) {
             // Supports the formula ref text selection feature,
             // under the condition of preserving all previous selections, it modifies the position of the latest selection.
-            activeControl.update(
+            activeSelectionControl.update(
                 startSelectionRange,
                 rowHeaderWidth,
                 columnHeaderHeight,
@@ -438,14 +438,14 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
             );
         } else {
             // Create new control as default
-            activeControl = new SelectionShape(
+            activeSelectionControl = new SelectionControl(
                 scene,
                 curControls.length + zIndex,
                 this._isHeaderHighlight,
                 this._themeService
             );
 
-            activeControl.update(
+            activeSelectionControl.update(
                 startSelectionRange,
                 rowHeaderWidth,
                 columnHeaderHeight,
@@ -453,7 +453,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
                 primaryWithCoord
             );
 
-            curControls.push(activeControl);
+            curControls.push(activeSelectionControl);
         }
 
         this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
@@ -469,10 +469,10 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         scene.getTransformer()?.clearSelectedObjects();
 
         if (rangeType === RANGE_TYPE.ROW || rangeType === RANGE_TYPE.COLUMN) {
-            this._moving(newEvtOffsetX, newEvtOffsetY, activeControl, rangeType);
+            this._moving(newEvtOffsetX, newEvtOffsetY, activeSelectionControl, rangeType);
         }
 
-        this._setupPointerMoveListener(viewportMain, activeControl!, scrollTimer, rangeType, newEvtOffsetX, newEvtOffsetY);
+        this._setupPointerMoveListener(viewportMain, activeSelectionControl!, scrollTimer, rangeType, newEvtOffsetX, newEvtOffsetY);
 
         this._shortcutService.setDisable(true);
         this._upEventSubscription = scene.onPointerUp$.subscribeEvent(() => {
@@ -485,7 +485,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     // eslint-disable-next-line max-lines-per-function
     private _setupPointerMoveListener(
         viewportMain: Nullable<Viewport>,
-        activeControl: SelectionShape,
+        activeControl: SelectionControl,
         scrollTimer: ScrollTimer,
         rangeType: RANGE_TYPE,
         newEvtOffsetX: number,
@@ -641,7 +641,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     getSelectionCellByPosition(x: number, y: number) {
         const scene = this._scene;
         const skeleton = this._skeleton;
-        const scrollXY = scene.getScrollXY(scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!);
+        const scrollXY = scene.getViewportScrollXY(scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!);
         const { scaleX, scaleY } = scene.getAncestorScale();
 
         return skeleton.calculateCellIndexByPosition(
@@ -660,7 +660,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     private _moving(
         moveOffsetX: number,
         moveOffsetY: number,
-        selectionControl: Nullable<SelectionShape>,
+        selectionControl: Nullable<SelectionControl>,
         rangeType: RANGE_TYPE
     ) {
         const skeleton = this._skeleton;
@@ -679,7 +679,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         const targetViewport = this._getViewportByCell(oldEndRow, oldEndColumn) ?? viewportMain;
 
-        const scrollXY = scene.getScrollXYByRelativeCoords(
+        const scrollXY = scene.getVpScrollXYInfoByPosToVp(
             Vector2.FromArray([this._startOffsetX, this._startOffsetY]),
             targetViewport
         );
@@ -872,12 +872,12 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     private _checkClearPreviousControls(evt: IPointerEvent | IMouseEvent) {
-        const curControls = this.getCurrentControls();
+        const curControls = this.getSelectionControls();
         if (curControls.length === 0) return;
 
         // In addition to pressing the ctrl or shift key, we must clear the previous selection.
         if (
-            (!evt.ctrlKey && !evt.shiftKey && !this._remainLastEnabled) ||
+            (!evt.ctrlKey && !evt.shiftKey && !this._refRangeRemainLastEnabled) ||
             (this._singleSelectionEnabled && !evt.shiftKey)
         ) {
             for (const control of curControls) {
@@ -893,7 +893,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         startSelectionRange: IRangeWithCoord,
         skeleton: SpreadsheetSkeleton,
         rangeType: RANGE_TYPE,
-        activeControl: SelectionShape,
+        activeControl: SelectionControl,
         rowHeaderWidth: number,
         columnHeaderHeight: number
     ): void {
@@ -956,4 +956,3 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         );
     }
 }
-

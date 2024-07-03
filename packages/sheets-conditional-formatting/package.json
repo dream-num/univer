@@ -65,7 +65,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "0.15.4",
+        "@wendellhu/redi": "0.15.5",
         "dayjs": ">=1.11.0",
         "rxjs": ">=7.0.0"
     },
@@ -79,12 +79,12 @@
         "@univerjs/icons-svg": "^0.1.55",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "0.15.4",
+        "@wendellhu/redi": "0.15.5",
         "dayjs": "^1.11.11",
         "rxjs": "^7.8.1",
         "sharp": "^0.33.4",
         "typescript": "^5.5.3",
-        "vite": "^5.3.2",
+        "vite": "^5.3.3",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

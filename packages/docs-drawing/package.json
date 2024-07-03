@@ -62,7 +62,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@wendellhu/redi": "0.15.4"
+        "@wendellhu/redi": "0.15.5"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
@@ -71,9 +71,9 @@
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@wendellhu/redi": "^0.15.4",
+        "@wendellhu/redi": "0.15.5",
         "typescript": "^5.5.3",
-        "vite": "^5.3.2",
+        "vite": "^5.3.3",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

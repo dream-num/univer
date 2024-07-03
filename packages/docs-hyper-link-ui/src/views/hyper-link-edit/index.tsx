@@ -33,15 +33,13 @@ export const DocHyperLinkEdit = () => {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const [link, setLink] = useState('');
-    const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const doc = editingId
+        ? univerInstanceService.getUnit<DocumentDataModel>(editingId.unitId, UniverInstanceType.UNIVER_DOC) :
+        univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     useEffect(() => {
-        if (!doc) {
-            return;
-        }
-        const unitId = doc.getUnitId();
-        const linkDetail = editingId ? hyperLinkModel.getLink(unitId, editingId) : null;
+        const linkDetail = editingId ? hyperLinkModel.getLink(editingId.unitId, editingId.linkId) : null;
         setLink(linkDetail?.payload ?? '');
-    }, [doc, editingId, hyperLinkModel]);
+    }, [editingId, hyperLinkModel]);
 
     const handleCancel = () => {
         hyperLinkService.hideEditPopup();
@@ -59,7 +57,7 @@ export const DocHyperLinkEdit = () => {
             commandService.executeCommand(UpdateDocHyperLinkCommand.id, {
                 unitId: doc.getUnitId(),
                 payload: link,
-                linkId: editingId,
+                linkId: editingId.linkId,
             });
         }
         hyperLinkService.hideEditPopup();

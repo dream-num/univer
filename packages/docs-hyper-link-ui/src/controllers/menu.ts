@@ -18,13 +18,13 @@ import type { IAccessor } from '@wendellhu/redi';
 import { UniverInstanceType } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { ShowDocHyperLinkPopupOperation } from '../commands/operations/popup.operation';
+import { ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 
 export const DOC_LINK_ICON = 'doc-hyper-link-icon';
 
 export function AddHyperLinkMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: ShowDocHyperLinkPopupOperation.id,
+        id: ShowDocHyperLinkEditPopupOperation.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: DOC_LINK_ICON,
@@ -34,3 +34,4 @@ export function AddHyperLinkMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
+

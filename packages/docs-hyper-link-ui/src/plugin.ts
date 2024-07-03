@@ -18,9 +18,13 @@ import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { UniverDocHyperLinkPlugin } from '@univerjs/docs-hyper-link';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DOC_HYPER_LINK_UI_PLUGIN } from './types/const';
+import type { IDocHyperLinkUIConfig } from './controllers/ui.controller';
 import { DocHyperLinkUIController } from './controllers/ui.controller';
 import { DocHyperLinkService } from './services/hyper-link.service';
+import { DocHyperLinkSelectionController } from './controllers/doc-hyper-link-selection.controller';
+import { DocHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 
 @DependentOn(UniverDocHyperLinkPlugin)
 export class UniverDocHyperLinkUIPlugin extends Plugin {
@@ -28,7 +32,9 @@ export class UniverDocHyperLinkUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
-        @Inject(Injector) protected override _injector: Injector
+        private _config: IDocHyperLinkUIConfig = { menu: {} },
+        @Inject(Injector) protected override _injector: Injector,
+        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService
     ) {
         super();
     }
@@ -36,12 +42,26 @@ export class UniverDocHyperLinkUIPlugin extends Plugin {
     override onStarting(injector: Injector): void {
         const deps: Dependency[] = [
             [DocHyperLinkService],
-            [DocHyperLinkUIController],
-
+            [DocHyperLinkUIController,
+                {
+                    useFactory: () => this._injector.createInstance(DocHyperLinkUIController, this._config),
+                },
+            ],
+            [DocHyperLinkSelectionController],
         ];
 
         deps.forEach((dep) => {
             injector.add(dep);
+        });
+    }
+
+    override onRendered(): void {
+        this._initRenderModule();
+    }
+
+    private _initRenderModule() {
+        [DocHyperLinkRenderController].forEach((dep) => {
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, dep);
         });
     }
 }

@@ -14,39 +14,63 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
+import type { DocumentDataModel, ITextRange, Nullable } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { TextSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
+import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import { DocHyperLinkEdit } from '../views/hyper-link-edit';
+import { DocLinkPopup } from '../views/hyper-link-popup';
 
 export class DocHyperLinkService extends Disposable {
-    private readonly _editingLink$ = new BehaviorSubject<string | undefined>(undefined);
+    private readonly _editingLink$ = new BehaviorSubject<Nullable<{ unitId: string; linkId: string }>>(null);
+    private readonly _showingLink$ = new BehaviorSubject<Nullable<{ unitId: string; linkId: string }>>(null);
     readonly editingLink$ = this._editingLink$.asObservable();
+    readonly showingLink$ = this._showingLink$.asObservable();
 
     private _editPopup: Nullable<IDisposable> = null;
     private _infoPopup: Nullable<IDisposable> = null;
 
     constructor(
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopupManagerService: DocCanvasPopManagerService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocHyperLinkModel) private readonly _docHyperLinkModel: DocHyperLinkModel,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
-    }
-
-    startAddOrEdit(id: string | undefined) {
-        this._editingLink$.next(id);
     }
 
     getEditing() {
         return this._editingLink$.value;
     }
 
-    showEditPopup() {
-        const activeRange = this._textSelectionManagerService.getActiveRange();
+    getShowing() {
+        return this._showingLink$.value;
+    }
+
+    showEditPopup(linkInfo: Nullable<{ unitId: string; linkId: string }>): Nullable<IDisposable> {
+        this._editingLink$.next(linkInfo);
+        let activeRange: Nullable<ITextRange> = this._textSelectionManagerService.getActiveRange();
+        if (linkInfo) {
+            const { unitId, linkId } = linkInfo;
+            const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+            const range = doc?.getBody()?.customRanges?.find((i) => i.rangeId === linkId);
+            if (range) {
+                activeRange = {
+                    collapsed: false,
+                    startOffset: range.startIndex,
+                    endOffset: range.endIndex + 1,
+                };
+                this._textSelectionManagerService.replaceTextRanges([{
+                    startOffset: range.startIndex,
+                    endOffset: range.endIndex + 1,
+                }]);
+            }
+        }
 
         if (activeRange) {
             this._editPopup = this._docCanvasPopupManagerService.attachPopupToRange(
@@ -63,10 +87,39 @@ export class DocHyperLinkService extends Disposable {
     }
 
     hideEditPopup() {
+        this._editingLink$.next(null);
         this._editPopup?.dispose();
     }
 
-    showInfoPopup() {}
+    showInfoPopup(unitId: string, linkId: string): Nullable<IDisposable> {
+        const link = this._docHyperLinkModel.getLink(unitId, linkId);
+        const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        if (!doc || !link) {
+            return;
+        }
+        const range = doc.getBody()?.customRanges?.find((i) => i.rangeId === linkId);
+        this._showingLink$.next({ unitId, linkId });
+        if (!range) {
+            return;
+        }
 
-    hideInfoPopup() {}
+        this._infoPopup = this._docCanvasPopupManagerService.attachPopupToRange(
+            {
+                collapsed: false,
+                startOffset: range.startIndex,
+                endOffset: range.endIndex + 1,
+            },
+            {
+                componentKey: DocLinkPopup.componentKey,
+                direction: 'top',
+                closeOnSelfTarget: true,
+            }
+        );
+        return this._infoPopup;
+    }
+
+    hideInfoPopup() {
+        this._showingLink$.next(null);
+        this._infoPopup?.dispose();
+    }
 }

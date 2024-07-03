@@ -81,7 +81,6 @@ export class DocHyperLinkModel extends Disposable {
         }
         const oldPayload = link.payload;
         link.payload = payload;
-
         this._linkUpdate$.next({
             type: 'update',
             link,

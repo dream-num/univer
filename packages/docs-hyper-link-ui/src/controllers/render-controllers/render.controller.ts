@@ -18,7 +18,7 @@ import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, IUniverInstanceService } from '@univerjs/core';
 import { DocHyperLinkModel } from '@univerjs/docs-hyper-link';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { DocInterceptorService } from '@univerjs/docs';
+import { DOC_INTERCEPTOR_POINT, DocInterceptorService } from '@univerjs/docs';
 import { DocRenderController } from '@univerjs/docs-ui';
 import { Inject } from '@wendellhu/redi';
 import { DocHyperLinkService } from '../../services/hyper-link.service';
@@ -33,9 +33,26 @@ export class DocHyperLinkRenderController extends Disposable implements IRenderM
         @Inject(DocHyperLinkModel) private readonly _hyperLinkModel: DocHyperLinkModel
     ) {
         super();
+
+        this._init();
     }
 
     private _init() {
+        this._docInterceptorService.intercept(DOC_INTERCEPTOR_POINT.CUSTOM_RANGE, {
+            handler: (data, pos, next) => {
+                if (!data) {
+                    return next(data);
+                }
+                const { unitId } = pos;
+                const activeLink = this._hyperLinkService.getEditing();
+                const { linkId, unitId: linkUnitId } = activeLink || {};
 
+                const isActive = linkUnitId === unitId && data.rangeId === linkId;
+                return next({
+                    ...data,
+                    active: isActive,
+                });
+            },
+        });
     }
 }

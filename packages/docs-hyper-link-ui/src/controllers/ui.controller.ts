@@ -15,6 +15,7 @@
  */
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { MenuConfig } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { LinkSingle } from '@univerjs/icons';
@@ -22,12 +23,18 @@ import { DocHyperLinkEdit } from '../views/hyper-link-edit';
 import { AddDocHyperLinkCommand } from '../commands/commands/add-link.command';
 import { UpdateDocHyperLinkCommand } from '../commands/commands/update-link.command';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
-import { ShowDocHyperLinkPopupOperation } from '../commands/operations/popup.operation';
+import { ShowDocHyperLinkEditPopupOperation, ToggleDocHyperLinkInfoPopupOperation } from '../commands/operations/popup.operation';
+import { DocLinkPopup } from '../views/hyper-link-popup';
 import { AddHyperLinkMenuItemFactory, DOC_LINK_ICON } from './menu';
+
+export interface IDocHyperLinkUIConfig {
+    menu: MenuConfig;
+}
 
 @OnLifecycle(LifecycleStages.Starting, DocHyperLinkUIController)
 export class DocHyperLinkUIController extends Disposable {
     constructor(
+        protected _config: IDocHyperLinkUIConfig,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuService private readonly _menuService: IMenuService,
@@ -43,6 +50,7 @@ export class DocHyperLinkUIController extends Disposable {
     private _initComponents() {
         ([
             [DocHyperLinkEdit, DocHyperLinkEdit.componentKey],
+            [DocLinkPopup, DocLinkPopup.componentKey],
             [LinkSingle, DOC_LINK_ICON],
         ] as const).forEach(([comp, key]) => {
             this._componentManager.register(key, comp);
@@ -54,7 +62,8 @@ export class DocHyperLinkUIController extends Disposable {
             AddDocHyperLinkCommand,
             UpdateDocHyperLinkCommand,
             DeleteDocHyperLinkCommand,
-            ShowDocHyperLinkPopupOperation,
+            ShowDocHyperLinkEditPopupOperation,
+            ToggleDocHyperLinkInfoPopupOperation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

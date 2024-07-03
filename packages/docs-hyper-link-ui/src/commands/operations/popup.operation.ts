@@ -14,15 +14,47 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand } from '@univerjs/core';
+import type { ICommand, Nullable } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { DocHyperLinkService } from '../../services/hyper-link.service';
 
-export const ShowDocHyperLinkPopupOperation: ICommand = {
+export interface IShowDocHyperLinkEditPopupOperationParams {
+    link?: {
+        unitId: string;
+        linkId: string;
+    };
+}
+
+export const ShowDocHyperLinkEditPopupOperation: ICommand<IShowDocHyperLinkEditPopupOperationParams> = {
     type: CommandType.OPERATION,
-    id: 'docs.operation.show-hyper-link-popup',
-    handler(accessor) {
+    id: 'docs.operation.show-hyper-link-edit-popup',
+    handler(accessor, params) {
+        const linkInfo = params?.link;
         const hyperLinkService = accessor.get(DocHyperLinkService);
-        hyperLinkService.showEditPopup();
+        hyperLinkService.showEditPopup(linkInfo);
+        return true;
+    },
+};
+
+export interface IToggleDocHyperLinkInfoPopupOperationParams {
+    link?: Nullable<{
+        unitId: string;
+        linkId: string;
+    }>;
+}
+
+export const ToggleDocHyperLinkInfoPopupOperation: ICommand<IToggleDocHyperLinkInfoPopupOperationParams> = {
+    type: CommandType.OPERATION,
+    id: 'docs.operation.toggle-hyper-link-info-popup',
+    handler(accessor, params) {
+        const link = params?.link;
+        const hyperLinkService = accessor.get(DocHyperLinkService);
+        if (link) {
+            hyperLinkService.showInfoPopup(link.unitId, link.linkId);
+        } else {
+            hyperLinkService.hideInfoPopup();
+        }
+
         return true;
     },
 };

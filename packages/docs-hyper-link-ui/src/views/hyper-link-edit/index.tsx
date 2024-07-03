@@ -43,10 +43,10 @@ export const DocHyperLinkEdit = () => {
         setLink(linkDetail?.payload ?? '');
     }, [doc, editingId, hyperLinkModel]);
 
-    const handleConfirm = () => {
+    const handleCancel = () => {
         hyperLinkService.hideEditPopup();
     };
-    const handleCancel = () => {
+    const handleConfirm = () => {
         if (!doc) {
             return;
         }
@@ -62,6 +62,7 @@ export const DocHyperLinkEdit = () => {
                 linkId: editingId,
             });
         }
+        hyperLinkService.hideEditPopup();
     };
 
     if (!doc) {
@@ -72,7 +73,7 @@ export const DocHyperLinkEdit = () => {
         <div className={styles.docsLinkEdit}>
             <div className={styles.docsLinkEditTitle}>
                 <span>Link</span>
-                <CloseSingle className={styles.docsLinkEditClose} />
+                <CloseSingle className={styles.docsLinkEditClose} onClick={handleCancel} />
             </div>
             <div>
                 <FormLayout label="Link address">

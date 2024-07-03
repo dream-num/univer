@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, IUniverInstanceService, JSONX } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, JSONX, Tools } from '@univerjs/core';
 import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
 import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
 import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';

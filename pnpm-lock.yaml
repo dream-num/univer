@@ -222,6 +222,9 @@ importers:
       '@univerjs/docs-drawing-ui':
         specifier: workspace:*
         version: link:../packages/docs-drawing-ui
+      '@univerjs/docs-hyper-link-ui':
+        specifier: workspace:*
+        version: link:../packages/docs-hyper-link-ui
       '@univerjs/docs-thread-comment-ui':
         specifier: workspace:*
         version: link:../packages/docs-thread-comment-ui

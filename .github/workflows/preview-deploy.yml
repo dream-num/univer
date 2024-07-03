@@ -23,7 +23,7 @@ jobs:
         steps:
             # Get PR id from artifact
             - name: download pr artifact
-              uses: dawidd6/action-download-artifact@v2
+              uses: dawidd6/action-download-artifact@v6
               with:
                   workflow: ${{ github.event.workflow_run.workflow_id }}
                   run_id: ${{ github.event.workflow_run.id }}
@@ -35,7 +35,7 @@ jobs:
 
             # Get PR ref from artifact
             - name: download pr artifact
-              uses: dawidd6/action-download-artifact@v2
+              uses: dawidd6/action-download-artifact@v6
               with:
                   workflow: ${{ github.event.workflow_run.workflow_id }}
                   run_id: ${{ github.event.workflow_run.id }}
@@ -47,7 +47,7 @@ jobs:
 
             # Get PR repo from artifact
             - name: download pr artifact
-              uses: dawidd6/action-download-artifact@v2
+              uses: dawidd6/action-download-artifact@v6
               with:
                   workflow: ${{ github.event.workflow_run.workflow_id }}
                   run_id: ${{ github.event.workflow_run.id }}
@@ -64,7 +64,7 @@ jobs:
         steps:
             # ================= Create Comment =================
             - name: 🧽 Find And Delete Comment
-              uses: peter-evans/find-comment@v2
+              uses: peter-evans/find-comment@v3
               if: ${{ needs.setup.outputs.id != '' }}
               id: fc
               with:
@@ -209,7 +209,7 @@ jobs:
 
             # ================= Create Comment =================
             - name: 🧽 Find And Delete Comment
-              uses: peter-evans/find-comment@v2
+              uses: peter-evans/find-comment@v3
               if: ${{ needs.setup.outputs.id != '' }}
               id: fc
               with:

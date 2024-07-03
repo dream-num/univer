@@ -15,9 +15,12 @@
  */
 
 import type { IAccessor } from '@wendellhu/redi';
-import { UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { debounceTime, Observable } from 'rxjs';
+import { TextSelectionManagerService } from '@univerjs/docs';
 import { ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 
 export const DOC_LINK_ICON = 'doc-hyper-link-icon';
@@ -32,6 +35,37 @@ export function AddHyperLinkMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         tooltip: 'hyperLinkUI.panel.addComment',
         positions: [MenuPosition.TOOLBAR_START, MenuPosition.CONTEXT_MENU],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        disabled$: new Observable(function (subscribe) {
+            const textSelectionService = accessor.get(TextSelectionManagerService);
+            const univerInstanceService = accessor.get(IUniverInstanceService);
+            textSelectionService.textSelection$.pipe(debounceTime(16)).subscribe(() => {
+                const activeRange = textSelectionService.getActiveRange();
+                const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+                if (!doc || !activeRange || activeRange.collapsed) {
+                    subscribe.next(true);
+                    return;
+                }
+
+                const paragraphs = doc.getBody()?.paragraphs;
+                if (!paragraphs) {
+                    subscribe.next(true);
+                    return;
+                }
+                for (let i = 0, len = paragraphs.length; i < len; i++) {
+                    const p = paragraphs[i];
+                    if (activeRange.startOffset <= p.startIndex && (activeRange.endOffset - 1) > p.startIndex) {
+                        subscribe.next(true);
+                        return;
+                    }
+
+                    if (p.startIndex > activeRange.endOffset) {
+                        break;
+                    }
+                }
+
+                subscribe.next(false);
+            });
+        }),
     };
 }
 

@@ -81,6 +81,34 @@ describe('Test FRange', () => {
         };
     });
 
+    it('Range getRow', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        const range = activeSheet?.getRange(0, 0, 1, 1);
+
+        expect(range?.getRow()).toBe(0);
+    });
+
+    it('Range getColumn', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        const range = activeSheet?.getRange(0, 0, 1, 1);
+
+        expect(range?.getColumn()).toBe(0);
+    });
+
+    it('Range getWidth', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        const range = activeSheet?.getRange(0, 0, 1, 1);
+
+        expect(range?.getWidth()).toBe(1);
+    });
+
+    it('Range getHeight', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        const range = activeSheet?.getRange(0, 0, 1, 1);
+
+        expect(range?.getHeight()).toBe(1);
+    });
+
     it('Range setValue', () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
 
@@ -239,6 +267,13 @@ describe('Test FRange', () => {
             ['=SUM(A4)'],
             [''],
         ]);
+    });
+
+    it('Range getWrap', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        const range = activeSheet?.getRange(0, 0);
+        await range?.setWrap(true);
+        expect(range?.getWrap()).toBe(true);
     });
 
     it('Range setFontWeight', () => {

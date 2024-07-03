@@ -387,7 +387,7 @@ function __getSplitWidthNoAngle(
     const newAtop = top - (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distT : 0);
     const newHeight = height + (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distB : 0);
 
-    if (newAtop + newHeight < lineTop || newAtop > lineHeight + lineTop) {
+    if (newAtop + newHeight <= lineTop || newAtop >= lineHeight + lineTop) {
         return;
     }
 

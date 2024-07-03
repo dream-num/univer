@@ -23,7 +23,7 @@ export interface IAddCommentMutationParams {
     unitId: string;
     subUnitId: string;
     comment: IThreadComment;
-    sync?: boolean
+    sync?: boolean;
 }
 
 export const AddCommentMutation: ICommand<IAddCommentMutationParams> = {

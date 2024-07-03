@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { ITransformState, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import type { ITransformState } from '@univerjs/drawing';
 import { precisionTo } from '@univerjs/engine-render';
 import type { ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import type { ISelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export function drawingPositionToTransform(position: ISheetDrawingPosition, selectionRenderService: ISelectionRenderService, sheetSkeletonManagerService: SheetSkeletonManagerService): Nullable<ITransformState> {
-    const { from, to } = position;
+    const { from, to, flipY, flipX, angle, skewX, skewY } = position;
     const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
     const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
 
@@ -76,6 +77,7 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, sele
     }
 
     return {
+        flipY, flipX, angle, skewX, skewY,
         left,
         top,
         width,
@@ -85,7 +87,7 @@ export function drawingPositionToTransform(position: ISheetDrawingPosition, sele
 
 // use transform and originSize convert to  ISheetDrawingPosition
 export function transformToDrawingPosition(transform: ITransformState, selectionRenderService: ISelectionRenderService): Nullable<ISheetDrawingPosition> {
-    const { left = 0, top = 0, width = 0, height = 0 } = transform;
+    const { left = 0, top = 0, width = 0, height = 0, flipY, flipX, angle, skewX, skewY } = transform;
 
     const startSelectionCell = selectionRenderService.getSelectionCellByPosition(left, top);
 
@@ -114,6 +116,7 @@ export function transformToDrawingPosition(transform: ITransformState, selection
     };
 
     return {
+        flipY, flipX, angle, skewX, skewY,
         from,
         to,
     };

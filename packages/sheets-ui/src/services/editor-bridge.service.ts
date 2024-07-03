@@ -39,6 +39,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
+import { attachPrimaryWithCoord } from './selection/util';
 
 export interface IEditorBridgeServiceVisibleParam {
     visible: boolean;
@@ -189,7 +190,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         const { primary, unitId, sheetId, scene, engine } = currentEditCell;
         const { startRow, startColumn } = primary;
-        const primaryWithCoord = selectionRenderService.attachPrimaryWithCoord(primary);
+        const primaryWithCoord = attachPrimaryWithCoord(primary, skeleton);
         if (primaryWithCoord == null) {
             return;
         }

@@ -18,7 +18,6 @@ import type {
     IInterceptor,
     IRange,
     IRangeWithCoord,
-    ISelectionCell,
     ISelectionCellWithCoord,
     ISelectionWithCoord,
     Nullable,
@@ -38,7 +37,7 @@ import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
 import { SelectionControl } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
-import { attachPrimaryWithCoord, attachSelectionWithCoord } from './util';
+import { attachSelectionWithCoord } from './util';
 
 export interface IControlFillConfig {
     oldRange: IRange;
@@ -58,6 +57,9 @@ export interface ISheetSelectionRenderService {
 
     /** @deprecated This should not be provided by the selection render service. */
     getViewPort(): Viewport; // AutoFill
+
+    getSkeleton(): SpreadsheetSkeleton;
+
     getSelectionControls(): SelectionControl[]; // AutoFill
 
     // The following methods are used to get range locations in a worksheet. Though `attachRangeWithCoord` should not happens here.
@@ -66,7 +68,8 @@ export interface ISheetSelectionRenderService {
     /** @deprecated Use the function `attachSelectionWithCoord` instead. */
     attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
     /** @deprecated Use the function `attachPrimaryWithCoord` instead`. */
-    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
+    // attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
+
     getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithCoord>; // drawing
 }
 
@@ -87,7 +90,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     private _selectionControls: SelectionControl[] = []; // sheetID:Controls
 
-    private _startSelectionRange: IRangeWithCoord = {
+    private _activeCellRangeOfCurrSelection: IRangeWithCoord = {
         startY: 0,
         endY: 0,
         startX: 0,
@@ -157,6 +160,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._setStyle(getNormalSelectionStyle(this._themeService));
     }
 
+    /** @deprecated This should not be provided by the selection render service. */
     getViewPort() {
         return this._activeViewport!;
     }
@@ -229,6 +233,10 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         this._skeleton = skeleton;
         this._scene = scene;
         this._activeViewport = viewport || scene?.getViewports()[0];
+    }
+
+    getSkeleton() {
+        return this._skeleton;
     }
 
     getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[] {
@@ -381,7 +389,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const { rangeWithCoord: cursorCellRange, primaryWithCoord: primaryCursorCellRange } = cursorCellRangeInfo;
         const cursorCellRangeWithRangeType: IRangeWithCoord = { ...cursorCellRange, rangeType };
 
-        this._startSelectionRange = cursorCellRangeWithRangeType;
+        this._activeCellRangeOfCurrSelection = cursorCellRangeWithRangeType;
 
         let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelection();
         const curControls = this.getSelectionControls();
@@ -623,13 +631,15 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         });
     }
 
+    /** @deprecated Use the function `attachSelectionWithCoord` instead`. */
     attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle {
         return attachSelectionWithCoord(selectionWithStyle, this._skeleton);
     }
 
-    attachPrimaryWithCoord(primary: ISelectionCell): ISelectionCellWithCoord {
-        return attachPrimaryWithCoord(primary, this._skeleton);
-    }
+    /** @deprecated Use the function `attachPrimaryWithCoord` instead`. */
+    // attachPrimaryWithCoord(primary: ISelectionCell): ISelectionCellWithCoord {
+    //     return attachPrimaryWithCoord(primary, this._skeleton);
+    // }
 
     getSelectionCellByPosition(x: number, y: number) {
         const scene = this._scene;
@@ -659,7 +669,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const skeleton = this._skeleton;
         const scene = this._scene;
 
-        const { startRow, startColumn, endRow, endColumn } = this._startSelectionRange;
+        const { startRow, startColumn, endRow, endColumn } = this._activeCellRangeOfCurrSelection;
 
         const {
             startRow: oldStartRow,
@@ -924,7 +934,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
          */
         const activeCell = skeleton.getCellByIndex(actualRow, actualColumn);
 
-        this._startSelectionRange = {
+        this._activeCellRangeOfCurrSelection = {
             startColumn: activeCell.mergeInfo.startColumn,
             startRow: activeCell.mergeInfo.startRow,
             endColumn: activeCell.mergeInfo.endColumn,

@@ -21,6 +21,7 @@ import { IContextMenuService, ILayoutService, MenuPosition } from '@univerjs/ui'
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
+import { attachSelectionWithCoord } from '../../../services/selection/util';
 
 /**
  * On mobile devices, the context menu would popup when
@@ -57,7 +58,8 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
             }
 
             const canvasRect = this._layoutService.getCanvasElement().getBoundingClientRect();
-            const range = this._selectionRenderService.attachSelectionWithCoord(selectionRange);
+            const skeleton = this._selectionRenderService.getSkeleton();
+            const range = attachSelectionWithCoord(selectionRange, skeleton);
             this._contextMenuService.triggerContextMenu({
                 // TODO@wzhudev: there is an offset with the rangeWithCoord.endX and rangeWithCoord.endY
                 // with the client rect

@@ -29,6 +29,7 @@ import type { ISheetObjectParam } from '../../controllers/utils/component-tools'
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { checkInHeaderRanges } from '../../controllers/utils/selections-tools';
 import { BaseSelectionRenderService } from './base-selection-render.service';
+import { attachSelectionWithCoord } from './util';
 
 /**
  * This services controls rendering of normal selections in a render unit.
@@ -122,7 +123,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
             const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
             const selectionWithStyle = getAllSelection(skeleton);
-            const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
+            const selectionData = attachSelectionWithCoord(selectionWithStyle, skeleton);
             this._addSelectionControlBySelectionData(selectionData);
             this.refreshSelectionMoveStart();
 
@@ -144,7 +145,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
     private _refreshSelection(params: readonly ISelectionWithStyle[]) {
         const selections = params.map((selectionWithStyle) => {
-            const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
+            const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
             selectionData.style = getNormalSelectionStyle(this._themeService);
             return selectionData;
         });
@@ -161,7 +162,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
         this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((params) => {
             this._reset();
             for (const selectionWithStyle of params) {
-                const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
+                const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);
                 this._addSelectionControlBySelectionData(selectionData);
             }
         }));

@@ -113,6 +113,9 @@ export class CalculateFormulaService extends Disposable {
         for (let i = 0; i < cycleReferenceCount; i++) {
             this._runtimeService.setFormulaCycleIndex(i);
             await this._execute();
+
+            FORMULA_REF_TO_ARRAY_CACHE.clear();
+
             const isCycleDependency = this._runtimeService.isCycleDependency();
             if (!isCycleDependency) {
                 break;
@@ -124,8 +127,6 @@ export class CalculateFormulaService extends Disposable {
         this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
 
         this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
-
-        FORMULA_REF_TO_ARRAY_CACHE.clear();
 
         CELL_INVERTED_INDEX_CACHE.clear();
     }

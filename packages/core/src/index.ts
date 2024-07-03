@@ -184,6 +184,7 @@ export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service'
 export { IAuthzIoService } from './services/authz-io/type';
 export { createDefaultUser } from './services/user-manager/const';
 export { skipParseTagNames } from './types/const/clipboard';
+export { normalizeBody } from './docs/data-model/text-x/utils';
 
 installShims();
 

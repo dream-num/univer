@@ -153,8 +153,7 @@ export class TextX {
 
         let index = 0;
 
-        for (let action of actions) {
-            action = { ...action };
+        for (const action of actions) {
             if (action.t === TextXActionType.DELETE && action.body == null) {
                 const body = getBodySlice(doc, index, index + action.len, false);
                 action.len = body.dataStream.length;

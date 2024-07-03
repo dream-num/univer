@@ -15,7 +15,7 @@
  */
 
 import type { ICustomRange, IDocumentBody, IParagraph } from '@univerjs/core';
-import { Disposable, ICommandService, ILogService, IUniverInstanceService, toDisposable } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService, IUniverInstanceService, normalizeBody, toDisposable } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
@@ -163,7 +163,8 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
     }
 
-    private async _paste(body: IDocumentBody): Promise<boolean> {
+    private async _paste(_body: IDocumentBody): Promise<boolean> {
+        const body = normalizeBody(_body);
         const { segmentId, endOffset: activeEndOffset, style } = this._textSelectionManagerService.getActiveRange() ?? {};
         const ranges = this._textSelectionManagerService.getSelections();
 

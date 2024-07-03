@@ -53,6 +53,9 @@ export class DocHyperLinkService extends Disposable {
     }
 
     showEditPopup(linkInfo: Nullable<{ unitId: string; linkId: string }>): Nullable<IDisposable> {
+        if (this._editPopup) {
+            this._editPopup.dispose();
+        }
         this._editingLink$.next(linkInfo);
         let activeRange: Nullable<ITextRange> = this._textSelectionManagerService.getActiveRange();
         if (linkInfo) {
@@ -92,6 +95,9 @@ export class DocHyperLinkService extends Disposable {
     }
 
     showInfoPopup(unitId: string, linkId: string): Nullable<IDisposable> {
+        if (this._infoPopup) {
+            this._infoPopup.dispose();
+        }
         const link = this._docHyperLinkModel.getLink(unitId, linkId);
         const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         if (!doc || !link) {

@@ -51,9 +51,10 @@ export function AddHyperLinkMenuItemFactory(accessor: IAccessor): IMenuButtonIte
                     subscribe.next(true);
                     return;
                 }
+
                 for (let i = 0, len = paragraphs.length; i < len; i++) {
                     const p = paragraphs[i];
-                    if (activeRange.startOffset <= p.startIndex && (activeRange.endOffset - 1) > p.startIndex) {
+                    if (activeRange.startOffset <= p.startIndex && activeRange.endOffset > p.startIndex) {
                         subscribe.next(true);
                         return;
                     }

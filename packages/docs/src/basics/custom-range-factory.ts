@@ -30,25 +30,16 @@ interface IAddCustomRangeParam {
     rangeType: CustomRangeType;
 }
 
-export function addCustomRangeFactory(param: IAddCustomRangeParam, body: IDocumentBody) {
-    const { unitId, range, rangeId, rangeType, segmentId } = param;
+function addCustomRangeTextX(param: IAddCustomRangeParam, body: IDocumentBody) {
+    const { range, rangeId, rangeType, segmentId } = param;
     const actualRange = getSelectionForAddCustomRange(range, body);
     if (!actualRange) {
         return null;
     }
 
     const { startOffset: start, endOffset: end } = actualRange;
-    const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
-        id: RichTextEditingMutation.id,
-        params: {
-            unitId,
-            actions: [],
-            textRanges: undefined,
-        },
-    };
 
     const textX = new TextX();
-    const jsonX = JSONX.getInstance();
 
     if (start > 0) {
         textX.push({
@@ -93,6 +84,23 @@ export function addCustomRangeFactory(param: IAddCustomRangeParam, body: IDocume
         line: 0,
     });
 
+    return textX;
+}
+
+export function addCustomRangeFactory(param: IAddCustomRangeParam, body: IDocumentBody) {
+    const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+        id: RichTextEditingMutation.id,
+        params: {
+            unitId: param.unitId,
+            actions: [],
+            textRanges: undefined,
+        },
+    };
+    const jsonX = JSONX.getInstance();
+    const textX = addCustomRangeTextX(param, body);
+    if (!textX) {
+        return false;
+    }
     doMutation.params.actions = jsonX.editOp(textX.serialize());
     return doMutation;
 }
@@ -103,6 +111,7 @@ interface IAddCustomRangeFactoryParam {
     rangeType: CustomRangeType;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAddCustomRangeFactoryParam) {
     const { segmentId, rangeId, rangeType } = param;
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
@@ -122,22 +131,108 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     if (!body) {
         return false;
     }
+    const { startOffset, endOffset } = selection;
+    const customRanges = body.customRanges ?? [];
 
-    const doMutation = addCustomRangeFactory(
-        {
-            unitId,
-            range: {
-                startOffset: selection.startOffset,
-                endOffset: selection.endOffset,
-                collapsed: true,
-            },
-            rangeId,
-            rangeType,
+    const relativeCustomRanges = [];
+    for (let i = 0, len = customRanges.length; i < len; i++) {
+        const customRange = customRanges[i];
+        // intersect
+        if (customRange.rangeType === rangeType && Math.max(customRange.startIndex, startOffset) <= Math.min(customRange.endIndex, endOffset - 1)) {
+            relativeCustomRanges.push({ ...customRange });
+        }
+
+        // optimize
+        if (customRange.startIndex >= endOffset) {
+            break;
+        }
+    }
+    const deletes = relativeCustomRanges.map((i) => [i.startIndex, i.endIndex]).flat().sort();
+    // console.log('===deletes', relativeCustomRanges, deletes);
+
+    let cursor = 0;
+    const textX = new TextX();
+
+    const range = deletes.length
+        ? {
+            startOffset: Math.min(deletes[0], startOffset),
+            endOffset: Math.max(deletes[deletes.length - 1] + 1, endOffset),
+        }
+        : selection;
+
+    if (range.startOffset !== cursor) {
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: range.startOffset - cursor,
             segmentId,
+        });
+        cursor = range.startOffset;
+    }
+    textX.push({
+        t: TextXActionType.INSERT,
+        body: {
+            dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_START,
         },
-        body
-    );
+        len: 1,
+        line: 0,
+        segmentId,
+    });
 
+    deletes.forEach((index, i) => {
+        if (index !== cursor) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: index - cursor,
+                segmentId,
+            });
+            cursor = index;
+        }
+        textX.push({
+            t: TextXActionType.DELETE,
+            len: 1,
+            line: 0,
+            segmentId,
+        });
+        cursor++;
+    });
+
+    if (cursor !== range.endOffset) {
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: range.endOffset - cursor,
+            segmentId,
+        });
+        cursor = range.endOffset;
+    }
+
+    textX.push({
+        t: TextXActionType.INSERT,
+        body: {
+            dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_END,
+            customRanges: [
+                {
+                    rangeId,
+                    rangeType,
+                    startIndex: -(range.endOffset - range.startOffset - deletes.length + 1),
+                    endIndex: 0,
+                },
+            ],
+        },
+        len: 1,
+        line: 0,
+        segmentId,
+    });
+    const jsonX = JSONX.getInstance();
+    const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+        id: RichTextEditingMutation.id,
+        params: {
+            unitId,
+            actions: [],
+            textRanges: undefined,
+        },
+    };
+    // console.log('===actions', textX, textX.serialize());
+    doMutation.params.actions = jsonX.editOp(textX.serialize());
     return doMutation;
 }
 
@@ -147,7 +242,7 @@ export interface IDeleteCustomRangeParam {
     segmentId?: string;
 }
 
-export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCustomRangeParam) {
+function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCustomRangeParam) {
     const { unitId, rangeId, segmentId } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -160,18 +255,10 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
     if (!range) {
         return false;
     }
-    const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
-        id: RichTextEditingMutation.id,
-        params: {
-            unitId,
-            actions: [],
-            textRanges: undefined,
-        },
-    };
 
     const { startIndex, endIndex } = range;
     const textX = new TextX();
-    const jsonX = JSONX.getInstance();
+
     const len = endIndex - startIndex + 1;
 
     if (startIndex > 0) {
@@ -203,6 +290,25 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
         segmentId,
         line: 0,
     });
+
+    return textX;
+}
+
+export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCustomRangeParam) {
+    const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+        id: RichTextEditingMutation.id,
+        params: {
+            unitId: params.unitId,
+            actions: [],
+            textRanges: undefined,
+        },
+    };
+
+    const jsonX = JSONX.getInstance();
+    const textX = deleteCustomRangeTextX(accessor, params);
+    if (!textX) {
+        return false;
+    }
 
     doMutation.params.actions = jsonX.editOp(textX.serialize());
     return doMutation;

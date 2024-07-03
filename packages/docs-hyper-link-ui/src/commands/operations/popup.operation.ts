@@ -16,6 +16,7 @@
 
 import type { ICommand, Nullable } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
+import { TextSelectionManagerService } from '@univerjs/docs';
 import { DocHyperLinkService } from '../../services/hyper-link.service';
 
 export interface IShowDocHyperLinkEditPopupOperationParams {

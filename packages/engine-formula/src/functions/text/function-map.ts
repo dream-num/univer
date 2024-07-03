@@ -20,8 +20,10 @@ import { Len } from './len';
 import { Lenb } from './lenb';
 import { Text } from './text';
 import { Lower } from './lower';
+import { Concat } from './concat';
 
 export const functionText = [
+    [Concat, FUNCTION_NAMES_TEXT.CONCAT],
     [Concatenate, FUNCTION_NAMES_TEXT.CONCATENATE],
     [Len, FUNCTION_NAMES_TEXT.LEN],
     [Lenb, FUNCTION_NAMES_TEXT.LENB],

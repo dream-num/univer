@@ -83,3 +83,9 @@ export function groupBy<T>(arr: Readonly<T[]>, keyFn: (v: T) => string): Map<str
 
     return groups;
 }
+
+export function makeArray<T>(thing: T | T[]): T[] {
+    if (Array.isArray(thing)) return thing;
+
+    return [thing];
+}

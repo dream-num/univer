@@ -16,9 +16,7 @@
 
 import type { IMutation } from '@univerjs/core';
 
-import {
-    CommandType,
-} from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
 import type { IAnchor } from '../../utils/anchor';
 import { anchorUndoFactory } from '../../utils/anchor';

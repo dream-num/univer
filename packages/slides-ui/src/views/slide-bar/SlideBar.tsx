@@ -23,7 +23,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useObservable } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ActivateSlidePageOperation } from '../../commands/operations/activate.operation';
-import { SetSlidePageThumbOperation } from '../../commands/operations/setThumb.operation';
+import { SetSlidePageThumbOperation } from '../../commands/operations/set-thumb.operation';
 import styles from './index.module.less';
 
 /**

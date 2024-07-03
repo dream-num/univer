@@ -83,7 +83,7 @@ export class Scene extends ThinScene {
 
         this.disposeWithMe(
             toDisposable(
-                this._parent?.onTransformChangeObservable.add((change: ITransformChangeState) => {
+                this._parent?.onTransformChange$.subscribeEvent((_change: ITransformChangeState) => {
                     this._setTransForm();
                 })
             )
@@ -218,7 +218,7 @@ export class Scene extends ThinScene {
         }
 
         this._setTransForm();
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize,
             value: {
                 width: this.width,
@@ -256,7 +256,7 @@ export class Scene extends ThinScene {
         }
 
         this._setTransForm();
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
             value: {
                 scaleX: this.scaleX,
@@ -284,7 +284,7 @@ export class Scene extends ThinScene {
         this.scaleY = precisionTo(this.scaleY, 1);
 
         this._setTransForm();
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale,
             value: {
                 scaleX: this.scaleX,
@@ -300,7 +300,6 @@ export class Scene extends ThinScene {
      * scene._setTransForm --> viewport@resetCanvasSizeAndUpdateScrollBar ---> scrollTo ---> limitedScroll ---> onScrollBeforeObserver ---> setScrollInfo
      * scrollInfo needs accurate scene width & height, limitedScroll depends on scene & engine's width & height
      * @param state
-     * @returns
      */
     transformByState(state: ISceneTransformState) {
         const optionKeys = Object.keys(state);
@@ -318,7 +317,7 @@ export class Scene extends ThinScene {
 
         this._setTransForm();
 
-        this.onTransformChangeObservable.notifyObservers({
+        this.onTransformChange$.emitEvent({
             type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.all,
             value: state,
             preValue: preKeys,
@@ -385,7 +384,7 @@ export class Scene extends ThinScene {
         // this.onTransformChangeObservable.add((state: ITransformChangeState) => {
         //     o.scaleCacheCanvas();
         // });
-        o.onIsAddedToParentObserver.notifyObservers(this);
+        o.onIsAddedToParent$.emitEvent(this);
     }
 
     override addObjects(objects: BaseObject[], zIndex: number = 1) {
@@ -710,21 +709,21 @@ export class Scene extends ThinScene {
         this.clearLayer();
         this.clearViewports();
         this.detachControl();
-        this.onTransformChangeObservable?.clear();
+        this.onTransformChange$?.complete();
         this._inputManager?.dispose();
         this._inputManager = null;
         this._transformer?.dispose();
         this._transformer = null;
-        this.onPointerDownObserver.clear();
-        this.onPointerMoveObserver.clear();
-        this.onPointerUpObserver.clear();
-        this.onPointerEnterObserver.clear();
-        this.onPointerLeaveObserver.clear();
-        this.onDblclickObserver.clear();
-        this.onTripleClickObserver.clear();
-        this.onMouseWheelObserver.clear();
-        this.onKeyDownObservable.clear();
-        this.onKeyUpObservable.clear();
+        this.onPointerDown$.complete();
+        this.onPointerMove$.complete();
+        this.onPointerUp$.complete();
+        this.onPointerEnter$.complete();
+        this.onPointerLeave$.complete();
+        this.onDblclick$.complete();
+        this.onTripleClick$.complete();
+        this.onMouseWheel$.complete();
+        this.onKeyDown$.complete();
+        this.onKeyUp$.complete();
         this._addObject$.complete();
         super.dispose();
     }
@@ -796,14 +795,14 @@ export class Scene extends ThinScene {
     }
 
     override triggerKeyDown(evt: IKeyboardEvent) {
-        this.onKeyDownObservable.notifyObservers(evt);
+        this.onKeyDown$.emitEvent(evt);
         // if (this._parent instanceof SceneViewer) {
         //     this._parent?.triggerKeyDown(evt);
         // }
     }
 
     override triggerKeyUp(evt: IKeyboardEvent) {
-        this.onKeyUpObservable.notifyObservers(evt);
+        this.onKeyUp$.emitEvent(evt);
         // if (this._parent instanceof SceneViewer) {
         //     this._parent?.triggerKeyUp(evt);
         // }
@@ -811,7 +810,7 @@ export class Scene extends ThinScene {
 
     override triggerPointerUp(evt: IPointerEvent | IMouseEvent) {
         if (
-            !this.onPointerUpObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onPointerUp$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerPointerUp(evt);
@@ -822,7 +821,7 @@ export class Scene extends ThinScene {
 
     override triggerMouseWheel(evt: IWheelEvent) {
         if (
-            !this.onMouseWheelObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onMouseWheel$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerMouseWheel(evt);
@@ -833,7 +832,7 @@ export class Scene extends ThinScene {
 
     override triggerPointerMove(evt: IPointerEvent | IMouseEvent) {
         if (
-            !this.onPointerMoveObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onPointerMove$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerPointerMove(evt);
@@ -844,7 +843,7 @@ export class Scene extends ThinScene {
 
     override triggerDblclick(evt: IPointerEvent | IMouseEvent) {
         if (
-            !this.onDblclickObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onDblclick$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerDblclick(evt);
@@ -855,7 +854,7 @@ export class Scene extends ThinScene {
 
     override triggerTripleClick(evt: IPointerEvent | IMouseEvent) {
         if (
-            !this.onTripleClickObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onTripleClick$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerTripleClick(evt);
@@ -866,7 +865,7 @@ export class Scene extends ThinScene {
 
     override triggerPointerDown(evt: IPointerEvent | IMouseEvent) {
         if (
-            !this.onPointerDownObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onPointerDown$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerPointerDown(evt);
@@ -886,9 +885,9 @@ export class Scene extends ThinScene {
     }
 
     override triggerPointerLeave(evt: IPointerEvent | IMouseEvent) {
-        // this.onPointerLeaveObserver.notifyObservers(evt);
+        // this.onPointerLeave$.emitEvent(evt);
         if (
-            !this.onPointerLeaveObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onPointerLeave$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerPointerLeave(evt);
@@ -907,9 +906,9 @@ export class Scene extends ThinScene {
     }
 
     override triggerPointerEnter(evt: IPointerEvent | IMouseEvent) {
-        // this.onPointerEnterObserver.notifyObservers(evt);
+        // this.onPointerEnter$.emitEvent(evt);
         if (
-            !this.onPointerEnterObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onPointerEnter$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerPointerEnter(evt);
@@ -920,7 +919,7 @@ export class Scene extends ThinScene {
 
     override triggerDragLeave(evt: IDragEvent) {
         if (
-            !this.onDragLeaveObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onDragLeave$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerDragLeave(evt);
@@ -931,7 +930,7 @@ export class Scene extends ThinScene {
 
     override triggerDragOver(evt: IDragEvent) {
         if (
-            !this.onDragOverObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onDragOver$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerDragOver(evt);
@@ -942,7 +941,7 @@ export class Scene extends ThinScene {
 
     override triggerDragEnter(evt: IDragEvent) {
         if (
-            !this.onDragEnterObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onDragEnter$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerDragEnter(evt);
@@ -953,7 +952,7 @@ export class Scene extends ThinScene {
 
     override triggerDrop(evt: IDragEvent) {
         if (
-            !this.onDropObserver.notifyObservers(evt)?.stopPropagation &&
+            !this.onDrop$.emitEvent(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
         ) {
             (this._parent as SceneViewer)?.triggerDrop(evt);

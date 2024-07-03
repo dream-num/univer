@@ -37,3 +37,7 @@ export function getCellValueOrigin(cell: Nullable<ICellData>) {
 
     return cell?.v;
 }
+
+export function getStringCellValue(cell: Nullable<ICellData>) {
+    return String(getCellValueOrigin(cell) ?? '');
+}

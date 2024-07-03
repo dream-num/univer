@@ -46,8 +46,10 @@ import { FUNCTION_NAMES_STATISTICAL } from '../statistical/function-names';
 import { FUNCTION_NAMES_DATE } from '../date/function-names';
 import { FUNCTION_NAMES_TEXT } from '../text/function-names';
 import { IFunctionService } from '../../services/function.service';
-import type { ArrayValueObject } from '../../engine/value-object/array-value-object';
 import type { LexerNode } from '../../engine/analysis/lexer-node';
+import { Choose } from '../lookup/choose';
+import { Sum } from '../math/sum';
+import { ErrorType } from '../../basics/error-type';
 import { createFunctionTestBed, getObjectValue } from './create-function-test-bed';
 
 const getFunctionsTestWorkbookData = (): IWorkbookData => {
@@ -73,6 +75,10 @@ const getFunctionsTestWorkbookData = (): IWorkbookData => {
                         },
                         3: {
                             v: 'D',
+                            t: 1,
+                        },
+                        4: {
+                            v: '"test"',
                             t: 1,
                         },
                     },
@@ -252,6 +258,7 @@ describe('Test nested functions', () => {
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
     let interpreter: Interpreter;
+    let calculate: (formula: string) => (string | number | boolean | null)[][] | string | number | boolean;
 
     beforeEach(() => {
         const testBed = createFunctionTestBed(getFunctionsTestWorkbookData());
@@ -307,29 +314,63 @@ describe('Test nested functions', () => {
             new Min(FUNCTION_NAMES_STATISTICAL.MIN),
             new Plus(FUNCTION_NAMES_META.PLUS),
             new Minus(FUNCTION_NAMES_META.MINUS),
-            new Concatenate(FUNCTION_NAMES_TEXT.CONCATENATE)
+            new Concatenate(FUNCTION_NAMES_TEXT.CONCATENATE),
+            new Sum(FUNCTION_NAMES_MATH.SUM),
+            new Choose(FUNCTION_NAMES_LOOKUP.CHOOSE)
 
         );
+
+        calculate = (formula: string) => {
+            const lexerNode = lexer.treeBuilder(formula);
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            return getObjectValue(result);
+        };
     });
 
     describe('Normal', () => {
         it('Nested functions IFERROR,XLOOKUP,MAX,SUMIFS,EDATE,TODAY,DAY,PLUS,Minus,CONCATENATE', () => {
-            const lexerNode = lexer.treeBuilder('=IFERROR(XLOOKUP(MAX(SUMIFS(C2:C10, A2:A10, ">="&EDATE(TODAY(),-1)+1-DAY(TODAY()), A2:A10, "<"&TODAY()-DAY(TODAY())+1)), SUMIFS(C2:C10, A2:A10, ">="&EDATE(TODAY(),-1)+1-DAY(TODAY()), A2:A10, "<"&TODAY()-DAY(TODAY())+1), B2:B10, "No Data"), "No Data")');
+            const result = calculate('=IFERROR(XLOOKUP(MAX(SUMIFS(C2:C10, A2:A10, ">="&EDATE(TODAY(),-1)+1-DAY(TODAY()), A2:A10, "<"&TODAY()-DAY(TODAY())+1)), SUMIFS(C2:C10, A2:A10, ">="&EDATE(TODAY(),-1)+1-DAY(TODAY()), A2:A10, "<"&TODAY()-DAY(TODAY())+1), B2:B10, "No Data"), "No Data")');
 
-            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
-
-            const result = interpreter.execute(astNode as BaseAstNode);
-
-            expect((result as ArrayValueObject).toValue()).toStrictEqual([[101], [102], [103], [104], [105], [101], [102], [103], [104]]);
+            expect(result).toStrictEqual([[101], [102], [103], [104], [105], [101], [102], [103], [104]]);
         });
         it('Nested functions ADDRESS,XMATCH,MIN,SUMIFS,EDATE,TODAY,DAY', () => {
-            const lexerNode = lexer.treeBuilder('=ADDRESS(XMATCH(MIN(SUMIFS(C2:C10, A2:A10, ">=" & EDATE(TODAY(), -1) + 1 - DAY(TODAY()), A2:A10, "<" & TODAY() - DAY(TODAY()) + 1)), SUMIFS(C2:C10, A2:A10, ">=" & EDATE(TODAY(), -1) + 1 - DAY(TODAY()), A2:A10, "<" & TODAY() - DAY(TODAY()) + 1), 0) + 1, 2)');
+            const result = calculate('=ADDRESS(XMATCH(MIN(SUMIFS(C2:C10, A2:A10, ">=" & EDATE(TODAY(), -1) + 1 - DAY(TODAY()), A2:A10, "<" & TODAY() - DAY(TODAY()) + 1)), SUMIFS(C2:C10, A2:A10, ">=" & EDATE(TODAY(), -1) + 1 - DAY(TODAY()), A2:A10, "<" & TODAY() - DAY(TODAY()) + 1), 0) + 1, 2)');
 
-            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+            expect(result).toStrictEqual([['$B$2']]);
+        });
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+        it('SUM, CHOOSE', () => {
+            let result = calculate('=SUM(A2:CHOOSE(2,B2,C2))');
 
-            expect(getObjectValue(result)).toStrictEqual([['$B$2']]);
+            expect(result).toStrictEqual(45033);
+
+            result = calculate('=SUM(CHOOSE(1,A2:B2))');
+
+            expect(result).toStrictEqual(45028);
+
+            result = calculate('=SUM(CHOOSE({1,1},A2:B2))');
+
+            expect(result).toStrictEqual(45028);
+
+            result = calculate('=SUM(CHOOSE({1,1,1},A2:B2))');
+
+            expect(result).toStrictEqual(ErrorType.NA);
+
+            result = calculate('=SUM(CHOOSE({1,2},A2:B2))');
+
+            expect(result).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('Parsing of double-quoted strings', () => {
+            let result = calculate('=E1');
+            expect(result).toStrictEqual([['"test"']]);
+
+            result = calculate('="test"');
+            expect(result).toStrictEqual('test');
         });
     });
 });

@@ -204,8 +204,9 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         }
         // font color
         else if (key === 'color') {
+            const rgbStr = new ColorKit(value).toRgbString();
             styleList.cl = {
-                rgb: value,
+                rgb: rgbStr,
             };
         }
         // fill color / background
@@ -499,7 +500,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
             arr.splice(0, 2);
             const color = arr.join('');
             const lineType = getBorderStyleType(type);
-            if (lineType !== BorderStyleTypes.NONE) {
+            if (lineType !== BorderStyleTypes.NONE && color) {
                 const obj = {
                     cl: {
                         rgb: color,
@@ -523,7 +524,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
                     };
                 }
             }
-        } else if (key === 'data-rotate') {
+        } else if (key === '--data-rotate') {
             const regex = /[+-]?\d+/;
             const match = value.match(regex);
 

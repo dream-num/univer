@@ -22,6 +22,7 @@ import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import type { BaseDataValidator, IBaseDataValidationWidget, IFormulaResult } from '@univerjs/data-validation';
 import { Inject } from '@wendellhu/redi';
+import type { CheckboxValidator } from '../validators/checkbox-validator';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2 } from '../validators/checkbox-validator';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
@@ -97,18 +98,18 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
         const value = getCellValueOrigin(data);
         const rule = data.dataValidation?.rule;
-        const validator = data.dataValidation?.validator as BaseDataValidator;
+        const validator = data.dataValidation?.validator as CheckboxValidator;
         if (!rule || !validator) {
             return;
         }
 
         const colors = this._themeService.getCurrentTheme();
-        if (!validator.skipDefaultFontRender(rule, value, { unitId, subUnitId })) {
+        if (!validator.skipDefaultFontRender(rule, value, { unitId: unitId!, subUnitId })) {
             return;
         }
 
-        const { formula1 = CHECKBOX_FORMULA_1 } = rule;
-
+        const result = validator.parseFormulaSync(rule, unitId, subUnitId);
+        const { formula1 } = result;
         const layout = this._calc(cellBounding, style);
         const { a: scaleX, d: scaleY } = ctx.getTransform();
         const left = fixLineWidthByScale(layout.left, scaleX);

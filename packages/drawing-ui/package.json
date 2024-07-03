@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/drawing-ui",
-    "version": "0.1.16",
+    "version": "0.1.17",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -73,7 +73,7 @@
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.57"
+        "@univerjs/icons": "^0.1.58"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
@@ -87,8 +87,8 @@
         "less": "^4.2.0",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.4.5",
-        "vite": "^5.3.1",
+        "typescript": "^5.5.3",
+        "vite": "^5.3.2",
         "vitest": "^1.6.0"
     },
     "univerSpace": {

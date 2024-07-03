@@ -28,3 +28,9 @@ export { ThreadCommentRemoveSheetsController } from './controllers/sheets-thread
 export { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
 export { IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 export { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
+
+// #region - all commands
+
+export { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
+
+// #endregion

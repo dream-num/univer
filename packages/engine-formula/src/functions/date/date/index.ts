@@ -99,8 +99,7 @@ export class DateFunction extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const valueObject = NumberValueObject.create(currentSerial);
-            valueObject.setPattern(DEFAULT_DATE_FORMAT);
+            const valueObject = NumberValueObject.create(currentSerial, DEFAULT_DATE_FORMAT);
 
             return valueObject;
         });

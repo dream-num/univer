@@ -16,25 +16,10 @@
 
 export * from './basics';
 export { getEditorObject } from './basics/editor/get-editor-object';
-export { AutoFillCommand } from './commands/commands/auto-fill.command';
-export { SheetCopyCommand } from './commands/commands/clipboard.command';
-export { expandToContinuousRange } from './commands/commands/utils/selection-utils';
-export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from './commands/commands/set-selection.command';
-export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from './commands/operations/cell-edit.operation';
-export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 export { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from './controllers/menu/menu-util';
 export { SheetsRenderService } from './services/sheets-render.service';
-export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
-export {
-    ResetScrollCommand,
-    ScrollCommand,
-    ScrollToCellCommand,
-    SetScrollRelativeCommand,
-    type IScrollCommandParams,
-    type IScrollToCellCommandParams,
-    type ISetScrollRelativeCommandParams,
-} from './commands/commands/set-scroll.command';
+
 export { SHEET_VIEWPORT_KEY as VIEWPORT_KEY } from './common/keys';
 export { AutoFillController } from './controllers/auto-fill.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
@@ -77,7 +62,7 @@ export { SelectionShape } from './services/selection/selection-shape';
 export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manager.service';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 export { UniverSheetsUIPlugin } from './sheets-ui-plugin';
-export { SheetRenderController } from './controllers/render-controllers/sheet-render.controller';
+export { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export { HoverManagerService } from './services/hover-manager.service';
 export { DragManagerService } from './services/drag-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
@@ -96,14 +81,87 @@ export { SheetMenuPosition } from './controllers/menu/menu';
 export { useHighlightRange } from './hooks/useHighlightRange';
 export { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
 export { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
-export type { ISheetPasteParams } from './commands/commands/clipboard.command';
-export { SheetCutCommand, SheetPasteColWidthCommand, SheetPasteCommand, SheetPasteShortKeyCommand } from './commands/commands/clipboard.command';
-export { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeUnderlineCommand, SetRangeStrickThroughCommand } from './commands/commands/inline-format.command';
-export { ApplyFormatPainterCommand } from './commands/commands/set-format-painter.command';
 export { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 export { FormulaEditorController } from './controllers/editor/formula-editor.controller';
 export { StatusBarController } from './controllers/status-bar.controller';
 export { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';
 export type { IRangeProtectionRenderCellData } from './views/permission/extensions/range-protection.render';
-export { ScrollToRangeOperation } from './commands/operations/scroll-to-range.operation';
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';
+export { UniverSheetsMobileUIPlugin } from './mobile-sheets-ui-plugin';
+export { MobileSheetBar } from './views/mobile/sheet-bar/MobileSheetBar';
+export { expandToContinuousRange } from './commands/commands/utils/selection-utils';
+
+// #region - all commands
+
+export { AddWorksheetMergeCommand, AddWorksheetMergeAllCommand, AddWorksheetMergeVerticalCommand, AddWorksheetMergeHorizontalCommand } from './commands/commands/add-worksheet-merge.command';
+export { AutoFillCommand, AutoClearContentCommand } from './commands/commands/auto-fill.command';
+export {
+    SheetCopyCommand,
+    SheetCutCommand,
+    SheetPasteCommand,
+    SheetPasteValueCommand,
+    SheetPasteShortKeyCommand,
+    SheetPasteColWidthCommand,
+    SheetPasteFormatCommand,
+    SheetPasteBesidesBorderCommand,
+    type ISheetPasteParams,
+} from './commands/commands/clipboard.command';
+export { DeleteRangeMoveLeftConfirmCommand } from './commands/commands/delete-range-move-left-confirm.command';
+export { DeleteRangeMoveUpConfirmCommand } from './commands/commands/delete-range-move-up-confirm.command';
+export { HideRowConfirmCommand, HideColConfirmCommand } from './commands/commands/hide-row-col-confirm.command';
+export { SetRangeBoldCommand,
+    SetRangeItalicCommand,
+    SetRangeUnderlineCommand,
+    SetRangeStrickThroughCommand,
+    SetRangeSubscriptCommand,
+    SetRangeSuperscriptCommand,
+    SetRangeFontSizeCommand,
+    SetRangeFontFamilyCommand,
+    SetRangeTextColorCommand,
+} from './commands/commands/inline-format.command';
+export { InsertRangeMoveDownConfirmCommand } from './commands/commands/insert-range-move-down-confirm.command';
+export { InsertRangeMoveRightConfirmCommand } from './commands/commands/insert-range-move-right-confirm.command';
+export {
+    AddRangeProtectionFromToolbarCommand,
+    AddRangeProtectionFromContextMenuCommand,
+    ViewSheetPermissionFromContextMenuCommand,
+    AddRangeProtectionFromSheetBarCommand,
+    ViewSheetPermissionFromSheetBarCommand,
+    AddRangeProtectionCommand,
+    DeleteRangeSelectionCommand,
+    SetRangeProtectionCommand,
+    DeleteRangeProtectionFromContextMenuCommand,
+    SetRangeProtectionFromContextMenuCommand,
+    SetProtectionCommand,
+} from './commands/commands/range-protection.command';
+export { RefillCommand } from './commands/commands/refill.command';
+export { RemoveRowConfirmCommand, RemoveColConfirmCommand } from './commands/commands/remove-row-col-confirm.command';
+export { RemoveSheetConfirmCommand } from './commands/commands/remove-sheet-confirm.command';
+export { SetInfiniteFormatPainterCommand, SetOnceFormatPainterCommand, ApplyFormatPainterCommand } from './commands/commands/set-format-painter.command';
+export { SetSelectionFrozenCommand, SetRowFrozenCommand, SetColumnFrozenCommand, CancelFrozenCommand } from './commands/commands/set-frozen.command';
+export {
+    ResetScrollCommand,
+    ScrollCommand,
+    ScrollToCellCommand,
+    SetScrollRelativeCommand,
+    type IScrollCommandParams,
+    type IScrollToCellCommandParams,
+    type ISetScrollRelativeCommandParams,
+} from './commands/commands/set-scroll.command';
+export { JumpOver, MoveSelectionCommand, MoveSelectionEnterAndTabCommand, ExpandSelectionCommand, SelectAllCommand } from './commands/commands/set-selection.command';
+export { ChangeZoomRatioCommand, SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
+export { ShowMenuListCommand } from './commands/commands/unhide.command';
+export { AddWorksheetProtectionCommand, DeleteWorksheetProtectionCommand, SetWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, ChangeSheetProtectionFromSheetBarCommand } from './commands/commands/worksheet-protection.command';
+
+export { SetActivateCellEditOperation } from './commands/operations/activate-cell-edit.operation';
+export { SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation, SetCellEditVisibleArrowOperation } from './commands/operations/cell-edit.operation';
+export { RenameSheetOperation } from './commands/operations/rename-sheet.operation';
+export { ScrollToRangeOperation } from './commands/operations/scroll-to-range.operation';
+export { SetScrollOperation } from './commands/operations/scroll.operation';
+export { SetFormatPainterOperation } from './commands/operations/set-format-painter.operation';
+export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
+export { SheetPermissionOpenDialogOperation } from './commands/operations/sheet-permission-open-dialog.operation';
+export { SheetPermissionOpenPanelOperation } from './commands/operations/sheet-permission-open-panel.operation';
+export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defined-name.operation';
+
+// #endregion

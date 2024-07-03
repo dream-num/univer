@@ -17,7 +17,7 @@
 const locale = {
     sheets: {
         tabs: {
-            sheetCopy: '（副本）',
+            sheetCopy: '（副本{0}）',
             sheet: '工作表',
         },
         info: {

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
+import type { EventState, IKeyValue, Nullable } from '@univerjs/core';
 
-import { EVENT_TYPE } from '../basics/const';
+import { Subscription } from 'rxjs';
 import type { IMouseEvent, IPointerEvent } from '../basics/i-events';
 import { Transform } from '../basics/transform';
 import type { Vector2 } from '../basics/vector2';
@@ -42,13 +42,13 @@ export class ScrollBar extends BaseScrollBar {
 
     private _isVerticalMove = false;
 
-    private _horizonPointerMoveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _horizonPointerMoveSub: Nullable<Subscription>;
 
-    private _horizonPointerUpObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _horizonPointerUpSub: Nullable<Subscription>;
 
-    private _verticalPointerMoveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _verticalPointerMoveSub: Nullable<Subscription>;
 
-    private _verticalPointerUpObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _verticalPointerUpSub: Nullable<Subscription>;
 
     barSize = 14;
 
@@ -71,6 +71,8 @@ export class ScrollBar extends BaseScrollBar {
 
     barBorderColor = 'rgba(255,255,255,0.7)';
 
+    private _eventSub = new Subscription();
+
     constructor(view: Viewport, props?: IScrollBarProps) {
         super();
         if (!view) {
@@ -79,6 +81,8 @@ export class ScrollBar extends BaseScrollBar {
         this.setProps(props);
         this._view = view;
         this._initialScrollRect();
+        this._initialVerticalEvent();
+        this._initialHorizontalEvent();
         this._view.setScrollBar(this);
     }
 
@@ -88,10 +92,11 @@ export class ScrollBar extends BaseScrollBar {
 
     override dispose() {
         super.dispose();
-        this._horizonPointerMoveObserver?.dispose();
-        this._horizonPointerUpObserver?.dispose();
-        this._verticalPointerMoveObserver?.dispose();
-        this._verticalPointerUpObserver?.dispose();
+        this._horizonPointerMoveSub?.unsubscribe();
+        this._horizonPointerUpSub?.unsubscribe();
+        this._verticalPointerMoveSub?.unsubscribe();
+        this._verticalPointerUpSub?.unsubscribe();
+        this._eventSub.unsubscribe();
         this._mainScene = null;
         this._view.removeScrollBar();
     }
@@ -316,9 +321,6 @@ export class ScrollBar extends BaseScrollBar {
                 stroke: this.barBorderColor!,
             });
         }
-
-        this._initialVerticalEvent();
-        this._initialHorizontalEvent();
     }
 
     private _initialVerticalEvent() {
@@ -328,26 +330,31 @@ export class ScrollBar extends BaseScrollBar {
 
         const mainScene = this._mainScene || this._view.scene;
 
-        this.verticalThumbRect?.on(
-            EVENT_TYPE.PointerEnter,
-            this._hoverFunc(this.thumbHoverBackgroundColor!, this.verticalThumbRect)
-        );
-        this.verticalThumbRect?.on(
-            EVENT_TYPE.PointerLeave,
-            this._hoverFunc(this.thumbBackgroundColor!, this.verticalThumbRect)
-        );
+        // this.verticalThumbRect?.on(
+        //     EVENT_TYPE.PointerEnter,
+        //     this._hoverFunc(this.thumbHoverBackgroundColor!, this.verticalThumbRect)
+        // );
+        // this.verticalThumbRect?.on(
+        //     EVENT_TYPE.PointerLeave,
+        //     this._hoverFunc(this.thumbBackgroundColor!, this.verticalThumbRect)
+        // );
+        this.verticalThumbRect && this._eventSub.add(this.verticalThumbRect.onPointerEnter$.subscribeEvent((_evt: unknown, _state: EventState) => {
+            this._hoverFunc(this.thumbHoverBackgroundColor!, this.verticalThumbRect!);
+        }));
+        this.verticalThumbRect && this._eventSub.add(this.verticalThumbRect.onPointerLeave$.subscribeEvent((_evt: unknown, _state: EventState) => {
+            this._hoverFunc(this.thumbHoverBackgroundColor!, this.verticalThumbRect!);
+        }));
 
-        // 垂直滚动条槽的点击滚动事件
-        this.verticalBarRect?.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
+        this.verticalBarRect && this._eventSub.add(this.verticalBarRect.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             this._view.scrollTo({
                 y: e.offsetY - this._view.top - this.verticalThumbHeight / 2,
             });
             state.stopPropagation();
-        });
+        }));
 
         // 垂直滚动条的拖拽事件
-        this.verticalThumbRect?.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
+        this.verticalThumbRect && this._eventSub.add(this.verticalThumbRect.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             const srcElement = this.verticalThumbRect;
             this._isVerticalMove = true;
@@ -360,8 +367,9 @@ export class ScrollBar extends BaseScrollBar {
             mainScene.disableEvent();
             this.makeViewDirty(true);
             state.stopPropagation();
-        });
-        this._verticalPointerMoveObserver = mainScene.onPointerMoveObserver.add((evt: unknown, state: EventState) => {
+        }));
+
+        this._verticalPointerMoveSub = mainScene.onPointerMove$.subscribeEvent((evt: unknown, _state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             if (!this._isVerticalMove) {
                 return;
@@ -372,8 +380,9 @@ export class ScrollBar extends BaseScrollBar {
             this._lastY = e.offsetY;
             mainScene.getEngine()?.setRemainCapture();
         });
-        this._verticalPointerUpObserver = mainScene.onPointerUpObserver.add((evt: unknown, state: EventState) => {
-            const e = evt as IPointerEvent | IMouseEvent;
+
+        this._verticalPointerUpSub = mainScene.onPointerUp$.subscribeEvent((_evt: unknown, _state: EventState) => {
+            // const e = evt as IPointerEvent | IMouseEvent;
             const srcElement = this.verticalThumbRect;
             this._isVerticalMove = false;
             // srcElement.fill = this._thumbBackgroundColor!;
@@ -409,26 +418,32 @@ export class ScrollBar extends BaseScrollBar {
 
         const mainScene = this._mainScene || this._view.scene;
 
-        this.horizonThumbRect?.on(
-            EVENT_TYPE.PointerEnter,
-            this._hoverFunc(this.thumbHoverBackgroundColor!, this.horizonThumbRect)
-        );
-        this.horizonThumbRect?.on(
-            EVENT_TYPE.PointerLeave,
-            this._hoverFunc(this.thumbBackgroundColor!, this.horizonThumbRect)
-        );
+        // this.horizonThumbRect?.on(
+        //     EVENT_TYPE.PointerEnter,
+        //     this._hoverFunc(this.thumbHoverBackgroundColor!, this.horizonThumbRect)
+        // );
+        // this.horizonThumbRect?.on(
+        //     EVENT_TYPE.PointerLeave,
+        //     this._hoverFunc(this.thumbBackgroundColor!, this.horizonThumbRect)
+        // );
+        this.horizonThumbRect && this._eventSub.add(this.horizonThumbRect.onPointerEnter$.subscribeEvent((_evt: unknown, _state: EventState) => {
+            this._hoverFunc(this.thumbHoverBackgroundColor!, this.horizonThumbRect!);
+        }));
+        this.horizonThumbRect && this._eventSub.add(this.horizonThumbRect.onPointerLeave$.subscribeEvent((_evt: unknown, _state: EventState) => {
+            this._hoverFunc(this.thumbHoverBackgroundColor!, this.horizonThumbRect!);
+        }));
 
         // 水平滚动条槽的点击滚动事件
-        this.horizonBarRect?.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
+        this.horizonBarRect && this._eventSub.add(this.horizonBarRect.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             this._view.scrollTo({
                 x: e.offsetX - this._view.left - this.horizontalThumbWidth / 2,
             });
             state.stopPropagation();
-        });
+        }));
 
         // 水平滚动条的拖拽事件
-        this.horizonThumbRect?.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
+        this.horizonThumbRect && this._eventSub.add(this.horizonThumbRect.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             this._isHorizonMove = true;
             this._lastX = e.offsetX;
@@ -440,8 +455,9 @@ export class ScrollBar extends BaseScrollBar {
             this.makeViewDirty(true);
             mainScene.disableEvent();
             state.stopPropagation();
-        });
-        this._horizonPointerMoveObserver = mainScene.onPointerMoveObserver.add((evt: unknown, state: EventState) => {
+        }));
+
+        this._horizonPointerMoveSub = mainScene.onPointerMove$.subscribeEvent((evt: unknown, _state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             if (!this._isHorizonMove) {
                 return;
@@ -452,8 +468,7 @@ export class ScrollBar extends BaseScrollBar {
             this._lastX = e.offsetX;
             mainScene.getEngine()?.setRemainCapture();
         });
-        this._horizonPointerUpObserver = mainScene.onPointerUpObserver.add((evt: unknown, state: EventState) => {
-            const e = evt as IPointerEvent | IMouseEvent;
+        this._horizonPointerUpSub = mainScene.onPointerUp$.subscribeEvent((evt: unknown, state: EventState) => {
             const srcElement = this.horizonThumbRect;
             this._isHorizonMove = false;
             mainScene.enableEvent();

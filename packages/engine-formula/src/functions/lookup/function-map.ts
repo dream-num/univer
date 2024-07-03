@@ -28,10 +28,12 @@ import { Rows } from './rows';
 import { Vlookup } from './vlookup';
 import { Xlookup } from './xlookup';
 import { Xmatch } from './xmatch';
+import { Choose } from './choose';
 import { Index } from './index';
 
 export const functionLookup = [
     [Address, FUNCTION_NAMES_LOOKUP.ADDRESS],
+    [Choose, FUNCTION_NAMES_LOOKUP.CHOOSE],
     [Column, FUNCTION_NAMES_LOOKUP.COLUMN],
     [Columns, FUNCTION_NAMES_LOOKUP.COLUMNS],
     [Index, FUNCTION_NAMES_LOOKUP.INDEX],

@@ -169,49 +169,6 @@ export function isFormulaId(value: any): boolean {
 }
 
 /**
- * Convert rich text json to DOM
- * @param p
- */
-export function handleJsonToDom(p: IDocumentData): string {
-    // let span = '';
-    // // let span = `<span id="${p.id}">`;
-    // if (p.body?.blockElements) {
-    //     for (let k in p.body.blockElements) {
-    //         const section = p.body.blockElements[k];
-    //         if (
-    //             section.blockType !== BlockType.PARAGRAPH &&
-    //             section.blockType !== BlockType.SECTION_BREAK
-    //         ) {
-    //             continue;
-    //         }
-    //         if (section.blockType === BlockType.PARAGRAPH) {
-    //             for (let i in section.paragraph) {
-    //                 const element = section.paragraph[i];
-    //                 for (let j in element) {
-    //                     const item = element[j];
-    //                     if (item.et === ParagraphElementType.TEXT_RUN) {
-    //                         let style = `display:inline-block;${handleStyleToString(
-    //                             item.tr.ts
-    //                         )}`;
-    //                         span += `<span id='${item.eId}' ${
-    //                             style.length ? `style="${style}"` : ''
-    //                         } >${item.tr.ct}</span>`;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         // else if (section.blockType === BlockType.SECTION_BREAK) {
-    //         //     span += '<br/>';
-    //         // }
-    //     }
-    // }
-
-    // // span += '</span>';
-    // return span;
-    return '';
-}
-
-/**
  * transform style object to string
  * @param style
  * @returns
@@ -270,7 +227,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
                     if (str.indexOf('text-decoration-line') > -1) {
                         str = str.replace(/(text-decoration-line:\s*[^;]+)(?=;)/g, (_, p1) => `${p1} underline`);
                     } else {
-                        str += 'text-decoration-line: underline; ';
+                        str += 'text-decoration: underline; ';
                     }
                     if (style.ul.cl && str.indexOf('text-decoration-color') === -1) {
                         str += `text-decoration-color: ${getColorStyle(style.ul.cl)}; `;
@@ -374,7 +331,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'tr',
             () => {
                 if (style.tr) {
-                    str += `data-rotate: (${style.tr?.a}deg${style.tr?.v ? ` ,${style.tr?.v}` : ''});`;
+                    str += `--data-rotate: (${style.tr?.a}deg${style.tr?.v ? ` ,${style.tr?.v}` : ''});`;
                 }
             },
         ],

@@ -15,11 +15,11 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, isICellData, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { Disposable, isICellData, LocaleService } from '@univerjs/core';
 import { ErrorType } from '@univerjs/engine-formula';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
-import type { IRenderContext } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { extractFormulaError } from './utils/utils';
 
 const ALERT_KEY = 'SHEET_FORMULA_ALERT';
@@ -39,8 +39,7 @@ const ErrorTypeToMessageMap = {
     [ErrorType.NULL]: 'null',
 };
 
-@OnLifecycle(LifecycleStages.Rendered, FormulaAlertRenderController)
-export class FormulaAlertRenderController extends Disposable {
+export class FormulaAlertRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,

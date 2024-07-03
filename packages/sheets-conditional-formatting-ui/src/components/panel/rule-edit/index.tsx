@@ -91,39 +91,39 @@ export const RuleEdit = (props: IRuleEditProps) => {
             return defaultType;
         }
         switch (type) {
-            case CFRuleType.highlightCell:{
+            case CFRuleType.highlightCell: {
                 const subType = props.rule?.rule.subType;
                 switch (subType) {
                     case CFSubRuleType.number:
                     case CFSubRuleType.text:
                     case CFSubRuleType.duplicateValues:
                     case CFSubRuleType.uniqueValues:
-                    case CFSubRuleType.timePeriod:{
+                    case CFSubRuleType.timePeriod: {
                         return '1';
                     }
                     case CFSubRuleType.average:
-                    case CFSubRuleType.rank:{
+                    case CFSubRuleType.rank: {
                         return '2';
                     }
-                    case CFSubRuleType.formula:{
+                    case CFSubRuleType.formula: {
                         return '5';
                     }
                 }
                 break;
             }
-            case CFRuleType.dataBar:{
+            case CFRuleType.dataBar: {
                 return '3';
             }
-            case CFRuleType.colorScale:{
+            case CFRuleType.colorScale: {
                 return '4';
             }
-            case CFRuleType.iconSet:{
+            case CFRuleType.iconSet: {
                 return '6';
             }
         }
         return defaultType;
     });
-    const result = useRef < Parameters<IStyleEditorProps['onChange']>>();
+    const result = useRef<Parameters<IStyleEditorProps['onChange']>>();
     const interceptorManager = useMemo(() => {
         const _interceptorManager = new InterceptorManager({ beforeSubmit, submit });
         return _interceptorManager;
@@ -131,25 +131,25 @@ export const RuleEdit = (props: IRuleEditProps) => {
 
     const StyleEditor = useMemo(() => {
         switch (ruleType) {
-            case '1':{
+            case '1': {
                 return HighlightCellStyleEditor;
             }
-            case '2':{
+            case '2': {
                 return RankStyleEditor;
             }
-            case '3':{
+            case '3': {
                 return DataBarStyleEditor;
             }
-            case '4':{
+            case '4': {
                 return ColorScaleStyleEditor;
             }
-            case '5':{
+            case '5': {
                 return FormulaStyleEditor;
             }
-            case '6':{
+            case '6': {
                 return IconSet;
             }
-            default :{
+            default: {
                 return HighlightCellStyleEditor;
             }
         }
@@ -182,7 +182,6 @@ export const RuleEdit = (props: IRuleEditProps) => {
     };
 
     const handleSubmit = () => {
-        const beforeSubmitResult = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().beforeSubmit)(true, null);
         const getRanges = () => {
             const worksheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
             if (!worksheet) {
@@ -192,11 +191,11 @@ export const RuleEdit = (props: IRuleEditProps) => {
             const result = ranges.filter((range) => !(Number.isNaN(range.startRow) || Number.isNaN(range.startColumn)));
             return result;
         };
-
+        const ranges = getRanges();
+        const beforeSubmitResult = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().beforeSubmit)(true, null);
         if (beforeSubmitResult) {
             const result = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().submit)(null, null);
-            const ranges = getRanges();
-            if (result && ranges.length) {
+            if (result) {
                 // When you switch the child table, you need to fetch it again here, instead of using the
                 const unitId = getUnitId(univerInstanceService);
                 const subUnitId = getSubUnitId(univerInstanceService);
@@ -224,7 +223,15 @@ export const RuleEdit = (props: IRuleEditProps) => {
         <div className={styles.cfRuleStyleEditor}>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>
             <div className={`${styleBase.mTBase}`}>
-                <RangeSelector placeholder={localeService.t('sheet.cf.form.rangeSelector')} width={'100%' as unknown as number} openForSheetSubUnitId={subUnitId} openForSheetUnitId={unitId} value={rangeString} id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_rangeSelector`)} onChange={onRangeSelectorChange} />
+                <RangeSelector
+                    placeholder={localeService.t('sheet.cf.form.rangeSelector')}
+                    width={'100%' as unknown as number}
+                    openForSheetSubUnitId={subUnitId}
+                    openForSheetUnitId={unitId}
+                    value={rangeString}
+                    id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_rangeSelector`)}
+                    onChange={onRangeSelectorChange}
+                />
             </div>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.styleType')}</div>
             <div className={styleBase.mTBase}>

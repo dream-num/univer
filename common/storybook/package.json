@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/storybook",
-    "version": "0.1.16",
+    "version": "0.1.17",
     "private": true,
     "description": "Some infrastructures for univerjs",
     "author": "DreamNum <developer@univer.ai>",
@@ -37,7 +37,7 @@
         "storybook-addon-swc": "^1.2.0",
         "style-loader": "^3.3.4",
         "tsconfig-paths-webpack-plugin": "^4.1.0",
-        "typescript": "^5.4.5"
+        "typescript": "^5.5.3"
     },
     "devDependencies": {
         "@univerjs/shared": "workspace:*"

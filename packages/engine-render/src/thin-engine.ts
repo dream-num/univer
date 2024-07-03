@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, Observable } from '@univerjs/core';
+import { Disposable, EventSubject } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 
 import type { CURSOR_TYPE } from './basics/const';
@@ -26,9 +26,9 @@ import type { Canvas } from './canvas';
 // FIXME: ThinEngine and ThinScene should be removed
 
 export abstract class ThinEngine<T extends IDisposable> extends Disposable {
-    onInputChangedObservable = new Observable<IEvent>();
+    onInputChanged$ = new EventSubject<IEvent>();
 
-    onTransformChangeObservable = new Observable<ITransformChangeState>();
+    onTransformChange$ = new EventSubject<ITransformChangeState>();
 
     private _scenes: { [sceneKey: string]: T } = {};
 

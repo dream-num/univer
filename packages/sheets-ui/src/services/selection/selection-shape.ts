@@ -609,7 +609,7 @@ export class SelectionShape extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                scene.onTransformChangeObservable.add((state) => {
+                scene.onTransformChange$.subscribeEvent((state) => {
                     if (state.type !== TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale) {
                         return;
                     }

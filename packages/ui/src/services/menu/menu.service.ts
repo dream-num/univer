@@ -38,7 +38,7 @@ export interface IMenuService {
     getMenuItem(id: string): IMenuItem | null;
 }
 
-export class DesktopMenuService extends Disposable implements IMenuService {
+export class MenuService extends Disposable implements IMenuService {
     private readonly _menuItemMap = new Map<string, IMenuItem>();
 
     private readonly _menuByPositions = new Map<MenuPosition | string, Array<[string, IMenuItem]>>();

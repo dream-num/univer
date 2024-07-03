@@ -74,7 +74,7 @@ export class Path extends Shape<IPathProps> {
 
         this._setFixBoundingBox();
 
-        this.onTransformChangeObservable.add((changeState) => {
+        this.onTransformChange$.subscribeEvent((changeState) => {
             const { type, preValue } = changeState;
             if (type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize || type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.all) {
                 this._reCalculateCache = true;

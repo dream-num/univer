@@ -21,7 +21,8 @@ import type {
     IRangeWithCoord,
     ITextRun,
     Nullable,
-    Workbook } from '@univerjs/core';
+    Workbook,
+} from '@univerjs/core';
 import {
     AbsoluteRefType,
     Direction,
@@ -45,7 +46,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import {
-    DocViewModelManagerService,
+    DocSkeletonManagerService,
     MoveCursorOperation,
     ReplaceContentCommand,
     TextSelectionManagerService,
@@ -168,7 +169,6 @@ export class PromptController extends Disposable {
         @Inject(ISelectionRenderService) private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @IEditorService private readonly _editorService: IEditorService
     ) {
@@ -835,7 +835,7 @@ export class PromptController extends Disposable {
 
         this._formulaPromptService.disableLockedSelectionInsert();
 
-            // this._lastSequenceNodes = [];
+        // this._lastSequenceNodes = [];
 
         this._formulaPromptService.clearSequenceNodes();
 
@@ -1340,13 +1340,11 @@ export class PromptController extends Disposable {
         const documentDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
 
         const editorUnitId = documentDataModel!.getUnitId();
-
         if (!this._editorService.isEditor(editorUnitId)) {
             return;
         }
 
-        const docViewModel = this._docViewModelManagerService.getViewModel(editorUnitId);
-
+        const docViewModel = this._renderManagerService.getRenderById(editorUnitId)?.with(DocSkeletonManagerService).getViewModel();
         if (docViewModel == null || documentDataModel == null) {
             return;
         }
@@ -1691,15 +1689,13 @@ export class PromptController extends Disposable {
         }
 
         const { mainComponent: documentComponent } = editorObject;
-        this.disposeWithMe(
-            toDisposable(
-                documentComponent?.onPointerDownObserver.add(() => {
-                    this._arrowMoveActionState = ArrowMoveAction.moveCursor;
+        if (documentComponent) {
+            this.disposeWithMe(documentComponent.onPointerDown$.subscribeEvent(() => {
+                this._arrowMoveActionState = ArrowMoveAction.moveCursor;
 
-                    this._inputPanelState = InputPanelState.mouse;
-                })
-            )
-        );
+                this._inputPanelState = InputPanelState.mouse;
+            }));
+        }
     }
 
     private _pressEnter(params: ISelectEditorFormulaOperationParam) {
@@ -1895,13 +1891,11 @@ export class PromptController extends Disposable {
         }
 
         const { mainComponent: documentComponent } = editorObject;
-        this.disposeWithMe(
-            toDisposable(
-                documentComponent?.onPointerDownObserver.add(() => {
-                    this._userCursorMove = true;
-                })
-            )
-        );
+        if (documentComponent) {
+            this.disposeWithMe(documentComponent?.onPointerDown$.subscribeEvent(() => {
+                this._userCursorMove = true;
+            }));
+        }
     }
 
     private _inputFormulaListener() {

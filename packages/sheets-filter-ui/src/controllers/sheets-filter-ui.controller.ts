@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { ICommandService, IContextService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IContextService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { ComponentManager, IMenuService, IMessageService, IShortcutService } from '@univerjs/ui';
 import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
@@ -28,13 +28,13 @@ import { FilterSingle } from '@univerjs/icons';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { MessageType } from '@univerjs/design';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../commands/sheets-filter.command';
+import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
 import { FilterPanel } from '../views/components/SheetsFilterPanel';
-import { ChangeFilterByOperation, CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../commands/sheets-filter.operation';
+import { ChangeFilterByOperation, CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../commands/operations/sheets-filter.operation';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
 import { ClearFilterCriteriaMenuItemFactory, ReCalcFilterMenuItemFactory, SmartToggleFilterMenuItemFactory } from './sheets-filter.menu';
-import { SheetsFilterRenderController } from './sheets-filter-render.controller';
+import { SheetsFilterMobileUIController } from './sheets-filter-mobile-ui.controller';
 
 export interface IUniverSheetsFilterUIConfig {
     menu: MenuConfig;
@@ -48,7 +48,7 @@ export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
  * This controller controls the UI of "filter" features. Menus, commands and filter panel etc. Except for the rendering.
  */
 @OnLifecycle(LifecycleStages.Ready, SheetsFilterUIController)
-export class SheetsFilterUIController extends RxDisposable {
+export class SheetsFilterUIController extends SheetsFilterMobileUIController {
     constructor(
         private readonly _config: Partial<IUniverSheetsFilterUIConfig>,
         @Inject(Injector) private readonly _injector: Injector,
@@ -57,20 +57,19 @@ export class SheetsFilterUIController extends RxDisposable {
         @Inject(SheetCanvasPopManagerService) private _sheetCanvasPopupService: SheetCanvasPopManagerService,
         @Inject(SheetsFilterService) private _sheetsFilterService: SheetsFilterService,
         @Inject(LocaleService) private _localeService: LocaleService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuService private readonly _menuService: IMenuService,
         @IContextService private readonly _contextService: IContextService,
-        @IMessageService private readonly _messageService: IMessageService
+        @IMessageService private readonly _messageService: IMessageService,
+        @IRenderManagerService _renderManagerService: IRenderManagerService
     ) {
-        super();
+        super(_renderManagerService);
 
         this._initCommands();
         this._initShortcuts();
         this._initMenuItems();
         this._initUI();
-        this._initRenderControllers();
     }
 
     override dispose(): void {
@@ -133,10 +132,6 @@ export class SheetsFilterUIController extends RxDisposable {
                 });
             }
         }));
-    }
-
-    private _initRenderControllers(): void {
-        this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, SheetsFilterRenderController));
     }
 
     private _popupDisposable?: Nullable<IDisposable>;

@@ -48,11 +48,11 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
 
     /** @type {import('vite').UserConfig} */
     const originalConfig = {
-        optimizeDeps: {
-            esbuildOptions: {
-                keepNames: true,
-            },
-        },
+        // optimizeDeps: {
+        //     esbuildOptions: {
+        //         keepNames: true,
+        //     },
+        // },
         build: {
             target: 'chrome70',
             outDir: 'lib',

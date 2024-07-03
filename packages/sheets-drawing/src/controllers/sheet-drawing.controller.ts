@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, IResourceManagerService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { IDrawingMapItem, IDrawingParam, IDrawingSearch, IDrawingSubunitMap } from '@univerjs/drawing';
+import type { IDrawingSubunitMap } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import type { ISheetDrawing } from '../services/sheet-drawing.service';
 import { ISheetDrawingService } from '../services/sheet-drawing.service';
@@ -80,7 +80,6 @@ export class SheetsDrawingController extends Disposable {
                 },
                 onLoad: (unitId, value) => {
                     this._sheetDrawingService.registerDrawingData(unitId, value);
-                    // this._drawingManagerService.registerDrawingData(unitId, value);
                 },
             })
         );

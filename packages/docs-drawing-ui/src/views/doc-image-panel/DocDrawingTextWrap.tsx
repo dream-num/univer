@@ -27,6 +27,9 @@ import { RichTextEditingMutation } from '@univerjs/docs';
 import { TextWrappingStyle, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand } from '../../commands/commands/update-doc-drawing.command';
 import styles from './index.module.less';
 
+const MIN_MARGIN = 0;
+const MAX_MARGIN = 100;
+
 export interface IDocDrawingTextWrapProps {
     drawings: IDrawingParam[];
 }
@@ -312,7 +315,15 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber disabled={disableDistTB} precision={1} value={distToText.distT} onChange={(val) => { handleDistToTextChange(val, 'distT'); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber
+                                    min={MIN_MARGIN}
+                                    max={MAX_MARGIN}
+                                    disabled={disableDistTB}
+                                    precision={1}
+                                    value={distToText.distT}
+                                    onChange={(val) => { handleDistToTextChange(val, 'distT'); }}
+                                    className={styles.imageCommonPanelInput}
+                                />
                             </div>
                         </div>
                     </label>
@@ -326,7 +337,15 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber disabled={disableDistLR} precision={1} value={distToText.distL} onChange={(val) => { handleDistToTextChange(val, 'distL'); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber
+                                    min={MIN_MARGIN}
+                                    max={MAX_MARGIN}
+                                    disabled={disableDistLR}
+                                    precision={1}
+                                    value={distToText.distL}
+                                    onChange={(val) => { handleDistToTextChange(val, 'distL'); }}
+                                    className={styles.imageCommonPanelInput}
+                                />
                             </div>
                         </div>
                     </label>
@@ -342,7 +361,15 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber disabled={disableDistTB} precision={1} value={distToText.distB} onChange={(val) => { handleDistToTextChange(val, 'distB'); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber
+                                    min={MIN_MARGIN}
+                                    max={MAX_MARGIN}
+                                    disabled={disableDistTB}
+                                    precision={1}
+                                    value={distToText.distB}
+                                    onChange={(val) => { handleDistToTextChange(val, 'distB'); }}
+                                    className={styles.imageCommonPanelInput}
+                                />
                             </div>
                         </div>
                     </label>
@@ -356,7 +383,15 @@ export const DocDrawingTextWrap = (props: IDocDrawingTextWrapProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber disabled={disableDistLR} precision={1} value={distToText.distR} onChange={(val) => { handleDistToTextChange(val, 'distR'); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber
+                                    min={MIN_MARGIN}
+                                    max={MAX_MARGIN}
+                                    disabled={disableDistLR}
+                                    precision={1}
+                                    value={distToText.distR}
+                                    onChange={(val) => { handleDistToTextChange(val, 'distR'); }}
+                                    className={styles.imageCommonPanelInput}
+                                />
                             </div>
                         </div>
                     </label>

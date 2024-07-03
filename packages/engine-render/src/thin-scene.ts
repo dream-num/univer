@@ -41,6 +41,10 @@ export abstract class ThinScene extends Disposable {
 
     onPointerEnter$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
+    onPointerOut$ = new EventSubject<IPointerEvent | IMouseEvent>();
+
+    onPointerCancel$ = new EventSubject<IPointerEvent | IMouseEvent>();
+
     onPointerLeave$ = new EventSubject<IPointerEvent | IMouseEvent>();
 
     onDragEnter$ = new EventSubject<IDragEvent>();
@@ -205,6 +209,8 @@ export abstract class ThinScene extends Disposable {
         this.onMouseWheel$.complete();
         this.onKeyDown$.complete();
         this.onKeyUp$.complete();
+        this.onPointerOut$.complete();
+        this.onPointerCancel$.complete();
 
         super.dispose();
     }

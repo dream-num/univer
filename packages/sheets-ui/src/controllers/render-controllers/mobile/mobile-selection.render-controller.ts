@@ -40,14 +40,16 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
-import type { ISetZoomRatioOperationParams } from '../../commands/operations/set-zoom-ratio.operation';
-import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
-import { ISelectionRenderService } from '../../services/selection/selection-render.service';
-import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
-import type { ISheetObjectParam } from '../utils/component-tools';
-import { getSheetObject } from '../utils/component-tools';
+import type { ISetZoomRatioOperationParams } from '../../../commands/operations/set-zoom-ratio.operation';
+import { SetZoomRatioOperation } from '../../../commands/operations/set-zoom-ratio.operation';
+import { ISelectionRenderService } from '../../../services/selection/selection-render.service';
+import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
+import type { ISheetObjectParam } from '../../utils/component-tools';
+import { getSheetObject } from '../../utils/component-tools';
+import { ScrollManagerService } from '../../../services/scroll-manager.service';
+import type { MobileSelectionControl } from '../../../services/selection/mobile-selection-shape';
 
-export class SelectionRenderController extends Disposable implements IRenderModule {
+export class MobileSelectionRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
@@ -56,10 +58,10 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @Inject(ScrollManagerService) private _scrollManagerService: ScrollManagerService
     ) {
         super();
-
         this._init();
     }
 
@@ -74,14 +76,11 @@ export class SelectionRenderController extends Disposable implements IRenderModu
     private _init() {
         const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            throw new Error('No active sheet');
-        }
         const sheetObject = this._getSheetObject();
 
         this._initSpreadsheetEvent(sheetObject);
-        this._initRowHeader(sheetObject);
-        this._initColumnHeader(sheetObject);
+        this._initRowHeaderEvent(sheetObject);
+        this._initColumnHeaderEvent(sheetObject);
         this._initLeftTop(sheetObject);
         this._initSelectionChangeListener();
         this._initThemeChangeListener();
@@ -89,8 +88,9 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         this._initCommandListener();
         this._initUserActionSyncListener();
         this._initDefinedNameListener();
-
+        this._updateControlPointWhenScrolling();
         const unitId = workbook.getUnitId();
+        if (!worksheet) return;
         const sheetId = worksheet.getSheetId();
         this._selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
@@ -134,11 +134,39 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         );
     }
 
+    private _updateControlPointWhenScrolling() {
+        //this._scrollManagerService.scrollInfo$.subscribe((param) => {
+        const { scene } = this._context;
+        const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        if (!viewportMain) return;
+        // const sub = this._scrollManagerService.scrollInfo$.subscribe((param) => {
+        // const sub = viewportMain.onScrollAfter$.subscribeEvent((param) => {
+        const sub = this._scrollManagerService.validViewportScrollInfo$.subscribe((param) => {
+            if (param == null) {
+                return;
+            }
+            const { viewportScrollX, viewportScrollY } = param!;
+            const activeControl = this._selectionRenderService.getActiveSelectionControl() as unknown as MobileSelectionControl;
+            if (activeControl == null) {
+                return;
+            }
+            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+            const sheetContentHeight = skeleton?.rowTotalHeight;
+            const sheetContentWidth = skeleton?.columnTotalWidth;
+            const rangeType = activeControl.rangeType;
+            if (rangeType === RANGE_TYPE.COLUMN) {
+                activeControl.transformControlPoint(0, viewportScrollY, sheetContentWidth, sheetContentHeight);
+            } else if (rangeType === RANGE_TYPE.ROW) {
+                activeControl.transformControlPoint(viewportScrollX, 0, sheetContentWidth, sheetContentHeight);
+            }
+        });
+        this.disposeWithMe(toDisposable(sub));
+    }
+
     private async _getSelections(workbook: Workbook, unitId: string, formulaOrRefString: string) {
         const valueArray = formulaOrRefString.split(',');
 
         let worksheet = workbook.getActiveSheet();
-
         if (!worksheet) {
             return [];
         }
@@ -196,25 +224,59 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
     private _initSpreadsheetEvent(sheetObject: ISheetObjectParam) {
         const { spreadsheet } = sheetObject;
+        let longPressTimer: ReturnType<typeof setTimeout>;
+        const longPressDuration = 500; // Longpress duration in milliseconds
+        const pointerDownPos = { x: 0, y: 0 };
 
-        this.disposeWithMe(
-            toDisposable(
-                spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
-                    this._selectionRenderService.enableDetectMergedCell();
+        const clearLongPressTimer = () => {
+            // Clear the timer if pointer is moved or released
+            clearTimeout(longPressTimer);
+        };
 
-                    this._selectionRenderService.eventTrigger(
-                        evt,
-                        spreadsheet.zIndex + 1,
-                        RANGE_TYPE.NORMAL,
-                        this._getActiveViewport(evt)
-                    );
+        const createNewSelection = (evt: IPointerEvent | IMouseEvent, showContextMenu: boolean) => {
+            this._selectionRenderService.enableDetectMergedCell();
+            this._selectionRenderService.eventTrigger(
+                evt,
+                spreadsheet.zIndex + 1,
+                RANGE_TYPE.NORMAL,
+                this._getActiveViewport(evt)
+            );
+            if (showContextMenu) {
+                this._selectionManagerService.refreshSelection();
+            }
+        };
+        spreadsheet?.onPointerMove$.subscribeEvent((evt: IPointerEvent | IMouseEvent, _state) => {
+            const edge = 10;
+            if (Math.abs(evt.offsetX - pointerDownPos.x) > edge ||
+            Math.abs(evt.offsetY - pointerDownPos.y) > edge) {
+                clearLongPressTimer();
+            }
+        });
+        const spreadsheetPointerDownSub = spreadsheet?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            this._selectionRenderService.enableDetectMergedCell();
+            pointerDownPos.x = evt.offsetX;
+            pointerDownPos.y = evt.offsetY;
+            longPressTimer = setTimeout(() => {
+                createNewSelection(evt, true);
+            }, longPressDuration);
 
-                    if (evt.button !== 2) {
-                        state.stopPropagation();
-                    }
-                })
-            )
-        );
+            if (evt.button !== 2) {
+                state.stopPropagation();
+            }
+        });
+        const spreadsheetPointerUpSub = spreadsheet?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            clearTimeout(longPressTimer);
+            const edge = 10;
+            if (Math.abs(evt.offsetX - pointerDownPos.x) > edge ||
+            Math.abs(evt.offsetY - pointerDownPos.y) > edge) {
+                return;
+            }
+            createNewSelection(evt, false);
+            state.stopPropagation();
+        });
+
+        this.disposeWithMe(toDisposable(spreadsheetPointerDownSub));
+        this.disposeWithMe(toDisposable(spreadsheetPointerUpSub));
     }
 
     private _initThemeChangeListener() {
@@ -245,11 +307,11 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         this._selectionRenderService.updateControlForCurrentByRangeData(selections);
     }
 
-    private _initRowHeader(sheetObject: ISheetObjectParam) {
+    private _initRowHeaderEvent(sheetObject: ISheetObjectParam) {
         const { spreadsheetRowHeader, spreadsheet } = sheetObject;
 
         this.disposeWithMe(
-            spreadsheetRowHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            spreadsheetRowHeader?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 this._selectionRenderService.disableDetectMergedCell();
                 this._selectionRenderService.eventTrigger(
                     evt,
@@ -258,21 +320,20 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                     this._getActiveViewport(evt),
                     ScrollTimerType.Y
                 );
-
-                if (evt.button !== 2) {
-                    state.stopPropagation();
-                }
+                state.stopPropagation();
+                // use this to show contextmenu
+                this._selectionManagerService.refreshSelection();
             })
         );
 
         // spreadsheetRowHeader?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {});
     }
 
-    private _initColumnHeader(sheetObject: ISheetObjectParam) {
+    private _initColumnHeaderEvent(sheetObject: ISheetObjectParam) {
         const { spreadsheetColumnHeader, spreadsheet } = sheetObject;
 
         this.disposeWithMe(
-            spreadsheetColumnHeader?.onPointerDown$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
+            spreadsheetColumnHeader?.onPointerUp$.subscribeEvent((evt: IPointerEvent | IMouseEvent, state) => {
                 this._selectionRenderService.disableDetectMergedCell();
 
                 this._selectionRenderService.eventTrigger(
@@ -282,10 +343,9 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                     this._getActiveViewport(evt),
                     ScrollTimerType.X
                 );
-
-                if (evt.button !== 2) {
-                    state.stopPropagation();
-                }
+                state.stopPropagation();
+                // use this to show contextmenu
+                this._selectionManagerService.refreshSelection();
             })
         );
     }
@@ -320,8 +380,8 @@ export class SelectionRenderController extends Disposable implements IRenderModu
     private _initSelectionChangeListener() {
         this.disposeWithMe(
             toDisposable(
-                this._selectionManagerService.selectionMoveEndBefore$.subscribe((params) => {
-                    // clear selection controls
+                // selectionMoveEnd$ would also be invoked when changing sheet(_currentSkeleton$.next)
+                this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
                     this._selectionRenderService.reset();
                     if (params == null) {
                         return;
@@ -333,8 +393,6 @@ export class SelectionRenderController extends Disposable implements IRenderModu
                         }
                         const selectionData =
                             this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
-
-                        // then add a new selection control.
                         this._selectionRenderService.addSelectionControlBySelectionData(selectionData);
                     }
 
@@ -379,7 +437,6 @@ export class SelectionRenderController extends Disposable implements IRenderModu
         if (!worksheet) {
             return;
         }
-
         this._definedNamesService.setCurrentRange({
             range: lastSelection.range,
             unitId: workbook.getUnitId(),
@@ -407,8 +464,6 @@ export class SelectionRenderController extends Disposable implements IRenderModu
 
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet()?.getSheetId();
-        if (!sheetId) return;
-
         const current = this._selectionManagerService.getCurrent();
 
         if (selectionDataWithStyleList == null || selectionDataWithStyleList.length === 0) {

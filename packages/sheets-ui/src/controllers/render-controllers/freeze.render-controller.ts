@@ -1503,13 +1503,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         [this._freezeDownSubs, this._freezePointerEnterSubs, this._freezePointerLeaveSubs].forEach((s) => {
             s?.unsubscribe();
         });
+        // TODO @lumixraku
         this._freezeDownSubs = null;
         this._freezePointerEnterSubs = null;
         this._freezePointerLeaveSubs = null;
-
-        // TODO @lumixraku
-        // in prev version, scene.onPointerEnterObserver.remove(this._moveObserver);
-        // but did not find when to add
         this._scenePointerMoveSub?.unsubscribe();
         this._scenePointerUpSub?.unsubscribe();
         this._scenePointerMoveSub = null;

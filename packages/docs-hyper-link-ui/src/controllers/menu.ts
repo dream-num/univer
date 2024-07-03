@@ -38,7 +38,7 @@ export function AddHyperLinkMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         disabled$: new Observable(function (subscribe) {
             const textSelectionService = accessor.get(TextSelectionManagerService);
             const univerInstanceService = accessor.get(IUniverInstanceService);
-            textSelectionService.textSelection$.pipe(debounceTime(16)).subscribe(() => {
+            const observer = textSelectionService.textSelection$.pipe(debounceTime(16)).subscribe(() => {
                 const activeRange = textSelectionService.getActiveRange();
                 const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
                 if (!doc || !activeRange || activeRange.collapsed) {
@@ -65,6 +65,10 @@ export function AddHyperLinkMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
                 subscribe.next(false);
             });
+
+            return () => {
+                observer.unsubscribe();
+            };
         }),
     };
 }

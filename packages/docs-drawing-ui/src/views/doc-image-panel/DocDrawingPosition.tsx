@@ -262,7 +262,8 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     }
 
     function updateState(drawingParam: IDrawingParam) {
-        const drawing = documentDataModel?.getSnapshot()?.drawings?.[drawingParam.drawingId];
+        const snapshot = documentDataModel?.getSnapshot();
+        const drawing = snapshot?.drawings?.[drawingParam.drawingId];
         if (drawing == null) {
             return;
         }

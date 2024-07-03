@@ -19,7 +19,18 @@ import type { Nullable } from '@univerjs/core';
 import { sortRules, sortRulesByDesc } from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
 import * as json1 from 'ot-json1';
-import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
+import type {
+    IDrawingGroupUpdateParam,
+    IDrawingMap,
+    IDrawingMapItemData,
+    IDrawingOrderMapParam,
+    IDrawingOrderUpdateParam,
+    IDrawingParam,
+    IDrawingSearch,
+    IDrawingSubunitMap,
+    IDrawingVisibleParam,
+    IUnitDrawingService
+} from './drawing-manager.service';
 
 export interface IDrawingJsonUndo1 {
     undo: JSONOp;
@@ -783,4 +794,4 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     }
 }
 
-export class DrawingManagerService extends UnitDrawingService<IDrawingParam> {}
+export class DrawingManagerService extends UnitDrawingService<IDrawingParam> { }

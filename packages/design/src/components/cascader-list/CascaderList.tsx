@@ -16,8 +16,9 @@
 
 import { CheckMarkSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 
+import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
 interface IOption {
@@ -48,6 +49,8 @@ export interface ICascaderListProps {
 export function CascaderList(props: ICascaderListProps) {
     const { value, options = [], onChange } = props;
 
+    const { locale } = useContext(ConfigContext);
+
     const activeOptions = useMemo(() => {
         const activeOptions = [options];
         value.forEach((item, index) => {
@@ -62,19 +65,19 @@ export function CascaderList(props: ICascaderListProps) {
     }, [value]);
 
     function handleChange(index: number, v: string) {
-        if (v === props.value[index]) {
+        if (v === value[index]) {
             return;
         }
 
-        if (props.value[index + 1]) {
-            const newValue = props.value.slice(0, index + 1);
+        if (value[index + 1]) {
+            const newValue = value.slice(0, index + 1);
             newValue[index] = v;
 
             onChange(newValue);
             return;
         }
 
-        const newValue = [...props.value];
+        const newValue = [...value];
         newValue[index] = v;
 
         onChange(newValue);
@@ -108,11 +111,11 @@ export function CascaderList(props: ICascaderListProps) {
                     )
                     : (
                         <section key={index} className={styles.cascaderListEmpty}>
-                            无
+                            {locale?.CascaderList.empty}
                         </section>
                     )
             )}
-            {value.length <= 0 && <section className={styles.cascaderListEmpty}>无</section>}
+            {value.length <= 0 && <section className={styles.cascaderListEmpty}>{locale?.CascaderList.empty}</section>}
         </section>
     );
 }

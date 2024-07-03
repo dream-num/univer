@@ -77,6 +77,11 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
             'process.env.BUNDLE_TYPE': JSON.stringify(process.env.BUNDLE_TYPE ?? ''),
         },
         test: {
+            css: {
+                modules: {
+                    classNameStrategy: 'non-scoped',
+                },
+            },
             coverage: {
                 reporter: ['html', 'json'],
                 provider: 'custom',

@@ -17,7 +17,7 @@
 import type { ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
+import type { IDrawingSearch, IImageData, IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
@@ -70,6 +70,8 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         this._groupDrawingListener();
 
         this._focusDrawingListener();
+
+        this._drawingAddListener();
     }
 
     /**
@@ -376,5 +378,31 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
                 }
             })
         );
+    }
+
+    private _drawingAddListener() {
+        this.disposeWithMe(
+            this._sheetDrawingService.add$.subscribe((params) => {
+                this._registerDrawing(params);
+            })
+        );
+    }
+
+    private _registerDrawing(params: IDrawingSearch[]) {
+        (params).forEach((param) => {
+            const drawingParam = this._sheetDrawingService.getDrawingByParam(param) as ISheetDrawing;
+
+            if (drawingParam == null) {
+                return;
+            }
+
+            const { sheetTransform } = drawingParam;
+
+            drawingParam.transform = drawingPositionToTransform(sheetTransform, this._selectionRenderService, this._sheetSkeletonManagerService);
+        });
+
+        const unitId = params[0].unitId;
+
+        this._drawingManagerService.registerDrawingData(unitId, this._sheetDrawingService.getDrawingDataForUnit(unitId));
     }
 }

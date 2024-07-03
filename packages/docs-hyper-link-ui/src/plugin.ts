@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import { Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { DOC_HYPER_LINK_PLUGIN } from './types/const';
-import { DocHyperLinkModel } from './models/hyper-link.model';
-import { DocHyperLinkController } from './controllers/hyper-link.controller';
-import { DocHyperLinkResourceController } from './controllers/resource.controller';
+import { UniverDocHyperLinkPlugin } from '@univerjs/docs-hyper-link';
+import { DOC_HYPER_LINK_UI_PLUGIN } from './types/const';
+import { DocHyperLinkUIController } from './controllers/ui.controller';
+import { DocHyperLinkService } from './services/hyper-link.service';
 
-export class UniverDocHyperLinkPlugin extends Plugin {
-    static override pluginName = DOC_HYPER_LINK_PLUGIN;
+@DependentOn(UniverDocHyperLinkPlugin)
+export class UniverDocHyperLinkUIPlugin extends Plugin {
+    static override pluginName = DOC_HYPER_LINK_UI_PLUGIN;
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
@@ -34,9 +35,9 @@ export class UniverDocHyperLinkPlugin extends Plugin {
 
     override onStarting(injector: Injector): void {
         const deps: Dependency[] = [
-            [DocHyperLinkModel],
-            [DocHyperLinkController],
-            [DocHyperLinkResourceController],
+            [DocHyperLinkService],
+            [DocHyperLinkUIController],
+
         ];
 
         deps.forEach((dep) => {

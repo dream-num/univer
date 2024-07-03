@@ -21,13 +21,19 @@ import type { IDocHyperLink } from '../types/interfaces/i-doc-hyper-link';
 export type DocLinkUpdate = {
     type: 'add';
     link: IDocHyperLink;
+    unitId: string;
 } | {
     type: 'update';
     oldPayload: string;
     link: IDocHyperLink;
+    unitId: string;
 } | {
     type: 'delete';
     link: IDocHyperLink;
+    unitId: string;
+} | {
+    type: 'delete-unit';
+    unitId: string;
 };
 
 export class DocHyperLinkModel extends Disposable {
@@ -61,6 +67,7 @@ export class DocHyperLinkModel extends Disposable {
         this._linkUpdate$.next({
             type: 'add',
             link,
+            unitId,
         });
 
         return true;
@@ -79,6 +86,7 @@ export class DocHyperLinkModel extends Disposable {
             type: 'update',
             link,
             oldPayload,
+            unitId,
         });
         return true;
     }
@@ -95,7 +103,28 @@ export class DocHyperLinkModel extends Disposable {
         this._linkUpdate$.next({
             type: 'delete',
             link,
+            unitId,
         });
         return false;
     }
+
+    getLink(unitId: string, linkId: string) {
+        const map = this._ensureMap(unitId);
+        return map.get(linkId);
+    }
+
+    getUnit(unitId: string) {
+        const map = this._ensureMap(unitId);
+
+        return Array.from(map.values());
+    }
+
+    deleteUnit(unitId: string) {
+        this._links.delete(unitId);
+        this._linkUpdate$.next({
+            unitId,
+            type: 'delete-unit',
+        });
+    }
 }
+

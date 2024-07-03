@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-export interface IDocHyperLink {
-    payload: string;
-    id: string;
-}
+import { CommandType, type ICommand } from '@univerjs/core';
+import { DocHyperLinkService } from '../../services/hyper-link.service';
+
+export const ShowDocHyperLinkPopupOperation: ICommand = {
+    type: CommandType.OPERATION,
+    id: 'docs.operation.show-hyper-link-popup',
+    handler(accessor) {
+        const hyperLinkService = accessor.get(DocHyperLinkService);
+        hyperLinkService.showEditPopup();
+        return true;
+    },
+};

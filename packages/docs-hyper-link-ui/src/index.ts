@@ -14,7 +14,4 @@
  * limitations under the License.
  */
 
-export interface IDocHyperLink {
-    payload: string;
-    id: string;
-}
+export { UniverDocHyperLinkUIPlugin } from './plugin';

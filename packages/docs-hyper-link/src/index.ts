@@ -16,7 +16,9 @@
 
 export { DOC_HYPER_LINK_PLUGIN } from './types/const';
 export { DocHyperLinkModel } from './models/hyper-link.model';
-
+export type { IDocHyperLink } from './types/interfaces/i-doc-hyper-link';
+export { DocHyperLinkType } from './types/enums/doc-hyper-link-type';
+export { UniverDocHyperLinkPlugin } from './plugin';
 // #region - all commands
 
 export { AddDocHyperLinkMutation, type IAddDocHyperLinkMutationParams } from './commands/mutations/add-link.mutation';

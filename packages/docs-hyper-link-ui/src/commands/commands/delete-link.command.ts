@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
-export interface IDocHyperLink {
-    payload: string;
-    id: string;
+import { CommandType, type ICommand } from '@univerjs/core';
+
+export interface IDeleteDocHyperLinkMutationParams {
+    unitId: string;
+    linkId: string;
 }
+
+export const DeleteDocHyperLinkCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'docs.command.delete-hyper-link',
+    handler(accessor, params, options) {
+        return true;
+    },
+};

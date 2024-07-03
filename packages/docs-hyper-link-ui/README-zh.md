@@ -1,33 +1,33 @@
-# @univerjs/docs-hyper-link
+# @univerjs/docs-hyper-link-ui
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/docs-hyper-link)](https://npmjs.org/packages/@univerjs/docs-hyper-link )
-[![license](https://img.shields.io/npm/l/@univerjs/docs-hyper-link)](https://img.shields.io/npm/l/@univerjs/sheets- thread-comment)
+[![npm version](https://img.shields.io/npm/v/@univerjs/docs-hyper-link-ui)](https://npmjs.org/packages/@univerjs/docs-hyper-link-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/docs-hyper-link-ui)](https://img.shields.io/npm/l/@univerjs/docs-hyper-link-ui)
 
-## Introduction
+## 简介
 
-`@univerjs/docs-hyper-link` provides the comment/annotation function of Univer Sheets.
+`@univerjs/docs-hyper-link-ui` 提供了 Univer Docs 的链接功能。
 
 
-## Usage
+## 使用指南
 
-### Install
+### 安装
 
 ```shell
-# Use npm
-npm install @univerjs/docs-hyper-link
+# 使用 npm
+npm install @univerjs/docs-hyper-link-ui
 
-# Use pnpm
-pnpm add @univerjs/docs-hyper-link
+# 使用 pnpm
+pnpm add @univerjs/docs-hyper-link-ui
 ```
 
-### use
+### 使用
 ```js
-import { UniverSheetsThreadCommentPlugin, IThreadCommentMentionDataService} from '@univerjs/docs-hyper-link';
+import { UniverSheetsThreadCommentPlugin, IThreadCommentMentionDataService } from '@univerjs/docs-hyper-link-ui';
 
 const mockUser = {
     userID: 'mockId',
     name: 'MockUser',
-    avatar: 'icon-url',
+    avatar: 'avatar-icon-url',
     anonymous: false,
     canBindAnonymous: false,
 };
@@ -35,7 +35,7 @@ const mockUser = {
 class CustomMentionDataService implements IThreadCommentMentionDataService {
     trigger: string = '@';
 
-     // Get the common interface implementation of the mentioned user
+    // 获取提及用户的通用接口实现
     async getMentions(search: string) {
         return [
             {

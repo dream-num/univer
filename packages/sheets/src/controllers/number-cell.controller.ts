@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import { CellValueType, Disposable, ICommandService, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
+import { CellValueType, Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
+import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
+import { INTERCEPTOR_POINT } from '../services/sheet-interceptor/interceptor-const';
 
 @OnLifecycle(LifecycleStages.Ready, NumberCellDisplayController)
 export class NumberCellDisplayController extends Disposable {
     constructor(
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
-    ) {
+        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService) {
         super();
 
         this._initialize();

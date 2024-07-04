@@ -986,7 +986,7 @@ function __updatePreLineDrawingPosition(
                 const { size, angle } = docTransform;
                 const { width = 0, height = 0 } = size;
 
-                drawing.aLeft = glyph.left || 0;
+                drawing.aLeft = divide.left + glyph.left || 0;
                 drawing.aTop = top + lineHeight - height || 0; // + (lineHeight - height) / 2
                 drawing.width = width;
                 drawing.height = height;

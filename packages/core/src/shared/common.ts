@@ -25,13 +25,13 @@ import {
 import { type IRange, RANGE_TYPE } from '../types/interfaces';
 import type { ICellData, ICellDataForSheetInterceptor } from '../types/interfaces/i-cell-data';
 import type { IDocumentData } from '../types/interfaces/i-document-data';
-import type { IRangeWithCoord, ISelectionCell, ISelectionCellWithCoord } from '../types/interfaces/i-selection-data';
+import type { IRangeWithCoord, ISelectionCell, ISelectionCellWithMergeInfo } from '../types/interfaces/i-selection-data';
 import type { IColorStyle, IStyleData } from '../types/interfaces/i-style-data';
 import { ColorBuilder } from './color/color';
 import { Tools } from './tools';
 import type { Nullable } from './types';
 
-export function makeCellToSelection(cellInfo: ISelectionCellWithCoord): IRangeWithCoord {
+export function makeCellToSelection(cellInfo: ISelectionCellWithMergeInfo): IRangeWithCoord {
     const { actualRow, actualColumn, isMerged, isMergedMainCell, mergeInfo } = cellInfo;
     let { startY, endY, startX, endX } = cellInfo;
     let startRow = actualRow;

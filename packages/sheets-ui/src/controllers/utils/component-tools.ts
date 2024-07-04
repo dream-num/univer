@@ -105,7 +105,7 @@ export function getCoordByOffset(
     viewport?: Viewport,
     closeFirst?: boolean
 ) {
-    const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+    const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
     const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
 
@@ -139,7 +139,7 @@ export function getCoordByOffset(
 }
 
 export function getTransformCoord(evtOffsetX: number, evtOffsetY: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
-    const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+    const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
     const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 

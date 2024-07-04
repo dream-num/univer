@@ -591,7 +591,7 @@ export class Scene extends ThinScene {
         //     }
         //     parent = parent?.getParent && parent?.getParent();
         // }
-        coord = this.getRelativeCoord(coord);
+        coord = this.getRelativeToViewportCoord(coord);
         return this.findViewportByPosToViewport(coord);
     }
 
@@ -634,7 +634,7 @@ export class Scene extends ThinScene {
      * @param coord Coordinates to be converted.
      * @returns
      */
-    getRelativeCoord(coord: Vector2) {
+    getRelativeToViewportCoord(coord: Vector2) {
         let parent: any = this.getParent();
 
         const parentList: any[] = [];

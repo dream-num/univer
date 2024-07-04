@@ -186,7 +186,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
 
             const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
-            const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+            const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
             const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
 
@@ -249,7 +249,7 @@ export class HeaderMoveRenderController extends Disposable implements IRenderMod
                 initScrollTimer();
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-                const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
+                const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(
                     Vector2.FromArray([moveOffsetX, moveOffsetY])
                 );
 

@@ -260,7 +260,7 @@ export class SelectionShapeExtension {
 
         const scene = this._scene;
 
-        const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
 
@@ -346,7 +346,7 @@ export class SelectionShapeExtension {
                 return;
             }
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
             );
 
@@ -518,7 +518,7 @@ export class SelectionShapeExtension {
 
         const scene = this._scene;
 
-        const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
 
@@ -565,7 +565,7 @@ export class SelectionShapeExtension {
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
             );
 
@@ -625,7 +625,7 @@ export class SelectionShapeExtension {
 
         const { row, column } = moveActualSelection;
 
-        const moveRelativeCoords = scene.getRelativeCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+        const moveRelativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 
         const maxRow = this._skeleton.getRowCount() - 1;
 
@@ -755,7 +755,7 @@ export class SelectionShapeExtension {
 
         const scene = this._scene;
 
-        const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
 
@@ -837,7 +837,7 @@ export class SelectionShapeExtension {
                 return;
             }
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
             );
 

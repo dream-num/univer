@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRangeWithCoord, ISelectionCellWithCoord, Nullable, ThemeService } from '@univerjs/core';
+import type { IRangeWithCoord, ISelectionCellWithMergeInfo, Nullable, ThemeService } from '@univerjs/core';
 import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
 import type { Scene } from '@univerjs/engine-render';
 import { cancelRequestFrame, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
@@ -253,7 +253,7 @@ export class SelectionControl extends Disposable {
         rowHeaderWidth: number = 0,
         columnHeaderHeight: number = 0,
         style?: Nullable<ISelectionStyle>,
-        highlight?: Nullable<ISelectionCellWithCoord>
+        highlight?: Nullable<ISelectionCellWithMergeInfo>
     ) {
         this._selectionModel.setValue(newSelectionRange, highlight);
         if (style == null) {

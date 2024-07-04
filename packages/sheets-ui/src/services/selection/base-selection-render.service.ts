@@ -18,7 +18,7 @@ import type {
     IInterceptor,
     IRange,
     IRangeWithCoord,
-    ISelectionCellWithCoord,
+    ISelectionCellWithMergeInfo,
     ISelectionWithCoord,
     Nullable,
     ThemeService,
@@ -70,7 +70,7 @@ export interface ISheetSelectionRenderService {
     /** @deprecated Use the function `attachPrimaryWithCoord` instead`. */
     // attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
 
-    getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithCoord>; // drawing
+    getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithMergeInfo>; // drawing
 }
 
 export const ISheetSelectionRenderService = createIdentifier<ISheetSelectionRenderService>('univer.sheet.selection-render-service');
@@ -101,9 +101,15 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         endColumn: -1,
     };
 
-    private _startOffsetX: number = 0;
+    /**
+     * the posX of viewport when the pointer down
+     */
+    private _startViewportPosX: number = 0;
 
-    private _startOffsetY: number = 0;
+    /**
+     * the posY of viewport when the pointer down
+     */
+    private _startViewportPosY: number = 0;
 
     private _scrollTimer!: ScrollTimer;
 
@@ -370,20 +376,20 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (!viewportMain) return;
-        const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const relativeCoords = scene.getRelativeToViewportCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
-        let { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
-        this._startOffsetX = newEvtOffsetX;
-        this._startOffsetY = newEvtOffsetY;
+        let { x: startViewportPosX, y: startViewportPosY } = relativeCoords;
+        this._startViewportPosX = startViewportPosX;
+        this._startViewportPosY = startViewportPosY;
         if (rangeType === RANGE_TYPE.ROW) {
-            newEvtOffsetX = 0;
+            startViewportPosX = 0;
         } else if (rangeType === RANGE_TYPE.COLUMN) {
-            newEvtOffsetY = 0;
+            startViewportPosY = 0;
         }
 
         const scrollXY = scene.getVpScrollXYInfoByPosToVp(relativeCoords);
         const { scaleX, scaleY } = scene.getAncestorScale();
-        const cursorCellRangeInfo = this._getSelectedRangeWithMerge(newEvtOffsetX, newEvtOffsetY, scaleX, scaleY, scrollXY);
+        const cursorCellRangeInfo = this._getSelectedRangeWithMerge(startViewportPosX, startViewportPosY, scaleX, scaleY, scrollXY);
         if (!cursorCellRangeInfo) return false;
 
         const { rangeWithCoord: cursorCellRange, primaryWithCoord: primaryCursorCellRange } = cursorCellRangeInfo;
@@ -436,22 +442,17 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         } else if (remainLastEnable && activeSelectionControl) {
             // Supports the formula ref text selection feature,
             // under the condition of preserving all previous selections, it modifies the position of the latest selection.
-            activeSelectionControl.update(
+            this._updateSelectionControlRange(
+                activeSelectionControl,
                 cursorCellRangeWithRangeType,
-                rowHeaderWidth,
-                columnHeaderHeight,
-                this._selectionStyle,
                 primaryCursorCellRange
             );
         } else {
             // Create new control as default
             activeSelectionControl = this.newSelectionControl(scene, rangeType);
-
-            activeSelectionControl.update(
+            this._updateSelectionControlRange(
+                activeSelectionControl,
                 cursorCellRangeWithRangeType,
-                rowHeaderWidth,
-                columnHeaderHeight,
-                this._selectionStyle,
                 primaryCursorCellRange
             );
         }
@@ -470,10 +471,10 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         scene.getTransformer()?.clearSelectedObjects();
 
         if (rangeType === RANGE_TYPE.ROW || rangeType === RANGE_TYPE.COLUMN) {
-            this._moving(newEvtOffsetX, newEvtOffsetY, activeSelectionControl, rangeType);
+            this._moving(startViewportPosX, startViewportPosY, activeSelectionControl, rangeType);
         }
 
-        this._setupPointerMoveListener(viewportMain, activeSelectionControl!, scrollTimer, rangeType, newEvtOffsetX, newEvtOffsetY);
+        this._setupPointerMoveListener(viewportMain, activeSelectionControl!, scrollTimer, rangeType, startViewportPosX, startViewportPosY);
 
         this._shortcutService.setDisable(true);
         this._upEventSubscription = scene.onPointerUp$.subscribeEvent(() => {
@@ -489,21 +490,21 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         activeControl: SelectionControl,
         scrollTimer: ScrollTimer,
         rangeType: RANGE_TYPE,
-        newEvtOffsetX: number,
-        newEvtOffsetY: number
+        startViewportPosX: number,
+        startViewportPosY: number
     ): void {
         let xCrossTime = 0;
         let yCrossTime = 0;
-        let lastX = newEvtOffsetX;
-        let lastY = newEvtOffsetY;
+        let lastX = startViewportPosX;
+        let lastY = startViewportPosY;
 
         const scene = this._scene;
-        const startViewport = scene.getActiveViewportByCoord(Vector2.FromArray([newEvtOffsetX, newEvtOffsetY]));
+        const startViewport = scene.getActiveViewportByCoord(Vector2.FromArray([startViewportPosX, startViewportPosY]));
         // eslint-disable-next-line max-lines-per-function, complexity
         this._moveEventSubscription = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeToViewportCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
 
             this._moving(newMoveOffsetX, newMoveOffsetY, activeControl, rangeType);
 
@@ -661,108 +662,92 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
      */
     // eslint-disable-next-line max-lines-per-function
     private _moving(
-        moveOffsetX: number,
-        moveOffsetY: number,
-        selectionControl: Nullable<SelectionControl>,
+        offsetX: number,
+        offsetY: number,
+        currSelectionControl: Nullable<SelectionControl>,
         rangeType: RANGE_TYPE
     ) {
         const skeleton = this._skeleton;
         const scene = this._scene;
 
-        const { startRow, startColumn, endRow, endColumn } = this._activeCellRangeOfCurrSelection;
-
-        const {
-            startRow: oldStartRow,
-            endRow: oldEndRow,
-            startColumn: oldStartColumn,
-            endColumn: oldEndColumn,
-        } = selectionControl?.model || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
+        const currSelectionRange: IRange = {
+            startRow: currSelectionControl?.model.startRow ?? -1,
+            endRow: currSelectionControl?.model.endRow ?? -1,
+            startColumn: currSelectionControl?.model.startColumn ?? -1,
+            endColumn: currSelectionControl?.model.endColumn ?? -1,
+        };
 
         const viewportMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN)!;
 
-        const targetViewport = this._getViewportByCell(oldEndRow, oldEndColumn) ?? viewportMain;
+        const targetViewport = this._getViewportByCell(currSelectionRange.endRow, currSelectionRange.endColumn) ?? viewportMain;
 
         const scrollXY = scene.getVpScrollXYInfoByPosToVp(
-            Vector2.FromArray([this._startOffsetX, this._startOffsetY]),
+            Vector2.FromArray([this._startViewportPosX, this._startViewportPosY]),
             targetViewport
         );
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-
         if (rangeType === RANGE_TYPE.ROW) {
-            moveOffsetX = Number.POSITIVE_INFINITY;
+            offsetX = Number.POSITIVE_INFINITY;
         } else if (rangeType === RANGE_TYPE.COLUMN) {
-            moveOffsetY = Number.POSITIVE_INFINITY;
+            offsetY = Number.POSITIVE_INFINITY;
         }
 
-        const selectionData = this._getSelectedRangeWithMerge(moveOffsetX, moveOffsetY, scaleX, scaleY, scrollXY);
-        if (!selectionData) {
+        const cursorCellRangeInfo = this._getSelectedRangeWithMerge(offsetX, offsetY, scaleX, scaleY, scrollXY);
+        if (!cursorCellRangeInfo) {
             return false;
         }
 
-        const { rangeWithCoord: moveRangeWithCoord } = selectionData;
+        const { rangeWithCoord: cursorCellRange } = cursorCellRangeInfo;
+        const activeCellRange = this._activeCellRangeOfCurrSelection;
 
-        const {
-            startRow: moveStartRow,
-            startColumn: moveStartColumn,
-            endColumn: moveEndColumn,
-            endRow: moveEndRow,
-        } = moveRangeWithCoord;
-
-        const newStartRow = Math.min(moveStartRow, startRow);
-        const newStartColumn = Math.min(moveStartColumn, startColumn);
-        const newEndRow = Math.max(moveEndRow, endRow);
-        const newEndColumn = Math.max(moveEndColumn, endColumn);
-
-        let newBounding = {
-            startRow: newStartRow,
-            startColumn: newStartColumn,
-            endRow: newEndRow,
-            endColumn: newEndColumn,
+        let newSelectionRange: IRange = {
+            startRow: Math.min(cursorCellRange.startRow, activeCellRange.startRow),
+            startColumn: Math.min(cursorCellRange.startColumn, activeCellRange.startColumn),
+            endRow: Math.max(cursorCellRange.endRow, activeCellRange.endRow),
+            endColumn: Math.max(cursorCellRange.endColumn, activeCellRange.endColumn),
         };
 
         if (this._shouldDetectMergedCells) {
-            newBounding = skeleton.getSelectionBounding(newStartRow, newStartColumn, newEndRow, newEndColumn);
+            newSelectionRange = skeleton.getSelectionBounding(newSelectionRange.startRow, newSelectionRange.startColumn, newSelectionRange.endRow, newSelectionRange.endColumn);
         }
 
-        if (!newBounding) {
+        if (!newSelectionRange) {
             return false;
         }
-        const {
-            startRow: finalStartRow,
-            startColumn: finalStartColumn,
-            endRow: finalEndRow,
-            endColumn: finalEndColumn,
-        } = newBounding;
 
-        const startCell = skeleton.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
-        const endCell = skeleton.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
+        const startCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.startRow, newSelectionRange.startColumn);
+        const endCellXY = skeleton.getNoMergeCellPositionByIndex(newSelectionRange.endRow, newSelectionRange.endColumn);
 
-        const newSelectionRange: IRangeWithCoord = {
-            startColumn: finalStartColumn,
-            startRow: finalStartRow,
-            endColumn: finalEndColumn,
-            endRow: finalEndRow,
-            startY: startCell?.startY || 0,
-            endY: endCell?.endY || 0,
-            startX: startCell?.startX || 0,
-            endX: endCell?.endX || 0,
+        const newSelectionRangeWithCoord: IRangeWithCoord = {
+            startRow: newSelectionRange.startRow,
+            startColumn: newSelectionRange.startColumn,
+            endRow: newSelectionRange.endRow,
+            endColumn: newSelectionRange.endColumn,
+            startY: startCellXY?.startY || 0,
+            endY: endCellXY?.endY || 0,
+            startX: startCellXY?.startX || 0,
+            endX: endCellXY?.endX || 0,
         };
         // Only notify when the selection changes
 
-        if (
-            (oldStartColumn !== finalStartColumn ||
-                oldStartRow !== finalStartRow ||
-                oldEndColumn !== finalEndColumn ||
-                oldEndRow !== finalEndRow) &&
-            selectionControl != null
-        ) {
-            selectionControl.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight);
-
+        const rangeChanged =
+            currSelectionRange.startRow !== newSelectionRange.startRow ||
+            currSelectionRange.startColumn !== newSelectionRange.startColumn ||
+            currSelectionRange.endRow !== newSelectionRange.endRow ||
+            currSelectionRange.endColumn !== newSelectionRange.endColumn;
+        if (currSelectionControl != null && rangeChanged) {
+            // selectionControl.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight);
+            this._updateSelectionControlRange(currSelectionControl, newSelectionRangeWithCoord);
             this._selectionMoving$.next(this.getSelectionDataWithStyle());
         }
+    }
+
+    private _updateSelectionControlRange(control: SelectionControl, newSelectionRange: IRangeWithCoord, highlight: Nullable<ISelectionCellWithMergeInfo>) {
+        const skeleton = this._skeleton;
+        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+        control.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight, this._selectionStyle, !highlight ? null : highlight);
     }
 
     private _clearMove(): void {
@@ -888,7 +873,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     }
 
     private _performSelectionByTwoCells(
-        currentCell: ISelectionCellWithCoord,
+        currentCell: ISelectionCellWithMergeInfo,
         startSelectionRange: IRangeWithCoord,
         skeleton: SpreadsheetSkeleton,
         rangeType: RANGE_TYPE,

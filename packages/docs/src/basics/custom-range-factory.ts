@@ -230,7 +230,6 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
             textRanges: undefined,
         },
     };
-    // console.log('===actions', textX, textX.serialize());
     doMutation.params.actions = jsonX.editOp(textX.serialize());
     return doMutation;
 }

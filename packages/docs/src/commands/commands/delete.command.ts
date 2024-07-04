@@ -17,6 +17,8 @@
 import type { ICommand, IDocumentBody, IMutationInfo, IParagraph, ITextRun } from '@univerjs/core';
 import {
     CommandType,
+    getCustomDecorationSlice,
+    getCustomRangeSlice,
     ICommandService,
     IUniverInstanceService,
     JSONX,
@@ -150,10 +152,13 @@ export const DeleteLeftCommand: ICommand = {
                     return true;
                 }
                 if (preGlyph.content === '\r') {
-                    result = await commandService.executeCommand(MergeTwoParagraphCommand.id, {
-                        direction: DeleteDirection.LEFT,
-                        range: actualRange,
-                    });
+                    result = await commandService.executeCommand(
+                        MergeTwoParagraphCommand.id,
+                        {
+                            direction: DeleteDirection.LEFT,
+                            range: actualRange,
+                        }
+                    );
                 } else {
                     cursor -= preGlyph.count;
                     result = await commandService.executeCommand(DeleteCommand.id, {
@@ -291,11 +296,15 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         }
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!docDataModel) {
+        const originBody = docDataModel?.getBody();
+        if (!docDataModel || !originBody) {
             return false;
         }
 
-        const { startOffset, collapsed, segmentId, style } = activeRange;
+        const actualRange = getDeleteSelection(activeRange, originBody);
+
+        const { segmentId, style } = activeRange;
+        const { startOffset, collapsed } = actualRange;
 
         if (!collapsed) {
             return false;
@@ -380,6 +389,8 @@ function getParagraphBody(body: IDocumentBody, startIndex: number, endIndex: num
     if (originTextRuns == null) {
         return {
             dataStream,
+            customRanges: getCustomRangeSlice(body, startIndex, endIndex).customRanges,
+            customDecorations: getCustomDecorationSlice(body, startIndex, endIndex),
         };
     }
 
@@ -415,6 +426,8 @@ function getParagraphBody(body: IDocumentBody, startIndex: number, endIndex: num
     return {
         dataStream,
         textRuns,
+        customRanges: getCustomRangeSlice(body, startIndex, endIndex).customRanges,
+        customDecorations: getCustomDecorationSlice(body, startIndex, endIndex),
     };
 }
 

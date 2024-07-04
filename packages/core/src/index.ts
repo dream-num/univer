@@ -183,7 +183,7 @@ export { AuthzIoLocalService } from './services/authz-io/authz-io-local.service'
 export { IAuthzIoService } from './services/authz-io/type';
 export { createDefaultUser } from './services/user-manager/const';
 export { skipParseTagNames } from './types/const/clipboard';
-export { normalizeBody } from './docs/data-model/text-x/utils';
+export { normalizeBody, getCustomRangeSlice, getCustomDecorationSlice } from './docs/data-model/text-x/utils';
 export { updateAttributeByDelete } from './docs/data-model/text-x/apply-utils/delete-apply';
 export { nameCharacterCheck } from './shared/name';
 installShims();

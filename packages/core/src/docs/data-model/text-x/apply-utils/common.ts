@@ -397,9 +397,12 @@ export function insertCustomRanges(
                     continue;
                 }
 
-                const isClosed = body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START &&
-                    body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END;
+                const isClosed =
+                    body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START &&
+                    body.dataStream[oldCustomRange.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END;
+
                 if (isClosed) {
+                    insertCustomRanges.push(customRange);
                     continue;
                 }
                 // old is start

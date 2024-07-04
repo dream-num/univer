@@ -15,13 +15,13 @@
  */
 
 import type { SlideDataModel } from '@univerjs/core';
-import { IUniverInstanceService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SlideUIController } from './controllers/slide-ui.controller';
 
-export const SLIDE_UI_PLUGIN_NAME = 'slides-ui';
+export const SLIDE_UI_PLUGIN_NAME = 'SLIDE_UI';
 
 export class UniverSlidesUIPlugin extends Plugin {
     static override pluginName = SLIDE_UI_PLUGIN_NAME;
@@ -30,7 +30,6 @@ export class UniverSlidesUIPlugin extends Plugin {
     constructor(
         _config: unknown,
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();

@@ -737,7 +737,7 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.56
+        specifier: ^0.1.58
         version: 0.1.58(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
@@ -762,8 +762,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: 0.15.4
-        version: 0.15.4
+        specifier: 0.15.5
+        version: 0.15.5
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -774,10 +774,10 @@ importers:
         specifier: ^7.8.1
         version: 7.8.1
       typescript:
-        specifier: ^5.4.5
+        specifier: ^5.5.3
         version: 5.5.3
       vite:
-        specifier: ^5.2.12
+        specifier: ^5.3.3
         version: 5.3.3(@types/node@20.14.9)(less@4.2.0)(sass@1.77.5)(terser@5.31.1)
       vitest:
         specifier: ^1.6.0
@@ -5236,9 +5236,6 @@ packages:
 
   '@webassemblyjs/wast-printer@1.12.1':
     resolution: {integrity: sha512-+X4WAlOisVWQMikjbcvY2e0rwPsKQ9F688lksZhBcPycBBuii3O7m8FACbDMWDojpAqvjIncrG8J0XHKyQfVeA==}
-
-  '@wendellhu/redi@0.15.4':
-    resolution: {integrity: sha512-XhflsMuOJKGpdhZUzr45t//3yjAsXP9uBtqwQaPcH8dK7MTqrP7saKffLn/GbVmZsJ/cORm8nCbsdvwZtmdkKA==}
 
   '@wendellhu/redi@0.15.5':
     resolution: {integrity: sha512-16UPZN5lHuyjBljkzFoJuXbGhK4AP0XvhUGHISWBgkNJ5omJlkdFMatWbaB5oHHRWDpsugQWNnIYl6GWnlIDUQ==}
@@ -14043,8 +14040,6 @@ snapshots:
     dependencies:
       '@webassemblyjs/ast': 1.12.1
       '@xtuc/long': 4.2.2
-
-  '@wendellhu/redi@0.15.4': {}
 
   '@wendellhu/redi@0.15.5': {}
 
